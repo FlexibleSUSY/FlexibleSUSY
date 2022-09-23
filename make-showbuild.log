@@ -1,0 +1,66 @@
+PKGNAME            = FlexibleSUSY
+VERSION            = 2.3.0
+ABSBASEDIR         = /home/thomas/Promotion/Development_FS/FlexibleSUSY
+INSTALL_DIR        = 
+
+MATH               = math
+MODELS             = models/SMEFTHiggsTopDown models/NUHMSSMNoFVHimalayaEFTHiggs
+ADDONS             = 
+SOLVERS            = two_scale semi_analytic shooting
+
+CXX                = g++
+CPPFLAGS           = -Iconfig -Isrc -Ifflite -Islhaea -Idoc -Imeta -Itemplates -Imodels/SMEFTHiggsTopDown -Imodels/NUHMSSMNoFVHimalayaEFTHiggs -Itest -I.
+CXXFLAGS           = -std=c++14 -O2 -fPIC
+FC                 = gfortran
+FFLAGS             = -O2 -fPIC -frecursive
+FLIBS              = -L/usr/lib/gcc/x86_64-linux-gnu/7/ -lgfortran -lm
+LDFLAGS            = 
+LDLIBS             = 
+LLFLAGS            = -I/usr/local/Wolfram/Mathematica/11.3/SystemFiles/IncludeFiles/C -I/usr/local/Wolfram/Mathematica/11.3/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
+LLLIBS             = 
+BLASLIBS           = 
+BOOSTTESTLIBS      = -lboost_unit_test_framework
+BOOSTTHREADLIBS    = 
+BOOSTFLAGS         = -I/usr/local/include
+EIGENFLAGS         = -I/usr/local/include/eigen3
+GSLLIBS            = -L/usr/local/lib -lgsl -lgslcblas -lm
+GSLFLAGS           = -I/usr/local/include
+HIMALAYAFLAGS      = -I/home/thomas/Software/Himalaya/Himalaya-master/source/include
+HIMALAYALIBS       = -L/home/thomas/Software/Himalaya/Himalaya-master/build -Wl,-rpath,/home/thomas/Software/Himalaya/Himalaya-master/build -lHimalaya -lDSZ
+LAPACKLIBS         = -L/usr/local/Wolfram/Mathematica/11.3/SystemFiles/Libraries/Linux-x86-64 -Wl,-rpath,/usr/local/Wolfram/Mathematica/11.3/SystemFiles/Libraries/Linux-x86-64 -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5
+LIBLNK_MAKE_LIB_CMD= g++ -shared -o
+LIBLNK_LIBEXT      = .so
+LOOPFUNCFLAGS      = 
+LOOPFUNCLIBS       = fflite/libfflite.a
+MODULE_MAKE_LIB_CMD= ar cru
+MODULE_LIBEXT      = .a
+SQLITELIBS         = -lsqlite3
+SQLITEFLAGS        = 
+THREADLIBS         = -lpthread
+TSILLIBS           = 
+TSILFLAGS          = 
+
+ENABLE_COLORS      = no
+ENABLE_COMPILE     = yes
+ENABLE_DEBUG       = 
+ENABLE_CHECK_EIGENVALUE_ERROR = no
+ENABLE_FFLITE      = yes
+ENABLE_HIMALAYA    = yes
+ENABLE_LAPACK      = yes
+ENABLE_LIBRARYLINK = yes
+ENABLE_ILP64MKL_WORKAROUND = yes
+ENABLE_FEYNARTS   = no
+ENABLE_FORMCALC   = no
+ENABLE_LOOPTOOLS   = no
+ENABLE_META        = yes
+ENABLE_SHARED_LIBS = no
+ENABLE_SILENT      = no
+ENABLE_SQLITE      = yes
+ENABLE_STATIC      = no
+ENABLE_THREADS     = yes
+ENABLE_TSIL        = no
+ENABLE_VERBOSE     = no
+
+The list of modules to be built:
+--------------------------------
+config src fflite slhaea doc meta templates models/SMEFTHiggsTopDown models/NUHMSSMNoFVHimalayaEFTHiggs  test

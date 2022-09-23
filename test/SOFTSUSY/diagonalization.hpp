@@ -27,13 +27,10 @@ namespace flexiblesusy {
  * @class DiagonalizationError
  * @brief Diagonalization failed
  */
-class DiagonalizationError : public Error {
+class DiagonalizationError : public std::runtime_error {
 public:
-   explicit DiagonalizationError(const std::string& message_) : message(message_) {}
+   explicit DiagonalizationError(const std::string& msg) : std::runtime_error(msg) {}
    virtual ~DiagonalizationError() {}
-   virtual std::string what() const { return message; }
-private:
-   std::string message;
 };
 
 softsusy::DoubleVector AbsSqrt(const softsusy::DoubleVector&);

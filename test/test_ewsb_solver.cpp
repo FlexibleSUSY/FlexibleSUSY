@@ -86,19 +86,19 @@ BOOST_AUTO_TEST_CASE( test_parabola_2dim )
       new Minimizer<dimension>(chi2, max_iterations, precision, Minimizer<dimension>::GSLSimplex),
       new Minimizer<dimension>(chi2, max_iterations, precision, Minimizer<dimension>::GSLSimplex2),
       new Minimizer<dimension>(chi2, max_iterations, precision, Minimizer<dimension>::GSLSimplex2Rand),
-      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_relative>(update, max_iterations, fixed_point_iterator::Convergence_tester_relative(precision)),
-      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_absolute>(update, max_iterations, fixed_point_iterator::Convergence_tester_absolute(precision))
+      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_relative<dimension>>(update, max_iterations, fixed_point_iterator::Convergence_tester_relative<dimension>(precision)),
+      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_absolute<dimension>>(update, max_iterations, fixed_point_iterator::Convergence_tester_absolute<dimension>(precision))
    };
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       reset();
 
       const int status = solvers[i]->solve(start);
 
       BOOST_CHECK(status == EWSB_solver::SUCCESS);
 
-      BOOST_CHECK_CLOSE_FRACTION(solvers[i]->get_solution()(0), 5., 0.01);
-      BOOST_CHECK_CLOSE_FRACTION(solvers[i]->get_solution()(1), 1., 0.01);
+      BOOST_CHECK_CLOSE_FRACTION(solvers[i]->get_solution()(0), 5., 0.02);
+      BOOST_CHECK_CLOSE_FRACTION(solvers[i]->get_solution()(1), 1., 0.02);
 
       BOOST_TEST_MESSAGE("solver " << i << ": "
                     << (status == EWSB_solver::SUCCESS ?
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( test_parabola_2dim )
                     << get_number_of_calls() << " function calls)");
    }
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       delete solvers[i];
    }
 }
@@ -175,12 +175,12 @@ BOOST_AUTO_TEST_CASE( test_perturbation )
       new Minimizer<dimension>(chi2, max_iterations, precision, Minimizer<dimension>::GSLSimplex),
       new Minimizer<dimension>(chi2, max_iterations, precision, Minimizer<dimension>::GSLSimplex2),
       new Minimizer<dimension>(chi2, max_iterations, precision, Minimizer<dimension>::GSLSimplex2Rand),
-      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_relative>(update, max_iterations, fixed_point_iterator::Convergence_tester_relative(precision)),
-      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_absolute>(update, max_iterations, fixed_point_iterator::Convergence_tester_absolute(precision)),
-      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_tadpole<dimension> >(update, max_iterations, fixed_point_iterator::Convergence_tester_tadpole<dimension>(precision, func))
+      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_relative<dimension>>(update, max_iterations, fixed_point_iterator::Convergence_tester_relative<dimension>(precision)),
+      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_absolute<dimension>>(update, max_iterations, fixed_point_iterator::Convergence_tester_absolute<dimension>(precision)),
+      new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_tadpole<dimension>>(update, max_iterations, fixed_point_iterator::Convergence_tester_tadpole<dimension>(precision, func))
    };
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       reset();
 
       const int status = solvers[i]->solve(start);
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE( test_perturbation )
                     << get_number_of_calls() << " function calls)");
    }
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       delete solvers[i];
    }
 }

@@ -196,17 +196,18 @@ B0analytic[p_, m1_, m2_, mu_] :=
            xp = (s + Sqrt[s^2 - 4 p^2 (m1^2 - I eps)]) / (2 p^2);
            xm = (s - Sqrt[s^2 - 4 p^2 (m1^2 - I eps)]) / (2 p^2);
            fB[x_] := Log[1-x] - x Log[1 - 1/x] - 1;
-           Limit[Delta - Log[p^2/mu^2] - fB[xp] - fB[xm], eps -> 0,
-                 Direction -> -1,
-                 Assumptions :> p > 0 && m1 >= 0 && m2 >= 0 && mu > 0]
+           Normal @ Series[Delta - Log[p^2/mu^2] - fB[xp] - fB[xm],
+                           {eps, 0, 0},
+                           Assumptions :> p > 0 && m1 > 0 && m2 > 0 && mu > 0]
           ];
 
 (* B0 with explicit integration [arxiv:hep-ph/9606211 Eq. (B.6)] *)
 B0integral[p_, m1_, m2_, mu_] :=
     Module[{eps},
-           Limit[
+           Normal @ Series[
                Delta - Integrate[Log[((1-x) m1^2 + x m2^2 - x (1-x) p^2 - I eps)/mu^2], {x,0,1}],
-               eps -> 0]
+               {eps, 0, 0}
+           ]
           ];
 
 DivB0[_, _, _, _] := Delta;
@@ -392,9 +393,8 @@ C0analytic[p1_, p2_, m1_, m2_, m3_, mu_] :=
                           ) Log[(1 - y0[i])/(-y0[i])],
                         {i,0,2}] / alpha;
 
-           Limit[result, eps -> 0, Direction -> -1,
-                 Assumptions :> Element[p1, Complexes] || \
-                                Element[p2, Complexes]]
+           Normal @ Series[result, {eps, 0, 0},
+                           Assumptions :> Element[p1, Complexes] || Element[p2, Complexes]]
           ];
 
 (********************* C1 *********************)

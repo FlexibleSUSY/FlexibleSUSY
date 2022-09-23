@@ -105,11 +105,6 @@ ExtraSLHAOutputBlocks = {
             {3, m0Sq} } },
    {FlexibleSUSYLowEnergy,
            {{0, FlexibleSUSYObservable`aMuon} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } },
    {NMSSMRUN,
            {{1, \[Lambda]},
             {2, \[Kappa]},
@@ -118,3 +113,5 @@ ExtraSLHAOutputBlocks = {
             {5, \[Lambda] vS / Sqrt[2]},
             {10, ms2} } }
 };
+
+FSCalculateDecays = True;

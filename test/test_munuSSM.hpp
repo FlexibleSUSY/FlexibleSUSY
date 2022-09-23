@@ -31,7 +31,7 @@ namespace softsusy {
 
 namespace flexiblesusy {
 
-inline munuSSM_slha<munuSSM<Two_scale>> setup_munuSSM(
+inline munuSSM_slha setup_munuSSM(
    const munuSSM_input_parameters& input,
    const softsusy::QedQcd& qedqcd,
    const Spectrum_generator_settings& settings)

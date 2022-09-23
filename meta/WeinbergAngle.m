@@ -33,6 +33,9 @@ GetBottomMass::usage="";
 GetTopMass::usage="";
 DefVZSelfEnergy::usage="";
 DefVWSelfEnergy::usage="";
+YukawaMatching::usage="";
+DefVZVWSelfEnergies::usage="";
+DeltaAlphaHatBSM::usage="";
 
 DeltaRhoHat2LoopSM::usage="";
 DeltaRHat2LoopSM::usage="";
@@ -57,7 +60,8 @@ DebugPrint[msg___] :=
 CheckMuonDecayInputRequirements[] :=
     Module[{requiredSymbols, availPars, areDefined},
            requiredSymbols = {SARAH`VectorP, SARAH`VectorW, SARAH`VectorZ,
-                              SARAH`hyperchargeCoupling, SARAH`leftCoupling, SARAH`strongCoupling};
+                              SARAH`hyperchargeCoupling, SARAH`leftCoupling, SARAH`strongCoupling,
+                              SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa};
            availPars = Join[TreeMasses`GetParticles[],
                             Parameters`GetInputParameters[],
                             Parameters`GetModelParameters[],
@@ -126,6 +130,51 @@ DefVWSelfEnergy[] :=
            If[!MuonDecayWorks,
               Return[result <> "0.;"]];
            result <> "Re(model->" <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(p));"
+          ];
+
+YukawaMatching[] :=
+    Module[{fermion, yukawa, result},
+           fermion = {TreeMasses`GetSMTopQuarkMultiplet[],
+                      TreeMasses`GetSMBottomQuarkMultiplet[],
+                      TreeMasses`GetSMTauLeptonMultiplet[]};
+           yukawa = {SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa};
+           If[(Parameters`GetParameterDimensions /@ yukawa) != {{3, 3}, {3, 3}, {3, 3}},
+              MuonDecayWorks = False;
+              DebugPrint["Error: Not all SM Yukawas are 3x3 matrices"];];
+           prefactor = Table[ThresholdCorrections`YukawaToMassPrefactor[fermion[[i]], yukawa[[i]]], {i, 3}];
+           If[!(And @@ Not /@ NumericQ /@ prefactor),
+              MuonDecayWorks = False;
+              DebugPrint["Error: Prefactors of SM Yukawas cannot be determined"];];
+           If[!MuonDecayWorks,
+              Return[""]];
+           result = Parameters`CreateLocalConstRefs[prefactor] <> "\n";
+           result = result <> "sm.set_Yu(Re(model->get_";
+           result = result <> CConversion`ToValidCSymbolString[yukawa[[1]]] <> "()*";
+           result = result <> CConversion`RValueToCFormString[prefactor[[1]]/(Global`SMvev/Sqrt[2])] <> "));\n";
+           result = result <> "sm.set_Yd(Re(model->get_";
+           result = result <> CConversion`ToValidCSymbolString[yukawa[[2]]] <> "()*";
+           result = result <> CConversion`RValueToCFormString[prefactor[[2]]/(Global`SMvev/Sqrt[2])] <> "));\n";
+           result = result <> "sm.set_Ye(Re(model->get_";
+           result = result <> CConversion`ToValidCSymbolString[yukawa[[3]]] <> "()*";
+           result <> CConversion`RValueToCFormString[prefactor[[3]]/(Global`SMvev/Sqrt[2])] <> "));"
+          ];
+
+DefVZVWSelfEnergies[] :=
+    Module[{result},
+           result = "const double sigma_Z_MZ_Model = Re(model->";
+           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorZ, 1] <> "(mz));\n";
+           result = result <> "const double sigma_W_MW_Model = Re(model->";
+           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(mw));\n";
+           result = result <> "const double sigma_W_0_Model  = Re(model->";
+           result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(0.));"
+          ];
+
+DeltaAlphaHatBSM[scheme_] :=
+    Module[{dahatbsm, result},
+           dahatbsm = ThresholdCorrections`CalculateElectromagneticCoupling[scheme];
+           result = Parameters`CreateLocalConstRefs[dahatbsm] <> "\n";
+           result = result <> "delta_alpha_hat_bsm += alpha_em/(2.*Pi)*(";
+           result <> CConversion`RValueToCFormString[dahatbsm] <> ");"
           ];
 
 FindMassZ2[masses_List] := FindMass2[masses, SARAH`VectorZ];
@@ -367,11 +416,11 @@ WaveResult[diagr_List, includeGoldstones_] :=
            intparticles = ({SARAH`Internal[1], SARAH`Internal[2]} /. diagr[[2]]) /.
                              {SARAH`bar[p_] :> p, Susyno`LieGroups`conj[p_] :> p};
            If[Select[intparticles, TreeMasses`IsFermion] === {},
-              Print["Warning: no internal fermion in wave function diagram"];
+              Utils`FSFancyWarning["No internal fermion in wave function diagram"];
               Return[0]];
            intfermion = Select[intparticles, TreeMasses`IsFermion][[1]];
            If[Select[intparticles, TreeMasses`IsScalar] === {},
-              Print["Warning: no internal scalar in wave function diagram"];
+              Utils`FSFancyWarning["No internal scalar in wave function diagram"];
               Return[0]];
            intscalar = Select[intparticles, TreeMasses`IsScalar][[1]];
            result = -coupl Susyno`LieGroups`conj[coupl] *
@@ -499,7 +548,7 @@ VertexResultFSS[diagr_List, includeGoldstones_] :=
               factor = 1,
               If[scalarsoutin === {inscalar, outscalar},
                  factor = -1,
-                 Print["Warning: scalar direction could not be determined"];
+                 Utils`FSFancyWarning["Scalar direction could not be determined"];
                  Return[0]]];
            couplSSV = factor couplSSV;
            couplFFSout = (diagr[[1, extoutindex]] /. C[a__] -> SARAH`Cp[a])[SARAH`PR];
@@ -591,7 +640,8 @@ VertexResult[diagr_List, includeGoldstones_] :=
            Switch[{nFermions, nScalars},
                   {1, 2}, VertexResultFSS[diagr, includeGoldstones],
                   {2, 1}, VertexResultFFS[diagr, includeGoldstones],
-                  _, Print["Warning: vertex diagram type not supported"]; 0]
+                  _, Utils`FSFancyWarning["Vertex diagram type not supported"];
+                     0]
           ];
 
 (*calculates tree-level vertex result for normalization of one-loop results*)
@@ -717,10 +767,10 @@ BoxResult[diagr_List, includeGoldstones_] :=
                             SARAH`Internal[3], SARAH`Internal[4]} /. diagr[[2]]) /.
                              {SARAH`bar[p_] :> p, Susyno`LieGroups`conj[p_] :> p};
            If[Length[Select[intparticles, TreeMasses`IsFermion]] != 2,
-              Print["Warning: not 2 internal fermions in box diagram"];
+              Utils`FSFancyWarning["Not 2 internal fermions in box diagram"];
               Return[0]];
            If[Length[Select[intparticles, TreeMasses`IsScalar]] != 2,
-              Print["Warning: not 2 internal scalars in box diagram"];
+              Utils`FSFancyWarning["Not 2 internal scalars in box diagram"];
               Return[0]];
            intfermions = Select[intparticles, TreeMasses`IsFermion];
            toponr = WeinbergAngle`topoNr /. diagr[[2]];
@@ -847,7 +897,7 @@ CreateDeltaVBContribution[deltaVBcontri_WeinbergAngle`DeltaVB, vertexRules_List]
            body = Parameters`CreateLocalConstRefs[expr] <> "\n";
            body = body <> "const " <> type <> " result = " <>
                   Parameters`ExpressionToString[expr /. vertexRules /. a_[List[i__]] :> a[i]] <> ";\n";
-           body = body <> "\nreturn result;";
+           body = body <> "\nreturn result;\n";
            body = TextFormatting`IndentText[TextFormatting`WrapLines[body]];
            decl = decl <> body <> "}\n";
            {prototype, decl}
@@ -900,7 +950,7 @@ GetNeutrinoIndex[] :=
                             GetWPlusBoson[]][SARAH`PL];
            (*follow vertex conventions:*)
            coupl = Vertices`SortCp[coupl];
-           (*omit a possible minus sign:*)   
+           (*omit a possible minus sign:*)
            If[MatchQ[coupl, Times[-1, _]], coupl = -coupl];
            coupl = SelfEnergies`CreateCouplingSymbol[coupl];
            For[k = 0, k <= 2, k++,
@@ -946,7 +996,7 @@ CreateContributionCall[0] := "0."; (*needed in case of an error*)
 CreateDeltaVBCalculation[deltaVBcontris_List] :=
     Module[{type, result = "", boxcontri, vertexcontris, wavecontris},
            If[!(TreeMasses`FindMixingMatrixSymbolFor[TreeMasses`GetSMNeutralLeptons[][[1]]] === Null),
-              Print["Warning: neutrino mixing is not considered in muon decay"]];
+              Utils`FSFancyWarning["Neutrino mixing is not considered in muon decay"]];
            type = CConversion`CreateCType[CConversion`ScalarType[CConversion`complexScalarCType]];
            boxcontri = Cases[deltaVBcontris, WeinbergAngle`DeltaVB[{WeinbergAngle`fsbox, __}, _]];
            If[boxcontri === {},

@@ -303,7 +303,7 @@ GetPlaceholders[FlexibleSUSY`FSSolveEWSBFor[parameters_List]] :=
 *)
 GetBoundaryValueSubstitutions[settings_List] :=
     Module[{i, noTemp, test, fixedPars, boundaryValues, rules, finalRules = {}},
-           noTemp = DeleteCases[settings, {FlexibleSUSY`Temporary[_], _}];
+           noTemp = DeleteCases[settings, {FlexibleSUSY`FSTemporary[_], _}];
            test = Function[{first, second}, first[[1]] === second[[1]]];
            For[i = 1, i <= Length[noTemp], i++,
                Switch[noTemp[[i]],
@@ -685,7 +685,7 @@ ApplySemiAnalyticBoundaryConditions[settings_List, solutions_List, modelPrefix_S
            (* replace implicit constraints with placeholder values *)
            noMacros = ReplaceImplicitConstraints[settings];
            (* @todo handle temporary settings properly *)
-           noMacros = DeleteCases[noMacros, {FlexibleSUSY`Temporary[_], _}];
+           noMacros = DeleteCases[noMacros, {FlexibleSUSY`FSTemporary[_], _}];
            boundaryValues = GetBoundaryValueParameters[solutions];
            parameters = Select[Parameters`FindAllParameters[#[[2]]& /@ noMacros], !MemberQ[boundaryValues, #]&];
            (* in SUSY models, boundary values for the dimensionful SUSY parameters should also be set *)

@@ -40,7 +40,7 @@ void setup_SMSSM_const(SMSSM<Two_scale>& m, NmssmSoftsusy& s, const SMSSM_input_
    const double MS = input.MSInput;
    const double BMS = input.BMSInput;
    const double L1 = input.L1Input;
-   const double LL1 = 2. * L1;
+   const double LL1 = m0 * L1;
 
    DoubleMatrix Yu_SS(3,3), Yd_SS(3,3), Ye_SS(3,3);
    Yu_SS(3,3) = 165.0   * root2 / (vev * sinBeta);

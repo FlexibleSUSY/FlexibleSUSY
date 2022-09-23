@@ -5,6 +5,7 @@ UTILSDIR=${BASEDIR}/../utils
 MODELSDIR=${BASEDIR}/../models
 MATH=${MATH_CMD:-math}
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 slha_input="
@@ -195,7 +196,7 @@ Mh_slha=$(echo "$slha_input" | ${MODELSDIR}/MSSMEFTHiggs/run_MSSMEFTHiggs.x --sl
 ll_script="${BASEDIR}/run_MSSMEFTHiggs.m"
 echo "$ll_input" > "$ll_script"
 
-Mh_ll=$($MATH -noprompt -run "commandLineArg={\"$1\"}; Get[\"$ll_script\"]; Exit[];" | tail -n 1)
+Mh_ll=$(printf "%s" "commandLineArg={\"$1\"}; Get[\"$ll_script\"]; Exit[]" | "$MATH" -noprompt | tail -n 1)
 
 echo "Mh SLHA        = $Mh_slha"
 echo "Mh LibraryLink = $Mh_ll"

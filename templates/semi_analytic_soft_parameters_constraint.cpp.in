@@ -16,14 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_semi_analytic_soft_parameters_constraint.hpp"
 #include "@ModelName@_semi_analytic_model.hpp"
 #include "wrappers.hpp"
 #include "logger.hpp"
 #include "ew_input.hpp"
-#include "gsl_utils.hpp"
 #include "minimizer.hpp"
 #include "root_finder.hpp"
 #include "threshold_loop_functions.hpp"

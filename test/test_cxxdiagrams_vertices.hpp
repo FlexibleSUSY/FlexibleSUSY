@@ -23,6 +23,7 @@
 #include <iterator>
 
 #include "cxx_qft/SM_qft.hpp"
+#include "SM_mass_eigenstates.hpp"
 
 #include "test_complex_equality.hpp"
 
@@ -79,32 +80,32 @@ struct test_zero_vertex
 		}
 	}
 	
-	void test( const SM_cxx_diagrams::ScalarVertex &v )
+	void test( const cxx_diagrams::ScalarVertex &v )
 	{ TEST_COMPLEX_EQUALITY( v.value(), 0 ); }
 	
-	void test( const SM_cxx_diagrams::MomentumVertex &v )
+	void test( const cxx_diagrams::MomentumVertex &v )
 	{ TEST_COMPLEX_EQUALITY( v.value( v.index() ), 0 ); }
 	
-	void test( const SM_cxx_diagrams::MomentumDifferenceVertex &v )
+	void test( const cxx_diagrams::MomentumDifferenceVertex &v )
 	{
 		TEST_COMPLEX_EQUALITY(
 			v.value( v.incoming_index(), v.outgoing_index() ), 0 );
 	}
 	
-	void test( const SM_cxx_diagrams::InverseMetricVertex &v )
+	void test( const cxx_diagrams::InverseMetricVertex &v )
 	{ TEST_COMPLEX_EQUALITY( v.value(), 0 ); }
 	
-	void test( const SM_cxx_diagrams::ChiralVertex &v )
+	void test( const cxx_diagrams::ChiralVertex &v )
 	{
 		TEST_COMPLEX_EQUALITY( v.left(), 0 );
 		TEST_COMPLEX_EQUALITY( v.right(), 0 );
 	}
 	
-	void test( const SM_cxx_diagrams::TripleVectorVertex &v )
+	void test( const cxx_diagrams::TripleVectorVertex &v )
 	{ TEST_COMPLEX_EQUALITY( v.value(
-			SM_cxx_diagrams::TripleVectorVertex::even_permutation{} ), 0 ); }
+			cxx_diagrams::TripleVectorVertex::even_permutation{} ), 0 ); }
 	
-	void test( const SM_cxx_diagrams::QuadrupleVectorVertex &v )
+	void test( const cxx_diagrams::QuadrupleVectorVertex &v )
 	{
 		TEST_COMPLEX_EQUALITY( v.value1(), 0 );
 		TEST_COMPLEX_EQUALITY( v.value2(), 0 );
@@ -146,20 +147,20 @@ struct test_vertex_equality
 		}
 	}
 	
-	void test( const SM_cxx_diagrams::ScalarVertex &v1,
-		const SM_cxx_diagrams::ScalarVertex &v2 )
+	void test( const cxx_diagrams::ScalarVertex &v1,
+		const cxx_diagrams::ScalarVertex &v2 )
 	{ TEST_COMPLEX_EQUALITY( v1.value(), v2.value() ); }
 	
-	void test( const SM_cxx_diagrams::MomentumVertex &v1,
-		const SM_cxx_diagrams::MomentumVertex &v2 )
+	void test( const cxx_diagrams::MomentumVertex &v1,
+		const cxx_diagrams::MomentumVertex &v2 )
 	{
 		BOOST_TEST( v1.index() == v2.index() );
 		TEST_COMPLEX_EQUALITY( v1.value( v1.index() ),
 			v2.value( v1.index() ) );
 	}
 	
-	void test( const SM_cxx_diagrams::MomentumDifferenceVertex &v1,
-		const SM_cxx_diagrams::MomentumDifferenceVertex &v2 )
+	void test( const cxx_diagrams::MomentumDifferenceVertex &v1,
+		const cxx_diagrams::MomentumDifferenceVertex &v2 )
 	{
 		if( v1.incoming_index() == v2.incoming_index() )
 		{
@@ -176,26 +177,26 @@ struct test_vertex_equality
 		);
 	}
 	
-	void test( const SM_cxx_diagrams::InverseMetricVertex &v1,
-		const SM_cxx_diagrams::InverseMetricVertex &v2 )
+	void test( const cxx_diagrams::InverseMetricVertex &v1,
+		const cxx_diagrams::InverseMetricVertex &v2 )
 	{ TEST_COMPLEX_EQUALITY( v1.value(), v2.value() ); }
 	
-	void test( const SM_cxx_diagrams::ChiralVertex &v1,
-		const SM_cxx_diagrams::ChiralVertex &v2 )
+	void test( const cxx_diagrams::ChiralVertex &v1,
+		const cxx_diagrams::ChiralVertex &v2 )
 	{
 		TEST_COMPLEX_EQUALITY( v1.left(), v2.left() );
 		TEST_COMPLEX_EQUALITY( v1.right(), v2.right() );
 	}
 	
-	void test( const SM_cxx_diagrams::TripleVectorVertex &v1,
-		const SM_cxx_diagrams::TripleVectorVertex &v2 )
+	void test( const cxx_diagrams::TripleVectorVertex &v1,
+		const cxx_diagrams::TripleVectorVertex &v2 )
 	{
-		using even = SM_cxx_diagrams::TripleVectorVertex::even_permutation;
+		using even = cxx_diagrams::TripleVectorVertex::even_permutation;
 		TEST_COMPLEX_EQUALITY( v1.value( even{} ), v2.value( even{} ) );
 	}
 	
-	void test( const SM_cxx_diagrams::QuadrupleVectorVertex &v1,
-		const SM_cxx_diagrams::QuadrupleVectorVertex &v2 )
+	void test( const cxx_diagrams::QuadrupleVectorVertex &v1,
+		const cxx_diagrams::QuadrupleVectorVertex &v2 )
 	{
 		TEST_COMPLEX_EQUALITY( v1.value1(), v2.value1() );
 		TEST_COMPLEX_EQUALITY( v1.value2(), v2.value2() );

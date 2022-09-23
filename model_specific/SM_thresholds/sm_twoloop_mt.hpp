@@ -46,6 +46,14 @@ namespace sm_twoloop_mt {
 
 /* ******************** 1-loop ******************** */
 
+/// returns 1-loop O(as) correction to Mt
+TSIL_REAL delta_Mt_1loop_as(
+   TSIL_REAL g3, TSIL_REAL t, TSIL_REAL qq);
+
+/// returns 1-loop O(at) correction to Mt
+TSIL_REAL delta_Mt_1loop_at(
+   TSIL_REAL t, TSIL_REAL h, TSIL_REAL yt, TSIL_REAL qq);
+
 /// returns 1-loop O(as) correction to mt
 TSIL_REAL delta_mt_1loop_as(
    TSIL_REAL g3, TSIL_REAL t, TSIL_REAL qq);
@@ -63,6 +71,10 @@ TSIL_REAL delta_mt_1loop_at_R(
    TSIL_REAL yt, TSIL_REAL t, TSIL_REAL h, TSIL_REAL s, TSIL_REAL qq);
 
 /* ******************** 2-loop ******************** */
+
+/// returns 2-loop O(as^2) correction to Mt, Eq.(2.1) of [1604.01134]
+TSIL_REAL delta_Mt_2loop_as_as(
+   TSIL_REAL g3, TSIL_REAL t, TSIL_REAL qq);
 
 /// returns 2-loop O(as^2) correction to mt in FlexibleSUSY convention, Eq.(9) of [1710.03760]
 TSIL_REAL delta_mt_2loop_as_as_flexiblesusy(

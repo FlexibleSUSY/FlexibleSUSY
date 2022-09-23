@@ -13,7 +13,7 @@ using namespace flexiblesusy;
 
 BOOST_AUTO_TEST_CASE( test_CMSSM_slha_reading )
 {
-   CMSSM_slha<CMSSM<Two_scale> > model;
+   CMSSM_slha model;
    model.do_calculate_sm_pole_masses(true);
 
    const double scale = 91.0;

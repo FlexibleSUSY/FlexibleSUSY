@@ -6,8 +6,6 @@
 
 BASEDIR=$(dirname $0)
 UTILSDIR=${BASEDIR}/../utils
-print_block="$UTILSDIR/print_slha_block.awk"
-print_block_entry="$UTILSDIR/print_slha_block_entry.awk"
 remove_block="$UTILSDIR/remove_slha_block.awk"
 
 semi_analytic_model="THDMIIEWSBAtMZSemiAnalytic"

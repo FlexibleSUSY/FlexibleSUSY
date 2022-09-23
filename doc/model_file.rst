@@ -881,10 +881,10 @@ Temporary parameter re-definitions
 
 Since FlexibleSUSY 1.4.0, the user can perform a temporary parameter
 definition to be used in the boundary conditions using the
-``Temporary[]`` head.
+``FSTemporary[]`` head.
 
 If a parameter ``p`` set in a boundary conditions in the form
-``Temporary[p,<expr>]``, the following happens: Immediately after the RG
+``FSTemporary[p,<expr>]``, the following happens: Immediately after the RG
 running the value of the parameter is saved locally.  Afterwards, the
 parameter is assigned to ``<expr>``.  Now, all further boundary
 conditions are imposed and calculations are performed (calculation of
@@ -899,10 +899,10 @@ triangular basis::
     g1XT = (g1X*gX + g1*gX1)/Sqrt[gX^2 + gX1^2];
     
     SUSYScaleInput = {
-        {Temporary[g1], g1T},
-        {Temporary[gX], gXT},
-        {Temporary[g1X], g1XT},
-        {Temporary[gX1], 0},
+        {FSTemporary[g1], g1T},
+        {FSTemporary[gX], gXT},
+        {FSTemporary[g1X], g1XT},
+        {FSTemporary[gX1], 0},
         {xS, vSInput},
         {x2, Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)]/(2*gX*Sqrt[1 + TanBetaX^2])},
         {x1, (TanBetaX*Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)])/(2*gX*Sqrt[1 + TanBetaX^2])},
@@ -1431,11 +1431,11 @@ by setting in the model file::
 
            UseHiggs2LoopSM = True;
            UseHiggs3LoopSM = True;
-           UseSMYukawa2Loop = True;    (* use 2-loop non-QCD corrections to m_t *)
-           UseSMAlphaS3Loop = True;    (* use 2- and 3-loop QCD corrections to alpha_s *)
-           UseYukawa3LoopQCD = True;   (* use 2- and 3-loop QCD corrections to m_t *)
+           UseSMAlphaS4Loop = True;    (* use 2-, 3- and 4-loop QCD corrections to alpha_s *)
+           UseYukawa4LoopQCD = True;   (* use 2-, 3- and 4-loop QCD corrections to m_t *)
            UseSM3LoopRGEs = True;      (* use 3-loop RGEs *)
            UseSM4LoopRGEs = True;      (* use 4-loop RGEs *)
+           UseSM5LoopRGEs = True;      (* use 4-loop RGEs *)
 
 Split-MSSM
 ''''''''''
@@ -1496,12 +1496,12 @@ Two-loop threshold corrections
 Standard Model
 ''''''''''''''
 
-The known SM 2- and 3-loop QCD threshold corrections of order
-:math:`O(\alpha_s^2 + \alpha_s^3)` to the strong coupling constant are
-known by [hep-ph/0004189].  They can be taken into account by setting
-in the model file::
+The known SM 2-, 3- and 4-loop QCD threshold corrections of order
+:math:`O(\alpha_s^2 + \alpha_s^3 + \alpha_s^4)` to the strong coupling
+constant are known by [hep-ph/0004189, hep-ph/0512060].  They can be
+taken into account by setting in the model file::
 
-    UseSMAlphaS3Loop = True; (* use 2- and 3-loop threshold for αs *)
+    UseSMAlphaS4Loop = True; (* use 2-, 3- and 4-loop threshold for αs *)
 
 The known SM 2-loop threshold corrections of order :math:`O(\alpha_t
 \alpha_s + \alpha_t^2)` to the running top mass are known by
@@ -1565,6 +1565,23 @@ Note, that these 3-loop corrections are only applied at run-time if
 the threshold correction loop order (block ``FlexibleSUSY[7]``) is set
 to a value > 2.
 
+Four-loop threshold corrections
+```````````````````````````````
+
+Standard Model
+''''''''''''''
+
+In non-SUSY models the known 4-loop (Standard Model) QCD corrections
+:math:`O(\alpha_s^4)` [1604.01134]_, [1502.01030]_, [1606.06754]_ can
+be used in the determination of the running :math:`\overline{MS}` top
+Yukawa coupling :math:`y_t` at the low-energy scale by setting::
+
+    UseYukawa4LoopQCD = Automatic;
+
+or::
+
+    UseYukawa4LoopQCD = True;
+
 
 References
 ----------
@@ -1578,3 +1595,6 @@ References
 .. [hep-ph:0308231] `Phys.Lett. B579 (2004) 180-188 <https://inspirehep.net/record/626390>`_ [`arxiv:hep-ph/0308231 <https://arxiv.org/abs/hep-ph/0308231>`_]
 .. [1406.2319] `CPC 190 (2015) 139-172 <https://inspirehep.net/record/1299998>`_ [`arxiv:1406.2319 <https://arxiv.org/abs/1406.2319>`_]
 .. [1602.05581] `Eur.Phys.J. C76 (2016) no.9, 516 <https://inspirehep.net/record/1422208>`_ [`arxiv:1602.05581 <https://arxiv.org/abs/1602.05581>`_]
+.. [1604.01134] `Phys.Rev. D93 (2016) no.9, 094017 <https://inspirehep.net/record/1442368>`_ [`arXiv:1604.01134 <https://arxiv.org/abs/1604.01134>`_]
+.. [1502.01030] `Phys.Rev.Lett. 114 (2015) 14, 142002 <https://inspirehep.net/literature/1342942>`_ [`arXiv:1502.01030 <https://arxiv.org/abs/1502.01030>`_]
+.. [1606.06754] `Phys.Rev.D 94 (2016) 7, 074025 <https://inspirehep.net/literature/1471728>`_ [`arXiv:1606.06754 <https://arxiv.org/abs/1606.06754>`_]

@@ -115,12 +115,9 @@ void test_equality(const sPhysical& a, const sPhysical& b, double tolerance)
 
 class SoftSusy_error : public Error {
 public:
-   SoftSusy_error(const std::string& msg_)
-      : msg(msg_) {}
+   SoftSusy_error(const std::string& msg)
+      : Error(msg) {}
    virtual ~SoftSusy_error() {}
-   virtual std::string what() const { return msg; }
-private:
-   std::string msg;
 };
 
 class SoftSusy_NoConvergence_error : public SoftSusy_error {
@@ -128,7 +125,6 @@ public:
    SoftSusy_NoConvergence_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NoConvergence_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_NonPerturbative_error : public SoftSusy_error {
@@ -136,7 +132,6 @@ public:
    SoftSusy_NonPerturbative_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NonPerturbative_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_tester {
@@ -303,7 +298,7 @@ BOOST_AUTO_TEST_CASE( test_non_perturbative_point )
 
    BOOST_TEST_MESSAGE("testing non-perturbative " << pp);
    Two_scale_tester two_scale_tester;
-   BOOST_CHECK_THROW(two_scale_tester.test(pp, qedqcd), flexiblesusy::Error);
+   BOOST_CHECK_THROW(two_scale_tester.test(pp, qedqcd), std::exception);
    SoftSusy_tester softSusy_tester;
    // BOOST_CHECK_THROW(softSusy_tester.test(pp, qedqcd), SoftSusy_NonPerturbative_error);
    BOOST_CHECK_THROW(softSusy_tester.test(pp, qedqcd), SoftSusy_error);

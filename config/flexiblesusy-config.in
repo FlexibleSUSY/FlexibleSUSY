@@ -10,7 +10,6 @@ packagename="@PKGNAME@"
 version="@FLEXIBLESUSY_VERSION@"
 
 addons="@ADDONS@"
-blaslibs="@BLASLIBS@"
 boostflags="@BOOSTFLAGS@"
 boosttestlibs="@BOOSTTESTLIBS@"
 boostthreadlibs="@BOOSTTHREADLIBS@"
@@ -21,17 +20,19 @@ eigenflags="@EIGENFLAGS@"
 fc="@FC@"
 fflags="@FFLAGS@"
 flibs="@FLIBS@"
+gm2calcflags="@GM2CALCFLAGS@"
+gm2calclibs="@GM2CALCLIBS@"
 gslflags="@GSLFLAGS@"
 gsllibs="@GSLLIBS@"
 himalayaflags="@HIMALAYAFLAGS@"
 himalayalibs="@HIMALAYALIBS@"
-lapacklibs="@LAPACKLIBS@"
 ldflags="@LDFLAGS@"
 ldlibs="@LDLIBS@"
 llflags="@LLFLAGS@"
 lllibs="@LLLIBS@"
 loopfuncflags="@LOOPFUNCFLAGS@"
 loopfunclibs="@LOOPFUNCLIBS@"
+futilibs="@FUTILIBS@"
 math="@MATH@"
 models="@MODELS@"
 module_make_lib_cmd="@MODULE_MAKE_LIB_CMD@"
@@ -45,7 +46,6 @@ static_lib_cmd="@STATIC_LIB_CMD@"
 threadlibs="@THREADLIBS@"
 tsilflags="@TSILFLAGS@"
 tsillibs="@TSILLIBS@"
-gm2calclibs=""
 
 #_____________________________________________________________________
 string_trim() {
@@ -109,7 +109,7 @@ create_model_specific_modules_list() {
 }
 
 create_module_list() {
-    echo "config src fflite slhaea doc $models $addons $model_specific_modules $optional_modules"
+    echo "config src fflite slhaea doc nlohmann $models $addons $model_specific_modules $optional_modules"
 }
 
 create_include_directives_for_FS_modules() {
@@ -124,6 +124,9 @@ create_include_directives_for_FS_modules() {
 
 create_include_directives_for_external_modules() {
     local incl="$gslflags $eigenflags $boostflags"
+
+    [ "x@ENABLE_GM2CALC@" = xyes ] && \
+        incl="$incl $gm2calcflags"
 
     [ "x@ENABLE_HIMALAYA@" = xyes ] && \
         incl="$incl $himalayaflags"
@@ -145,12 +148,10 @@ create_flexiblesusy_libs() {
     local flexiblesusylibs=
 
     for a in $addons $models ; do
-        [ "x$(basename $a)" = "xGM2Calc" ] && continue
         flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/${a}/lib$(basename $a)${module_lib_ext}"
     done
 
     for a in $model_specific_modules ; do
-        [ "x$(basename $a)" = "xGM2Calc" ] && continue
         flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/${a}/libmodel_specific_$(basename $a)${module_lib_ext}"
     done
 
@@ -159,24 +160,31 @@ create_flexiblesusy_libs() {
     echo "$flexiblesusylibs"
 }
 
-create_gm2calc_libs() {
-    for a in $addons ; do
-        [ "x$(basename $a)" = "xGM2Calc" ] && {
-            echo "${ABSBASEDIR}/addons/GM2Calc/libGM2Calc${module_lib_ext}"
-            return
-        }
-    done
-    echo ""
+create_cppflags() {
+    [ -z "$incl_external_modules" ] && incl_external_modules="$(create_include_directives_for_external_modules)"
+    cppflags="$cppflags_from_configure $incl_FS_modules $incl_external_modules"
+    echo "$cppflags"
+}
+
+create_cppflags_without_modules() {
+    [ -z "$incl_external_modules" ] && incl_external_modules="$(create_include_directives_for_external_modules)"
+    cppflags_without_modules="$cppflags_from_configure $incl_external_modules"
+    echo "$cppflags_without_modules"
+}
+
+create_compile_cmd() {
+    compile_cmd="$cxx $(create_cppflags) $cxxflags"
+    echo "$compile_cmd"
 }
 
 model_specific_modules="$(create_model_specific_modules_list)"
 incl_FS_modules="$(create_include_directives_for_FS_modules)"
-incl_external_modules="$(create_include_directives_for_external_modules)"
-cppflags_without_modules="$cppflags_from_configure $incl_external_modules"
-cppflags="$cppflags_from_configure $incl_FS_modules $incl_external_modules"
+incl_external_modules=""
+cppflags_without_modules=""
+cppflags=""
 flexiblesusy_libs="$(create_flexiblesusy_libs)"
-compile_cmd="$cxx $cppflags $cxxflags"
-libs="$ldflags $flexiblesusy_libs $(create_gm2calc_libs) $loopfunclibs $himalayalibs $gsllibs $boostthreadlibs $lapacklibs $blaslibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs"
+compile_cmd=""
+libs="$ldflags $flexiblesusy_libs $loopfunclibs $gm2calclibs $himalayalibs $gsllibs $boostthreadlibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs $futilibs"
 modules="$(create_module_list)"
 
 help() {
@@ -184,7 +192,6 @@ cat <<EOF
 Usage: `basename $0` [options]
 Options:
   --addons              Print all addons that are build
-  --blaslibs            Print BLAS libraries, BLASLIBS
   --boostflags          Print compiler flags for BOOST, BOOSTFLAGS
   --boosttestlibs       Print BOOST test libraries, BOOSTTESTLIBS
   --boostthreadlibs     Print BOOST thread libraries, BOOSTTHREADLIBS
@@ -202,14 +209,12 @@ Options:
                         Test if compiler warnings are enabled
   --enable-debug        Test if debug mode is enabled
   --enable-fflite       Test if FFlite is enabled
+  --enable-gm2calc      Test if GM2Calc is enabled
   --enable-himalaya     Test if Himalaya is enabled
-  --enable-lapack       Test if LAPACK is enabled
   --enable-librarylink  Test if LibraryLink is enabled
   --enable-looptools    Test if LoopTools is enabled
   --enable-mass-error-check
                         Test if mass error check is enabled
-  --enable-ilp64mkl-workaround
-                        Test if ilp64 MKL workaround is enabled
   --enable-silent       Test if silet mode is enabled
   --enable-shared-libs  Test if shared libraries are build
   --enable-sqlite       Test if SQLite is enabled
@@ -221,11 +226,12 @@ Options:
   --fflags              Print Fortran flags, FFLAGS
   --flexiblesusylibs    Print FlexibleSUSY module libraries
   --flibs               Print Fortran libraries, FLIBS
+  --gm2calcflags        Print compiler flags for GM2Calc, GM2CALCFLAGS
+  --gm2calclibs         Print GM2Calc library, GM2CALCLIBS
   --gslflags            Print compiler flags for GSL, GSLFLAGS
   --gsllibs             Print GSL libraries, GSLLIBS
   --himalayaflags       Print compiler flags for Himalaya, HIMALAYAFLAGS
   --himalayalibs        Print Himalaya library, HIMALAYALIBS
-  --lapacklibs          Print LAPACK libraries, LAPACKLIBS
   --ldflags             Print flags for optional libraries, LDFLAGS
   --ldlibs              Print optional libraries, LDLIBS
   --libs                Print all libraries linked to an executable
@@ -265,13 +271,12 @@ while test $# -gt 0; do
     case $1 in
         --addons)                out="$out $addons" ;;
         --solvers)               out="$out $solvers" ;;
-        --blaslibs)              out="$out $blaslibs" ;;
         --boostflags)            out="$out $boostflags" ;;
         --boosttestlibs)         out="$out $boosttestlibs" ;;
         --boostthreadlibs)       out="$out $boostthreadlibs" ;;
-        --compile-cmd)           out="$out $compile_cmd" ;;
-        --cppflags)              out="$out $cppflags" ;;
-        --cppflags-without-modules) out="$out $cppflags_without_modules" ;;
+        --compile-cmd)           out="$out $(create_compile_cmd)" ;;
+        --cppflags)              out="$out $(create_cppflags)" ;;
+        --cppflags-without-modules) out="$out $(create_cppflags_without_modules)" ;;
         --cxx)                   out="$out $cxx" ;;
         --cxxflags)              out="$out $cxxflags" ;;
         --eigenflags)            out="$out $eigenflags" ;;
@@ -283,7 +288,6 @@ while test $# -gt 0; do
         --gsllibs)               out="$out $gsllibs" ;;
         --himalayaflags)         out="$out $himalayaflags" ;;
         --himalayalibs)          out="$out $himalayalibs" ;;
-        --lapacklibs)            out="$out $lapacklibs" ;;
         --ldflags)               out="$out $ldflags" ;;
         --ldlibs)                out="$out $ldlibs" ;;
         --libs)                  out="$out $libs" ;;
@@ -324,12 +328,11 @@ while test $# -gt 0; do
         --enable-compiler-warnings)   out="$out @ENABLE_COMPILER_WARNINGS@" ;;
         --enable-debug)               out="$out @ENABLE_DEBUG@" ;;
         --enable-fflite)              out="$out @ENABLE_FFLITE@" ;;
+        --enable-gm2calc)             out="$out @ENABLE_GM2CALC@" ;;
         --enable-himalaya)            out="$out @ENABLE_HIMALAYA@" ;;
-        --enable-lapack)              out="$out @ENABLE_LAPACK@" ;;
         --enable-librarylink)         out="$out @ENABLE_LIBRARYLINK@" ;;
         --enable-looptools)           out="$out @ENABLE_LOOPTOOLS@" ;;
         --enable-mass-error-check)    out="$out @ENABLE_CHECK_EIGENVALUE_ERROR@" ;;
-        --enable-ilp64mkl-workaround) out="$out @ENABLE_ILP64MKL_WORKAROUND@" ;;
         --enable-silent)              out="$out @ENABLE_SILENT@" ;;
         --enable-shared-libs)         out="$out @ENABLE_SHARED_LIBS@" ;;
         --enable-sqlite)              out="$out @ENABLE_SQLITE@" ;;

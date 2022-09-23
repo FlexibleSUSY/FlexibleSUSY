@@ -22,8 +22,8 @@
 #include <Eigen/Core>
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <complex>
-#include <string>
 #include <limits>
 
 namespace flexiblesusy {
@@ -73,6 +73,36 @@ Derived div_safe(
          const Scalar q = x / y;
          return std::isfinite(q) ? q : Scalar{};
       });
+}
+
+/**
+ * Returns true when two objects are element-wise equal up to a
+ * relative precision \a eps.
+ *
+ * @param a first object
+ * @param b second object
+ * @param eps maximum relative difference
+ *
+ * @return true when both objects are equal, false otherwise
+ */
+template <class Derived>
+bool is_equal_rel(const Eigen::PlainObjectBase<Derived>& a,
+                  const Eigen::PlainObjectBase<Derived>& b, double eps)
+{
+   if (a.rows() != b.rows() || a.cols() != b.cols()) {
+      return false;
+   }
+
+   for (decltype(a.size()) i = 0; i < a.size(); i++) {
+      const auto ai = a.data()[i];
+      const auto bi = b.data()[i];
+      const auto max = std::max(std::abs(ai), std::abs(bi));
+      if (std::abs(ai - bi) >= eps*(1 + max)) {
+         return false;
+      }
+   }
+
+   return true;
 }
 
 /**
@@ -206,7 +236,9 @@ void reorder_vector(
 }
 
 /**
- * @brief reorders vector v according to ordering of diagonal elements in mass_matrix
+ * @brief reorders vector v according to ordering of the magitude of
+ * the diagonal elements in matrix
+ *
  * @param v vector with elementes to be reordered
  * @param matrix matrix with diagonal elements with reference ordering
  */
@@ -215,7 +247,7 @@ void reorder_vector(
    Eigen::Array<double,Eigen::MatrixBase<Derived>::RowsAtCompileTime,1>& v,
    const Eigen::MatrixBase<Derived>& matrix)
 {
-   reorder_vector(v, matrix.diagonal().array().eval());
+   reorder_vector(v, matrix.diagonal().array().cwiseAbs().eval());
 }
 
 /// sorts an Eigen array

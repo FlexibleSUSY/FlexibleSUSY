@@ -75,7 +75,7 @@ decltype(
 		boost::unit_test::data::xrange( 1, number_of_random_samples + 1 ) ^
 		detail::random_MSSM_dataset();
 	
-	return std::move(random_datset);
+	return random_datset;
 }
 
 #define FS_TEST_MSSM_PARAMETER_SEQUENCE TanBeta, SignMu, Qin, mHd2IN, \

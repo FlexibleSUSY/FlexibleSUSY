@@ -19,7 +19,7 @@ rm -f "$output"
 # to make seq use point
 LANG=en_US
 
-Xt_values=$(seq -3 0.1 3)
+Xt_values=$(LC_NUMERIC=en_US.UTF-8 seq -3 0.1 3)
 MS=2000
 MS2=$(echo "$MS*$MS" | bc)
 Mu="$MS"

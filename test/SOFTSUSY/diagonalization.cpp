@@ -17,8 +17,6 @@
 // ====================================================================
 
 #include "diagonalization.hpp"
-#include "error.hpp"
-#include "wrappers.hpp"
 #include <sstream>
 
 #ifndef ENABLE_DEBUG
@@ -30,7 +28,7 @@ namespace flexiblesusy {
 namespace {
    double AbsSqrt_d(double x)
    {
-      return AbsSqrt(x);
+      return std::sqrt(std::abs(x));
    }
 }
 
@@ -264,7 +262,7 @@ void Symmetrize(softsusy::DoubleMatrix& m)
 namespace {
   inline double ZeroSqrt_d(double x) noexcept
   {
-    return ZeroSqrt(x);
+    return x > 0.0 ? std::sqrt(x) : 0.0;
   }
 } // anonymous namespace
 

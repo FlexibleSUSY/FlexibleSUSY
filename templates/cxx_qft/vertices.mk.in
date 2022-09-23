@@ -17,5 +17,5 @@
 #  ====================================================================
 
 
-LIB@ModelName@_SRC += \
+LIB@ModelName@_CXXQFT_VERTICES_SRC := \
 @generatedCXXVerticesFiles@

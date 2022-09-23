@@ -24,8 +24,6 @@
 #ifndef BASIC_RK_INTEGRATOR_H
 #define BASIC_RK_INTEGRATOR_H
 
-#include <algorithm>
-#include <cmath>
 #include <functional>
 
 #include "rk.hpp"

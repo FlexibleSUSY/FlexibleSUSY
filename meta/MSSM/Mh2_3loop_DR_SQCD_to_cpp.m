@@ -58,7 +58,7 @@ Simp[expr_] := expr //.
         Power[x_,-5]          :> 1/Symbol["pow" <> ToString[5]][x],
         Power[x_,-6]          :> 1/Symbol["pow" <> ToString[6]][x],
         Log[x_]               :> log[x],
-        PolyLog[2,x_]         :> dilog[x],
+        PolyLog[2,x_]         :> Li2[x],
         PolyLog[4,1/2]        -> N[PolyLog[4,1/2]]
     };
 
@@ -70,7 +70,7 @@ Corrections[alphaSOrder_, logOrder_] :=
     Inactive -> Identity;
 
 impl = "\
-#include \"dilog.hpp\"
+#include \"Li2.hpp\"
 #include <cmath>
 #include <limits>
 

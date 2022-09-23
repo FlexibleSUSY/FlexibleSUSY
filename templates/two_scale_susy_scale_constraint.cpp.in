@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_two_scale_susy_scale_constraint.hpp"
 #include "@ModelName@_two_scale_model.hpp"
@@ -25,7 +24,6 @@
 #include "logger.hpp"
 #include "error.hpp"
 #include "ew_input.hpp"
-#include "gsl_utils.hpp"
 #include "minimizer.hpp"
 #include "raii.hpp"
 #include "root_finder.hpp"
@@ -72,6 +70,7 @@ void @ModelName@_susy_scale_constraint<Two_scale>::apply()
 
    // apply user-defined susy scale constraints
 @applyConstraint@
+@calculateSMHiggsPoleMass@
 }
 
 double @ModelName@_susy_scale_constraint<Two_scale>::get_scale() const

@@ -27,7 +27,7 @@ FillHimalayaInput::usage = "Fills parameters into Himalaya input
  struct.";
 
 { RenormalizationScheme, Lambda3L, Lambda3LUncertainty,
-  \[Mu], SARAH`g1, Susyno`LieGroups`g2, g3, vd, vu,
+  \[Mu], SARAH`g1, Susyno`LieGroups`g2, SARAH`g3, SARAH`vd, SARAH`vu,
   MSQ2, MSD2, MSU2, MSL2, MSE2,
   Au, Ad, Ae, Yu, Yd, Ye, M1, M2, M3, mA };
 

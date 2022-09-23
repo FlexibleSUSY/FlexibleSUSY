@@ -31,12 +31,14 @@
 #include "loop_corrections.hpp"
 #include "threshold_corrections.hpp"
 #include "error.hpp"
+#include "names.hpp"
 #include "problems.hpp"
 #include "physical_input.hpp"
 
 #include <array>
 #include <iosfwd>
 #include <string>
+#include <utility>
 
 #include <Eigen/Core>
 
@@ -131,8 +133,8 @@ public:
    double,3,3>& Ye_, double mu2_, double v_);
    Standard_model(const Standard_model&) = default;
    Standard_model(Standard_model&&) = default;
-
    virtual ~Standard_model() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    Standard_model& operator=(const Standard_model&) = default;
    Standard_model& operator=(Standard_model&&) = default;
@@ -166,7 +168,8 @@ public:
 
    virtual Eigen::ArrayXd beta() const override;
    virtual Eigen::ArrayXd get() const override;
-   void print(std::ostream& out = std::cerr) const;
+   void print() const;
+   void print(std::ostream&) const;
    virtual void set(const Eigen::ArrayXd&) override;
 
    Standard_model calc_beta() const;
@@ -527,7 +530,7 @@ public:
    double calculate_delta_alpha_s(double alphaS) const;
    void calculate_Lambdax_DRbar();
    double calculate_G_fermi(const softsusy::QedQcd&);
-   double calculate_theta_w(const softsusy::QedQcd&, double alpha_em_drbar);
+   std::pair<double,double> calculate_theta_w(const softsusy::QedQcd&, double alpha_em_drbar);
    void calculate_Yu_DRbar(const softsusy::QedQcd&);
    void calculate_Yd_DRbar(const softsusy::QedQcd&);
    void calculate_Ye_DRbar(const softsusy::QedQcd&);
@@ -604,8 +607,8 @@ private:
 
    class EEWSBStepFailed : public Error {
    public:
+      EEWSBStepFailed() : Error("Could not perform EWSB step") {}
       virtual ~EEWSBStepFailed() = default;
-      virtual std::string what() const override { return "Could not perform EWSB step."; }
    };
 
    int ewsb_loop_order{4};

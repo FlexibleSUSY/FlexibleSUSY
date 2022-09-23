@@ -69,6 +69,7 @@ DV3 calculate_gauge_couplings(
    SMSU3_low_scale_constraint<Two_scale> constraint,
    double scale)
 {
+   model.set_thresholds(1);
    model.set_scale(scale);
    constraint.set_model(&model);
    constraint.apply();
@@ -94,7 +95,7 @@ BOOST_AUTO_TEST_CASE( test_threshold_corrections )
    SMSU3_low_scale_constraint<Two_scale> constraint(&m, qedqcd);
 
    const double Q1 = constraint.get_scale();
-   const double Q2 = 2. * Q1;
+   const double Q2 = 1.1 * Q1;
    DV3 g_old;
    g_old(0) = Electroweak_constants::g1;
    g_old(1) = Electroweak_constants::g2;

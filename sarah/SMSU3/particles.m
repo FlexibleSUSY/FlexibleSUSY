@@ -81,6 +81,7 @@ ParticleDefinitions[GaugeES] = {
       {VWp,  { Description -> "W+ - Boson",
       			Goldstone -> Hp }},         
       {VCo2, { Description -> "F-Boson",
+               PDG -> {1000000},
                ElectricCharge -> 0 }},         
       {gP,   { Description -> "Photon Ghost"}},                                                   
       {gWp,  { Description -> "Positive W+ - Boson Ghost"}}, 

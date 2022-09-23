@@ -191,7 +191,7 @@ public:
   /// Evolves object to MZ
   void toMz();
   /// Evolves object to given scale.
-  void to(double scale, double tol = 1e-5, int max_iterations = 20);
+  void to(double scale, double precision_goal = 1e-5, int max_iterations = 20);
   /// guess coupling constants {alpha_1, alpha_2, alpha_3} in SM(5)
   Eigen::Array<double,3,1> guess_alpha_SM5(double scale) const;
 };

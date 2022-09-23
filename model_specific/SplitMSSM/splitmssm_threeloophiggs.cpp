@@ -17,10 +17,20 @@
 // ====================================================================
 
 #include "splitmssm_threeloophiggs.hpp"
-#include "wrappers.hpp"
+#include <cmath>
 
 namespace flexiblesusy {
 namespace splitmssm_threeloophiggs {
+
+namespace {
+
+constexpr double threeLoop = 2.539456721913701978e-07; // 1/(4 Pi)^6
+
+double sqr(double x) noexcept { return x*x; }
+double pow3(double x) noexcept { return x*x*x; }
+double pow4(double x) noexcept { return sqr(sqr(x)); }
+
+} // anonymous namespace
 
 /**
  * Split-SUSY Higgs self-energy 3-loop contribution from a gluino,
@@ -43,13 +53,13 @@ namespace splitmssm_threeloophiggs {
 double delta_mh_3loop_gluino_split(
    double scale, double mt, double yt, double g3, double mg)
 {
-   const double yt2 = Sqr(yt);
-   const double mt2 = Sqr(mt);
-   const double g34 = std::pow(g3, 4);
-   const double mg2 = Sqr(mg);
-   const double Q2 = Sqr(scale);
-   const double LogG = FiniteLog(mg2 / Q2);
-   const double LogG3 = std::pow(LogG, 3);
+   const double yt2 = sqr(yt);
+   const double mt2 = sqr(mt);
+   const double g34 = pow4(g3);
+   const double mg2 = sqr(mg);
+   const double Q2 = sqr(scale);
+   const double LogG = std::log(mg2 / Q2);
+   const double LogG3 = pow3(LogG);
 
    const double result = 64*g34*yt2*mt2*LogG3;
 

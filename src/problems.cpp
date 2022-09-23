@@ -17,9 +17,11 @@
 // ====================================================================
 
 #include "problems.hpp"
-#include "logger.hpp"
-#include "string_utils.hpp"
 #include "config.h"
+#include "logger.hpp"
+#include "names.hpp"
+#include "string_format.hpp"
+#include "string_utils.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -67,6 +69,8 @@ void Problems::clear()
    std::fill(pole_tachyons.begin(), pole_tachyons.end(), 0);
    std::fill(failed_pole_mass_convergence.begin(), failed_pole_mass_convergence.end(), 0);
    non_pert_pars.clear();
+   failed_minimum.clear();
+   failed_root.clear();
    exception_msg = "";
    failed_ewsb = false;
    failed_ewsb_tree_level = false;
@@ -85,6 +89,8 @@ void Problems::add(const Problems& other)
    vector_or(pole_tachyons, other.pole_tachyons);
    vector_or(failed_pole_mass_convergence, other.failed_pole_mass_convergence);
    map_or(non_pert_pars, other.non_pert_pars);
+   map_or(failed_minimum, other.failed_minimum);
+   map_or(failed_root, other.failed_root);
 
    if (exception_msg.empty() && !other.exception_msg.empty())
       exception_msg = other.exception_msg;
@@ -98,17 +104,35 @@ void Problems::add(const Problems& other)
 
 bool Problems::have_problem() const
 {
-   return have_tachyon() || failed_ewsb || failed_ewsb_tree_level
-      || non_perturbative || failed_sinThetaW_convergence
-      || failed_GF_convergence
-      || have_thrown()
-      || have_failed_pole_mass_convergence()
-      || have_non_perturbative_parameter();
+   return number_of_problems() > 0;
+}
+
+unsigned Problems::number_of_problems() const
+{
+   unsigned count = 0;
+   if (have_tachyon()) count++;
+   if (failed_ewsb) count++;
+   if (failed_ewsb_tree_level) count++;
+   if (non_perturbative || have_non_perturbative_parameter()) count++;
+   if (failed_sinThetaW_convergence) count++;
+   if (failed_GF_convergence) count++;
+   if (no_minimum()) count++;
+   if (no_root()) count++;
+   if (have_thrown()) count++;
+   if (have_failed_pole_mass_convergence()) count++;
+   return count;
 }
 
 bool Problems::have_warning() const
 {
-   return have_bad_mass();
+   return number_of_warnings() > 0;
+}
+
+unsigned Problems::number_of_warnings() const
+{
+   unsigned count = 0;
+   if (have_bad_mass()) count++;
+   return count;
 }
 
 std::string Problems::get_parameter_name(int idx) const
@@ -117,6 +141,11 @@ std::string Problems::get_parameter_name(int idx) const
       return "Q";
 
    return parameter_names->get(idx);
+}
+
+std::string Problems::get_particle_name(int idx) const
+{
+   return particle_names->get(idx);
 }
 
 std::vector<std::string> Problems::get_problem_strings() const
@@ -154,15 +183,23 @@ std::vector<std::string> Problems::get_problem_strings() const
       std::string str("non-perturbative " + par_name);
       if (par.second.threshold > 0) {
          str += " [|" + par_name + "|(" +
-                std::to_string(par.second.scale) + ") = " +
-                std::to_string(par.second.value) +
-                " > " + std::to_string(par.second.threshold) + "]";
+                flexiblesusy::to_string(par.second.scale) + ") = " +
+                flexiblesusy::to_string(par.second.value) +
+                " > " + flexiblesusy::to_string(par.second.threshold) + "]";
       } else {
          str += " [" + par_name + "(" +
-                std::to_string(par.second.scale) +
-                ") = " + std::to_string(par.second.value) + "]";
+                flexiblesusy::to_string(par.second.scale) +
+                ") = " + flexiblesusy::to_string(par.second.value) + "]";
       }
       strings.emplace_back(str);
+   }
+
+   for (const auto& m: failed_minimum) {
+      strings.emplace_back(std::string("no minimum for parameters ") + m.first);
+   }
+
+   for (const auto& m: failed_root) {
+      strings.emplace_back(std::string("no root for parameters ") + m.first);
    }
 
    strings.shrink_to_fit();
@@ -193,12 +230,22 @@ std::string Problems::get_warning_string(const std::string& sep) const
    return concat(get_warning_strings(), sep);
 }
 
+void Problems::print_problems() const
+{
+   print_problems(std::cerr);
+}
+
 void Problems::print_problems(std::ostream& ostr) const
 {
    if (!have_problem())
       return;
 
    ostr << get_problem_string();
+}
+
+void Problems::print_warnings() const
+{
+   print_warnings(std::cerr);
 }
 
 void Problems::print_warnings(std::ostream& ostr) const
@@ -288,6 +335,16 @@ void Problems::flag_no_G_fermi_convergence()
    failed_GF_convergence = true;
 }
 
+void Problems::flag_no_minimum(const std::string& msg, int status)
+{
+   failed_minimum[msg] = status;
+}
+
+void Problems::flag_no_root(const std::string& msg, int status)
+{
+   failed_root[msg] = status;
+}
+
 void Problems::unflag_bad_mass(int particle)
 {
    bad_masses.at(particle) = false;
@@ -357,6 +414,16 @@ void Problems::unflag_no_sinThetaW_convergence()
 void Problems::unflag_no_G_fermi_convergence()
 {
    failed_GF_convergence = false;
+}
+
+void Problems::unflag_no_minimum(const std::string& msg)
+{
+   failed_minimum.erase(msg);
+}
+
+void Problems::unflag_no_root(const std::string& msg)
+{
+   failed_root.erase(msg);
 }
 
 bool Problems::is_bad_mass(int particle) const
@@ -437,6 +504,16 @@ bool Problems::no_sinThetaW_convergence() const
 bool Problems::no_G_fermi_convergence() const
 {
    return failed_GF_convergence;
+}
+
+bool Problems::no_minimum() const
+{
+   return !failed_minimum.empty();
+}
+
+bool Problems::no_root() const
+{
+   return !failed_root.empty();
 }
 
 std::vector<int> Problems::get_bad_masses() const

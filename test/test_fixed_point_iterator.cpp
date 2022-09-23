@@ -65,12 +65,11 @@ BOOST_AUTO_TEST_CASE( test_parabola1 )
    const double precision = 1.0e-4;
    Eigen::Matrix<double,2,1> start;
    start << 9, 9;
-   Fixed_point_iterator<2> fpi(parabola1, 1000, fixed_point_iterator::Convergence_tester_relative(precision));
-   int status = GSL_SUCCESS;
+   Fixed_point_iterator<2> fpi(parabola1, 1000, fixed_point_iterator::Convergence_tester_relative<2>(precision));
 
    reset();
 
-   status = fpi.find_fixed_point(start);
+   int status = fpi.find_fixed_point(start);
    const auto fixed_point = fpi.get_solution();
 
    const double residual_1 = MaxRelDiff(5.0, fixed_point(0));
@@ -82,9 +81,9 @@ BOOST_AUTO_TEST_CASE( test_parabola1 )
    // subsequent steps are very close to each other, but x_n might not
    // be close to the true fixed point.
 
-   BOOST_REQUIRE(status == GSL_SUCCESS);
-   BOOST_CHECK_LT(residual_1, 100*precision);
-   BOOST_CHECK_LT(residual_2, 100*precision);
+   BOOST_REQUIRE(status == EWSB_solver::SUCCESS);
+   BOOST_CHECK_LT(residual_1, 200*precision);
+   BOOST_CHECK_LT(residual_2, 200*precision);
    BOOST_TEST_MESSAGE("fixed point iterator used " << get_number_of_calls() << " calls");
 }
 
@@ -93,18 +92,17 @@ BOOST_AUTO_TEST_CASE( test_parabola2 )
    const double precision = 1.0e-4;
    Eigen::Matrix<double,2,1> start;
    start << 9, 9;
-   Fixed_point_iterator<2> fpi(parabola2, 1000, fixed_point_iterator::Convergence_tester_relative(precision));
-   int status = GSL_SUCCESS;
+   Fixed_point_iterator<2> fpi(parabola2, 1000, fixed_point_iterator::Convergence_tester_relative<2>(precision));
 
    reset();
 
-   status = fpi.find_fixed_point(start);
+   int status = fpi.find_fixed_point(start);
 
    // The form of the update steps in Parabola2 is problematic,
    // because they are quadratic in the variables and are therefore
    // not small.
 
-   BOOST_REQUIRE(status != GSL_SUCCESS);
+   BOOST_REQUIRE(status != EWSB_solver::SUCCESS);
 }
 
 /**
@@ -128,15 +126,14 @@ BOOST_AUTO_TEST_CASE( test_perturbation )
    const double precision = 1.0e-4;
    Eigen::Matrix<double,2,1> start;
    start << 10, 10;
-   Fixed_point_iterator<2> fpi(perturbation, 1000, fixed_point_iterator::Convergence_tester_relative(precision));
-   int status = GSL_SUCCESS;
+   Fixed_point_iterator<2> fpi(perturbation, 1000, fixed_point_iterator::Convergence_tester_relative<2>(precision));
 
    reset();
 
-   status = fpi.find_fixed_point(start);
+   int status = fpi.find_fixed_point(start);
    const auto fixed_point = fpi.get_solution();
 
-   BOOST_REQUIRE(status == GSL_SUCCESS);
+   BOOST_REQUIRE(status == EWSB_solver::SUCCESS);
    BOOST_CHECK_CLOSE_FRACTION(fixed_point(0), 1.0, 0.02);
    BOOST_CHECK_CLOSE_FRACTION(fixed_point(1), 2.0, 0.04);
 

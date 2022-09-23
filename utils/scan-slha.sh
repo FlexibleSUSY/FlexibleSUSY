@@ -39,8 +39,8 @@ BEGIN {
    }
 }
 {
-   pattern     = "^block[[:blank:]]*" tolower(block) "([^[:graph:]].*)?$";
-   not_pattern = "^block[[:blank:]]*.*$";
+   pattern     = "^block[ \t\n\r\f]*" tolower(block) "([^a-zA-Z0-9_].*)?$";
+   not_pattern = "^block[ \t\n\r\f]*.*$";
 
    if (tolower($0) ~ pattern) {
       is_block = 1
@@ -130,10 +130,10 @@ Examples:
         --output=MINPAR[3],MASS[25],Yu[3:3] \\
      > scan-slha.dat
 
-   $  echo "set xlabel \"tan(beta)\"; 
+   $  echo "set xlabel \"tan(beta)\";
             set ylabel \"mh / GeV\";
             plot 'scan-slha.dat' u 1:2 w linespoints" \\
-        | gnuplot -p 
+        | gnuplot -p
 EOF
 }
 
@@ -334,7 +334,7 @@ EOF
         if test "$check_present" -eq 1 ; then
             # check if entry exists
             # if entry exists, set value=1, otherwise set value=0
-            test -z "$value" > /dev/null
+            [ -z "${value}" ]
             value=$?
         fi
 

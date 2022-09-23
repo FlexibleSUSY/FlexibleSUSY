@@ -97,7 +97,6 @@ void @ModelName@_standard_model_initial_guesser<Shooting>::guess()
    sm.set_ewsb_loop_order(2);
    sm.initialise_from_input(qedqcd);
    sm.calculate_DRbar_masses();
-   sm.set_integrator(runge_kutta::RKF_integrator());
 
    VERBOSE_MSG("\t[2] running SM up to Q_match = " << susy_scale_guess << " GeV ...");
 

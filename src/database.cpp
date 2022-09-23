@@ -17,20 +17,92 @@
 // ====================================================================
 
 #include "database.hpp"
+#include "error.hpp"
 #include "logger.hpp"
 #include "config.h"
+#include "string_format.hpp"
 
+#include <cstddef>
 #include <limits>
 #include <sstream>
+#include <string>
 #include <iomanip>
 
 #ifdef ENABLE_SQLITE
 
-#include <boost/lexical_cast.hpp>
 #include <sqlite3.h>
 
 namespace flexiblesusy {
 namespace database {
+
+namespace {
+
+double to_double(const std::string& str)
+{
+   double d = 0.0;
+
+   try {
+      d = std::stod(str);
+   } catch (std::exception& e) {
+      throw ReadError(e.what());
+   }
+
+   return d;
+}
+
+} // anonymous namespace
+
+class SQLiteReadError : Error {
+public:
+   explicit SQLiteReadError(const std::string& msg) : Error(msg) {}
+   explicit SQLiteReadError(const char* msg) : Error(msg) {}
+   virtual ~SQLiteReadError() = default;
+};
+
+/**
+ * Open database
+ *
+ * @param file_name file name
+ *
+ * @return pointer to database, or 0 if database cannot be opened.
+ */
+sqlite3* open(const std::string& file_name)
+{
+   sqlite3* db = nullptr;
+
+   const int rc = sqlite3_open(file_name.c_str(), &db);
+
+   if (rc) {
+      throw SQLiteReadError("Cannot open sqlite3 database file "
+                            + file_name + ": " + sqlite3_errmsg(db));
+   }
+
+   return db;
+}
+
+/**
+ * Callback function which fills an Eigen::ArrayXd with the data in
+ * the given row.
+ *
+ * @param data pointer to Eigen::ArrayXd
+ * @param argc number of columns
+ * @param argv array of column entries
+ * @param col_name array of column names
+ *
+ * @return 0
+ */
+int extract_callback(void* data, int argc, char** argv, char** col_name)
+{
+   auto values = static_cast<Eigen::ArrayXd*>(data);
+   values->conservativeResize(argc);
+
+   for (int i = 0; i < argc; i++) {
+      (*values)(i) = to_double(argv[i]);
+      VERBOSE_MSG(col_name[i] << " = " << argv[i]);
+   }
+
+   return 0;
+}
 
 Database::Database(const std::string& file_name)
    : db(open(file_name))
@@ -75,7 +147,7 @@ void Database::insert(
    sql += ") VALUES (";
 
    for (std::size_t i = 0; i < number_of_elements; i++) {
-      sql += boost::lexical_cast<std::string>(data[i]);
+      sql += flexiblesusy::to_string(data[i]);
       if (i + 1 != number_of_elements)
          sql += ',';
    }
@@ -99,9 +171,9 @@ Eigen::ArrayXd Database::extract(const std::string& table_name, long long row)
    const std::string sql =
       (row >= 0 ?
        "SELECT * FROM " + table_name + " LIMIT 1 OFFSET "
-          + std::to_string(row) + ";" :
+          + flexiblesusy::to_string(row) + ";" :
        "SELECT * FROM " + table_name + " WHERE ROWID = (SELECT MAX(ROWID) - "
-          + std::to_string(std::abs(row + 1)) + " FROM " + table_name + ");");
+          + flexiblesusy::to_string(std::abs(row + 1)) + " FROM " + table_name + ");");
 
    execute(sql, extract_callback, static_cast<void*>(&values));
 
@@ -171,51 +243,6 @@ void Database::execute(const std::string& cmd, TCallback callback, void* data)
    }
 }
 
-/**
- * Open database
- *
- * @param file_name file name
- *
- * @return pointer to database, or 0 if database cannot be opened.
- */
-sqlite3* Database::open(const std::string& file_name)
-{
-   sqlite3* db = nullptr;
-
-   const int rc = sqlite3_open(file_name.c_str(), &db);
-
-   if (rc) {
-      throw SQLiteReadError("Cannot open sqlite3 database file "
-                            + file_name + ": " + sqlite3_errmsg(db));
-   }
-
-   return db;
-}
-
-/**
- * Callback function which fills an Eigen::ArrayXd with the data in
- * the given row.
- *
- * @param data pointer to Eigen::ArrayXd
- * @param argc number of columns
- * @param argv array of column entries
- * @param col_name array of column names
- *
- * @return 0
- */
-int Database::extract_callback(void* data, int argc, char** argv, char** col_name)
-{
-   auto values = static_cast<Eigen::ArrayXd*>(data);
-   values->conservativeResize(argc);
-
-   for (int i = 0; i < argc; i++) {
-      (*values)(i) = boost::lexical_cast<double>(argv[i]);
-      VERBOSE_MSG(col_name[i] << " = " << argv[i]);
-   }
-
-   return 0;
-}
-
 } // namespace database
 } // namespace flexiblesusy
 
@@ -224,8 +251,14 @@ int Database::extract_callback(void* data, int argc, char** argv, char** col_nam
 namespace flexiblesusy {
 namespace database {
 
+class DisabledSQLiteError : Error {
+public:
+   explicit DisabledSQLiteError(const std::string& msg) : Error(msg) {}
+   explicit DisabledSQLiteError(const char* msg) : Error(msg) {}
+   virtual ~DisabledSQLiteError() = default;
+};
+
 Database::Database(const std::string&)
-   : db(nullptr)
 {
 }
 
@@ -252,16 +285,6 @@ void Database::create_table(const std::string&, const std::vector<std::string>&)
 void Database::execute(const std::string&) {}
 
 void Database::execute(const std::string&, TCallback, void*) {}
-
-sqlite3* Database::open(const std::string&)
-{
-   return nullptr;
-}
-
-int Database::extract_callback(void*, int, char**, char**)
-{
-   return 1;
-}
 
 } // namespace database
 } // namespace flexiblesusy

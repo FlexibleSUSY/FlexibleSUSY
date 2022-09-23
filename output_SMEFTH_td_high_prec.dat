@@ -1,0 +1,24 @@
+ ====================================================
+   FF 2.0, a package to evaluate one-loop integrals
+ written by G. J. van Oldenborgh, NIKHEF-H, Amsterdam
+ ====================================================
+ for the algorithms used see preprint NIKHEF-H 89/17,
+ 'New Algorithms for One-loop Integrals', by G.J. van
+ Oldenborgh and J.A.M. Vermaseren, published in 
+ Zeitschrift fuer Physik C46(1990)425.
+ ====================================================
+Running 1 test case...
+test/test_SMEFTHiggsTopDown.cpp(159): [1;31;49merror: in "test_Mh": difference{6.67404e-05} between bu.at(0){124.83672058197868} and td.at(0){124.84505223162812} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(160): [1;31;49merror: in "test_Mh": difference{0.000238865} between bu.at(1){0.27522732830753083} and td.at(1){0.27529307052781055} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(161): [1;31;49merror: in "test_Mh": difference{1.46523e-05} between bu.at(2){0.4614201933363381} and td.at(2){0.46142695419518165} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(162): [1;31;49merror: in "test_Mh": difference{4.92811e-05} between bu.at(3){0.65064912954635146} and td.at(3){0.65061706640649175} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(163): [1;31;49merror: in "test_Mh": difference{8.20428e-07} between bu.at(4){1.2041110913444715} and td.at(4){1.2041101034592132} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(164): [1;31;49merror: in "test_Mh": difference{0.000164873} between bu.at(5){0.96648814449168308} and td.at(5){0.96664749225708424} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(165): [1;31;49merror: in "test_Mh": difference{1.70028e-05} between bu.at(6){0.016305780844659092} and td.at(6){0.016306058089056861} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(166): [1;31;49merror: in "test_Mh": difference{0.00308966} between bu.at(7){0.0099647698774327324} and td.at(7){0.009934076969223023} exceeds 1e-10[0;39;49m
+test/test_SMEFTHiggsTopDown.cpp(167): [1;31;49merror: in "test_Mh": difference{1.53877e-05} between bu.at(8){248.71691079741046} and td.at(8){248.71308366614826} exceeds 1e-10[0;39;49m
+ 
+total number of errors and warnings
+===================================
+fferr: no errors
+ 

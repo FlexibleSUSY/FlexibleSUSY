@@ -43,6 +43,8 @@ const auto PI2 = PI*PI;
 const auto k  = 1.0L/(16.0L*PI2);
 const auto k2 = k*k;
 
+#ifdef TSIL_SIZE_DOUBLE
+
 /*
  * The following operators need to be defined, if TSIL was compiled
  * with precision -DTSIL_SIZE_DOUBLE instead of -DTSIL_SIZE_LONG.
@@ -85,6 +87,8 @@ std::complex<double> operator-(std::complex<double> b, long double a)
 {
    return b - static_cast<double>(a);
 }
+
+#endif
 
 /**
  * Returns \f$\frac{1}{t} \cdot \delta^{(1)}_{\text{QCD}}\f$ in Eq.(2.1)
@@ -297,7 +301,7 @@ TSIL_COMPLEXCPP delta2QCD(TSIL_REAL t, TSIL_REAL qq)
 {
    const auto t2 = t*t;
    const auto At = TSIL_A_(t,qq);
-   const auto At2 = TSIL_A_(t,qq)*TSIL_A_(t,qq);
+   const auto At2 = At*At;
 
    const TSIL_COMPLEXCPP a = 112.55555555555556L + (16.0L*PI2)/9.0L
    + (60.0L*At2)*(1.0L/t2) - 84.0L*At*(1.0L/t)
@@ -336,10 +340,10 @@ TSIL_COMPLEXCPP delta2mixed(TSIL_REAL t, TSIL_REAL h, TSIL_REAL yt,
    const auto v2 = v*v;
    const auto t2 = t*t;
    const auto h2 = h*h;
-   const auto h3 = h*h*h;
+   const auto h3 = h2*h;
    const auto At = TSIL_A_(t,qq);
    const auto Ah = TSIL_A_(h,qq);
-   const auto At2 = TSIL_A_(t,qq)*TSIL_A_(t,qq);
+   const auto At2 = At*At;
    const auto Bht = TSIL_B_(h,t,t,qq);
    const auto Ihtt = TSIL_I2_(h,t,t,qq);
 
@@ -430,11 +434,11 @@ TSIL_COMPLEXCPP delta2Higgs(TSIL_REAL t, TSIL_REAL h, TSIL_REAL yt,
    const auto q2 = q*q;
    const auto v4 = v*v*v*v;
    const auto h2 = h*h;
-   const auto h3 = h*h*h;
-   const auto h4 = h*h*h*h;
+   const auto h3 = h2*h;
+   const auto h4 = h2*h2;
    const auto t2 = t*t;
-   const auto t3 = t*t*t;
-   const auto t4 = t*t*t*t;
+   const auto t3 = t2*t;
+   const auto t4 = t2*t2;
    const auto Logt = std::log(t);
    const auto Logh = std::log(h);
    const auto Logtmh = std::log(t-h);
@@ -443,14 +447,14 @@ TSIL_COMPLEXCPP delta2Higgs(TSIL_REAL t, TSIL_REAL h, TSIL_REAL yt,
    const auto Logh2 = Logh*Logh;
    const auto Ah = TSIL_A_(h,qq);
    const auto At = TSIL_A_(t,qq);
-   const auto At2 = TSIL_A_(t,qq)*TSIL_A_(t,qq);
-   const auto Ah2 = TSIL_A_(h,qq)*TSIL_A_(h,qq);
+   const auto At2 = At*At;
+   const auto Ah2 = Ah*Ah;
    const auto B00 = TSIL_B_(0.0L,0.0L,t,qq);
    const auto Bt0 = TSIL_B_(t,0.0L,t,qq);
    const auto B0h = TSIL_B_(0.0L,h,t,qq);
    const auto Bht = TSIL_B_(h,t,t,qq);
-   const auto B002 = TSIL_B_(0.0L,0.0L,t,qq)*TSIL_B_(0.0L,0.0L,t,qq);
-   const auto Bht2 = TSIL_B_(h,t,t,qq)*TSIL_B_(h,t,t,qq);
+   const auto B002 = B00*B00;
+   const auto Bht2 = Bht*Bht;
    const auto Ih00 = TSIL_I2_(h,0.0L,0.0L,qq);
    const auto I0t0 = TSIL_I2_(0.0L,t,0.0L,qq);
    const auto Ihhh = TSIL_I2_(h,h,h,qq);
@@ -609,6 +613,8 @@ TSIL_COMPLEXCPP Sigma2SHiggs(TSIL_REAL t, TSIL_REAL h,
    return a;
 }
 
+/*
+
 TSIL_COMPLEXCPP mt_flexiblesusy(TSIL_REAL g3, TSIL_REAL t, TSIL_REAL h,
    TSIL_REAL yt, TSIL_REAL T, TSIL_REAL qq)
 {
@@ -623,6 +629,8 @@ TSIL_COMPLEXCPP mt_flexiblesusy(TSIL_REAL g3, TSIL_REAL t, TSIL_REAL h,
 
    return a;
 }
+
+*/
 
 TSIL_COMPLEXCPP deltamt2QCDspheno(TSIL_REAL g3, TSIL_REAL t,
    TSIL_REAL qq)
@@ -692,6 +700,8 @@ TSIL_COMPLEXCPP Sigma2SHiggsspheno(TSIL_REAL t,
    return a;
 }
 
+/*
+
 TSIL_COMPLEXCPP mt_spheno(TSIL_REAL g3, TSIL_REAL t, TSIL_REAL h,
    TSIL_REAL yt, TSIL_REAL T, TSIL_REAL qq)
 {
@@ -709,9 +719,26 @@ TSIL_COMPLEXCPP mt_spheno(TSIL_REAL g3, TSIL_REAL t, TSIL_REAL h,
    return a;
 }
 
+*/
+
 } // anonymous namespace
 
 /* ******************** 1-loop ******************** */
+
+TSIL_REAL delta_Mt_1loop_as(TSIL_REAL g3, TSIL_REAL t, TSIL_REAL qq)
+{
+   return std::real(-deltamt1QCD(g3, t, qq));
+}
+
+TSIL_REAL delta_Mt_1loop_at(TSIL_REAL t, TSIL_REAL h, TSIL_REAL yt, TSIL_REAL qq)
+{
+   const auto mt = std::sqrt(t);
+   const auto ss = Sigma1S(t, h, yt, t, qq);
+   const auto sl = Sigma1L(t, h, yt, t, qq);
+   const auto sr = Sigma1R(t, h, yt, t, qq);
+
+   return -std::real(ss + mt*(sl + sr));
+}
 
 TSIL_REAL delta_mt_1loop_as(TSIL_REAL g3, TSIL_REAL t, TSIL_REAL qq)
 {
@@ -734,6 +761,16 @@ TSIL_REAL delta_mt_1loop_at_R(TSIL_REAL yt, TSIL_REAL t, TSIL_REAL h, TSIL_REAL 
 }
 
 /* ******************** 2-loop ******************** */
+
+TSIL_REAL delta_Mt_2loop_as_as(TSIL_REAL g3, TSIL_REAL t, TSIL_REAL qq)
+{
+   const auto g34 = g3*g3*g3*g3;
+   const auto d1 = delta1QCD(t,qq);
+
+   const auto a = -d1*d1/8.0L + 0.5L*delta2QCD(t,qq);
+
+   return std::real(k2*g34*a);
+}
 
 /// FlexibleSUSY convention ///
 

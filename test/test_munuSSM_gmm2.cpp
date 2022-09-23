@@ -126,7 +126,7 @@ Block YVIN
    settings.set(Spectrum_generator_settings::calculate_sm_masses, 0);
    settings.set(Spectrum_generator_settings::calculate_bsm_masses, 0);
 
-   munuSSM_slha<munuSSM<Two_scale>> m = setup_munuSSM(input, qedqcd, settings);
+   munuSSM_slha m = setup_munuSSM(input, qedqcd, settings);
 
    constexpr double reference_value = 2.1176299646121334e-09;
 

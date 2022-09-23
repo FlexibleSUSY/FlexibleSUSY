@@ -89,7 +89,6 @@ void @ModelName@_spectrum_generator<Shooting>::init(
    @ModelName@_ewsb_solver<Shooting> ewsb_solver;
    model.set_ewsb_solver(
       std::make_shared<@ModelName@_ewsb_solver<Shooting> >(ewsb_solver));
-   model.set_integrator(runge_kutta::RKF_integrator());
 }
 
 void @ModelName@_spectrum_generator<Shooting>::init(

@@ -5,19 +5,19 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=3
-FLEXIBLESUSY_PATCH=0
+FLEXIBLESUSY_MINOR=7
+FLEXIBLESUSY_PATCH=1
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
-GM2CALC_VERSION="1.4.3"
+GM2CALC_VERSION="unknown"
 HIMALAYA_VERSION="unknown"
 
 # directory of this script
 BASEDIR=$(dirname $0)
 
 # absolute path to this script
-ABSBASEDIR=$(cd "$BASEDIR"; pwd | sed 's/ /\\\\ /g')
+ABSBASEDIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
 # config directory
 CONFIGDIR="${BASEDIR}/config"
@@ -94,8 +94,8 @@ options="                    \
    enable_compiler_warnings  \
    enable_debug              \
    enable_fflite             \
+   enable_gm2calc            \
    enable_himalaya           \
-   enable_lapack             \
    enable_librarylink        \
    enable_looptools          \
    enable_mass_error_check   \
@@ -122,11 +122,11 @@ enable_colors="no"
 enable_debug=""
 enable_mass_error_check="no"
 enable_fflite="no"
+enable_gm2calc="automatic"
 enable_himalaya="automatic"
-enable_lapack="automatic"
 enable_librarylink="automatic"
-enable_ilp64mkl_workaround="automatic"
 enable_looptools="no"
+enable_collier="no"
 enable_meta="no"
 # BEGIN: NOT EXPORTED ##########################################
 enable_meta="yes"
@@ -146,11 +146,11 @@ DEFINE_ENABLE_COLORS="#undef ENABLE_COLORS"
 DEFINE_ENABLE_DEBUG="#undef ENABLE_DEBUG"
 DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR="#undef CHECK_EIGENVALUE_ERROR"
 DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
+DEFINE_ENABLE_GM2CALC="#undef ENABLE_GM2CALC"
 DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
-DEFINE_ENABLE_LAPACK="#undef ENABLE_LAPACK"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
-DEFINE_ENABLE_ILP64MKL_WORKAROUND="#undef ENABLE_ILP64MKL_WORKAROUND"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
+DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
 DEFINE_ENABLE_ODEINT="#undef ENABLE_ODEINT"
 DEFINE_ENABLE_RANDOM="#undef ENABLE_RANDOM"
 DEFINE_ENABLE_SILENT="#undef ENABLE_SILENT"
@@ -169,15 +169,18 @@ boost_inc_dir=""
 eigen_inc_dir=""
 BOOSTFLAGS=""
 gsl_config="gsl-config"
-blas_lib_dir=""
-lapack_lib_dir=""
 looptools_lib_dir=""
 looptools_inc_dir=""
+collier_lib_dir=""
+collier_inc_dir=""
 GSLFLAGS=""
 CPPFLAGS=""
 CXXFLAGS="-std=c++14 -O2 -fPIC"
 FFLAGS="-O2 -fPIC"
 FLIBS=""
+FMOD=""
+FSTD=''
+FUTILIBS=''
 BOOSTTESTLIBS=""
 BOOSTTHREADLIBS=""
 THREADLIBS=""
@@ -186,8 +189,6 @@ EIGENFLAGS=""
 FC="gfortran"
 GSLLIBS=""
 INSTALL_DIR=""
-BLASLIBS=""
-LAPACKLIBS=""
 MATH="math"
 OPTIONAL_MODULES=""
 pthread_lib_dir=""
@@ -205,6 +206,8 @@ LIBLNK_LIBEXT="$SHARED_LIB_EXT"
 LIBLNK_MAKE_LIB_CMD="$SHARED_LIB_CMD"
 LOOPFUNCFLAGS=""
 LOOPFUNCLIBS=""
+COLLIERFLAGS=""
+COLLIERLIBS=""
 LDFLAGS="$SHARED_LDFLAGS"
 LDLIBS="$SHARED_LDLIBS"
 LLFLAGS=""
@@ -226,6 +229,9 @@ MODELS=""
 # addons that will be compiled
 ADDONS=""
 
+#loop libraries that will be enabled additionally
+LOOP_LIBRARIES=""
+
 # C++ compiler type and version
 cxx_compiler_type="unknown"
 cxx_compiler_version="unknown"
@@ -240,7 +246,7 @@ required_icpc_compiler_version="17.0.0"
 required_boost_version="1.37.0"
 
 # required Mathematica version
-required_mathematica_version="7"
+required_mathematica_version="11.0"
 
 # required SARAH version
 required_sarah_major="4"
@@ -339,7 +345,9 @@ log_package_information() {
 
 #_____________________________________________________________________
 guess_machine_word_size() {
-    local chip="$(uname -m | tr '[A-Z]' '[a-z]')"
+    local chip
+    chip="$(uname -m | tr '[A-Z]' '[a-z]')"
+    exists_in_path getconf && chip="${chip}$(getconf LONG_BIT)"
     case "$chip" in
         *32|i[36]86)
              machine_word_size="32"; return 0 ;;
@@ -427,7 +435,7 @@ check_library() {
 
     libs=""
     for i in $lib ; do
-        for ext in .a .lib "" .so .sl .dylib .dll.a ; do
+        for ext in .a .lib "" .so .sl .dylib .dll.a .tbd ; do
             libs="$libs $i$ext"
         done
     done
@@ -624,12 +632,7 @@ check_symbol() {
     # Check if we got a specific argument as to where the library
     # is to be found
     symbolfile=$symbollib
-    exts=".so .lib .dylib"
-    if test ! "x$shared" = "xno" ; then
-        exts="$exts .a"
-    else
-        exts=".a $exts"
-    fi
+    exts=".so .lib .dylib .a"
 
     usrlib="/usr/lib"
     if test "x$machine_word_size" = "x32" ; then
@@ -698,8 +701,9 @@ split_version() {
     local minor_var="$3"
     local patch_var="$4"
 
+    # shellcheck disable=SC2046
     set -- $(printf "%s" "$version" |
-	     sed 's/^\([[:digit:].]*\).*$/\1/' | tr . ' ')
+        sed 's/^\([[:digit:].]*\).*$/\1/' | tr . ' ')
     eval "$major_var=\"${1:-0}\""
     eval "$minor_var=\"${2:-0}\""
     eval "$patch_var=\"${3:-0}\""
@@ -774,7 +778,7 @@ try_compile_run_cpp_program() {
     # output through stdout and stderr is stored in cpp_output
     # and whose exit code is stored in cpp_exit.
 
-    if [ $# -lt 1 -o $# -gt 3 ]; then
+    if [ $# -lt 1 ] || [ $# -gt 3 ]; then
         echo "try_compile_run_cpp_program: 1, 2, or 3 arguments required!"
         exit 1
     fi
@@ -883,7 +887,23 @@ is_empty_dir() {
         return 1
     fi
 
-    find "$1" -maxdepth 0 -empty | read v
+    if [ -n "$(ls -A "$1")" ]; then
+       return 1
+    else
+       return 0
+    fi
+}
+
+#_____________________________________________________________________
+is_posix_platform() {
+    case "$operating_system" in
+        *BSD*)     return 0 ;;
+        Darwin)    return 0 ;;
+        DragonFly) return 0 ;;
+        GNU*)      return 0 ;;
+        Linux)     return 0 ;;
+    esac
+    return 1
 }
 
 #_____________________________________________________________________
@@ -942,7 +962,8 @@ check_solvers() {
     fi
 
     checking_msg "RGE solvers"
-    local algs="$(echo $SOLVERS | tr ',' ' ')"
+    local algs
+    algs="$(echo $SOLVERS | tr ',' ' ')"
     SOLVERS=""
     for a in ${algs}; do
         case "$a" in
@@ -974,7 +995,8 @@ check_models() {
     fi
 
     checking_msg "models"
-    local models="$(echo $MODELS | tr ',' ' ')"
+    local models
+    models="$(echo $MODELS | tr ',' ' ')"
     MODELS=""
     for a in ${models}; do
         case "$a" in
@@ -1018,7 +1040,8 @@ check_models() {
         fi
     done
 
-    local model_names="$(echo ${MODELS} | sed -e 's|models/||g' -e 's/^ *//' -e 's/ *$//')"
+    local model_names
+    model_names="$(echo ${MODELS} | sed -e 's|models/||g' -e 's/^ *//' -e 's/ *$//')"
 
     result "ok (${model_names})"
     logmsg "   Models: ${MODELS}"
@@ -1032,7 +1055,8 @@ check_addons() {
     fi
 
     checking_msg "addons"
-    local addons="$(echo $ADDONS | tr ',' ' ')"
+    local addons
+    addons="$(echo $ADDONS | tr ',' ' ')"
     ADDONS=""
     for a in ${addons}; do
         case "$a" in
@@ -1062,7 +1086,8 @@ check_addons() {
         fi
     done
 
-    local addon_names="$(echo ${ADDONS} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
+    local addon_names
+    addon_names="$(echo ${ADDONS} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
 
     result "ok (${addon_names})"
     logmsg "   Addons: ${ADDONS}"
@@ -1076,7 +1101,8 @@ check_optional_modules() {
     fi
 
     checking_msg "optional modules"
-    local optional_modules="$(echo $OPTIONAL_MODULES | tr ',' ' ')"
+    local optional_modules
+    optional_modules="$(echo $OPTIONAL_MODULES | tr ',' ' ')"
     OPTIONAL_MODULES=""
     for a in ${optional_modules}; do
         if test -d "$BASEDIR/$a" ; then
@@ -1100,7 +1126,8 @@ check_optional_modules() {
         fi
     done
 
-    local module_names="$(echo ${OPTIONAL_MODULES} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
+    local module_names
+    module_names="$(echo ${OPTIONAL_MODULES} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
 
     result "ok (${module_names})"
     logmsg "   Optional modules: ${OPTIONAL_MODULES}"
@@ -1108,11 +1135,13 @@ check_optional_modules() {
 
 #_____________________________________________________________________
 check_librarylink_incl() {
+    # sysid is defined in config/mathematica_include_paths.sh
+    # shellcheck disable=SC2154
     local default_llincdir="\
 ${MATH_INSTDIR}/SystemFiles/IncludeFiles/C:\
 ${MATH_INSTDIR}/SystemFiles/Links/MathLink/DeveloperKit/${MATH_SYSTEMID}/CompilerAdditions:\
 ${MATH_INSTDIR}/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions:\
-${MATH_INSTDIR}/AddOns/MathLink/DeveloperKit/$sysid/CompilerAdditions"
+${MATH_INSTDIR}/AddOns/MathLink/DeveloperKit/${sysid}/CompilerAdditions"
 
     check_header "WolframLibrary.h" "$default_llincdir" \
                  "$default_inc_paths"
@@ -1211,7 +1240,8 @@ ${MATH_INSTDIR}/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions"
                     exit 1
                 fi
 
-                local mathlink_lib=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+                local mathlink_lib
+                mathlink_lib=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
                 mathlink_lib_flags="-L${found_dir} ${mathlink_lib} -lc++ -framework Foundation"
                 ;;
         esac
@@ -1236,6 +1266,7 @@ check_librarylink() {
     if [ "x$enable_librarylink" = "xyes" ] ; then
         check_librarylink_incl
         check_librarylink_libs
+	[ "x$machine_word_size" = "x32" ] && CPPFLAGS="$CPPFLAGS -DMINT_32"
     fi
 }
 
@@ -1291,6 +1322,16 @@ check_platform() {
 }
 
 #_____________________________________________________________________
+reset_default_static_linker_cmd() {
+    local os_
+    os_=$( (uname -s) 2>/dev/null || echo unknown)
+    case "$os_" in
+        Linux)
+            STATIC_LIB_CMD="ar cruU";;
+    esac
+}
+
+#_____________________________________________________________________
 check_multiarch() {
     local linuxdist=""
     debmultiarch=""
@@ -1304,6 +1345,7 @@ check_multiarch() {
 
     if test "x$linuxdist" = "xmultiarch"; then
         if type dpkg-architecture > /dev/null 2>&1 ; then
+            # shellcheck disable=SC2091
             if $(dpkg-architecture -qDEB_HOST_MULTIARCH > /dev/null 2>&1) ; then
                 checking_msg "dpkg-architecture"
                 debmultiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2> /dev/null)
@@ -1318,6 +1360,30 @@ check_multiarch() {
 
 #_____________________________________________________________________
 check_boost() {
+    [ -z "$boost_inc_dir" ] && \
+    [ -z "$boost_lib_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -f boost_unit_test_framework.pc ] && \
+    {
+        message -n "Checking boost library using local boost_unit_test_framework.pc ... "
+        BOOSTFLAGS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --cflags)
+        BOOSTTESTLIBS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --libs)
+        message "ok"
+        return
+    }
+
+    [ -z "$boost_inc_dir" ] && \
+    [ -z "$boost_lib_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -f boost.pc ] && \
+    {
+        message -n "Checking boost library using local boost.pc ... "
+        BOOSTFLAGS=$(PKG_CONFIG_PATH=. pkg-config boost --cflags)
+        BOOSTTESTLIBS=$(PKG_CONFIG_PATH=. pkg-config boost --libs)
+        message "ok"
+        return
+    }
+
     check_header "boost/version.hpp" "$boost_inc_dir" \
 	"$default_inc_paths"
     if test "x$found_hdr" = "x" ; then
@@ -1330,6 +1396,10 @@ check_boost() {
             BOOSTFLAGS="${BOOSTFLAGS} -I$found_dir"
         fi
     fi
+
+    check_boost_version
+    check_boost_test_incl
+    check_boost_test_libs
 }
 
 #_____________________________________________________________________
@@ -1375,8 +1445,8 @@ check_boost_test_libs() {
         message "Warning: libboost_unit_test_framework(-mt) must be installed"
         message "  to compile and run the tests, see http://www.boost.org"
     else
-        local BOOSTTESTLIBS_=-l$(
-	    echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+        local BOOSTTESTLIBS_
+        BOOSTTESTLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
         if [ -z "$boost_lib_dir" ]; then
             # assume that the linker will look in the default paths
             BOOSTTESTLIBS="$BOOSTTESTLIBS_"
@@ -1406,7 +1476,8 @@ check_boost_thread_libs() {
         message "  You can disable the lattice method with the --with-solvers= flag."
         exit 1
     fi
-    local BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+    local BOOSTTHREADLIBS_
+    BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
 
     check_library "libboost_system libboost_system-mt" \
 	"$boost_lib_dir" "$default_lib_paths"
@@ -1470,22 +1541,29 @@ check_std_threads() {
 
 #_____________________________________________________________________
 check_thread_libs() {
-    # link libpthread only if $enable_threads = yes
-    # I'm assuming here, that no other library we link needs libpthread.
-    if [ "x$enable_threads" = "xyes" -o -n "$pthread_lib_dir" ] ; then
-        check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths"
-        if [ -z "$found_lib" ]; then
-            message "Error: libpthread must be installed to enable multithreading!"
-            exit 1
-        fi
-        THREADLIBS=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-        # need to link whole libpthread.a for static linking
-        if [ "x$enable_static" = xyes ] ; then
-            THREADLIBS="-Wl,--push-state,-z,muldefs,--whole-archive ${THREADLIBS} -Wl,--pop-state"
-        fi
-        if [ -n "$pthread_lib_dir" ]; then
-            THREADLIBS="-L$pthread_lib_dir $THREADLIBS"
-        fi
+    is_posix_platform || return
+
+    # additional search paths by the compiler
+    local cc_lib_search_paths=""
+    case "$cxx_compiler_type" in
+	gnu|clang)
+	    cc_lib_search_paths=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+	    cc_lib_search_paths=$cc_lib_search_paths$(${CXX} -Xlinker -v 2>&1 | sed -n '/Library search paths:/,/Framework search paths:/p' | sed '/Library search paths:/d; /Framework search paths:/d' | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g' | tr -s '[:blank:]' ':')
+	    ;;
+    esac
+
+    check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths:$cc_lib_search_paths"
+    if [ -z "$found_lib" ]; then
+        message "Error: libpthread must be installed to enable multithreading!"
+        exit 1
+    fi
+    THREADLIBS=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+    # need to link whole libpthread.a for static linking
+    if [ "x$enable_static" = xyes ] ; then
+        THREADLIBS="-Wl,--push-state,-z,muldefs,--whole-archive ${THREADLIBS} -Wl,--pop-state"
+    fi
+    if [ -n "$pthread_lib_dir" ]; then
+        THREADLIBS="-L$pthread_lib_dir $THREADLIBS"
     fi
 }
 
@@ -1497,14 +1575,11 @@ check_cxx_compiler_type() {
 
     case "$cxx_compiler_type" in
     gnu)   result "GNU"
-	   required_cxx_compiler_version="$required_gpp_compiler_version"
-	   std_cxx11_compiler_version="$std_cxx11_gpp_version" ;;
+	   required_cxx_compiler_version="$required_gpp_compiler_version" ;;
     clang) result "Clang"
-	   required_cxx_compiler_version="$required_clang_compiler_version"
-	   std_cxx11_compiler_version="$std_cxx11_clang_version" ;;
+	   required_cxx_compiler_version="$required_clang_compiler_version" ;;
     intel) result "Intel"
-	   required_cxx_compiler_version="$required_icpc_compiler_version"
-	   std_cxx11_compiler_version="$std_cxx11_icpc_version" ;;
+	   required_cxx_compiler_version="$required_icpc_compiler_version" ;;
     *)     result "unknown" ;;
     esac
 
@@ -1548,7 +1623,7 @@ check_icpc_features() {
 
     # disable multi-threading for versions < 14.0.0
     if ! major_minor_patch_at_least $major $minor $patch "14" "0" "0" &&
-       [ "$enable_threads" = "yes" -o "$enable_threads" = "automatic" ]; then
+       { [ "$enable_threads" = "yes" ] || [ "$enable_threads" = "automatic" ] ;} ; then
 	message ""
 	message "   Warning: multi-threading support requires $compiler 14.0.0 or newer."
 	enable_threads="no"
@@ -1605,14 +1680,15 @@ get_gpp_version() {
     output=$($compiler -dM -E -x c++ /dev/null) || {
         message "Warning: could not determine $compiler version because"
         message "   execution of $compiler failed."
-	return 1
+    return 1
     }
-    local major=$(printf "%s" "$output" |
-	sed 's/^.*__GNUC__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local minor=$(printf "%s" "$output" |
-	sed 's/^.*__GNUC_MINOR__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local patch=$(printf "%s" "$output" |
-	sed 's/^.*__GNUC_PATCHLEVEL__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    local major minor patch
+    major=$(printf "%s" "$output" |
+    sed 's/^.*__GNUC__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    minor=$(printf "%s" "$output" |
+    sed 's/^.*__GNUC_MINOR__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    patch=$(printf "%s" "$output" |
+    sed 's/^.*__GNUC_PATCHLEVEL__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
 
     eval "$ret_var=\"$major.$minor.$patch\""
 }
@@ -1631,10 +1707,11 @@ get_icpc_version() {
     output=$($compiler -dM -E -x c++ /dev/null) || {
         message "Warning: could not determine $compiler version because"
         message "   execution of $compiler failed."
-	return 1
+        return 1
     }
-    local version=$(printf "%s" "$output" |
-	sed 's/^.*__INTEL_COMPILER[[:space:]]*\([[:digit:]]*\)\([[:digit:]]\)\([[:digit:]]\).*$/\1.\2.\3/p;d')
+    local version
+    version=$(printf "%s" "$output" |
+        sed 's/^.*__INTEL_COMPILER[[:space:]]*\([[:digit:]]*\)\([[:digit:]]\)\([[:digit:]]\).*$/\1.\2.\3/p;d')
 
     eval "$ret_var=\"$version\""
 }
@@ -1662,12 +1739,13 @@ get_clang_version() {
         message "   execution of $compiler failed."
 	return 1
     }
-    local major=$(printf "%s" "$output" |
-	sed 's/^.*__clang_major__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local minor=$(printf "%s" "$output" |
-	sed 's/^.*__clang_minor__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local patch=$(printf "%s" "$output" |
-	sed 's/^.*__clang_patchlevel__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    local major minor patch
+    major=$(printf "%s" "$output" |
+        sed 's/^.*__clang_major__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    minor=$(printf "%s" "$output" |
+        sed 's/^.*__clang_minor__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    patch=$(printf "%s" "$output" |
+        sed 's/^.*__clang_patchlevel__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
 
     eval "$ret_var=\"$major.$minor.$patch\""
 }
@@ -1698,7 +1776,7 @@ check_cxxflags() {
         fi
     fi
 
-    if [ "x$enable_shared_libs" = "xyes" -o "x$enable_librarylink" = "xyes" ] ; then
+    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] ; then
         # check if -fPIC is in CXXFLAGS
         case "${CXX}" in
             g++*|clang++*|icpc*)
@@ -1722,6 +1800,22 @@ check_cxxflags() {
 
 #_____________________________________________________________________
 check_eigen_incl() {
+    local eigen_name=""
+
+    [ -f eigen.pc ] && eigen_name="eigen"
+    [ -f eigen3.pc ] && eigen_name="eigen3"
+
+    [ -z "$eigen_inc_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -n "${eigen_name}" ] && \
+    [ -f ${eigen_name}.pc ] && \
+    {
+        message -n "Checking for Eigen library using local ${eigen_name}.pc ... "
+        EIGENFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${eigen_name} --cflags)
+        message "ok"
+        return
+    }
+
     # Eigen headers are usually in the `eigen3` subdirectory of the include paths.
     eigen_inc_paths=""
     IFS=":"
@@ -1770,6 +1864,12 @@ int main() {
 }
 
 #_____________________________________________________________________
+check_eigen() {
+    check_eigen_incl
+    check_eigen_version
+}
+
+#_____________________________________________________________________
 check_gsl_config() {
     checking_msg "GSL configuration $gsl_config"
     exists_in_path "$gsl_config"
@@ -1780,9 +1880,17 @@ check_gsl_config() {
         message "  use $0 --with-gsl-config=<path to gsl-config>"
         exit 1
     else
-        result "found $cmd"
+        local GSL_VERSION
+        GSL_VERSION=$($cmd --version)
+        result "found $cmd (version ${GSL_VERSION})"
         GSLFLAGS=$($cmd --cflags)
         GSLLIBS=$($cmd --libs)
+
+        version_at_least "$GSL_VERSION" "2.0.0" || {
+            message "Error: An old version of GSL has been detected ($GSL_VERSION)."
+            message "   Please upgrade to version 2.0.0 (or higher)."
+            exit 1
+        }
     fi
 }
 
@@ -1799,6 +1907,30 @@ check_fc() {
     else
         result "found $cmd"
     fi
+}
+
+#_____________________________________________________________________
+check_fmod() {
+   case "${FC}" in
+      gfortran*)
+         FMOD='-J'
+         ;;
+      ifort*)
+         FMOD='-module'
+         ;;
+   esac
+}
+
+#_____________________________________________________________________
+check_fstd() {
+   case "${FC}" in
+      gfortran*)
+         FSTD='-std=f2008'
+         ;;
+      ifort*)
+         FSTD='-std08'
+         ;;
+   esac
 }
 
 #_____________________________________________________________________
@@ -1819,7 +1951,7 @@ check_fflags() {
     esac
 
     # check if -fPIC is in FFLAGS
-    if [ "x$enable_shared_libs" = "xyes" -o "x$enable_librarylink" = "xyes" ] ; then
+    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] ; then
         case "${FC}" in
             gfortran*|ifort*)
                 if contains_not "${FFLAGS}" "-fPIC" ; then
@@ -1848,7 +1980,7 @@ check_fortran_libs() {
             fi ;;
         g77|f77)
             FLIBS="-lg2c -lm" ;;
-        ifort)
+        ifort*)
             FLIBS="-lifcore -lifport -limf -ldl -lintlc -lsvml" ;;
     esac
 }
@@ -1881,22 +2013,113 @@ check_linking() {
 }
 
 #_____________________________________________________________________
-check_blas_libs_using_options() {
-    check_library "libblas" "$blas_lib_dir" \
-	"$default_lib_paths"
-    if test "x$found_lib" = "x" ; then
-        message "Warning: could not find libblas, proceeding without it."
-        message "  It can be downloaded from http://www.netlib.org/blas"
-	enable_lapack="no"
-    else
-        local BLASLIBS_=-lblas
-        if [ -z "$blas_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            BLASLIBS="$BLASLIBS_"
+check_gm2calc_version() {
+    checking_msg "GM2Calc version"
+
+    try_compile_run_cpp_program "#include <iostream>
+#include \"gm2calc/gm2_version.h\"
+int main() {
+   std::cout << GM2CALC_VERSION << '\n';
+   return 0;
+}" "$CXX" "${GM2CALCFLAGS}" && [ $cpp_exit = 0 ] || {
+        result "unknown"
+        message "Warning: could not determine GM2Calc version because"
+        message "   compilation or execution of the GM2Calc test program failed."
+	return 1
+    }
+
+    local GM2CALC_VERSION="$cpp_output"
+
+    result "ok (version ${GM2CALC_VERSION})"
+    logmsg "   GM2Calc version found: ${GM2CALC_VERSION}"
+
+    version_at_least "$GM2CALC_VERSION" "1.7.0" || {
+        message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+        message "   Please consider upgrading to version 1.7.0 (or higher)."
+    }
+}
+
+#_____________________________________________________________________
+check_gm2calc_incl() {
+    check_header "gm2calc/gm2_version.h" "$gm2calc_inc_dir"
+    if test "x$found_hdr" = "x" ; then
+        if test "x$enable_gm2calc" = "xyes" ; then
+            message "Error: GM2Calc's gm2_version.h must be installed if you want"
+            message "   to use GM2Calc, see https://github.com/GM2Calc/GM2Calc"
+            message "   You can use the --with-gm2calc-incdir= option to specify the"
+            message "   location of version.hpp and the other headers."
+            exit 1
         else
-            BLASLIBS="-L$blas_lib_dir $BLASLIBS_"
+            return 1
         fi
-	check_symbol ztpsv_ "$found_lib" "$found_dir"
+    else
+        # assume that the compiler will look in the default paths
+        if [ -n "$gm2calc_inc_dir" ]; then
+            GM2CALCFLAGS="-I$gm2calc_inc_dir"
+        fi
+
+        check_gm2calc_version
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
+check_gm2calc_libs() {
+    check_library "libgm2calc" "$gm2calc_lib_dir" "$default_lib_paths"
+    if test "x$found_lib" = "x" ; then
+        if test "x$enable_gm2calc" = "xyes" ; then
+            message "Error: The GM2Calc library must be installed if you want"
+            message "   to use GM2Calc, see https://github.com/GM2Calc/GM2Calc"
+            message "   You can use the --with-gm2calc-libdir= option to specify the"
+            message "   location of the GM2Calc library."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        local GM2CALCLIBS_="-lgm2calc"
+        if [ -z "$gm2calc_lib_dir" ]; then
+            # assume that the linker will look in the default paths
+            GM2CALCLIBS="$GM2CALCLIBS_"
+        else
+            GM2CALCLIBS="-L$gm2calc_lib_dir -Wl,-rpath,$gm2calc_lib_dir $GM2CALCLIBS_"
+        fi
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
+check_gm2calc() {
+    if test "x$enable_gm2calc" != "xno" ; then
+        local gm2calc_name=""
+
+        [ -f GM2Calc.pc ] && gm2calc_name="GM2Calc"
+        [ -f gm2calc.pc ] && gm2calc_name="gm2calc"
+
+        [ -z "$gm2calc_inc_dir" ] && \
+        [ -z "$gm2calc_lib_dir" ] && \
+        type pkg-config > /dev/null && \
+        [ -n "${gm2calc_name}" ] && \
+        [ -f ${gm2calc_name}.pc ] && \
+        {
+            message -n "Checking GM2Calc using local ${gm2calc_name}.pc ... "
+            GM2CALCFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --cflags)
+            GM2CALCLIBS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --libs)
+            GM2CALC_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --modversion)
+            enable_gm2calc=yes
+            message "ok (version ${GM2CALC_VERSION})"
+            version_at_least "$GM2CALC_VERSION" "1.7.0" || {
+                message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+                message "   Please consider upgrading to version 1.7.0 (or higher)."
+            }
+            return
+        }
+
+        if check_gm2calc_incl && check_gm2calc_libs ; then
+            enable_gm2calc=yes
+        else
+            enable_gm2calc=no
+        fi
     fi
 }
 
@@ -1905,7 +2128,7 @@ check_himalaya_version() {
     checking_msg "Himalaya version"
 
     try_compile_run_cpp_program "#include <iostream>
-#include \"version.hpp\"
+#include \"himalaya/version.hpp\"
 int main() {
    std::cout << Himalaya_VERSION_MAJOR << '.' << Himalaya_VERSION_MINOR << '.' << Himalaya_VERSION_RELEASE << '\n';
    return 0;
@@ -1929,11 +2152,11 @@ int main() {
 
 #_____________________________________________________________________
 check_himalaya_incl() {
-    check_header "version.hpp" "$himalaya_inc_dir"
+    check_header "himalaya/version.hpp" "$himalaya_inc_dir"
     if test "x$found_hdr" = "x" ; then
         if test "x$enable_himalaya" = "xyes" ; then
             message "Error: Himalaya's version.hpp must be installed if you want"
-            message "   to use Himalaya, see https://github.com/jklappert/Himalaya"
+            message "   to use Himalaya, see https://github.com/Himalaya-Library"
             message "   You can use the --with-himalaya-incdir= option to specify the"
             message "   location of version.hpp and the other headers."
             exit 1
@@ -1958,7 +2181,7 @@ check_himalaya_libs() {
     if test "x$found_lib" = "x" ; then
         if test "x$enable_himalaya" = "xyes" ; then
             message "Error: The Himalaya library must be installed if you want"
-            message "   to use Himalaya, see https://github.com/jklappert/Himalaya"
+            message "   to use Himalaya, see https://github.com/Himalaya-Library"
             message "   You can use the --with-himalaya-libdir= option to specify the"
             message "   location of the Himalaya library."
             exit 1
@@ -1980,6 +2203,26 @@ check_himalaya_libs() {
 #_____________________________________________________________________
 check_himalaya() {
     if test "x$enable_himalaya" != "xno" ; then
+        local himalaya_name=""
+
+        [ -f Himalaya.pc ] && himalaya_name="Himalaya"
+        [ -f himalaya.pc ] && himalaya_name="himalaya"
+
+        [ -z "$himalaya_inc_dir" ] && \
+        [ -z "$himalaya_lib_dir" ] && \
+        type pkg-config > /dev/null && \
+        [ -n "${himalaya_name}" ] && \
+        [ -f ${himalaya_name}.pc ] && \
+        {
+            message -n "Checking Himalaya using local ${himalaya_name}.pc ... "
+            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --cflags)
+            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --libs)
+            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --modversion)
+            enable_himalaya=yes
+            message "ok"
+            return
+        }
+
         if check_himalaya_incl && check_himalaya_libs ; then
             enable_himalaya=yes
         else
@@ -1990,20 +2233,37 @@ check_himalaya() {
 
 #_____________________________________________________________________
 check_required_libs() {
-    if [ "$enable_meta" = yes -a -n "${MATH}" ] ; then
+    if [ "$enable_meta" = yes ] && [ -n "${MATH}" ] ; then
         message "Checking model files for required third party libraries"
 
         for m in ${MODELS}; do
-            local model_name=$(echo ${m} | sed -e 's|models/||')
+            local model_name
+            model_name=$(echo ${m} | sed -e 's|models/||')
             local model_file="models/${model_name}/FlexibleSUSY.m"
 
+            [ -e "${model_file}" ] || continue
+
+            # early continue to skip expensive Mathematica kernel
+            # calls, if possible
+            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
+
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
-                message "    TSIL is required to build $model_name"
+                message "   TSIL is required to build $model_name"
                 enable_tsil=yes
             }
 
+            mma_symbol_is "${model_file}" "${MATH}" "aMuonGM2Calc" "True" && {
+                message "   GM2Calc is required to build $model_name";
+                enable_gm2calc=yes
+            }
+
+            mma_symbol_is "${model_file}" "${MATH}" "aMuonGM2CalcUncertainty" "True" && {
+                message "   GM2Calc is required to build $model_name";
+                enable_gm2calc=yes
+            }
+
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
-                message "    Himalaya is required to build $model_name";
+                message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
 
@@ -2019,7 +2279,7 @@ If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
 EOF
 
             [ "x$?" = "x0" ] && {
-                message "    Himalaya is required to build $model_name";
+                message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
 
@@ -2028,140 +2288,236 @@ EOF
 }
 
 #_____________________________________________________________________
-# Mathematica 9.0 or newer is shipped with Intel MKL with the ILP64
-# interface whereas LP64 is the standard 64 bit programming model
-# which external LAPACK/BLAS would also follow:
-# http://www.unix.org/version2/whatsnew/lp64_wp.html.  When
-# Mathematica loads a LibraryLink library, calls to LAPACK/BLAS
-# subroutines are bound to the MKL ILP64.  This means that an FS
-# object cannot call an external LAPACK/BLAS subroutine if LibraryLink
-# is enabled.  In this case, FS attempts to circumvent the conflict by
-# calling the LAPACK subroutines from the MKL installed with
-# Mathematica.  This workaround is however possible only when FS
-# executables are dynamically linked since Mathematica does not come
-# with a static MKL.
-check_ilp64mkl_in_math() {
-    [ "$enable_librarylink" = "no" ] && return 0
-    [ "$enable_lapack" = "no" ] && return 0
-
-    local math_lib_dir="$MATH_INSTDIR/SystemFiles/Libraries/$MATH_SYSTEMID"
-
-    check_library "libmkl_intel_ilp64" "$math_lib_dir" "$default_lib_paths"
-    [ -z "$found_lib" ] && return 0
-
-    enable_ilp64mkl_workaround="yes"
-
-    if [ "$enable_static" = "yes" ]; then
-	if [ "$enable_lapack" = "yes" ]; then
-	    message "Error: --enable-{static,lapack,librarylink} together conflict with the Intel MKL ILP64 linked to this version of Mathematica"
-	    exit 1
-	else
-	    enable_lapack="no"
-	fi
-    else
-	LAPACKLIBS="-L$math_lib_dir -Wl,-rpath,$math_lib_dir -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5"
-	check_symbol ztpsv_ "$found_lib" "$found_dir"
-	check_symbol dgbsv_ "$found_lib" "$found_dir"
-    fi
-}
-
-#_____________________________________________________________________
-check_lapack_libs_using_options() {
-    check_library "liblapack" "$lapack_lib_dir" \
-	"$default_lib_paths"
-    if test "x$found_lib" = "x" ; then
-        message "Warning: could not find liblapack, proceeding without it."
-        message "  It can be downloaded from http://www.netlib.org/lapack"
-	enable_lapack="no"
-    else
-        local LAPACKLIBS_=-llapack
-        if [ -z "$lapack_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            LAPACKLIBS="$LAPACKLIBS_"
-        else
-            LAPACKLIBS="-L$lapack_lib_dir $LAPACKLIBS_"
-        fi
-	check_symbol dgbsv_ "$found_lib" "$found_dir"
-    fi
-}
-
-#_____________________________________________________________________
 check_looptools_libs() {
-    if test "x$enable_looptools" != "xyes"; then
-        if [ -n "$looptools_lib_dir" ] ; then
-            message "Warning: --with-looptools-libdir= has been set, but"
-            message "   LoopTools has not been enabled via --enable-looptools."
-        fi
-        return
-    fi
+   if [ -z "$looptools_lib_dir" ]; then
+      message "Warning: --with-looptools-libdir= has not been set, but"
+      message "         LoopTools has been enabled via --enable-looptools or"
+      message "         by --with-loop-libraries=looptools."
+   fi
 
-    check_library "libooptools" "$looptools_lib_dir" \
-	"$default_lib_paths"
-    if test "x$found_lib" = "x" ; then
-        message "Error: libooptools must be installed if you want"
-        message "   to use LoopTools, see http://www.feynarts.de/looptools/"
-        message "   You can use the --with-looptools-libdir= option to specify the"
-        message "   location of the libooptools library."
-        exit 1
-    else
-        local LOOPTOOLSLIBS_="-looptools"
-        if [ -z "$looptools_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
-        else
-            LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
-        fi
-    fi
+   check_library "libooptools" "$looptools_lib_dir" "$default_lib_paths"
+   if [ "x$found_lib" = "x" ]; then
+      message "Error: libooptools must be installed if you want"
+      message "       to use LoopTools, see http://www.feynarts.de/looptools/"
+      message "       You can use the --with-looptools-libdir= option to specify"
+      message "       the location of the libooptools library."
+      exit 1
+   else
+      local LOOPTOOLSLIBS_="-looptools"
+      if [ -z "$looptools_lib_dir" ]; then
+         # assume that the linker will look in the default paths
+         LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
+      else
+         LOOPTOOLSLIBS="-L$looptools_lib_dir -Wl,-rpath,$looptools_lib_dir $LOOPTOOLSLIBS_"
+      fi
+
+      # check dependency on libquadmath by searching for cabsq in liblooptools
+      check_symbol "cabsq" "$found_lib" "$found_dir"
+      if test -n "$found_lib" ; then
+         LOOPTOOLSLIBS="$LOOPTOOLSLIBS -lquadmath"
+      fi
+   fi
+   case "$operating_system" in
+      Darwin)
+         local gcc_
+         gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+         check_library "libgcc" "$gcc_" "$default_lib_paths"
+         if test "x$found_lib" = "x" ; then
+            message "Error: libgcc not found in $gcc_ $default_lib_paths"
+            message "       but required by LoopTools."
+               exit 1
+            else
+               LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc"
+         fi;;
+   esac
 }
 
 #_____________________________________________________________________
 check_looptools_incl() {
-    if test "x$enable_looptools" != "xyes"; then
-        if [ -n "$looptools_inc_dir" ] ; then
-            message "Warning: --with-looptools-incdir= has been set, but"
-            message "   LoopTools has not been enabled via --enable-looptools."
-        fi
-        return
-    fi
+# defines LOOPTOOLSFLAGS variable
+   if [ -z "$looptools_inc_dir" ]; then
+      message "Warning: --with-looptools-incdir= has not been set, but"
+      message "         LoopTools has been enabled via --enable-looptools or"
+      message "         by --with-loop-libraries=looptools."
+   fi
 
-    check_header "clooptools.h" "$looptools_inc_dir" \
-	"$default_inc_paths"
-    if test "x$found_hdr" = "x" ; then
-        message "Error: clooptools.h must be installed if you want"
-        message "   to use LoopTools, see http://www.feynarts.de/looptools/"
-        message "   You can use the --with-looptools-incdir= option to specify the"
-        message "   location of the clooptools.h header."
-        exit 1
-    else
-        # assume that the compiler will look in the default paths
-        if [ -n "$looptools_inc_dir" ]; then
-            LOOPTOOLSFLAGS="-I$looptools_inc_dir"
-        fi
-    fi
+   check_header "clooptools.h" "$looptools_inc_dir" "$default_inc_paths"
+   if [ "x$found_hdr" = "x" ]; then
+      message "Error: clooptools.h must be installed if you want"
+      message "       to use LoopTools, see http://www.feynarts.de/looptools/"
+      message "       You can use the --with-looptools-incdir= option to specify"
+      message "       the location of the clooptools.h header."
+      exit 1
+   else
+      if [ -n "$looptools_inc_dir" ]; then
+         LOOPTOOLSFLAGS="-I$looptools_inc_dir"
+      fi
+   fi
 }
 
 #_____________________________________________________________________
-check_loop_functions() {
-    if test "$enable_fflite" = "yes" -a "$enable_looptools" = "yes"; then
-	message "Error: do not \`--enable-fflite' and \`--enable-looptools' at the same time"
-	exit 1
-    fi
+check_looptools() {
+    local looptools_name=""
 
-    if test "$enable_looptools" = "yes" ; then
-        LOOPFUNCFLAGS="$LOOPTOOLSFLAGS"
-        LOOPFUNCLIBS="$LOOPTOOLSLIBS"
+    [ -f LoopTools.pc ] && looptools_name="LoopTools"
+    [ -f looptools.pc ] && looptools_name="looptools"
 
-        message "Note: LoopTools is thread-unsafe since it accepts the renormalization scale"
-        message "   via a global variable.  This might lead to a race condition if different"
-        message "   RGE solvers run in multiple threads.  For such an application, consider the"
-        message "   alternative \`--enable-fflite'.  For now, multi-threading is disabled."
-        enable_threads=no
-    fi
+   [ -z "$looptools_inc_dir" ] && \
+   [ -z "$looptools_lib_dir" ] && \
+   type pkg-config > /dev/null && \
+   [ -n "${looptools_name}" ] && \
+   [ -f ${looptools_name}.pc ] && \
+   {
+      message -n "Checking LoopTools using local ${looptools_name}.pc ... "
+      LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${looptools_name} --cflags)
+      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config ${looptools_name} --libs)
+      enable_looptools=yes
+      message "ok"
+      return
+   }
 
-    if test "$enable_fflite" = "yes" ; then
-        LOOPFUNCFLAGS=""
-        LOOPFUNCLIBS="fflite/libfflite${MODULE_LIBEXT}"
-    fi
+   check_looptools_incl
+   check_looptools_libs
+}
+
+#_____________________________________________________________________
+check_collier_libs() {
+# defines COLLIERLIBS variable
+   if [ -z "$collier_lib_dir" ]; then
+      message "Warning: --with-collier-libdir= has not been set, but COLLIER"
+      message "         has been enabled via --with-loop-libraries=."
+   fi
+
+   check_library "libcollier" "$collier_lib_dir" "$default_lib_paths"
+   if [ "x$found_lib" = "x" ]; then
+      message "Error: libcollier must be present if you want"
+      message "       to use COLLIER, see https://collier.hepforge.org/"
+      message "       You can use the --with-collier-libdir= option to specify"
+      message "       the location of the libcollier library."
+      exit 1
+   else
+      local COLLIERLIBS_="-lcollier"
+      if [ -z "$collier_lib_dir" ]; then
+         # assume that the linker will look in the default paths
+         COLLIERLIBS=" $COLLIERLIBS_ "
+      else
+         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir -Wl,-rpath,$collier_lib_dir $COLLIERLIBS_"
+      fi
+   fi
+}
+
+#_____________________________________________________________________
+check_collier_incl() {
+# defines COLLIERFLAGS variable
+   if [ -z "$collier_inc_dir" ] ; then
+      message "Warning: --with-collier-incdir= has not been set, but COLLIER"
+      message "         has been enabled by --with-loop-libraries=collier."
+   fi
+
+   check_header "collier.mod" "$collier_inc_dir" "$default_inc_paths"
+   if [ "x$found_hdr" = "x" ]; then
+      message "Error: at least collier.mod must be present if you want"
+      message "       to use COLLIER, see https://collier.hepforge.org/"
+      message "       You can use the --with-collier-incdir= option to specify"
+      message "       the location of the collier.mod file."
+      exit 1
+   else
+      if [ -n "$collier_inc_dir" ]; then
+         COLLIERFLAGS="-I$collier_inc_dir"
+      fi
+   fi
+}
+
+#_____________________________________________________________________
+check_collier() {
+    local collier_name=""
+
+    [ -f COLLIER.pc ] && collier_name="COLLIER"
+    [ -f collier.pc ] && collier_name="collier"
+
+   [ -z "$collier_inc_dir" ] && \
+   [ -z "$collier_lib_dir" ] && \
+   type pkg-config > /dev/null && \
+   [ -n "${collier_name}" ] && \
+   [ -f ${collier_name}.pc ] && \
+   {
+      message -n "Checking COLLIER using local ${collier_name}.pc ... "
+      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${collier_name} --cflags)
+      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a $(PKG_CONFIG_PATH=. pkg-config ${collier_name} --libs)"
+      enable_collier=yes
+      message "ok"
+      return
+   }
+
+   check_collier_incl
+   check_collier_libs
+}
+
+#_____________________________________________________________________
+check_looplibrary() {
+   # applying "or" logic to old options
+   # "no" by default, only --enable-looptools could make it "yes"
+   if [ "$enable_looptools" = "yes" ]; then
+      logmsg "Enabling LoopTools because of --enable-looptools flag."
+   fi
+   # "no" by default, only --enable-fflite could make it "yes"
+   if [ "$enable_fflite" = "yes" ]; then
+      logmsg "Enabling fflite because of --enable-fflite flag."
+   fi
+
+   LOOP_LIBRARIES="$(echo $LOOP_LIBRARIES | tr ',' ' ')"
+
+   if contains "$LOOP_LIBRARIES" "looptools"; then enable_looptools="yes"; fi
+   if contains "$LOOP_LIBRARIES" "collier"; then enable_collier="yes"; fi
+   if contains "$LOOP_LIBRARIES" "fflite"; then enable_fflite="yes"; fi
+
+   # interference of libraries can be destructive
+   if [ "$enable_fflite" = "yes" ] && [ "$enable_looptools" = "yes" ]; then
+      message "Error: Do not use fflite and LoopTools at the same time."
+      exit 1
+   fi
+   if [ "$enable_fflite" = "yes" ] && [ "$enable_collier" = "yes" ]; then
+      message "Error: Do not use fflite and COLLIER at the same time."
+      exit 1
+   fi
+
+   local info_=""
+   if [ "$enable_collier" = "yes" ]; then info_="COLLIER"
+      if [ "$enable_looptools" = "yes" ]; then info_="$info_ and LoopTools are"
+      else info_="$info_ is"
+      fi
+   elif [ "$enable_looptools" = "yes" ]; then info_="LoopTools is"
+   fi
+   if [ "$enable_collier" = "yes" ] || [ "$enable_looptools" = "yes" ]; then
+      message "Note: $info_ thread-unsafe since there the renormalization"
+      message "      scale is set via a global variable. This might"
+      message "      lead to a race condition if different RGE solvers run in"
+      message "      multiple threads. For such an application, consider usage of"
+      message "      fflite. For now, multi-threading is disabled."
+      enable_threads=no
+   fi
+
+   # now rules for libraries themselves
+   if [ "$enable_collier" = "yes" ]; then
+      check_collier
+      LOOPFUNCFLAGS="$LOOPFUNCFLAGS $COLLIERFLAGS"
+      LOOPFUNCLIBS="$LOOPFUNCLIBS $COLLIERLIBS"
+   fi
+   if [ "$enable_fflite" = "yes" ]; then
+      LOOPFUNCLIBS="fflite/libfflite${MODULE_LIBEXT}"
+   fi
+   if [ "$enable_looptools" = "yes" ]; then
+      check_looptools
+      LOOPFUNCFLAGS="$LOOPFUNCFLAGS $LOOPTOOLSFLAGS"
+      LOOPFUNCLIBS="$LOOPFUNCLIBS $LOOPTOOLSLIBS"
+   fi
+
+   # if any is present then the fortran_utils will be compiled
+   if [ "$enable_collier" = "yes" ] || \
+      [ "$enable_fflite" = "yes" ] || \
+      [ "$enable_looptools" = "yes" ]; then
+      FUTILIBS="$ABSBASEDIR/src/libfortran_utils.a"
+   fi
 }
 
 #_____________________________________________________________________
@@ -2252,7 +2608,7 @@ check_tsil_libs() {
             # assume that the linker will look in the default paths
             TSILLIBS="$TSILLIBS_"
         else
-            TSILLIBS="-L$tsil_lib_dir $TSILLIBS_"
+            TSILLIBS="-L$tsil_lib_dir -Wl,-rpath,$tsil_lib_dir $TSILLIBS_"
         fi
     fi
     return 0
@@ -2275,11 +2631,13 @@ check_tsil_incl() {
 
 #_____________________________________________________________________
 check_tsil_size() {
-    local tsil_dir=$([ -n "$tsil_inc_dir" ] && echo "$tsil_inc_dir" || echo "$tsil_lib_dir")
+    local tsil_dir
+    tsil_dir=$([ -n "$tsil_inc_dir" ] && echo "$tsil_inc_dir" || echo "$tsil_lib_dir")
 
     if [ -f "${tsil_dir}/Makefile" ] ; then
-        local tsil_makefile="${tsil_dir}/Makefile"
-        local tsil_size=$({ echo "first: ; @echo \$(TSIL_SIZE)"
+        local tsil_makefile tsil_size
+        tsil_makefile="${tsil_dir}/Makefile"
+        tsil_size=$({ echo "first: ; @echo \$(TSIL_SIZE)"
                             cat "$tsil_makefile"
                           } | make -f - first
               )
@@ -2294,82 +2652,66 @@ check_tsil_size() {
 
 #_____________________________________________________________________
 check_tsil() {
-    if test "x$enable_tsil" != "xno" ; then
-        if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
-            enable_tsil=yes
-        else
-            if [ "x$enable_tsil" = xyes ] ; then
-                message "Error: TSIL not found."
-                exit 1
-            fi
-            enable_tsil=no
+    [ "x$enable_tsil" = "xno" ] && return
+
+    local tsil_name=""
+
+    [ -f TSIL.pc ] && tsil_name="TSIL"
+    [ -f tsil.pc ] && tsil_name="tsil"
+
+    [ -z "$tsil_inc_dir" ] && \
+    [ -z "$tsil_lib_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -n "${tsil_name}" ] && \
+    [ -f ${tsil_name}.pc ] && \
+    {
+        message -n "Checking TSIL using local ${tsil_name}.pc ... "
+        TSILFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${tsil_name} --cflags)
+        TSILLIBS=$(PKG_CONFIG_PATH=. pkg-config ${tsil_name} --libs)
+        enable_tsil=yes
+        message "ok"
+        return
+    }
+
+    if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
+        enable_tsil=yes
+    else
+        if [ "x$enable_tsil" = xyes ] ; then
+            message "Error: TSIL not found."
+            exit 1
         fi
+        enable_tsil=no
     fi
 }
 
 #_____________________________________________________________________
 find_symbol_using_pkgconfig() {
-    local symbol
-    local pkg
-    local ldpaths
-    local libnames
-    local pkg_flags=$([ "x$enable_static" = xyes ] && echo "--static")
+    local symbol pkg ldpaths libnames pkg_flags
+    pkg_flags=$([ "x$enable_static" = xyes ] && echo "--static")
     pkg="$1"
-    linker_flags=""
     type pkg-config > /dev/null 2>&1 || {
-	logmsg "pkg-config not found"
-	return 1
+        logmsg "pkg-config not found"
+        return 1
     }
     pkg-config --exists "$pkg" || {
-	logmsg "pkg-config does not manage $pkg"
-	return 1
+        logmsg "pkg-config does not manage $pkg"
+        return 1
     }
     ldpaths=$(pkg-config ${pkg_flags} --libs-only-L "$pkg")
     libnames=$(pkg-config ${pkg_flags} --libs-only-l "$pkg")
     shift
     for symbol; do
-	for dopt in $default_lib_paths $ldpaths; do
-	    for lopt in $libnames; do
-		if check_symbol "$symbol" "$lopt" "$dopt"; then
-		    logmsg "found $symbol in $dopt $lopt"
-		    linker_flags=$(pkg-config ${pkg_flags} --libs "$pkg")
-		    continue 3
-		fi
-	    done
-	done
-	return 1
+        for dopt in $default_lib_paths $ldpaths; do
+            for lopt in $libnames; do
+                if check_symbol "$symbol" "$lopt" "$dopt"; then
+                  logmsg "found $symbol in $dopt $lopt"
+                  continue 3
+                fi
+            done
+        done
+        return 1
     done
     return 0
-}
-
-#_____________________________________________________________________
-check_blas_libs() {
-    [ "$enable_lapack" = "no" ] && return 0
-    [ "$enable_ilp64mkl_workaround" = "yes" ] && return 0
-
-    # user has set BLASLIBS explicitly, no need to search
-    test -n "$BLASLIBS" && return 0
-
-    if find_symbol_using_pkgconfig blas ztpsv_; then
-	BLASLIBS="$linker_flags"
-    else
-	check_blas_libs_using_options
-    fi
-}
-
-#_____________________________________________________________________
-check_lapack_libs() {
-    [ "$enable_lapack" = "no" ] && return 0
-    [ "$enable_ilp64mkl_workaround" = "yes" ] && return 0
-
-    # user has set LAPACKLIBS explicitly, no need to search
-    test -n "$LAPACKLIBS" && return 0
-
-    if find_symbol_using_pkgconfig lapack dgbsv_; then
-	LAPACKLIBS="$linker_flags"
-    else
-	check_lapack_libs_using_options
-    fi
 }
 
 #_____________________________________________________________________
@@ -2412,8 +2754,10 @@ check_math_cmd() {
     exists_in_path "$MATH"
     if [ -z "$cmd" ] ; then
         result "not found"
-	MATH=""
-	[ "${enable_meta}" = "yes" -o "$enable_librarylink" = "yes" ] || return
+        MATH=""
+        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+            return
+        fi
 
         message "Error: Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
         message "   You can use the --with-math-cmd= option to specify the location of"
@@ -2466,13 +2810,15 @@ EOF
     if $_ok; then
         result "ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
     else
-	if [ "$_exit_status" = 2 ]; then
-	    result "not ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
-	else
-	    result "not ok"
-	fi
-	MATH=""
-	[ "${enable_meta}" = "yes" -o "$enable_librarylink" = "yes" ] || return
+        if [ "$_exit_status" = 2 ]; then
+            result "not ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
+        else
+            result "not ok"
+        fi
+        MATH=""
+        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+            return
+        fi
 
         message "Error: Mathematica ${required_mathematica_version} or higher needs to be installed!"
         exit 1
@@ -2540,7 +2886,8 @@ WriteString["stderr", \$sarahModelDir];
 EOF
              )
 
-    if [ -z "$SARAH_MODEL_DIR" ] ; then
+    if [ -z "$SARAH_MODEL_DIR" ] || \
+       { [ ! -z "$SARAH_MODEL_DIR" ] && [ ! -d "$SARAH_MODEL_DIR" ] ;} ;then
         message "Error: Could not determine the SARAH model directory."
         message "   Please check that Mathematica and SARAH are installed correctly."
         message "   To do that, you may run \`${MATH}' and then copy and paste:\n"
@@ -2556,8 +2903,10 @@ If[Needs[\"SARAH\`\"] === \$Failed,
 #_____________________________________________________________________
 check_feynarts() {
     if test "x$enable_feynarts" = "xno"; then return; fi
-    
+
     checking_msg "FeynArts installation"
+    local oldVersion=""
+    [ -f "${feynartsconfig}" ] && oldVersion=$(cat "${feynartsconfig}")
     rm -f ${feynartsconfig}
     "$MATH" <<EOF > /dev/null
 Needs["FeynArts\`"];
@@ -2572,7 +2921,7 @@ EOF
     if test "x${_feynarts_is_available}" = "x0" ; then
         if test -r "${feynartsconfig}" ; then
             FEYNARTS_VERSION=$(cat "${feynartsconfig}")
-            
+
             if version_at_least $FEYNARTS_VERSION "${required_feynarts_version}"; then
                 enable_feynarts="yes"
                 result "ok (version ${FEYNARTS_VERSION})"
@@ -2602,13 +2951,39 @@ EOF
         message "   Please make sure Needs[\"FeynArts\`\"] works correctly."
         exit 1
     fi
+
+   # Removing NPointFunctions, FormCalc, FeynArts output folders
+   [ "${enable_feynarts}" = "yes" ] && {
+      [ "${FEYNARTS_VERSION}" = "${oldVersion}" ] || {
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
+            local eigenstate output dir
+            eigenstate=$(grep 'FSEigenstates' "$m/FlexibleSUSY.m" \
+                       | sed 's/ //g' \
+                       | sed 's/.*`\(.*\);/\1/')
+            output=$(grep -m1 'OutputDirectory' "$m/start.m" \
+                        | sed 's/ //g' \
+                        | sed 's/.*\"\(.*\)\".*/\1/')
+            output=$(echo $m | sed "s/models/${output}/")
+            dir="${output}/${eigenstate}/FeynArts"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/${eigenstate}/FormCalc"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/${eigenstate}/NPointFunctions"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+         done
+      }
+   }
 }
 
 #_____________________________________________________________________
 check_formcalc() {
     if test "x$enable_formcalc" = "xno"; then return; fi
-    
+
     checking_msg "FormCalc installation"
+    local oldVersion=""
+    [ -f "${formcalcconfig}" ] && oldVersion=$(cat "${formcalcconfig}")
     rm -f ${formcalcconfig}
     "$MATH" <<EOF > /dev/null
 Needs["FormCalc\`"];
@@ -2623,7 +2998,7 @@ EOF
     if test "x${_formcalc_is_available}" = "x0" ; then
         if test -r "${formcalcconfig}" ; then
             FORMCALC_VERSION=$(cat "${formcalcconfig}")
-            
+
             if version_at_least $FORMCALC_VERSION "${required_formcalc_version}"; then
                 result "ok (version ${FORMCALC_VERSION})"
             elif test "x$enable_formcalc" = "xautomatic"; then
@@ -2652,10 +3027,33 @@ EOF
         message "   Please make sure Needs[\"FormCalc\`\"] works correctly."
         exit 1
     fi
-    
+
+   # Removing NPointFunctions, FormCalc output folders
+
+   [ "${enable_formcalc}" = "yes" ] && {
+      [ "${FORMCALC_VERSION}" = "${oldVersion}" ] || {
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
+            local eigenstate output dir
+            eigenstate=$(grep 'FSEigenstates' "models/$m/FlexibleSUSY.m" \
+                         | sed 's/ //g' \
+                         | sed 's/.*`\(.*\);/\1/')
+            output=$(grep -m1 'OutputDirectory' "models/$m/start.m" \
+                     | sed 's/ //g' \
+                     | sed 's/.*\"\(.*\)\".*/\1/')
+            output=$(echo $m | sed "s/models/${output}/")
+            dir="${output}/$m/${eigenstate}/FormCalc"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/$m/${eigenstate}/NPointFunctions"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+         done
+      }
+   }
+
     if test "x$enable_formcalc" != "xno"; then
         checking_msg "working FormCalc"
-        
+
         if test "x$enable_feynarts" != "xyes"; then
             if test "x$enable_formcalc" = "xautomatic"; then
                 enable_formcalc="no"
@@ -2669,7 +3067,7 @@ EOF
 Needs["FeynArts\`"];
 Needs["FormCalc\`"];
 SetDirectory[CreateDirectory[]];
-    
+
 topologies = FeynArts\`CreateTopologies[1, 1 -> 1];
 diagrams = FeynArts\`InsertFields[topologies,
   {FeynArts\`S[1]} -> {FeynArts\`S[1]},
@@ -2765,21 +3163,33 @@ get_model_specific_corrections() {
         return 1
     }
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs4LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS3Loop" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "FlexibleEFTHiggs" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True"   && ho="${ho} SM_thresholds"
+    grep -q 'UseSMYukawa2Loop' "${model_file}"   && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True" && \
+        ho="${ho} SM_thresholds"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
-    mma_symbol_is "$model_file" "$math_cmd" "UseMSSMAlphaS2Loop" "True" && ho="${ho} MSSM_thresholds"
-    mma_symbol_is "$model_file" "$math_cmd" "UseMSSMYukawa2Loop" "True" && ho="${ho} MSSM_thresholds"
+    grep -q 'UseHiggs2LoopMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopMSSM" "True" && \
+        ho="${ho} MSSM_higgs"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && ho="${ho} MSSM_higgs NMSSM_higgs"
+    grep -q 'UseHiggs3LoopMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopMSSM" "True" && \
+        ho="${ho} MSSM_higgs"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && ho="${ho} SplitMSSM"
+    grep -q 'UseMSSMAlphaS2Loop' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseMSSMAlphaS2Loop" "True" && \
+        ho="${ho} MSSM_thresholds"
+
+    grep -q 'UseMSSMYukawa2Loop' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseMSSMYukawa2Loop" "True" && \
+        ho="${ho} MSSM_thresholds"
+
+    grep -q 'UseHiggs2LoopNMSSM' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && \
+        ho="${ho} MSSM_higgs NMSSM_higgs"
+
+    grep -q 'UseHiggs3LoopSplit' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && \
+        ho="${ho} SplitMSSM"
 
     ho=$(make_unique "${ho}")
     ho=$(string_trim "${ho}")
@@ -2794,12 +3204,21 @@ update_module_mk() {
     local math_cmd="${4:-math}"
 
     [ -e "$model_file" ] || return
-    { find "$mkfile" -newer "$model_file" | grep ^; } > /dev/null 2>&1 &&
-	return
+
+    local mk_date model_date date_tolerance
+    mk_date="$(date -r "${mkfile}" +%s)"
+    model_date="$(date -r "${model_file}" +%s)"
+    date_tolerance="5" # Seconds
+    if [ "0" = "$(( $mk_date + $date_tolerance < $model_date ))" ] && \
+       [ "0" = "$(( $model_date < $mk_date - $date_tolerance ))" ]; then
+       return
+    fi
 
     message -n "   Updating model-specific modules in $mkfile ... "
-    local ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
+    local ho
+    ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
     sed -i -e "s|^\(MOD${name}_MOD[[:space:]]*:=\).*$|\1 $ho|" "$mkfile"
+    touch "${mkfile}" "${model_file}"
     message "($ho)"
     logmsg "   Depends on model-specific modules: ${ho}"
 }
@@ -2808,16 +3227,18 @@ update_module_mk() {
 update_model_makefiles() {
     # If Mathematica is disabled, dependences on model-specific
     # modules should have been already resolved.
-    [ "$enable_meta" != yes -o -z "${MATH}" ] && return
+    if [ "$enable_meta" != yes ] || [ -z "${MATH}" ]; then
+       return
+    fi
 
     message "Checking model makefiles"
 
+    local model_name model_file mkfile
     for m in ${MODELS}; do
-        local model_name=$(echo ${m} | sed -e 's|models/||')
-        local model_file="${m}/FlexibleSUSY.m"
-	local mkfile="$m/module.mk"
-
-	update_module_mk "$model_name" "$mkfile" "$model_file" "$MATH"
+        model_name="$(echo ${m} | sed -e 's|models/||')"
+        model_file="${m}/FlexibleSUSY.m"
+        mkfile="$m/module.mk"
+        update_module_mk "$model_name" "$mkfile" "$model_file" "$MATH"
     done
 }
 
@@ -2872,6 +3293,15 @@ enable_defines() {
     fi
     logmsg "   ${DEFINE_ENABLE_FFLITE}"
 
+    if test "x$enable_gm2calc" = "xyes" ; then
+        DEFINE_ENABLE_GM2CALC="#define ENABLE_GM2CALC 1"
+        message "Enabling GM2Calc"
+    else
+        DEFINE_ENABLE_GM2CALC="#undef ENABLE_GM2CALC"
+        message "Disabling GM2Calc"
+    fi
+    logmsg "   ${DEFINE_ENABLE_GM2CALC}"
+
     if test "x$enable_himalaya" = "xyes" ; then
         DEFINE_ENABLE_HIMALAYA="#define ENABLE_HIMALAYA 1"
         message "Enabling Himalaya"
@@ -2880,17 +3310,6 @@ enable_defines() {
         message "Disabling Himalaya"
     fi
     logmsg "   ${DEFINE_ENABLE_HIMALAYA}"
-
-    if test "x$enable_lapack" = "xno" ; then
-        DEFINE_ENABLE_LAPACK="#undef ENABLE_LAPACK"
-        message "Disabling LAPACK"
-        logmsg "   ${DEFINE_ENABLE_LAPACK}"
-    else
-        enable_lapack=yes
-        DEFINE_ENABLE_LAPACK="#define ENABLE_LAPACK 1"
-        logmsg "Enabling LAPACK"
-        logmsg "   ${DEFINE_ENABLE_LAPACK}"
-    fi
 
     if test "x$enable_librarylink" = "xyes" ; then
         DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
@@ -2903,26 +3322,29 @@ enable_defines() {
         logmsg "   ${DEFINE_ENABLE_LIBRARYLINK}"
     fi
 
-    if test "x$enable_ilp64mkl_workaround" = "xyes" ; then
-        DEFINE_ENABLE_ILP64MKL_WORKAROUND="#define ENABLE_ILP64MKL_WORKAROUND 1"
-        message "Enabling MKL ILP64 workaround"
-        logmsg "   ${DEFINE_ENABLE_ILP64MKL_WORKAROUND}"
-    else
-        enable_ilp64mkl_workaround=no
-        DEFINE_ENABLE_ILP64MKL_WORKAROUND="#undef ENABLE_ILP64MKL_WORKAROUND"
-        logmsg "Disabling usage of ILP64 MKL"
-        logmsg "   ${DEFINE_ENABLE_ILP64MKL_WORKAROUND}"
-    fi
-
     if test "x$enable_looptools" = "xyes" ; then
         DEFINE_ENABLE_LOOPTOOLS="#define ENABLE_LOOPTOOLS 1"
         message "Enabling usage of LoopTools"
         logmsg "   ${DEFINE_ENABLE_LOOPTOOLS}"
     else
+        enable_looptools="no"
         DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
         logmsg "Disabling usage of LoopTools"
         logmsg "   ${DEFINE_ENABLE_LOOPTOOLS}"
     fi
+    logmsg "   ${DEFINE_ENABLE_LOOPTOOLS}"
+
+    if test "x$enable_collier" = "xyes" ; then
+        DEFINE_ENABLE_COLLIER="#define ENABLE_COLLIER 1"
+        message "Enabling usage of COLLIER"
+        logmsg "   ${DEFINE_ENABLE_COLLIER}"
+    else
+        enable_collier="no"
+        DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
+        logmsg "Disabling usage of COLLIER"
+        logmsg "   ${DEFINE_ENABLE_COLLIER}"
+    fi
+    logmsg "   ${DEFINE_ENABLE_COLLIER}"
 
     if test "x$enable_silent" = "xyes" ; then
         DEFINE_ENABLE_SILENT="#define ENABLE_SILENT 1"
@@ -3016,67 +3438,128 @@ enable_defines() {
     done
 
     for a in ${ADDONS}; do
-        local addon_name="$(basename ${a})"
+        local addon_name
+        addon_name="$(basename ${a})"
         DEFINE_ENABLE_ADDONS="${DEFINE_ENABLE_ADDONS}@n@#define ENABLE_${addon_name} 1"
     done
 }
 
 #_____________________________________________________________________
+add_metaflags() {
+   local tlib_ lib_
+   tlib_='FSLoopLibraries = { FSSOFTSUSY'
+   lib_="${tlib_}"
+   test ${enable_looptools} = 'yes' && lib_="${lib_}, FSLoopTools"
+   test ${enable_fflite} = 'yes' && lib_="${lib_}, FSFFlite"
+   test ${enable_collier} = 'yes' && lib_="${lib_}, FSCOLLIER"
+   lib_="${lib_} };"
+
+   local tfa_ fa_
+   tfa_='FSFeynArtsAvailable = '
+   fa_="${tfa_}$(test ${enable_feynarts} = 'yes' && echo 'True' || echo 'False');"
+
+   local tfc_ fc_
+   tfc_='FSFormCalcAvailable = '
+   fc_="${tfc_}$(test ${enable_formcalc} = 'yes' && echo 'True' || echo 'False');"
+
+   local tcol_ col_
+   tcol_='FSEnableColors = '
+   col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
+
+   local c_=''
+   local fs_=''
+   for m in ${MODELS}; do
+      fs_="${m}/FlexibleSUSY.m"
+
+      [ ! -e "$fs_" ] && continue
+
+      c_=$(grep "$tlib_" $fs_)
+      if [ "$c_" != "$lib_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tlib_}.*/${lib_}/g" $fs_ || echo "$lib_" >> $fs_
+      fi
+
+      c_=$(grep "$tfa_" $fs_)
+      if [ "$c_" != "$fa_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tfa_}.*/${fa_}/g" $fs_ || echo "$fa_" >> $fs_
+      fi
+
+      c_=$(grep "$tfc_" $fs_)
+      if [ "$c_" != "$fc_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+      fi
+
+      c_=$(grep "$tcol_" $fs_)
+      if [ "$c_" != "$col_" ]; then
+         [ "$c_" != '' ] && \
+            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
+            echo "$col_" >> $fs_
+      fi
+
+   done
+}
+
+#_____________________________________________________________________
 replace_markers() {
-    sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
+	sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
+	-e "s|@OPERATING_SYSTEM@|$operating_system|"     \
 	-e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
 	-e "s|@FLEXIBLESUSY_MINOR@|$FLEXIBLESUSY_MINOR|" \
 	-e "s|@FLEXIBLESUSY_PATCH@|$FLEXIBLESUSY_PATCH|" \
 	-e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
-        -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
+	-e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
 	-e "s|@PKGNAME@|$PROGRAM_NAME|"    \
 	-e "s|@ABSBASEDIR@|$ABSBASEDIR|"   \
 	-e "s|@ADDONS@|$ADDONS|"           \
 	-e "s|@INSTALL_DIR@|$INSTALL_DIR|" \
 	-e "s|@SOLVERS@|$SOLVERS|"   \
-	-e "s|@BLASLIBS@|$BLASLIBS|"       \
 	-e "s|@BOOSTTESTLIBS@|$BOOSTTESTLIBS|"     \
 	-e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"     \
 	-e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"   \
 	-e "s|@THREADLIBS@|$THREADLIBS|"   \
+	-e "s|@ENABLE_COLLIER@|$enable_collier|" \
+	-e "s|@COLLIERFLAGS@|$COLLIERFLAGS|" \
+	-e "s|@COLLIERLIBS@|$COLLIERLIBS|" \
 	-e "s|@CPPFLAGS@|$CPPFLAGS|"       \
 	-e "s|@CXXFLAGS@|$CXXFLAGS|"       \
 	-e "s|@CXX@|$CXX|"                 \
 	-e "s|@FC@|$FC|"                   \
 	-e "s|@FFLAGS@|$FFLAGS|"           \
 	-e "s|@FLIBS@|$FLIBS|"             \
+	-e "s|@FUTILIBS@|$FUTILIBS|"       \
+	-e "s|@FMOD@|$FMOD|"               \
+	-e "s|@FSTD@|$FSTD|"   \
 	-e "s|@FSCONFIG@|$FSCONFIG|"       \
 	-e "s|@EIGENFLAGS@|$EIGENFLAGS|"   \
 	-e "s|@GSLLIBS@|$GSLLIBS|"         \
 	-e "s|@GSLFLAGS@|$GSLFLAGS|"       \
-	-e "s|@LAPACKLIBS@|$LAPACKLIBS|"   \
-        -e "s|@LDFLAGS@|$LDFLAGS|"         \
-        -e "s|@LDLIBS@|$LDLIBS|"           \
-        -e "s|@LLFLAGS@|$LLFLAGS|"         \
-        -e "s|@LLLIBS@|$LLLIBS|"           \
+	-e "s|@LDFLAGS@|$LDFLAGS|"         \
+	-e "s|@LDLIBS@|$LDLIBS|"           \
+	-e "s|@LLFLAGS@|$LLFLAGS|"         \
+	-e "s|@LLLIBS@|$LLLIBS|"           \
 	-e "s|@ENABLE_COLORS@|$enable_colors|" \
 	-e "s|@ENABLE_COMPILE@|$enable_compile|" \
 	-e "s|@ENABLE_COMPILER_WARNINGS@|$enable_compiler_warnings|" \
 	-e "s|@ENABLE_CHECK_EIGENVALUE_ERROR@|$enable_mass_error_check|" \
 	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
+	-e "s|@ENABLE_GM2CALC@|$enable_gm2calc|" \
 	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
-	-e "s|@ENABLE_ILP64MKL_WORKAROUND@|$enable_ilp64mkl_workaround|" \
-	-e "s|@ENABLE_LAPACK@|$enable_lapack|" \
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
 	-e "s|@ENABLE_FORMCALC@|$enable_formcalc|"        \
-	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@ENABLE_META@|$enable_meta|" \
 	-e "s|@ENABLE_SILENT@|$enable_silent|"    \
 	-e "s|@ENABLE_SQLITE@|$enable_sqlite|"    \
 	-e "s|@ENABLE_THREADS@|$enable_threads|"  \
 	-e "s|@ENABLE_TSIL@|$enable_tsil|"        \
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
+        -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
+        -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
         -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
         -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
 	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
+	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
 	-e "s|@LOOPTOOLSFLAGS@|$LOOPTOOLSFLAGS|"  \
 	-e "s|@OPTIONAL_MODULES@|$OPTIONAL_MODULES|" \
@@ -3114,8 +3597,8 @@ enable/disable options, prefix with either --enable- or --disable-
   compiler-warnings Enable compiler warnings (default: $enable_compiler_warnings)
   debug             Debug messages and assertions (no default)
   fflite            Use fflite to compute the loop functions (default: $enable_fflite)
+  gm2calc           Enable GM2Calc (default: $enable_gm2calc)
   himalaya          Enable Himalaya (default: $enable_himalaya)
-  lapack            Enable LAPACK (default: $enable_lapack)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
@@ -3140,8 +3623,6 @@ Package directories, compilation settings and model selection
 
   --with-addons=            Comma separated list of addons to be build
                             (default: $ADDONS)
-  --with-blas-libdir=       Path to search for BLAS library
-  --with-blas-libs=         BLAS libraries to be linked
   --with-boost-libdir=      Path to search for BOOST libraries
   --with-boost-incdir=      Path to search for BOOST headers
   --with-cppflags           C preprocessor flags (default: $CPPFLAGS)
@@ -3152,16 +3633,20 @@ Package directories, compilation settings and model selection
   --with-fflags=            Fortran compiler flags (default: $FFLAGS)
   --with-flibs=             Fortran libraries (default: $FLIBS)
                             If empty, FLIBS will be determined automatically.
+  --with-gm2calc-libdir=    Path to search for GM2Calc library
+  --with-gm2calc-incdir=    Path to search for GM2Calc header
   --with-gsl-config=        Path to gsl-config (default: $gsl_config)
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
   --with-install-dir=       Path to source code installation directory
-  --with-lapack-libdir=     Path to search for LAPACK library
-  --with-lapack-libs=       LAPACK libraries to be linked
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
+  --with-loop-libraries=    Comma separated list of loop libraries to be enabled
+                            (for example \`collier', \`looptools', \`fflite')
   --with-looptools-libdir=  Path to search for LoopTools libraries
   --with-looptools-incdir=  Path to search for LoopTools headers
+  --with-collier-libdir=    Path to search for COLLIER libraries
+  --with-collier-incdir=    Path to search for COLLIER modules
 EOF
 # BEGIN: NOT EXPORTED ##########################################
 cat <<EOF
@@ -3209,6 +3694,7 @@ trap "exit 1" INT QUIT TERM
 
 rm -f $logfile
 write_configure_parameters "$*"
+reset_default_static_linker_cmd
 
 if test $# -gt 0 ; then
     while test ! "x$1" = "x" ; do
@@ -3220,7 +3706,8 @@ if test $# -gt 0 ; then
         case $1 in
             --enable-*)
                 f=$(echo "$1" | sed -e 's/--//' -e 's/-/_/g')
-                eval prev='$'$(echo "${f}")
+                eval prev='$'"$(echo "${f}")"
+                # shellcheck disable=SC2154
                 if test "x${prev}" = "xyes"; then
                     echo "INFO: $1: already enabled by default."
                 fi
@@ -3244,7 +3731,7 @@ if test $# -gt 0 ; then
                 ;;
             --disable-*)
                 f=$(echo "$1" | sed -e 's/--disable/enable/' -e 's/-/_/g')
-                eval prev='$'$(echo "${f}")
+                eval prev='$'"$(echo "${f}")"
                 if test "x${prev}" = "xno"; then
                     echo "INFO: $1: already disabled by default."
                 fi
@@ -3260,25 +3747,29 @@ if test $# -gt 0 ; then
                 ;;
             --with-addons=*)         ADDONS=$optarg ;;
             --with-solvers=*)        SOLVERS=$optarg ;;
-            --with-blas-libdir=*)    blas_lib_dir=$optarg ;;
-            --with-blas-libs=*)      BLASLIBS=$optarg ;;
             --with-boost-libdir=*)   boost_lib_dir=$optarg ;;
             --with-boost-incdir=*)   boost_inc_dir=$optarg ;;
             --with-cppflags=*)       CPPFLAGS=$optarg ;;
-            --with-cxx=*)            CXX=$optarg ;;
+            --with-cxx=*)            CXX=$optarg
+                                     SHARED_LIB_CMD="$CXX -shared -o"
+                                     LIBLNK_MAKE_LIB_CMD="$SHARED_LIB_CMD"
+                                     ;;
             --with-cxxflags=*)       CXXFLAGS=$optarg ;;
+            --with-collier-libdir=*) collier_lib_dir=$optarg ;;
+            --with-collier-incdir=*) collier_inc_dir=$optarg ;;
             --with-eigen-incdir=*)   eigen_inc_dir=$optarg ;;
             --with-fc=*)             FC=$optarg ;;
             --with-fflags=*)         FFLAGS=$optarg ;;
             --with-flibs=*)          FLIBS=$optarg ;;
+            --with-gm2calc-incdir=*) gm2calc_inc_dir=$optarg ;;
+            --with-gm2calc-libdir=*) gm2calc_lib_dir=$optarg ;;
             --with-gsl-config=*)     gsl_config=$optarg ;;
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
-            --with-lapack-libdir=*)  lapack_lib_dir=$optarg ;;
-            --with-lapack-libs=*)    LAPACKLIBS=$optarg ;;
             --with-llflags=*)        LLFLAGS=$optarg ;;
             --with-lllibs=*)         LLLIBS=$optarg ;;
+            --with-loop-libraries=*) LOOP_LIBRARIES=$optarg ;;
             --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
             --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
             --with-math-cmd=*)       MATH=$optarg ;;
@@ -3312,9 +3803,10 @@ check_solvers
 check_install
 check_install_dir
 
-# check for Mathematic if meta code generation is enabled or we
+# check for Mathematica if meta code generation is enabled or we
 # compile with LibraryLink
-if [ "$enable_meta" = yes -o \( "$enable_compile" = yes -a "$enable_librarylink" != no \) ]; then
+if [ "$enable_meta" = yes ] || \
+   { [ "$enable_compile" = yes ] && [ "$enable_librarylink" != no ] ;} ; then
     check_math_cmd
     check_mathematica_info
 else
@@ -3350,27 +3842,21 @@ if test "x${enable_compile}" = "xyes"; then
     check_cxxflags
     check_fc
     check_fflags
+    check_fmod
+    check_fstd
     check_linking
     check_librarylink
     check_boost
-    check_boost_version
-    check_boost_test_incl
-    check_boost_test_libs
-    check_eigen_incl
-    check_eigen_version
+    check_eigen
     check_fortran_libs
     check_gsl_config
+    check_gm2calc
     check_himalaya
-    check_ilp64mkl_in_math
-    check_blas_libs
-    check_lapack_libs
     if use_solver "lattice"; then
         check_boost_thread_incl
         check_boost_thread_libs
     fi
-    check_looptools_incl
-    check_looptools_libs
-    check_loop_functions
+    check_looplibrary
     check_odeint
     check_sqlite
     check_tsil
@@ -3411,11 +3897,12 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@GM2CALC_VERSION@|$GM2CALC_VERSION|"       \
     -e "s|@HIMALAYA_VERSION@|$HIMALAYA_VERSION|"     \
     -e "s|@PKGNAME@|$PROGRAM_NAME|"                  \
-    -e "s|@BLASLIBS@|$BLASLIBS|"                     \
     -e "s|@BOOSTTESTLIBS@|$BOOSTTESTLIBS|"           \
     -e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"       \
     -e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"                 \
     -e "s|@THREADLIBS@|$THREADLIBS|"                 \
+    -e "s|@COLLIERFLAGS@|$COLLIERFLAGS|"             \
+    -e "s|@COLLIERLIBS@|$COLLIERLIBS|"               \
     -e "s|@CPPFLAGS@|$CPPFLAGS|"                     \
     -e "s|@CXX@|$CXX|"                               \
     -e "s|@CXXFLAGS@|$CXXFLAGS|"                     \
@@ -3423,14 +3910,18 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FC@|$FC|"                                 \
     -e "s|@FFLAGS@|$FFLAGS|"                         \
     -e "s|@FLIBS@|$FLIBS|"                           \
+    -e "s|@FMOD@|$FMOD|"                             \
+    -e "s|@FSTD@|$FSTD|"                             \
+    -e "s|@FUTILIBS@|$FUTILIBS|"                     \
     -e "s|@GSLLIBS@|$GSLLIBS|"                       \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
+    -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"               \
+    -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"             \
     -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
     -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
-    -e "s|@LAPACKLIBS@|$LAPACKLIBS|"                 \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
     -e "s|@LDLIBS@|$LDLIBS|"                         \
-    -e "s|@LLFLAGS@|$LLFLAGS|"                        \
+    -e "s|@LLFLAGS@|$LLFLAGS|"                       \
     -e "s|@LLLIBS@|$LLLIBS|"                         \
     -e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"             \
     -e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"           \
@@ -3452,11 +3943,11 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_DEBUG@|$DEFINE_ENABLE_DEBUG|"         \
     -e "s|@DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR@|$DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR|" \
     -e "s|@DEFINE_ENABLE_FFLITE@|$DEFINE_ENABLE_FFLITE|" \
+    -e "s|@DEFINE_ENABLE_GM2CALC@|$DEFINE_ENABLE_GM2CALC|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
-    -e "s|@DEFINE_ENABLE_LAPACK@|$DEFINE_ENABLE_LAPACK|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
-    -e "s|@DEFINE_ENABLE_ILP64MKL_WORKAROUND@|$DEFINE_ENABLE_ILP64MKL_WORKAROUND|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
+    -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \
     -e "s|@DEFINE_ENABLE_SILENT@|$DEFINE_ENABLE_SILENT|"       \
     -e "s|@DEFINE_ENABLE_ODEINT@|$DEFINE_ENABLE_ODEINT|"       \
@@ -3486,7 +3977,12 @@ sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
     < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
 
-echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
+if test "x${enable_meta}" = "xyes"; then
+    add_metaflags
+fi
+
+rm -f ${CONFIGDIR}/version
+echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/flexiblesusy-version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
 echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > ${CONFIGDIR}/required_sarah_version.m
 

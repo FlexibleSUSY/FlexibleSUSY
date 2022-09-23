@@ -79,10 +79,11 @@ void print_build_info(std::ostream& ostr)
       "C++ compiler (CXX):                     " CXX "\n"
       "C++ compiler flags (CXXFLAGS):          " CXXFLAGS "\n"
       "C preprocessor flags (CPPFLAGS):        " CPPFLAGS "\n"
+      "COLLIER flags (COLLIERFLAGS):           " COLLIERFLAGS "\n"
+      "COLLIER libraries (COLLIERLIBS):        " COLLIERLIBS "\n"
       "Fortran compiler (FC):                  " FC "\n"
       "Fortran compiler flags (FFLAGS):        " FFLAGS "\n"
       "Fortran libraries (FLIBS):              " FLIBS "\n"
-      "BLAS library (BLASLIBS):                " BLASLIBS "\n"
       "Boost flags (BOOSTFLAGS):               " BOOSTFLAGS "\n"
       "Boost libraries:                        " BOOSTTESTLIBS " " BOOSTTHREADLIBS "\n"
       "Eigen flags (EIGENFLAGS):               " EIGENFLAGS "\n"
@@ -90,7 +91,6 @@ void print_build_info(std::ostream& ostr)
       "Himalaya libraries (HIMALAYALIBS):      " HIMALAYALIBS "\n"
       "GSL flags (GSLFLAGS):                   " GSLFLAGS "\n"
       "GSL libraries (GSLLIBS):                " GSLLIBS "\n"
-      "LAPACK library (LAPACKLIBS):            " LAPACKLIBS "\n"
       "LibraryLink flags (LLFLAGS):            " LLFLAGS "\n"
       "LibraryLink library (LLLIBS):           " LLLIBS "\n"
       "Loop function flags (LOOPFUNCFLAGS):    " LOOPFUNCFLAGS "\n"
@@ -159,8 +159,15 @@ void print_build_info(std::ostream& ostr)
       "no"
 #endif
       "\n"
+      "Use COLLIER:                            "
+#ifdef ENABLE_COLLIER
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
       "Use GM2Calc:                            "
-#ifdef ENABLE_GM2Calc
+#ifdef ENABLE_GM2CALC
       "yes"
 #else
       "no"
@@ -168,13 +175,6 @@ void print_build_info(std::ostream& ostr)
       "\n"
       "Use Himalaya:                           "
 #ifdef ENABLE_HIMALAYA
-      "yes"
-#else
-      "no"
-#endif
-      "\n"
-      "Use LAPACK:                             "
-#ifdef ENABLE_LAPACK
       "yes"
 #else
       "no"
@@ -189,13 +189,6 @@ void print_build_info(std::ostream& ostr)
       "\n"
       "Use LoopTools:                          "
 #ifdef ENABLE_LOOPTOOLS
-      "yes"
-#else
-      "no"
-#endif
-      "\n"
-      "Use MKL ILP64 workaround:               "
-#ifdef ENABLE_ILP64MKL_WORKAROUND
       "yes"
 #else
       "no"

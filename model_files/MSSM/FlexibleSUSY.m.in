@@ -142,8 +142,12 @@ ExtraSLHAOutputBlocks = {
            {{21, FlexibleSUSYObservable`aMuon},
             {23, FlexibleSUSYObservable`EDM[Fe[1]]},
             {24, FlexibleSUSYObservable`EDM[Fe[2]]},
-            {25, FlexibleSUSYObservable`EDM[Fe[3]]}, 
+            {25, FlexibleSUSYObservable`EDM[Fe[3]]},
             {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
-           } 
+           }
    }
 };
+
+FSCalculateDecays = True;
+FSDecayParticles = {hh, Ah, Hpm, Su, Sd, Se, Sv};
+

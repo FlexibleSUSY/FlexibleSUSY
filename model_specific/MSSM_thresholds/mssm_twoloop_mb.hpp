@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// This file has been generated at Thu 13 Jul 2017 10:34:54
+// This file has been generated at Sat 18 Apr 2020 01:20:19
 // with the script "bquark_to_cpp.m".
 
 #ifndef MSSM_TWO_LOOP_SQCD_MB_H

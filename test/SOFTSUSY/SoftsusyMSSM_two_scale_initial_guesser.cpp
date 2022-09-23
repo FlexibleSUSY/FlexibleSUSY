@@ -19,9 +19,9 @@
 #include "SoftsusyMSSM_two_scale_initial_guesser.hpp"
 #include "SoftsusyMSSM_two_scale.hpp"
 #include "softsusy.h"
-#include "logger.hpp"
 
 #include <cassert>
+#include <iostream>
 
 using namespace softsusy;
 
@@ -77,8 +77,8 @@ void SoftsusyMSSM_initial_guesser::guess()
    double mz = mssm->displayMz();
 
    if (oneset.displayMu() != mz) {
-      WARNING("lowOrg in softsusy.cpp called with oneset at scale\n"
-              << oneset.displayMu() << "instead of " << mz);
+      std::cerr << "lowOrg in softsusy.cpp called with oneset at scale\n"
+                << oneset.displayMu() << "instead of " << mz << std::endl;
    }
 
    MssmSusy t(mssm->guessAtSusyMt(pp.tanBeta, oneset));
@@ -86,8 +86,8 @@ void SoftsusyMSSM_initial_guesser::guess()
    t.setLoops(2); /// 2 loops should protect against ht Landau pole
    int err = t.runto(mx);
    if (err)
-      ERROR("<SoftsusyMSSM_initial_guesser::guess()>: non-perturbative running to"
-            " mx = " << mx);
+      std::cerr << "<SoftsusyMSSM_initial_guesser::guess()>: non-perturbative running to"
+         " mx = " << mx << std::endl;
 
    mssm->setSusy(t);
 
@@ -110,8 +110,8 @@ void SoftsusyMSSM_initial_guesser::guess()
 
    err = mssm->run(mx, mz);
    if (err)
-      ERROR("<SoftsusyMSSM_initial_guesser::guess()>: non-perturbative running from"
-            " mx = " << mx << " to mz = " << mz);
+      std::cerr << "<SoftsusyMSSM_initial_guesser::guess()>: non-perturbative running from"
+         " mx = " << mx << " to mz = " << mz << std::endl;
 
    if (sgnMu == 1 || sgnMu == -1)
       mssm->rewsbTreeLevel(sgnMu);
@@ -124,9 +124,9 @@ void SoftsusyMSSM_initial_guesser::guess()
    sProblem problem = mssm->displayProblem();
    if (problem.test()) {
       if (problem.testSeriousProblem())
-         WARNING("<SoftsusyMSSM_initial_guesser::guess()>: serious problem: " << problem);
+         std::cerr << "<SoftsusyMSSM_initial_guesser::guess()>: serious problem: " << problem << std::endl;
       else
-         WARNING("<SoftsusyMSSM_initial_guesser::guess()>: problem: " << problem);
+         std::cerr << "<SoftsusyMSSM_initial_guesser::guess()>: problem: " << problem << std::endl;
    }
 }
 

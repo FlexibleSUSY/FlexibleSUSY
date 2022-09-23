@@ -28,20 +28,20 @@ all-$(MODNAME): $(LIB_model_specific_SM_thresholds)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_SM_thresholds_SRC) $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_SM_thresholds_HDR) $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_SM_thresholds_MK) $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
+		$(Q)install -d $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_thresholds_SRC) $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_thresholds_HDR) $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_thresholds_MK) $(LIB_model_specific_SM_thresholds_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIB_model_specific_SM_thresholds_DEP)
+		$(Q)-rm -f $(LIB_model_specific_SM_thresholds_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIB_model_specific_SM_thresholds)
+		$(Q)-rm -f $(LIB_model_specific_SM_thresholds)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIB_model_specific_SM_thresholds_OBJ)
+		$(Q)-rm -f $(LIB_model_specific_SM_thresholds_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
 		@true
@@ -54,7 +54,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIB_model_specific_SM_thresholds_DEP) $(LIB_model_specific_SM_thresholds_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(TSILFLAGS)
+$(LIB_model_specific_SM_thresholds_DEP) $(LIB_model_specific_SM_thresholds_OBJ): CPPFLAGS += $(EIGENFLAGS) $(BOOSTFLAGS) $(TSILFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB_model_specific_SM_thresholds_DEP) $(LIB_model_specific_SM_thresholds_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
@@ -62,10 +62,12 @@ endif
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIB_model_specific_SM_thresholds): $(LIB_model_specific_SM_thresholds_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(TSILLIBS)
 else
 $(LIB_model_specific_SM_thresholds): $(LIB_model_specific_SM_thresholds_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 endif
 
 ALLDEP += $(LIB_model_specific_SM_thresholds_DEP)

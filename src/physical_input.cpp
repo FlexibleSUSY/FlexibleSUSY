@@ -18,6 +18,7 @@
 
 #include "physical_input.hpp"
 #include "error.hpp"
+#include <algorithm>
 
 namespace flexiblesusy {
 

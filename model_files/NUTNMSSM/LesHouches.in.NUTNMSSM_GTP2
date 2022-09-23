@@ -32,6 +32,7 @@ Block FlexibleSUSY
    28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+   31   0                    # loop library (0 = softsusy)
 BLOCK SMINPUTS
     1     1.28962000E+02   # alpha_em^(-1)
     2     1.16637000E-05   # G_F

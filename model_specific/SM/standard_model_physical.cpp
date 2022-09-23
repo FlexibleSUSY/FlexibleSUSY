@@ -18,6 +18,7 @@
 
 #include "standard_model_physical.hpp"
 #include "slha_io.hpp"
+#include "wrappers.hpp"
 
 #include <iostream>
 

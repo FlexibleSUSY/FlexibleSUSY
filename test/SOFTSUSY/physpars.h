@@ -210,7 +210,7 @@ double sTfn(double sTins, double sTouts);
 
 /// LCT: Calculates fractional difference in Drbar masses between a and b
 namespace softsusy {
-   class drBarPars;
+   struct drBarPars;
    class DoubleVector;
 }
 void sumTol(const softsusy::drBarPars & a, const softsusy::drBarPars & b, softsusy::DoubleVector & sT);

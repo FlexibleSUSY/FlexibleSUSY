@@ -5,6 +5,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "problems.hpp"
+#include "names.hpp"
 
 using namespace flexiblesusy;
 

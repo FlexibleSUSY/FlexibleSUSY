@@ -20,11 +20,67 @@
 #define BOOST_TEST_MODULE test_eigen_utils
 
 #include <boost/test/unit_test.hpp>
-#include <typeinfo>
 #include "eigen_utils.hpp"
 #include <complex>
+#include <typeinfo>
 
 using namespace flexiblesusy;
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_array_same)
+{
+   Eigen::Array<double,3,1> v1, v2;
+   v1 << 1.0, 2.0, 3.0;
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_array_zero)
+{
+   Eigen::Array<double,3,1> v1, v2;
+   v1.setZero();
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_array_small)
+{
+   Eigen::Array<double,3,1> v1, v2;
+   v1 << 0.0, 100.0, 1000.0;
+   v2 << 0.0, 101.0, 1001.0;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-2));
+   BOOST_CHECK(!is_equal_rel(v1, v2, 9e-3));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_matrix_same)
+{
+   Eigen::Matrix<double,3,1> v1, v2;
+   v1 << 1.0, 2.0, 3.0;
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_matrix_zero)
+{
+   Eigen::Matrix<double,3,1> v1, v2;
+   v1.setZero();
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_matrix_small)
+{
+   Eigen::Matrix<double,3,1> v1, v2;
+   v1 << 0.0, 100.0, 1000.0;
+   v2 << 0.0, 101.0, 1001.0;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-2));
+   BOOST_CHECK(!is_equal_rel(v1, v2, 9e-3));
+}
 
 BOOST_AUTO_TEST_CASE(test_div_safe_zero)
 {
@@ -96,6 +152,40 @@ BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix)
    vec1 << 1, 2, 3;
 
    Eigen::Matrix<double,3,3> matrix;
+   matrix << 3, 0, 0,
+             0, 1, 0,
+             0, 0, 2;
+
+   reorder_vector(vec1, matrix);
+
+   BOOST_CHECK_EQUAL(vec1(0), 3);
+   BOOST_CHECK_EQUAL(vec1(1), 1);
+   BOOST_CHECK_EQUAL(vec1(2), 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix_abs)
+{
+   Eigen::Array<double,3,1> vec1;
+   vec1 << 1, 2, 3;
+
+   Eigen::Matrix<double,3,3> matrix;
+   matrix << 3, 0, 0,
+             0, 1, 0,
+             0, 0, -2; // uses abs() of diagonal values
+
+   reorder_vector(vec1, matrix);
+
+   BOOST_CHECK_EQUAL(vec1(0), 3);
+   BOOST_CHECK_EQUAL(vec1(1), 1);
+   BOOST_CHECK_EQUAL(vec1(2), 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix_complex)
+{
+   Eigen::Array<double,3,1> vec1;
+   vec1 << 1, 2, 3;
+
+   Eigen::Matrix<std::complex<double>,3,3> matrix;
    matrix << 3, 0, 0,
              0, 1, 0,
              0, 0, 2;

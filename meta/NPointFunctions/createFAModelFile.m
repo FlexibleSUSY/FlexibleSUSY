@@ -22,35 +22,31 @@
 
 BeginPackage["NPointFunctions`", {"SARAH`"}];
 
-CreateFAModelFile::usage="Create the FeynArts model file using \
-SARAH`MakeFeynArts[].";
+CreateFAModelFile::usage=
+"@brief Create the FeynArts model file using SARAH`.`MakeFeynArts[].
+@param sarahInputDirectories the SARAH input directories
+@param sarahOutputDirectory the SARAH output directory
+@param sarahModelName the model name used by SARAH
+@param eigenstates the option to forward to SARAH`.`MakeFeynArts[]
+@note Effectively Private function hence there are no checks for input";
 
 Begin["`Private`"];
 
-(** \brief Create the FeynArts model file using
- * ``SARAH`MakeFeynArts[]``.
- * \param sarahInputDirectories the SARAH input directories
- * \param sarahOutputDirectory the SARAH output directory
- * \param sarahModelName the model name used by SARAH
- * \param eigenstates the option to forward to ``SARAH`MakeFeynArts[]``
- **)
-CreateFAModelFile[sarahInputDirectories_, sarahOutputDirectory_,
-	sarahModelName_, eigenstates_] :=
+CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_, 
+   eigenstates_] :=
 (
-	SARAH`SARAH[SARAH`InputDirectories] = sarahInputDirectories;
-  SARAH`SARAH[SARAH`OutputDirectory] = sarahOutputDirectory;
-      
-	SARAH`Start[sarahModelName];
-      
-  SA`CurrentStates = eigenstates; 
-  SARAH`InitVertexCalculation[eigenstates, False];
-  SARAH`partDefinition = SARAH`ParticleDefinitions[eigenstates];
-  SARAH`Particles[SARAH`Current] = SARAH`Particles[eigenstates];
-	SARAH`ReadVertexList[eigenstates, False, False, True];
-  SARAH`MakeCouplingLists;
-  
-  SARAH`MakeFeynArts[SARAH`Eigenstates -> eigenstates];
-)
+   SARAH`SARAH@SARAH`InputDirectories = sarahInputDirs;
+   SARAH`SARAH@SARAH`OutputDirectory = sarahOutputDir;
+   SARAH`Start@sarahModelName;
+   SA`CurrentStates = eigenstates; 
+   SARAH`InitVertexCalculation[eigenstates, False];
+   SARAH`partDefinition = SARAH`ParticleDefinitions@eigenstates;
+   SARAH`Particles@SARAH`Current = SARAH`Particles@eigenstates;
+   SARAH`ReadVertexList[eigenstates, False, False, True];
+   SARAH`MakeCouplingLists;
+   SARAH`MakeFeynArts[SARAH`Eigenstates -> eigenstates];
+);
+SetAttributes[CreateFAModelFile,{Protected, Locked}];
 
 End[];
 EndPackage[];

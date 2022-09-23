@@ -4,19 +4,21 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "loop_libraries/loop_library.hpp"
 #include "test_SM.hpp"
 #include "wrappers.hpp"
-#include "pv.hpp"
 #include "SM_two_scale_model.hpp"
 #include "standard_model.hpp"
 #include "config.h"
 
-#define SARAH_VERSION_AT_LEAST(x,y,z) (SARAH_MAJOR > x || (SARAH_MAJOR >= x && \
-                                      (SARAH_MINOR > y || (SARAH_MINOR >= y && \
-                                                           SARAH_PATCH >= z))))
+#define SARAH_VERSION_AT_LEAST(x,y,z) (                                 \
+      (SARAH_MAJOR == 0 && SARAH_MINOR == 0 && SARAH_PATCH == 0) ||     \
+      (SARAH_MAJOR > x || (SARAH_MAJOR >= x &&                          \
+                           (SARAH_MINOR > y || (SARAH_MINOR >= y &&     \
+                                                SARAH_PATCH >= z))))    \
+      )
 
 using namespace flexiblesusy;
-using namespace passarino_veltman;
 
 BOOST_AUTO_TEST_CASE( test_SM_one_loop_Higgs_masses )
 {
@@ -111,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_SM_heavy_top_self_energy )
    for (int i = 0; i < 3; i++) {
       const double gluon_contrib =
          -5.333333333333333 *
-         (-0.5 + ReB0(Sqr(p),Sqr(MFu(i)),0,Sqr(scale)))
+         (-0.5 + Loop_library::get().B0(Sqr(p),Sqr(MFu(i)),0,Sqr(scale)).real())
             * Sqr(g3) * MFu(i);
 
       se_t_check(i,i) += gluon_contrib * oneOver16PiSqr;

@@ -211,9 +211,6 @@ UseYukawa3LoopQCD = True;
 UseSMAlphaS3Loop = True;
 
 ExtraSLHAOutputBlocks = {
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
 };
 
 SARAH`ParameterDefinitions = Append[

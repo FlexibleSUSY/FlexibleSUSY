@@ -89,6 +89,9 @@ TestEquality[RValueToCFormString[\[Mu][1,2,3]], "Mu(1,2,3)"];
 TestEquality[RValueToCFormString[MACROSTRING[T[Yu]][0,0]/MACROSTRING[Yu][0,0]], "MACROSTRING(TYu)(0,0)/MACROSTRING(Yu)(0,0)"];
 TestEquality[RValueToCFormString[MACROSTRING[T[\[Kappa]]][0,0]/MACROSTRING[\[Kappa]][0,0]], "MACROSTRING(TKappa)(0,0)/MACROSTRING(Kappa)(0,0)"];
 
+TestEquality[CreateCBoolValue[True], "true"];
+TestEquality[CreateCBoolValue[False], "false"];
+
 Print["testing GetHead[] ..."];
 
 TestEquality[GetHead[1], 1];

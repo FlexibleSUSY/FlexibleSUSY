@@ -57,11 +57,6 @@ Print["time for sequential runs: ", resultMap[[1]]];
 Print["time for parallel map   : ", resultParallelMap[[1]]];
 Print["time for parallel table : ", resultParallelTab[[1]]];
 
-If[Length[kernels] > 1,
-   TestLowerThan[resultParallelMap[[1]], resultMap[[1]]];
-   TestLowerThan[resultParallelTab[[1]], resultMap[[1]]];
-  ];
-
 TestEquality[resultMap[[2]], resultParallelMap[[2]]];
 TestEquality[resultMap[[2]], resultParallelTab[[2]]];
 

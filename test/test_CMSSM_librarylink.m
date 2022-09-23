@@ -45,6 +45,7 @@ settings = {
     forcePositiveMasses -> 0,
     poleMassScale -> 0.,
     parameterOutputScale -> 0.
+    loopLibrary -> -1
 };
 
 smInputs = {
@@ -147,10 +148,6 @@ TestCloseRel[BMu /. slhaData, B[\[Mu]] /. specML, delta];
 
 delta = 1*^-6;
 
-TestCloseRel[{CpHPP1, CpHPP2} /. slhaData, Abs[FlexibleSUSYObservable`CpHiggsPhotonPhoton /. obsML], delta];
-TestCloseRel[{CpHGG1, CpHGG2} /. slhaData, Abs[FlexibleSUSYObservable`CpHiggsGluonGluon] /. obsML, delta];
-TestCloseRel[CpAPP  /. slhaData, Abs[FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton  /. obsML], delta];
-TestCloseRel[CpAGG  /. slhaData, Abs[FlexibleSUSYObservable`CpPseudoScalarGluonGluon /. obsML], delta];
 TestCloseRel[aMuon  /. slhaData, FlexibleSUSYObservable`aMuon /. obsML, delta];
 
 TestEquality[CMSSM /. probML, {}];

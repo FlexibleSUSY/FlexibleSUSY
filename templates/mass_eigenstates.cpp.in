@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file @ModelName@_mass_eigenstates.cpp
@@ -26,8 +25,7 @@
  * which solve EWSB and calculate pole masses and mixings from @RenScheme@
  * parameters.
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #include "@ModelName@_mass_eigenstates.hpp"
@@ -37,12 +35,10 @@
 #include "ewsb_solver.hpp"
 #include "wrappers.hpp"
 #include "linalg2.hpp"
-#include "numerics2.hpp"
 #include "logger.hpp"
 #include "error.hpp"
-#include "pv.hpp"
+#include "loop_libraries/loop_library.hpp"
 #include "raii.hpp"
-#include "functors.hpp"
 
 #ifdef ENABLE_THREADS
 #include "thread_pool.hpp"
@@ -54,13 +50,11 @@
 @fourLoopHiggsHeaders@
 @twoLoopThresholdHeaders@
 
-#include <array>
 #include <cmath>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <algorithm>
-#include <stdexcept>
 
 namespace flexiblesusy {
 
@@ -90,6 +84,11 @@ CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
    : @ModelName@_soft_parameters(input_)
 @defaultEWSBSolverCctor@
 {
+}
+
+std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
+{
+   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
 }
 
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
@@ -411,42 +410,55 @@ void CLASSNAME::print(std::ostream& ostr) const
 
 double CLASSNAME::A0(double m) const noexcept
 {
-   return passarino_veltman::ReA0(m, Sqr(get_scale()));
+   return Loop_library::get().A0(m, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB0(p, m1, m2, Sqr(get_scale()));
+   return Loop_library::get().B0(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B1(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB1(p, m1, m2, Sqr(get_scale()));
+   return Loop_library::get().B1(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B00(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB00(p, m1, m2, Sqr(get_scale()));
+   return Loop_library::get().B00(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B22(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB22(p, m1, m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return (
+      Loop_library::get().B00(p, m1, m2, scl2) - Loop_library::get().A0(m1, scl2)/4.0 -
+      Loop_library::get().A0(m2, scl2)/4.0
+   ).real();
 }
 
 double CLASSNAME::H0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReH0(p, m1, m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return 4.0*Loop_library::get().B00(p, m1, m2, scl2).real() + CLASSNAME::G0(p, m1, m2);
 }
 
 double CLASSNAME::F0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReF0(p, m1, m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return (
+      Loop_library::get().A0(m1, scl2) - 2.0*Loop_library::get().A0(m2, scl2)
+      - (2.0*p + 2.0*m1 - m2) * Loop_library::get().B0(p, m1, m2, scl2)
+   ).real();
 }
 
 double CLASSNAME::G0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReG0(p, m1, m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return (
+      (p - m1 - m2) * Loop_library::get().B0(p, m1, m2, scl2)
+      - Loop_library::get().A0(m1, scl2) - Loop_library::get().A0(m2, scl2)
+   ).real();
 }
 
 /**
@@ -598,6 +610,61 @@ void CLASSNAME::run_to(double scale, double eps)
    if (eps < 0.0)
       eps = precision;
    @ModelName@_soft_parameters::run_to(scale, eps);
+}
+
+void CLASSNAME::calculate_tree_level_mass_spectrum()
+{
+   calculate_DRbar_masses();
+}
+
+void CLASSNAME::calculate_pole_mass_spectrum()
+{
+   calculate_pole_masses();
+}
+
+void CLASSNAME::calculate_mass_spectrum()
+{
+   calculate_spectrum();
+}
+
+int CLASSNAME::solve_ewsb_equations_tree_level()
+{
+   return solve_ewsb_tree_level();
+}
+
+int CLASSNAME::solve_ewsb_equations()
+{
+   return solve_ewsb();
+}
+
+const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
+{
+   return get_input();
+}
+
+@ModelName@_input_parameters& CLASSNAME::get_input_parameters()
+{
+   return get_input();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses() const
+{
+   return get_DRbar_masses();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses_and_mixings() const
+{
+   return get_DRbar_masses_and_mixings();
+}
+
+void CLASSNAME::set_tree_level_masses(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses(m);
+}
+
+void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses_and_mixings(m);
 }
 
 @higgsMassGetters@

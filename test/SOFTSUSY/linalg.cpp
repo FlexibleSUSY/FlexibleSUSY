@@ -9,7 +9,6 @@
 #include "linalg.h"
 #include "utils.h"
 #include "def.h"
-#include "error.hpp"
 #include "diagonalization.hpp"
 #include <cmath>
 using std::abs;
@@ -53,7 +52,7 @@ void DoubleVector::setEnd(int e) {
     ostringstream ii;
     ii << "DoubleVector.setEnd called with new end " << e << " before start " << start;
     ii << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   if (e != end) {
@@ -169,7 +168,7 @@ const DoubleMatrix & DoubleMatrix::operator=(double v) {
     ostringstream ii;
     ii << "DoubleMatrix = double overload; not square\n";
     ii << *this << "=\n" << v;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   std::valarray<double> diagvec(v,rows);
@@ -253,7 +252,7 @@ double DoubleMatrix::trace() const {
   if (rows != cols)  {
     ostringstream ii;
     ii << "trace of non-square DoubleMatrix\n" << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   double sum = 0.0;
@@ -298,7 +297,7 @@ void DoubleMatrix::associateOrderAbs(DoubleVector &v) {
       (v.displayStart() != 1)) {
     ostringstream ii;
     ii << "Associated ordering incompatibility\n";
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   for (int i=v.displayStart(); i<=v.displayEnd(); ++i)
@@ -321,7 +320,7 @@ void DoubleMatrix::associateOrderAbs(DoubleMatrix & u,
       (w.displayStart() != 1)) {
     ostringstream ii;
     ii << "Associated ordering incompatibility\n";
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   for (int i=w.displayStart(); i<=w.displayEnd(); ++i)
@@ -339,7 +338,7 @@ void DoubleMatrix::symmetrise() {
   if (rows != cols) {
     ostringstream ii;
     ii << "Error: symmetrising rectangular matrix " << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   for (int i=1; i<=rows; ++i)
@@ -355,7 +354,7 @@ double DoubleMatrix::compare(const DoubleMatrix & a) const {
     ostringstream ii;
     ii << "Error: comparing matrices of different sizes" << *this << 
       " and " << a;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   return abs(x - a.x).sum();
@@ -368,7 +367,7 @@ double DoubleMatrix::compare(const ComplexMatrix & a) const {
     ostringstream ii;
     ii << "Error: comparing matrices of different sizes" << *this << 
       " and " << a;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   ComplexMatrix temp(*this);
@@ -392,7 +391,7 @@ DoubleMatrix DoubleMatrix::inverse() const {
     ostringstream ii;
     ii << "Error in DoubleMatrix::invert, trying to invert non-square";
     ii << " matrix " << *this << '\n';
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   DoubleMatrix u(ans.displayRows(), ans.displayRows());
@@ -428,7 +427,7 @@ double DoubleMatrix::diagonalise(DoubleMatrix & u, DoubleMatrix & v,
     ostringstream ii;
     ii << "Error: Trying to diagonalise matrix \n" << *this 
        << "with u" << u << "v " << v << "w " << w;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   // Numerical routine replaces argument, so make a copy of elements
@@ -455,7 +454,7 @@ double DoubleMatrix::diagonaliseSym(DoubleMatrix & v, DoubleVector & w) const {
       || v.displayRows() !=c || c > 10) {
     ostringstream ii;
     ii << "Error: Trying to diagonalise matrix \n" << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   // Numerical recipes routine replaces argument, so make a copy of elements
@@ -484,7 +483,7 @@ double DoubleMatrix::diagonaliseSym(ComplexMatrix & v, DoubleVector & w) const {
       || v.displayRows() !=c || c > 10) {
     ostringstream ii;
     ii << "Error: Trying to diagonalise matrix \n" << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   // Numerical recipes routine replaces argument, so make a copy of elements
@@ -530,12 +529,12 @@ DoubleVector DoubleMatrix::sym2by2(double & theta) const  {
     ostringstream ii;
     ii << "Called sym2by2 with matrix of dimension ("
        << displayRows() << ", " << displayCols() << ")\n";
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
   if (display(1, 2) != display(2, 1)) {
     ostringstream ii;
     ii << "Called non symmetric sym2by2:" << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   
@@ -565,7 +564,7 @@ DoubleVector DoubleMatrix::sym2by2(double & theta) const  {
     ii << "Inaccurate diagonalisation in LINALG::sym2by2\n";
     ii << "Diagonalising " << * this;
     ii << "Found diagonalised matrix to be " << mm;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   
@@ -606,7 +605,7 @@ DoubleVector DoubleMatrix::asy2by2(double & thetaL, double & thetaR) const {
     ii << "diagonalising " << e << " where thetaR=" << thetaR 
        << " thetaL=" << thetaL << '\n';
     ii << "m=" << mm;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   
@@ -701,7 +700,7 @@ void positivise(double thetaL, double thetaR, const DoubleVector & diag,
     ostringstream ii;
     ii << "DoubleMatrix::positivise currentl only available for 2 by 2"
        << "matrices, not " << diag << u << v;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   
@@ -1025,7 +1024,7 @@ void ComplexVector::setEnd(int e) {
   if (e < start) {
     ostringstream ii;
     ii << "ComplexVector.setEnd called with incompatible length " << e << '\n'; 
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   if (e != end) {
@@ -1132,7 +1131,7 @@ const ComplexMatrix & ComplexMatrix::operator=(const Complex &v) {
     ostringstream ii;
     ii << "ComplexMatrix = Complex overload; must be square\n";
     ii << *this << "=\n" << v;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   std::valarray<Complex> diagvec(v,rows);
@@ -1210,7 +1209,7 @@ Complex ComplexMatrix::trace() const {
   if (rows != cols)  {
     ostringstream ii;
     ii << "Complexrace of non-square matrix\n" << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   Complex sum(0.0);
@@ -1270,7 +1269,7 @@ void ComplexMatrix::symmetrise() {
   if (rows != cols) {
     ostringstream ii;
     ii << "Error: symmetrising rectangular matrix " << *this;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   for (int i=1; i<=rows; ++i)
@@ -1286,7 +1285,7 @@ double ComplexMatrix::compare(const ComplexMatrix & a) const {
     ostringstream ii;
     ii << "Error: comparing matrices of different sizes" << *this << 
       " and " << a;
-    throw flexiblesusy::OutOfBoundsError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 #endif
   return abs(x - a.x).sum().real();
@@ -1400,7 +1399,7 @@ double DoubleMatrix::nmin(int & k, int & l) const {
 double DoubleVector::compare(const DoubleVector & a) const {
 #ifdef ARRAY_BOUNDS_CHECKING
   if (displayStart() != a.displayStart() || displayEnd() != a.displayEnd())
-    throw flexiblesusy::OutOfBoundsError("In DoubleVector::compare, two vectors are of incompatible size.");
+    throw std::runtime_error("In DoubleVector::compare, two vectors are of incompatible size.");
 #endif
   
   DoubleVector sumTol(display());
@@ -1433,7 +1432,7 @@ DoubleVector DoubleVector::divide(DoubleVector const &v) const {
       ostringstream ii;
       ii << "DoubleVector * overload; incompatible lengths\n";
       ii << *this << "*\n" << v;
-      throw flexiblesusy::OutOfBoundsError(ii.str());
+      throw std::runtime_error(ii.str());
     }
 #endif
   DoubleVector temp(v);
@@ -1471,7 +1470,7 @@ const ComplexMatrix& ComplexMatrix::operator+=(const DoubleMatrix& other)
       ostringstream ii;
       ii << "ComplexMatrix::operator+(const DoubleMatrix&) incompatible lengths\n";
       ii << *this << "*\n" << other;
-      throw flexiblesusy::OutOfBoundsError(ii.str());
+      throw std::runtime_error(ii.str());
     }
 #endif
   for (std::size_t i = 0; i < x.size(); i++)
@@ -1487,7 +1486,7 @@ ComplexMatrix ComplexMatrix::operator+(const DoubleMatrix& other)
       ostringstream ii;
       ii << "ComplexMatrix::operator+=(const DoubleMatrix&) incompatible lengths\n";
       ii << *this << "*\n" << other;
-      throw flexiblesusy::OutOfBoundsError(ii.str());
+      throw std::runtime_error(ii.str());
     }
 #endif
   ComplexMatrix temp(*this);
