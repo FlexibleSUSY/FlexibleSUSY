@@ -279,7 +279,7 @@ ToMatrixExpression[{}] := Null;
 ToMatrixExpression[expr_ /; Head[expr] =!= List] := expr;
 
 ToMatrixExpression[list_List] :=
-    Module[{dim, symbol, matrix, i, k, diag, expression = Null,
+    Module[{dim, symbol, matrix, diag, expression = Null,
             expandedList, permutations},
            dim = Length[list];
            symbol = ExtractSymbols[list[[1,1]]];
