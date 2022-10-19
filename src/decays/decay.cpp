@@ -115,6 +115,27 @@ const Decay& Decays_list::get_decay(
    return pos->second;
 }
 
+/**
+ * Sort decays of every particle according to their width
+ */
+std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
+   std::vector<Decay> decays_list_as_vector;
+   decays_list_as_vector.reserve(decays_list.size());
+   for (const auto& el : decays_list) {
+      decays_list_as_vector.push_back(el.second);
+   }
+
+   std::sort(
+      decays_list_as_vector.begin(),
+      decays_list_as_vector.end(),
+      [](const auto& d1, const auto& d2) {
+         return d1.get_width() > d2.get_width();
+      }
+   );
+
+   return decays_list_as_vector;
+}
+
 std::string strip_field_namespace(std::string const& s) {
    std::string result = s.substr(s.find_last_of(':')+1);
    if (s.find("bar") != std::string::npos) {

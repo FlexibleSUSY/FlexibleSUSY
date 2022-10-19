@@ -420,9 +420,13 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
               is such a coupling, it must be 0. So for those processes
               we start generating amplitudes from the 1-loop level. *)
            minLoops =
-              If[MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
+              If[(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
                  (Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
-                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]),
+                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
+                 ||
+                 (* a photon or a gluon always couples diagonally at the tree-level - e.g. no γXY coupling when X =! Y *)
+                 (MemberQ[finalParticles, TreeMasses`GetPhoton[]] && !MemberQ[finalParticles, initialParticle]) ||
+                 (MemberQ[finalParticles, TreeMasses`GetGluon[]] && !MemberQ[finalParticles, initialParticle]),
                  1,
                  0
               ];
@@ -434,8 +438,11 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
            {#[[1]], With[{toposAndDiags = #[[2]]}, {#[[1]], Select[#[[2]], IsSupportedDiagram]}& /@ toposAndDiags]}& /@ diagrams
           ];
 
+(* in the MRSSM this 1-loop decay amplitude for Fu crashes the code
+   {Fu, bar[Fd], conj[SRdp], {Fu, Chi, conj[Su]}, {bar[Fd], bar[Chi], Sd}, {conj[SRdp], Su, conj[Sd]}}
+   Temporarily disable 1-loop Fu decay *)
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List] :=
-    GetContributingGraphsForDecay[initialParticle, finalParticles, 1];
+    GetContributingGraphsForDecay[initialParticle, finalParticles, If[initialParticle === First@TreeMasses`GetSMUpQuarks[], 0, 1]];
 
 (* defines a fixed ordering for final state particles  *)
 (* @todo decide on what this ordering actually will be *)
