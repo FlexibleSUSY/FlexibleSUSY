@@ -45,6 +45,7 @@ NUHMSSMNoFVHimalaya<Two_scale> run(int loops, const NUHMSSMNoFVHimalaya_input_pa
    return spectrum_generator.get_model();
 }
 
+/// calculates CP-even Higgs pole mass at given loop order for degenerate SUSY parameters
 double calc_Mh(int loops, double tb, double MS, double xt)
 {
    NUHMSSMNoFVHimalaya_input_parameters input;
@@ -87,7 +88,7 @@ double calc_Mh(int loops, double tb, double MS, double xt)
    return run(loops, input).get_physical().Mhh(0);
 }
 
-/// test some points from arxiv:1708.05720 Fig.6
+/// test 3-loop calculation for some points from arxiv:1708.05720 Fig.6
 BOOST_AUTO_TEST_CASE( test_Mh )
 {
    BOOST_CHECK_CLOSE_FRACTION(calc_Mh(2, 5, 1e4, -std::sqrt(6.0)), 127.25093812326084, 1e-4);
