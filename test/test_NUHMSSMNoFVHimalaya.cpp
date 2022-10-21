@@ -11,13 +11,15 @@
 
 using namespace flexiblesusy;
 
-NUHMSSMNoFVHimalaya<Two_scale> run(const NUHMSSMNoFVHimalaya_input_parameters& input)
+NUHMSSMNoFVHimalaya<Two_scale> run(int loops, const NUHMSSMNoFVHimalaya_input_parameters& input)
 {
    softsusy::QedQcd qedqcd;
    qedqcd.to(qedqcd.displayPoleMZ());
 
    Spectrum_generator_settings settings;
    settings.set(Spectrum_generator_settings::precision, 1.0e-5);
+   settings.set(Spectrum_generator_settings::beta_loop_order, loops);
+   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, loops);
 
    NUHMSSMNoFVHimalaya_spectrum_generator<Two_scale> spectrum_generator;
    spectrum_generator.set_settings(settings);
@@ -65,7 +67,7 @@ double calc_Mh(int loops, double tb, double MS, double xt)
    input.md33IN = MS;
    input.Mlow = 0;
 
-   return run(input).get_physical().Mhh(0);
+   return run(loops, input).get_physical().Mhh(0);
 }
 
 struct Mh {
