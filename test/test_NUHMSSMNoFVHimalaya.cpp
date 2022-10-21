@@ -6,10 +6,6 @@
 #include "models/NUHMSSMNoFVHimalaya/NUHMSSMNoFVHimalaya_two_scale_spectrum_generator.hpp"
 #include "src/threshold_corrections.hpp"
 
-#include <cstdio>
-#include <vector>
-#include <tuple>
-
 using namespace flexiblesusy;
 
 NUHMSSMNoFVHimalaya<Two_scale> run(int loops, const NUHMSSMNoFVHimalaya_input_parameters& input)
