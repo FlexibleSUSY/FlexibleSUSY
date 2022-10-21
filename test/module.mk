@@ -716,8 +716,6 @@ endif
 ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
 TEST_META += \
 		$(DIR)/test_NUHMSSMNoFVHimalaya_uncertainty.m
-TEST_SRC += \
-		$(DIR)/test_NUHMSSMNoFVHimalaya.cpp
 endif
 
 ifeq ($(WITH_SMHighPrecision) $(WITH_SMEFTHiggs),yes yes)
@@ -1156,8 +1154,6 @@ $(DIR)/test_NMSSM_benchmark.x.xml: $(RUN_NMSSM_EXE) $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_NMSSM_slha_output.x.xml: $(EXAMPLES_EXE) $(DIR)/test_NMSSM_slha_output.in.spc $(RUN_SOFTPOINT_EXE)
 $(DIR)/test_NMSSM_slha_output.x: $(LIBNMSSM)
-
-$(DIR)/test_NUHMSSMNoFVHimalaya.x: $(LIBNUHMSSMNoFVHimalaya)
 
 $(DIR)/test_SMSSM_beta_functions.x: $(LIBSMSSM)
 
