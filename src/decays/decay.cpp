@@ -149,9 +149,8 @@ std::string strip_field_namespace(std::string const& s) {
    }
 }
 
-double hVV_4body(double *q2, size_t dim, void *params)
+double hVV_4body(double *q2, size_t /* dim */, void *params)
 {
-  (void)(dim); /* avoid unused parameter warnings */
   struct my_f_params * fp = (struct my_f_params *)params;
   const double mHOS = fp->mHOS;
   if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
