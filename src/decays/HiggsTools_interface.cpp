@@ -86,7 +86,6 @@ void call_HiggsTools(
       // finally, after fixing lambda to a value giving mhSM == mass,
       // compute all the other masses
       sm.calculate_pole_masses();
-      std::cout << el.particle << ' ' << mass << ' ' << sm.get_physical().Mhh << ' ' << sm.get_Lambdax() << '\n';
 
       if (sm.get_physical().Mhh > 0) {
          // calculate decays in the SM equivalent
@@ -121,7 +120,6 @@ void call_HiggsTools(
          s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau));
          // set total width to the one computed by FD as HiggsTools doesn't calculate
          // some decays of Higgs at all, e.g. H -> Ah Z
-         std::cout << "HT totalWidth/FS width " << s.totalWidth()/el.width << '\n';
          if (el.width > s.totalWidth()) {
             s.setDecayWidth("NP", "NP", el.width - s.totalWidth());
          }
@@ -129,7 +127,6 @@ void call_HiggsTools(
    }
 
    for (auto const& el : bsm_input2) {
-      std::cout << "kupa " << el.mass <<  ' ' << el.width << ' ' << el.brtaunu << std::endl;
       auto& Hpm = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::single));
       // set mass
       Hpm.setMass(el.mass);
