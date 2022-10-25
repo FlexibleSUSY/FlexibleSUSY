@@ -20,9 +20,9 @@
 #define DECAY_FUNCTIONS_H
 
 #include <complex>
-#include "src/lowe.h"
+#include "lowe.h"
 #include "flexibledecay_settings.hpp"
-#include "src/wrappers.hpp"
+#include "wrappers.hpp"
 
 namespace flexiblesusy {
 
