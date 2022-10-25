@@ -39,6 +39,7 @@
 #include <iosfwd>
 #include <string>
 #include <utility>
+#include <boost/optional.hpp>
 
 #include <Eigen/Core>
 
@@ -90,6 +91,7 @@ namespace standard_model_info {
 
    int get_pdg_code_for_particle(Particles);
    int get_pdg_code_for_particle(Particles, int);
+   std::string get_particle_name_from_pdg(int);
 
    class Standard_model_particle_names : public Names {
    public:

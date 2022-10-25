@@ -53,7 +53,7 @@ public:
    std::size_t size() const noexcept { return decay_table.size(); }
 
    void clear();
-   // void print(std::ostream&) const;
+   void print(std::ostream&) const;
 
    Decays_list& get_hh_decays();
    const Decays_list& get_hh_decays() const;

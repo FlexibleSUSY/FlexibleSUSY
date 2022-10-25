@@ -38,8 +38,7 @@ void standard_model_decay_table::clear()
    }
 }
 
-/*
-void SM_decay_table::print(std::ostream& ostr) const
+void standard_model_decay_table::print(std::ostream& ostr) const
 {
    for (const auto& particle: decay_table) {
       const auto pdg = particle.get_particle_id();
@@ -47,10 +46,10 @@ void SM_decay_table::print(std::ostream& ostr) const
          const auto& final_state = decay.second.get_final_state_particle_ids();
          const std::size_t final_state_size = final_state.size();
          ostr << "Partial width["
-              << SM_info::get_particle_name_from_pdg(pdg)
+              << standard_model_info::get_particle_name_from_pdg(pdg)
               << " -> ";
          for (std::size_t i = 0; i < final_state_size; ++i) {
-            ostr << SM_info::get_particle_name_from_pdg(final_state[i]);
+            ostr << standard_model_info::get_particle_name_from_pdg(final_state[i]);
             if (i < final_state_size - 1) {
                ostr << ", ";
             }
@@ -61,12 +60,11 @@ void SM_decay_table::print(std::ostream& ostr) const
 }
 
 std::ostream& operator<<(std::ostream& ostr,
-                         const SM_decay_table& table)
+                         const standard_model_decay_table& table)
 {
    table.print(ostr);
    return ostr;
 }
-*/
 
 Decays_list& standard_model_decay_table::get_hh_decays()
 {
