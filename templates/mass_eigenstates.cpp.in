@@ -677,6 +677,8 @@ void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
 
 @selfEnergyFunctions@
 
+@selfEnergyDerivFunctions@
+
 @secondGenerationHelperFunctions@
 @thirdGenerationHelperFunctions@
 

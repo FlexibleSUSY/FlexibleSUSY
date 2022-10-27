@@ -1627,6 +1627,22 @@ CreateDefaultEWSBSolverConstructor[solvers_List] :=
 ParameterAppearsExactlyOnceIn[eqs_List, par_] :=
     Length[Select[eqs, (!FreeQ[#, par])&]] === 1;
 
+criterionFun[string_String, particle_] := StringMatchQ[string, __~~"self_energy_"<>particle<>"_1loop("~~__];
+
+replaceWithDeriv[input_, particles_, separator_] := 
+    Module[{manyFun, temp, res = {}},
+	       manyFun = StringSplit[input, separator];
+	       Do[
+	          	temp = Select[manyFun, criterionFun[#1, elem]&];
+	          	temp = StringReplace[temp, {
+		       	      "self_energy_"<>elem<>"_1loop("->"self_energy_deriv_"<>elem<>"_1loop(",
+			      "B0("->"B0("}];
+   		        temp = #<>separator&/@temp;
+		        AppendTo[res, temp];
+	       , {elem, particles}];
+	       StringJoin[Flatten[res, 1]]
+   ];
+
 WriteModelClass[massMatrices_List, ewsbEquations_List,
                 parametersFixedByEWSB_List, ewsbSubstitutions_List,
                 nPointFunctions_List, vertexRules_List, phases_List,
@@ -1643,7 +1659,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             physicalMassesDef = "", mixingMatricesDef = "",
             massCalculationPrototypes = "", massCalculationFunctions = "",
             calculateAllMasses = "",
-            selfEnergyPrototypes = "", selfEnergyFunctions = "",
+            selfEnergyPrototypes = "", selfEnergyFunctions = "", 
+            selfEnergyDerivPrototypes = "",   selfEnergyDerivFunctions = "",
             twoLoopTadpolePrototypes = "", twoLoopTadpoleFunctions = "",
             twoLoopSelfEnergyPrototypes = "", twoLoopSelfEnergyFunctions = "",
             threeLoopSelfEnergyPrototypes = "", threeLoopSelfEnergyFunctions = "",
@@ -1770,6 +1787,19 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {thirdGenerationHelperPrototypes, thirdGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[3];
              ];
            {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];
+
+
+
+         selfEnergyDerivPrototypes = replaceWithDeriv[selfEnergyPrototypes, {"hh", "Ah"}, ";\n"];
+         selfEnergyDerivFunctions = replaceWithDeriv[selfEnergyFunctions, {"hh", "Ah"}, "}\n\n"];
+
+           (*           Put[{selfEnergyPrototypes, selfEnergyFunctions},"~/vova.txt"];*)
+(*selfEnergyDerivPrototypes,*) 
+           (*    {selfEnergyDerivFunctions} = SelfEnergies`CreateLoopSelfEnergiesDeriv[{SARAH`HiggsBoson, SARAH`PseudoScalar}];*)
+
+           
+
+           
            phasesDefinition             = Phases`CreatePhasesDefinition[phases];
            phasesGetterSetters          = Phases`CreatePhasesGetterSetters[phases];
            If[Parameters`GetExtraParameters[] =!= {},
@@ -1946,6 +1976,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@[abstract]selfEnergyPrototypes@" -> IndentText[FunctionModifiers`MakeAbstract[selfEnergyPrototypes]],
                             "@[override]selfEnergyPrototypes@" -> IndentText[FunctionModifiers`MakeOverride[selfEnergyPrototypes]],
                             "@selfEnergyFunctions@"       -> selfEnergyFunctions,
+                            "@selfEnergyDerivPrototypes@" -> selfEnergyDerivPrototypes,
+                            "@selfEnergyDerivFunctions@"  -> selfEnergyDerivFunctions,
                             "@twoLoopTadpolePrototypes@"  -> IndentText[twoLoopTadpolePrototypes],
                             "@twoLoopTadpoleFunctions@"   -> twoLoopTadpoleFunctions,
                             "@twoLoopSelfEnergyPrototypes@" -> IndentText[twoLoopSelfEnergyPrototypes],

@@ -145,6 +145,7 @@ public:
 @[override]massCalculationPrototypes@
 @[override]tadpoleEqPrototypes@
 @selfEnergyPrototypes@
+@selfEnergyDerivPrototypes@
 
    /// calculates the tadpoles at current loop order
    void tadpole_equations(double[number_of_ewsb_equations]) const;
