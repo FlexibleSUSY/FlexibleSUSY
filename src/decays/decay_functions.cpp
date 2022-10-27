@@ -326,17 +326,23 @@ double sm_down_quark_masses(softsusy::QedQcd const& qedqcd, int n)
    }
 }
 
+/*
+ * Computes 1-loop QCD correction to t -> H^+ b + X in the limit mb -> 0
+ * as given in Eq. 2.5 of 2201.08139
+ */
 double Delta_t(double z) noexcept {
    const double lnz = std::log(z);
    const double ln1mz = std::log1p(-z);
-   // eq. 2.5 of 2201.08139
    return -2.*Li2(z) + z/(z-1.)*lnz + (1./z - 2.5)*ln1mz - lnz*ln1mz - 2.*zeta2 + 2.25;
 }
 
+/*
+ * Computes 1-loop QCD correction to H^+ -> t bbar + X in the limit mb -> 0
+ * as given in Eq. 2.6 of 2201.08139
+ */
 double Delta_Hp(double z) noexcept {
    const double lnz = std::log(z);
    const double ln1mz = std::log1p(-z);
-   // eq. 2.5 of 2201.08139
    return 2.*Li2(z) + lnz*ln1mz + (z-2.5)*(ln1mz-lnz) + 1./(z-1.)*lnz + 2.25;
 }
 

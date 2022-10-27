@@ -27,6 +27,7 @@ double CLASSNAME::get_partial_width<Hp, bar<d>::type, u>(
       if(indexOut1.at(0) == 2 && indexOut2.at(0) == 2) {
          const double z = Sqr(mu/mHp);
          static constexpr double CF = 4./3.;
+         // @todo: missing MSbar -> OS conversion factor?
          const double corr = 1. + CF*get_alphas(context)/Pi*Delta_Hp(z);
          // Delta_Hp has logarithmic singularity for z->0
          if (corr > 0) {
