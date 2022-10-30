@@ -80,7 +80,7 @@ std::pair<int, double> call_HiggsTools(
       };
       Minimizer<1> minimizer(match_Higgs_mass, 100, 1.0e-5);
       Eigen::Matrix<double,1,1> start;
-      start << 10;
+      start << 1.;
       const int status = minimizer.minimize(start);
       const auto minimum_point = minimizer.get_solution();
       // finally, after fixing lambda to a value giving mhSM == mass,
