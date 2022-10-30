@@ -95,6 +95,10 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
       }
    }
 
+#ifdef ENABLE_HIGGSTOOLS
+   int higgssignals_ndof;
+   double higgssignals_chi2;
+#endif
 @calculateDecaysForModel@
 
    const bool show_result = !problems.have_problem() ||

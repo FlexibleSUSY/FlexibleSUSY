@@ -975,5 +975,15 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
+void SLHA_io::set_higgssignals(int ndof, double chi2)
+{
+   std::ostringstream ss;
+
+   ss << block_head("HIGGSSIGNALS", 0.0);
+   ss << FORMAT_ELEMENT( 1, ndof  , "number of degrees of freedom");
+   ss << FORMAT_ELEMENT( 2, chi2    , "𝜒²");
+
+   set_block(ss);
+}
 
 } // namespace flexiblesusy

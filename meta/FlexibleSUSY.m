@@ -2657,7 +2657,7 @@ IndentText[
       "get_charged_higgstools_input(std::get<0>(models), decays)",
       "{}"
    ] <> ";\n" <>
-   "call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);\n"
+   "std::tie(higgssignals_ndof, higgssignals_chi2) = call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);\n"
 ] <>
 "}\n"
 ] <>
@@ -2677,6 +2677,11 @@ const bool show_decays = !decays.get_problems().have_problem() ||
 if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
+#ifdef ENABLE_HIGGSTOOLS
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
+      slha_io.set_higgssignals(higgssignals_ndof, higgssignals_chi2);
+   }
+#endif
 }";
 
 ExampleCalculateCmdLineDecays[] :=

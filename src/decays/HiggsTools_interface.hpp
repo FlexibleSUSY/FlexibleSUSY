@@ -33,10 +33,11 @@
 #include "decays/flexibledecay_settings.hpp"
 
 #include <vector>
+#include <utility>
 
 namespace flexiblesusy {
 
-void call_HiggsTools(
+std::pair<int, double> call_HiggsTools(
    EffectiveCoupling_list const&,
    std::vector<SingleChargedHiggsInput> const&,
    Physical_input const&,

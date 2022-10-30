@@ -37,7 +37,7 @@
 
 namespace flexiblesusy {
 
-void call_HiggsTools(
+std::pair<int, double> call_HiggsTools(
    EffectiveCoupling_list const& bsm_input,
    std::vector<SingleChargedHiggsInput> const& bsm_input2,
    Physical_input const& physical_input,
@@ -169,6 +169,8 @@ void call_HiggsTools(
    const double hs_chisq = signals(pred);
    std::cout << "\nHiggsSignals chisq: " << hs_chisq << " from "
               << signals.observableCount() << " observables" << ' ' << "(χ^2/ndf=" << hs_chisq/signals.observableCount() << ")" << std::endl;
+
+   return {signals.observableCount(), hs_chisq};
 }
 
 } // flexiblesusy

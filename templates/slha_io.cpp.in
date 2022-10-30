@@ -462,6 +462,11 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
 
+void @ModelName@_slha_io::set_higgssignals(int ndof, double chi2)
+{
+   slha_io.set_higgssignals(ndof, chi2);
+}
+
 /**
  * Stores the model (DR-bar) parameters, masses and mixing matrices in
  * the SLHA object.
