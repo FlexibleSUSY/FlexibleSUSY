@@ -167,8 +167,6 @@ std::pair<int, double> call_HiggsTools(
    // HiggsSignals
    const auto signals = Higgs::Signals {"/fs_dependencies/hsdataset"};
    const double hs_chisq = signals(pred);
-   std::cout << "\nHiggsSignals chisq: " << hs_chisq << " from "
-              << signals.observableCount() << " observables" << ' ' << "(χ^2/ndf=" << hs_chisq/signals.observableCount() << ")" << std::endl;
 
    return {signals.observableCount(), hs_chisq};
 }
