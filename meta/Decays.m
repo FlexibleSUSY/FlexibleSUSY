@@ -997,11 +997,13 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body ]<>
                   If[MemberQ[Join[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}], particle],
                   "\n#ifdef ENABLE_HIGGSTOOLS\n" <>
+                  TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
                   TextFormatting`IndentText[
                   "auto found = std::find_if(std::begin(higgstools_input), std::end(higgstools_input), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
                   "found->width = decays.get_total_width();\n" <>
                   "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n"] <>
+                  "}\n"] <>
                   "\r#endif",
                   ""
                   ];
