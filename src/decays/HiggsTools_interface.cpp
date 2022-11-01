@@ -32,9 +32,9 @@
 #include "minimizer.hpp"
 
 #include <algorithm>
-#include <iostream>
+#include <filesystem>
 #include <fstream>
-#include <sys/stat.h>
+#include <iostream>
 
 namespace flexiblesusy {
 
@@ -154,11 +154,10 @@ std::pair<int, double> call_HiggsTools(
 
 
    // HiggsBounds
-   struct stat buffer;
    if (higgsbounds_dataset.empty()) {
       throw SetupError("Need to specify location of HiggsBounds database");
    }
-   else if (stat(higgsbounds_dataset.c_str(), &buffer) != 0) {
+   else if (!std::filesystem::exists(higgsbounds_dataset)) {
       throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
    }
    auto bounds = Higgs::Bounds {higgsbounds_dataset};
@@ -177,7 +176,7 @@ std::pair<int, double> call_HiggsTools(
    if (higgssignals_dataset.empty()) {
       throw SetupError("Need to specify location of HiggsSignals database");
    }
-   else if (stat(higgssignals_dataset.c_str(), &buffer) != 0) {
+   else if (!std::filesystem::exists(higgssignals_dataset)) {
       throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
    }
    const auto signals = Higgs::Signals {higgssignals_dataset};
