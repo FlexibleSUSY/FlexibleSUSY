@@ -2657,7 +2657,14 @@ IndentText[
       "get_charged_higgstools_input(std::get<0>(models), decays)",
       "{}"
    ] <> ";\n" <>
-   "std::tie(higgssignals_ndof, higgssignals_chi2) = call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
+   "try {\n" <>
+   IndentText[
+      "std::tie(higgssignals_ndof, higgssignals_chi2) = call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
+   ] <>
+   "}\n" <>
+   "catch (const Error& error) {\n" <>
+      "WARNING(error.what_detailed());\n" <>
+   "}\n"
 ] <>
 "}\n"
 ] <>
