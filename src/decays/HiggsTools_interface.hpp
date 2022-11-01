@@ -32,6 +32,7 @@
 #include "spectrum_generator_settings.hpp"
 #include "decays/flexibledecay_settings.hpp"
 
+#include <string>
 #include <vector>
 #include <utility>
 
@@ -43,7 +44,8 @@ std::pair<int, double> call_HiggsTools(
    Physical_input const&,
    softsusy::QedQcd const&,
    Spectrum_generator_settings const&,
-   FlexibleDecay_settings const&);
+   FlexibleDecay_settings const&,
+   std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);
 
 } // flexiblesusy
 

@@ -2601,7 +2601,7 @@ RunEnabledSpectrumGenerator[solver_] :=
                         "slha_io, spectrum_generator_settings, " <>
                         If[FSCalculateDecays, "flexibledecay_settings, ", ""] <>
                         "slha_output_file,\n"]
-                  <> IndentText["database_output_file, spectrum_file, rgflow_file);\n"]
+                  <> IndentText["database_output_file, spectrum_file, rgflow_file, higgsbounds_dataset, higgssignals_dataset);\n"]
                   <> "if (!exit_code || solver_type != 0) break;\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
@@ -2657,7 +2657,7 @@ IndentText[
       "get_charged_higgstools_input(std::get<0>(models), decays)",
       "{}"
    ] <> ";\n" <>
-   "std::tie(higgssignals_ndof, higgssignals_chi2) = call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);\n"
+   "std::tie(higgssignals_ndof, higgssignals_chi2) = call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
 ] <>
 "}\n"
 ] <>

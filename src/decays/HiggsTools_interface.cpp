@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <sys/stat.h>
 
 namespace flexiblesusy {
 
@@ -43,7 +44,8 @@ std::pair<int, double> call_HiggsTools(
    Physical_input const& physical_input,
    softsusy::QedQcd const& qedqcd,
    Spectrum_generator_settings const& spectrum_generator_settings,
-   FlexibleDecay_settings const& flexibledecay_settings) {
+   FlexibleDecay_settings const& flexibledecay_settings,
+   std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
 
    auto pred = Higgs::Predictions();
    namespace HP = Higgs::predictions;
@@ -152,7 +154,14 @@ std::pair<int, double> call_HiggsTools(
 
 
    // HiggsBounds
-   auto bounds = Higgs::Bounds {"/fs_dependencies/hbdataset"};
+   struct stat buffer;
+   if (higgsbounds_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsBounds database");
+   }
+   else if (stat(higgsbounds_dataset.c_str(), &buffer) != 0) {
+      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
+   }
+   auto bounds = Higgs::Bounds {higgsbounds_dataset};
    auto hbResult = bounds(pred);
    std::ofstream hb_output("HiggsBounds.out");
    hb_output << hbResult;
@@ -165,7 +174,13 @@ std::pair<int, double> call_HiggsTools(
    }
 
    // HiggsSignals
-   const auto signals = Higgs::Signals {"/fs_dependencies/hsdataset"};
+   if (higgssignals_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsSignals database");
+   }
+   else if (stat(higgssignals_dataset.c_str(), &buffer) != 0) {
+      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
+   }
+   const auto signals = Higgs::Signals {higgssignals_dataset};
    const double hs_chisq = signals(pred);
 
    return {signals.observableCount(), hs_chisq};
