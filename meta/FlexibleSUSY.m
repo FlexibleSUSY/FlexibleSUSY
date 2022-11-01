@@ -2685,7 +2685,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
 #ifdef ENABLE_HIGGSTOOLS
-   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) && higgssignals_ndof > 0) {
       slha_io.set_higgssignals(higgssignals_ndof, higgssignals_chi2);
    }
 #endif
