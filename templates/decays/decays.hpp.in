@@ -28,23 +28,22 @@
 #ifndef @ModelName@_DECAYS_H
 #define @ModelName@_DECAYS_H
 
-#include "@ModelName@_decay_table.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
-#include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
-#include "cxx_qft/@ModelName@_qft.hpp"
-#include "decays/flexibledecay_problems.hpp"
-#include "lowe.h"
-#include "wrappers.hpp"
-#include "error.hpp"
-#include "physical_input.hpp"
-#include "decays/flexibledecay_settings.hpp"
-#include "decays/decay_amplitudes.hpp"
 #include "config.h"
 
+#include "@ModelName@_decay_table.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "cxx_qft/@ModelName@_qft.hpp"
+
+#include "decays/flexibledecay_problems.hpp"
+#include "decays/flexibledecay_settings.hpp"
+#include "decays/decay_amplitudes.hpp"
+#include "decays/decay.hpp"
+#include "logger.hpp"
+#include "lowe.h"
+#include "physical_input.hpp"
+#include "wrappers.hpp"
+
 #include <cmath>
-#include <complex>
-#include <string>
-#include <tuple>
 #include <vector>
 
 namespace flexiblesusy {

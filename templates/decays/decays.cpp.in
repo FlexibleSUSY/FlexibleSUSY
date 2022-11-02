@@ -38,11 +38,13 @@
 #include <boost/mpl/list.hpp>
 
 #include "@ModelName@_decays.hpp"
+#include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "@ModelName@_info.hpp"
 #include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
 #include "decays/decay_functions.hpp"
 #include "config.h"
+#include "error.hpp"
 #include "thread_pool.hpp"
 #include "wrappers.hpp"
 #include "standard_model.hpp"
