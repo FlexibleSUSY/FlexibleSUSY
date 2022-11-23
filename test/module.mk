@@ -354,6 +354,11 @@ TEST_SRC += \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.cpp
 endif
 
+ifeq ($(WITH_GrimusNeufeld), yes)
+TEST_SRC += \
+		$(DIR)/test_GrimusNeufeld_Fv_masses.cpp
+endif
+
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 ifeq ($(WITH_CMSSM) $(WITH_CMSSMSemiAnalytic), yes yes)
 TEST_SH += \
@@ -1063,6 +1068,8 @@ $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
+
+$(DIR)/test_GrimusNeufeld_Fv_masses.x: $(LIBGrimusNeufeld)
 
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
