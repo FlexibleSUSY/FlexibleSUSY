@@ -96,21 +96,27 @@ output edc_output( char const* const slha_input)
    results[0]=calc_Mh(input, qedqcd, settings);// /200.;
    results[2]=calc_lambda(input, qedqcd, settings);
 
-/*   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2);
+   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2);
+   
+   settings.set(Spectrum_generator_settings::pole_mass_loop_order, 2);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, 1);
+
    results[3]=calc_lambda(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 0);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
-   results[4]=calc_lambda(input, qedqcd, settings);
+ //  results[4]=calc_lambda(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, 1);
-   results[5]=calc_lambda(input, qedqcd, settings);
 
-   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order,3);
+   // settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, 2);
+//   results[5]=calc_lambda(input, qedqcd, settings);
+
+/*   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order,3);
    settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, 2);
 //Have a look how implemented
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, 2);
@@ -127,7 +133,7 @@ output edc_output( char const* const slha_input)
 BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
 {
 
-// degenrate case with vanishing stop mixing At = (1/10 + 0)*50000 = 5000
+// scenario 1 degenrate case with vanishing stop mixing At = (1/10 + 0)*50000 = 5000
    char const * const slha_input_case1 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
@@ -223,7 +229,7 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-// degenrate case with high stop mixing At = (1/10 - sqrt(6))*50000 = -117474.5
+// scenario 2 degenrate case with high stop mixing At = (1/10 - sqrt(6))*50000 = -117474.5
 char const * const slha_input_case2 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
@@ -320,7 +326,7 @@ Block AEIN
 )";
 
   
-// non-degenrate case with vanishing stop mixing At = (1/10 - 0)*50000 = 5000
+// scenario 3 non-degenrate case with vanishing stop mixing At = (1/10 - 0)*50000 = 5000
 // mQ3 = MS/2
 // mU3 = MS * 1.2
 // M3  = MS/4
@@ -419,7 +425,7 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-// non-degenrate case with vanishing stop mixing At = (1/10 - sqrt(6))*50000 = -117474.5
+// scenario 4 non-degenrate case with vanishing stop mixing At = (1/10 - sqrt(6))*50000 = -117474.5
 // mQ3 = MS/2
 // mU3 = MS * 1.2
 // M3  = MS/4
@@ -453,7 +459,7 @@ Block FlexibleSUSY
    23   0                    # calculate BSM pole masses
    24   111111111            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
-   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   26   0                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
    27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
    28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   0                    # Higgs 3-loop corrections O(alpha_t^3)
@@ -529,11 +535,17 @@ Block AEIN
    output results_new_3  = edc_output(slha_input_case3);
    output results_new_4  = edc_output(slha_input_case4);
 
-   output results_old_1 = {129.024202, 0.125588145, 0.125768663, 0., 0., 0., 0.};
-   output results_old_2 = {132.709997, 0.125588071, 0.147703015, 0., 0., 0., 0.};
-   output results_old_3 = {128.315047, 0.12558815, 0.121657248, 0., 0., 0., 0.};
-   output results_old_4 = {130.665551, 0.125588152, 0.135417609, 0., 0., 0., 0.};
-
+  
+   output results_old_1 = {129.024202, 0.125588145, 0.125768663, 0.12577649, 0., 0., 0.};
+   output results_old_2 = {132.709997, 0.125588071, 0.147703015, 0.147818818, 0., 0., 0.};
+   output results_old_3 = {128.315047, 0.12558815, 0.121657248, 0.1212177, 0., 0., 0.};
+   output results_old_4 = {130.665551, 0.125588152, 0.135417609, 0.13559143, 0., 0., 0.};
+/*
+output results_old_1 = {129.024202, 0.125588145, 0.125768663, 0.125883692, 0., 0., 0.};
+   output results_old_2 = {132.709997, 0.125588071, 0.147703015, 0.147787693, 0., 0., 0.};
+   output results_old_3 = {128.315047, 0.12558815, 0.121657248, 0.121333083, 0., 0., 0.};
+   output results_old_4 = {130.665551, 0.125588152, 0.135417609, 0.135614437, 0., 0., 0.};
+*/
    /*
 
    This is the one |
@@ -556,9 +568,9 @@ Block AEIN
 */
 
    for(int i=0; i<7; i++){
-      BOOST_CHECK_CLOSE_FRACTION(results_new_1[i], results_old_1[i], 4e-7);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_2[i], results_old_2[i], 4e-7);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_3[i], results_old_3[i], 4e-7);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_4[i], results_old_4[i], 4e-7);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_1[i], results_old_1[i], 4e-8);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_3[i], results_old_3[i], 4e-8);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_2[i], results_old_2[i], 4e-8);
+    //  BOOST_CHECK_CLOSE_FRACTION(results_new_4[i], results_old_4[i], 4e-8);
    }
 }
