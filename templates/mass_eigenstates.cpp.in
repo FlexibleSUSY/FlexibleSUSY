@@ -139,6 +139,12 @@ const Loop_corrections& CLASSNAME::get_loop_corrections() const
    return loop_corrections;
 }
 
+
+void CLASSNAME::set_top_QCD_order(int loop_order_plus)
+{
+   loop_corrections.top_qcd = loop_order_plus;
+}
+
 void CLASSNAME::set_threshold_corrections(const Threshold_corrections& tc)
 {
    threshold_corrections = tc;
@@ -460,6 +466,52 @@ double CLASSNAME::G0(double p, double m1, double m2) const noexcept
       - Loop_library::get().A0(m1, scl2) - Loop_library::get().A0(m2, scl2)
    ).real();
 }
+
+
+/**
+ * wrapper routines for derivatives of passarino Veltman functions 
+ * @note: They take squared arguments!
+ */
+
+double CLASSNAME::DA0(double m) const noexcept
+{
+   return 0.;
+}
+
+double CLASSNAME::DB0(double p2, double m2a, double m2b) const noexcept
+{
+   double DB0 = 0;
+   double m4a = m2a * m2a; 
+   double m4b = m2b * m2b; 
+
+   if( ( std::abs(m2a) < 0.0001) !=  (std::abs(m2b) < 0.0001) ) {
+      DB0 = (m4a - m4b )
+	    /(2. * pow( (m2a -  m2b), 3));
+      return DB0;
+   } 
+   else if ( ( std::abs(m2a) < 0.0001) &&  (std::abs(m2b) < 0.0001) ) {
+      DB0 = 0.;
+      return DB0;
+   }  
+   else if( std::abs(m2b - m2a) < 0.001  ){
+      DB0 = (m2a-m2b)/(12.* m4a) + 1./(6. * m2a ) ;
+   } 
+
+   else{
+      DB0 = (m4a - m4b + 2. * m2a * m2b * log(m2b/m2a) )
+	    /(2. * pow( (m2a -  m2b), 3));
+   }
+
+   return DB0;
+}
+
+double CLASSNAME::DG0(double p2, double m2a, double m2b) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return Loop_library::get().B0(p2, m2a, m2b, scl2).real()
+	    +  (p2 - m2a - m2b) * DB0(p2, m2a, m2b);
+}
+
 
 /**
  * routine which finds the @RenScheme@ mass eigenstates and mixings.

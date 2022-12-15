@@ -150,6 +150,7 @@ public:
    void set_ewsb_iteration_precision(double);
    void set_ewsb_loop_order(int);
    void set_loop_corrections(const Loop_corrections&);
+   void set_top_QCD_order(int);
    const Loop_corrections& get_loop_corrections() const;
    void set_threshold_corrections(const Threshold_corrections&);
    const Threshold_corrections& get_threshold_corrections() const;
