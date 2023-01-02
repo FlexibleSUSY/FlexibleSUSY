@@ -269,6 +269,47 @@ CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`bsgamma, structName_String] :=
     structName <> ".BSGAMMA = Re(" <> FlexibleSUSY`FSModelName <> "_b_to_s_gamma::calculate_b_to_s_gamma(MODEL, qedqcd)[0]);";
 
+(* fill struct with model parameters to be passed to GM2Calc *)
+FillGM2CalcInterfaceData[struct_String] :=
+    Which[
+        IsGM2CalcCompatibleMSSM[], FillGM2CalcMSSMNoFVInterfaceData[struct],
+        True, Print["Error: This model is neither a MSSM-like nor a 2HDM-like model compatible with GM2Calc."]; Quit[1]
+    ];
+
+(* returns true, if model is an MSSM-like model compatible with GM2Calc *)
+IsGM2CalcCompatibleMSSM[] :=
+    Module[{w, pseudoscalar, smuon, muonsneutrino, chargino, neutralino,
+            mu, m1, m2, m3, mq2, mu2, md2, ml2, me2, tu, td, te, yu, yd, ye},
+           w             = Parameters`GetParticleFromDescription["W-Boson"];
+           pseudoscalar  = Parameters`GetParticleFromDescription["Pseudo-Scalar Higgs"];
+           smuon         = Parameters`GetParticleFromDescription["Smuon"];
+           muonsneutrino = Parameters`GetParticleFromDescription["Muon Sneutrino"];
+           chargino      = Parameters`GetParticleFromDescription["Charginos"];
+           neutralino    = Parameters`GetParticleFromDescription["Neutralinos"];
+           mu            = Parameters`GetParameterFromDescription["Mu-parameter"];
+           m1            = Parameters`GetParameterFromDescription["Bino Mass parameter"];
+           m2            = Parameters`GetParameterFromDescription["Wino Mass parameter"];
+           m3            = Parameters`GetParameterFromDescription["Gluino Mass parameter"];
+           mq2           = Parameters`GetParameterFromDescription["Softbreaking left Squark Mass"];
+           mu2           = Parameters`GetParameterFromDescription["Softbreaking right Up-Squark Mass"];
+           md2           = Parameters`GetParameterFromDescription["Softbreaking right Down-Squark Mass"];
+           ml2           = Parameters`GetParameterFromDescription["Softbreaking left Slepton Mass"];
+           me2           = Parameters`GetParameterFromDescription["Softbreaking right Slepton Mass"];
+           tu            = Parameters`GetParameterFromDescription["Trilinear-Up-Coupling"];
+           td            = Parameters`GetParameterFromDescription["Trilinear-Down-Coupling"];
+           te            = Parameters`GetParameterFromDescription["Trilinear-Lepton-Coupling"];
+           yu            = Parameters`GetParameterFromDescription["Up-Yukawa-Coupling"];
+           yd            = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
+           ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
+           Print[{w, pseudoscalar, smuon, muonsneutrino,
+                  chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
+                  md2, ml2, me2, tu, td, te, yu, yd, ye}];
+           Not[MemberQ[{w, pseudoscalar, smuon, muonsneutrino,
+                        chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
+                        md2, ml2, me2, tu, td, te, yu, yd, ye}, Null]]
+    ];
+
+(* fill struct with MSSM parameters to be passed to GM2Calc *)
 FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
     Module[{filling, mwStr,
             w, pseudoscalar, smuon, muonsneutrino, chargino, neutralino,
@@ -294,15 +335,6 @@ FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
            yu            = Parameters`GetParameterFromDescription["Up-Yukawa-Coupling"];
            yd            = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
            ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
-
-           If[MemberQ[{w, pseudoscalar, smuon, muonsneutrino,
-                       chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
-                       md2, ml2, me2, tu, td, te, yu, yd, ye}, Null],
-              Print["Error: The GM2Calc addon cannot be used in this model, because it is not a MSSM-like model with sfermion flavour conservation. ",
-                    "Please remove aMuonGM2Calc and aMuonGM2CalcUncertainty from the model file."];
-              Quit[1];
-           ];
-
            mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
            filling = \
            struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>
@@ -354,7 +386,7 @@ FillInterfaceData[obs_List] :=
     Module[{filled = ""},
            If[MemberQ[obs,FlexibleSUSYObservable`aMuonGM2Calc] ||
               MemberQ[obs,FlexibleSUSYObservable`aMuonGM2CalcUncertainty],
-              filled = filled <> FillGM2CalcMSSMNoFVInterfaceData["gm2calc_data"];
+              filled = filled <> FillGM2CalcInterfaceData["gm2calc_data"];
              ];
            filled
           ];
