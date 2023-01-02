@@ -80,8 +80,8 @@ ExtraSLHAOutputBlocks = {
 
 FSGM2CalcInput = {
     yukawaType -> 2,
-    lambda1 -> Lambda1,
-    lambda2 -> Lambda2,
+    lambda1 -> 2 Lambda1,
+    lambda2 -> 2 Lambda2,
     lambda3 -> Lambda3,
     lambda4 -> Lambda4,
     lambda5 -> Lambda5,

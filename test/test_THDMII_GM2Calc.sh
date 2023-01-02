@@ -95,8 +95,8 @@ Block GM2CalcInput
     33     125.09           # SM Higgs boson mass   [1L]
 Block MINPAR                # model parameters
      3     10               # tan(beta)
-    11     2                # lambda_1
-    12     0.1              # lambda_2
+    11     4                # lambda_1
+    12     0.2              # lambda_2
     13     0.5              # lambda_3
     14     0.8              # lambda_4
     15     -2               # lambda_5
