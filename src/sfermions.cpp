@@ -43,7 +43,7 @@ int sign(double x) noexcept { return x >= 0.0 ? 1 : -1; }
 
 namespace sfermions {
 
-static const double oneOverRoot2 = 0.7071067811865475; // 1/sqrt(2.)
+static constexpr double oneOverRoot2 = 0.7071067811865475; // 1/sqrt(2.)
 
 const double Isospin[NUMBER_OF_MSSM_SPARTICLES] = {
    0.5, -0.5, 0.5, -0.5

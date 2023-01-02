@@ -57,7 +57,7 @@ protected:
 @parameterDef@
 
 private:
-   static const int numberOfParameters = @numberOfParameters@;
+   static constexpr int numberOfParameters = @numberOfParameters@;
 
    struct Soft_traces {
 @traceDefs@

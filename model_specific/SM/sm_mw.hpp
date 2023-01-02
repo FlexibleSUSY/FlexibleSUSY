@@ -16,22 +16,21 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef TEST_COMPLEX_EQUALITY_H
-#define TEST_COMPLEX_EQUALITY_H
+#ifndef SM_MW_H
+#define SM_MW_H
 
-#include <boost/test/unit_test.hpp>
-#include <complex>
+#include <utility>
 
-#define TEST_COMPLEX_EQUALITY(a, b)                     \
-   do {                                                 \
-      const std::complex<double> aa(a), bb(b);          \
-      BOOST_TEST(std::real(aa) == std::real(bb));       \
-      BOOST_TEST(std::imag(aa) == std::imag(bb));       \
-   } while (false)
+namespace flexiblesusy {
+namespace sm_mw {
 
-#define TEST_COMPLEX_CLOSE_FRACTION(a, b, eps) do {                     \
-      BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(b), eps);      \
-      BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(b), eps);      \
-   } while (false)
+/// returns W pole mass in the SM and corresponding uncertainty, using fit formula (MS-bar scheme)
+std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(double mh, double mt, double as, double da5had) noexcept;
+
+/// returns W pole mass in the SM and corresponding uncertainty, using fit formula (OS scheme)
+std::pair<double, double> calculate_mw_pole_SM_fit_OS(double mz, double mh, double mt, double as, double Da) noexcept;
+
+} // namespace sm_mw
+} // namespace flexiblesusy
 
 #endif

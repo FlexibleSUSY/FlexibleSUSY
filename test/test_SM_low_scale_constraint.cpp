@@ -119,6 +119,11 @@ BOOST_AUTO_TEST_CASE( test_low_scale_constraint )
    sm.calculate_DRbar_masses();
 
    SM_low_scale_constraint<Two_scale> c_m(&m, qedqcd);
+   // The hard-coded SM class solves EWSB eqs. at loop level at the
+   // low-energy scale, because it calculates the Higgs pole mass
+   // temporarily at that scale, which is needed for the SM part of
+   // the MW calculation in the decoupling scheme.
+   m.solve_ewsb();
    c_m.apply();
    standard_model::Standard_model_low_scale_constraint<Two_scale> c_sm(&sm, qedqcd);
    c_sm.apply();

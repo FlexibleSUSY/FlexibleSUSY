@@ -38,6 +38,7 @@
 #include <array>
 #include <iosfwd>
 #include <string>
+#include <utility>
 
 #include <Eigen/Core>
 
@@ -528,7 +529,7 @@ public:
    double calculate_delta_alpha_em(double alphaEm) const;
    double calculate_delta_alpha_s(double alphaS) const;
    void calculate_Lambdax_DRbar();
-   double calculate_theta_w(const softsusy::QedQcd&, double alpha_em_drbar);
+   std::pair<double,double> calculate_theta_w(const softsusy::QedQcd&, double alpha_em_drbar);
    void calculate_Yu_DRbar(const softsusy::QedQcd&);
    void calculate_Yd_DRbar(const softsusy::QedQcd&);
    void calculate_Ye_DRbar(const softsusy::QedQcd&);
