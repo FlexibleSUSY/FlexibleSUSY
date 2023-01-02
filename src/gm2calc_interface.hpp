@@ -66,11 +66,47 @@ struct GM2Calc_MSSMNoFV_data {
    Eigen::Matrix<double,3,3> Ae{Eigen::Matrix<double,3,3>::Zero()};  ///< down-type slepton trilinear coupling
 };
 
-/// calculates amu using GM2Calc
+/**
+ * @class GM2Calc_THDM_data
+ * @brief data to be passed to GM2Calc
+ */
+struct GM2Calc_THDM_data {
+   double alpha_em_MZ{0.0};       ///< alpha_em(MZ)
+   double alpha_em_0{0.0};        ///< alpha_em(0)
+   double alpha_s_MZ{0.0};        ///< alpha_s(MZ) SM MS-bar
+   double MZ{0.0};                ///< Z pole mass
+   double MW{0.0};                ///< W pole mass
+   double mb_mb{0.0};             ///< mb(mb) SM MS-bar
+   double MT{0.0};                ///< top quark pole mass
+   double MTau{0.0};              ///< tau lepton pole mass
+   double MM{0.0};                ///< muon pole mass
+   double MH{0.0};                ///< SM-like Higgs boson mass
+   int yukawa_type{0};            ///< Yukawa type
+   Eigen::Matrix<double,7,1> lambda{Eigen::Matrix<double,7,1>::Zero()};
+   double tan_beta{0.0};
+   double m122{0.0};
+   double zeta_u{0.0};
+   double zeta_d{0.0};
+   double zeta_l{0.0};
+   Eigen::Matrix<double,3,3> delta_u{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> delta_d{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> delta_l{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> pi_u{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> pi_d{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> pi_l{Eigen::Matrix<double,3,3>::Zero()};
+};
+
+/// calculates amu using GM2Calc in the MSSMNoFV
 double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data&);
 
-/// calculates uncertainty of amu using GM2Calc
+/// calculates uncertainty of amu using GM2Calc in the MSSMNoFV
 double gm2calc_calculate_amu_uncertainty(const GM2Calc_MSSMNoFV_data&);
+
+/// calculates amu using GM2Calc in the THDM
+double gm2calc_calculate_amu(const GM2Calc_THDM_data&);
+
+/// calculates uncertainty of amu using GM2Calc in the THDM
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_THDM_data&);
 
 } // namespace flexiblesusy
 

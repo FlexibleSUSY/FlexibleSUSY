@@ -22,6 +22,11 @@
 
 BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Parameters`", "TreeMasses`", "Utils`", "CConversion`", "TextFormatting`"}];
 
+(* GM2Calc interface parameters (gauge basis) *)
+{ yukawaType, lambda1, lambda2, lambda3, lambda4, lambda5, lambda6,
+  lambda7, tanBeta, m122, zetau, zetad, zetal, deltau, deltad, deltal,
+  piu, pid, pil };
+
 (* observables *)
 Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
@@ -273,6 +278,7 @@ CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`bsgamma, structName_S
 FillGM2CalcInterfaceData[struct_String] :=
     Which[
         IsGM2CalcCompatibleMSSM[], FillGM2CalcMSSMNoFVInterfaceData[struct],
+        IsGM2CalcCompatibleTHDM[], FillGM2CalcTHDMInterfaceData[struct, FlexibleSUSY`FSGM2CalcInput],
         True, Print["Error: This model is neither a MSSM-like nor a 2HDM-like model compatible with GM2Calc."]; Quit[1]
     ];
 
@@ -376,6 +382,75 @@ FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
            "GM2Calc_MSSMNoFV_data " <> struct <> ";\n" <> filling <> "\n" <>
            "#endif\n\n"
           ];
+
+(* returns true, if model is an THDM-like model compatible with GM2Calc *)
+IsGM2CalcCompatibleTHDM[] :=
+    Module[{w, h, a, hp, yu, yd, ye},
+           w  = Parameters`GetParticleFromDescription["W-Boson"];
+           h  = Parameters`GetParticleFromDescription["Higgs"];
+           a  = Parameters`GetParticleFromDescription["Pseudo-Scalar Higgs"];
+           hp = Parameters`GetParticleFromDescription["Charged Higgs"];
+           yu = Parameters`GetParameterFromDescription["Up-Yukawa-Coupling"];
+           yd = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
+           ye = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
+           Not[MemberQ[{w, h, a, hp, yu, yd, ye}, Null]]
+    ];
+
+(* fill struct with THDM parameters to be passed to GM2Calc *)
+FillGM2CalcTHDMInterfaceData[struct_String, inputPars_List] :=
+    Module[{filling, w, mwStr, higgs, mhStr,
+            inPars = Parameters`DecreaseIndexLiterals[inputPars],
+            pars = First /@ Reverse /@ inputPars
+           },
+           w     = Parameters`GetParticleFromDescription["W-Boson"];
+           higgs = Parameters`GetParticleFromDescription["Higgs"];
+           mwStr = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
+           mhStr = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[higgs][0]];
+           (* fill struct *)
+           filling = \
+           struct <> ".alpha_em_MZ = ALPHA_EM_MZ;\n" <>
+           struct <> ".alpha_em_0 = ALPHA_EM_0;\n" <>
+           struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>
+           struct <> ".MZ = MZPole;\n" <>
+           "if (!is_zero(" <> mwStr <> ")) {\n" <>
+              TextFormatting`IndentText[struct <> ".MW = " <> mwStr <> ";"] <> "\n" <>
+           "} else if (!is_zero(MWPole)) {\n" <>
+              TextFormatting`IndentText[struct <> ".MW = MWPole;"] <> "\n}\n" <>
+           struct <> ".mb_mb = MBMB;\n" <>
+           struct <> ".MT = MTPole;\n" <>
+           struct <> ".MTau = MTauPole;\n" <>
+           struct <> ".MM = MMPole;\n" <>
+           "if (!is_zero(" <> mhStr <> ")) {\n" <>
+              TextFormatting`IndentText[struct <> ".MH = " <> mhStr <> ";"] <> "\n" <>
+           "} else if (!is_zero(MHPole)) {\n" <>
+              TextFormatting`IndentText[struct <> ".MH = MHPole;"] <> "\n}\n" <>
+           struct <> ".yukawa_type = " <> CConversion`RValueToCFormString[FlexibleSUSY`yukawaType /. inPars] <> ";\n" <>
+           struct <> ".lambda(0) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda1 /. inPars] <> ";\n" <>
+           struct <> ".lambda(1) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda2 /. inPars] <> ";\n" <>
+           struct <> ".lambda(2) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda3 /. inPars] <> ";\n" <>
+           struct <> ".lambda(3) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda4 /. inPars] <> ";\n" <>
+           struct <> ".lambda(4) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda5 /. inPars] <> ";\n" <>
+           struct <> ".lambda(5) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda6 /. inPars] <> ";\n" <>
+           struct <> ".lambda(6) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda7 /. inPars] <> ";\n" <>
+           struct <> ".tan_beta = " <> CConversion`RValueToCFormString[FlexibleSUSY`tanBeta /. inPars] <> ";\n" <>
+           struct <> ".m122 = " <> CConversion`RValueToCFormString[FlexibleSUSY`m122 /. inPars] <> ";\n" <>
+           struct <> ".zeta_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetau /. inPars] <> ";\n" <>
+           struct <> ".zeta_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetad /. inPars] <> ";\n" <>
+           struct <> ".zeta_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetal /. inPars] <> ";\n" <>
+           struct <> ".delta_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltau /. inPars] <> ";\n" <>
+           struct <> ".delta_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltad /. inPars] <> ";\n" <>
+           struct <> ".delta_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltal /. inPars] <> ";\n" <>
+           struct <> ".pi_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`piu /. inPars] <> ";\n" <>
+           struct <> ".pi_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`pid /. inPars] <> ";\n" <>
+           struct <> ".pi_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`pil /. inPars] <> ";\n";
+           (* create struct and fill it *)
+           "#ifdef ENABLE_GM2CALC\n" <>
+           "GM2Calc_THDM_data " <> struct <> ";\n{\n" <>
+              TextFormatting`IndentText[Parameters`CreateLocalConstRefs[pars]] <> "\n" <>
+              TextFormatting`IndentText[filling] <> "\n" <>
+           "}\n" <>
+           "#endif\n\n"
+    ];
 
 FillInterfaceData[{}] := "";
 
