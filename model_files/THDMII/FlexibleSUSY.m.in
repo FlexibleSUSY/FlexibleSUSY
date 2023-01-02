@@ -78,6 +78,7 @@ ExtraSLHAOutputBlocks = {
    }
 };
 
+(* input parameters for GM2Calc, see [arxiv:2110.13238] *)
 FSGM2CalcInput = {
     yukawaType -> 2,
     lambda1 -> 2 Lambda1,

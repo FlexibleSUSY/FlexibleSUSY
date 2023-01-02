@@ -329,7 +329,7 @@ have a scale associated with it.";
 CurrentScale::usage="placeholder indicating the current renormalization
 scale of the model.";
 
-(* input parameters for GM2Calc *)
+(* input parameters for GM2Calc, see [arxiv:2110.13238] *)
 FSGM2CalcInput = {
     yukawaType -> 0,
     lambda1 -> 0,
