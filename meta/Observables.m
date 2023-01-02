@@ -301,9 +301,6 @@ IsGM2CalcCompatibleMSSM[] :=
            yu            = Parameters`GetParameterFromDescription["Up-Yukawa-Coupling"];
            yd            = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
            ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
-           Print[{w, pseudoscalar, smuon, muonsneutrino,
-                  chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
-                  md2, ml2, me2, tu, td, te, yu, yd, ye}];
            Not[MemberQ[{w, pseudoscalar, smuon, muonsneutrino,
                         chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
                         md2, ml2, me2, tu, td, te, yu, yd, ye}, Null]]
