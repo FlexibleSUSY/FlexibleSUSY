@@ -147,7 +147,7 @@ EOF
 }
 
 # amu from FS
-amu_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 21) print $2 }')
+amu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 21) print $2 }')
 
 # Mh from FS
 mh_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=MASS | awk '{ if ($1 == 25) print $2 }')
@@ -156,13 +156,28 @@ mh_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=MASS | awk '{ if ($1 
 mw_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=MASS | awk '{ if ($1 == 24) print $2 }')
 
 # amu from GM2Calc, embedded in FS
-amu_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 26) print $2 }')
+amu_2l_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 26) print $2 }')
 
 # amu from vanilla GM2Calc
-amu_gm2calc=$({ printf "%s\n" "${GM2CALC_IN}";
+amu_2l_gm2calc=$({ printf "%s\n" "${GM2CALC_IN}";
                 cat <<EOF
 Block GM2CalcConfig
      0  0  # minimal output
+     1  2  # loop order (0, 1 or 2)
+     4  0  # verbose output
+Block SMINPUTS
+     9     ${mw_fs}   # mW(pole)              [1L]
+Block GM2CalcInput
+    33     ${mh_fs}   # SM Higgs boson mass   [1L]
+EOF
+      } | "${GM2CALC_EXE}" --thdm-input-file=-)
+
+# amu from vanilla GM2Calc
+amu_1l_gm2calc=$({ printf "%s\n" "${GM2CALC_IN}";
+                cat <<EOF
+Block GM2CalcConfig
+     0  0  # minimal output
+     1  1  # loop order (0, 1 or 2)
      4  0  # verbose output
 Block SMINPUTS
      9     ${mw_fs}   # mW(pole)              [1L]
@@ -177,31 +192,48 @@ EOF
 }
 
 # convert scientific notation to bc friendly notation
-amu_fs=$(echo "${amu_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
-amu_gm2calc_fs=$(echo "${amu_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
-amu_gm2calc=$(echo "${amu_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_1l_fs=$(echo "${amu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_2l_gm2calc=$(echo "${amu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 
-### test GM2Calc vs. embedded GM2Calc
+### test 2L GM2Calc vs. embedded 2L GM2Calc
 
+errors=0
 rel_error=0.0001
 
 diff=$(cat <<EOF | bc $BASEDIR/abs.bc
 scale=100
-abs((abs($amu_gm2calc_fs) - abs($amu_gm2calc)) / ($amu_gm2calc_fs)) < $rel_error
+abs((abs($amu_2l_gm2calc_fs) - abs($amu_2l_gm2calc)) / ($amu_2l_gm2calc_fs)) < $rel_error
 EOF
     )
 
-errors=0
-
 if test $diff -ne 1 ; then
     echo "Error: relative difference between"
-    echo " $amu_gm2calc_fs and $amu_gm2calc is larger than $rel_error"
+    echo " $amu_2l_gm2calc_fs and $amu_2l_gm2calc is larger than $rel_error"
     errors=1
 fi
 
-echo "FlexibleSUSY 1L + 2L QED: amu = $amu_fs"
-echo "embedded GM2Calc        : amu = $amu_gm2calc_fs"
-echo "original GM2Calc        : amu = $amu_gm2calc"
+### test 1L GM2Calc vs. 1L FS
+
+rel_error=0.3
+
+diff=$(cat <<EOF | bc $BASEDIR/abs.bc
+scale=100
+abs((abs($amu_1l_fs) - abs($amu_1l_gm2calc)) / ($amu_1l_fs)) < $rel_error
+EOF
+    )
+
+if test $diff -ne 1 ; then
+    echo "Error: relative difference between"
+    echo " $amu_1l_fs and $amu_1l_gm2calc is larger than $rel_error"
+    errors=1
+fi
+
+echo "FlexibleSUSY 1L + 2L QED: amu = $amu_1l_fs"
+echo "original GM2Calc 1L     : amu = $amu_1l_gm2calc"
+echo "original GM2Calc 2L     : amu = $amu_2l_gm2calc"
+echo "embedded GM2Calc 2L     : amu = $amu_2l_gm2calc_fs"
 
 if test $errors -eq 0 ; then
     echo "Test status: OK"
