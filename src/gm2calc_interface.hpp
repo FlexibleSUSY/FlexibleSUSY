@@ -71,16 +71,17 @@ struct GM2Calc_MSSMNoFV_data {
  * @brief data to be passed to GM2Calc
  */
 struct GM2Calc_THDM_data {
-   double alpha_em_MZ{0.0};       ///< alpha_em(MZ)
+   double alpha_em_mz{0.0};       ///< alpha_em(mz)
    double alpha_em_0{0.0};        ///< alpha_em(0)
-   double alpha_s_MZ{0.0};        ///< alpha_s(MZ) SM MS-bar
-   double MZ{0.0};                ///< Z pole mass
-   double MW{0.0};                ///< W pole mass
-   double mb_mb{0.0};             ///< mb(mb) SM MS-bar
-   double MT{0.0};                ///< top quark pole mass
-   double MTau{0.0};              ///< tau lepton pole mass
-   double MM{0.0};                ///< muon pole mass
-   double MH{0.0};                ///< SM-like Higgs boson mass
+   double alpha_s_mz{0.0};        ///< alpha_s(mz) SM MS-bar
+   double mh{0.0};                ///< SM Higgs boson pole mass
+   double mw{0.0};                ///< W pole mass
+   double mz{0.0};                ///< Z pole mass
+   Eigen::Matrix<double,3,1> mu{Eigen::Matrix<double,3,1>::Zero()}; ///< up-type quarks
+   Eigen::Matrix<double,3,1> md{Eigen::Matrix<double,3,1>::Zero()}; ///< down-type quark masses
+   Eigen::Matrix<double,3,1> mv{Eigen::Matrix<double,3,1>::Zero()}; ///< neutrino masses
+   Eigen::Matrix<double,3,1> ml{Eigen::Matrix<double,3,1>::Zero()}; ///< down-type lepton pole masses
+   Eigen::Matrix<std::complex<double>,3,3> ckm{Eigen::Matrix<std::complex<double>,3,3>::Identity()}; ///< CKM matrix
    int yukawa_type{0};            ///< Yukawa type
    Eigen::Matrix<double,7,1> lambda{Eigen::Matrix<double,7,1>::Zero()};
    double tan_beta{0.0};

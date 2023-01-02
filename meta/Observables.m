@@ -408,22 +408,31 @@ FillGM2CalcTHDMInterfaceData[struct_String, inputPars_List] :=
            mhStr = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[higgs][0]];
            (* fill struct *)
            filling = \
-           struct <> ".alpha_em_MZ = ALPHA_EM_MZ;\n" <>
+           struct <> ".alpha_em_mz = ALPHA_EM_MZ;\n" <>
            struct <> ".alpha_em_0 = ALPHA_EM_0;\n" <>
-           struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>
-           struct <> ".MZ = MZPole;\n" <>
-           "if (!is_zero(" <> mwStr <> ")) {\n" <>
-              TextFormatting`IndentText[struct <> ".MW = " <> mwStr <> ";"] <> "\n" <>
-           "} else if (!is_zero(MWPole)) {\n" <>
-              TextFormatting`IndentText[struct <> ".MW = MWPole;"] <> "\n}\n" <>
-           struct <> ".mb_mb = MBMB;\n" <>
-           struct <> ".MT = MTPole;\n" <>
-           struct <> ".MTau = MTauPole;\n" <>
-           struct <> ".MM = MMPole;\n" <>
+           struct <> ".alpha_s_mz = ALPHA_S_MZ;\n" <>
            "if (!is_zero(" <> mhStr <> ")) {\n" <>
-              TextFormatting`IndentText[struct <> ".MH = " <> mhStr <> ";"] <> "\n" <>
+              TextFormatting`IndentText[struct <> ".mh = " <> mhStr <> ";"] <> "\n" <>
            "} else if (!is_zero(MHPole)) {\n" <>
-              TextFormatting`IndentText[struct <> ".MH = MHPole;"] <> "\n}\n" <>
+              TextFormatting`IndentText[struct <> ".mh = MHPole;"] <> "\n}\n" <>
+           "if (!is_zero(" <> mwStr <> ")) {\n" <>
+              TextFormatting`IndentText[struct <> ".mw = " <> mwStr <> ";"] <> "\n" <>
+           "} else if (!is_zero(MWPole)) {\n" <>
+              TextFormatting`IndentText[struct <> ".mw = MWPole;"] <> "\n}\n" <>
+           struct <> ".mz = MZPole;\n" <>
+           struct <> ".mu(0) = MU2GeV;\n" <>
+           struct <> ".mu(1) = MCMC;\n" <>
+           struct <> ".mu(2) = MTPole;\n" <>
+           struct <> ".md(0) = MD2GeV;\n" <>
+           struct <> ".md(1) = MS2GeV;\n" <>
+           struct <> ".md(2) = MBMB;\n" <>
+           struct <> ".mv(0) = Mv1Pole;\n" <>
+           struct <> ".mv(1) = Mv2Pole;\n" <>
+           struct <> ".mv(2) = Mv3Pole;\n" <>
+           struct <> ".ml(0) = MEPole;\n" <>
+           struct <> ".ml(1) = MMPole;\n" <>
+           struct <> ".ml(2) = MTauPole;\n" <>
+           struct <> ".ckm = CKMInput;\n" <>
            struct <> ".yukawa_type = " <> CConversion`RValueToCFormString[FlexibleSUSY`yukawaType /. inPars] <> ";\n" <>
            struct <> ".lambda(0) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda1 /. inPars] <> ";\n" <>
            struct <> ".lambda(1) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda2 /. inPars] <> ";\n" <>

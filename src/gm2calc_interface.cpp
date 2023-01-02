@@ -95,17 +95,16 @@ gm2calc::THDM setup(const GM2Calc_THDM_data& data)
 {
    gm2calc::SM sm;
    sm.set_alpha_em_0(data.alpha_em_0);
-   sm.set_alpha_em_mz(data.alpha_em_MZ);
-   sm.set_alpha_s_mz(data.alpha_s_MZ);
-   sm.set_mh(data.MH);
-   sm.set_mw(data.MW);
-   sm.set_mz(data.MZ);
-   sm.set_mu(2, data.MT);
-   sm.set_md(2, data.mb_mb);
-   sm.set_mv(Eigen::Matrix<double,3,1>::Zero());
-   sm.set_ml(1, data.MM);
-   sm.set_ml(2, data.MTau);
-   sm.set_ckm(Eigen::Matrix<std::complex<double>,3,3>::Identity());
+   sm.set_alpha_em_mz(data.alpha_em_mz);
+   sm.set_alpha_s_mz(data.alpha_s_mz);
+   sm.set_mh(data.mh);
+   sm.set_mw(data.mw);
+   sm.set_mz(data.mz);
+   sm.set_mu(data.mu);
+   sm.set_md(data.md);
+   sm.set_mv(data.mv);
+   sm.set_ml(data.ml);
+   sm.set_ckm(data.ckm);
 
    gm2calc::thdm::Gauge_basis basis;
    basis.yukawa_type = gm2calc::thdm::int_to_cpp_yukawa_type(data.yukawa_type);

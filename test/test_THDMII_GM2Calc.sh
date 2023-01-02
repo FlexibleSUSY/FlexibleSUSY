@@ -200,7 +200,7 @@ amu_2l_gm2calc=$(echo "${amu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/
 ### test 2L GM2Calc vs. embedded 2L GM2Calc
 
 errors=0
-rel_error=0.0001
+rel_error=0.0000001
 
 diff=$(cat <<EOF | bc $BASEDIR/abs.bc
 scale=100
