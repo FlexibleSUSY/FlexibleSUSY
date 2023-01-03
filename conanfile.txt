@@ -2,9 +2,6 @@
 boost/1.75.0
 eigen/[>=3.1]
 gm2calc/[>=2.1.0]
-himalaya/[>=4.0.0]
-looptools/[>=2.15]
-collier/[>=1.2.3]
 tsil/[>=1.44]
 
 [options]
@@ -55,13 +52,6 @@ boost:zlib=False
 boost:zstd=False
 
 gm2calc:fPIC=True
-
-himalaya:fPIC=True
-
-looptools:fPIC=True
-
-collier:shared=False
-collier:fPIC=True
 
 tsil:fPIC=True
 
