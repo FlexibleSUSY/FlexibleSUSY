@@ -5,6 +5,8 @@ FSDefaultSARAHModel = SE6SSM;
 
 FSBVPSolvers = { SemiAnalyticSolver };
 
+FSEWSBSolvers = { GSLBroyden };
+
 (*
    CSE6SSM model definition, see arXiv:1512.07040 [hep-ph]
 *)
