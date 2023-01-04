@@ -35,7 +35,7 @@ class @ModelName@_mass_eigenstates;
 class Physical_input;
 
 struct @ModelName@_observables {
-   static const int NUMBER_OF_OBSERVABLES = @numberOfObservables@;
+   static constexpr int NUMBER_OF_OBSERVABLES = @numberOfObservables@;
 
    @ModelName@_observables();
    Eigen::ArrayXd get() const; ///< returns vector of all observables

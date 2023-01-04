@@ -72,8 +72,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
       // absolute value of baru d W+ vertex (no CKM and no PL projector)
       const double g2 = context.model.get_g2();
-      // M_SQRT1_2 =	1/sqrt(2)
-      const double gWud = g2*M_SQRT1_2;
+      const double gWud = g2/std::sqrt(2.0);
 
       res *= std::norm(ghWW*gWud);
 

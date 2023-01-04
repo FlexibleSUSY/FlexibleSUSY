@@ -486,8 +486,8 @@ Lepton, Fermion, Scalar
          const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
          const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
-         if (isSMField<Fermion>(fermionIndices) &&
-             isSMField<Scalar>(scalarIndices))
+         if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
+             cxx_diagrams::isSMField<Scalar>(scalarIndices))
                continue;
 
          if (scalarIndices != FermionVertex::template indices_of_field<0>(index2))
@@ -576,8 +576,8 @@ Lepton, Fermion, Scalar
                const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
                const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
-               if (isSMField<Fermion>(fermionIndices) &&
-                   isSMField<Scalar>(scalarIndices))
+               if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
+                   cxx_diagrams::isSMField<Scalar>(scalarIndices))
                   continue;
 
                if (scalarIndices != FermionVertex::template indices_of_field<0>(index2))
@@ -667,8 +667,8 @@ Lepton, ChargedScalar, NeutralScalar
          const auto neutralScalarIndices = MuonVertex::template indices_of_field<0>(index1);
          const auto chargedScalarIndices = ScalarVertex::template indices_of_field<1>(index2);
 
-         if (isSMField<ChargedScalar>(chargedScalarIndices) &&
-             isSMField<NeutralScalar>(neutralScalarIndices))
+         if (cxx_diagrams::isSMField<ChargedScalar>(chargedScalarIndices) &&
+             cxx_diagrams::isSMField<NeutralScalar>(neutralScalarIndices))
             {
                continue;
             }
@@ -736,8 +736,8 @@ Lepton, Vector, Scalar
          const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
          const auto vectorIndices = VectorVertex::template indices_of_field<1>(index2);
 
-         if (isSMField<Vector>(vectorIndices) &&
-             isSMField<Scalar>(scalarIndices))
+         if (cxx_diagrams::isSMField<Vector>(vectorIndices) &&
+             cxx_diagrams::isSMField<Scalar>(scalarIndices))
                continue;
 
          if (scalarIndices != VectorVertex::template indices_of_field<0>(index2))

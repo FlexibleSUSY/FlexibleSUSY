@@ -22,6 +22,8 @@
 #include <complex>
 #include <limits>
 
+#include "cxx_qft/fields.hpp"
+
 namespace flexiblesusy {
 
 /**
@@ -167,6 +169,107 @@ double square_amplitude(const Amplitude& a)
    return a.square();
 }
 
-} // namespace flexiblesusy
+namespace detail {
+
+template <class Field_in, class Field_out_1, class Field_out_2,
+          class Amplitude_type = void>
+struct Two_body_decay_amplitude_type { };
+// @ModelName@_cxx_diagrams::fields::
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_scalar<Field_in>::value &&
+                           cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_scalar<Field_out_2>::value>> {
+   using type = Decay_amplitude_SSS;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_scalar<Field_in>::value &&
+                           cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_vector<Field_out_2>::value>> {
+   using type = Decay_amplitude_SSV;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_scalar<Field_in>::value &&
+                           cxx_diagrams::fields::is_vector<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_scalar<Field_out_2>::value>> {
+   using type = Decay_amplitude_SSV;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_scalar<Field_in>::value &&
+                           cxx_diagrams::fields::is_vector<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_vector<Field_out_2>::value>> {
+   using type = Decay_amplitude_SVV;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_scalar<Field_in>::value &&
+                           cxx_diagrams::fields::is_fermion<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_fermion<Field_out_2>::value>> {
+   using type = Decay_amplitude_SFF;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_fermion<Field_in>::value &&
+                           cxx_diagrams::fields::is_fermion<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_scalar<Field_out_2>::value>> {
+   using type = Decay_amplitude_FFS;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_fermion<Field_in>::value &&
+                           cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_fermion<Field_out_2>::value>> {
+   using type = Decay_amplitude_FFS;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_fermion<Field_in>::value &&
+                           cxx_diagrams::fields::is_fermion<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_vector<Field_out_2>::value>> {
+   using type = Decay_amplitude_FFV;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+struct Two_body_decay_amplitude_type<
+   Field_in, Field_out_1, Field_out_2,
+   std::enable_if_t<cxx_diagrams::fields::is_fermion<Field_in>::value &&
+                           cxx_diagrams::fields::is_vector<Field_out_1>::value &&
+                           cxx_diagrams::fields::is_fermion<Field_out_2>::value>> {
+   using type = Decay_amplitude_FFV;
+};
+
+} // namespace detail
+
+/**
+ * @class Decay_amplitude_type
+ * @brief helper class to determine amplitude type for a given set of fields
+ */
+template <class... Fields>
+struct Decay_amplitude_type {
+   using type =
+      std::enable_if_t<
+      sizeof...(Fields) == 3,
+      typename detail::Two_body_decay_amplitude_type<Fields...>::type>;
+};
+
+}
 
 #endif

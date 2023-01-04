@@ -826,7 +826,7 @@ Block ImMSOFT Q= 2.00000000E+03
                               0.0021707237775801919, 6e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 1, 1, 1),
-                              0.00010604105374890464, 2e-13);
+                              0.00010607114819048992, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
                               0.00022695659608435093, 3e-13);

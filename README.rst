@@ -24,7 +24,7 @@ modification, extension and reuse.
 * Mailing list:            flexiblesusy@projects.hepforge.org
 * Source code repository:  https://github.com/FlexibleSUSY
 * Bug reports:             https://github.com/FlexibleSUSY/FlexibleSUSY/issues
-* References: [1406.2319]_, [1609.00371]_, [1710.03760]_
+* References: [1406.2319]_, [1609.00371]_, [1710.03760]_, [2204.05285]_
 
   If you use **FlexibleSUSY** in your work please cite [1406.2319]_
   and [1710.03760]_.
@@ -41,6 +41,9 @@ modification, extension and reuse.
 
   If you use **FlexibleDecay** in your work, please cite
   [2106.05038]_.
+
+  If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
+  (or later), please cite [2204.05285]_.
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
@@ -147,7 +150,7 @@ the following setup
 
 .. code-block:: shell
 
-    SARAH_VERSION=4.14.5
+    SARAH_VERSION=4.15.0
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
@@ -1038,5 +1041,6 @@ References
 .. [1804.09410] `Eur. Phys. J. C78 (2018) no. 7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
 .. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
-.. [2106.05038] [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
+.. [2106.05038] `CPC 283 (2023) 108584 <https://inspirehep.net/literature/1867840>`_ [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
 .. [2110.13238] `Eur. Phys. J. C82 (2022) no. 3, 229 <https://inspirehep.net/literature/1952331>`_ [`arxiv:2110.13238 <https://arxiv.org/abs/2110.13238>`_]
+.. [2204.05285] `Phys. Rev. D 106 (2022) 9, 095023 <https://inspirehep.net/literature/2065408>`_ [`arxiv:2204.05285 <https://arxiv.org/abs/2204.05285>`_]

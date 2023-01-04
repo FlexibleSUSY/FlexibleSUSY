@@ -10,6 +10,7 @@
 #include "MRSSM2_input_parameters.hpp"
 #include "MRSSM2_two_scale_spectrum_generator.hpp"
 #include "ew_input.hpp"
+#include "sm_mw.hpp"
 
 using namespace flexiblesusy;
 
@@ -52,20 +53,40 @@ MRSSM2<Two_scale> run_MRSSM2(double MS)
    return spectrum_generator.get_model();
 }
 
+std::pair<double, double> calc_mw_mh_MRSSM2(double MS)
+{
+   const auto model = run_MRSSM2(MS);
+   return std::make_pair(model.get_physical().MVWm, model.get_physical().Mhh(0));
+}
+
+double calc_mw_SM(double mh)
+{
+   using flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar;
+   softsusy::QedQcd qedqcd;
+
+   const auto res = calculate_mw_pole_SM_fit_MSbar(
+      mh,
+      qedqcd.displayPoleMt(),
+      qedqcd.displayAlphaSInput(),
+      Electroweak_constants::delta_alpha_s_5_had);
+
+   return res.first;
+}
+
 BOOST_AUTO_TEST_CASE( test_decoupling )
 {
    double mw1, mw2, mw5, mw10;
+   double mh1, mh2, mh5, mh10;
 
-   BOOST_REQUIRE_NO_THROW(mw1 = run_MRSSM2(1000.).get_physical().MVWm);
-   BOOST_REQUIRE_NO_THROW(mw2 = run_MRSSM2(2000.).get_physical().MVWm);
-   BOOST_REQUIRE_NO_THROW(mw5 = run_MRSSM2(5000.).get_physical().MVWm);
-   BOOST_REQUIRE_NO_THROW(mw10 = run_MRSSM2(10000.).get_physical().MVWm);
+   std::tie(mw1, mh1) = calc_mw_mh_MRSSM2(1000);
+   std::tie(mw2, mh2) = calc_mw_mh_MRSSM2(2000);
+   std::tie(mw5, mh5) = calc_mw_mh_MRSSM2(5000);
+   std::tie(mw10, mh10) = calc_mw_mh_MRSSM2(10000);
 
-   const double mwSM = Electroweak_constants::MWSM;
+   BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 5.0e-4);
 
-   BOOST_CHECK_GT(std::abs(mw1 / mwSM - 1.), 5.0e-4);
-   BOOST_CHECK_CLOSE_FRACTION(mw1, mw2, 1.0e-3);
-   BOOST_CHECK_CLOSE_FRACTION(mw2, mw5, 5.0e-4);
-   BOOST_CHECK_CLOSE_FRACTION(mw5, mw10, 1.0e-4);
-   BOOST_CHECK_CLOSE_FRACTION(mw10, mwSM, 5.0e-5);
+   BOOST_CHECK_CLOSE_FRACTION(mw1, calc_mw_SM(mh1), 1.0e-3);
+   BOOST_CHECK_CLOSE_FRACTION(mw2, calc_mw_SM(mh2), 1.0e-3);
+   BOOST_CHECK_CLOSE_FRACTION(mw5, calc_mw_SM(mh5), 1.0e-4);
+   BOOST_CHECK_CLOSE_FRACTION(mw10, calc_mw_SM(mh10), 5.0e-5);
 }

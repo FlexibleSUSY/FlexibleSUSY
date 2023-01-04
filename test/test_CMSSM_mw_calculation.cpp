@@ -10,6 +10,9 @@
 #include "CMSSM_input_parameters.hpp"
 #include "CMSSM_two_scale_spectrum_generator.hpp"
 #include "ew_input.hpp"
+#include "sm_mw.hpp"
+#include <utility>
+#include <tuple>
 
 using namespace flexiblesusy;
 
@@ -28,9 +31,30 @@ CMSSM<Two_scale> run_CMSSM(const CMSSM_input_parameters& input)
    return spectrum_generator.get_model();
 }
 
+std::pair<double, double> calc_mw_mh_CMSSM(const CMSSM_input_parameters& input)
+{
+   const auto model = run_CMSSM(input);
+   return std::make_pair(model.get_physical().MVWm, model.get_physical().Mhh(0));
+}
+
+double calc_mw_SM(double mh)
+{
+   using flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar;
+   softsusy::QedQcd qedqcd;
+
+   const auto res = calculate_mw_pole_SM_fit_MSbar(
+      mh,
+      qedqcd.displayPoleMt(),
+      qedqcd.displayAlphaSInput(),
+      Electroweak_constants::delta_alpha_s_5_had);
+
+   return res.first;
+}
+
 BOOST_AUTO_TEST_CASE( test_decoupling )
 {
    double mw1, mw2, mw5, mw10;
+   double mh1, mh2, mh5, mh10;
 
    CMSSM_input_parameters input;
    input.TanBeta = 10.;
@@ -39,25 +63,23 @@ BOOST_AUTO_TEST_CASE( test_decoupling )
 
    input.m0  = 1000.;
    input.m12 = 1000.;
-   BOOST_REQUIRE_NO_THROW(mw1 = run_CMSSM(input).get_physical().MVWm);
+   std::tie(mw1, mh1) = calc_mw_mh_CMSSM(input);
 
    input.m0  = 2000.;
    input.m12 = 2000.;
-   BOOST_REQUIRE_NO_THROW(mw2 = run_CMSSM(input).get_physical().MVWm);
+   std::tie(mw2, mh2) = calc_mw_mh_CMSSM(input);
 
    input.m0  = 5000.;
    input.m12 = 5000.;
-   BOOST_REQUIRE_NO_THROW(mw5 = run_CMSSM(input).get_physical().MVWm);
+   std::tie(mw5, mh5) = calc_mw_mh_CMSSM(input);
 
    input.m0  = 10000.;
    input.m12 = 10000.;
-   BOOST_REQUIRE_NO_THROW(mw10 = run_CMSSM(input).get_physical().MVWm);
+   std::tie(mw10, mh10) = calc_mw_mh_CMSSM(input);
 
-   const double mwSM = Electroweak_constants::MWSM;
-
-   BOOST_CHECK_GT(std::abs(mw1 / mwSM - 1.), 1.0e-5);
-   BOOST_CHECK_CLOSE_FRACTION(mw1, mw2, 1.0e-4);
-   BOOST_CHECK_CLOSE_FRACTION(mw2, mw5, 1.0e-5);
-   BOOST_CHECK_CLOSE_FRACTION(mw5, mw10, 1.0e-6);
-   BOOST_CHECK_CLOSE_FRACTION(mw10, mwSM, 5.0e-7);
+   BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 1.0e-5);
+   BOOST_CHECK_CLOSE_FRACTION(mw1, calc_mw_SM(mh1), 1.0e-4);
+   BOOST_CHECK_CLOSE_FRACTION(mw2, calc_mw_SM(mh2), 1.0e-4);
+   BOOST_CHECK_CLOSE_FRACTION(mw5, calc_mw_SM(mh5), 1.0e-5);
+   BOOST_CHECK_CLOSE_FRACTION(mw10, calc_mw_SM(mh10), 1.0e-6);
 }
