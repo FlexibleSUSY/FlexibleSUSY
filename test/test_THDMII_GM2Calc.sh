@@ -252,10 +252,15 @@ errors=0
 
 # compares two values $1 and $2 for relative equality with a maximum relative deviation $3
 test_close() {
-    local val1="$1"
-    local val2="$2"
-    local rel_error="$3"
-    local diff=$(cat <<EOF | bc $BASEDIR/abs.bc
+    local val1
+    local val2
+    local rel_error
+    local diff
+
+    val1="$1"
+    val2="$2"
+    rel_error="$3"
+    diff=$(cat <<EOF | bc $BASEDIR/abs.bc
 scale=100
 abs((abs(${val1}) - abs(${val2})) / (${val1})) < ${rel_error}
 EOF
