@@ -158,7 +158,10 @@ mw_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=MASS | awk '{ if ($1 
 # amu from GM2Calc, embedded in FS
 amu_2l_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 26) print $2 }')
 
-# amu from vanilla GM2Calc
+# uncertainty of amu from GM2Calc, embedded in FS
+damu_2l_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 27) print $2 }')
+
+# amu 2-loop from vanilla GM2Calc
 amu_2l_gm2calc=$({ printf "%s\n" "${GM2CALC_IN}";
                 cat <<EOF
 Block GM2CalcConfig
@@ -172,7 +175,32 @@ Block GM2CalcInput
 EOF
       } | "${GM2CALC_EXE}" --thdm-input-file=-)
 
-# amu from vanilla GM2Calc
+[ $? = 0 ] || {
+    echo "Error: ${GM2CALC_EXE} failed!"
+    exit 1
+}
+
+# uncertainty of amu 2-loop from vanilla GM2Calc
+damu_2l_gm2calc=$({ printf "%s\n" "${GM2CALC_IN}";
+                cat <<EOF
+Block GM2CalcConfig
+     0  0  # minimal output
+     1  2  # loop order (0, 1 or 2)
+     4  0  # verbose output
+     5  1  # calculate uncertainty (0 or 1)
+Block SMINPUTS
+     9     ${mw_fs}   # mW(pole)              [1L]
+Block GM2CalcInput
+    33     ${mh_fs}   # SM Higgs boson mass   [1L]
+EOF
+      } | "${GM2CALC_EXE}" --thdm-input-file=-)
+
+[ $? = 0 ] || {
+    echo "Error: ${GM2CALC_EXE} failed!"
+    exit 1
+}
+
+# amu 1-loop from vanilla GM2Calc
 amu_1l_gm2calc=$({ printf "%s\n" "${GM2CALC_IN}";
                 cat <<EOF
 Block GM2CalcConfig
@@ -191,49 +219,68 @@ EOF
     exit 1
 }
 
+# uncertainty of amu 1-loop from vanilla GM2Calc
+damu_1l_gm2calc=$({ printf "%s\n" "${GM2CALC_IN}";
+                cat <<EOF
+Block GM2CalcConfig
+     0  0  # minimal output
+     1  1  # loop order (0, 1 or 2)
+     4  0  # verbose output
+     5  1  # calculate uncertainty (0 or 1)
+Block SMINPUTS
+     9     ${mw_fs}   # mW(pole)              [1L]
+Block GM2CalcInput
+    33     ${mh_fs}   # SM Higgs boson mass   [1L]
+EOF
+      } | "${GM2CALC_EXE}" --thdm-input-file=-)
+
+[ $? = 0 ] || {
+    echo "Error: ${GM2CALC_EXE} failed!"
+    exit 1
+}
+
 # convert scientific notation to bc friendly notation
 amu_1l_fs=$(echo "${amu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+damu_2l_gm2calc_fs=$(echo "${damu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+damu_1l_gm2calc=$(echo "${damu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc=$(echo "${amu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
-
-### test 2L GM2Calc vs. embedded 2L GM2Calc
+damu_2l_gm2calc=$(echo "${damu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 
 errors=0
-rel_error=0.0000001
 
-diff=$(cat <<EOF | bc $BASEDIR/abs.bc
+# compares two values $1 and $2 for relative equality with a maximum relative deviation $3
+test_close() {
+    local val1="$1"
+    local val2="$2"
+    local rel_error="$3"
+    local diff=$(cat <<EOF | bc $BASEDIR/abs.bc
 scale=100
-abs((abs($amu_2l_gm2calc_fs) - abs($amu_2l_gm2calc)) / ($amu_2l_gm2calc_fs)) < $rel_error
+abs((abs(${val1}) - abs(${val2})) / (${val1})) < ${rel_error}
 EOF
-    )
+        )
 
-if test $diff -ne 1 ; then
-    echo "Error: relative difference between"
-    echo " $amu_2l_gm2calc_fs and $amu_2l_gm2calc is larger than $rel_error"
-    errors=1
-fi
+    if test $diff -ne 1 ; then
+        echo "Error: relative difference between"
+        echo " ${val1} and ${val2} is larger than ${rel_error}"
+        errors=1
+    fi
+}
+
+### test 2L GM2Calc vs. embedded 2L GM2Calc
+test_close "${amu_2l_gm2calc_fs}" "${amu_2l_gm2calc}" "0.0000001"
+
+### test uncertainty 2L GM2Calc vs. embedded 2L GM2Calc
+test_close "${damu_2l_gm2calc_fs}" "${damu_2l_gm2calc}" "0.0000001"
 
 ### test 1L GM2Calc vs. 1L FS
+test_close "${amu_1l_fs}" "${amu_1l_gm2calc}" "0.3"
 
-rel_error=0.3
-
-diff=$(cat <<EOF | bc $BASEDIR/abs.bc
-scale=100
-abs((abs($amu_1l_fs) - abs($amu_1l_gm2calc)) / ($amu_1l_fs)) < $rel_error
-EOF
-    )
-
-if test $diff -ne 1 ; then
-    echo "Error: relative difference between"
-    echo " $amu_1l_fs and $amu_1l_gm2calc is larger than $rel_error"
-    errors=1
-fi
-
-echo "FlexibleSUSY 1L + 2L QED: amu = $amu_1l_fs"
-echo "original GM2Calc 1L     : amu = $amu_1l_gm2calc"
-echo "original GM2Calc 2L     : amu = $amu_2l_gm2calc"
-echo "embedded GM2Calc 2L     : amu = $amu_2l_gm2calc_fs"
+echo "FlexibleSUSY 1L + 2L QED: amu = ${amu_1l_fs}"
+echo "original GM2Calc 1L     : amu = ${amu_1l_gm2calc} +/- ${damu_1l_gm2calc}"
+echo "original GM2Calc 2L     : amu = ${amu_2l_gm2calc} +/- ${damu_2l_gm2calc}"
+echo "embedded GM2Calc 2L     : amu = ${amu_2l_gm2calc_fs} +/- ${damu_2l_gm2calc_fs}"
 
 if test $errors -eq 0 ; then
     echo "Test status: OK"
