@@ -6,6 +6,15 @@ Fixed bugs
 
 * [commit ]: Fixed incorect quark charge in some higher order QED corrections to :math:`$H \to u\bar{u}$` and :math:`$A \to u\bar{u}$`
 
+New features
+------------
+
+* Allow user to calculate the anomalous magnetic moment of the muon
+  :math:`$a_\mu$` in 2HDM-like models with `GM2Calc 2`_
+  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_].  See the
+  FlexibleSUSY model `THDMII` (`model_files/THDMII/FlexibleSUSY.m.in`)
+  for an example.
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
@@ -2360,6 +2369,7 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _Conan: https://conan.io/
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _GM2Calc: https://arxiv.org/abs/1510.08071
+.. _GM2Calc 2: https://arxiv.org/abs/2110.13238
 .. _MhEFT: https://gabrlee.com/code/
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc

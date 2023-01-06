@@ -1,7 +1,7 @@
 [requires]
 boost/1.75.0
 eigen/[>=3.1]
-gm2calc/[>=1.7.0]
+gm2calc/[>=2.1.0]
 tsil/[>=1.44]
 
 [options]

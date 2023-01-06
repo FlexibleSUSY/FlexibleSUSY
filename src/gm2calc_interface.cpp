@@ -31,6 +31,7 @@
 #include "gm2calc/gm2_error.hpp"
 #include "gm2calc/gm2_uncertainty.hpp"
 #include "gm2calc/MSSMNoFV_onshell.hpp"
+#include "gm2calc/THDM.hpp"
 #include "logger.hpp"
 #include "wrappers.hpp"
 
@@ -46,7 +47,7 @@ double calculate_alpha(double e) {
    return e * e / (4. * Pi);
 }
 
-gm2calc::MSSMNoFV_onshell setup(const GM2Calc_data& data)
+gm2calc::MSSMNoFV_onshell setup(const GM2Calc_MSSMNoFV_data& data)
 {
    gm2calc::MSSMNoFV_onshell model;
 
@@ -90,9 +91,44 @@ gm2calc::MSSMNoFV_onshell setup(const GM2Calc_data& data)
    return model;
 }
 
+gm2calc::THDM setup(const GM2Calc_THDM_data& data)
+{
+   gm2calc::SM sm;
+   sm.set_alpha_em_0(data.alpha_em_0);
+   sm.set_alpha_em_mz(data.alpha_em_mz);
+   sm.set_alpha_s_mz(data.alpha_s_mz);
+   sm.set_mh(data.mh);
+   sm.set_mw(data.mw);
+   sm.set_mz(data.mz);
+   sm.set_mu(data.mu);
+   sm.set_md(data.md);
+   sm.set_mv(data.mv);
+   sm.set_ml(data.ml);
+   sm.set_ckm(data.ckm);
+
+   gm2calc::thdm::Gauge_basis basis;
+   basis.yukawa_type = gm2calc::thdm::int_to_cpp_yukawa_type(data.yukawa_type);
+   basis.lambda = data.lambda;
+   basis.tan_beta = data.tan_beta;
+   basis.m122 = data.m122;
+   basis.zeta_u = data.zeta_u;
+   basis.zeta_d = data.zeta_d;
+   basis.zeta_l = data.zeta_l;
+   basis.Delta_u = data.delta_u;
+   basis.Delta_d = data.delta_d;
+   basis.Delta_l = data.delta_l;
+   basis.Pi_u = data.pi_u;
+   basis.Pi_d = data.pi_d;
+   basis.Pi_l = data.pi_l;
+
+   return gm2calc::THDM(basis, sm);
+}
+
 } // anonymous namespace
 
-GM2Calc_data::GM2Calc_data()
+/* ****************************** MSSM ****************************** */
+
+GM2Calc_MSSMNoFV_data::GM2Calc_MSSMNoFV_data()
 {
    initialize();
 }
@@ -100,7 +136,7 @@ GM2Calc_data::GM2Calc_data()
 /**
  * Initializes data members to the GM2Calc default values
  */
-void GM2Calc_data::initialize()
+void GM2Calc_MSSMNoFV_data::initialize()
 {
    const gm2calc::MSSMNoFV_onshell model;
 
@@ -118,7 +154,7 @@ void GM2Calc_data::initialize()
 
 /**
  * This function calculates \f$a_\mu\f$ up to the 2-loop level
- * including tan(beta) resummation by calling GM2Calc.
+ * including tan(beta) resummation in the MSSM with GM2Calc.
  *
  * If the calculation fails, 0 is returned.
  *
@@ -126,7 +162,7 @@ void GM2Calc_data::initialize()
  *
  * @return \f$a_\mu\f$ up to the 2-loop level w/ tan(beta) resummation
  */
-double gm2calc_calculate_amu(const GM2Calc_data& data)
+double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data& data)
 {
    double amu = 0.;
 
@@ -145,7 +181,61 @@ double gm2calc_calculate_amu(const GM2Calc_data& data)
 
 /**
  * This function calculates the uncertainty \f$\delta a_\mu\f$ of
- * \f$a_\mu\f$ at the 2-loop level by calling GM2Calc's uncertainty
+ * \f$a_\mu\f$ at the 2-loop level in the MSSM by calling GM2Calc's
+ * uncertainty estimation function.
+ *
+ * If the calculation fails, 0 is returned.
+ *
+ * @param data data necessary for GM2Calc
+ *
+ * @return \f$\delta a_\mu\f$ at the 2-loop level
+ */
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_MSSMNoFV_data& data)
+{
+   double uncertainty = 0.;
+
+   try {
+      const gm2calc::MSSMNoFV_onshell model(setup(data));
+      uncertainty = gm2calc::calculate_uncertainty_amu_2loop(model);
+   } catch (const gm2calc::Error& e) {
+      ERROR("GM2Calc: uncertainty estimation: " << e.what());
+   }
+
+   return uncertainty;
+}
+
+/* ****************************** THDM ****************************** */
+
+/**
+ * This function calculates \f$a_\mu\f$ up to the 2-loop level in the
+ * THDM with GM2Calc.
+ *
+ * If the calculation fails, 0 is returned.
+ *
+ * @param data data necessary for GM2Calc
+ *
+ * @return \f$a_\mu\f$ up to the 2-loop level w/ tan(beta) resummation
+ */
+double gm2calc_calculate_amu(const GM2Calc_THDM_data& data)
+{
+   double amu = 0.;
+
+   try {
+      const gm2calc::THDM model = setup(data);
+
+      amu =
+         + gm2calc::calculate_amu_1loop(model)
+         + gm2calc::calculate_amu_2loop(model);
+   } catch (const gm2calc::Error& e) {
+      ERROR("GM2Calc: " << e.what());
+   }
+
+   return amu;
+}
+
+/**
+ * This function calculates the uncertainty \f$\delta a_\mu\f$ of
+ * \f$a_\mu\f$ at the 2-loop level with GM2Calc's uncertainty
  * estimation function.
  *
  * If the calculation fails, 0 is returned.
@@ -154,12 +244,12 @@ double gm2calc_calculate_amu(const GM2Calc_data& data)
  *
  * @return \f$\delta a_\mu\f$ at the 2-loop level
  */
-double gm2calc_calculate_amu_uncertainty(const GM2Calc_data& data)
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_THDM_data& data)
 {
    double uncertainty = 0.;
 
    try {
-      const gm2calc::MSSMNoFV_onshell model(setup(data));
+      const gm2calc::THDM model = setup(data);
       uncertainty = gm2calc::calculate_uncertainty_amu_2loop(model);
    } catch (const gm2calc::Error& e) {
       ERROR("GM2Calc: uncertainty estimation: " << e.what());
@@ -174,15 +264,29 @@ double gm2calc_calculate_amu_uncertainty(const GM2Calc_data& data)
 
 namespace flexiblesusy {
 
-GM2Calc_data::GM2Calc_data() {}
-void GM2Calc_data::initialize() {}
+/* ****************************** MSSM ****************************** */
 
-double gm2calc_calculate_amu(const GM2Calc_data&)
+GM2Calc_MSSMNoFV_data::GM2Calc_MSSMNoFV_data() {}
+void GM2Calc_MSSMNoFV_data::initialize() {}
+
+double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data&)
 {
    return 0.;
 }
 
-double gm2calc_calculate_amu_uncertainty(const GM2Calc_data&)
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_MSSMNoFV_data&)
+{
+   return 0.;
+}
+
+/* ****************************** THDM ****************************** */
+
+double gm2calc_calculate_amu(const GM2Calc_THDM_data&)
+{
+   return 0.;
+}
+
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_THDM_data&)
 {
    return 0.;
 }

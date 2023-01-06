@@ -13,6 +13,11 @@ if [ -e GM2Calc.pc ] ; then
     eval $(grep '^prefix=' GM2Calc.pc)
     # shellcheck disable=SC2154
     GM2CALC_EXE="${prefix}/bin/gm2calc.x"
+elif [ -e gm2calc.pc ] ; then
+    # shellcheck disable=SC2046
+    eval $(grep '^prefix=' gm2calc.pc)
+    # shellcheck disable=SC2154
+    GM2CALC_EXE="${prefix}/bin/gm2calc.x"
 fi
 
 if [ ! -x "${GM2CALC_EXE}" ] ; then

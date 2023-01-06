@@ -321,6 +321,29 @@ have a scale associated with it.";
 CurrentScale::usage="placeholder indicating the current renormalization
 scale of the model.";
 
+(* input parameters for GM2Calc, see [arxiv:2110.13238] *)
+FSGM2CalcInput = {
+    yukawaType -> 0,
+    lambda1 -> 0,
+    lambda2 -> 0,
+    lambda3 -> 0,
+    lambda4 -> 0,
+    lambda5 -> 0,
+    lambda6 -> 0,
+    lambda7 -> 0,
+    tanBeta -> SARAH`VEVSM2 / SARAH`VEVSM1,
+    m122 -> 0,
+    zetau -> 0,
+    zetad -> 0,
+    zetal -> 0,
+    deltau -> ZEROMATRIX[3,3],
+    deltad -> ZEROMATRIX[3,3],
+    deltal -> ZEROMATRIX[3,3],
+    piu -> ZEROMATRIX[3,3],
+    pid -> ZEROMATRIX[3,3],
+    pil -> ZEROMATRIX[3,3]
+};
+
 (* input parameters for Himalaya *)
 FSHimalayaInput = {
     RenormalizationScheme -> DRbar,
