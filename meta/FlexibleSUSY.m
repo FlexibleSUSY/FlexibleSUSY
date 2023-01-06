@@ -2500,7 +2500,7 @@ WriteAMMClass[fields_List, files_List] :=
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPhysicalMass,
-            BarrZeeLeptonIdx},
+            BarrZeeLeptonIdx, gm2WrapperDecl, gm2WrapperDef, gm2UncWrapperDecl, gm2UncWrapperDef},
 
       calculation =
          If[Length[fields] =!= 0,
@@ -2569,6 +2569,19 @@ TextFormatting`IndentText[
 
       BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
 
+      gm2WrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      gm2UncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      gm2WrapperDef = StringRiffle[
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+}")& /@ fields, "\n"
+      ];
+      gm2UncWrapperDef = StringRiffle[
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+}")& /@ fields, "\n"
+      ];
+
       WriteOut`ReplaceInFiles[files,
         {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]],
          "@AMuon_ZBosonField@"      -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
@@ -2582,6 +2595,10 @@ TextFormatting`IndentText[
          "@leptonPhysicalMass@" -> leptonPhysicalMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
          "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
+         "@gm2WrapperDecl@" -> gm2WrapperDecl,
+         "@gm2WrapperDef@" -> gm2WrapperDef,
+         "@gm2UncWrapperDecl@" -> gm2UncWrapperDecl,
+         "@gm2UncWrapperDef@" -> gm2UncWrapperDef,
          Sequence @@ GeneralReplacementRules[]
         }];
 
@@ -5111,8 +5128,12 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /. FlexibleSUSYObservable`AMM[f_[_]] -> f /. FlexibleSUSYObservable`AMM[f_] -> f],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
-                              {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]}}];
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.cpp"}]}}];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];
