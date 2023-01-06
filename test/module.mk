@@ -348,6 +348,11 @@ TEST_SRC += \
 endif
 endif
 
+ifeq ($(ENABLE_GM2CALC) $(WITH_THDMII),yes yes)
+TEST_SH += \
+		$(DIR)/test_THDMII_GM2Calc.sh
+endif
+
 ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
 TEST_SRC += \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.cpp \
