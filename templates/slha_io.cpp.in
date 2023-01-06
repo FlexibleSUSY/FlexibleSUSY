@@ -459,6 +459,21 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
    slha_io.set_block(decay);
 }
 
+/*
+void @ModelName@_slha_io::set_effectivecouplings_block(const std::vector<EffectiveCoupling>& list)
+{
+   std::ostringstream decay;
+   decay << "Block EFFHIGGSCOUPLINGS\n";
+   for (const auto& channel : list) {
+      const auto pids = channel.get_pids();
+      const auto coupling = channel.get_coupling();
+      const std::string proc_string = channel.get_proc_string();
+      decay << FORMAT_EFFECTIVECOUPLINGS(pids.at(0), pids.at(1), pids.at(2), coupling.real(), proc_string);
+   }
+   slha_io.set_block(decay);
+}
+*/
+
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
 
