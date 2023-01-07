@@ -2515,7 +2515,7 @@ WriteAMMClass[fields_List, files_List] :=
 
       getMSUSY = AMM`AMMGetMSUSY[];
 
-      graphs = AMM`AMuonContributingGraphs[];
+      graphs = AMM`AMMContributingGraphs[];
       diagrams = Outer[AMM`AMuonContributingDiagramsForGraph, graphs, 1];
 
       vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
@@ -2584,9 +2584,9 @@ TextFormatting`IndentText[
 
       WriteOut`ReplaceInFiles[files,
         {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]],
-         "@AMuon_ZBosonField@"      -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
-         "@AMuon_Calculation@"    -> TextFormatting`IndentText[calculation],
-         "@AMuon_GetMSUSY@"       -> TextFormatting`IndentText[WrapLines[getMSUSY]],
+         "@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
+         "@AMMCalculation@"       -> TextFormatting`IndentText[calculation],
+         "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
          "@AMuon_MuonIndex@" -> muonIndex,
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
@@ -2594,7 +2594,7 @@ TextFormatting`IndentText[
          "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
-         "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
+         "@AMMBarZeeCalculation@" -> TextFormatting`IndentText[barZee],
          "@gm2WrapperDecl@" -> gm2WrapperDecl,
          "@gm2WrapperDef@" -> gm2WrapperDef,
          "@gm2UncWrapperDecl@" -> gm2UncWrapperDecl,
@@ -4175,7 +4175,7 @@ Options[MakeFlexibleSUSY] :=
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, initialGuesserInputFile,
-            aMuonVertices, edmVertices, edmFields,
+            aMMVertices, edmVertices, edmFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -5124,7 +5124,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                ];
 
            Print["Creating lepton AMM class ..."];
-           aMuonVertices = WriteAMMClass[
+           aMMVertices = WriteAMMClass[
               DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /. FlexibleSUSYObservable`AMM[f_[_]] -> f /. FlexibleSUSYObservable`AMM[f_] -> f],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
@@ -5156,7 +5156,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[aMuonVertices, edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
+              Join[aMMVertices, edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

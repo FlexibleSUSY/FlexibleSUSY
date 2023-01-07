@@ -24,7 +24,7 @@ BeginPackage["AMM`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`"
 
 AMuonGetMuon::usage="";
 AMMGetMSUSY::usage="";
-AMuonContributingGraphs::usage="";
+AMMContributingGraphs::usage="";
 AMuonContributingDiagramsForGraph::usage="";
 CXXEvaluatorForDiagramFromGraph::usage="";
 ForwardDeclaration::usage = "";
@@ -42,7 +42,7 @@ barZeeGraph = {{0,0,0,1,0,0,0,0},
 
 contributingGraphs = {barZeeGraph};
 
-AMuonContributingGraphs[] := contributingGraphs;
+AMMContributingGraphs[] := contributingGraphs;
 
 AMuonGetMuon[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultiplet[]] =!= 1,
                 TreeMasses`GetSMMuonLeptonMultiplet[],
