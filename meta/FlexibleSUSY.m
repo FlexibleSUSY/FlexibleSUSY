@@ -2499,7 +2499,7 @@ WriteAMMClass[fields_List, files_List] :=
             muonIndex = If[TreeMasses`GetDimension[AMM`AMuonGetMuon[]] =!= 1, "idx", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
-            graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPhysicalMass,
+            graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPoleMass,
             BarrZeeLeptonIdx, gm2WrapperDecl, gm2WrapperDef, gm2UncWrapperDecl, gm2UncWrapperDef},
 
       calculation =
@@ -2535,10 +2535,10 @@ WriteAMMClass[fields_List, files_List] :=
          ];
       ];
 
-      leptonPhysicalMass =
+      leptonPoleMass =
          If[GetParticleFromDescription["Leptons"] =!= Null,
 "template <typename Lepton>
-double leptonPhysicalMass(const softsusy::QedQcd& qedqcd, int idx)
+double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 {
    double lepton_physical_mass;
    switch(idx) {
@@ -2553,7 +2553,7 @@ StringRiffle[
 (
 "template <typename Lepton>
 std::enable_if_t<std::is_same<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">::value, double>
-leptonPhysicalMass(const softsusy::QedQcd& qedqcd)
+lepton_pole_mass(const softsusy::QedQcd& qedqcd)
 {\n" <>
 TextFormatting`IndentText[
    Switch[#,
@@ -2592,7 +2592,7 @@ TextFormatting`IndentText[
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
          "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
-         "@leptonPhysicalMass@" -> leptonPhysicalMass,
+         "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
          "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
          "@gm2WrapperDecl@" -> gm2WrapperDecl,
