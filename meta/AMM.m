@@ -50,10 +50,6 @@ AMuonGetMuon[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultiplet
                       {p_, {Description -> "Muon", ___}} -> p, 1][[1]]
                ];
 
-GetCXXMuonIndex[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultiplet[]] =!= 1,
-                        1,
-                        Null];
-
 AMuonContributingDiagramsForGraph[graph_] :=
   Module[{diagrams},
     diagrams = CXXDiagrams`FeynmanDiagramsOfType[graph,
