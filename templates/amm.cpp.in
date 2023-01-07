@@ -52,7 +52,7 @@ double BarZeeLoopS(double);
 double BarZeeLoopV(double);
 
 /**
- * @class AMuonBarZeeFermionLoop
+ * @class AMMBarZeeFermionLoop
  * @brief A template that calculate contributions to the
  *        anomalous magnetic dipole moment of a given particle in
  *        a BarZee diagram with a fermion loop and scalar/Photon exchange
@@ -68,14 +68,14 @@ double BarZeeLoopV(double);
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeFermionLoop {
+struct AMMBarZeeFermionLoop {
    static double value(const typename field_indices<Muon>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMuonBarZeeFermionZLoop
+ * @class AMMBarZeeFermionZLoop
  * @brief A template that calculate contributions to the
  *        anomalous magnetic dipole moment of a given particle in
  *        a BarZee diagram with a fermion loop and scalar/Z-boson exchange
@@ -91,14 +91,14 @@ struct AMuonBarZeeFermionLoop {
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeFermionLoopZ {
+struct AMMBarZeeFermionLoopZ {
    static double value(const typename field_indices<Muon>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMuonBarZeeScalarLoop
+ * @class AMMBarZeeScalarLoop
  * @brief A template that calculate contributions to the
  *        anomalous dipole moment of a given particle in
  *        a BarZee diagram with a scalar loop and scalar exchange
@@ -114,14 +114,14 @@ struct AMuonBarZeeFermionLoopZ {
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeScalarLoop {
+struct AMMBarZeeScalarLoop {
    static double value(const typename field_indices<Muon>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMuonBarZeeVectorLoop
+ * @class AMMBarZeeVectorLoop
  * @brief A template that calculate contributions to the
  *        anomalous dipole moment of a given particle in
  *        a BarZee diagram with a scalar loop and scalar exchange
@@ -137,7 +137,7 @@ struct AMuonBarZeeScalarLoop {
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeVectorLoop {
+struct AMMBarZeeVectorLoop {
    static double value(const typename field_indices<Muon>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
@@ -459,7 +459,7 @@ double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double 
 }
 
 template<typename Lepton, class Fermion, class Scalar>
-double AMuonBarZeeFermionLoop<
+double AMMBarZeeFermionLoop<
 Lepton, Fermion, Scalar
 >::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
@@ -530,7 +530,7 @@ Lepton, Fermion, Scalar
 }
 
 template<typename Lepton, class Fermion, class Scalar>
-double AMuonBarZeeFermionLoopZ<
+double AMMBarZeeFermionLoopZ<
 Lepton, Fermion, Scalar
 >::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
@@ -640,7 +640,7 @@ Lepton, Fermion, Scalar
 }
 
 template<typename Lepton, class ChargedScalar, class NeutralScalar>
-double AMuonBarZeeScalarLoop<
+double AMMBarZeeScalarLoop<
 Lepton, ChargedScalar, NeutralScalar
 >::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
@@ -708,7 +708,7 @@ Lepton, ChargedScalar, NeutralScalar
 }
 
 template<typename Lepton, class Vector, class Scalar>
-double AMuonBarZeeVectorLoop<
+double AMMBarZeeVectorLoop<
 Lepton, Vector, Scalar
 >::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {

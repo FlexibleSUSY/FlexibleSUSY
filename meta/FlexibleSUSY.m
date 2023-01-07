@@ -2513,7 +2513,7 @@ WriteAMMClass[fields_List, files_List] :=
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
 
-      getMSUSY = AMM`AMuonGetMSUSY[];
+      getMSUSY = AMM`AMMGetMSUSY[];
 
       graphs = AMM`AMuonContributingGraphs[];
       diagrams = Outer[AMM`AMuonContributingDiagramsForGraph, graphs, 1];
