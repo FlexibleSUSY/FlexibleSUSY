@@ -43,10 +43,6 @@ double calculate_e(double alpha) {
    return std::sqrt(4. * Pi * alpha);
 }
 
-double calculate_alpha(double e) {
-   return e * e / (4. * Pi);
-}
-
 gm2calc::MSSMNoFV_onshell setup(const GM2Calc_MSSMNoFV_data& data)
 {
    gm2calc::MSSMNoFV_onshell model;
