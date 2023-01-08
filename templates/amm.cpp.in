@@ -40,11 +40,11 @@
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 
-using Muon = fields::@AMuon_MuonField@;
 using VZ = fields::@AMMZBosonField@;
 
 namespace {
 
+template <typename Lepton>
 double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
 double BarZeeLoopFPS(double);
 double BarZeeLoopFS(double);
@@ -69,7 +69,7 @@ double BarZeeLoopV(double);
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarZeeFermionLoop {
-   static double value(const typename field_indices<Muon>::type& indices,
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
@@ -92,7 +92,7 @@ struct AMMBarZeeFermionLoop {
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarZeeFermionLoopZ {
-   static double value(const typename field_indices<Muon>::type& indices,
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
@@ -115,7 +115,7 @@ struct AMMBarZeeFermionLoopZ {
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarZeeScalarLoop {
-   static double value(const typename field_indices<Muon>::type& indices,
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
@@ -138,7 +138,7 @@ struct AMMBarZeeScalarLoop {
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarZeeVectorLoop {
-   static double value(const typename field_indices<Muon>::type& indices,
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
@@ -322,14 +322,14 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
       // vector form factor
       1./2.*(form_factors[2] + form_factors[3]).real()
       // reinstate the mass that was factored out in definition of form factor
-      * context.mass<Muon>({@AMuon_MuonIndex@})
-      // factor out e/(2*muon pole mass)
+      * context.mass<Lepton>({@extraIdxUsageNoComma@})
+      // factor out e/(2*lepton pole mass)
       / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
       // definition of photon momentum flow for g-2 is opposite than for form factors
       * (-1.);
 
    // add 2-loop QED logarithms
-   val *= 1. + get_QED_2L(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
+   val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
 
    std::complex<double> valBarZee {0., 0.};
 
@@ -449,11 +449,12 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
 @calculateAUncertaintyForwardDeclaration@
 
 namespace {
-double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_muon)
+template <typename Lepton>
+double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
 {
    const double MSUSY = Abs(get_MSUSY(context.model));
-   const double alpha_em = Sqr(Muon::electric_charge * unit_charge(context))/(4*Pi);
-   const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_muon/MSUSY);
+   const double alpha_em = Sqr(Lepton::electric_charge * unit_charge(context))/(4*Pi);
+   const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
 
    return qed_2L;
 }
@@ -461,12 +462,12 @@ double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double 
 template<typename Lepton, class Fermion, class Scalar>
 double AMMBarZeeFermionLoop<
 Lepton, Fermion, Scalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       Scalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
    using FermionVertex = Vertex<
@@ -476,14 +477,14 @@ Lepton, Fermion, Scalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<FermionVertex>()) {
-          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (muonIndices != indices)
+         if (leptonIndices != indices)
             continue;
 
-         const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
@@ -496,18 +497,18 @@ Lepton, Fermion, Scalar
          if (fermionIndices != FermionVertex::template indices_of_field<2>(index2))
             continue;
 
-         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto fermionVertex = FermionVertex::evaluate(index2, context);
 
          const auto fermionMass = context.mass<Fermion>(fermionIndices);
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
-         const auto muonMass = context.mass<Muon>(muonIndices);
+         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          const double fermionChargeCount =
-            Fermion::electric_charge / Muon::electric_charge;
+            Fermion::electric_charge / Lepton::electric_charge;
 
-         const std::complex<double> zrm = muonVertex.right();
-         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zrf = fermionVertex.right();
          const std::complex<double> zlf = fermionVertex.left();
 
@@ -532,18 +533,18 @@ Lepton, Fermion, Scalar
 template<typename Lepton, class Fermion, class Scalar>
 double AMMBarZeeFermionLoopZ<
 Lepton, Fermion, Scalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       Scalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
-   using MuonZVertex = Vertex<
+   using LeptonZVertex = Vertex<
                       VZ,
-                      Muon,
-                      typename Muon::lorentz_conjugate
+                      Lepton,
+                      typename Lepton::lorentz_conjugate
                       >;
 
    using FermionVertex = Vertex<
@@ -559,21 +560,21 @@ Lepton, Fermion, Scalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<FermionVertex>()) {
-         for (const auto& indexMuonZ: index_range<MuonZVertex>()) {
+         for (const auto& indexLeptonZ: index_range<LeptonZVertex>()) {
             for (const auto& indexFermionZ: index_range<FermionZVertex>()) {
 
-               const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+               const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-               if (muonIndices != indices)
+               if (leptonIndices != indices)
                   continue;
 
-               if ((muonIndices != MuonZVertex::template indices_of_field<2>(indexMuonZ)) ||
-                   (muonIndices != MuonZVertex::template indices_of_field<1>(indexMuonZ)))
+               if ((leptonIndices != LeptonZVertex::template indices_of_field<2>(indexLeptonZ)) ||
+                   (leptonIndices != LeptonZVertex::template indices_of_field<1>(indexLeptonZ)))
                   continue;
 
-               const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+               const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
                const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
                if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
@@ -590,14 +591,14 @@ Lepton, Fermion, Scalar
                    (fermionIndices != FermionZVertex::template indices_of_field<1>(indexFermionZ)))
                   continue;
 
-               const auto muonVertex = MuonVertex::evaluate(index1, context);
+               const auto leptonVertex = LeptonVertex::evaluate(index1, context);
                const auto fermionVertex = FermionVertex::evaluate(index2, context);
-               const auto muonZVertex = MuonZVertex::evaluate(indexMuonZ, context);
+               const auto leptonZVertex = LeptonZVertex::evaluate(indexLeptonZ, context);
                const auto fermionZVertex = FermionZVertex::evaluate(indexFermionZ, context);
 
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
-               const auto muonMass = context.mass<Muon>(muonIndices);
+               const auto leptonMass = context.mass<Lepton>(leptonIndices);
                const auto zMass = context.mass<VZ>({ });
                const auto ThetaW = DERIVEDPARAMETER(ThetaW);
                const double cw = Cos(ThetaW);
@@ -608,13 +609,13 @@ Lepton, Fermion, Scalar
                }
 
                const double fermionChargeCount =
-                  Fermion::electric_charge / Muon::electric_charge;
+                  Fermion::electric_charge / Lepton::electric_charge;
 
-               const std::complex<double> zrm = muonVertex.right();
-               const std::complex<double> zlm = muonVertex.left();
+               const std::complex<double> zrm = leptonVertex.right();
+               const std::complex<double> zlm = leptonVertex.left();
                const std::complex<double> zrf = fermionVertex.right();
                const std::complex<double> zlf = fermionVertex.left();
-               const std::complex<double> zmzr = muonZVertex.right();
+               const std::complex<double> zmzr = leptonZVertex.right();
                const std::complex<double> zfzr = fermionZVertex.right();
 
                const double gvm = (0.5) * (zmzr.real()/unit_charge(context) + sw/cw);
@@ -642,12 +643,12 @@ Lepton, Fermion, Scalar
 template<typename Lepton, class ChargedScalar, class NeutralScalar>
 double AMMBarZeeScalarLoop<
 Lepton, ChargedScalar, NeutralScalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       NeutralScalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
    using ScalarVertex = Vertex<
@@ -657,14 +658,14 @@ Lepton, ChargedScalar, NeutralScalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<ScalarVertex>()) {
-          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (muonIndices != indices)
+         if (leptonIndices != indices)
             continue;
 
-         const auto neutralScalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto neutralScalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto chargedScalarIndices = ScalarVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<ChargedScalar>(chargedScalarIndices) &&
@@ -679,18 +680,18 @@ Lepton, ChargedScalar, NeutralScalar
          if (chargedScalarIndices != ScalarVertex::template indices_of_field<2>(index2))
             continue;
 
-         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto scalarVertex = ScalarVertex::evaluate(index2, context);
 
          const auto chargedScalarMass = context.mass<ChargedScalar>(chargedScalarIndices);
          const auto neutralScalarMass = context.mass<NeutralScalar>(neutralScalarIndices);
-         const auto muonMass = context.mass<Muon>(muonIndices);
+         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          const double scalarChargeCount =
-            ChargedScalar::electric_charge / Muon::electric_charge;
+            ChargedScalar::electric_charge / Lepton::electric_charge;
 
-         const std::complex<double> zrm = muonVertex.right();
-         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zss = scalarVertex.value();
 
          const std::complex<double> coeff = (zrm + zlm) * zss;
@@ -710,13 +711,13 @@ Lepton, ChargedScalar, NeutralScalar
 template<typename Lepton, class Vector, class Scalar>
 double AMMBarZeeVectorLoop<
 Lepton, Vector, Scalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
 
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       Scalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
    using VectorVertex = Vertex<
@@ -726,14 +727,14 @@ Lepton, Vector, Scalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<VectorVertex>()) {
-          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (muonIndices != indices)
+         if (leptonIndices != indices)
             continue;
 
-         const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto vectorIndices = VectorVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<Vector>(vectorIndices) &&
@@ -746,18 +747,18 @@ Lepton, Vector, Scalar
          if (vectorIndices != VectorVertex::template indices_of_field<2>(index2))
             continue;
 
-         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto vectorVertex = VectorVertex::evaluate(index2, context);
 
          const auto vectorMass = context.mass<Vector>(vectorIndices);
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
-         const auto muonMass = context.mass<Muon>(muonIndices);
+         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          const double vectorChargeCount =
-            Vector::electric_charge / Muon::electric_charge;
+            Vector::electric_charge / Lepton::electric_charge;
 
-         const std::complex<double> zrm = muonVertex.right();
-         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zsv = vectorVertex.value();
 
          const std::complex<double> coeff = (zrm + zlm) * zsv;

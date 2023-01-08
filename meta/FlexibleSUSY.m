@@ -2505,8 +2505,8 @@ WriteAMMClass[fields_List, files_List] :=
       calculation =
          If[Length[fields] =!= 0,
             "const auto form_factors = " <>
-            FSModelName <> "_FFV_form_factors::calculate_form_factors<" <> CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]] <> "," <>
-            CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]] <> "," <> CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
+            FSModelName <> "_FFV_form_factors::calculate_form_factors<Lepton,Lepton," <>
+            CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
             muonIndex <> If[muonIndex === "", "", ", "] <>
             muonIndex <> If[muonIndex === "", "", ", "] <>
             "model, " <> discardSMcontributions <> ");",
@@ -2540,14 +2540,14 @@ WriteAMMClass[fields_List, files_List] :=
 "template <typename Lepton>
 double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 {
-   double lepton_physical_mass;
+   double lepton_pole_mass;
    switch(idx) {
-      case 0: lepton_physical_mass = qedqcd.displayPoleMel(); break;
-      case 1: lepton_physical_mass = qedqcd.displayPoleMmuon(); break;
-      case 2: lepton_physical_mass = qedqcd.displayPoleMtau(); break;
+      case 0: lepton_pole_mass = qedqcd.displayPoleMel(); break;
+      case 1: lepton_pole_mass = qedqcd.displayPoleMmuon(); break;
+      case 2: lepton_pole_mass = qedqcd.displayPoleMtau(); break;
       default: throw OutOfBoundsError(\"Cannot compute anomalous magnetic moment of " <> CXXDiagrams`CXXNameOfField[GetParticleFromDescription["Leptons"]] <>  "(\" + std::to_string(idx+1) + \")\");
    }
-   return lepton_physical_mass;
+   return lepton_pole_mass;
 }",
 StringRiffle[
 (
@@ -2592,6 +2592,7 @@ TextFormatting`IndentText[
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
          "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
+         "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
          "@AMMBarZeeCalculation@" -> TextFormatting`IndentText[barZee],
