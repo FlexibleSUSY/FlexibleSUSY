@@ -391,7 +391,7 @@ IsGM2CalcCompatibleTHDM[] :=
 
 (* fill struct with THDM parameters to be passed to GM2Calc *)
 FillGM2CalcTHDMInterfaceData[struct_String, inputPars_List] :=
-    Module[{filling, w, mwStr, higgs, mhStr,
+    Module[{w, mwStr, higgs, mhStr,
             inPars = Parameters`DecreaseIndexLiterals[inputPars],
             pars = First /@ Reverse /@ inputPars
            },
@@ -399,57 +399,57 @@ FillGM2CalcTHDMInterfaceData[struct_String, inputPars_List] :=
            higgs = Parameters`GetParticleFromDescription["Higgs"];
            mwStr = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
            mhStr = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[higgs][0]];
-           (* fill struct *)
-           filling = \
-           struct <> ".alpha_em_mz = ALPHA_EM_MZ;\n" <>
-           struct <> ".alpha_em_0 = ALPHA_EM_0;\n" <>
-           struct <> ".alpha_s_mz = ALPHA_S_MZ;\n" <>
-           "if (!is_zero(" <> mhStr <> ")) {\n" <>
-              TextFormatting`IndentText[struct <> ".mh = " <> mhStr <> ";"] <> "\n" <>
-           "} else if (!is_zero(MHPole)) {\n" <>
-              TextFormatting`IndentText[struct <> ".mh = MHPole;"] <> "\n}\n" <>
-           "if (!is_zero(" <> mwStr <> ")) {\n" <>
-              TextFormatting`IndentText[struct <> ".mw = " <> mwStr <> ";"] <> "\n" <>
-           "} else if (!is_zero(MWPole)) {\n" <>
-              TextFormatting`IndentText[struct <> ".mw = MWPole;"] <> "\n}\n" <>
-           struct <> ".mz = MZPole;\n" <>
-           struct <> ".mu(0) = MU2GeV;\n" <>
-           struct <> ".mu(1) = MCMC;\n" <>
-           struct <> ".mu(2) = MTPole;\n" <>
-           struct <> ".md(0) = MD2GeV;\n" <>
-           struct <> ".md(1) = MS2GeV;\n" <>
-           struct <> ".md(2) = MBMB;\n" <>
-           struct <> ".mv(0) = Mv1Pole;\n" <>
-           struct <> ".mv(1) = Mv2Pole;\n" <>
-           struct <> ".mv(2) = Mv3Pole;\n" <>
-           struct <> ".ml(0) = MEPole;\n" <>
-           struct <> ".ml(1) = MMPole;\n" <>
-           struct <> ".ml(2) = MTauPole;\n" <>
-           struct <> ".ckm = CKMInput;\n" <>
-           struct <> ".yukawa_type = " <> CConversion`RValueToCFormString[FlexibleSUSY`yukawaType /. inPars] <> ";\n" <>
-           struct <> ".lambda(0) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda1 /. inPars] <> ";\n" <>
-           struct <> ".lambda(1) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda2 /. inPars] <> ";\n" <>
-           struct <> ".lambda(2) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda3 /. inPars] <> ";\n" <>
-           struct <> ".lambda(3) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda4 /. inPars] <> ";\n" <>
-           struct <> ".lambda(4) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda5 /. inPars] <> ";\n" <>
-           struct <> ".lambda(5) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda6 /. inPars] <> ";\n" <>
-           struct <> ".lambda(6) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda7 /. inPars] <> ";\n" <>
-           struct <> ".tan_beta = " <> CConversion`RValueToCFormString[FlexibleSUSY`tanBeta /. inPars] <> ";\n" <>
-           struct <> ".m122 = " <> CConversion`RValueToCFormString[FlexibleSUSY`m122 /. inPars] <> ";\n" <>
-           struct <> ".zeta_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetau /. inPars] <> ";\n" <>
-           struct <> ".zeta_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetad /. inPars] <> ";\n" <>
-           struct <> ".zeta_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetal /. inPars] <> ";\n" <>
-           struct <> ".delta_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltau /. inPars] <> ";\n" <>
-           struct <> ".delta_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltad /. inPars] <> ";\n" <>
-           struct <> ".delta_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltal /. inPars] <> ";\n" <>
-           struct <> ".pi_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`piu /. inPars] <> ";\n" <>
-           struct <> ".pi_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`pid /. inPars] <> ";\n" <>
-           struct <> ".pi_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`pil /. inPars] <> ";\n";
-           (* create struct and fill it *)
+           (* compose string *)
            "#ifdef ENABLE_GM2CALC\n" <>
-           "GM2Calc_THDM_data " <> struct <> ";\n{\n" <>
+           "GM2Calc_THDM_data " <> struct <> ";\n" <>
+           "{\n" <>
               TextFormatting`IndentText[Parameters`CreateLocalConstRefs[pars]] <> "\n" <>
-              TextFormatting`IndentText[filling] <> "\n" <>
+              TextFormatting`IndentText[
+                 struct <> ".alpha_em_mz = ALPHA_EM_MZ;\n" <>
+                 struct <> ".alpha_em_0 = ALPHA_EM_0;\n" <>
+                 struct <> ".alpha_s_mz = ALPHA_S_MZ;\n" <>
+                 "if (!is_zero(" <> mhStr <> ")) {\n" <>
+                    TextFormatting`IndentText[struct <> ".mh = " <> mhStr <> ";"] <> "\n" <>
+                 "} else if (!is_zero(MHPole)) {\n" <>
+                    TextFormatting`IndentText[struct <> ".mh = MHPole;"] <> "\n}\n" <>
+                 "if (!is_zero(" <> mwStr <> ")) {\n" <>
+                    TextFormatting`IndentText[struct <> ".mw = " <> mwStr <> ";"] <> "\n" <>
+                 "} else if (!is_zero(MWPole)) {\n" <>
+                    TextFormatting`IndentText[struct <> ".mw = MWPole;"] <> "\n}\n" <>
+                 struct <> ".mz = MZPole;\n" <>
+                 struct <> ".mu(0) = MU2GeV;\n" <>
+                 struct <> ".mu(1) = MCMC;\n" <>
+                 struct <> ".mu(2) = MTPole;\n" <>
+                 struct <> ".md(0) = MD2GeV;\n" <>
+                 struct <> ".md(1) = MS2GeV;\n" <>
+                 struct <> ".md(2) = MBMB;\n" <>
+                 struct <> ".mv(0) = Mv1Pole;\n" <>
+                 struct <> ".mv(1) = Mv2Pole;\n" <>
+                 struct <> ".mv(2) = Mv3Pole;\n" <>
+                 struct <> ".ml(0) = MEPole;\n" <>
+                 struct <> ".ml(1) = MMPole;\n" <>
+                 struct <> ".ml(2) = MTauPole;\n" <>
+                 struct <> ".ckm = CKMInput;\n" <>
+                 struct <> ".yukawa_type = " <> CConversion`RValueToCFormString[FlexibleSUSY`yukawaType /. inPars] <> ";\n" <>
+                 struct <> ".lambda(0) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda1 /. inPars] <> ";\n" <>
+                 struct <> ".lambda(1) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda2 /. inPars] <> ";\n" <>
+                 struct <> ".lambda(2) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda3 /. inPars] <> ";\n" <>
+                 struct <> ".lambda(3) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda4 /. inPars] <> ";\n" <>
+                 struct <> ".lambda(4) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda5 /. inPars] <> ";\n" <>
+                 struct <> ".lambda(5) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda6 /. inPars] <> ";\n" <>
+                 struct <> ".lambda(6) = " <> CConversion`RValueToCFormString[FlexibleSUSY`lambda7 /. inPars] <> ";\n" <>
+                 struct <> ".tan_beta = " <> CConversion`RValueToCFormString[FlexibleSUSY`tanBeta /. inPars] <> ";\n" <>
+                 struct <> ".m122 = " <> CConversion`RValueToCFormString[FlexibleSUSY`m122 /. inPars] <> ";\n" <>
+                 struct <> ".zeta_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetau /. inPars] <> ";\n" <>
+                 struct <> ".zeta_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetad /. inPars] <> ";\n" <>
+                 struct <> ".zeta_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`zetal /. inPars] <> ";\n" <>
+                 struct <> ".delta_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltau /. inPars] <> ";\n" <>
+                 struct <> ".delta_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltad /. inPars] <> ";\n" <>
+                 struct <> ".delta_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`deltal /. inPars] <> ";\n" <>
+                 struct <> ".pi_u = " <> CConversion`RValueToCFormString[FlexibleSUSY`piu /. inPars] <> ";\n" <>
+                 struct <> ".pi_d = " <> CConversion`RValueToCFormString[FlexibleSUSY`pid /. inPars] <> ";\n" <>
+                 struct <> ".pi_l = " <> CConversion`RValueToCFormString[FlexibleSUSY`pil /. inPars] <> ";\n"
+              ] <>
            "}\n" <>
            "#endif\n\n"
     ];
