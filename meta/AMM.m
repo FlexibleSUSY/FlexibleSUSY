@@ -25,7 +25,7 @@ BeginPackage["AMM`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`"
 AMuonGetMuon::usage="";
 AMMGetMSUSY::usage="";
 AMMContributingGraphs::usage="";
-AMuonContributingDiagramsForGraph::usage="";
+AMMContributingDiagramsForGraph::usage="";
 CXXEvaluatorForDiagramFromGraph::usage="";
 ForwardDeclaration::usage = "";
 
@@ -50,10 +50,10 @@ AMuonGetMuon[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultiplet
                       {p_, {Description -> "Muon", ___}} -> p, 1][[1]]
                ];
 
-AMuonContributingDiagramsForGraph[graph_] :=
+AMMContributingDiagramsForGraph[graph_, field_] :=
   Module[{diagrams},
     diagrams = CXXDiagrams`FeynmanDiagramsOfType[graph,
-         {1 -> AMuonGetMuon[], 2 -> SARAH`AntiField[AMuonGetMuon[]], 3 -> GetPhoton[]}];
+         {1 -> field, 2 -> SARAH`AntiField[field], 3 -> GetPhoton[]}];
 
     Select[diagrams,IsDiagramSupported[graph,#] &]
  ]

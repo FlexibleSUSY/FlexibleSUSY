@@ -2515,8 +2515,10 @@ WriteAMMClass[fields_List, files_List] :=
 
       getMSUSY = AMM`AMMGetMSUSY[];
 
+      (* only Barr-Zee graphs
+         1-loop diagrams will be provided by the FFMasslessV module and are taken care of elsewhere *)
       graphs = AMM`AMMContributingGraphs[];
-      diagrams = Outer[AMM`AMuonContributingDiagramsForGraph, graphs, 1];
+      diagrams = Flatten[Outer[AMM`AMMContributingDiagramsForGraph, graphs, fields, 1], 1];
 
       vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
       calculateForwadDeclaration = StringRiffle[AMM`ForwardDeclaration[#, "calculate_amm"]& /@ fields, "\n"];
