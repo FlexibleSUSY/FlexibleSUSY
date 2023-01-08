@@ -48,6 +48,16 @@ EOF
     exit 1
 }
 
+alpha_em_MZ_inv=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=SMINPUTS | awk '{ if ($1 == 1) print $2 }' | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+
+alpha_em_MZ=$(cat <<EOF | bc
+scale=17
+1.0/(${alpha_em_MZ_inv})
+EOF
+    )
+
+alpha_em_0=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYInput | awk '{ if ($1 == 0) print $2 }')
+
 amu_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
 
 amu_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 2) print $2 }')
@@ -56,6 +66,9 @@ amu_gm2calc=$({ cat <<EOF
 Block GM2CalcConfig
      0  0  # minimal output
      4  0  # verbose output
+Block GM2CalcInput
+     1  ${alpha_em_MZ}  # alpha(MZ) [1L]
+     2  ${alpha_em_0}   # alpha(0)  [2L]
 EOF
   cat "${SLHA_OUT}";
       } | "${GM2CALC_EXE}" --slha-input-file=-)

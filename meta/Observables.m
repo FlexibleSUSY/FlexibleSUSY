@@ -340,6 +340,9 @@ FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
            ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
            mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
            filling = \
+           struct <> ".scale = MODEL.get_scale();\n" <>
+           struct <> ".alpha_em_MZ = ALPHA_EM_MZ;\n" <>
+           struct <> ".alpha_em_0 = ALPHA_EM_0;\n" <>
            struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>
            struct <> ".MZ    = MZPole;\n" <>
            "if (!is_zero(" <> mwStr <> ")) {\n" <>
@@ -350,34 +353,25 @@ FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
            struct <> ".MT    = MTPole;\n" <>
            struct <> ".MTau  = MTauPole;\n" <>
            struct <> ".MM    = MMPole;\n" <>
-           struct <> ".MA0   = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[pseudoscalar][1]] <> ";\n" <>
-           struct <> ".MSvm  = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[muonsneutrino]] <> ";\n" <>
-           struct <> ".MSm   = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[smuon]] <> ";\n" <>
-           struct <> ".MCha  = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[chargino]] <> ";\n" <>
-           struct <> ".MChi  = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[neutralino]] <> ";\n" <>
-           struct <> ".scale = MODEL.get_scale();\n" <>
+           struct <> ".MA0   = MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[pseudoscalar][1]] <> ";\n" <>
+           struct <> ".MSvm  = MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[muonsneutrino]] <> ";\n" <>
            struct <> ".TB    = MODEL.get_" <> CConversion`RValueToCFormString[SARAH`VEVSM2] <> "() / " <>
                               "MODEL.get_" <> CConversion`RValueToCFormString[SARAH`VEVSM1] <> "();\n" <>
            struct <> ".Mu    = MODEL.get_" <> CConversion`RValueToCFormString[mu] <> "();\n" <>
            struct <> ".M1    = MODEL.get_" <> CConversion`RValueToCFormString[m1] <> "();\n" <>
            struct <> ".M2    = MODEL.get_" <> CConversion`RValueToCFormString[m2] <> "();\n" <>
            struct <> ".M3    = MODEL.get_" <> CConversion`RValueToCFormString[m3] <> "();\n" <>
+           struct <> ".MSm   = MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[smuon]] <> ";\n" <>
+           struct <> ".MCha  = MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[chargino]] <> ";\n" <>
+           struct <> ".MChi  = MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[neutralino]] <> ";\n" <>
            struct <> ".mq2   = MODEL.get_" <> CConversion`RValueToCFormString[mq2] <> "();\n" <>
            struct <> ".mu2   = MODEL.get_" <> CConversion`RValueToCFormString[mu2] <> "();\n" <>
            struct <> ".md2   = MODEL.get_" <> CConversion`RValueToCFormString[md2] <> "();\n" <>
            struct <> ".ml2   = MODEL.get_" <> CConversion`RValueToCFormString[ml2] <> "();\n" <>
            struct <> ".me2   = MODEL.get_" <> CConversion`RValueToCFormString[me2] <> "();\n" <>
-           struct <> ".Au    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[tu] <>
-                               "(), MODEL.get_" <> CConversion`RValueToCFormString[yu] <> "());\n" <>
-           struct <> ".Ad    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[td] <>
-                               "(), MODEL.get_" <> CConversion`RValueToCFormString[yd] <> "());\n" <>
-           struct <> ".Ae    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[te] <>
-                               "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());";
+           struct <> ".Au    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[tu] <> "(), MODEL.get_" <> CConversion`RValueToCFormString[yu] <> "());\n" <>
+           struct <> ".Ad    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[td] <> "(), MODEL.get_" <> CConversion`RValueToCFormString[yd] <> "());\n" <>
+           struct <> ".Ae    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[te] <> "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());";
            "#ifdef ENABLE_GM2CALC\n" <>
            "GM2Calc_MSSMNoFV_data " <> struct <> ";\n" <> filling <> "\n" <>
            "#endif\n\n"
