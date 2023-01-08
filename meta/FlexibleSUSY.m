@@ -5096,12 +5096,12 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   (* collect external states from observables needing massless triangles *)
                   DeleteDuplicates @ Join[
 
-                     (* muon g-2 *)
+                     (* lepton g-2 *)
                      If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`AMM[_]],
-                           Block[{muon = TreeMasses`GetSMMuonLepton[], muonWithoutIndex},
-                              muonWithoutIndex = If[AtomQ[muon], TreeMasses`GetSMMuonLepton[], Head@muon];
-                              {muonWithoutIndex -> {muonWithoutIndex, TreeMasses`GetPhoton[]}}
-                           ],
+                           (# -> {#, TreeMasses`GetPhoton[]})& /@ (
+                           Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /.
+                              FlexibleSUSYObservable`AMM[l_[_]] :> l /. FlexibleSUSYObservable`AMM[l_] :> l
+                        ),
                         {}
                      ],
 
