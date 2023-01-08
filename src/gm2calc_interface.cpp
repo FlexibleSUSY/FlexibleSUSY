@@ -128,30 +128,6 @@ gm2calc::THDM setup(const GM2Calc_THDM_data& data)
 
 /* ****************************** MSSM ****************************** */
 
-GM2Calc_MSSMNoFV_data::GM2Calc_MSSMNoFV_data()
-{
-   initialize();
-}
-
-/**
- * Initializes data members to the GM2Calc default values
- */
-void GM2Calc_MSSMNoFV_data::initialize()
-{
-   const gm2calc::MSSMNoFV_onshell model;
-
-   scale       = model.get_scale();
-   alpha_em_MZ = calculate_alpha(model.get_EL());
-   alpha_em_0  = calculate_alpha(model.get_EL0());
-   alpha_s_MZ  = calculate_alpha(model.get_g3());
-   MZ          = model.get_MZ();
-   MW          = model.get_MW();
-   mb_mb       = model.get_MBMB();
-   MT          = model.get_MT();
-   MTau        = model.get_ML();
-   MM          = model.get_MM();
-}
-
 /**
  * This function calculates \f$a_\mu\f$ up to the 2-loop level
  * including tan(beta) resummation in the MSSM with GM2Calc.
@@ -265,9 +241,6 @@ double gm2calc_calculate_amu_uncertainty(const GM2Calc_THDM_data& data)
 namespace flexiblesusy {
 
 /* ****************************** MSSM ****************************** */
-
-GM2Calc_MSSMNoFV_data::GM2Calc_MSSMNoFV_data() {}
-void GM2Calc_MSSMNoFV_data::initialize() {}
 
 double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data&)
 {
