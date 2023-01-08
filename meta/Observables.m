@@ -314,8 +314,7 @@ IsGM2CalcCompatibleMSSM[] :=
 
 (* fill struct with MSSM parameters to be passed to GM2Calc *)
 FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
-    Module[{filling, mwStr,
-            w, pseudoscalar, smuon, muonsneutrino, chargino, neutralino,
+    Module[{mwStr, w, pseudoscalar, smuon, muonsneutrino, chargino, neutralino,
             mu, m1, m2, m3, mq2, mu2, md2, ml2, me2, tu, td, te, yu, yd, ye},
            w             = Parameters`GetParticleFromDescription["W-Boson"];
            pseudoscalar  = Parameters`GetParticleFromDescription["Pseudo-Scalar Higgs"];
@@ -339,7 +338,9 @@ FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
            yd            = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
            ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
            mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
-           filling = \
+           (* compose string *)
+           "#ifdef ENABLE_GM2CALC\n" <>
+           "GM2Calc_MSSMNoFV_data " <> struct <> ";\n" <>
            struct <> ".scale = MODEL.get_scale();\n" <>
            struct <> ".alpha_em_MZ = ALPHA_EM_MZ;\n" <>
            struct <> ".alpha_em_0 = ALPHA_EM_0;\n" <>
@@ -371,9 +372,7 @@ FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
            struct <> ".me2   = MODEL.get_" <> CConversion`RValueToCFormString[me2] <> "();\n" <>
            struct <> ".Au    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[tu] <> "(), MODEL.get_" <> CConversion`RValueToCFormString[yu] <> "());\n" <>
            struct <> ".Ad    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[td] <> "(), MODEL.get_" <> CConversion`RValueToCFormString[yd] <> "());\n" <>
-           struct <> ".Ae    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[te] <> "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());";
-           "#ifdef ENABLE_GM2CALC\n" <>
-           "GM2Calc_MSSMNoFV_data " <> struct <> ";\n" <> filling <> "\n" <>
+           struct <> ".Ae    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[te] <> "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());\n" <>
            "#endif\n\n"
           ];
 
