@@ -95,10 +95,34 @@ std::vector<double> subdivide(double start, double stop,
                               std::size_t number_of_divisions)
 {
    if (number_of_divisions == 0) {
-      throw flexiblesusy::OutOfBoundsError("subdivide: number_of_divisions must be > 0");
+      throw flexiblesusy::OutOfBoundsError("subdivide: number_of_divisions must be > 0.");
    }
 
    auto result = float_range(start, stop, number_of_divisions);
+   result.push_back(stop);
+
+   return result;
+}
+
+/**
+ * Returns vector with (number_of_divisions + 1) floating point values
+ * between (including) start and (including) stop with logarithmic
+ * spacing.
+ *
+ * @param start smallest value (included)
+ * @param stop largest value (included)
+ * @param number_of_divisions number of divisions
+ *
+ * @return vector of floating point values
+ */
+std::vector<double> subdivide_log(double start, double stop,
+                                  std::size_t number_of_divisions)
+{
+   if (number_of_divisions == 0) {
+      throw flexiblesusy::OutOfBoundsError("subdivide_log: number_of_divisions must be > 0.");
+   }
+
+   auto result = float_range_log(start, stop, number_of_divisions);
    result.push_back(stop);
 
    return result;

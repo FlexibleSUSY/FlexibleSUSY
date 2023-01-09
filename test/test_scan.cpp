@@ -163,3 +163,45 @@ BOOST_AUTO_TEST_CASE( test_subdivide )
       BOOST_CHECK_EQUAL(range.size(), 5);
    }
 }
+
+BOOST_AUTO_TEST_CASE( test_subdivide_log )
+{
+   static constexpr double e = 2.7182818284590452;
+   {
+      BOOST_CHECK_THROW(flexiblesusy::subdivide_log(1.0, 1.0, 0), flexiblesusy::Error);
+   }
+   {
+      // range with equal interval boundaries
+      const auto range = flexiblesusy::subdivide_log(1.0, 1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 1.0);
+      BOOST_CHECK_EQUAL(range.at(1), 1.0);
+      BOOST_CHECK_EQUAL(range.at(2), 1.0);
+      BOOST_CHECK_EQUAL(range.at(3), 1.0);
+      BOOST_CHECK_EQUAL(range.at(4), 1.0);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+   {
+      // range with sorted interval boundaries
+      const auto range = flexiblesusy::subdivide_log(1.0, e, 4);
+      const double step_size = 0.25; // (log(e) - log(1))/4
+      const double eps = 1e-15;
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(0)), 0*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(1)), 1*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(2)), 2*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(3)), 3*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(4)), 4*step_size, eps);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+   {
+      // range with inverted interval boundaries
+      const auto range = flexiblesusy::subdivide_log(e, 1.0, 4);
+      const double step_size = 0.25; // (log(e) - log(1))/4
+      const double eps = 1e-15;
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(0)), 4*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(1)), 3*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(2)), 2*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(3)), 1*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(4)), 0*step_size, eps);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+}

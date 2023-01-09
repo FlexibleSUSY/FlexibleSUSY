@@ -36,6 +36,10 @@ std::vector<double> float_range_log(double start, double stop,
 std::vector<double> subdivide(double start, double stop,
                               std::size_t number_of_divisions);
 
+/// returns range of (number_of_divisions + 1) floating point values between (including) start and (including) stop with logarithmic spacing
+std::vector<double> subdivide_log(double start, double stop,
+                                  std::size_t number_of_divisions);
+
 } // namespace flexiblesusy
 
 #endif
