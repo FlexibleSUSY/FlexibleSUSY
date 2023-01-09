@@ -33,9 +33,6 @@ namespace flexiblesusy {
  * @brief data to be passed to GM2Calc
  */
 struct GM2Calc_MSSMNoFV_data {
-   GM2Calc_MSSMNoFV_data();                ///< initializes members to GM2Calc default values
-   void initialize();             ///< initializes members to GM2Calc default values
-
    double scale{0.0};             ///< renormalization scale
    double alpha_em_MZ{0.0};       ///< alpha_em(MZ)
    double alpha_em_0{0.0};        ///< alpha_em(0)
