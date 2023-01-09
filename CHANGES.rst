@@ -1,12 +1,6 @@
 FlexibleSUSY 2.X.X [X, X X]
 ==================================
 
-Fixed bugs
-----------
-
-* [commit 1ffb4f7]: Fixed incorect quark charge in some higher order QED
-  corrections to up-type quark decays of :math:`$H$` and :math:`$A$`.
-
 New features
 ------------
 
@@ -15,6 +9,12 @@ New features
   [`2110.13238 <https://arxiv.org/abs/2110.13238>`_].  See the
   FlexibleSUSY model `THDMII` (`model_files/THDMII/FlexibleSUSY.m.in`)
   for an example.
+
+Fixed bugs
+----------
+
+* [commit 1ffb4f7]: Fixed incorect quark charge in some higher order QED
+  corrections to up-type quark decays of :math:`$H$` and :math:`$A$`.
 
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
