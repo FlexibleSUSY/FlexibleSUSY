@@ -380,7 +380,6 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
                         m.get_physical().clear();
                         m.calculate_DRbar_masses();
                         m.solve_ewsb();
-                        m.calculate_M@AMuon_MuonField@_pole();
                         amu = calculate_amm_impl<Lepton>(m, qedqcd@extraIdxUsage@);
                      }
                      catch(const Error& e) {
@@ -411,15 +410,9 @@ double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   double m_lepton_pole = lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@);
-
-   if (is_zero(m_lepton_pole)) {
-      model.solve_ewsb();
-      model.calculate_M@AMuon_MuonField@_pole();
-   }
-
    return calculate_amm_impl<Lepton>(model, qedqcd@extraIdxUsage@);
 }
+
 // spliting templated function into header and cpp
 // https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
 @calculateAForwardDeclaration@

@@ -22,7 +22,6 @@
 
 BeginPackage["AMM`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`", "LoopMasses`"}];
 
-AMuonGetMuon::usage="";
 AMMGetMSUSY::usage="";
 AMMContributingGraphs::usage="";
 AMMContributingDiagramsForGraph::usage="";
@@ -43,12 +42,6 @@ barZeeGraph = {{0,0,0,1,0,0,0,0},
 contributingGraphs = {barZeeGraph};
 
 AMMContributingGraphs[] := contributingGraphs;
-
-AMuonGetMuon[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultiplet[]] =!= 1,
-                TreeMasses`GetSMMuonLeptonMultiplet[],
-                Cases[SARAH`ParticleDefinitions[FlexibleSUSY`FSEigenstates],
-                      {p_, {Description -> "Muon", ___}} -> p, 1][[1]]
-               ];
 
 AMMContributingDiagramsForGraph[graph_, field_] :=
   Module[{diagrams},

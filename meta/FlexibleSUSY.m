@@ -2584,8 +2584,7 @@ TextFormatting`IndentText[
       ];
 
       WriteOut`ReplaceInFiles[files,
-        {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]],
-         "@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
+        {"@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
          "@AMMCalculation@"       -> TextFormatting`IndentText[calculation],
          "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
