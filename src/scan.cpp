@@ -100,6 +100,7 @@ std::vector<double> subdivide(double start, double stop,
 
    auto result = float_range(start, stop, number_of_divisions);
    result.push_back(stop);
+   result.shrink_to_fit();
 
    return result;
 }
@@ -124,6 +125,7 @@ std::vector<double> subdivide_log(double start, double stop,
 
    auto result = float_range_log(start, stop, number_of_divisions);
    result.push_back(stop);
+   result.shrink_to_fit();
 
    return result;
 }
