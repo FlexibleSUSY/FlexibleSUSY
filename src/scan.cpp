@@ -31,9 +31,9 @@ namespace flexiblesusy {
 
 /**
  * Returns vector with number_of_steps floating point values between
- * start and stop.  The endpoint is excluded.
+ * start (included) and stop (excluded).  The endpoint is excluded.
  *
- * @param start smallest value
+ * @param start smallest value (included)
  * @param stop largest value (excluded)
  * @param number_of_steps number of values
  *
@@ -54,11 +54,11 @@ std::vector<double> float_range(double start, double stop,
 
 /**
  * Returns vector with number_of_steps floating point values between
- * start and stop.  The values are logarithmically distributed,
- * i.e. the difference of the logarithm of two consecutive points is
- * constant.  The endpoint is excluded.
+ * start (included) and stop (excluded).  The values are
+ * logarithmically distributed, i.e. the difference of the logarithm
+ * of two consecutive points is constant.  The endpoint is excluded.
  *
- * @param start smallest value
+ * @param start smallest value (included)
  * @param stop largest value (excluded)
  * @param number_of_steps number of values
  *
