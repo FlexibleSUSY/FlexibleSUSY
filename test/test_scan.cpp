@@ -6,11 +6,6 @@
 #include <random>
 #include <array>
 
-/**
- * @file scan.hpp
- * @brief contains helper functions and classes for parameter scans
- */
-
 namespace flexiblesusy {
 
 /**

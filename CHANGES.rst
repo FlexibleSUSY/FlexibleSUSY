@@ -1,11 +1,6 @@
 FlexibleSUSY 2.X.X [X, X X]
 ==================================
 
-Fixed bugs
-----------
-
-* [commit ]: Fixed incorect quark charge in some higher order QED corrections to :math:`$H \to u\bar{u}$` and :math:`$A \to u\bar{u}$`
-
 New features
 ------------
 
@@ -35,6 +30,12 @@ New features
            {22, FlexibleSUSYObservable`AMM[Fe[3]]}
         }
      };
+
+Fixed bugs
+----------
+
+* [commit 1ffb4f7]: Fixed incorect quark charge in some higher order QED
+  corrections to up-type quark decays of :math:`$H$` and :math:`$A$`.
 
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
