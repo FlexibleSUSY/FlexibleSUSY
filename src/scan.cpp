@@ -81,4 +81,27 @@ std::vector<double> float_range_log(double start, double stop,
    return result;
 }
 
+/**
+ * Returns vector with (number_of_divisions + 1) floating point values
+ * between (including) start and (including) stop.
+ *
+ * @param start smallest value (included)
+ * @param stop largest value (included)
+ * @param number_of_divisions number of divisions
+ *
+ * @return vector of floating point values
+ */
+std::vector<double> subdivide(double start, double stop,
+                              std::size_t number_of_divisions)
+{
+   if (number_of_divisions == 0) {
+      throw flexiblesusy::OutOfBoundsError("subdivide: number_of_divisions must be > 0");
+   }
+
+   auto result = float_range(start, stop, number_of_divisions);
+   result.push_back(stop);
+
+   return result;
+}
+
 } // namespace flexiblesusy
