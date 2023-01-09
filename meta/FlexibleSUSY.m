@@ -2494,9 +2494,8 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
 (* Write the AMM c++ files *)
 WriteAMMClass[fields_List, files_List] :=
     Module[{calculation, getMSUSY,
-            (* in models without flavour violation (no FV models) muon does not have an index,
-               otherwise we assume it's the second particle in the lepton multiplet *)
-            muonIndex = If[TreeMasses`GetDimension[AMM`AMuonGetMuon[]] =!= 1, "idx", ""],
+            (* in models without flavour violation (no FV models) lepton does not have an index *)
+            leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPoleMass,
@@ -2507,8 +2506,8 @@ WriteAMMClass[fields_List, files_List] :=
             "const auto form_factors = " <>
             FSModelName <> "_FFV_form_factors::calculate_form_factors<Lepton,Lepton," <>
             CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
-            muonIndex <> If[muonIndex === "", "", ", "] <>
-            muonIndex <> If[muonIndex === "", "", ", "] <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
             "model, " <> discardSMcontributions <> ");",
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
@@ -2533,7 +2532,7 @@ WriteAMMClass[fields_List, files_List] :=
                   graphs[[i]]
                 ], 16] <> " * " <>
                 ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
-                "::value({" <> muonIndex <> "}, context, qedqcd);\n"
+                "::value({" <> leptonIndex <> "}, context, qedqcd);\n"
          ];
       ];
 
@@ -2589,7 +2588,6 @@ TextFormatting`IndentText[
          "@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
          "@AMMCalculation@"       -> TextFormatting`IndentText[calculation],
          "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
-         "@AMuon_MuonIndex@" -> muonIndex,
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
