@@ -17,6 +17,8 @@
 // ====================================================================
 
 #include "scan.hpp"
+#include "error.hpp"
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 
@@ -44,8 +46,7 @@ std::vector<double> float_range(double start, double stop,
    std::vector<double> result(number_of_steps);
 
    for (std::size_t i = 0; i < number_of_steps; ++i) {
-      const double point = start + i * step_size;
-      result[i] = point;
+      result[i] = start + i*step_size;
    }
 
    return result;
@@ -66,17 +67,16 @@ std::vector<double> float_range(double start, double stop,
 std::vector<double> float_range_log(double start, double stop,
                                     std::size_t number_of_steps)
 {
-   if (number_of_steps == 0)
-      return std::vector<double>();
-
-   const double step_size = (log(stop) - log(start)) / number_of_steps;
-   std::vector<double> result(number_of_steps);
-   result[0] = start;
-
-   for (std::size_t i = 1; i < number_of_steps; ++i) {
-      const double point = exp(step_size + log(result[i-1]));
-      result[i] = point;
+   if (start <= 0 || stop <= 0) {
+      throw flexiblesusy::OutOfBoundsError("float_range_log: interval boundaries must be > 0.");
    }
+
+   const double log_start = std::log(start);
+   const double log_stop = std::log(stop);
+   auto result = float_range(log_start, log_stop, number_of_steps);
+
+   std::transform(result.begin(), result.end(), result.begin(),
+                  [] (double x) { return std::exp(x); });
 
    return result;
 }
