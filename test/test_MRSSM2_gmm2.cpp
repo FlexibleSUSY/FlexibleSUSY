@@ -25,7 +25,9 @@
 
 #include "lowe.h"
 #include "wrappers.hpp"
-#include "MRSSM2_a_muon.hpp"
+#include "MRSSM2_amm.hpp"
+#include "MRSSM2_lepton_gm2_wrapper.hpp"
+#include "cxx_qft/MRSSM2_qft.hpp"
 
 using namespace flexiblesusy;
 
@@ -61,13 +63,29 @@ BOOST_AUTO_TEST_CASE( test_amu )
    softsusy::QedQcd qedqcd;
    MRSSM2_slha m = setup_MRSSM2(input, qedqcd);
 
-   auto amu = MRSSM2_a_muon::calculate_a_muon(m, qedqcd);
+   using MRSSM2_cxx_diagrams::fields::Fe;
+
+   auto ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 0);
+   BOOST_CHECK_CLOSE_FRACTION(ae, -1.8019319960731353e-15, 1e-7);
+
+   auto amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, -8.1718908052626219e-11, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
+
+   auto atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, -2.2071915628545153e-08, 1e-7);
 
    // neutralino dominance
    input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
    m = setup_MRSSM2(input, qedqcd);
 
-   amu = MRSSM2_a_muon::calculate_a_muon(m, qedqcd);
+   ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 0);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 1.3719721889662895e-16, 1e-7);
+
+   amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 6.2650685449349102e-12, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
+
+   atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 3.7290205060896637e-09, 1e-7);
 }

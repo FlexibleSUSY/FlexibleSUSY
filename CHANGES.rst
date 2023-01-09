@@ -10,10 +10,31 @@ New features
   FlexibleSUSY model `THDMII` (`model_files/THDMII/FlexibleSUSY.m.in`)
   for an example.
 
+* Allow user to calculate anomalous magnetic moment of electron and tau.
+
+  The old syntax for requesting calculation of muon g-2::
+
+     ExtraSLHAOutputBlock s = {
+        {FlexibleSUSYLowEnergy, {
+           {21, FlexibleSUSYObservable`aMuon}}
+        }
+     };
+
+  has been replaced with syntax analogues to requesting calculation of electric
+  dipole moments::
+
+     ExtraSLHAOutputBlocks = {
+        {FlexibleSUSYLowEnergy, {
+           {20, FlexibleSUSYObservable`AMM[Fe[1]]},
+           {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+           {22, FlexibleSUSYObservable`AMM[Fe[3]]}
+        }
+     };
+
 Fixed bugs
 ----------
 
-* [commit 1ffb4f7]: Fixed incorect quark charge in some higher order QED
+* [commit 1ffb4f7]: Fixed incorrect quark charge in some higher order QED
   corrections to up-type quark decays of :math:`$H$` and :math:`$A$`.
 
 FlexibleSUSY 2.7.1 [June, 07 2022]

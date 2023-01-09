@@ -91,7 +91,16 @@ struct FFV_FFS {
 
 namespace flexiblesusy {
 namespace @ModelName@_FFV_form_factors {
+
+/*
+template <typename F1, template typename F2, template V>
+std::valarray<std::complex<double>>
+calculate_form_factors(int, int, const @ModelName@_mass_eigenstates&, bool);
+*/
+
 @FFVFormFactors_InterfaceDefinitions@
+
+@TemplateWrapper_InterfaceDefinitions@
 }
 } // namespace flexiblesusy
 
