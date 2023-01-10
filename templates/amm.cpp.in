@@ -34,6 +34,7 @@
 #include "wrappers.hpp"
 #include "numerics2.hpp"
 #include "logger.hpp"
+#include "scan.hpp"
 
 #define DERIVEDPARAMETER(p) context.model.p()
 
@@ -346,30 +347,11 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
    return val;
 }
 
-/// generates array with N scales from mean/factor to mean*factor
-template <int N>
-std::array<double,N> generate_scales(double mean, double factor)
-{
-   static_assert(N > 1, "N must be greater than 1!");
-
-   const double start = mean / factor, stop = mean * factor;
-   std::array<double,N> scales;
-
-   scales[0] = start;
-
-   for (int i = 1; i < (N-1); i++)
-      scales[i] = std::exp(std::log(start) + (std::log(stop) - std::log(start))*i / N);
-
-   scales[N-1] = stop;
-
-   return scales;
-}
-
 /// returns minimum and maximum a_mu when scale is varied by a factor 2
 template <typename Lepton>
 std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
-   auto scales = generate_scales<7>(model.get_scale(), 2.);
+   auto scales = subdivide_log(0.5*model.get_scale(), 2*model.get_scale(), 6);
 
    std::transform(scales.begin(), scales.end(), scales.begin(),
                   [&model,&qedqcd@extraIdxUsage@] (double scale) {
