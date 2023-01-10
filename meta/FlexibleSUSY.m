@@ -2541,14 +2541,7 @@ WriteAMMClass[fields_List, files_List] :=
 "template <typename Lepton>
 double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 {
-   double lepton_pole_mass;
-   switch(idx) {
-      case 0: lepton_pole_mass = qedqcd.displayPoleMel(); break;
-      case 1: lepton_pole_mass = qedqcd.displayPoleMmuon(); break;
-      case 2: lepton_pole_mass = qedqcd.displayPoleMtau(); break;
-      default: throw OutOfBoundsError(\"Cannot compute anomalous magnetic moment of " <> CXXDiagrams`CXXNameOfField[GetParticleFromDescription["Leptons"]] <>  "(\" + std::to_string(idx+1) + \")\");
-   }
-   return lepton_pole_mass;
+   return qedqcd.displayLeptonPoleMass(idx);
 }",
 StringRiffle[
 (
