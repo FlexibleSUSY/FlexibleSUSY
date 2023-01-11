@@ -26,7 +26,8 @@
 #include "lowe.h"
 
 #include "SM_two_scale_model.hpp"
-#include "SM_a_muon.hpp"
+#include "SM_amm.hpp"
+#include "cxx_qft/SM_qft.hpp"
 
 using namespace flexiblesusy;
 
@@ -42,7 +43,13 @@ BOOST_AUTO_TEST_CASE( test_zero )
 
    softsusy::QedQcd qedqcd;
 
-   const double amu = SM_a_muon::calculate_a_muon(sm, qedqcd);
+   using SM_cxx_diagrams::fields::Fe;
 
+   const double ae = SM_amm::calculate_amm<Fe>(sm, qedqcd, 0);
+   const double amu = SM_amm::calculate_amm<Fe>(sm, qedqcd, 1);
+   const double atau = SM_amm::calculate_amm<Fe>(sm, qedqcd, 2);
+
+   BOOST_CHECK_SMALL(ae, 1e-15);
    BOOST_CHECK_SMALL(amu, 1e-15);
+   BOOST_CHECK_SMALL(atau, 1e-15);
 }

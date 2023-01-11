@@ -31,10 +31,10 @@ namespace looplibrary
 
 std::complex<double> Softsusy::A0(A_ARGS) noexcept
 {
-   double m = std::sqrt(m02_in.real());
-   double q = std::sqrt(scl2_in);
+   double m2 = m02_in.real();
+   double q2 = scl2_in;
 
-   return {softsusy::a0(m, q), 0.0};
+   return {softsusy::rea0(m2, q2), 0.0};
 }
 
 std::complex<double> Softsusy::B0(B_ARGS) noexcept

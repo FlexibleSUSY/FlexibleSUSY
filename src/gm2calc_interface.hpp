@@ -29,13 +29,10 @@
 namespace flexiblesusy {
 
 /**
- * @class GM2Calc_data
+ * @class GM2Calc_MSSMNoFV_data
  * @brief data to be passed to GM2Calc
  */
-struct GM2Calc_data {
-   GM2Calc_data();                ///< initializes members to GM2Calc default values
-   void initialize();             ///< initializes members to GM2Calc default values
-
+struct GM2Calc_MSSMNoFV_data {
    double scale{0.0};             ///< renormalization scale
    double alpha_em_MZ{0.0};       ///< alpha_em(MZ)
    double alpha_em_0{0.0};        ///< alpha_em(0)
@@ -66,11 +63,48 @@ struct GM2Calc_data {
    Eigen::Matrix<double,3,3> Ae{Eigen::Matrix<double,3,3>::Zero()};  ///< down-type slepton trilinear coupling
 };
 
-/// calculates amu using GM2Calc
-double gm2calc_calculate_amu(const GM2Calc_data&);
+/**
+ * @class GM2Calc_THDM_data
+ * @brief data to be passed to GM2Calc
+ */
+struct GM2Calc_THDM_data {
+   double alpha_em_mz{0.0};       ///< alpha_em(mz)
+   double alpha_em_0{0.0};        ///< alpha_em(0)
+   double alpha_s_mz{0.0};        ///< alpha_s(mz) SM MS-bar
+   double mh{0.0};                ///< SM Higgs boson pole mass
+   double mw{0.0};                ///< W pole mass
+   double mz{0.0};                ///< Z pole mass
+   Eigen::Matrix<double,3,1> mu{Eigen::Matrix<double,3,1>::Zero()}; ///< up-type quarks
+   Eigen::Matrix<double,3,1> md{Eigen::Matrix<double,3,1>::Zero()}; ///< down-type quark masses
+   Eigen::Matrix<double,3,1> mv{Eigen::Matrix<double,3,1>::Zero()}; ///< neutrino masses
+   Eigen::Matrix<double,3,1> ml{Eigen::Matrix<double,3,1>::Zero()}; ///< down-type lepton pole masses
+   Eigen::Matrix<std::complex<double>,3,3> ckm{Eigen::Matrix<std::complex<double>,3,3>::Identity()}; ///< CKM matrix
+   int yukawa_type{0};            ///< Yukawa type
+   Eigen::Matrix<double,7,1> lambda{Eigen::Matrix<double,7,1>::Zero()};
+   double tan_beta{0.0};
+   double m122{0.0};
+   double zeta_u{0.0};
+   double zeta_d{0.0};
+   double zeta_l{0.0};
+   Eigen::Matrix<double,3,3> delta_u{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> delta_d{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> delta_l{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> pi_u{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> pi_d{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> pi_l{Eigen::Matrix<double,3,3>::Zero()};
+};
 
-/// calculates uncertainty of amu using GM2Calc
-double gm2calc_calculate_amu_uncertainty(const GM2Calc_data&);
+/// calculates amu using GM2Calc in the MSSMNoFV
+double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data&);
+
+/// calculates uncertainty of amu using GM2Calc in the MSSMNoFV
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_MSSMNoFV_data&);
+
+/// calculates amu using GM2Calc in the THDM
+double gm2calc_calculate_amu(const GM2Calc_THDM_data&);
+
+/// calculates uncertainty of amu using GM2Calc in the THDM
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_THDM_data&);
 
 } // namespace flexiblesusy
 

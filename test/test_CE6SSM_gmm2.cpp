@@ -23,16 +23,17 @@
 
 #include "test_CE6SSM.hpp"
 
-#include "CE6SSM_a_muon.hpp"
+#include "CE6SSM_amm.hpp"
 #include "CE6SSM_semi_analytic_spectrum_generator.hpp"
 #include "CE6SSM_slha_io.hpp"
 #include "CE6SSM_spectrum_generator.hpp"
+#include "cxx_qft/CE6SSM_qft.hpp"
 
 using namespace flexiblesusy;
 
 BOOST_AUTO_TEST_CASE( test_amu )
 {
-   
+
      char const * const slha_input = R"(
 Block MODSEL
 Block FlexibleSUSY
@@ -87,15 +88,15 @@ Block SMINPUTS
 Block MINPAR
     3   7.1
 Block EXTPAR
-   61   0.4         
-   62   0.171        
-   63   7276          
-   64   0.26           
-   65   7400            
-   66   0.16             
-   67   1.6e7             
-   68   400                
-   69   400                 
+   61   0.4
+   62   0.171
+   63   7276
+   64   0.26
+   65   7400
+   66   0.16
+   67   1.6e7
+   68   400
+   69   400
 )";
 
    std::stringstream istr(slha_input);
@@ -124,10 +125,13 @@ Block EXTPAR
    spectrum_generator.run(qedqcd, input);
 
    auto models = spectrum_generator.get_models_slha();
-   auto amu = CE6SSM_a_muon::calculate_a_muon(std::get<0>(models), qedqcd);
+
+   using CE6SSM_cxx_diagrams::fields::Fe;
+
+   auto amu = CE6SSM_amm::calculate_amm<Fe>(std::get<0>(models), qedqcd, 1);
 
    // Reference value from FlexibleSUSY, checks that value does not change
-   constexpr double reference_value = 
+   constexpr double reference_value =
 	   + 1.88800475E-11   // Contribution from FFS + SSF diagrams
 	   - 0.06664329E-11;  // Contribution from Vector diagrams
 

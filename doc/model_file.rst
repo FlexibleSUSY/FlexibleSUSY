@@ -934,6 +934,46 @@ If ``FSSolveEWSBFor[EWSBOutputParameters]`` is not given in any boundary
 condition, then it is added to ``SUSYScaleInput``.  This implies, that
 by default, the EWSB conditions are imposed at the scale ``SUSYScale``.
 
+In some models FlexibleSUSY cannot solve the EWSB conditions for the
+desired parameter(s) given in ``EWSBOutputParameters``. In this case
+one can implement the solution of the EWSB conditions by hand in the
+FlexibleSUSY model file using the variable ``TreeLevelEWSBSolution``.
+The variable ``TreeLevelEWSBSolution`` must be a list. The list
+elements are two-component lists, where the first entry is the symbol
+of the parameter to be fixed, and the second entry is the expression
+used to fix the value of the parameter::
+
+    TreeLevelEWSBSolution = {
+       {<parameter-1>, <expression-1>},
+       {<parameter-2>, <expression-2>},
+       ...
+    };
+
+Example: (``CMSSMSemiAnalytic``)::
+
+    TreeLevelEWSBSolution = {
+       {m0Sq, ((mHd2Coeff2 vd^2 - mHu2Coeff2 vu^2) m12^2
+               + (mHd2Coeff3 vd^2 - mHu2Coeff3 vu^2) m12 Azero
+               + (mHd2Coeff4 vd^2 - mHu2Coeff4 vu^2) Azero^2
+               + (Abs[\[Mu]]^2 + (g2^2 + GUTNormalization[g1]^2 g1^2)
+                  ( vd^2 + vu^2) / 8) (vd^2 - vu^2)
+               - vd tadpole[1] + vu tadpole[2])
+               / (mHu2Coeff1 vu^2 - mHd2Coeff1 vd^2)},
+       {BMu0, vd vu ((mHd2Coeff1 + mHu2Coeff1) m0Sq
+                     + (mHd2Coeff2 + mHu2Coeff2) m12^2
+                     + (mHd2Coeff3 + mHu2Coeff3) m12 Azero
+                     + (mHd2Coeff4 + mHu2Coeff4) Azero^2 + 2 Abs[\[Mu]]^2
+                     - tadpole[1] / vd - tadpole[2] / vu)
+              / (BMuCoeff1 (vd^2 + vu^2)) - BMuCoeff2 MuBV m12 / BMuCoeff1
+              - BMuCoeff3 MuBV Azero / BMuCoeff1}
+    };
+
+Note: To express the tadpole loop expressions the symbol
+``tadpole[n]`` can be used, where ``n`` is a positive integer (``n > 0``)
+enumerating the tadpole expressions. The order of the enumeration
+refers to the order of the list ``DEFINITION[EWSB][VEVs]`` in the
+SARAH model file.
+
 Automatic input of unspecified model parameters
 '''''''''''''''''''''''''''''''''''''''''''''''
 

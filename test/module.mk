@@ -349,6 +349,11 @@ TEST_SRC += \
 endif
 endif
 
+ifeq ($(ENABLE_GM2CALC) $(WITH_THDMII),yes yes)
+TEST_SH += \
+		$(DIR)/test_THDMII_GM2Calc.sh
+endif
+
 ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
 TEST_SRC += \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.cpp \
@@ -1301,7 +1306,7 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
+		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)

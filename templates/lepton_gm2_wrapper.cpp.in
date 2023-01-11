@@ -16,31 +16,25 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+
 /**
- * @file @ModelName@_FFV_form_factors.hpp
+ * @file @ModelName@_muon_gm2_wrapper.cpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_FFVFormFactors_H
-#define @ModelName@_FFVFormFactors_H
-
-#include <valarray>
-
+#include "@ModelName@_lepton_gm2_wrapper.hpp"
+#include "@ModelName@_amm.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
 namespace flexiblesusy {
+namespace MRSSM2_lepton_gm2_wrapper {
 
-class @ModelName@_mass_eigenstates;
+using namespace @ModelName@_cxx_diagrams;
 
-namespace @ModelName@_FFV_form_factors {
+@gm2WrapperDef@
 
-@FFVFormFactors_InterfacePrototypes@
+@gm2UncWrapperDef@
 
-@TemplateWrapper_InterfacePrototypes@
 }
-
-} // namespace flexiblesusy
-
-#endif
-
+}
