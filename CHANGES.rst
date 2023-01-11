@@ -32,7 +32,7 @@ New features
      };
 
 * Added calculation of vector diagram contributions to leptons :math:
-  `(g-2)/2`.
+  `$(g-2)/2$`.
 
   Thanks to Douglas Jacob.
 
