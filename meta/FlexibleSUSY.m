@@ -2355,7 +2355,7 @@ WriteEDMClass[fields_List, files_List] :=
   Module[{(* in models without flavour violation (no FV models) lepton does not have an index *)
           leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
           (* we want to calculate an offset of g-2 compared to the SM *)
-          discardSMcontributions = CConversion`CreateCBoolValue[True],
+          discardSMcontributions = CConversion`CreateCBoolValue[False],
           calculation, calculateForwadDeclaration},
 
     calculation =
