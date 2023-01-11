@@ -339,8 +339,7 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
       ERROR("Error in the g-2 calculation! Form factor F2 should be real");
       return std::numeric_limits<double>::quiet_NaN();
    } else {
-      // @todo: enable once the calculation of Barr-Zee contributions is validated
-      // val += valBarZee.real();
+      val += valBarZee.real();
    }
 
    return val;
