@@ -24,9 +24,9 @@
  */
 
 #include "@ModelName@_edm.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
+#include "@ModelName@_FFV_form_factors.hpp"
 
 #include "wrappers.hpp"
 #include "numerics2.hpp"
@@ -87,7 +87,28 @@ struct EDMVertexCorrectionFS {
 
 namespace flexiblesusy {
 namespace @ModelName@_edm {
-@EDM_InterfaceDefinitions@
+
+// spliting templated function into header and cpp
+// https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
+@calculateForwadDeclaration@
+
+template <typename Lepton>
+double calculate_edm(const CMSSMCPV_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, int idx)
+{
+   context_base context{ model };
+
+   using namespace CMSSMCPV_cxx_diagrams::fields;
+
+@EDMCalculation@
+
+   double val =
+      // vector form factor
+      1./2.*(form_factors[3] - form_factors[2]).imag()
+      // reinstate the mass that was factored out in definition of form factor
+      * context.mass<Lepton>({idx});
+
+   return val;
+}
 }
 } // namespace flexiblesusy
 

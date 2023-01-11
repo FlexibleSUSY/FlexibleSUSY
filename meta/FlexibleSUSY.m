@@ -2351,24 +2351,30 @@ WriteCXXDiagramClass[vertices_List, files_List,
     ];
 
 (* Write the EDM c++ files *)
-WriteEDMClass[edmFields_List,files_List] :=
-  Module[{graphs,diagrams,vertices,
-          interfacePrototypes,interfaceDefinitions},
-    graphs = EDM`EDMContributingGraphs[];
-    diagrams = Outer[EDM`EDMContributingDiagramsForFieldAndGraph,edmFields,graphs,1];
+WriteEDMClass[fields_List, files_List] :=
+  Module[{(* in models without flavour violation (no FV models) lepton does not have an index *)
+          leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
+          (* we want to calculate an offset of g-2 compared to the SM *)
+          discardSMcontributions = CConversion`CreateCBoolValue[True],
+          calculation, calculateForwadDeclaration},
 
-    vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,2],1];
+    calculation =
+       If[Length[fields] =!= 0,
+            "const auto form_factors = " <>
+            FSModelName <> "_FFV_form_factors::calculate_form_factors<Lepton,Lepton," <>
+            CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            "model, " <> discardSMcontributions <> ");",
+            "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
+       ];
 
-    {interfacePrototypes,interfaceDefinitions} =
-      If[diagrams === {},
-         {"",""},
-         StringJoin @@@
-          (Riffle[#, "\n\n"] & /@ Transpose[EDM`EDMCreateInterfaceFunctionForField @@@
-            Transpose[{edmFields,Transpose[{graphs,#}] & /@ diagrams}]])];
+    calculateForwadDeclaration = StringRiffle[EDM`ForwardDeclaration[#, "calculate_edm"]& /@ fields, "\n"];
 
     WriteOut`ReplaceInFiles[files,
-                            {"@EDM_InterfacePrototypes@"       -> interfacePrototypes,
-                             "@EDM_InterfaceDefinitions@"      -> interfaceDefinitions,
+                            {"@EDMCalculation@"       -> TextFormatting`IndentText[calculation],
+                             "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
+                             "@calculateForwadDeclaration@" -> calculateForwadDeclaration,
                              Sequence @@ GeneralReplacementRules[]
                             }];
 
