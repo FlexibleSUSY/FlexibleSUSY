@@ -61,7 +61,8 @@ BeginPackage["FlexibleSUSY`",
               "FlexibleTower`",
               "WeinbergAngle`",
               "Wrappers`",
-              "Himalaya`"
+              "Himalaya`",
+              "GM2Calc`"
 }];
 
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
