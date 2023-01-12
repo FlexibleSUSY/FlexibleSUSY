@@ -4182,7 +4182,7 @@ Options[MakeFlexibleSUSY] :=
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, initialGuesserInputFile,
-            aMMVertices, edmFields,
+            aMMVertices, edmFields, ammFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -5103,22 +5103,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   DeleteDuplicates @ Join[
 
                      (* lepton g-2 *)
-                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`AMM[_]],
-                           (# -> {#, TreeMasses`GetPhoton[]})& /@ (
-                           Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /.
-                              FlexibleSUSYObservable`AMM[l_[_]] :> l /. FlexibleSUSYObservable`AMM[l_] :> l
-                        ),
-                        {}
-                     ],
+                     (# -> {#, TreeMasses`GetPhoton[]})& /@ ammFields,
 
                      (* lepton edm *)
-                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`EDM[_]],
-                           (# -> {#, TreeMasses`GetPhoton[]})& /@ (
-                           Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`EDM[_]]&] /.
-                              FlexibleSUSYObservable`EDM[l_[_]] :> l /. FlexibleSUSYObservable`EDM[l_] :> l
-                        ),
-                        {}
-                     ],
+                     (# -> {#, TreeMasses`GetPhoton[]})& /@ edmFields,
 
                      (* Br(L -> L Gamma) *)
                      LToLGammaFields,
@@ -5141,7 +5129,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            Print["Creating lepton AMM class ..."];
            aMMVertices = WriteAMMClass[
-              DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /. FlexibleSUSYObservable`AMM[f_[_]] -> f /. FlexibleSUSYObservable`AMM[f_] -> f],
+              ammFields,
               {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
                {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
