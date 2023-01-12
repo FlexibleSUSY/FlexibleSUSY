@@ -5096,6 +5096,20 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
 
+           Print["Creating lepton AMM class ..."];
+           ammFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
+                                                FlexibleSUSYObservable`AMM[p_[__]|p_] :> p];
+           aMMVertices = WriteAMMClass[
+              ammFields,
+              {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.cpp"}]}}];
+
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
                WriteFFVFormFactorsClass[
@@ -5126,18 +5140,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      {FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
                ];
-
-           Print["Creating lepton AMM class ..."];
-           aMMVertices = WriteAMMClass[
-              ammFields,
-              {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.hpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.cpp"}]}}];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];
