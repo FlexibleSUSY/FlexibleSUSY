@@ -265,7 +265,7 @@ endif
 
 ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_gmm2.cpp \
+		$(DIR)/test_MRSSM2_amm.cpp \
 		$(DIR)/test_MRSSM2_mw_calculation.cpp \
 		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
 endif
@@ -310,7 +310,7 @@ endif
 ifeq ($(WITH_CE6SSM), yes)
 TEST_SRC += \
 		$(DIR)/test_CE6SSM_ewsb.cpp \
-		$(DIR)/test_CE6SSM_gmm2.cpp \
+		$(DIR)/test_CE6SSM_amm.cpp \
 		$(DIR)/test_CE6SSM_semi_analytic_solutions.cpp
 endif
 
@@ -404,7 +404,7 @@ TEST_META += \
 		$(DIR)/test_munuSSM_TreeMasses.m
 
 TEST_SRC += \
-		$(DIR)/test_munuSSM_gmm2.cpp
+		$(DIR)/test_munuSSM_amm.cpp
 endif
 
 ifeq ($(WITH_munuSSM) $(WITH_munuSSMSemiAnalytic), yes yes)
@@ -541,7 +541,7 @@ TEST_META += \
 		$(DIR)/test_SM_vvvv.m
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
-		$(DIR)/test_SM_gmm2.cpp \
+		$(DIR)/test_SM_amm.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
 		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
@@ -1070,7 +1070,7 @@ $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
 
-$(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
+$(DIR)/test_MRSSM2_amm.x: $(LIBMRSSM2)
 
 $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
 
@@ -1181,7 +1181,7 @@ $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 
 $(DIR)/test_SM_beta_functions.x: $(LIBSM)
 
-$(DIR)/test_SM_gmm2.x: $(LIBSM)
+$(DIR)/test_SM_amm.x: $(LIBSM)
 
 $(DIR)/test_SM_higgs_loop_corrections.x: $(LIBSM)
 
@@ -1239,7 +1239,7 @@ $(DIR)/test_CNMSSM_consistent_solutions.x: $(LIBCNMSSM) $(LIBNMSSM)
 
 $(DIR)/test_CE6SSM_ewsb.x: $(LIBCE6SSM)
 
-$(DIR)/test_CE6SSM_gmm2.x: $(LIBCE6SSM)
+$(DIR)/test_CE6SSM_amm.x: $(LIBCE6SSM)
 
 $(DIR)/test_CE6SSM_semi_analytic_solutions.x: $(LIBCE6SSM)
 
@@ -1253,7 +1253,7 @@ $(DIR)/test_lowNUHMSSMSemiAnalytic_semi_analytic_solutions.x: $(LIBlowNUHMSSMSem
 
 $(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.x: $(LIBlowNUHMSSMSemiAnalytic) $(LIBlowNUHMSSM)
 
-$(DIR)/test_munuSSM_gmm2.x: $(LIBmunuSSM)
+$(DIR)/test_munuSSM_amm.x: $(LIBmunuSSM)
 
 $(DIR)/test_munuSSMSemiAnalytic_ewsb.x: $(LIBmunuSSMSemiAnalytic)
 

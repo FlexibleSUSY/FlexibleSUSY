@@ -61,36 +61,67 @@ BOOST_AUTO_TEST_CASE( test_amu )
    input.MDGocInput = 1500;
 
    softsusy::QedQcd qedqcd;
-   MRSSM2_slha m = setup_MRSSM2(input, qedqcd);
 
    using MRSSM2_cxx_diagrams::fields::Fe;
 
-   auto ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 0);
+   Spectrum_generator_settings settings;
+   // 1L + 2L QED
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+
+   MRSSM2_slha m = setup_MRSSM2(input, qedqcd, settings);
+
+   auto ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
    BOOST_CHECK_CLOSE_FRACTION(ae, -1.8019363934392491e-15, 1e-7);
 
-   auto amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
+   auto amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, -8.1719107571588341e-11, 1e-7);
-   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
-   double damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, 1);
+   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, settings, 1), 1e-16);
+   double damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 1);
    BOOST_CHECK_CLOSE_FRACTION(damu, 9.0675554049399791e-13, 1e-7);
 
-   auto atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 2);
+   auto atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
    BOOST_CHECK_CLOSE_FRACTION(atau, -2.2071973783347808e-08, 1e-7);
 
-   // neutralino dominance
-   input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
-   m = setup_MRSSM2(input, qedqcd);
+   // 1L + 2L QED + Barr-Zee
+   settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
 
-   ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 0);
+   ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
+   BOOST_CHECK_CLOSE_FRACTION(ae, -1.1509961403223395e-15, 1e-7);
+
+   amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
+   BOOST_CHECK_CLOSE_FRACTION(amu, -5.3889383787834972e-11, 1e-7);
+
+   atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, -1.4200847904302034e-08, 1e-7);
+
+   // neutralino dominance
+
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+
+   input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
+   m = setup_MRSSM2(input, qedqcd, settings);
+
+   ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
    BOOST_CHECK_CLOSE_FRACTION(ae, 1.3730107649079216e-16, 1e-7);
 
-   amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
+   amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 6.2697795623223974e-12, 1e-7);
-   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
 
-   atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 2);
+   atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
    BOOST_CHECK_CLOSE_FRACTION(atau, 3.7303931716651099e-09, 1e-7);
 
-   damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, 1);
+   damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 1);
    BOOST_CHECK_CLOSE_FRACTION(damu, 7.277946979761437e-12, 1e-7);
+
+   // 1L + 2L QED + Barr-Zee
+   settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
+
+   ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 7.9271723544599888e-16, 1e-7);
+
+   amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 3.4290840213640912e-11, 1e-7);
+
+   atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 1.1653887003170018e-08, 1e-7);
 }

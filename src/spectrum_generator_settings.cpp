@@ -343,7 +343,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
    values[loop_library]                     = -1.; // -1 = (set via environment FLEXIBLESUSY_LOOP_LIBRARY)
-   values[calculate_amm]                    = 0;
+   values[calculate_amm]                    = 1;
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const

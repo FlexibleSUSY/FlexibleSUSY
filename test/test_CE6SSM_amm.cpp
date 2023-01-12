@@ -128,7 +128,10 @@ Block EXTPAR
 
    using CE6SSM_cxx_diagrams::fields::Fe;
 
-   auto amu = CE6SSM_amm::calculate_amm<Fe>(std::get<0>(models), qedqcd, 1);
+   // 1L + 2L QED
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+
+   auto amu = CE6SSM_amm::calculate_amm<Fe>(std::get<0>(models), qedqcd, settings, 1);
 
    // Reference value from FlexibleSUSY, checks that value does not change
    constexpr double reference_value =
@@ -138,4 +141,9 @@ Block EXTPAR
    // Perform a rough closeness check
    BOOST_CHECK_CLOSE_FRACTION(amu, reference_value, 1e-3);
 
+   // 1L + 2L QED + Barr-Zee
+   settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
+
+   amu = CE6SSM_amm::calculate_amm<Fe>(std::get<0>(models), qedqcd, settings, 1);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 4.7615802422189462e-11, 1e-7);
 }

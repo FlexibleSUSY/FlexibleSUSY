@@ -132,12 +132,27 @@ Block YVIN
 
    using munuSSM_cxx_diagrams::fields::Cha;
 
-   const double ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 0);
+   // 1L + 2L QED
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+
+   double ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 0);
    BOOST_CHECK_CLOSE_FRACTION(ae, 1.9398670311763684e-14, 1e-6);
 
-   const double amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 1);
+   double amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 3.4829855830138246e-09, 1e-6);
 
-   const double atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 2);
+   double atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 2);
    BOOST_CHECK_CLOSE_FRACTION(atau, 1.7900498254975007e-05, 1e-6);
+
+   // 1L + 2L QED + Barr-Zee
+   settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
+
+   ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 0);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 1.5891673276315595e-11, 1e-6);
+
+   amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 1);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 4.2684661421478245e-09, 1e-6);
+
+   atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 1.7171354180269422e-05, 1e-6);
 }
