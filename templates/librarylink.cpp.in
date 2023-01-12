@@ -152,7 +152,7 @@ public:
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
-   virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) = 0;
+   virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&, const Spectrum_generator_settings&) = 0;
 @calculateDecaysVirtualFunc@
 };
 
@@ -173,7 +173,7 @@ public:
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
-   virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) override;
+   virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&, const Spectrum_generator_settings&) override;
 @calculateSpectrumDecaysPrototype@
 private:
    std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
@@ -661,9 +661,9 @@ void @ModelName@_spectrum_impl<Solver_type>::calculate_spectrum(
 
 template <typename Solver_type>
 void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
-   const softsusy::QedQcd& qedqcd, const Physical_input& physical_input)
+   const softsusy::QedQcd& qedqcd, const Physical_input& physical_input, const Spectrum_generator_settings& settings)
 {
-   observables = calculate_observables(std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
+   observables = calculate_observables(std::get<0>(models), qedqcd, physical_input, settings, scales.pole_mass_scale);
 }
 @calculateSpectrumDecaysFunction@
 /******************************************************************/
@@ -739,7 +739,7 @@ void Model_data::calculate_spectrum()
 void Model_data::calculate_model_observables()
 {
    check_spectrum_pointer();
-   spectrum->calculate_model_observables(qedqcd, physical_input);
+   spectrum->calculate_model_observables(qedqcd, physical_input, settings);
 }
 @calculateModelDecaysFunction@
 /******************************************************************/

@@ -2570,16 +2570,16 @@ TextFormatting`IndentText[
 
       BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
 
-      gm2WrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
-      gm2UncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      gm2WrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      gm2UncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       gm2WrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
-   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd, settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
       gm2UncWrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
-   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd, settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
 
@@ -2594,7 +2594,7 @@ TextFormatting`IndentText[
          "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
-         "@AMMBarZeeCalculation@" -> TextFormatting`IndentText[barZee],
+         "@AMMBarZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 3],
          "@gm2WrapperDecl@" -> gm2WrapperDecl,
          "@gm2WrapperDef@" -> gm2WrapperDef,
          "@gm2UncWrapperDecl@" -> gm2UncWrapperDecl,

@@ -34,6 +34,7 @@
 #include "wrappers.hpp"
 #include "numerics2.hpp"
 #include "logger.hpp"
+#include "spectrum_generator_settings.hpp"
 
 #define DERIVEDPARAMETER(p) context.model.p()
 
@@ -303,7 +304,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 @leptonPoleMass@
 
 template <typename Lepton>
-double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
    VERBOSE_MSG("@ModelName@_amm: calculating a_mu at Q = " << model.get_scale());
 
@@ -318,28 +319,34 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   double val =
-      // vector form factor
-      1./2.*(form_factors[2] + form_factors[3]).real()
-      // reinstate the mass that was factored out in definition of form factor
-      * context.mass<Lepton>({@extraIdxUsageNoComma@})
-      // factor out e/(2*lepton pole mass)
-      / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
-      // definition of photon momentum flow for g-2 is opposite than for form factors
-      * (-1.);
+   double val = 0.;
 
-   // add 2-loop QED logarithms
-   val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
+   switch (static_cast<int>(settings.get(Spectrum_generator_settings::calculate_amm))) {
+      case 0:
+         break;
+      case 1:
+         val +=
+            // vector form factor
+            1./2.*(form_factors[2] + form_factors[3]).real()
+            // reinstate the mass that was factored out in definition of form factor
+            * context.mass<Lepton>({@extraIdxUsageNoComma@})
+            // factor out e/(2*lepton pole mass)
+            / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
+            // definition of photon momentum flow for g-2 is opposite than for form factors
+            * (-1.);
 
-   std::complex<double> valBarZee {0., 0.};
+         // add 2-loop QED logarithms
+         val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
+      case 2:
+         std::complex<double> valBarZee {0., 0.};
 
 @AMMBarZeeCalculation@
-
-   if (!is_zero(valBarZee.imag())) {
-      ERROR("Error in the g-2 calculation! Form factor F2 should be real");
-      return std::numeric_limits<double>::quiet_NaN();
-   } else {
-      val += valBarZee.real();
+         if (!is_zero(valBarZee.imag())) {
+            ERROR("Error in the g-2 calculation! Form factor F2 should be real");
+            return std::numeric_limits<double>::quiet_NaN();
+         } else {
+            val += valBarZee.real();
+         }
    }
 
    return val;
@@ -366,12 +373,12 @@ std::array<double,N> generate_scales(double mean, double factor)
 
 /// returns minimum and maximum a_mu when scale is varied by a factor 2
 template <typename Lepton>
-std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
    auto scales = generate_scales<7>(model.get_scale(), 2.);
 
    std::transform(scales.begin(), scales.end(), scales.begin(),
-                  [&model,&qedqcd@extraIdxUsage@] (double scale) {
+                  [&model,&qedqcd,&settings@extraIdxUsage@] (double scale) {
                      double amu = 0.;
                      try {
                         auto m = model;
@@ -379,7 +386,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
                         m.get_physical().clear();
                         m.calculate_DRbar_masses();
                         m.solve_ewsb();
-                        amu = calculate_amm_impl<Lepton>(m, qedqcd@extraIdxUsage@);
+                        amu = calculate_amm_impl<Lepton>(m, qedqcd, settings@extraIdxUsage@);
                      }
                      catch(const Error& e) {
                         ERROR("@ModelName@_amm: scale variation: " << e.what_detailed());
@@ -395,7 +402,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
 } // anonymous namespace
 
 template <typename Lepton>
-double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 
@@ -409,7 +416,7 @@ double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   return calculate_amm_impl<Lepton>(model, qedqcd@extraIdxUsage@);
+   return calculate_amm_impl<Lepton>(model, qedqcd, settings@extraIdxUsage@);
 }
 
 // spliting templated function into header and cpp
@@ -417,7 +424,7 @@ double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_
 @calculateAForwardDeclaration@
 
 template <typename Lepton>
-double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 
@@ -431,7 +438,7 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   const auto delta_amu_scale_minmax = vary_scale<Lepton>(model, qedqcd@extraIdxUsage@);
+   const auto delta_amu_scale_minmax = vary_scale<Lepton>(model, qedqcd, settings@extraIdxUsage@);
    const auto delta_amu_scale = std::abs(delta_amu_scale_minmax.second - delta_amu_scale_minmax.first);
 
    return delta_amu_scale;

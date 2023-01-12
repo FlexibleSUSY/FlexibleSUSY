@@ -31,6 +31,7 @@ namespace softsusy {
 } // namespace softsusy
 
 namespace flexiblesusy {
+class Spectrum_generator_settings;
 class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_lepton_gm2_wrapper {

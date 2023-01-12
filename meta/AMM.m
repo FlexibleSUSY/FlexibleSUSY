@@ -137,7 +137,7 @@ ForwardDeclaration[field_Symbol, functionName_String] :=
 "template double " <> FlexibleSUSY`FSModelName <> "_amm::" <> functionName <> "<" <>
    CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
    ">(" <>
-   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
+   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&, const Spectrum_generator_settings&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
 
 End[];
 EndPackage[];
