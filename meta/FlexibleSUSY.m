@@ -2375,6 +2375,7 @@ WriteEDMClass[fields_List, files_List] :=
                             {"@EDMCalculation@"       -> TextFormatting`IndentText[calculation],
                              "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
                              "@calculateForwadDeclaration@" -> calculateForwadDeclaration,
+                             "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
                              Sequence @@ GeneralReplacementRules[]
                             }];
 
@@ -5106,6 +5107,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            (# -> {#, TreeMasses`GetPhoton[]})& /@ (
                            Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /.
                               FlexibleSUSYObservable`AMM[l_[_]] :> l /. FlexibleSUSYObservable`AMM[l_] :> l
+                        ),
+                        {}
+                     ],
+
+                     (* lepton edm *)
+                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`EDM[_]],
+                           (# -> {#, TreeMasses`GetPhoton[]})& /@ (
+                           Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`EDM[_]]&] /.
+                              FlexibleSUSYObservable`EDM[l_[_]] :> l /. FlexibleSUSYObservable`EDM[l_] :> l
                         ),
                         {}
                      ],
