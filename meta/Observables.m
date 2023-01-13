@@ -238,7 +238,7 @@ CalculateObservable[FlexibleSUSYObservable`EDM[p_[idx_]], structName_String] :=
     Module[{pStr = CConversion`ToValidCSymbolString[p],
             idxStr = ToString[idx]},
            structName <> ".EDM1(" <> pStr <> ", " <> idxStr <> ") = " <>
-           FlexibleSUSY`FSModelName <> "_edm::calculate_edm_" <> pStr <> "(" <> idxStr <> ", MODEL);"
+           FlexibleSUSY`FSModelName <> "_edm::calculate_edm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd, " <> idxStr <> ");"
           ];
 
 CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}], structName_String] :=
