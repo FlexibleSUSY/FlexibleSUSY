@@ -58,12 +58,30 @@ EOF
 
 alpha_em_0=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYInput | awk '{ if ($1 == 0) print $2 }')
 
-amu_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
+amu_1l_2lQED_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
 
-amu_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 2) print $2 }')
+amu_2l_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 2) print $2 }')
 
-amu_gm2calc=$({ cat <<EOF
+amu_2l_gm2calc=$({ cat <<EOF
 Block GM2CalcConfig
+     1  2  # loop order
+     0  0  # minimal output
+     4  0  # verbose output
+Block GM2CalcInput
+     1  ${alpha_em_MZ}  # alpha(MZ) [1L]
+     2  ${alpha_em_0}   # alpha(0)  [2L]
+EOF
+  cat "${SLHA_OUT}";
+      } | "${GM2CALC_EXE}" --slha-input-file=-)
+
+[ $? = 0 ] || {
+    echo "Error: ${GM2CALC_EXE} failed!"
+    exit 1
+}
+
+amu_1l_gm2calc=$({ cat <<EOF
+Block GM2CalcConfig
+     1  1  # loop order
      0  0  # minimal output
      4  0  # verbose output
 Block GM2CalcInput
@@ -79,11 +97,37 @@ EOF
 }
 
 # convert scientific notation to bc friendly notation
-amu_fs=$(echo "${amu_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
-amu_gm2calc_fs=$(echo "${amu_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
-amu_gm2calc=$(echo "${amu_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_1l_2lQED_fs=$(echo "${amu_1l_2lQED_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_2l_gm2calc=$(echo "${amu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 
-### test GM2Calc vs. embedded GM2Calc
+errors=0
+
+# compares two values $1 and $2 for relative equality with a maximum relative deviation $3
+test_close() {
+    local val1
+    local val2
+    local rel_error
+    local diff
+
+    val1="$1"
+    val2="$2"
+    rel_error="$3"
+    diff=$(cat <<EOF | bc $BASEDIR/abs.bc
+scale=100
+abs((abs(${val1}) - abs(${val2})) / (${val1})) < ${rel_error}
+EOF
+        )
+
+    if test $diff -ne 1 ; then
+        echo "Error: relative difference between"
+        echo " ${val1} and ${val2} is larger than ${rel_error}"
+        errors=1
+    fi
+}
+
+### test 2L GM2Calc vs. embedded 2L GM2Calc
 
 # Note: The agreement between vanilla GM2Calc and the GM2Calc version
 # embedded in FlexibleSUSY is not 100% perfect.  The reason is, that
@@ -98,41 +142,20 @@ amu_gm2calc=$(echo "${amu_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^
 # exact  MSm = (229.991  360.947)
 # SLHA-1 MSm = (230.002  360.937)
 
-rel_error=0.0001
+test_close "${amu_2l_gm2calc_fs}" "${amu_2l_gm2calc}" "0.0001"
 
-diff=$(cat <<EOF | bc $BASEDIR/abs.bc
-scale=100
-abs((abs($amu_gm2calc_fs) - abs($amu_gm2calc)) / ($amu_gm2calc_fs)) < $rel_error
-EOF
-    )
+### test 1L + 2L QED FlexibleSUSY vs. embedded 2L GM2Calc
 
-errors=0
+test_close "${amu_2l_gm2calc_fs}" "${amu_1l_2lQED_fs}" "0.04"
 
-if test $diff -ne 1 ; then
-    echo "Error: relative difference between"
-    echo " $amu_gm2calc_fs and $amu_gm2calc is larger than $rel_error"
-    errors=1
-fi
+### test 1L + 2L QED FlexibleSUSY vs. 1L GM2Calc
 
-### test FlexibleSUSY vs. embedded GM2Calc
+test_close "${amu_1l_gm2calc}" "${amu_1l_2lQED_fs}" "0.1"
 
-rel_error=0.04
-
-diff=$(cat <<EOF | bc $BASEDIR/abs.bc
-scale=100
-abs((abs($amu_gm2calc_fs) - abs($amu_fs)) / ($amu_fs)) < $rel_error
-EOF
-    )
-
-if test $diff -ne 1 ; then
-    echo "Error: relative difference between"
-    echo " $amu_gm2calc_fs and $amu_fs is larger than $rel_error"
-    errors=1
-fi
-
-echo "FlexibleSUSY 1L + 2L QED                       : amu = $amu_fs"
-echo "embedded GM2Calc                               : amu = $amu_gm2calc_fs"
-echo "original GM2Calc                               : amu = $amu_gm2calc"
+echo "FlexibleSUSY 1L + 2L QED: amu = ${amu_1l_2lQED_fs}"
+echo "original 1L GM2Calc     : amu = ${amu_1l_gm2calc}"
+echo "original 2L GM2Calc     : amu = ${amu_2l_gm2calc}"
+echo "embedded 2L GM2Calc     : amu = ${amu_2l_gm2calc_fs}"
 
 if test $errors -eq 0 ; then
     echo "Test status: OK"
