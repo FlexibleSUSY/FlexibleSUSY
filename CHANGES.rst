@@ -31,8 +31,8 @@ New features
         }
      };
 
-* Added calculation of vector diagram contributions to leptons :math:
-  `$(g-2)/2$`.
+* Added calculation of vector diagram contributions to leptons
+  :math:`$(g-2)/2$`, EDMs and to :math:`$b \to s \gamma$`.
 
   Thanks to Douglas Jacob.
 
