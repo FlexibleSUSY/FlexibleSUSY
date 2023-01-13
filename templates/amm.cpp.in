@@ -322,7 +322,8 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    double val = 0.;
 
-   if (static_cast<int>(settings.get(Spectrum_generator_settings::calculate_amm)) > 0) {
+   // 1L
+   if (settings.get(Spectrum_generator_settings::calculate_amm) > 0.5) {
       val +=
          // vector form factor
          1./2.*(form_factors[2] + form_factors[3]).real()
@@ -332,12 +333,16 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
          / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
          // definition of photon momentum flow for g-2 is opposite than for form factors
          * (-1.);
+   }
 
+   // 2L QED
+   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.25) {
       // add 2-loop QED logarithms
       val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
    }
 
-   if (static_cast<int>(settings.get(Spectrum_generator_settings::calculate_amm)) > 1) {
+   // Barr-Zee
+   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.75) {
       std::complex<double> valBarZee {0., 0.};
 
 @AMMBarZeeCalculation@

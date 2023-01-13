@@ -109,6 +109,15 @@ void assert_le(double value, double upper_bound, const char* quantity)
    }
 }
 
+void assert_lt(double value, double upper_bound, const char* quantity)
+{
+   if (value >= upper_bound) {
+      throw SetupError(std::string(quantity) +
+                       " must be lower than " +
+                       flexiblesusy::to_string(upper_bound));
+   }
+}
+
 } // anonymous namespace
 
 /**
@@ -252,10 +261,9 @@ void Spectrum_generator_settings::set(Settings o, double value)
       assert_ge(value, -1, descriptions.at(o).c_str());
       assert_le(value, 3,  descriptions.at(o).c_str());
       break;
-   case calculate_amm: // 32 [int >= 0 and <= 2]
-      assert_integer(value, descriptions.at(o).c_str());
+   case calculate_amm: // 32 [double >= 0 and < 3]
       assert_ge(value, 0, descriptions.at(o).c_str());
-      assert_le(value, 2,  descriptions.at(o).c_str());
+      assert_lt(value, 3,  descriptions.at(o).c_str());
       break;
    default:
       break;
@@ -306,7 +314,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
  * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)  |
- * | calculate_amm                    | 0 (no),1 (1L+2LQED), 2 (1L+2LQED+2LBarr-Zee)    | 0 (= no)        |
+ * | calculate_amm                    | 0(no),1(1L),1.5(1L+2LQED),2(1L+2LQED+Barr-Zee)  | 0 (= no)        |
  */
 void Spectrum_generator_settings::reset()
 {
@@ -343,7 +351,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
    values[loop_library]                     = -1.; // -1 = (set via environment FLEXIBLESUSY_LOOP_LIBRARY)
-   values[calculate_amm]                    = 1;
+   values[calculate_amm]                    = 1.5;
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const
