@@ -618,7 +618,8 @@ endif
 
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMCPV_ewsb.cpp
+		$(DIR)/test_CMSSMCPV_ewsb.cpp \
+		$(DIR)/test_CMSSMCPV_edm.cpp
 endif
 ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -1127,6 +1128,8 @@ $(DIR)/test_CMSSMMassWInput_spectrum.x: $(LIBCMSSMMassWInput)
 $(DIR)/test_CMSSMLowPrecision.x: $(LIBCMSSMLowPrecision)
 
 $(DIR)/test_CMSSMCPV_ewsb.x: $(LIBCMSSMCPV)
+
+$(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
 
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 

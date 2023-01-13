@@ -2352,24 +2352,31 @@ WriteCXXDiagramClass[vertices_List, files_List,
     ];
 
 (* Write the EDM c++ files *)
-WriteEDMClass[edmFields_List,files_List] :=
-  Module[{graphs,diagrams,vertices,
-          interfacePrototypes,interfaceDefinitions},
-    graphs = EDM`EDMContributingGraphs[];
-    diagrams = Outer[EDM`EDMContributingDiagramsForFieldAndGraph,edmFields,graphs,1];
+WriteEDMClass[fields_List, files_List] :=
+  Module[{(* in models without flavour violation (no FV models) lepton does not have an index *)
+          leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
+          (* we want to calculate an offset of g-2 compared to the SM *)
+          discardSMcontributions = CConversion`CreateCBoolValue[False],
+          calculation, calculateForwadDeclaration},
 
-    vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,2],1];
+    calculation =
+       If[Length[fields] =!= 0,
+            "const auto form_factors = " <>
+            FSModelName <> "_FFV_form_factors::calculate_form_factors<Lepton,Lepton," <>
+            CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            "model, " <> discardSMcontributions <> ");",
+            "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
+       ];
 
-    {interfacePrototypes,interfaceDefinitions} =
-      If[diagrams === {},
-         {"",""},
-         StringJoin @@@
-          (Riffle[#, "\n\n"] & /@ Transpose[EDM`EDMCreateInterfaceFunctionForField @@@
-            Transpose[{edmFields,Transpose[{graphs,#}] & /@ diagrams}]])];
+    calculateForwadDeclaration = StringRiffle[EDM`ForwardDeclaration[#, "calculate_edm"]& /@ fields, "\n"];
 
     WriteOut`ReplaceInFiles[files,
-                            {"@EDM_InterfacePrototypes@"       -> interfacePrototypes,
-                             "@EDM_InterfaceDefinitions@"      -> interfaceDefinitions,
+                            {"@EDMCalculation@"       -> TextFormatting`IndentText[calculation],
+                             "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
+                             "@calculateForwadDeclaration@" -> calculateForwadDeclaration,
+                             "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
                              Sequence @@ GeneralReplacementRules[]
                             }];
 
@@ -4176,7 +4183,7 @@ Options[MakeFlexibleSUSY] :=
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, initialGuesserInputFile,
-            aMMVertices, edmVertices, edmFields,
+            aMMVertices, edmFields, ammFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -5090,6 +5097,20 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
 
+           Print["Creating lepton AMM class ..."];
+           ammFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
+                                                FlexibleSUSYObservable`AMM[p_[__]|p_] :> p];
+           aMMVertices = WriteAMMClass[
+              ammFields,
+              {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.cpp"}]}}];
+
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
                WriteFFVFormFactorsClass[
@@ -5097,13 +5118,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   DeleteDuplicates @ Join[
 
                      (* lepton g-2 *)
-                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`AMM[_]],
-                           (# -> {#, TreeMasses`GetPhoton[]})& /@ (
-                           Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /.
-                              FlexibleSUSYObservable`AMM[l_[_]] :> l /. FlexibleSUSYObservable`AMM[l_] :> l
-                        ),
-                        {}
-                     ],
+                     (# -> {#, TreeMasses`GetPhoton[]})& /@ ammFields,
+
+                     (* lepton edm *)
+                     (# -> {#, TreeMasses`GetPhoton[]})& /@ edmFields,
 
                      (* Br(L -> L Gamma) *)
                      LToLGammaFields,
@@ -5123,18 +5141,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      {FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
                ];
-
-           Print["Creating lepton AMM class ..."];
-           aMMVertices = WriteAMMClass[
-              DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /. FlexibleSUSYObservable`AMM[f_[_]] -> f /. FlexibleSUSYObservable`AMM[f_] -> f],
-              {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.hpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.cpp"}]}}];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];
@@ -5157,7 +5163,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[aMMVertices, edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
+              Join[aMMVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates
