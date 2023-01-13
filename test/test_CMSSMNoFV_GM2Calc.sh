@@ -79,10 +79,28 @@ EOF
     exit 1
 }
 
+amu_1l_gm2calc=$({ cat <<EOF
+Block GM2CalcConfig
+     1  1  # loop order
+     0  0  # minimal output
+     4  0  # verbose output
+Block GM2CalcInput
+     1  ${alpha_em_MZ}  # alpha(MZ) [1L]
+     2  ${alpha_em_0}   # alpha(0)  [2L]
+EOF
+  cat "${SLHA_OUT}";
+      } | "${GM2CALC_EXE}" --slha-input-file=-)
+
+[ $? = 0 ] || {
+    echo "Error: ${GM2CALC_EXE} failed!"
+    exit 1
+}
+
 # convert scientific notation to bc friendly notation
 amu_1l_2lQED_fs=$(echo "${amu_1l_2lQED_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc=$(echo "${amu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 
 errors=0
 
@@ -130,9 +148,14 @@ test_close "${amu_2l_gm2calc_fs}" "${amu_2l_gm2calc}" "0.0001"
 
 test_close "${amu_2l_gm2calc_fs}" "${amu_1l_2lQED_fs}" "0.04"
 
+### test 1L + 2L QED FlexibleSUSY vs. 1L GM2Calc
+
+test_close "${amu_1l_gm2calc}" "${amu_1l_2lQED_fs}" "0.1"
+
 echo "FlexibleSUSY 1L + 2L QED: amu = ${amu_1l_2lQED_fs}"
-echo "embedded GM2Calc        : amu = ${amu_2l_gm2calc_fs}"
-echo "original GM2Calc        : amu = ${amu_2l_gm2calc}"
+echo "original 1L GM2Calc     : amu = ${amu_1l_gm2calc}"
+echo "original 2L GM2Calc     : amu = ${amu_2l_gm2calc}"
+echo "embedded 2L GM2Calc     : amu = ${amu_2l_gm2calc_fs}"
 
 if test $errors -eq 0 ; then
     echo "Test status: OK"
