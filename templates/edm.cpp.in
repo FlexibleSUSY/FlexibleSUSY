@@ -31,10 +31,6 @@
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 
-namespace {
-static constexpr double oneOver16PiSquared = 0.0063325739776461107152;
-} // anonymous namespace
-
 namespace flexiblesusy {
 namespace @ModelName@_edm {
 
