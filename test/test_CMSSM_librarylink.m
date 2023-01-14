@@ -44,7 +44,7 @@ settings = {
     betaZeroThreshold -> 1.*10^-11,
     forcePositiveMasses -> 0,
     poleMassScale -> 0.,
-    parameterOutputScale -> 0.
+    parameterOutputScale -> 0.,
     loopLibrary -> -1
 };
 

@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE( test_non_perturbative_running )
 
    setup_SM_const(sm, input);
 
-   const auto obs = flexiblesusy::calculate_observables(sm, qedqcd, physical_input, setting, scale);
+   const auto obs = flexiblesusy::calculate_observables(sm, qedqcd, physical_input, settings, scale);
    const auto op = obs.problems;
 
    // BOOST_CHECK(op.have_problem());
