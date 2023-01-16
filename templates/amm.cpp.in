@@ -479,9 +479,10 @@ Lepton, Fermion, Scalar
                const std::complex<double> zrf = fermionVertex.right();
                const std::complex<double> zlf = fermionVertex.left();
                const std::complex<double> zmzr = leptonZVertex.right();
+               const std::complex<double> zmzl = leptonZVertex.left();
                const std::complex<double> zfzr = fermionZVertex.right();
 
-               const double gvm = (0.5) * (zmzr.real()/unit_charge(context) + sw/cw);
+               const double gvm = 0.5*(zmzr.real() + zmzl.real());
                const double gvf = (0.5) * (zfzr.real()/unit_charge(context) - fermionChargeCount*sw/cw);
                const std::complex<double> coeffA = (zrf + zlf) * (zrm + zlm);
                const std::complex<double> coeffB = (zlf - zrf) * (zrm - zlm);
@@ -491,7 +492,7 @@ Lepton, Fermion, Scalar
                const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFS(massRatioSquared) - BarrZeeLoopFS(Sqr(fermionMass / zMass)));
                const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFPS(massRatioSquared) - BarrZeeLoopFPS(Sqr(fermionMass / zMass)));
 
-               const double preFactor = - Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
+               const double preFactor = - unit_charge(context)/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
                res += preFactor * (part1 + part2);
