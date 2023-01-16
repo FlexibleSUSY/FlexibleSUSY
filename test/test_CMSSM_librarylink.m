@@ -148,7 +148,7 @@ TestCloseRel[BMu /. slhaData, B[\[Mu]] /. specML, delta];
 
 delta = 1*^-6;
 
-TestCloseRel[aMuon  /. slhaData, FlexibleSUSYObservable`aMuon /. obsML, delta];
+TestCloseRel[aMuon  /. slhaData, FlexibleSUSYObservable`AMM[Fe[2]] /. obsML, delta];
 
 TestEquality[CMSSM /. probML, {}];
 TestEquality[CMSSM /. warnML, {}];
