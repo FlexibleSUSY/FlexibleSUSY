@@ -29,7 +29,7 @@
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
-#include "Li2.hpp"
+#include "amm_loop_functions.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "numerics2.hpp"
@@ -48,10 +48,6 @@ namespace {
 
 template <typename Lepton>
 double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
-double BarZeeLoopFPS(double);
-double BarZeeLoopFS(double);
-double BarZeeLoopS(double);
-double BarZeeLoopV(double);
 
 /**
  * @class AMMBarZeeFermionLoop
@@ -144,124 +140,6 @@ struct AMMBarZeeVectorLoop {
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
-
-/**
-    Loop function needed for the calculation of the BarZeeDiagram with
-    fermion loop. (arXiv:1502.04199 Equation 26)
-
-    @param respective squared mass ratio.
-*/
-
-double BarZeeLoopFPS(double m) {
-   // @todo(alex): check stability for small values
-   if (m == 0) {
-      return 0;
-   }
-
-   if (m == 0.25) {
-      return ln2;
-   }
-
-   double r1, theta1, r2, theta2;
-   if (m <= 0.25) {
-      const double y = std::sqrt(1.0-4.0*m);
-      r1 = 1.0 - (1.0 - y)/(2*m);
-      r2 = 1.0 - (1.0 + y)/(2*m);
-      if (r1 > 0) {
-         theta1 = 0.0;
-      }
-      else {
-         r1 *= -1;
-         theta1 = Pi;
-      }
-      if (r2 > 0) {
-         theta2 = 0.0;
-      }
-      else {
-         r2 *= -1;
-         theta2 = Pi;
-      }
-      return m / y * (Li2(std::polar(r1, theta1)).real() - Li2(std::polar(r2, theta2)).real());
-   }
-   else {
-      const double y = std::sqrt(-1.0+4.0*m);
-      const double real = 1 - 1/(2*m);
-      r1 = r2 = 1.0;
-
-      theta1 = std::atan2(y/(2*m), real);
-      theta2 = std::atan2(-y/(2*m), real);
-
-      return m / y * (Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
-   }
-}
-
-/**
-    Loop function needed for the calculation of the BarZeeDiagram with
-    fermion loop. (arXiv:1502.04199 Equation 25)
-
-    @param respective squared mass ratio.
-*/
-
-double BarZeeLoopFS(double m)
-{
-    if (m == 0) {
-        return 0;
-    }
-
-    return (2*m - 1) * BarZeeLoopFPS(m) - m * (2 + std::log(m));
-}
-
-/**
-    Loop function needed for the calculation of the BarZeeDiagram with
-    fermion loop. (arXiv:1502.04199 Equation 27)
-
-    @param respective squared mass ratio.
-*/
-
-double BarZeeLoopS(const double m)
-{
-   return 1 + std::log(m)/2 - BarZeeLoopFPS(m);
-}
-
-/**
-    Loop function needed for the calculation of the BarZeeDiagram with
-    fermion loop. (arXiv:1502.04199 Equation 28)
-
-    @param respective squared mass ratio.
-*/
-
-double BarZeeLoopV(const double m) {
-   if (m == 0.25) {
-      return 4.75;
-   }
-
-   double j;
-
-   double r1, theta1, r2, theta2;
-
-   if (m < 0.25) {
-      const double y = std::sqrt(1.0-4.0*m);
-      r1 = 2 / (1-y);
-      theta1 = std::atan2(0, r1);
-      r1 = std::abs(r1);
-      r2 = 2 / (1+y);
-      theta2 = std::atan2(0, r2);
-      r2 = std::abs(r2);
-
-      j = 1/y * (std::log(std::abs(y-1) / (y+1)) * std::log(m) + Li2(std::polar(r1, theta1)).real() - Li2(std::polar(r2, theta2)).real());
-   }
-   else {
-      const double y = std::sqrt(-1.0+4.0*m);
-      r1 = r2 = std::sqrt(1/m);
-      const double real = 1/(2*m);
-      const double imag = y/(2*m);
-      theta1 = std::atan2(imag, real);
-      theta2 = std::atan2(-imag, real);
-      j = 1/y * ( (std::atan2(y, -1) - std::atan2(y, 1)) * std::log(m) + Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
-   }
-
-   return BarZeeLoopS(m) + 15.0/2.0 * m * (2.0 + std::log(m)) + m/2 * (19 - 12*m) * j - 9*m * BarZeeLoopFPS(m);
-}
 
 double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
 {

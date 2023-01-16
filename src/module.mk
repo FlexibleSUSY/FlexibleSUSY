@@ -6,6 +6,7 @@ LIBFLEXI_MK  := \
 		$(DIR)/module.mk
 
 LIBFLEXI_SRC := \
+		$(DIR)/amm_loop_functions.cpp \
 		$(DIR)/betafunction.cpp \
 		$(DIR)/build_info.cpp \
 		$(DIR)/bvp_solver_problems.cpp \
@@ -64,6 +65,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/zeta.cpp
 
 LIBFLEXI_HDR := \
+		$(DIR)/amm_loop_functions.hpp \
 		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
 		$(DIR)/betafunction.hpp \
