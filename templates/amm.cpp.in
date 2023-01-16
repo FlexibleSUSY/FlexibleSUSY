@@ -50,92 +50,92 @@ template <typename Lepton>
 double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
 
 /**
- * @class AMMBarZeeFermionLoop
+ * @class AMMBarrZeeFermionLoop
  * @brief A template that calculate contributions to the
  *        anomalous magnetic dipole moment of a given particle in
- *        a BarZee diagram with a fermion loop and scalar/Photon exchange
+ *        a BarrZee diagram with a fermion loop and scalar/Photon exchange
  *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (1))
  * @tparam Args Specifies in order the field of which to
  *              calculate the electric magnetic moment,
  *              the photon emitter and the exchange particle
- *              in a BarZee diagram where the photon emitter
+ *              in a BarrZee diagram where the photon emitter
  *              is a Fermion and the exchange particle a scalar particle.
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarZee diagram with fields given by
+ * dipole moment of a BarrZee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMMBarZeeFermionLoop {
+struct AMMBarrZeeFermionLoop {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMMBarZeeFermionZLoop
+ * @class AMMBarrZeeFermionZLoop
  * @brief A template that calculate contributions to the
  *        anomalous magnetic dipole moment of a given particle in
- *        a BarZee diagram with a fermion loop and scalar/Z-boson exchange
+ *        a BarrZee diagram with a fermion loop and scalar/Z-boson exchange
  *        particle.
  * @tparam Args Specifies in order the field of which to
  *              calculate the electric magnetic moment,
  *              the photon emitter and the exchange particle
- *              in a BarZee diagram where the photon emitter
+ *              in a BarrZee diagram where the photon emitter
  *              is a Fermion and the exchange particle a scalar particle.
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarZee diagram with fields given by
+ * dipole moment of a BarrZee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMMBarZeeFermionLoopZ {
+struct AMMBarrZeeFermionLoopZ {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMMBarZeeScalarLoop
+ * @class AMMBarrZeeScalarLoop
  * @brief A template that calculate contributions to the
  *        anomalous dipole moment of a given particle in
- *        a BarZee diagram with a scalar loop and scalar exchange
+ *        a BarrZee diagram with a scalar loop and scalar exchange
  *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (2))
  * @tparam Args Specifies in order the field of which to
  *              calculate the magnetic dipole moment,
  *              the photon emitter and the exchange particle
- *              in a BarZee diagram where the photon emitter
+ *              in a BarrZee diagram where the photon emitter
  *              is a scalar particle and the exchange particle a scalar particle.
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarZee diagram with fields given by
+ * dipole moment of a BarrZee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMMBarZeeScalarLoop {
+struct AMMBarrZeeScalarLoop {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMMBarZeeVectorLoop
+ * @class AMMBarrZeeVectorLoop
  * @brief A template that calculate contributions to the
  *        anomalous dipole moment of a given particle in
- *        a BarZee diagram with a scalar loop and scalar exchange
+ *        a BarrZee diagram with a scalar loop and scalar exchange
  *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (3))
  * @tparam Args Specifies in order the field of which to
  *              calculate the magnetic dipole moment,
  *              the photon emitter and the exchange particle
- *              in a BarZee diagram where the photon emitter
+ *              in a BarrZee diagram where the photon emitter
  *              is a scalar particle and the exchange particle a scalar particle.
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarZee diagram with fields given by
+ * dipole moment of a BarrZee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
-struct AMMBarZeeVectorLoop {
+struct AMMBarrZeeVectorLoop {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
@@ -221,14 +221,14 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    // Barr-Zee
    if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.75) {
-      std::complex<double> valBarZee {0., 0.};
+      std::complex<double> valBarrZee {0., 0.};
 
-@AMMBarZeeCalculation@
-      if (!is_zero(valBarZee.imag())) {
+@AMMBarrZeeCalculation@
+      if (!is_zero(valBarrZee.imag())) {
          ERROR("Error in the g-2 calculation! Form factor F2 should be real");
          return std::numeric_limits<double>::quiet_NaN();
       } else {
-         val += valBarZee.real();
+         val += valBarrZee.real();
       }
    }
 
@@ -323,7 +323,7 @@ double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double 
 }
 
 template<typename Lepton, class Fermion, class Scalar>
-double AMMBarZeeFermionLoop<
+double AMMBarrZeeFermionLoop<
 Lepton, Fermion, Scalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
@@ -380,8 +380,8 @@ Lepton, Fermion, Scalar
 
          const double massRatioSquared = Sqr(fermionMass / scalarMass);
 
-         const double part1 = coeffA.real() * BarZeeLoopFS(massRatioSquared);
-         const double part2 = coeffB.real() * BarZeeLoopFPS(massRatioSquared);
+         const double part1 = coeffA.real() * BarrZeeLoopFS(massRatioSquared);
+         const double part2 = coeffB.real() * BarrZeeLoopFPS(massRatioSquared);
 
          const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * fermionChargeCount
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
@@ -394,7 +394,7 @@ Lepton, Fermion, Scalar
 }
 
 template<typename Lepton, class Fermion, class Scalar>
-double AMMBarZeeFermionLoopZ<
+double AMMBarrZeeFermionLoopZ<
 Lepton, Fermion, Scalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
@@ -488,8 +488,8 @@ Lepton, Fermion, Scalar
 
                const double massRatioSquared = Sqr(fermionMass / scalarMass);
 
-               const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFS(massRatioSquared) - BarZeeLoopFS(Sqr(fermionMass / zMass)));
-               const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFPS(massRatioSquared) - BarZeeLoopFPS(Sqr(fermionMass / zMass)));
+               const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFS(massRatioSquared) - BarrZeeLoopFS(Sqr(fermionMass / zMass)));
+               const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFPS(massRatioSquared) - BarrZeeLoopFPS(Sqr(fermionMass / zMass)));
 
                const double preFactor = - Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
@@ -504,7 +504,7 @@ Lepton, Fermion, Scalar
 }
 
 template<typename Lepton, class ChargedScalar, class NeutralScalar>
-double AMMBarZeeScalarLoop<
+double AMMBarrZeeScalarLoop<
 Lepton, ChargedScalar, NeutralScalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
@@ -564,7 +564,7 @@ Lepton, ChargedScalar, NeutralScalar
          const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * scalarChargeCount * scalarChargeCount
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (neutralScalarMass * neutralScalarMass);
 
-         res += preFactor * coeff.real() * BarZeeLoopS(massRatioSquared);
+         res += preFactor * coeff.real() * BarrZeeLoopS(massRatioSquared);
       }
    }
 
@@ -572,7 +572,7 @@ Lepton, ChargedScalar, NeutralScalar
 }
 
 template<typename Lepton, class Vector, class Scalar>
-double AMMBarZeeVectorLoop<
+double AMMBarrZeeVectorLoop<
 Lepton, Vector, Scalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
@@ -631,7 +631,7 @@ Lepton, Vector, Scalar
          const double preFactor = - Sqr(unit_charge(context))/(128*Power4(Pi)) * vectorChargeCount * vectorChargeCount
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (vectorMass * vectorMass);
 
-         res += preFactor * coeff.real() * BarZeeLoopV(massRatioSquared);
+         res += preFactor * coeff.real() * BarrZeeLoopV(massRatioSquared);
       }
    }
 

@@ -2534,7 +2534,7 @@ WriteAMMClass[fields_List, files_List] :=
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,
             barZee = barZee <>
-               "valBarZee += std::complex<double> " <> ToString @ N[
+               "valBarrZee += std::complex<double> " <> ToString @ N[
                   ReIm @ CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
                CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
                   graphs[[i]]
@@ -2602,7 +2602,7 @@ TextFormatting`IndentText[
          "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
-         "@AMMBarZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 2],
+         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 2],
          "@gm2WrapperDecl@" -> gm2WrapperDecl,
          "@gm2WrapperDef@" -> gm2WrapperDef,
          "@gm2UncWrapperDecl@" -> gm2UncWrapperDecl,

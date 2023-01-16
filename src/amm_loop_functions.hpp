@@ -22,13 +22,13 @@
 namespace flexiblesusy {
 
 /// Barr-Zee 2-loop function with fermion loop
-double BarZeeLoopFPS(double);
+double BarrZeeLoopFPS(double);
 /// Barr-Zee 2-loop function with fermion loop
-double BarZeeLoopFS(double);
+double BarrZeeLoopFS(double);
 /// Barr-Zee 2-loop function with scalar loop
-double BarZeeLoopS(double);
+double BarrZeeLoopS(double);
 /// Barr-Zee 2-loop function with vector
-double BarZeeLoopV(double);
+double BarrZeeLoopV(double);
 
 } // namespace flexiblesusy
 

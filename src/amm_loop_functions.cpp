@@ -28,7 +28,7 @@ namespace flexiblesusy {
  *
  * @param m squared mass ratio
 */
-double BarZeeLoopFPS(double m)
+double BarrZeeLoopFPS(double m)
 {
    const double pi = 3.1415926535897932;
 
@@ -77,13 +77,13 @@ double BarZeeLoopFPS(double m)
  *
  * @param m squared mass ratio.
  */
-double BarZeeLoopFS(double m)
+double BarrZeeLoopFS(double m)
 {
     if (m == 0) {
         return 0;
     }
 
-    return (2*m - 1) * BarZeeLoopFPS(m) - m * (2 + std::log(m));
+    return (2*m - 1) * BarrZeeLoopFPS(m) - m * (2 + std::log(m));
 }
 
 /**
@@ -91,9 +91,9 @@ double BarZeeLoopFS(double m)
  *
  * @param m squared mass ratio
  */
-double BarZeeLoopS(double m)
+double BarrZeeLoopS(double m)
 {
-   return 1 + std::log(m)/2 - BarZeeLoopFPS(m);
+   return 1 + std::log(m)/2 - BarrZeeLoopFPS(m);
 }
 
 /**
@@ -101,7 +101,7 @@ double BarZeeLoopS(double m)
  *
  * @param m squared mass ratio
  */
-double BarZeeLoopV(double m)
+double BarrZeeLoopV(double m)
 {
    if (m == 0.25) {
       return 4.75;
@@ -132,7 +132,7 @@ double BarZeeLoopV(double m)
       j = 1/y * ( (std::atan2(y, -1) - std::atan2(y, 1)) * std::log(m) + Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
    }
 
-   return BarZeeLoopS(m) + 15.0/2.0 * m * (2.0 + std::log(m)) + m/2 * (19 - 12*m) * j - 9*m * BarZeeLoopFPS(m);
+   return BarrZeeLoopS(m) + 15.0/2.0 * m * (2.0 + std::log(m)) + m/2 * (19 - 12*m) * j - 9*m * BarrZeeLoopFPS(m);
 }
 
 } // namespace flexiblesusy
