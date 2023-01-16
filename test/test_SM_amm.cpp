@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_SM_gmm2
+#define BOOST_TEST_MODULE test_SM_amm
 
 #include <boost/test/unit_test.hpp>
 

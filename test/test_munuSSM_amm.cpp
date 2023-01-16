@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_munuSSM_gmm2
+#define BOOST_TEST_MODULE test_munuSSM_amm
 
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
@@ -133,7 +133,7 @@ Block YVIN
    using munuSSM_cxx_diagrams::fields::Cha;
 
    // 1L + 2L QED
-   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.5);
 
    double ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 0);
    BOOST_CHECK_CLOSE_FRACTION(ae, 1.9398670311763684e-14, 1e-6);

@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_CE6SSM_gmm2
+#define BOOST_TEST_MODULE test_CE6SSM_amm
 
 #include <boost/test/unit_test.hpp>
 
@@ -129,7 +129,7 @@ Block EXTPAR
    using CE6SSM_cxx_diagrams::fields::Fe;
 
    // 1L + 2L QED
-   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.5);
 
    auto amu = CE6SSM_amm::calculate_amm<Fe>(std::get<0>(models), qedqcd, settings, 1);
 

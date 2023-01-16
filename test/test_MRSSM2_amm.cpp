@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_MRSSM2_gmm2
+#define BOOST_TEST_MODULE test_MRSSM2_amm
 
 #include <boost/test/unit_test.hpp>
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
 
    Spectrum_generator_settings settings;
    // 1L + 2L QED
-   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.5);
 
    MRSSM2_slha m = setup_MRSSM2(input, qedqcd, settings);
 
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
 
    // neutralino dominance
 
-   settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.5);
 
    input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
    m = setup_MRSSM2(input, qedqcd, settings);
