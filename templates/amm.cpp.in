@@ -463,9 +463,6 @@ Lepton, Fermion, Scalar
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
                const auto leptonMass = context.mass<Lepton>(leptonIndices);
                const auto zMass = context.mass<VZ>({ });
-               const auto ThetaW = DERIVEDPARAMETER(ThetaW);
-               const double cw = Cos(ThetaW);
-               const double sw = Sin(ThetaW);
 
                if (is_zero(zMass - scalarMass, 3e-13)) {
                   continue;
@@ -481,9 +478,10 @@ Lepton, Fermion, Scalar
                const std::complex<double> zmzr = leptonZVertex.right();
                const std::complex<double> zmzl = leptonZVertex.left();
                const std::complex<double> zfzr = fermionZVertex.right();
+               const std::complex<double> zfzl = fermionZVertex.left();
 
                const double gvm = 0.5*(zmzr.real() + zmzl.real());
-               const double gvf = (0.5) * (zfzr.real()/unit_charge(context) - fermionChargeCount*sw/cw);
+               const double gvf = 0.5*(zfzr.real() + zfzl.real());
                const std::complex<double> coeffA = (zrf + zlf) * (zrm + zlm);
                const std::complex<double> coeffB = (zlf - zrf) * (zrm - zlm);
 
@@ -492,7 +490,7 @@ Lepton, Fermion, Scalar
                const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFS(massRatioSquared) - BarrZeeLoopFS(Sqr(fermionMass / zMass)));
                const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFPS(massRatioSquared) - BarrZeeLoopFPS(Sqr(fermionMass / zMass)));
 
-               const double preFactor = - unit_charge(context)/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
+               const double preFactor = -1.0/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
                res += preFactor * (part1 + part2);
