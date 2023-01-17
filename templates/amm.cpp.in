@@ -358,7 +358,7 @@ Lepton, Fermion, Scalar
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
          const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
-         const double fermionChargeCount =
+         static constexpr double fermionChargeCount =
             Fermion::electric_charge / Lepton::electric_charge;
 
          const std::complex<double> zrm = leptonVertex.right();
@@ -459,7 +459,7 @@ Lepton, Fermion, Scalar
                   continue;
                }
 
-               const double fermionChargeCount =
+               static constexpr double fermionChargeCount =
                   Fermion::electric_charge / Lepton::electric_charge;
 
                const std::complex<double> zrm = leptonVertex.right();
@@ -540,7 +540,7 @@ Lepton, ChargedScalar, NeutralScalar
          const auto neutralScalarMass = context.mass<NeutralScalar>(neutralScalarIndices);
          const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
-         const double scalarChargeCount =
+         static constexpr double scalarChargeCount =
             ChargedScalar::electric_charge / Lepton::electric_charge;
 
          const std::complex<double> zrm = leptonVertex.right();
@@ -607,7 +607,7 @@ Lepton, Vector, Scalar
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
          const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
-         const double vectorChargeCount =
+         static constexpr double vectorChargeCount =
             Vector::electric_charge / Lepton::electric_charge;
 
          const std::complex<double> zrm = leptonVertex.right();
