@@ -383,7 +383,7 @@ Lepton, Fermion, Scalar
          const double part1 = coeffA.real() * BarrZeeLoopFS(massRatioSquared);
          const double part2 = coeffB.real() * BarrZeeLoopFPS(massRatioSquared);
 
-         const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * fermionChargeCount
+         const double preFactor = Sqr(unit_charge(context))*4.*twoLoop * fermionChargeCount * fermionChargeCount
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
          res += preFactor * (part1 + part2);
@@ -490,7 +490,7 @@ Lepton, Fermion, Scalar
                const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFS(massRatioSquared) - BarrZeeLoopFS(Sqr(fermionMass / zMass)));
                const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFPS(massRatioSquared) - BarrZeeLoopFPS(Sqr(fermionMass / zMass)));
 
-               const double preFactor = -1.0/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
+               const double preFactor = -4.0*twoLoop * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
                res += preFactor * (part1 + part2);
@@ -560,7 +560,7 @@ Lepton, ChargedScalar, NeutralScalar
 
          const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
 
-         const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * scalarChargeCount * scalarChargeCount
+         const double preFactor = Sqr(unit_charge(context))*4.*twoLoop * scalarChargeCount * scalarChargeCount
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (neutralScalarMass * neutralScalarMass);
 
          res += preFactor * coeff.real() * BarrZeeLoopS(massRatioSquared);
@@ -627,7 +627,7 @@ Lepton, Vector, Scalar
 
          const double massRatioSquared = Sqr(vectorMass / scalarMass);
 
-         const double preFactor = - Sqr(unit_charge(context))/(128*Power4(Pi)) * vectorChargeCount * vectorChargeCount
+         const double preFactor = - Sqr(unit_charge(context))*2.*twoLoop * vectorChargeCount * vectorChargeCount
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (vectorMass * vectorMass);
 
          res += preFactor * coeff.real() * BarrZeeLoopV(massRatioSquared);
