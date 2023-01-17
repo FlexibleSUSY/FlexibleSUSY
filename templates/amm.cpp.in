@@ -37,8 +37,6 @@
 #include "scan.hpp"
 #include "spectrum_generator_settings.hpp"
 
-#define DERIVEDPARAMETER(p) context.model.p()
-
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 
