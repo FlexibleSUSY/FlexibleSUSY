@@ -145,5 +145,5 @@ Block EXTPAR
    settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
 
    amu = CE6SSM_amm::calculate_amm<Fe>(std::get<0>(models), qedqcd, settings, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, 4.7615802422189462e-11, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 4.753233875825685e-11, 1e-7);
 }

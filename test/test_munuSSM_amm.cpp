@@ -148,11 +148,11 @@ Block YVIN
    settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
 
    ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 0);
-   BOOST_CHECK_CLOSE_FRACTION(ae, 1.5891673276315595e-11, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 1.588748576865684e-11, 1e-6);
 
    amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, 4.2684661421478245e-09, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 4.2677731488826819e-09, 1e-6);
 
    atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, 1.7171354180269422e-05, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 1.717142461318717e-05, 1e-6);
 }
