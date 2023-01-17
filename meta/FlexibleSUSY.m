@@ -2534,11 +2534,13 @@ WriteAMMClass[fields_List, files_List] :=
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,
             barZee = barZee <>
-               "valBarrZee += std::complex<double> " <> ToString @ N[
-                  ReIm @ CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
-               CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
-                  graphs[[i]]
-                ], 16] <> " * " <>
+               "val += " <> ToString @ N[
+                  With[{colFac = CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
+                                    CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
+                                    graphs[[i]]
+                                 ]},
+                     If[Im[colFac] == 0, colFac, Print["Error: Colour prefactor of a Barr-Zee diagram should be real!"]; Quit[1]]
+                  ], 16] <> " * " <>
                 ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
                 "::value({" <> leptonIndex <> "}, context, qedqcd);\n"
          ];

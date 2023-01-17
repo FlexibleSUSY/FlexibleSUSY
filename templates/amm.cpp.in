@@ -221,15 +221,8 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    // Barr-Zee
    if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.75) {
-      std::complex<double> valBarrZee {0., 0.};
 
 @AMMBarrZeeCalculation@
-      if (!is_zero(valBarrZee.imag())) {
-         ERROR("Error in the g-2 calculation! Form factor F2 should be real");
-         return std::numeric_limits<double>::quiet_NaN();
-      } else {
-         val += valBarrZee.real();
-      }
    }
 
    return val;
