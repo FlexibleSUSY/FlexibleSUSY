@@ -93,6 +93,10 @@ double BarrZeeLoopFS(double m)
  */
 double BarrZeeLoopS(double m)
 {
+    if (m == 0) {
+        return 0;
+    }
+
    return 1 + std::log(m)/2 - BarrZeeLoopFPS(m);
 }
 

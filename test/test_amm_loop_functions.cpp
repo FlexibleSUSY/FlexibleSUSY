@@ -52,3 +52,28 @@ BOOST_AUTO_TEST_CASE( test_FS )
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
+
+/**
+ * Compares the Barr-Zee 2-loop function S (arXiv:1502.04199 Eq 27)
+ * with generated data.
+ *
+ * Note: The data has been taken from GM2Calc, where Eq. (72)
+ * arXiv:hep-ph/0609168 from arXiv:hep-ph/0609168 is implemented,
+ * which differs by Eq. (27) from arXiv:1502.04199 by a prefactor
+ * given by the mass ratio passed to the loop function.
+ */
+BOOST_AUTO_TEST_CASE( test_S )
+{
+   using namespace flexiblesusy;
+   const double eps = 1e-14;
+   const auto data = test::read_from_file<double>(
+      std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "fsferm.txt");
+
+   for (const auto d: data) {
+      BOOST_REQUIRE(d.size() == 2);
+      const double x = d.at(0);
+      const double expected = d.at(1);
+      const double value = x*BarrZeeLoopS(x);
+      BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
+   }
+}
