@@ -210,6 +210,26 @@ flexiblesusy::PMNS_parameters QedQcd::displayPMNS() const
    return pmns;
 }
 
+double QedQcd::displayLeptonPoleMass(int i) const
+{
+   switch (i) {
+   case 0: return displayPoleMel();
+   case 1: return displayPoleMmuon();
+   case 2: return displayPoleMtau();
+   }
+   throw flexiblesusy::OutOfBoundsError("displayLeptonPoleMass: generation index out of bounds.");
+}
+
+double QedQcd::displayLeptonRunningMass(int i) const
+{
+   switch (i) {
+   case 0: return displayMass(mElectron);
+   case 1: return displayMass(mMuon);
+   case 2: return displayMass(mTau);
+   }
+   throw flexiblesusy::OutOfBoundsError("displayLeptonRunningMass: generation index out of bounds.");
+}
+
 std::ostream& operator<<(std::ostream &left, const QedQcd &m) {
   left << "mU: " << m.displayMass(mUp)
        << "  mC: " << m.displayMass(mCharm)
