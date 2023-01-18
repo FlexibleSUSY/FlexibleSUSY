@@ -94,14 +94,14 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
                             "generationIndex2, ",
                             ""] <>
                   "model, " <> discardSMcontributions <> ");\n" <>
-                  (* Dominik suggest that the phase space prefactor should use pole masses  so we get them from the input file *)
-                  "const double leptonInMassOS = qedqcd.displayLeptonRunningMass(generationIndex1);\n" <>
+                  (* Dominik suggest that the phase space prefactor should use pole masses so we get them from the input file *)
+                  "const double leptonInMassOS = qedqcd.displayLeptonPoleMass(generationIndex1);\n" <>
                   "\n" <>
                   "// eq. 51 of arXiv:hep-ph/9510309 (note that we include 'e' in the definition of form_factor)\n" <>
                   "const double partial_width = pow(leptonInMassOS,5)/(16.0*Pi) * (std::norm(form_factors[2]) + std::norm(form_factors[3]));\n" <>
 
                   "const double total_width = lepton_total_decay_width<" <>
-                     CXXNameOfField[inFermion] <> ", " <> CXXNameOfField[outFermion] <> 
+                     CXXNameOfField[inFermion] <> ", " <> CXXNameOfField[outFermion] <>
                      ">(indices1, indices2, model, qedqcd);\n" <>
                   "\nreturn partial_width/total_width;\n"
                ] <> "}";
