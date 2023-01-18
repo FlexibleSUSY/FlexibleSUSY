@@ -48,6 +48,7 @@ endif
 ################################################################################
 
 TEST_SRC := \
+		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_array_view.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_ckm.cpp \
@@ -833,6 +834,8 @@ endif
 endif
 
 $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
+
+$(DIR)/test_amm_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/amm_loop_functions\""
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
