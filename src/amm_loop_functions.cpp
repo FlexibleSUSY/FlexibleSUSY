@@ -37,7 +37,7 @@ double BarrZeeLoopFPS(double m)
       return 0;
    }
 
-   const double pi = 3.1415926535897932;
+   static constexpr double pi = 3.1415926535897932;
 
    if (m == 0.25) {
       return 0.69314718055994531; // Log[2]
