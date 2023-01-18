@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE( test_FPS )
       BOOST_REQUIRE(d.size() == 2);
       const double x = d.at(0);
       const double expected = d.at(1);
-      const double value = 2*BarrZeeLoopFPS(x);
+      const double value = 2*BarrZeeLoopFPS(x); // note the factor 2
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( test_FS )
       BOOST_REQUIRE(d.size() == 2);
       const double x = d.at(0);
       const double expected = d.at(1);
-      const double value = 2*BarrZeeLoopFS(x);
+      const double value = 2*BarrZeeLoopFS(x); // note the factor 2
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( test_S )
       BOOST_REQUIRE(d.size() == 2);
       const double x = d.at(0);
       const double expected = d.at(1);
-      const double value = x*BarrZeeLoopS(x);
+      const double value = x*BarrZeeLoopS(x); // note the factor x
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
