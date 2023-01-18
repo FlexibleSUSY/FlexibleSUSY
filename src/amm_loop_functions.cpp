@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "amm_loop_functions.hpp"
+#include "error.hpp"
 #include "Li2.hpp"
 #include <cmath>
 #include <complex>
@@ -30,12 +31,13 @@ namespace flexiblesusy {
 */
 double BarrZeeLoopFPS(double m)
 {
-   const double pi = 3.1415926535897932;
-
-   // @todo(alex): check stability for small values
-   if (m == 0) {
+   if (m < 0) {
+      throw OutOfBoundsError("BarrZeeLoopFPS: argument m must not be negative.");
+   } else if (m == 0) {
       return 0;
    }
+
+   const double pi = 3.1415926535897932;
 
    if (m == 0.25) {
       return 0.69314718055994531; // Log[2]
@@ -79,11 +81,13 @@ double BarrZeeLoopFPS(double m)
  */
 double BarrZeeLoopFS(double m)
 {
-    if (m == 0) {
-        return 0;
-    }
+   if (m < 0) {
+      throw OutOfBoundsError("BarrZeeLoopFS: argument m must not be negative.");
+   } else if (m == 0) {
+      return 0;
+   }
 
-    return (2*m - 1) * BarrZeeLoopFPS(m) - m * (2 + std::log(m));
+   return (2*m - 1)*BarrZeeLoopFPS(m) - m*(2 + std::log(m));
 }
 
 /**
@@ -93,7 +97,13 @@ double BarrZeeLoopFS(double m)
  */
 double BarrZeeLoopS(double m)
 {
-   return 1 + std::log(m)/2 - BarrZeeLoopFPS(m);
+   if (m < 0) {
+      throw OutOfBoundsError("BarrZeeLoopS: argument m must not be negative.");
+   } else if (m == 0) {
+      return 0;
+   }
+
+   return 1 + 0.5*std::log(m) - BarrZeeLoopFPS(m);
 }
 
 /**
@@ -103,6 +113,12 @@ double BarrZeeLoopS(double m)
  */
 double BarrZeeLoopV(double m)
 {
+   if (m < 0) {
+      throw OutOfBoundsError("BarrZeeLoopV: argument m must not be negative.");
+   } else if (m == 0) {
+      return 0;
+   }
+
    if (m == 0.25) {
       return 4.75;
    }
