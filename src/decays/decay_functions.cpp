@@ -305,24 +305,15 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
 
 double sm_up_quark_masses(softsusy::QedQcd const& qedqcd, int n)
 {
-   switch(n) {
-      case 0: return qedqcd.displayMass(softsusy::mUp);
-      case 1: return qedqcd.displayMass(softsusy::mCharm);
-      default:
-         throw std::runtime_error("Unknown quark mass");
+   if (n == 2) {
+      throw std::runtime_error("sm_up_quark_masses: top quark mass cannot be used");
    }
+   return qedqcd.displayUpQuarkRunningMass(n);
 }
+
 double sm_down_quark_masses(softsusy::QedQcd const& qedqcd, int n)
 {
-   switch(n) {
-      case 0:
-         return qedqcd.displayMass(softsusy::mDown);
-      case 1:
-         return qedqcd.displayMass(softsusy::mStrange);
-      case 2:
-         return qedqcd.displayMass(softsusy::mBottom);
-      default:
-         throw std::runtime_error("Unknown quark mass");
-   }
+   return qedqcd.displayDownQuarkRunningMass(n);
 }
+
 } // namespace flexiblesusy
