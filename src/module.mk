@@ -23,6 +23,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/eta.cpp \
 		$(DIR)/factorial.cpp \
+		$(DIR)/ffv_loop_functions.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
 		$(DIR)/gsl_multimin_fminimizer.cpp \
@@ -101,6 +102,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/ew_input.hpp \
 		$(DIR)/ewsb_solver.hpp \
 		$(DIR)/factorial.hpp \
+		$(DIR)/ffv_loop_functions.hpp \
 		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/for_each.hpp \
