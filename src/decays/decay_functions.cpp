@@ -305,9 +305,6 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
 
 double sm_up_quark_masses(softsusy::QedQcd const& qedqcd, int n)
 {
-   if (n == 2) {
-      throw std::runtime_error("sm_up_quark_masses: top quark mass cannot be used");
-   }
    return qedqcd.displayUpQuarkRunningMass(n);
 }
 
