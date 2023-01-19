@@ -189,17 +189,17 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    using namespace @ModelName@_cxx_diagrams::fields;
 
-@AMMCalculation@
-
-   if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
-      ERROR("Error in the g-2 calculation! Form factor F2 should be real");
-      return std::numeric_limits<double>::quiet_NaN();
-   }
-
    double val = 0.;
 
    // 1L
    if (settings.get(Spectrum_generator_settings::calculate_amm) > 0.5) {
+@AMMCalculation@
+
+      if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real");
+         return std::numeric_limits<double>::quiet_NaN();
+      }
+
       val +=
          // vector form factor
          1./2.*(form_factors[2] + form_factors[3]).real()
