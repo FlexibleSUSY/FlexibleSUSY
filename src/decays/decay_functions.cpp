@@ -303,14 +303,4 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
    return nf;
 }
 
-double sm_up_quark_masses(softsusy::QedQcd const& qedqcd, int n)
-{
-   return qedqcd.displayUpQuarkRunningMass(n);
-}
-
-double sm_down_quark_masses(softsusy::QedQcd const& qedqcd, int n)
-{
-   return qedqcd.displayDownQuarkRunningMass(n);
-}
-
 } // namespace flexiblesusy
