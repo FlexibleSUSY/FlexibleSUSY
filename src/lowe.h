@@ -149,12 +149,16 @@ public:
   auto displayMass() const -> decltype(mf) { return mf; }
   /// Returns a single running mass
   double displayMass(EMass mno) const { return mf(mno - 1); }
+  /// Returns a single up-quark running MS-bar mass, given a zero-based generation index i
+  double displayUpQuarkRunningMass(int) const;
+  /// Returns a single down-quark running MS-bar mass, given a zero-based generation index i
+  double displayDownQuarkRunningMass(int) const;
   /// Returns a single neutrino pole mass
   double displayNeutrinoPoleMass(int i) const { return input(Mv1_pole + i - 1); }
   /// Returns a single charged lepton pole mass, given a zero-based generation index i
-  double displayLeptonPoleMass(int i) const;
+  double displayLeptonPoleMass(int) const;
   /// Returns a single charged lepton running mass, given a zero-based generation index i
-  double displayLeptonRunningMass(int i) const;
+  double displayLeptonRunningMass(int) const;
   /// Returns a single gauge structure constant
   double displayAlpha(EGauge ai) const { return a(ai - 1); }
   /// Returns gauge structure constants

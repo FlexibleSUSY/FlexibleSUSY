@@ -210,6 +210,26 @@ flexiblesusy::PMNS_parameters QedQcd::displayPMNS() const
    return pmns;
 }
 
+double QedQcd::displayUpQuarkRunningMass(int i) const
+{
+   switch (i) {
+   case 0: return displayMass(mUp);
+   case 1: return displayMass(mCharm);
+   case 2: return displayMass(mTop);
+   }
+   throw flexiblesusy::OutOfBoundsError("displayUpQuarkRunningMass: generation index out of bounds.");
+}
+
+double QedQcd::displayDownQuarkRunningMass(int i) const
+{
+   switch (i) {
+   case 0: return displayMass(mDown);
+   case 1: return displayMass(mStrange);
+   case 2: return displayMass(mBottom);
+   }
+   throw flexiblesusy::OutOfBoundsError("displayDownQuarkRunningMass: generation index out of bounds.");
+}
+
 double QedQcd::displayLeptonPoleMass(int i) const
 {
    switch (i) {
