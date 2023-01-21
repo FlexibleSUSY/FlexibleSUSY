@@ -3162,6 +3162,55 @@ WriteReferences[files_List] :=
                } ];
           ];
 
+WriteSMParticlesAliases[files_List] :=
+   Module[{},
+SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] =!= SARAH`bar] := "l";
+SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] === SARAH`bar] := "lbar";
+SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] =!= SARAH`bar] := "d";
+SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] === SARAH`bar] := "dbar";
+SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] =!= SARAH`bar] := "u";
+SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] === SARAH`bar] := "ubar";
+SimplifiedName[particle_ /; TreeMasses`GetHiggsBoson[] =!= Null && particle === TreeMasses`GetHiggsBoson[]] := "H";
+SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "Ah";
+SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]]] := "Wm";
+SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] := "Wp";
+SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === TreeMasses`GetZBoson[]] := "Z";
+SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === TreeMasses`GetPhoton[]] := "A";
+SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "g";
+SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]]] := "Hm";
+SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]] := "Hp";
+SimplifiedName[particle_] := particle;
+
+CreateParticleAlias[particle_, namespace_String] :=
+    "using " <> SimplifiedName[particle] <> " = " <>
+    CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
+
+CreateParticleAliases[particles_, namespace_:""] :=
+    Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
+
+CreateSMParticleAliases[namespace_:""] :=
+    Module[{smParticlesToAlias},
+           smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
+                                        TreeMasses`GetPseudoscalarHiggsBoson[],
+                                        TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]],
+                                        TreeMasses`GetZBoson[],
+                                        TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
+                                        TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
+                                        TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
+                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field,
+                                        TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]
+                                       }, (# =!= Null)&];
+           CreateParticleAliases[smParticlesToAlias, namespace]
+          ];
+
+           WriteOut`ReplaceInFiles[files,
+              {
+                 "@ModelName@"          -> FlexibleSUSY`FSModelName,
+                 "@SMParticlesAliases@" -> CreateSMParticleAliases[FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"]
+              }
+           ];
+   ];
+
 FilesExist[fileNames_List] :=
     And @@ (FileExistsQ /@ fileNames);
 
@@ -5161,6 +5210,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates
            ];
+
+           WriteSMParticlesAliases[{{FileNameJoin[{cxxQFTTemplateDir, "particle_aliases.hpp.in"}],
+                                     FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_particle_aliases.hpp"}]}}
+                                  ];
 
            Utils`PrintHeadline["Creating Mathematica interface"];
            Print["Creating LibraryLink ", FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> ".mx"}], " ..."];
