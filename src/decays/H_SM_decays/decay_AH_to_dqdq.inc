@@ -73,7 +73,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
                auto qedqcd_ = qedqcd;
                qedqcd_.to(mAOS);
                alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
-               Y_conversion = Sqr(sm_down_quark_masses(qedqcd_, indexOut1.at(0))/mdqDR);
+               Y_conversion = Sqr(qedqcd_.displayDownQuarkRunningMass(indexOut1.at(0))/mdqDR);
                break;
             }
             case 6:

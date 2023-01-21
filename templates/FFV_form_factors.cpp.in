@@ -410,7 +410,7 @@ double OneLoopFunctionK(double r)
       return 1.0;
    } else if (is_zero(1.0 - r)){
       return 2.0 / 3.0;
-   } else {   
+   } else {
       return (1.0 - 4.0 * r + 3.0 * r * r - 2 * r * r * std::log(r)) / Power3(1.0 - r);
    }
 }
@@ -418,7 +418,7 @@ double OneLoopFunctionK(double r)
 //  One loop function for the form factor F1 which is the coefficient
 //  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_FFV contribution.
 double OneLoopFunctionL(double r)
-{  
+{
    if (is_zero(1.0 - r)){
       return 10.5;
    } else if (std::isinf(r)) {
@@ -562,7 +562,7 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor
             * std::valarray<std::complex<double>> {A1L, A1R, A2L, A2R};
-	 
+
       }
    }
 
@@ -688,13 +688,13 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjVBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFV>()) {
-          
+
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjVBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFV::template indices_of_field<0>(indexOut);
          if (jFieldIndices != indices_in || iFieldIndices != indices_out)
             continue;
-         
+
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<0>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFV::template indices_of_field<2>(indexOut);
@@ -737,17 +737,17 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
             3. * mF/mj * vertexIn.left() * vertexOut.right() * LoopFunctionK
             + mi/mj * vertexIn.left() * vertexOut.left() * LoopFunctionJ / 6.
             + vertexIn.right() * vertexOut.right() * LoopFunctionJ / 6.;
-         
-         const std::complex<double> A1R = 
+
+         const std::complex<double> A1R =
             vertexIn.right() * vertexOut.right() * LoopFunctionH / 18.;
-         const std::complex<double> A2R = 
+         const std::complex<double> A2R =
             3. * mF/mj * vertexIn.right() * vertexOut.left() * LoopFunctionK
             + mi/mj * vertexIn.right() * vertexOut.right() * LoopFunctionJ / 6.
             + vertexIn.left() * vertexOut.left() * LoopFunctionJ / 6.;
 
          const std::complex<double> massFactor = Power2(1.0/mV);
 
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
 
       }
    }
@@ -783,7 +783,7 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjVBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFV>()) {
-           
+
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjVBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFV::template indices_of_field<0>(indexOut);
@@ -843,7 +843,7 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
             massFactor = Power2(1.0/mV);
          }
 
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
 
       }
    }
@@ -880,13 +880,13 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjVBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFG>()) {
-          
+
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjVBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFG::template indices_of_field<0>(indexOut);
          if (jFieldIndices != indices_in || iFieldIndices != indices_out)
             continue;
-         
+
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<0>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFG::template indices_of_field<2>(indexOut);
@@ -925,13 +925,13 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
 
          const std::complex<double> A1L = 0.;
          const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.left() * LoopFunctionN;
-      
+
          const std::complex<double> A1R = 0.;
          const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.right() * LoopFunctionN;
 
          const std::complex<double> massFactor = Power2(1.0/mV);
-          
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
 
       }
    }
@@ -968,13 +968,13 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjGBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFV>()) {
-          
+
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjGBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFV::template indices_of_field<0>(indexOut);
          if (jFieldIndices != indices_in || iFieldIndices != indices_out)
             continue;
-         
+
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjGBar::template indices_of_field<0>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFV::template indices_of_field<2>(indexOut);
@@ -993,13 +993,13 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
                continue;
             }
          }
-   
+
          const auto vertexIn = VertexFBarFjGBar::evaluate(indexIn, context);
          const auto vertexOut = VertexFiBarFV::evaluate(indexOut, context);
 
          const auto indexEmit = concatenate(goldstoneFieldIndicesIn, vectorFieldIndicesOut);
          const auto vertexEmit = VertexVBarGPBar::evaluate(indexEmit, context);
-   
+
          const auto mV = context.mass<GA>(goldstoneFieldIndicesIn);
          const auto mG = context.mass<VB>(vectorFieldIndicesOut);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
@@ -1013,13 +1013,13 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
 
          const std::complex<double> A1L = 0.;
          const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.right() * LoopFunctionN;
-      
+
          const std::complex<double> A1R = 0.;
          const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.left() * LoopFunctionN;
 
          const std::complex<double> massFactor = Power2(1.0/mV);
-          
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
 
       }
    }
