@@ -95,34 +95,24 @@ double BarrZeeLoopV(double z)
       throw OutOfBoundsError("BarrZeeLoopV: argument must not be negative.");
    } else if (z == 0) {
       return 0;
+   } else if (z < 0.25) {
+      const double y = std::sqrt(1 - 4*z);
+      const double r1 = 2/(1 - y);
+      const double r2 = 2/(1 + y);
+      const double lz = std::log(z);
+      return 1 + 15*z + 0.5*(1 + 15*z)*lz - (1 + 9*z)*BarrZeeLoopFPS(z)
+         + 0.5*z*(19 - 12*z)*(std::log(r2/r1)*lz + Li2(r1) - Li2(r2))/y;
    } else if (z == 0.25) {
       return 4.75;
    }
 
-   double j, r1, theta1, r2, theta2;
-
-   if (z < 0.25) {
-      const double y = std::sqrt(1.0-4.0*z);
-      r1 = 2 / (1-y);
-      theta1 = std::atan2(0, r1);
-      r1 = std::abs(r1);
-      r2 = 2 / (1+y);
-      theta2 = std::atan2(0, r2);
-      r2 = std::abs(r2);
-
-      j = 1/y * (std::log(std::abs(y-1) / (y+1)) * std::log(z) + Li2(std::polar(r1, theta1)).real() - Li2(std::polar(r2, theta2)).real());
-   }
-   else {
-      const double y = std::sqrt(-1.0+4.0*z);
-      r1 = r2 = std::sqrt(1/z);
-      const double real = 1/(2*z);
-      const double imag = y/(2*z);
-      theta1 = std::atan2(imag, real);
-      theta2 = std::atan2(-imag, real);
-      j = 1/y * ( (std::atan2(y, -1) - std::atan2(y, 1)) * std::log(z) + Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
-   }
-
-   return BarrZeeLoopS(z) + 15.0/2.0 * z * (2.0 + std::log(z)) + z/2 * (19 - 12*z) * j - 9*z * BarrZeeLoopFPS(z);
+   const double pi = 3.1415926535897932;
+   const double y = std::sqrt(4*z - 1);
+   const double r = std::sqrt(1/z);
+   const double theta = std::atan(y);
+   const double lz = std::log(z);
+   return 1 + 15*z + 0.5*(1 + 15*z)*lz - (1 + 9*z)*BarrZeeLoopFPS(z)
+      + 0.5*z*(19 - 12*z)*((pi - 2*theta)*lz + Li2(std::polar(r, theta)).imag() - Li2(std::polar(r, -theta)).imag())/y;
 }
 
 } // namespace flexiblesusy
