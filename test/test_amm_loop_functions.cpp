@@ -77,3 +77,23 @@ BOOST_AUTO_TEST_CASE( test_S )
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
+
+/**
+ * Compares the Barr-Zee 2-loop function V (arXiv:1502.04199 Eq 28)
+ * with generated data.
+ */
+BOOST_AUTO_TEST_CASE( test_V )
+{
+   using namespace flexiblesusy;
+   const double eps = 1e-14;
+   const auto data = test::read_from_file<double>(
+      std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "fv.txt");
+
+   for (const auto d: data) {
+      BOOST_REQUIRE(d.size() == 2);
+      const double x = d.at(0);
+      const double expected = d.at(1);
+      const double value = BarrZeeLoopV(x);
+      BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
+   }
+}
