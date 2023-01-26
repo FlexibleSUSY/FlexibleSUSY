@@ -331,25 +331,30 @@ Lepton, Fermion, Scalar
                          >;
 
    double res = 0.0;
+
    for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<FermionVertex>()) {
           const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (leptonIndices != indices)
+         if (leptonIndices != indices) {
             continue;
+         }
 
          const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
-             cxx_diagrams::isSMField<Scalar>(scalarIndices))
-               continue;
-
-         if (scalarIndices != FermionVertex::template indices_of_field<0>(index2))
+             cxx_diagrams::isSMField<Scalar>(scalarIndices)) {
             continue;
+         }
 
-         if (fermionIndices != FermionVertex::template indices_of_field<2>(index2))
+         if (scalarIndices != FermionVertex::template indices_of_field<0>(index2)) {
             continue;
+         }
+
+         if (fermionIndices != FermionVertex::template indices_of_field<2>(index2)) {
+            continue;
+         }
 
          const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto fermionVertex = FermionVertex::evaluate(index2, context);
@@ -366,15 +371,15 @@ Lepton, Fermion, Scalar
          const std::complex<double> zrf = fermionVertex.right();
          const std::complex<double> zlf = fermionVertex.left();
 
-         const std::complex<double> coeffA = (zrf + zlf) * (zrm + zlm);
-         const std::complex<double> coeffB = (zlf - zrf) * (zrm - zlm);
+         const double coeffA = std::real((zrf + zlf) * (zrm + zlm));
+         const double coeffB = std::real((zlf - zrf) * (zrm - zlm));
 
          const double massRatioSquared = Sqr(fermionMass / scalarMass);
 
-         const double part1 = coeffA.real() * BarrZeeLoopFS(massRatioSquared);
-         const double part2 = coeffB.real() * BarrZeeLoopFPS(massRatioSquared);
+         const double part1 = coeffA == 0 ? 0 : coeffA * BarrZeeLoopFS(massRatioSquared);
+         const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPS(massRatioSquared);
 
-         const double preFactor = Sqr(unit_charge(context))*4.*twoLoop * fermionChargeCount * fermionChargeCount
+         const double preFactor = 4 * twoLoop * Sqr(unit_charge(context) * fermionChargeCount)
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
          res += preFactor * (part1 + part2);
@@ -414,6 +419,7 @@ Lepton, Fermion, Scalar
                          >;
 
    double res = 0.0;
+
    for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<FermionVertex>()) {
          for (const auto& indexLeptonZ: index_range<LeptonZVertex>()) {
@@ -421,29 +427,35 @@ Lepton, Fermion, Scalar
 
                const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-               if (leptonIndices != indices)
+               if (leptonIndices != indices) {
                   continue;
+               }
 
                if ((leptonIndices != LeptonZVertex::template indices_of_field<2>(indexLeptonZ)) ||
-                   (leptonIndices != LeptonZVertex::template indices_of_field<1>(indexLeptonZ)))
+                   (leptonIndices != LeptonZVertex::template indices_of_field<1>(indexLeptonZ))) {
                   continue;
+               }
 
                const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
                const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
                if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
-                   cxx_diagrams::isSMField<Scalar>(scalarIndices))
+                   cxx_diagrams::isSMField<Scalar>(scalarIndices)) {
                   continue;
+               }
 
-               if (scalarIndices != FermionVertex::template indices_of_field<0>(index2))
+               if (scalarIndices != FermionVertex::template indices_of_field<0>(index2)) {
                   continue;
+               }
 
-               if (fermionIndices != FermionVertex::template indices_of_field<2>(index2))
+               if (fermionIndices != FermionVertex::template indices_of_field<2>(index2)) {
                   continue;
+               }
 
                if ((fermionIndices != FermionZVertex::template indices_of_field<2>(indexFermionZ)) ||
-                   (fermionIndices != FermionZVertex::template indices_of_field<1>(indexFermionZ)))
+                   (fermionIndices != FermionZVertex::template indices_of_field<1>(indexFermionZ))) {
                   continue;
+               }
 
                const auto leptonVertex = LeptonVertex::evaluate(index1, context);
                const auto fermionVertex = FermionVertex::evaluate(index2, context);
@@ -453,6 +465,8 @@ Lepton, Fermion, Scalar
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
                const auto leptonMass = context.mass<Lepton>(leptonIndices);
+
+               // @todo(alex): create a separate loop function to properly handle a potential division by zero
                const auto zMass = context.mass<VZ>({ });
 
                if (is_zero(zMass - scalarMass, 3e-13)) {
@@ -473,15 +487,15 @@ Lepton, Fermion, Scalar
 
                const double gvm = 0.5*(zmzr.real() + zmzl.real());
                const double gvf = 0.5*(zfzr.real() + zfzl.real());
-               const std::complex<double> coeffA = (zrf + zlf) * (zrm + zlm);
-               const std::complex<double> coeffB = (zlf - zrf) * (zrm - zlm);
+               const double coeffA = std::real((zrf + zlf) * (zrm + zlm));
+               const double coeffB = std::real((zlf - zrf) * (zrm - zlm));
 
                const double massRatioSquared = Sqr(fermionMass / scalarMass);
 
-               const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFS(massRatioSquared) - BarrZeeLoopFS(Sqr(fermionMass / zMass)));
-               const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFPS(massRatioSquared) - BarrZeeLoopFPS(Sqr(fermionMass / zMass)));
+               const double part1 = coeffA * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFS(massRatioSquared) - BarrZeeLoopFS(Sqr(fermionMass / zMass)));
+               const double part2 = coeffB * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFPS(massRatioSquared) - BarrZeeLoopFPS(Sqr(fermionMass / zMass)));
 
-               const double preFactor = -4.0*twoLoop * fermionChargeCount * gvm * gvf
+               const double preFactor = -4 * twoLoop * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
                res += preFactor * (part1 + part2);
@@ -511,27 +525,30 @@ Lepton, ChargedScalar, NeutralScalar
                          >;
 
    double res = 0.0;
+
    for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<ScalarVertex>()) {
           const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (leptonIndices != indices)
+         if (leptonIndices != indices) {
             continue;
+         }
 
          const auto neutralScalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto chargedScalarIndices = ScalarVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<ChargedScalar>(chargedScalarIndices) &&
-             cxx_diagrams::isSMField<NeutralScalar>(neutralScalarIndices))
-            {
-               continue;
-            }
-
-         if (neutralScalarIndices != ScalarVertex::template indices_of_field<0>(index2))
+             cxx_diagrams::isSMField<NeutralScalar>(neutralScalarIndices)) {
             continue;
+         }
 
-         if (chargedScalarIndices != ScalarVertex::template indices_of_field<2>(index2))
+         if (neutralScalarIndices != ScalarVertex::template indices_of_field<0>(index2)) {
             continue;
+         }
+
+         if (chargedScalarIndices != ScalarVertex::template indices_of_field<2>(index2)) {
+            continue;
+         }
 
          const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto scalarVertex = ScalarVertex::evaluate(index2, context);
@@ -547,14 +564,14 @@ Lepton, ChargedScalar, NeutralScalar
          const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zss = scalarVertex.value();
 
-         const std::complex<double> coeff = (zrm + zlm) * zss;
+         const double coeff = std::real((zrm + zlm) * zss);
 
          const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
 
-         const double preFactor = Sqr(unit_charge(context))*4.*twoLoop * scalarChargeCount * scalarChargeCount
-            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (neutralScalarMass * neutralScalarMass);
+         const double preFactor = 4 * twoLoop * Sqr(unit_charge(context) * scalarChargeCount)
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / Sqr(neutralScalarMass);
 
-         res += preFactor * coeff.real() * BarrZeeLoopS(massRatioSquared);
+         res += preFactor * coeff * BarrZeeLoopS(massRatioSquared);
       }
    }
 
@@ -580,25 +597,30 @@ Lepton, Vector, Scalar
                          >;
 
    double res = 0.0;
+
    for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<VectorVertex>()) {
           const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (leptonIndices != indices)
+         if (leptonIndices != indices) {
             continue;
+         }
 
          const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto vectorIndices = VectorVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<Vector>(vectorIndices) &&
-             cxx_diagrams::isSMField<Scalar>(scalarIndices))
-               continue;
-
-         if (scalarIndices != VectorVertex::template indices_of_field<0>(index2))
+             cxx_diagrams::isSMField<Scalar>(scalarIndices)) {
             continue;
+         }
 
-         if (vectorIndices != VectorVertex::template indices_of_field<2>(index2))
+         if (scalarIndices != VectorVertex::template indices_of_field<0>(index2)) {
             continue;
+         }
+
+         if (vectorIndices != VectorVertex::template indices_of_field<2>(index2)) {
+            continue;
+         }
 
          const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto vectorVertex = VectorVertex::evaluate(index2, context);
@@ -614,14 +636,14 @@ Lepton, Vector, Scalar
          const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zsv = vectorVertex.value();
 
-         const std::complex<double> coeff = (zrm + zlm) * zsv;
+         const double coeff = std::real((zrm + zlm) * zsv);
 
          const double massRatioSquared = Sqr(vectorMass / scalarMass);
 
-         const double preFactor = - Sqr(unit_charge(context))*2.*twoLoop * vectorChargeCount * vectorChargeCount
-            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (vectorMass * vectorMass);
+         const double preFactor = - 2 * twoLoop * Sqr(unit_charge(context) * vectorChargeCount)
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / Sqr(vectorMass);
 
-         res += preFactor * coeff.real() * BarrZeeLoopV(massRatioSquared);
+         res += preFactor * coeff * BarrZeeLoopV(massRatioSquared);
       }
    }
 
