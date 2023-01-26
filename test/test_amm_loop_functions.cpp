@@ -16,6 +16,7 @@
 BOOST_AUTO_TEST_CASE( test_FPS )
 {
    using namespace flexiblesusy;
+   using namespace amm_loop_functions::two_loop;
    const double eps = 1e-14;
    const auto data = test::read_from_file<double>(
       std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "fPS.txt");
@@ -40,6 +41,7 @@ BOOST_AUTO_TEST_CASE( test_FPS )
 BOOST_AUTO_TEST_CASE( test_FS )
 {
    using namespace flexiblesusy;
+   using namespace amm_loop_functions::two_loop;
    const double eps = 1e-14;
    const auto data = test::read_from_file<double>(
       std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "fS.txt");
@@ -65,6 +67,7 @@ BOOST_AUTO_TEST_CASE( test_FS )
 BOOST_AUTO_TEST_CASE( test_S )
 {
    using namespace flexiblesusy;
+   using namespace amm_loop_functions::two_loop;
    const double eps = 1e-14;
    const auto data = test::read_from_file<double>(
       std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "fsferm.txt");
@@ -85,6 +88,7 @@ BOOST_AUTO_TEST_CASE( test_S )
 BOOST_AUTO_TEST_CASE( test_V )
 {
    using namespace flexiblesusy;
+   using namespace amm_loop_functions::two_loop;
    const double eps = 1e-14;
    const auto data = test::read_from_file<double>(
       std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "fv.txt");

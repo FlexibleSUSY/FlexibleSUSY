@@ -24,6 +24,8 @@
 #include <complex>
 
 namespace flexiblesusy {
+namespace amm_loop_functions {
+namespace two_loop {
 
 /**
  * Barr-Zee 2-loop function with fermion loop (arXiv:1502.04199 Eq 26).
@@ -115,4 +117,6 @@ double BarrZeeLoopV(double z)
       + 0.5*z*(19 - 12*z)*((pi - 2*theta)*lz + Li2(std::polar(r, theta)).imag() - Li2(std::polar(r, -theta)).imag())/y;
 }
 
+} // namespace two_loop
+} // namespace amm_loop_functions
 } // namespace flexiblesusy
