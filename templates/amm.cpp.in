@@ -318,6 +318,8 @@ double AMMBarrZeeFermionLoop<
 Lepton, Fermion, Scalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
+
    using LeptonVertex = Vertex<
                       Scalar,
                       typename Lepton::lorentz_conjugate,
@@ -394,6 +396,8 @@ double AMMBarrZeeFermionLoopZ<
 Lepton, Fermion, Scalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
+
    using LeptonVertex = Vertex<
                       Scalar,
                       typename Lepton::lorentz_conjugate,
@@ -512,6 +516,8 @@ double AMMBarrZeeScalarLoop<
 Lepton, ChargedScalar, NeutralScalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
+
    using LeptonVertex = Vertex<
                       NeutralScalar,
                       typename Lepton::lorentz_conjugate,
@@ -583,6 +589,7 @@ double AMMBarrZeeVectorLoop<
 Lepton, Vector, Scalar
 >::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
 
    using LeptonVertex = Vertex<
                       Scalar,

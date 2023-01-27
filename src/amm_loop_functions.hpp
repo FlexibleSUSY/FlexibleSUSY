@@ -20,6 +20,8 @@
 #define AMM_LOOP_FUNCTIONS_H
 
 namespace flexiblesusy {
+namespace amm_loop_functions {
+namespace two_loop {
 
 /// Barr-Zee 2-loop function with fermion loop
 double BarrZeeLoopFPS(double);
@@ -30,6 +32,8 @@ double BarrZeeLoopS(double);
 /// Barr-Zee 2-loop function with vector
 double BarrZeeLoopV(double);
 
+} // namespace two_loop
+} // namespace amm_loop_functions
 } // namespace flexiblesusy
 
 #endif
