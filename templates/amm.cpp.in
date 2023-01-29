@@ -202,7 +202,7 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
       val +=
          // vector form factor
-         1./2.*(form_factors[2] + form_factors[3]).real()
+         0.5*(form_factors[2] + form_factors[3]).real()
          // reinstate the mass that was factored out in definition of form factor
          * context.mass<Lepton>({@extraIdxUsageNoComma@})
          // factor out e/(2*lepton pole mass)
