@@ -96,25 +96,10 @@ double BarrZeeLoopV(double z)
    if (z < 0) {
       throw OutOfBoundsError("BarrZeeLoopV: argument must not be negative.");
    } else if (z == 0) {
-      return 0;
-   } else if (z < 0.25) {
-      const double y = std::sqrt(1 - 4*z);
-      const double r1 = 2/(1 - y);
-      const double r2 = 2/(1 + y);
-      const double lz = std::log(z);
-      return 1 + 15*z + 0.5*(1 + 15*z)*lz - (1 + 9*z)*BarrZeeLoopFPS(z)
-         + 0.5*z*(19 - 12*z)*(std::log(r2/r1)*lz + Li2(r1) - Li2(r2))/y;
-   } else if (z == 0.25) {
-      return 4.75;
+      return 0; // actually -inf; return 0 to avoid propagation of inf
    }
 
-   const double pi = 3.1415926535897932;
-   const double y = std::sqrt(4*z - 1);
-   const double r = std::sqrt(1/z);
-   const double theta = std::atan(y);
-   const double lz = std::log(z);
-   return 1 + 15*z + 0.5*(1 + 15*z)*lz - (1 + 9*z)*BarrZeeLoopFPS(z)
-      + 0.5*z*(19 - 12*z)*((pi - 2*theta)*lz + Li2(std::polar(r, theta)).imag() - Li2(std::polar(r, -theta)).imag())/y;
+   return (17./2 - 15*z)*BarrZeeLoopFPS(z) + (0.5 + 7.5*z)*(2 + std::log(z));
 }
 
 } // namespace two_loop
