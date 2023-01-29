@@ -49,7 +49,7 @@ double calculate_edm(const @ModelName@_mass_eigenstates& model, const softsusy::
 
    const double val =
       // imaginary part of the axial-vector form factor
-      1./2.*(form_factors[3] - form_factors[2]).imag()
+      0.5*(form_factors[3] - form_factors[2]).imag()
       // reinstate the mass that was factored out in definition of form factor
       * context.mass<Lepton>({@extraIdxUsageNoComma@});
 
