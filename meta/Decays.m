@@ -220,13 +220,8 @@ CreateParticleAliases[particles_, namespace_:""] :=
 
 CreateSMParticleAliases[namespace_:""] :=
     Module[{smParticlesToAlias},
-           smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
-                                        TreeMasses`GetPseudoscalarHiggsBoson[],
-                                        TreeMasses`GetWBoson[], TreeMasses`GetZBoson[],
-                                        TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
-                                        TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field
+           smParticlesToAlias = Select[{
+                                        TreeMasses`GetWBoson[], TreeMasses`GetZBoson[]
                                        }, (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];

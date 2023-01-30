@@ -38,6 +38,7 @@
 #include <boost/mpl/list.hpp>
 
 #include "@ModelName@_decays.hpp"
+#include "@ModelName@_particle_aliases.hpp"
 #include "@ModelName@_info.hpp"
 #include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"

@@ -1,42 +1,42 @@
 // template specialization for the AH -> Fu Fu case
 
 template<>
-double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
+double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpQuark>::type, UpQuark>(
    const context_base& context,
-   typename field_indices<AH>::type const& indexIn,
-   typename field_indices<uq>::type const& indexOut1,
-   typename field_indices<uq>::type const& indexOut2
+   typename field_indices<PseudoscalarHiggs>::type const& indexIn,
+   typename field_indices<UpQuark>::type const& indexOut1,
+   typename field_indices<UpQuark>::type const& indexOut2
    ) const
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<AH,bar<uq>::type, uq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,bar<UpQuark>::type, UpQuark>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
    }
 
    // get AHBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto AHBBbarVertexDR = Vertex<bar<uq>::type, uq, AH>::evaluate(indices, context);
+   const auto AHBBbarVertexDR = Vertex<bar<UpQuark>::type, UpQuark, PseudoscalarHiggs>::evaluate(indices, context);
 
-   const double mAHOS = context.physical_mass<AH>(indexIn);
+   const double mAHOS = context.physical_mass<PseudoscalarHiggs>(indexIn);
    const double flux = 1./(2.*mAHOS);
 
-   constexpr double color_factor = squared_color_generator<AH, bar<uq>::type, uq>();
+   constexpr double color_factor = squared_color_generator<PseudoscalarHiggs, bar<UpQuark>::type, UpQuark>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(AHBBbarVertexDR.left()) || !is_zero(AHBBbarVertexDR.right())) {
-         const double muqOS1 = context.physical_mass<uq>(indexOut1);
-         const double muqOS2 = context.physical_mass<uq>(indexOut2);
+         const double muqOS1 = context.physical_mass<UpQuark>(indexOut1);
+         const double muqOS2 = context.physical_mass<UpQuark>(indexOut2);
          const auto xOS1 = Sqr(muqOS1/mAHOS);
          const auto xOS2 = Sqr(muqOS2/mAHOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
-         return flux * phase_space * color_factor * amplitude_squared<AH, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2);
+         return flux * phase_space * color_factor * amplitude_squared<PseudoscalarHiggs, bar<UpQuark>::type, UpQuark>(context, indexIn, indexOut1, indexOut2);
       }
       return 0.;
    }
 
-   const double muqDR = context.mass<uq>(indexOut1);
-   const double muqOS = context.physical_mass<uq>(indexOut1);
+   const double muqDR = context.mass<UpQuark>(indexOut1);
+   const double muqOS = context.physical_mass<UpQuark>(indexOut1);
    if(is_zero(muqDR) || is_zero(muqOS)) {
       throw std::runtime_error("Error in AH->uubar: down quarks cannot be massless");
    }
@@ -88,27 +88,27 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
 
          // 1L QED correction - eq. 17 in FD paper
          const double alpha_red = get_alpha(context)/Pi;
-         const double deltaqq_QED_DR = 17./4.*Sqr(uq::electric_charge)*alpha_red;
+         const double deltaqq_QED_DR = 17./4.*Sqr(UpQuark::electric_charge)*alpha_red;
 
          const double deltaqq_QCD_OS_P =
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
 
          const double deltaqq_QED_OS_P =
-               alpha_red * Sqr(uq::electric_charge) * calc_DeltaAH(betaOS);
+               alpha_red * Sqr(UpQuark::electric_charge) * calc_DeltaAH(betaOS);
 
          double deltaqq_QCDxQED_DR = 0.;
          double deltaPhi2_P = 0.;
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
             deltaqq_QCDxQED_DR =
-               deltaqq_QCDxQED*Sqr(uq::electric_charge)*alpha_red*alpha_s_red;
+               deltaqq_QCDxQED*Sqr(UpQuark::electric_charge)*alpha_red*alpha_s_red;
             if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAHOS/mtpole));
                const double lq = std::log(xDR);
                // eq. 28 of hep-ph/9505358
                const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-               const auto AHttbar = Vertex<bar<uq>::type, uq, AH>::evaluate(AHttindices, context);
-               const auto CSuu = AHBBbarVertexDR_P/context.mass<uq>(indexOut1);
+               const auto AHttbar = Vertex<bar<UpQuark>::type, UpQuark, PseudoscalarHiggs>::evaluate(AHttindices, context);
+               const auto CSuu = AHBBbarVertexDR_P/context.mass<UpQuark>(indexOut1);
                if (!is_zero(CSuu)) {
                   const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
                   const auto CStu = AHttbar_P/context.mass<Fu>({2});
