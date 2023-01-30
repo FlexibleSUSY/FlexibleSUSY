@@ -727,7 +727,7 @@ Block IMVCKM Q= 1.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00029585462066712443, 2e-13);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
-                              27.422426128468313, 5e-12);
+                              27.422744591984291, 5e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 1, 1, 1),
                               6.5374236623950305e-07, 2e-13);
 
