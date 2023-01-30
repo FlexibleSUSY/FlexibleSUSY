@@ -110,10 +110,10 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAOS/mtpole));
                const double lq = std::log(xDR);
-               const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-               const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
-               const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
-               const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
+               const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+               const auto AHttbar = Vertex<bar<uq>::type, uq, AH>::evaluate(AHttindices, context);
+               const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
+               const auto gtHoVEV_P = AHttbar_P/context.mass<uq>({2});
                deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
             }
          }

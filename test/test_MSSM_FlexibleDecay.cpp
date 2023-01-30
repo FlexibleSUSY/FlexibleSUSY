@@ -691,7 +691,7 @@ Block MSOFT Q= 8.64566212E+02
 
    // Ah -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
-                              0.88658115467704091, 4e-13);
+                              0.88672975360452144, 4e-13);
    // Ah -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFeFe(&m, 1, 2, 2),
                               0.14370135383550148, 4e-13);
