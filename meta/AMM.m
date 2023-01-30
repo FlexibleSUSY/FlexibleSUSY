@@ -26,7 +26,7 @@ AMMGetMSUSY::usage="";
 AMMContributingGraphs::usage="";
 AMMContributingDiagramsForGraph::usage="";
 CXXEvaluatorForDiagramFromGraph::usage="";
-ForwardDeclaration::usage = "";
+AMMForwardDeclaration::usage = "";
 
 Begin["`Private`"];
 
@@ -133,7 +133,7 @@ AMMGetMSUSY[] :=
              ]
           ];
 
-ForwardDeclaration[field_Symbol, functionName_String] :=
+AMMForwardDeclaration[field_Symbol, functionName_String] :=
 "template double " <> FlexibleSUSY`FSModelName <> "_amm::" <> functionName <> "<" <>
    CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
    ">(" <>

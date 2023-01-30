@@ -24,11 +24,11 @@
 
 BeginPackage["EDM`"];
 
-ForwardDeclaration::usage = "";
+EDMForwardDeclaration::usage = "";
 
 Begin["`Private`"];
 
-ForwardDeclaration[field_Symbol, functionName_String] :=
+EDMForwardDeclaration[field_Symbol, functionName_String] :=
 "template double " <> FlexibleSUSY`FSModelName <> "_edm::" <> functionName <> "<" <>
    CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
    ">(" <>

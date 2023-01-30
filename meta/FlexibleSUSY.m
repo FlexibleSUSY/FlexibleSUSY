@@ -2370,7 +2370,7 @@ WriteEDMClass[fields_List, files_List] :=
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
        ];
 
-    calculateForwadDeclaration = StringRiffle[EDM`ForwardDeclaration[#, "calculate_edm"]& /@ fields, "\n"];
+    calculateForwadDeclaration = StringRiffle[EDM`EDMForwardDeclaration[#, "calculate_edm"]& /@ fields, "\n"];
 
     WriteOut`ReplaceInFiles[files,
                             {"@EDMCalculation@"       -> TextFormatting`IndentText[calculation],
@@ -2528,8 +2528,8 @@ WriteAMMClass[fields_List, files_List] :=
       diagrams = If[Length[fields] > 0, Flatten[Outer[AMM`AMMContributingDiagramsForGraph, graphs, fields, 1], 1], {}];
 
       vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
-      calculateForwadDeclaration = StringRiffle[AMM`ForwardDeclaration[#, "calculate_amm"]& /@ fields, "\n"];
-      uncertaintyForwadDeclaration = StringRiffle[AMM`ForwardDeclaration[#, "calculate_amm_uncertainty"]& /@ fields, "\n"];
+      calculateForwadDeclaration = StringRiffle[AMM`AMMForwardDeclaration[#, "calculate_amm"]& /@ fields, "\n"];
+      uncertaintyForwadDeclaration = StringRiffle[AMM`AMMForwardDeclaration[#, "calculate_amm_uncertainty"]& /@ fields, "\n"];
 
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,
