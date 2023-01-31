@@ -18,11 +18,11 @@ double hVV_4body(double *q2, size_t dim, void *params)
 }
 
 template <>
-double CLASSNAME::get_partial_width<Higgs,Z,Z>(
+double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,
-   typename field_indices<Z>::type const& indexOut1,
-   typename field_indices<Z>::type const& indexOut2
+   typename field_indices<ZBoson>::type const& indexOut1,
+   typename field_indices<ZBoson>::type const& indexOut2
    ) const
 {
 
@@ -66,7 +66,7 @@ double CLASSNAME::get_partial_width<Higgs,Z,Z>(
       // prefactor
       const auto indices = concatenate(indexIn, indexOut2, indexOut1);
       const auto ghZZ =
-         Vertex<Higgs, Z, Z>::evaluate(indices, context).value();
+         Vertex<Higgs, ZBoson, ZBoson>::evaluate(indices, context).value();
       const double normalization = 1./(64.*Cube(Pi)) * std::norm(ghZZ) * Cube(mHOS)/Power4(mZOS)/2.;
       res *= normalization;
       err *= normalization;
@@ -84,7 +84,7 @@ double CLASSNAME::get_partial_width<Higgs,Z,Z>(
    }
    else if (4 * x > 1.0 && offshell_VV_decays != 0) {
 
-      if (check_3body_Vff_decay<BSMForZdecay,Z>(context, mHOS, indexOut1)) {
+      if (check_3body_Vff_decay<BSMForZdecay,ZBoson>(context, mHOS, indexOut1)) {
          const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
          WARNING("Warning in H" + index_as_string + "->ZZ decays: Single off-shell decays H->Zff' assume no possible BSM particles in the final state. Turning off.");
          return 0.;
@@ -97,7 +97,7 @@ double CLASSNAME::get_partial_width<Higgs,Z,Z>(
 
       const auto indices = concatenate(indexIn, indexOut2, indexOut1);
       const auto ghZZ =
-         Vertex<Higgs, Z, Z>::evaluate(indices, context).value();
+         Vertex<Higgs, ZBoson, ZBoson>::evaluate(indices, context).value();
 
       const double g2 = context.model.get_g2();
 
@@ -115,7 +115,7 @@ double CLASSNAME::get_partial_width<Higgs,Z,Z>(
       const double ps_symmetry = 1./2.;
 
       // matrix element squared
-      const auto mat_elem = calculate_amplitude<Higgs, Z, Z>(
+      const auto mat_elem = calculate_amplitude<Higgs, ZBoson, ZBoson>(
          context, indexIn, indexOut1, indexOut2);
       const auto mat_elem_sq = mat_elem.square();
 

@@ -3174,7 +3174,7 @@ SimplifiedName[particle_ /; TreeMasses`GetHiggsBoson[] =!= Null && particle === 
 SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "PseudoscalarHiggs";
 SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]]] := "Wm";
 SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] := "Wp";
-SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === TreeMasses`GetZBoson[]] := "Z";
+SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === TreeMasses`GetZBoson[]] := "ZBoson";
 SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === TreeMasses`GetPhoton[]] := "Photon";
 SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "Gluon";
 SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]]] := "Hm";

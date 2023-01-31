@@ -221,7 +221,7 @@ CreateParticleAliases[particles_, namespace_:""] :=
 CreateSMParticleAliases[namespace_:""] :=
     Module[{smParticlesToAlias},
            smParticlesToAlias = Select[{
-                                        TreeMasses`GetWBoson[], TreeMasses`GetZBoson[]
+                                        TreeMasses`GetWBoson[]
                                        }, (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];

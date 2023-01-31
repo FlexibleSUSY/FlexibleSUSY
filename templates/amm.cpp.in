@@ -27,6 +27,7 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
+#include "cxx_qft/@ModelName@_particle_aliases.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "Li2.hpp"
@@ -40,8 +41,6 @@
 
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
-
-using VZ = fields::@AMMZBosonField@;
 
 namespace {
 
@@ -517,7 +516,7 @@ Lepton, Fermion, Scalar
                       >;
 
    using LeptonZVertex = Vertex<
-                      VZ,
+                      ZBoson,
                       Lepton,
                       typename Lepton::lorentz_conjugate
                       >;
@@ -529,7 +528,7 @@ Lepton, Fermion, Scalar
                          >;
 
    using FermionZVertex = Vertex<
-                         VZ,
+                         ZBoson,
                          typename Fermion::lorentz_conjugate,
                          Fermion
                          >;
@@ -574,7 +573,7 @@ Lepton, Fermion, Scalar
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
                const auto leptonMass = context.mass<Lepton>(leptonIndices);
-               const auto zMass = context.mass<VZ>({ });
+               const auto zMass = context.mass<ZBoson>({ });
                const auto ThetaW = DERIVEDPARAMETER(ThetaW);
                const double cw = Cos(ThetaW);
                const double sw = Sin(ThetaW);

@@ -1,11 +1,11 @@
 template <>
-double CLASSNAME::get_partial_width<Higgs, Photon, Z>(
+double CLASSNAME::get_partial_width<Higgs, Photon, ZBoson>(
       const context_base& context,
       const typename field_indices<Higgs>::type& in_idx,
       const typename field_indices<Photon>::type& out1_idx,
-      const typename field_indices<Z>::type& out2_idx) const
+      const typename field_indices<ZBoson>::type& out2_idx) const
 {
-   const auto amp = calculate_amplitude<Higgs, Photon, Z>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude<Higgs, Photon, ZBoson>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<Higgs>(in_idx);
    const double mZ = qedqcd.displayPoleMZ();
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mH)));
