@@ -231,7 +231,7 @@ CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertain
 CalculateObservable[FlexibleSUSYObservable`EDM[p_], structName_String] :=
     Module[{pStr = CConversion`ToValidCSymbolString[p]},
            structName <> ".EDM0(" <> pStr <> ") = " <>
-           FlexibleSUSY`FSModelName <> "_edm::calculate_edm_" <> pStr <> "(MODEL);"
+           FlexibleSUSY`FSModelName <> "_edm::calculate_edm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd);"
           ];
 
 CalculateObservable[FlexibleSUSYObservable`EDM[p_[idx_]], structName_String] :=
