@@ -115,8 +115,6 @@ double get_alpha(context_base const&  context)
 
 // -------- specializations for decays needing higher order SM corrections --------
 
-@create_SM_particle_usings@
-
 @create_BSM_particle_list@
 
 template <typename DecayProds, typename V>

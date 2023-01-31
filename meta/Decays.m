@@ -37,7 +37,6 @@ CreateCompleteParticleList::usage="";
 GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
-CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
 CreateBSMParticleAliasList::usage="";
 
 CallDecaysCalculationFunctions::usage="creates calls to functions calculating
@@ -210,21 +209,6 @@ SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === Tree
 SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === TreeMasses`GetPhoton[]] := "A";
 SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "G";
 SimplifiedName[particle_] := particle;
-
-CreateParticleAlias[particle_, namespace_String] :=
-    "using " <> SimplifiedName[particle] <> " = " <>
-    CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
-
-CreateParticleAliases[particles_, namespace_:""] :=
-    Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
-
-CreateSMParticleAliases[namespace_:""] :=
-    Module[{smParticlesToAlias},
-           smParticlesToAlias = Select[{
-                                        TreeMasses`GetWBoson[]
-                                       }, (# =!= Null)&];
-           CreateParticleAliases[smParticlesToAlias, namespace]
-          ];
 
 CreateBSMParticleAliasList[namespace_:""] :=
    Module[{bsmForZdecay, bsmForWdecay},
