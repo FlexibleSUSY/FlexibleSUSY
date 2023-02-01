@@ -11,9 +11,9 @@ double CLASSNAME::get_partial_width<AH, G, G>(
 
    const auto amp = calculate_amplitude<AH, G, G>(context, in_idx, out1_idx, out2_idx);
    const double mAh = context.physical_mass<AH>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
-   constexpr double color_fact = squared_color_generator<AH, G, G>();
+   static constexpr double ps {1/(8.*Pi)};
+   static constexpr double ps_symmetry {0.5};
+   static constexpr double color_fact = squared_color_generator<AH, G, G>();
    const double flux = 0.5/mAh;
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
@@ -42,7 +42,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
       const double mu = mAh;
       const double LH = std::log(Sqr(mu/mAh));
       const double deltaNLO {
-         97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
+         97/4. - 7/6.*Nf + (33-2*Nf)/6.*LH
       };
 
       const double mt {context.mass<uq>({2})};
@@ -71,6 +71,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
          default:
             WARNING("Unknow correcion in Phi->gg");
       }
+      result += pseudoscalar_corr;
    }
 
    return result;

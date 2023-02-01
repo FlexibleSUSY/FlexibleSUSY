@@ -46,6 +46,8 @@ Fixed bugs
   (see Eq. 20 of `2106.05038 <https://arxiv.org/abs/2106.05038>`_). Numerical
   impact negligible.
 
+* [commit ]: Higher order corrections to :math:`$A\to gg$` where not applied.
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
