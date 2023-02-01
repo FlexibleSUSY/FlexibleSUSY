@@ -1000,8 +1000,8 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
          const auto indexEmit = concatenate(goldstoneFieldIndicesIn, vectorFieldIndicesOut);
          const auto vertexEmit = VertexVBarGPBar::evaluate(indexEmit, context);
    
-         const auto mV = context.mass<GA>(goldstoneFieldIndicesIn);
-         const auto mG = context.mass<VB>(vectorFieldIndicesOut);
+         const auto mG = context.mass<GA>(goldstoneFieldIndicesIn);
+         const auto mV = context.mass<VB>(vectorFieldIndicesOut);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mV);
          const auto y = Power2(mF/mG);
