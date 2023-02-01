@@ -363,7 +363,6 @@ Lepton, Fermion, Scalar
 
          const auto fermionMass = context.mass<Fermion>(fermionIndices);
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
-         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          static constexpr double fermionChargeCount =
             Fermion::electric_charge / Lepton::electric_charge;
@@ -468,7 +467,6 @@ Lepton, Fermion, Scalar
 
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
-               const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
                // @todo(alex): create a separate loop function to properly handle a potential division by zero
                const auto zMass = context.mass<VZ>({ });
@@ -561,7 +559,6 @@ Lepton, ChargedScalar, NeutralScalar
 
          const auto chargedScalarMass = context.mass<ChargedScalar>(chargedScalarIndices);
          const auto neutralScalarMass = context.mass<NeutralScalar>(neutralScalarIndices);
-         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          static constexpr double scalarChargeCount =
             ChargedScalar::electric_charge / Lepton::electric_charge;
@@ -634,7 +631,6 @@ Lepton, Vector, Scalar
 
          const auto vectorMass = context.mass<Vector>(vectorIndices);
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
-         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          static constexpr double vectorChargeCount =
             Vector::electric_charge / Lepton::electric_charge;
