@@ -66,31 +66,31 @@ BOOST_AUTO_TEST_CASE( test_amu )
    using MRSSM2_cxx_diagrams::fields::Fe;
 
    auto ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 0);
-   BOOST_CHECK_CLOSE_FRACTION(ae, -1.8019363934392491e-15, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(ae, -1.8019406450808272e-15, 1e-7);
 
    auto amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, -8.1719107571588341e-11, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, -8.1719300481437495e-11, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
    double damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, 1);
-   BOOST_CHECK_CLOSE_FRACTION(damu, 9.0675554049399791e-13, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(damu, 9.070380471705522e-13, 1e-7);
 
    auto atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, -2.2071973783347808e-08, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(atau, -2.2072030015344601e-08, 1e-7);
 
    // neutralino dominance
    input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
    m = setup_MRSSM2(input, qedqcd);
 
    ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 0);
-   BOOST_CHECK_CLOSE_FRACTION(ae, 1.3730107649079216e-16, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 1.3740153933375618e-16, 1e-7);
 
    amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, 6.2697795623223974e-12, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 6.2743365882975202e-12, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
 
    atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, 3.7303931716651099e-09, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 3.7317209742717716e-09, 1e-7);
 
    damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, 1);
-   BOOST_CHECK_CLOSE_FRACTION(damu, 7.277946979761437e-12, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(damu, 7.278529122136575e-12, 1e-7);
 }
