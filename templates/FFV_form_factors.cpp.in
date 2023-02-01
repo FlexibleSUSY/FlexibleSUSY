@@ -615,9 +615,8 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
    using VertexFiBarFG = Vertex<typename Fi::lorentz_conjugate, GB, F>;
    using VertexGBarVPBar = Vertex<typename GB::lorentz_conjugate, VA, typename P::lorentz_conjugate>;
 
-   // masses of external fermions
+   // mass of incoming fermion
    const auto mj = context.mass<Fj>(indices_in);
-   const auto mi = context.mass<Fi>(indices_out);
 
    // loop over all possible particle generations attached to both vertices
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
@@ -702,9 +701,8 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
    using VertexFiBarFV = Vertex<typename Fi::lorentz_conjugate, VB, F>;
    using VertexVBarGPBar = Vertex<typename VB::lorentz_conjugate, GA, typename P::lorentz_conjugate>;
 
-   // masses of external fermions
+   // mass of incoming fermion
    const auto mj = context.mass<Fj>(indices_in);
-   const auto mi = context.mass<Fi>(indices_out);
 
    // loop over all possible particle generations attached to both vertices
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
