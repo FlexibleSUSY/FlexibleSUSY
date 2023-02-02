@@ -299,7 +299,7 @@ Block UERMIX
 
    // Ah -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
-                              1.0248504807742072, 2e-15);
+                              1.0250734536109385, 2e-15);
    // Ah -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 1, 1, 1),
                               5.1697352441808561e-06, 2e-16);

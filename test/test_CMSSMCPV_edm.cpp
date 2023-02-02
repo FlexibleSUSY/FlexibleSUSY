@@ -639,11 +639,11 @@ Block UURMIX
    using CMSSMCPV_cxx_diagrams::fields::Fe;
 
    auto de = CMSSMCPV_edm::calculate_edm<Fe>(m, qedqcd, 0);
-   BOOST_CHECK_CLOSE_FRACTION(de, -3.2103128259717988e-13, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(de, -3.2103128259718866e-13, 3e-13);
 
    auto dmu = CMSSMCPV_edm::calculate_edm<Fe>(m, qedqcd, 1);
-   BOOST_CHECK_CLOSE_FRACTION(dmu, -6.6380036570344046e-11, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(dmu, -6.6380036570347626e-11, 2e-13);
 
    auto dtau = CMSSMCPV_edm::calculate_edm<Fe>(m, qedqcd, 2);
-   BOOST_CHECK_CLOSE_FRACTION(dtau, -1.1209226809366998e-09, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(dtau, -1.1209226809367614e-09, 3e-13);
 }

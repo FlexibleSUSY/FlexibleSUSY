@@ -136,7 +136,7 @@ Block EXTPAR
    // Reference value from FlexibleSUSY, checks that value does not change
    constexpr double reference_value =
 	   + 1.88800475E-11   // Contribution from FFS + SSF diagrams
-	   - 0.06664329E-11;  // Contribution from Vector diagrams
+	   -6.6643092103093927e-13; // Contribution from Vector diagrams
 
    // Perform a rough closeness check
    BOOST_CHECK_CLOSE_FRACTION(amu, reference_value, 1e-3);

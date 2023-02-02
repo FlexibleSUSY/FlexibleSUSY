@@ -42,6 +42,12 @@ Fixed bugs
 * [commit 1ffb4f7]: Fixed incorrect quark charge in some higher order QED
   corrections to up-type quark decays of :math:`$H$` and :math:`$A$`.
 
+* [commit c90028444]: Fixed wrong vertex in 2-loop corrections to :math:`$A\to d\bar{d}$`
+  (see Eq. 20 of `2106.05038 <https://arxiv.org/abs/2106.05038>`_). Numerical
+  impact negligible.
+
+* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` where not applied.
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
