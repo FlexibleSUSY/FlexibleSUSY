@@ -133,11 +133,11 @@ Block YVIN
    using munuSSM_cxx_diagrams::fields::Cha;
 
    const double ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 0);
-   BOOST_CHECK_CLOSE_FRACTION(ae, 1.9398670311763684e-14, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 1.9396185303343256e-14, 1e-6);
 
    const double amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, 3.4829855830138246e-09, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 3.4828450683984162e-09, 1e-6);
 
    const double atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, 1.7900498254975007e-05, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 1.7900444477375544e-05, 1e-6);
 }

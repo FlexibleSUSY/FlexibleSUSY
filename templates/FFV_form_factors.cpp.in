@@ -93,9 +93,9 @@ struct FFV_FFS {
  *          factors of a given particle in a one loop diagram
  *          specified by a vector emitter and an exchange particle.
  * @tparam Args Specifies in order the field of which to
- *              calculate the electric dipole moment, 
- *              the photon emitter and the exchange particle 
- *              in a one-loop diagram where the photon emitter 
+ *              calculate the electric dipole moment,
+ *              the photon emitter and the exchange particle
+ *              in a one-loop diagram where the photon emitter
  *              is a vector and the exchange particle a fermion.
  *
  * This template evaluates the contribution to the electric
@@ -439,7 +439,7 @@ double OneLoopFunctionM(double r)
    } else if (std::isinf(r)) {
       return 0.0;
    } else {
-      return (4.0 - 9.0 * r + 5.0 * r * r * r + 6.0 * (1.0 - 2.0 * r) * r * std::log(r)) / 
+      return (4.0 - 9.0 * r + 5.0 * r * r * r + 6.0 * (1.0 - 2.0 * r) * r * std::log(r)) /
               Power4(1.0 - r);
    }
 }
@@ -1000,8 +1000,8 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
          const auto indexEmit = concatenate(goldstoneFieldIndicesIn, vectorFieldIndicesOut);
          const auto vertexEmit = VertexVBarGPBar::evaluate(indexEmit, context);
 
-         const auto mV = context.mass<GA>(goldstoneFieldIndicesIn);
-         const auto mG = context.mass<VB>(vectorFieldIndicesOut);
+         const auto mG = context.mass<GA>(goldstoneFieldIndicesIn);
+         const auto mV = context.mass<VB>(vectorFieldIndicesOut);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mV);
          const auto y = Power2(mF/mG);
