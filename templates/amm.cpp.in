@@ -18,12 +18,12 @@
 
 
 /**
- * @file @ModelName@_a_muon.cpp
+ * @file @ModelName@_amm.cpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#include "@ModelName@_a_muon.hpp"
+#include "@ModelName@_amm.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
@@ -34,25 +34,26 @@
 #include "wrappers.hpp"
 #include "numerics2.hpp"
 #include "logger.hpp"
+#include "scan.hpp"
 
 #define DERIVEDPARAMETER(p) context.model.p()
 
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 
-using Muon = fields::@AMuon_MuonField@;
-using VZ = fields::@AMuon_ZBosonField@;
+using VZ = fields::@AMMZBosonField@;
 
 namespace {
 
-double get_QED_2L(context_base&, const softsusy::QedQcd&);
+template <typename Lepton>
+double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
 double BarZeeLoopFPS(double);
 double BarZeeLoopFS(double);
 double BarZeeLoopS(double);
 double BarZeeLoopV(double);
 
 /**
- * @class AMuonBarZeeFermionLoop
+ * @class AMMBarZeeFermionLoop
  * @brief A template that calculate contributions to the
  *        anomalous magnetic dipole moment of a given particle in
  *        a BarZee diagram with a fermion loop and scalar/Photon exchange
@@ -67,15 +68,15 @@ double BarZeeLoopV(double);
  * dipole moment of a BarZee diagram with fields given by
  * \a Args.
  */
-template<class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeFermionLoop {
-   static double value(const typename field_indices<Muon>::type& indices,
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarZeeFermionLoop {
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMuonBarZeeFermionZLoop
+ * @class AMMBarZeeFermionZLoop
  * @brief A template that calculate contributions to the
  *        anomalous magnetic dipole moment of a given particle in
  *        a BarZee diagram with a fermion loop and scalar/Z-boson exchange
@@ -90,15 +91,15 @@ struct AMuonBarZeeFermionLoop {
  * dipole moment of a BarZee diagram with fields given by
  * \a Args.
  */
-template<class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeFermionLoopZ {
-   static double value(const typename field_indices<Muon>::type& indices,
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarZeeFermionLoopZ {
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMuonBarZeeScalarLoop
+ * @class AMMBarZeeScalarLoop
  * @brief A template that calculate contributions to the
  *        anomalous dipole moment of a given particle in
  *        a BarZee diagram with a scalar loop and scalar exchange
@@ -113,15 +114,15 @@ struct AMuonBarZeeFermionLoopZ {
  * dipole moment of a BarZee diagram with fields given by
  * \a Args.
  */
-template<class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeScalarLoop {
-   static double value(const typename field_indices<Muon>::type& indices,
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarZeeScalarLoop {
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMuonBarZeeVectorLoop
+ * @class AMMBarZeeVectorLoop
  * @brief A template that calculate contributions to the
  *        anomalous dipole moment of a given particle in
  *        a BarZee diagram with a scalar loop and scalar exchange
@@ -136,9 +137,9 @@ struct AMuonBarZeeScalarLoop {
  * dipole moment of a BarZee diagram with fields given by
  * \a Args.
  */
-template<class PhotonEmitter, class ExchangeParticle>
-struct AMuonBarZeeVectorLoop {
-   static double value(const typename field_indices<Muon>::type& indices,
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarZeeVectorLoop {
+   static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
                        const softsusy::QedQcd& qedqcd);
 };
@@ -263,7 +264,7 @@ double BarZeeLoopV(const double m) {
 
 double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
 {
-@AMuon_GetMSUSY@
+@AMMGetMSUSY@
 }
 
 void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
@@ -274,7 +275,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    double precision = 0.;
    double MSUSY_old = 0., MSUSY_new = 0.;
 
-   VERBOSE_MSG("@ModelName@_a_muon: iterate to run to MSUSY ...");
+   VERBOSE_MSG("@ModelName@_amm: iterate to run to MSUSY ...");
 
    do {
       MSUSY_new = get_MSUSY(model);
@@ -282,7 +283,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       if (MSUSY_new <= 0.)
          return;
 
-      VERBOSE_MSG("@ModelName@_a_muon:    running to new MSUSY = " << MSUSY_new);
+      VERBOSE_MSG("@ModelName@_amm:    running to new MSUSY = " << MSUSY_new);
 
       model.run_to(MSUSY_new);
       model.calculate_DRbar_masses();
@@ -291,51 +292,60 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       MSUSY_old = MSUSY_new;
    } while (precision > precision_goal && ++it < Nmax);
 
-   VERBOSE_MSG("@ModelName@_a_muon: iteration finished. MSUSY = " << MSUSY_new);
+   VERBOSE_MSG("@ModelName@_amm: iteration finished. MSUSY = " << MSUSY_new);
 
    if (precision > precision_goal) {
-      WARNING("@ModelName@_a_muon: run_to_MSUSY(): "
+      WARNING("@ModelName@_amm: run_to_MSUSY(): "
               "Iteration did not converge after " << Nmax
               << " iterations (precision goal: " << precision_goal << ")");
    }
 }
 
-double muonPhysicalMass(const softsusy::QedQcd& qedqcd)
-{
-   return qedqcd.displayPoleMmuon();
-}
+@leptonPoleMass@
 
-double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+template <typename Lepton>
+double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
-   VERBOSE_MSG("@ModelName@_a_muon: calculating a_mu at Q = " << model.get_scale());
+   VERBOSE_MSG("@ModelName@_amm: calculating a_mu at Q = " << model.get_scale());
 
    context_base context{ model };
 
    using namespace @ModelName@_cxx_diagrams::fields;
 
-@AMuon_Calculation@
+@AMMCalculation@
 
-   if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
-      ERROR("Error in the g-2 calculation! Form factor F2 should be real");
-      return std::numeric_limits<double>::quiet_NaN();
+   // Im[F2]/Re[F2] ~ 0
+   if (!is_zero((form_factors[2] + form_factors[3]).real())) {
+      double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
+      if (!is_zero(ratio)) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[Fe]/Re[F2] = " + std::to_string(ratio));
+         return std::numeric_limits<double>::quiet_NaN();
+      }
+   }
+   // Im[F2] ~ 0
+   else {
+      if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[F2] = " + std::to_string((form_factors[2] + form_factors[3]).imag()));
+         return std::numeric_limits<double>::quiet_NaN();
+      }
    }
 
    double val =
       // vector form factor
-      1./2.*(form_factors[2] + form_factors[3]).real()
+      0.5*(form_factors[2] + form_factors[3]).real()
       // reinstate the mass that was factored out in definition of form factor
-      * context.mass<Muon>({@AMuon_MuonIndex@})
-      // factor out e/(2*muon pole mass)
-      / (unit_charge(context_base{model})/(2.*muonPhysicalMass(qedqcd)))
+      * context.mass<Lepton>({@extraIdxUsageNoComma@})
+      // factor out e/(2*lepton pole mass)
+      / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
       // definition of photon momentum flow for g-2 is opposite than for form factors
       * (-1.);
 
    // add 2-loop QED logarithms
-   val *= 1. + get_QED_2L(context, qedqcd);
+   val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
 
    std::complex<double> valBarZee {0., 0.};
 
-@AMuon_BarZeeCalculation@
+@AMMBarZeeCalculation@
 
    if (!is_zero(valBarZee.imag())) {
       ERROR("Error in the g-2 calculation! Form factor F2 should be real");
@@ -348,32 +358,14 @@ double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const so
    return val;
 }
 
-/// generates array with N scales from mean/factor to mean*factor
-template <int N>
-std::array<double,N> generate_scales(double mean, double factor)
-{
-   static_assert(N > 1, "N must be greater than 1!");
-
-   const double start = mean / factor, stop = mean * factor;
-   std::array<double,N> scales;
-
-   scales[0] = start;
-
-   for (int i = 1; i < (N-1); i++)
-      scales[i] = std::exp(std::log(start) + (std::log(stop) - std::log(start))*i / N);
-
-   scales[N-1] = stop;
-
-   return scales;
-}
-
 /// returns minimum and maximum a_mu when scale is varied by a factor 2
-std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+template <typename Lepton>
+std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
-   auto scales = generate_scales<7>(model.get_scale(), 2.);
+   auto scales = subdivide_log(0.5*model.get_scale(), 2*model.get_scale(), 6);
 
    std::transform(scales.begin(), scales.end(), scales.begin(),
-                  [&model,&qedqcd] (double scale) {
+                  [&model,&qedqcd@extraIdxUsage@] (double scale) {
                      double amu = 0.;
                      try {
                         auto m = model;
@@ -381,11 +373,10 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
                         m.get_physical().clear();
                         m.calculate_DRbar_masses();
                         m.solve_ewsb();
-                        m.calculate_M@AMuon_MuonField@_pole();
-                        amu = calculate_a_muon_impl(m, qedqcd);
+                        amu = calculate_amm_impl<Lepton>(m, qedqcd@extraIdxUsage@);
                      }
                      catch(const Error& e) {
-                        ERROR("@ModelName@_a_muon: scale variation: " << e.what_detailed());
+                        ERROR("@ModelName@_amm: scale variation: " << e.what_detailed());
                      }
                      return amu;
                   });
@@ -397,70 +388,72 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
 
 } // anonymous namespace
 
-double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd)
+template <typename Lepton>
+double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 
-   VERBOSE_MSG("@ModelName@_a_muon: starting calculation of a_mu ...");
+   VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu ...");
 
    try {
       run_to_MSUSY(model);
       model.get_physical().clear();
    } catch (const Error& e) {
-      ERROR("@ModelName@_a_muon:" << e.what_detailed());
+      ERROR("@ModelName@_amm:" << e.what_detailed());
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   double m_muon_pole = muonPhysicalMass(qedqcd);
-
-   if (m_muon_pole == 0.0) {
-      model.solve_ewsb();
-      model.calculate_M@AMuon_MuonField@_pole();
-   }
-
-   return calculate_a_muon_impl(model, qedqcd);
+   return calculate_amm_impl<Lepton>(model, qedqcd@extraIdxUsage@);
 }
 
-double @ModelName@_a_muon::calculate_a_muon_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd)
+// spliting templated function into header and cpp
+// https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
+@calculateAForwardDeclaration@
+
+template <typename Lepton>
+double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 
-   VERBOSE_MSG("@ModelName@_a_muon: starting calculation of a_mu uncertainty ...");
+   VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu uncertainty ...");
 
    try {
       run_to_MSUSY(model);
       model.get_physical().clear();
    } catch (const Error& e) {
-      ERROR("@ModelName@_a_muon uncertainty: " << e.what_detailed());
+      ERROR("@ModelName@_amm uncertainty: " << e.what_detailed());
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   const auto delta_amu_scale_minmax = vary_scale(model, qedqcd);
+   const auto delta_amu_scale_minmax = vary_scale<Lepton>(model, qedqcd@extraIdxUsage@);
    const auto delta_amu_scale = std::abs(delta_amu_scale_minmax.second - delta_amu_scale_minmax.first);
 
    return delta_amu_scale;
 }
+// spliting templated function into header and cpp
+// https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
+@calculateAUncertaintyForwardDeclaration@
 
 namespace {
-double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd)
+template <typename Lepton>
+double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
 {
    const double MSUSY = Abs(get_MSUSY(context.model));
-   const double m_muon = muonPhysicalMass(qedqcd);
-   const double alpha_em = Sqr(Muon::electric_charge * unit_charge(context))/(4*Pi);
-   const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_muon/MSUSY);
+   const double alpha_em = Sqr(Lepton::electric_charge * unit_charge(context))/(4*Pi);
+   const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
 
    return qed_2L;
 }
 
-template<class Fermion, class Scalar>
-double AMuonBarZeeFermionLoop<
-Fermion, Scalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+template<typename Lepton, class Fermion, class Scalar>
+double AMMBarZeeFermionLoop<
+Lepton, Fermion, Scalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       Scalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
    using FermionVertex = Vertex<
@@ -470,14 +463,14 @@ Fermion, Scalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<FermionVertex>()) {
-          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (muonIndices != indices)
+         if (leptonIndices != indices)
             continue;
 
-         const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
@@ -490,18 +483,18 @@ Fermion, Scalar
          if (fermionIndices != FermionVertex::template indices_of_field<2>(index2))
             continue;
 
-         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto fermionVertex = FermionVertex::evaluate(index2, context);
 
          const auto fermionMass = context.mass<Fermion>(fermionIndices);
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
-         const auto muonMass = context.mass<Muon>(muonIndices);
+         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          const double fermionChargeCount =
-            Fermion::electric_charge / Muon::electric_charge;
+            Fermion::electric_charge / Lepton::electric_charge;
 
-         const std::complex<double> zrm = muonVertex.right();
-         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zrf = fermionVertex.right();
          const std::complex<double> zlf = fermionVertex.left();
 
@@ -514,7 +507,7 @@ Fermion, Scalar
          const double part2 = coeffB.real() * BarZeeLoopFPS(massRatioSquared);
 
          const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * fermionChargeCount
-            * muonPhysicalMass(qedqcd) / fermionMass;
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
          res += preFactor * (part1 + part2);
       }
@@ -523,21 +516,21 @@ Fermion, Scalar
    return res;
 }
 
-template<class Fermion, class Scalar>
-double AMuonBarZeeFermionLoopZ<
-Fermion, Scalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+template<typename Lepton, class Fermion, class Scalar>
+double AMMBarZeeFermionLoopZ<
+Lepton, Fermion, Scalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       Scalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
-   using MuonZVertex = Vertex<
+   using LeptonZVertex = Vertex<
                       VZ,
-                      Muon,
-                      typename Muon::lorentz_conjugate
+                      Lepton,
+                      typename Lepton::lorentz_conjugate
                       >;
 
    using FermionVertex = Vertex<
@@ -553,21 +546,21 @@ Fermion, Scalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<FermionVertex>()) {
-         for (const auto& indexMuonZ: index_range<MuonZVertex>()) {
+         for (const auto& indexLeptonZ: index_range<LeptonZVertex>()) {
             for (const auto& indexFermionZ: index_range<FermionZVertex>()) {
 
-               const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+               const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-               if (muonIndices != indices)
+               if (leptonIndices != indices)
                   continue;
 
-               if ((muonIndices != MuonZVertex::template indices_of_field<2>(indexMuonZ)) ||
-                   (muonIndices != MuonZVertex::template indices_of_field<1>(indexMuonZ)))
+               if ((leptonIndices != LeptonZVertex::template indices_of_field<2>(indexLeptonZ)) ||
+                   (leptonIndices != LeptonZVertex::template indices_of_field<1>(indexLeptonZ)))
                   continue;
 
-               const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+               const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
                const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
                if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
@@ -584,14 +577,14 @@ Fermion, Scalar
                    (fermionIndices != FermionZVertex::template indices_of_field<1>(indexFermionZ)))
                   continue;
 
-               const auto muonVertex = MuonVertex::evaluate(index1, context);
+               const auto leptonVertex = LeptonVertex::evaluate(index1, context);
                const auto fermionVertex = FermionVertex::evaluate(index2, context);
-               const auto muonZVertex = MuonZVertex::evaluate(indexMuonZ, context);
+               const auto leptonZVertex = LeptonZVertex::evaluate(indexLeptonZ, context);
                const auto fermionZVertex = FermionZVertex::evaluate(indexFermionZ, context);
 
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
-               const auto muonMass = context.mass<Muon>(muonIndices);
+               const auto leptonMass = context.mass<Lepton>(leptonIndices);
                const auto zMass = context.mass<VZ>({ });
                const auto ThetaW = DERIVEDPARAMETER(ThetaW);
                const double cw = Cos(ThetaW);
@@ -602,13 +595,13 @@ Fermion, Scalar
                }
 
                const double fermionChargeCount =
-                  Fermion::electric_charge / Muon::electric_charge;
+                  Fermion::electric_charge / Lepton::electric_charge;
 
-               const std::complex<double> zrm = muonVertex.right();
-               const std::complex<double> zlm = muonVertex.left();
+               const std::complex<double> zrm = leptonVertex.right();
+               const std::complex<double> zlm = leptonVertex.left();
                const std::complex<double> zrf = fermionVertex.right();
                const std::complex<double> zlf = fermionVertex.left();
-               const std::complex<double> zmzr = muonZVertex.right();
+               const std::complex<double> zmzr = leptonZVertex.right();
                const std::complex<double> zfzr = fermionZVertex.right();
 
                const double gvm = (0.5) * (zmzr.real()/unit_charge(context) + sw/cw);
@@ -622,7 +615,7 @@ Fermion, Scalar
                const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFPS(massRatioSquared) - BarZeeLoopFPS(Sqr(fermionMass / zMass)));
 
                const double preFactor = - Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
-                  * muonPhysicalMass(qedqcd) / fermionMass;
+                  * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
                res += preFactor * (part1 + part2);
             }
@@ -633,15 +626,15 @@ Fermion, Scalar
    return res;
 }
 
-template<class ChargedScalar, class NeutralScalar>
-double AMuonBarZeeScalarLoop<
-ChargedScalar, NeutralScalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+template<typename Lepton, class ChargedScalar, class NeutralScalar>
+double AMMBarZeeScalarLoop<
+Lepton, ChargedScalar, NeutralScalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       NeutralScalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
    using ScalarVertex = Vertex<
@@ -651,14 +644,14 @@ ChargedScalar, NeutralScalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<ScalarVertex>()) {
-          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (muonIndices != indices)
+         if (leptonIndices != indices)
             continue;
 
-         const auto neutralScalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto neutralScalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto chargedScalarIndices = ScalarVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<ChargedScalar>(chargedScalarIndices) &&
@@ -673,18 +666,18 @@ ChargedScalar, NeutralScalar
          if (chargedScalarIndices != ScalarVertex::template indices_of_field<2>(index2))
             continue;
 
-         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto scalarVertex = ScalarVertex::evaluate(index2, context);
 
          const auto chargedScalarMass = context.mass<ChargedScalar>(chargedScalarIndices);
          const auto neutralScalarMass = context.mass<NeutralScalar>(neutralScalarIndices);
-         const auto muonMass = context.mass<Muon>(muonIndices);
+         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          const double scalarChargeCount =
-            ChargedScalar::electric_charge / Muon::electric_charge;
+            ChargedScalar::electric_charge / Lepton::electric_charge;
 
-         const std::complex<double> zrm = muonVertex.right();
-         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zss = scalarVertex.value();
 
          const std::complex<double> coeff = (zrm + zlm) * zss;
@@ -692,7 +685,7 @@ ChargedScalar, NeutralScalar
          const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
 
          const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * scalarChargeCount * scalarChargeCount
-            * muonPhysicalMass(qedqcd) / (neutralScalarMass * neutralScalarMass);
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (neutralScalarMass * neutralScalarMass);
 
          res += preFactor * coeff.real() * BarZeeLoopS(massRatioSquared);
       }
@@ -701,16 +694,16 @@ ChargedScalar, NeutralScalar
    return res;
 }
 
-template<class Vector, class Scalar>
-double AMuonBarZeeVectorLoop<
-Vector, Scalar
->::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+template<typename Lepton, class Vector, class Scalar>
+double AMMBarZeeVectorLoop<
+Lepton, Vector, Scalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
 
-   using MuonVertex = Vertex<
+   using LeptonVertex = Vertex<
                       Scalar,
-                      typename Muon::lorentz_conjugate,
-                      Muon
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
                       >;
 
    using VectorVertex = Vertex<
@@ -720,14 +713,14 @@ Vector, Scalar
                          >;
 
    double res = 0.0;
-   for (const auto& index1: index_range<MuonVertex>()) {
+   for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<VectorVertex>()) {
-          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
-         if (muonIndices != indices)
+         if (leptonIndices != indices)
             continue;
 
-         const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
          const auto vectorIndices = VectorVertex::template indices_of_field<1>(index2);
 
          if (cxx_diagrams::isSMField<Vector>(vectorIndices) &&
@@ -740,18 +733,18 @@ Vector, Scalar
          if (vectorIndices != VectorVertex::template indices_of_field<2>(index2))
             continue;
 
-         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
          const auto vectorVertex = VectorVertex::evaluate(index2, context);
 
          const auto vectorMass = context.mass<Vector>(vectorIndices);
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
-         const auto muonMass = context.mass<Muon>(muonIndices);
+         const auto leptonMass = context.mass<Lepton>(leptonIndices);
 
          const double vectorChargeCount =
-            Vector::electric_charge / Muon::electric_charge;
+            Vector::electric_charge / Lepton::electric_charge;
 
-         const std::complex<double> zrm = muonVertex.right();
-         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
          const std::complex<double> zsv = vectorVertex.value();
 
          const std::complex<double> coeff = (zrm + zlm) * zsv;
@@ -759,7 +752,7 @@ Vector, Scalar
          const double massRatioSquared = Sqr(vectorMass / scalarMass);
 
          const double preFactor = - Sqr(unit_charge(context))/(128*Power4(Pi)) * vectorChargeCount * vectorChargeCount
-            * muonPhysicalMass(qedqcd) / (vectorMass * vectorMass);
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (vectorMass * vectorMass);
 
          res += preFactor * coeff.real() * BarZeeLoopV(massRatioSquared);
       }

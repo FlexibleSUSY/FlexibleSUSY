@@ -49,7 +49,7 @@ BeginPackage["FlexibleSUSY`",
               "TerminalFormatting`",
               "ThreeLoopMSSM`",
               "CXXDiagrams`",
-              "AMuon`",
+              "AMM`",
               "Decays`",
               "EDM`",
               "FFVFormFactors`",
@@ -61,7 +61,8 @@ BeginPackage["FlexibleSUSY`",
               "FlexibleTower`",
               "WeinbergAngle`",
               "Wrappers`",
-              "Himalaya`"
+              "Himalaya`",
+              "GM2Calc`"
 }];
 
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
@@ -74,7 +75,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "W. Kotlarski",
               "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2021";
+FS`Years   = "2013-2023";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -207,14 +208,6 @@ ExtraSLHAOutputBlocks::usage = "@note
 this List is rewritten during the runnig of start.m script
 in the directory FlexibleSUSY/models/@CLASSNAME@ by
 the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
-ExtraSLHAOutputBlocks = {
-    {
-    	FlexibleSUSYLowEnergy,
-        {
-        	{1, FlexibleSUSYObservable`aMuon}
-        }
-    }
-};
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
 IMEXTPAR = {};
@@ -328,6 +321,29 @@ NoScale::usage="placeholder indicating an SLHA block should not
 have a scale associated with it.";
 CurrentScale::usage="placeholder indicating the current renormalization
 scale of the model.";
+
+(* input parameters for GM2Calc, see [arxiv:2110.13238] *)
+FSGM2CalcInput = {
+    yukawaType -> 0,
+    lambda1 -> 0,
+    lambda2 -> 0,
+    lambda3 -> 0,
+    lambda4 -> 0,
+    lambda5 -> 0,
+    lambda6 -> 0,
+    lambda7 -> 0,
+    tanBeta -> SARAH`VEVSM2 / SARAH`VEVSM1,
+    m122 -> 0,
+    zetau -> 0,
+    zetad -> 0,
+    zetal -> 0,
+    deltau -> ZEROMATRIX[3,3],
+    deltad -> ZEROMATRIX[3,3],
+    deltal -> ZEROMATRIX[3,3],
+    piu -> ZEROMATRIX[3,3],
+    pid -> ZEROMATRIX[3,3],
+    pil -> ZEROMATRIX[3,3]
+};
 
 (* input parameters for Himalaya *)
 FSHimalayaInput = {
@@ -2354,24 +2370,31 @@ WriteCXXDiagramClass[vertices_List, files_List,
     ];
 
 (* Write the EDM c++ files *)
-WriteEDMClass[edmFields_List,files_List] :=
-  Module[{graphs,diagrams,vertices,
-          interfacePrototypes,interfaceDefinitions},
-    graphs = EDM`EDMContributingGraphs[];
-    diagrams = Outer[EDM`EDMContributingDiagramsForFieldAndGraph,edmFields,graphs,1];
+WriteEDMClass[fields_List, files_List] :=
+  Module[{(* in models without flavour violation (no FV models) lepton does not have an index *)
+          leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
+          (* we want to calculate an offset of g-2 compared to the SM *)
+          discardSMcontributions = CConversion`CreateCBoolValue[False],
+          calculation, calculateForwadDeclaration},
 
-    vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,2],1];
+    calculation =
+       If[Length[fields] =!= 0,
+            "const auto form_factors = " <>
+            FSModelName <> "_FFV_form_factors::calculate_form_factors<Lepton,Lepton," <>
+            CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            "model, " <> discardSMcontributions <> ");",
+            "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
+       ];
 
-    {interfacePrototypes,interfaceDefinitions} =
-      If[diagrams === {},
-         {"",""},
-         StringJoin @@@
-          (Riffle[#, "\n\n"] & /@ Transpose[EDM`EDMCreateInterfaceFunctionForField @@@
-            Transpose[{edmFields,Transpose[{graphs,#}] & /@ diagrams}]])];
+    calculateForwadDeclaration = StringRiffle[EDM`EDMForwardDeclaration[#, "calculate_edm"]& /@ fields, "\n"];
 
     WriteOut`ReplaceInFiles[files,
-                            {"@EDM_InterfacePrototypes@"       -> interfacePrototypes,
-                             "@EDM_InterfaceDefinitions@"      -> interfaceDefinitions,
+                            {"@EDMCalculation@"       -> TextFormatting`IndentText[calculation],
+                             "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
+                             "@calculateForwadDeclaration@" -> calculateForwadDeclaration,
+                             "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
                              Sequence @@ GeneralReplacementRules[]
                             }];
 
@@ -2381,7 +2404,7 @@ WriteEDMClass[edmFields_List,files_List] :=
 (* Write the FFV c++ files *)
 WriteFFVFormFactorsClass[extParticles_List, files_List] :=
    Module[{
-         interfacePrototypes = "", interfaceDefinitions = "",
+         interfacePrototypes = "", interfaceDefinitions = "", templateWrapperDecl = "", templateWrapperDef = "",
          graphs, diagrams, vertices = {}
       },
 
@@ -2397,7 +2420,7 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
 
       	vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,2], 1];
 
-         {interfacePrototypes, interfaceDefinitions} =
+         {interfacePrototypes, interfaceDefinitions, templateWrapperDecl, templateWrapperDef} =
             StringJoin /@ (Riffle[#, "\n\n"]& /@ Transpose[
                FFVFormFactors`FFVFormFactorsCreateInterfaceFunction[#1, graphs, #2]& @@@
                   Transpose[{extParticles, diagrams}]
@@ -2407,6 +2430,8 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
       WriteOut`ReplaceInFiles[files,
          {"@FFVFormFactors_InterfacePrototypes@"   -> interfacePrototypes,
           "@FFVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,
+          "@TemplateWrapper_InterfacePrototypes@" -> templateWrapperDecl,
+          "@TemplateWrapper_InterfaceDefinitions@" -> templateWrapperDef,
           Sequence @@ GeneralReplacementRules[]}
       ];
 
@@ -2492,33 +2517,37 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
       DeleteDuplicates@Join[vertices,npfVertices]
    ];
 
-(* Write the AMuon c++ files *)
-WriteAMuonClass[calcAMu_, files_List] :=
+(* Write the AMM c++ files *)
+WriteAMMClass[fields_List, files_List] :=
     Module[{calculation, getMSUSY,
-            (* in models without flavour violation (no FV models) muon does not have an index,
-               otherwise we assume it's the second particle in the lepton multiplet *)
-            muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "1", ""],
+            (* in models without flavour violation (no FV models) lepton does not have an index *)
+            leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
-            graphs, diagrams, vertices, barZee = ""},
+            graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPoleMass,
+            BarrZeeLeptonIdx, gm2WrapperDecl, gm2WrapperDef, gm2UncWrapperDecl, gm2UncWrapperDef},
 
       calculation =
-         If[calcAMu,
+         If[Length[fields] =!= 0,
             "const auto form_factors = " <>
-            FSModelName <> "_FFV_form_factors::calculate_" <> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]] <> "_" <>
-            CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]] <> "_" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> "_form_factors(" <>
-            muonIndex <> If[muonIndex === "", "", ", "] <>
-            muonIndex <> If[muonIndex === "", "", ", "] <>
+            FSModelName <> "_FFV_form_factors::calculate_form_factors<Lepton,Lepton," <>
+            CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
+            leptonIndex <> If[leptonIndex === "", "", ", "] <>
             "model, " <> discardSMcontributions <> ");",
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
 
-      getMSUSY = AMuon`AMuonGetMSUSY[];
+      getMSUSY = AMM`AMMGetMSUSY[];
 
-      graphs = AMuon`AMuonContributingGraphs[];
-      diagrams = Outer[AMuon`AMuonContributingDiagramsForGraph, graphs, 1];
+      (* only Barr-Zee graphs
+         1-loop diagrams will be provided by the FFMasslessV module and are taken care of elsewhere *)
+      graphs = If[Length[fields] > 0, AMM`AMMContributingGraphs[], {}];
+      diagrams = If[Length[fields] > 0, Flatten[Outer[AMM`AMMContributingDiagramsForGraph, graphs, fields, 1], 1], {}];
 
       vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
+      calculateForwadDeclaration = StringRiffle[AMM`AMMForwardDeclaration[#, "calculate_amm"]& /@ fields, "\n"];
+      uncertaintyForwadDeclaration = StringRiffle[AMM`AMMForwardDeclaration[#, "calculate_amm_uncertainty"]& /@ fields, "\n"];
 
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,
@@ -2528,18 +2557,67 @@ WriteAMuonClass[calcAMu_, files_List] :=
                CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
                   graphs[[i]]
                 ], 16] <> " * " <>
-                ToString @ AMuon`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
-                "::value({" <> muonIndex <> "}, context, qedqcd);\n"
+                ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
+                "::value({" <> leptonIndex <> "}, context, qedqcd);\n"
          ];
       ];
 
+      leptonPoleMass =
+         If[GetParticleFromDescription["Leptons"] =!= Null,
+"template <typename Lepton>
+double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
+{
+   return qedqcd.displayLeptonPoleMass(idx);
+}",
+StringRiffle[
+(
+"template <typename Lepton>
+std::enable_if_t<std::is_same<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">::value, double>
+lepton_pole_mass(const softsusy::QedQcd& qedqcd)
+{\n" <>
+TextFormatting`IndentText[
+   Switch[#,
+      GetParticleFromDescription["Electron"], "return qedqcd.displayPoleMel()",
+      GetParticleFromDescription["Muon"],     "return qedqcd.displayPoleMmuon()",
+      GetParticleFromDescription["Tau"],      "return qedqcd.displayPoleMtau()"
+   ] <> ";\n"
+] <>
+"}")& /@ fields,
+"\n\n"
+]
+         ];
+
+      BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
+
+      gm2WrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      gm2UncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      gm2WrapperDef = StringRiffle[
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+}")& /@ fields, "\n"
+      ];
+      gm2UncWrapperDef = StringRiffle[
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+}")& /@ fields, "\n"
+      ];
+
       WriteOut`ReplaceInFiles[files,
-        {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]],
-         "@AMuon_ZBosonField@"      -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
-         "@AMuon_Calculation@"    -> TextFormatting`IndentText[calculation],
-         "@AMuon_GetMSUSY@"       -> TextFormatting`IndentText[WrapLines[getMSUSY]],
-         "@AMuon_MuonIndex@" -> muonIndex,
-         "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
+        {"@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
+         "@AMMCalculation@"       -> TextFormatting`IndentText[calculation],
+         "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
+         "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
+         "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
+         "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
+         "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
+         "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
+         "@leptonPoleMass@" -> leptonPoleMass,
+         "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
+         "@AMMBarZeeCalculation@" -> TextFormatting`IndentText[barZee],
+         "@gm2WrapperDecl@" -> gm2WrapperDecl,
+         "@gm2WrapperDef@" -> gm2WrapperDef,
+         "@gm2UncWrapperDecl@" -> gm2UncWrapperDecl,
+         "@gm2UncWrapperDef@" -> gm2UncWrapperDef,
          Sequence @@ GeneralReplacementRules[]
         }];
 
@@ -4214,7 +4292,7 @@ Options[MakeFlexibleSUSY] :=
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, initialGuesserInputFile,
-            aMuonVertices, edmVertices, edmFields,
+            aMMVertices, edmFields, ammFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -5059,7 +5137,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
 
-           Print["Creating EDM class ..."];
+           Print["Creating lepton EDM class ..."];
            edmFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
                                                 FlexibleSUSYObservable`EDM[p_[__]|p_] :> p];
            edmVertices =
@@ -5128,20 +5206,31 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
 
+           Print["Creating lepton AMM class ..."];
+           ammFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
+                                                FlexibleSUSYObservable`AMM[p_[__]|p_] :> p];
+           aMMVertices = WriteAMMClass[
+              ammFields,
+              {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.cpp"}]}}];
+
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
                WriteFFVFormFactorsClass[
                   (* collect external states from observables needing massless triangles *)
                   DeleteDuplicates @ Join[
 
-                     (* muon g-2 *)
-                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
-                           Block[{muon = TreeMasses`GetSMMuonLepton[], muonWithoutIndex},
-                              muonWithoutIndex = If[AtomQ[muon], TreeMasses`GetSMMuonLepton[], Head@muon];
-                              {muonWithoutIndex -> {muonWithoutIndex, TreeMasses`GetPhoton[]}}
-                           ],
-                        {}
-                     ],
+                     (* lepton g-2 *)
+                     (# -> {#, TreeMasses`GetPhoton[]})& /@ ammFields,
+
+                     (* lepton edm *)
+                     (# -> {#, TreeMasses`GetPhoton[]})& /@ edmFields,
 
                      (* Br(L -> L Gamma) *)
                      LToLGammaFields,
@@ -5161,13 +5250,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      {FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
                ];
-
-           Print["Creating AMuon class ..."];
-           aMuonVertices = WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
-              {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
-                              {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.cpp"}]}}];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];
@@ -5190,7 +5272,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[aMuonVertices, edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
+              Join[aMMVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

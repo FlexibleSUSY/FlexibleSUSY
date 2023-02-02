@@ -73,7 +73,7 @@ double CLASSNAME::get_partial_width<Ah, bar<d>::type, d>(
                auto qedqcd_ = qedqcd;
                qedqcd_.to(mAOS);
                alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
-               Y_conversion = Sqr(sm_down_quark_masses(qedqcd_, indexOut1.at(0))/mdqDR);
+               Y_conversion = Sqr(qedqcd_.displayDownQuarkRunningMass(indexOut1.at(0))/mdqDR);
                break;
             }
             case 6:
@@ -110,10 +110,10 @@ double CLASSNAME::get_partial_width<Ah, bar<d>::type, d>(
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAOS/mtpole));
                const double lq = std::log(xDR);
-               const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-               const auto Httbar = Vertex<bar<u>::type, u, H>::evaluate(Httindices, context);
-               const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
-               const auto gtHoVEV_P = Httbar_P/context.mass<u>({2});
+               const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+               const auto AHttbar = Vertex<bar<u>::type, u, Ah>::evaluate(AHttindices, context);
+               const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
+               const auto gtHoVEV_P = AHttbar_P/context.mass<u>({2});
                deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
             }
          }

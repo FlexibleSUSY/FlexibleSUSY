@@ -118,7 +118,7 @@ double CLASSNAME::get_partial_width<H, g, g>(
          const double Gamma_SM_LO_P = mH/(18.*Power3(Pi))*std::norm(alpha_s_5f * HGGVertexValP*sqrt(tau) * 3./4*A12_A);
 
          const double deltaNLO_P {
-            97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
+            97/4. - 7/6.*Nf + (33-2*Nf)/6.*LH
          };
 
          const double mt {context.mass<u>({2})};

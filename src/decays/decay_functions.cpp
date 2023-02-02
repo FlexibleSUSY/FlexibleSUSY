@@ -303,29 +303,6 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
    return nf;
 }
 
-double sm_up_quark_masses(softsusy::QedQcd const& qedqcd, int n)
-{
-   switch(n) {
-      case 0: return qedqcd.displayMass(softsusy::mUp);
-      case 1: return qedqcd.displayMass(softsusy::mCharm);
-      default:
-         throw std::runtime_error("Unknown quark mass");
-   }
-}
-double sm_down_quark_masses(softsusy::QedQcd const& qedqcd, int n)
-{
-   switch(n) {
-      case 0:
-         return qedqcd.displayMass(softsusy::mDown);
-      case 1:
-         return qedqcd.displayMass(softsusy::mStrange);
-      case 2:
-         return qedqcd.displayMass(softsusy::mBottom);
-      default:
-         throw std::runtime_error("Unknown quark mass");
-   }
-}
-
 /*
  * Computes 1-loop QCD correction to t -> H^+ b + X in the limit mb -> 0
  * as given in Eq. 2.5 of 2201.08139

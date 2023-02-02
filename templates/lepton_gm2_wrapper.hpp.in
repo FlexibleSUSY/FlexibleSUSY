@@ -16,31 +16,37 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+
 /**
- * @file @ModelName@_FFV_form_factors.hpp
+ * @file @ModelName@_gm2_wrapper.hpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_FFVFormFactors_H
-#define @ModelName@_FFVFormFactors_H
+#ifndef @ModelName@_LEPTON_GM2_WRAPPER_H
+#define @ModelName@_LEPTON_GM2_WRAPPER_H
 
-#include <valarray>
-
-#include "cxx_qft/@ModelName@_qft.hpp"
+namespace softsusy {
+   class QedQcd;
+} // namespace softsusy
 
 namespace flexiblesusy {
-
 class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_FFV_form_factors {
+namespace @ModelName@_lepton_gm2_wrapper {
+/**
+* @fn calculate_amm
+* @brief Calculates \f$a = Delta(g-2)/2\f$ of the lepton.
+*/
+@gm2WrapperDecl@
 
-@FFVFormFactors_InterfacePrototypes@
+/**
+* @fn calculate_amm_uncertainty
+* @brief Calculates uncertainty of \f$\Delta a\f$ of the muon.
+*/
+@gm2UncWrapperDecl@
 
-@TemplateWrapper_InterfacePrototypes@
-}
-
+} // namespace @ModelName@_gm2_wrapper
 } // namespace flexiblesusy
 
 #endif
-

@@ -2,69 +2,206 @@
 #define BOOST_TEST_MODULE test_scan
 
 #include <boost/test/unit_test.hpp>
-#include <algorithm>
-#include <random>
-#include <array>
+#include <cmath>
+#include "error.hpp"
+#include "scan.hpp"
 
-/**
- * @file scan.hpp
- * @brief contains helper functions and classes for parameter scans
- */
-
-namespace flexiblesusy {
-
-/**
- * @class Uniform
- * @brief real uniform distribution
- *
- * Usage:
- * @code
- * double x = Uniform<>::dice(0., 1.); // uses std::minstd_rand
- * double y = Uniform<std::mt19937>::dice(0., 1.); // uses std::mt19937
- * @endcode
- */
-template <typename Generator = std::minstd_rand, typename RealType = double>
-class Uniform {
-public:
-   /// returns random number between start and stop
-   static RealType dice(RealType start, RealType stop) {
-      static Generator generator;
-      static std::uniform_real_distribution<RealType> distribution(start, stop);
-      return distribution(generator);
-   }
-   /// returns random number between 0. and 1.
-   static RealType dice() {
-      static Generator generator;
-      static std::uniform_real_distribution<RealType> distribution;
-      return distribution(generator);
-   }
-};
-
-} // namespace flexiblesusy
-
-BOOST_AUTO_TEST_CASE( uniform_distribution_0_1 )
+BOOST_AUTO_TEST_CASE( test_float_range )
 {
-   using namespace flexiblesusy;
-   const std::size_t N = 1000;
-   std::array<double, N> a{};
-
-   std::generate(std::begin(a), std::end(a),
-                 [] () { return Uniform<>::dice(); });
-
-   BOOST_CHECK(*std::max_element(std::begin(a), std::end(a)) <= 1.);
-   BOOST_CHECK(*std::min_element(std::begin(a), std::end(a)) >= 0.);
+   {
+      // empty range
+      const auto range = flexiblesusy::float_range(0.0, 1.0, 0);
+      BOOST_CHECK(range.empty());
+   }
+   {
+      // range with equal interval boundaries
+      const auto range = flexiblesusy::float_range(1.0, 1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 1.0);
+      BOOST_CHECK_EQUAL(range.at(1), 1.0);
+      BOOST_CHECK_EQUAL(range.at(2), 1.0);
+      BOOST_CHECK_EQUAL(range.at(3), 1.0);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+   {
+      // range with inverted interval boundaries
+      const auto range = flexiblesusy::float_range(1.0, 0.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 1.0);
+      BOOST_CHECK_EQUAL(range.at(1), 0.75);
+      BOOST_CHECK_EQUAL(range.at(2), 0.5);
+      BOOST_CHECK_EQUAL(range.at(3), 0.25);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+   {
+      // range with sorted interval boundaries
+      const auto range = flexiblesusy::float_range(0.0, 1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 0.0);
+      BOOST_CHECK_EQUAL(range.at(1), 0.25);
+      BOOST_CHECK_EQUAL(range.at(2), 0.5);
+      BOOST_CHECK_EQUAL(range.at(3), 0.75);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+   {
+      // range with a negative interval boundary
+      const auto range = flexiblesusy::float_range(-1.0, 0.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), -1.0);
+      BOOST_CHECK_EQUAL(range.at(1), -0.75);
+      BOOST_CHECK_EQUAL(range.at(2), -0.5);
+      BOOST_CHECK_EQUAL(range.at(3), -0.25);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+   {
+      // range with a negative interval boundary (unsorted)
+      const auto range = flexiblesusy::float_range(0.0, -1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 0.0);
+      BOOST_CHECK_EQUAL(range.at(1), -0.25);
+      BOOST_CHECK_EQUAL(range.at(2), -0.5);
+      BOOST_CHECK_EQUAL(range.at(3), -0.75);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
 }
 
-BOOST_AUTO_TEST_CASE( uniform_distribution_start_stop )
+BOOST_AUTO_TEST_CASE( test_float_range_log )
 {
-   using namespace flexiblesusy;
-   const std::size_t N = 1000;
-   const double start = 0., stop = 10.;
-   std::array<double, N> a{};
+   static constexpr double e = 2.7182818284590452;
+   {
+      // empty range
+      const auto range = flexiblesusy::float_range_log(1.0, 1.0, 0);
+      BOOST_CHECK(range.empty());
+   }
+   {
+      // range with equal interval boundaries
+      const auto range = flexiblesusy::float_range_log(1.0, 1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 1.0);
+      BOOST_CHECK_EQUAL(range.at(1), 1.0);
+      BOOST_CHECK_EQUAL(range.at(2), 1.0);
+      BOOST_CHECK_EQUAL(range.at(3), 1.0);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+   {
+      // range with sorted interval boundaries
+      const auto range = flexiblesusy::float_range_log(1.0, e, 4);
+      const double step_size = 0.25; // (log(e) - log(1))/4
+      const double eps = 1e-15;
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(0)), 0*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(1)), 1*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(2)), 2*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(3)), 3*step_size, eps);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+   {
+      // range with inverted interval boundaries
+      const auto range = flexiblesusy::float_range_log(e, 1.0, 4);
+      const double step_size = 0.25; // (log(e) - log(1))/4
+      const double eps = 1e-15;
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(0)), 4*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(1)), 3*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(2)), 2*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(3)), 1*step_size, eps);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+}
 
-   std::generate(std::begin(a), std::end(a),
-                 [start, stop] () { return Uniform<>::dice(start, stop); });
+BOOST_AUTO_TEST_CASE( test_subdivide )
+{
+   {
+      BOOST_CHECK_THROW(flexiblesusy::subdivide(0.0, 1.0, 0), flexiblesusy::Error);
+   }
+   {
+      // range with 1 division
+      const auto range = flexiblesusy::subdivide(0.0, 1.0, 1);
+      BOOST_CHECK_EQUAL(range.at(0), 0.0);
+      BOOST_CHECK_EQUAL(range.at(1), 1.0);
+      BOOST_CHECK_EQUAL(range.size(), 2);
+   }
+   {
+      // range with equal interval boundaries
+      const auto range = flexiblesusy::subdivide(1.0, 1.0, 3);
+      BOOST_CHECK_EQUAL(range.at(0), 1.0);
+      BOOST_CHECK_EQUAL(range.at(1), 1.0);
+      BOOST_CHECK_EQUAL(range.at(2), 1.0);
+      BOOST_CHECK_EQUAL(range.at(3), 1.0);
+      BOOST_CHECK_EQUAL(range.size(), 4);
+   }
+   {
+      // range with inverted interval boundaries
+      const auto range = flexiblesusy::subdivide(1.0, 0.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 1.0);
+      BOOST_CHECK_EQUAL(range.at(1), 0.75);
+      BOOST_CHECK_EQUAL(range.at(2), 0.5);
+      BOOST_CHECK_EQUAL(range.at(3), 0.25);
+      BOOST_CHECK_EQUAL(range.at(4), 0.0);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+   {
+      // range with sorted interval boundaries
+      const auto range = flexiblesusy::subdivide(0.0, 1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 0.0);
+      BOOST_CHECK_EQUAL(range.at(1), 0.25);
+      BOOST_CHECK_EQUAL(range.at(2), 0.5);
+      BOOST_CHECK_EQUAL(range.at(3), 0.75);
+      BOOST_CHECK_EQUAL(range.at(4), 1.0);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+   {
+      // range with a negative interval boundary
+      const auto range = flexiblesusy::subdivide(-1.0, 0.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), -1.0);
+      BOOST_CHECK_EQUAL(range.at(1), -0.75);
+      BOOST_CHECK_EQUAL(range.at(2), -0.5);
+      BOOST_CHECK_EQUAL(range.at(3), -0.25);
+      BOOST_CHECK_EQUAL(range.at(4), 0.0);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+   {
+      // range with a negative interval boundary (unsorted)
+      const auto range = flexiblesusy::subdivide(0.0, -1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 0.0);
+      BOOST_CHECK_EQUAL(range.at(1), -0.25);
+      BOOST_CHECK_EQUAL(range.at(2), -0.5);
+      BOOST_CHECK_EQUAL(range.at(3), -0.75);
+      BOOST_CHECK_EQUAL(range.at(4), -1.0);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+}
 
-   BOOST_CHECK(*std::max_element(std::begin(a), std::end(a)) <= stop);
-   BOOST_CHECK(*std::min_element(std::begin(a), std::end(a)) >= start);
+BOOST_AUTO_TEST_CASE( test_subdivide_log )
+{
+   static constexpr double e = 2.7182818284590452;
+   {
+      BOOST_CHECK_THROW(flexiblesusy::subdivide_log(1.0, 1.0, 0), flexiblesusy::Error);
+   }
+   {
+      // range with equal interval boundaries
+      const auto range = flexiblesusy::subdivide_log(1.0, 1.0, 4);
+      BOOST_CHECK_EQUAL(range.at(0), 1.0);
+      BOOST_CHECK_EQUAL(range.at(1), 1.0);
+      BOOST_CHECK_EQUAL(range.at(2), 1.0);
+      BOOST_CHECK_EQUAL(range.at(3), 1.0);
+      BOOST_CHECK_EQUAL(range.at(4), 1.0);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+   {
+      // range with sorted interval boundaries
+      const auto range = flexiblesusy::subdivide_log(1.0, e, 4);
+      const double step_size = 0.25; // (log(e) - log(1))/4
+      const double eps = 1e-15;
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(0)), 0*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(1)), 1*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(2)), 2*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(3)), 3*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(4)), 4*step_size, eps);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
+   {
+      // range with inverted interval boundaries
+      const auto range = flexiblesusy::subdivide_log(e, 1.0, 4);
+      const double step_size = 0.25; // (log(e) - log(1))/4
+      const double eps = 1e-15;
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(0)), 4*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(1)), 3*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(2)), 2*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(3)), 1*step_size, eps);
+      BOOST_CHECK_CLOSE_FRACTION(std::log(range.at(4)), 0*step_size, eps);
+      BOOST_CHECK_EQUAL(range.size(), 5);
+   }
 }

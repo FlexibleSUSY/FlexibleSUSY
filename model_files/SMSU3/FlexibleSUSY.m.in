@@ -67,7 +67,7 @@ LowPoleMassPrecision     = {};
 
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon} } }
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]} } }
 };
 
 SARAH`ParameterDefinitions = Append[
