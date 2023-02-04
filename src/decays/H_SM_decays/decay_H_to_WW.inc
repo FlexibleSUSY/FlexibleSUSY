@@ -59,7 +59,7 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
    // three-body decays form mW < mH < 2*mW
    else if (4 * x > 1.0 && offshell_VV_decays != 0) {
 
-      if (check_3body_Vff_decay<BSMForWdecay, WmBoson>(context, mHOS, indexOut1)) {
+      if (check_3body_Vff_decay<BSMForWdecay, WpBoson>(context, mHOS, indexOut1)) {
          const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
          WARNING("Warning in H" + index_as_string + "->WW decays: Single off-shell decays H->Wff' assume no possible BSM particles in the final state. Turning off.");
          return 0.;

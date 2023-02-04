@@ -231,7 +231,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
             ]
          ];
       bsmForWdecay =
-         Select[Prepend[#, TreeMasses`GetWBoson[]]& /@
+         Select[Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] & /@
             DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
             IsPossibleNonZeroVertex[#, True]&
          ];
@@ -239,7 +239,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
          Join[
             bsmForWdecay,
             Select[
-               Prepend[#, TreeMasses`GetWBoson[]]& /@
+               Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]& /@
                   DeleteDuplicates@Sort@Tuples[{
                      Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]],
                      Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]
@@ -439,7 +439,11 @@ OrderFinalState[initialParticle_?TreeMasses`IsScalar, finalParticles_List] :=
                 ];
               If[TreeMasses`IsVector[orderedFinalState[[1]]] && TreeMasses`IsVector[orderedFinalState[[2]]],
                  If[Head[orderedFinalState[[2]]] === Susyno`LieGroups`conj && !Head[orderedFinalState[[1]]] === Susyno`LieGroups`conj,
+                    If[
+                     {If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]],
+                        Susyno`LieGroups`conj[If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]} =!= orderedFinalState,
                     orderedFinalState = Reverse[orderedFinalState];
+                    ]
                  ];
               ];
            ];

@@ -2098,6 +2098,9 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
            decaysVertices = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
            decaysVertices = SortFieldsInCp /@ decaysVertices;
+           With[{Wm = If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]]},
+              AppendTo[decaysVertices, {TreeMasses`GetHiggsBoson[], Susyno`LieGroups`conj[Wm], Wm}]
+           ];
 
            enableDecaysCalculationThreads = False;
            callAllDecaysFunctions = Decays`CallDecaysCalculationFunctions[decayParticles, enableDecaysCalculationThreads];
@@ -3163,8 +3166,14 @@ WriteReferences[files_List] :=
 
 WriteSMParticlesAliases[files_List] :=
    Module[{},
-SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] =!= SARAH`bar] := "Lepton";
-SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] === SARAH`bar] := "AntiLepton";
+SimplifiedName[particle_ /; TreeMasses`IsSMChargedLepton[particle] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMChargedLeptons[] === 1] := "ChargedLepton";
+SimplifiedName[particle_ /; TreeMasses`GetSMElectronLeptonMultiplet[] === particle && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMChargedLeptons[] > 1] := "Electron";
+SimplifiedName[particle_ /; TreeMasses`GetSMMuonLeptonMultiplet[] === particle && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMChargedLeptons[] > 1] := "Muon";
+SimplifiedName[particle_ /; TreeMasses`GetSMTauLeptonMultiplet[] === particle && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMChargedLeptons[] > 1] := "Tauon";
+SimplifiedName[particle_ /; TreeMasses`IsSMNeutralLepton[particle] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMNeutralLeptons[] === 1] := "Neutrino";
+SimplifiedName[particle_ /; particle === TreeMasses`GetSMNeutrino1[] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMNeutralLeptons[] > 1] := "ElectronNeutrino";
+SimplifiedName[particle_ /; particle === TreeMasses`GetSMNeutrino2[] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMNeutralLeptons[] > 1] := "MuonNeutrino";
+SimplifiedName[particle_ /; particle === TreeMasses`GetSMNeutrino3[] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMNeutralLeptons[] > 1] := "TauNeutrino";
 SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] =!= SARAH`bar] := "DownQuark";
 SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] === SARAH`bar] := "AntiDownQuark";
 SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] =!= SARAH`bar] := "UpQuark";
@@ -3189,16 +3198,23 @@ CreateParticleAliases[particles_, namespace_:""] :=
 
 CreateSMParticleAliases[namespace_:""] :=
     Module[{smParticlesToAlias},
-           smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
-                                        TreeMasses`GetPseudoscalarHiggsBoson[],
+           smParticlesToAlias = Select[Flatten[{
+                                        (* neutral Higgs bosons *)
+                                        TreeMasses`GetHiggsBoson[],
+                                        If[GetDimensionWithoutGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]] > 0, TreeMasses`GetPseudoscalarHiggsBoson[]],
+                                        (* charged Higgs bosons *)
+                                        If[GetDimensionWithoutGoldstones[TreeMasses`GetChargedHiggsBoson[]] > 0,
+                                           {TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]}
+                                        ],
+                                        (* W bosons *)
                                         TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]],
-                                        TreeMasses`GetZBoson[],
-                                        TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
-                                        TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
+                                        (* neutral gauge bosons *)
+                                        TreeMasses`GetPhoton[], TreeMasses`GetZBoson[], TreeMasses`GetGluon[],
+                                        (* leptons *)
+                                        TreeMasses`GetSMChargedLeptons[], TreeMasses`GetSMNeutralLeptons[],
                                         TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field,
-                                        TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]
-                                       }, (# =!= Null)&];
+                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field
+                                       }, 1], (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];
 
