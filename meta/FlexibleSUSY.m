@@ -3174,9 +3174,9 @@ SimplifiedName[particle_ /; TreeMasses`IsSMNeutralLepton[particle] && Head[parti
 SimplifiedName[particle_ /; particle === TreeMasses`GetSMNeutrino1[] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMNeutralLeptons[] > 1] := "ElectronNeutrino";
 SimplifiedName[particle_ /; particle === TreeMasses`GetSMNeutrino2[] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMNeutralLeptons[] > 1] := "MuonNeutrino";
 SimplifiedName[particle_ /; particle === TreeMasses`GetSMNeutrino3[] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMNeutralLeptons[] > 1] := "TauNeutrino";
-SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] =!= SARAH`bar] := "DownQuark";
+SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMDownQuarks[] === 1] := "DownTypeQuark";
 SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] === SARAH`bar] := "AntiDownQuark";
-SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] =!= SARAH`bar] := "UpQuark";
+SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] =!= SARAH`bar && Length@TreeMasses`GetSMUpQuarks[] === 1] := "UpTypeQuark";
 SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] === SARAH`bar] := "AntiUpQuark";
 SimplifiedName[particle_ /; TreeMasses`GetHiggsBoson[] =!= Null && particle === TreeMasses`GetHiggsBoson[]] := "Higgs";
 SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "PseudoscalarHiggs";
@@ -3212,8 +3212,12 @@ CreateSMParticleAliases[namespace_:""] :=
                                         TreeMasses`GetPhoton[], TreeMasses`GetZBoson[], TreeMasses`GetGluon[],
                                         (* leptons *)
                                         TreeMasses`GetSMChargedLeptons[], TreeMasses`GetSMNeutralLeptons[],
-                                        TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field
+                                        If[Length@TreeMasses`GetSMUpQuarks[] === 1,
+                                           TreeMasses`GetSMUpQuarks[]
+                                        ],
+                                        If[Length@TreeMasses`GetSMDownQuarks[] === 1,
+                                           TreeMasses`GetSMDownQuarks[]
+                                        ]
                                        }, 1], (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];
