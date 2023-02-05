@@ -30,7 +30,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type,
 
    // higher order corrections
 
-   if (FlexibleDecay_settings::include_higher_order_corrections) {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
       // 1-loop QED corrections
       res *= 1. + get_alpha(context)/Pi*17./4.;
    }

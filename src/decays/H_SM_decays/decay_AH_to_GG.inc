@@ -13,6 +13,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
    const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};
+   static constexpr double ps_symmetry {0.5};
    constexpr double color_fact = squared_color_generator<PseudoscalarHiggs, Gluon, Gluon>();
    const double flux = 0.5/mAh;
 
@@ -42,7 +43,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       const double mu = mAh;
       const double LH = std::log(Sqr(mu/mAh));
       const double deltaNLO {
-         97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
+         97/4. - 7/6.*Nf + (33-2*Nf)/6.*LH
       };
 
       const double mt {context.mass<UpQuark>({2})};
@@ -71,6 +72,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
          default:
             WARNING("Unknow correcion in Phi->gg");
       }
+      result += pseudoscalar_corr;
    }
 
    return result;

@@ -313,9 +313,20 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
 @AMMCalculation@
 
-   if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
-      ERROR("Error in the g-2 calculation! Form factor F2 should be real");
-      return std::numeric_limits<double>::quiet_NaN();
+   // Im[F2]/Re[F2] ~ 0
+   if (!is_zero((form_factors[2] + form_factors[3]).real())) {
+      double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
+      if (!is_zero(ratio)) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[Fe]/Re[F2] = " + std::to_string(ratio));
+         return std::numeric_limits<double>::quiet_NaN();
+      }
+   }
+   // Im[F2] ~ 0
+   else {
+      if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[F2] = " + std::to_string((form_factors[2] + form_factors[3]).imag()));
+         return std::numeric_limits<double>::quiet_NaN();
+      }
    }
 
    double val =
