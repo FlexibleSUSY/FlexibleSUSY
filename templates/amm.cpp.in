@@ -27,6 +27,7 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
+#include "cxx_qft/@ModelName@_particle_aliases.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "amm_loop_functions.hpp"
@@ -39,8 +40,6 @@
 
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
-
-using VZ = fields::@AMMZBosonField@;
 
 namespace {
 
@@ -415,7 +414,7 @@ Lepton, Fermion, Scalar
                       >;
 
    using LeptonZVertex = Vertex<
-                      VZ,
+                      ZBoson,
                       Lepton,
                       typename Lepton::lorentz_conjugate
                       >;
@@ -427,7 +426,7 @@ Lepton, Fermion, Scalar
                          >;
 
    using FermionZVertex = Vertex<
-                         VZ,
+                         ZBoson,
                          typename Fermion::lorentz_conjugate,
                          Fermion
                          >;
@@ -480,7 +479,7 @@ Lepton, Fermion, Scalar
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
 
                // @todo(alex): create a separate loop function to properly handle a potential division by zero
-               const auto zMass = context.mass<VZ>({ });
+               const auto zMass = context.mass<ZBoson>({ });
 
                if (is_zero(zMass - scalarMass, 3e-13)) {
                   continue;

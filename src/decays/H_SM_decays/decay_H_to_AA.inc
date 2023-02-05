@@ -1,12 +1,12 @@
 template <>
-double CLASSNAME::get_partial_width<H, A, A>(
+double CLASSNAME::get_partial_width<Higgs, Photon, Photon>(
       const context_base& context,
-      const typename field_indices<H>::type& in_idx,
-      const typename field_indices<A>::type& out1_idx,
-      const typename field_indices<A>::type& out2_idx) const
+      const typename field_indices<Higgs>::type& in_idx,
+      const typename field_indices<Photon>::type& out1_idx,
+      const typename field_indices<Photon>::type& out2_idx) const
 {
-   const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);
-   const double mH = context.physical_mass<H>(in_idx);
+   const auto amp = calculate_amplitude<Higgs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<Higgs>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};
    const double flux = 0.5/mH;
