@@ -2032,7 +2032,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             partialWidthCalculationPrototypes = "", partialWidthCalculationFunctions = "",
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
-            smParticleAliases, solverIncludes = "", solver = "", contentOfPath = $Path, modelName},
+            solverIncludes = "", solver = "", contentOfPath = $Path, modelName},
 
             modelName =
                If[SARAH`submodeldir =!= False,
@@ -2124,7 +2124,6 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
               ]
            ];
 
-           smParticleAliases = Decays`CreateSMParticleAliases["fields"];
            bsmParticleAliasList = Decays`CreateBSMParticleAliasList["fields"];
 
            solver =
