@@ -1,19 +1,19 @@
 // CP-odd Higgs to charged leptons
 
 template <>
-double CLASSNAME::get_partial_width<AH, bar<lep>::type, lep>(
+double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type, ChargedLepton>(
    const context_base& context,
-   typename field_indices<AH>::type const& indexIn,
-   typename field_indices<bar<lep>::type>::type const& indexOut1,
-   typename field_indices<lep>::type const& indexOut2) const
+   typename field_indices<PseudoscalarHiggs>::type const& indexIn,
+   typename field_indices<bar<ChargedLepton>::type>::type const& indexOut1,
+   typename field_indices<ChargedLepton>::type const& indexOut2) const
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<AH,bar<lep>::type, lep>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,bar<ChargedLepton>::type, ChargedLepton>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const double mAHOS = context.physical_mass<AH>(indexIn);
-   const double mL1OS = context.physical_mass<bar<lep>::type>(indexOut1);
-   const double mL2OS = context.physical_mass<lep>(indexOut2);
+   const double mAHOS = context.physical_mass<PseudoscalarHiggs>(indexIn);
+   const double mL1OS = context.physical_mass<bar<ChargedLepton>::type>(indexOut1);
+   const double mL2OS = context.physical_mass<ChargedLepton>(indexOut2);
 
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mAHOS);
@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<AH, bar<lep>::type, lep>(
 
    // matrix element squared
    const auto amp =
-      calculate_amplitude<AH, typename bar<lep>::type, lep>(context, indexIn, indexOut1, indexOut2);
+      calculate_amplitude<PseudoscalarHiggs, typename bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
    const auto amp2 = amp.square();
 
    // flux * phase space factor * symmetry factor * |matrix element|^2

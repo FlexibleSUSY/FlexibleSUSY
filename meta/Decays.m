@@ -37,7 +37,6 @@ CreateCompleteParticleList::usage="";
 GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
-CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
 CreateBSMParticleAliasList::usage="";
 
 CallDecaysCalculationFunctions::usage="creates calls to functions calculating
@@ -211,26 +210,6 @@ SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === Tree
 SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "G";
 SimplifiedName[particle_] := particle;
 
-CreateParticleAlias[particle_, namespace_String] :=
-    "using " <> SimplifiedName[particle] <> " = " <>
-    CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
-
-CreateParticleAliases[particles_, namespace_:""] :=
-    Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
-
-CreateSMParticleAliases[namespace_:""] :=
-    Module[{smParticlesToAlias},
-           smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
-                                        TreeMasses`GetPseudoscalarHiggsBoson[],
-                                        TreeMasses`GetWBoson[], TreeMasses`GetZBoson[],
-                                        TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
-                                        TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field
-                                       }, (# =!= Null)&];
-           CreateParticleAliases[smParticlesToAlias, namespace]
-          ];
-
 CreateBSMParticleAliasList[namespace_:""] :=
    Module[{bsmForZdecay, bsmForWdecay},
       bsmForZdecay =
@@ -252,7 +231,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
             ]
          ];
       bsmForWdecay =
-         Select[Prepend[#, TreeMasses`GetWBoson[]]& /@
+         Select[Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] & /@
             DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
             IsPossibleNonZeroVertex[#, True]&
          ];
@@ -260,7 +239,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
          Join[
             bsmForWdecay,
             Select[
-               Prepend[#, TreeMasses`GetWBoson[]]& /@
+               Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]& /@
                   DeleteDuplicates@Sort@Tuples[{
                      Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]],
                      Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]
@@ -460,7 +439,11 @@ OrderFinalState[initialParticle_?TreeMasses`IsScalar, finalParticles_List] :=
                 ];
               If[TreeMasses`IsVector[orderedFinalState[[1]]] && TreeMasses`IsVector[orderedFinalState[[2]]],
                  If[Head[orderedFinalState[[2]]] === Susyno`LieGroups`conj && !Head[orderedFinalState[[1]]] === Susyno`LieGroups`conj,
+                    If[
+                     {If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]],
+                        Susyno`LieGroups`conj[If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]} =!= orderedFinalState,
                     orderedFinalState = Reverse[orderedFinalState];
+                    ]
                  ];
               ];
            ];

@@ -124,6 +124,7 @@ LIB@CLASSNAME@_HDR := \
 LIB@CLASSNAME@_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/@CLASSNAME@_qft.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_fields.hpp \
+		$(DIR)/cxx_qft/@CLASSNAME@_particle_aliases.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_vertices.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_context_base.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions_wilsoncoeffs.hpp
