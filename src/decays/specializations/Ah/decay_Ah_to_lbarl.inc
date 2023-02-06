@@ -1,19 +1,19 @@
 // CP-odd Higgs to charged leptons
 
 template <>
-double CLASSNAME::get_partial_width<Ah, bar<l>::type, l>(
+double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type, ChargedLepton>(
    const context_base& context,
-   typename field_indices<Ah>::type const& indexIn,
-   typename field_indices<bar<l>::type>::type const& indexOut1,
-   typename field_indices<l>::type const& indexOut2)
+   typename field_indices<PseudoscalarHiggs>::type const& indexIn,
+   typename field_indices<bar<ChargedLepton>::type>::type const& indexOut1,
+   typename field_indices<ChargedLepton>::type const& indexOut2)
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<Ah,bar<l>::type, l>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,bar<ChargedLepton>::type, ChargedLepton>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const double mAHOS = context.physical_mass<Ah>(indexIn);
-   const double mL1OS = context.physical_mass<bar<l>::type>(indexOut1);
-   const double mL2OS = context.physical_mass<l>(indexOut2);
+   const double mAHOS = context.physical_mass<PseudoscalarHiggs>(indexIn);
+   const double mL1OS = context.physical_mass<bar<ChargedLepton>::type>(indexOut1);
+   const double mL2OS = context.physical_mass<ChargedLepton>(indexOut2);
 
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mAHOS);
@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<Ah, bar<l>::type, l>(
 
    // matrix element squared
    const auto amp =
-      calculate_amplitude<Ah, typename bar<l>::type, l>(context, indexIn, indexOut1, indexOut2);
+      calculate_amplitude<PseudoscalarHiggs, typename bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
    const auto amp2 = amp.square();
 
    // flux * phase space factor * symmetry factor * |matrix element|^2

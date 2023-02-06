@@ -37,7 +37,6 @@ CreateCompleteParticleList::usage="";
 GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
-CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
 CreateBSMParticleAliasList::usage="";
 
 CallDecaysCalculationFunctions::usage="creates calls to functions calculating
@@ -211,28 +210,6 @@ SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeM
 SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]]] := "Hm";
 SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]] := "Hp";
 SimplifiedName[particle_] := particle;
-
-CreateParticleAlias[particle_, namespace_String] :=
-    "using " <> SimplifiedName[particle] <> " = " <>
-    CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
-
-CreateParticleAliases[particles_, namespace_:""] :=
-    Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
-
-CreateSMParticleAliases[namespace_:""] :=
-    Module[{smParticlesToAlias},
-           smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
-                                        TreeMasses`GetPseudoscalarHiggsBoson[],
-                                        TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]],
-                                        TreeMasses`GetZBoson[],
-                                        TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
-                                        TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field,
-                                        TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]
-                                       }, (# =!= Null)&];
-           CreateParticleAliases[smParticlesToAlias, namespace]
-          ];
 
 CreateBSMParticleAliasList[namespace_:""] :=
    Module[{bsmForZdecay, bsmForWdecay},

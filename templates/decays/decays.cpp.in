@@ -39,6 +39,7 @@
 
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
+#include "cxx_qft/@ModelName@_particle_aliases.hpp"
 #include "@ModelName@_info.hpp"
 #include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
@@ -116,8 +117,6 @@ double CLASSNAME::get_alpha(@ModelName@_cxx_diagrams::context_base const&  conte
 @calcAmplitudeSpecializationDefs@
 
 // -------- specializations for decays needing higher order SM corrections --------
-
-@create_SM_particle_usings@
 
 @create_BSM_particle_list@
 

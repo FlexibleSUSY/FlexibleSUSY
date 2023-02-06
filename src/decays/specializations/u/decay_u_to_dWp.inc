@@ -1,19 +1,19 @@
 template <>
-double CLASSNAME::get_partial_width<u, d, Wp>(
+double CLASSNAME::get_partial_width<UpTypeQuark, DownTypeQuark, WpBoson>(
    const context_base& context,
-   typename field_indices<u>::type const& indexIn,
-   typename field_indices<d>::type const& indexOut1,
-   typename field_indices<Wp>::type const& indexOut2)
+   typename field_indices<UpTypeQuark>::type const& indexIn,
+   typename field_indices<DownTypeQuark>::type const& indexOut1,
+   typename field_indices<WpBoson>::type const& indexOut2)
 {
-   const double mu = context.physical_mass<u>(indexIn);
-   const double md = context.physical_mass<d>(indexOut1);
-   const double mWp = context.physical_mass<Wp>(indexOut2);
+   const double mu = context.physical_mass<UpTypeQuark>(indexIn);
+   const double md = context.physical_mass<DownTypeQuark>(indexOut1);
+   const double mWp = context.physical_mass<WpBoson>(indexOut2);
 
 
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(md/mu), Sqr(mWp/mu)));
 
    // matrix element squared
-   const auto mat_elem_sq = amplitude_squared<u, d, Wp>(
+   const auto mat_elem_sq = amplitude_squared<UpTypeQuark, DownTypeQuark, WpBoson>(
       context, indexIn, indexOut1, indexOut2);
 
    // flux * phase space factor * |matrix element|^2

@@ -46,6 +46,7 @@
 #include "config.h"
 #include "thread_pool.hpp"
 #include "wrappers.hpp"
+#include "cxx_qft/standard_model_particle_aliases.hpp"
 #include "cxx_qft/standard_model_vertices.hpp"
 #include "error.hpp"
 

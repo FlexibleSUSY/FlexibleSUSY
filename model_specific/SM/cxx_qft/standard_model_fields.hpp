@@ -278,7 +278,6 @@ struct VWp {
 };
 
 // Named fields
-using Photon = VP;
 using Electron = Fe;
 
 using scalars = boost::mpl::vector<Hp, Ah, hh>;

@@ -1,13 +1,13 @@
 template <>
-double CLASSNAME::get_partial_width<H, bar<l>::type, l>(
+double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLepton>(
    const context_base& context,
-   typename field_indices<H>::type const& indexIn,
-   typename field_indices<bar<l>::type>::type const& indexOut1,
-   typename field_indices<l>::type const& indexOut2)
+   typename field_indices<Higgs>::type const& indexIn,
+   typename field_indices<bar<ChargedLepton>::type>::type const& indexOut1,
+   typename field_indices<ChargedLepton>::type const& indexOut2)
 {
 
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto HLLbarVertexDR = Vertex<bar<l>::type, l, H>::evaluate(indices, context);
+   const auto HLLbarVertexDR = Vertex<bar<ChargedLepton>::type, ChargedLepton, Higgs>::evaluate(indices, context);
    const auto HLLbarVertexDR_S = 0.5*(HLLbarVertexDR.left() + HLLbarVertexDR.right());
    const auto HLLbarVertexDR_P = 0.5*(HLLbarVertexDR.right() - HLLbarVertexDR.left());
 
@@ -15,9 +15,9 @@ double CLASSNAME::get_partial_width<H, bar<l>::type, l>(
       return 0.;
    }
 
-   const double mHOS = context.physical_mass<H>(indexIn);
-   const double mL1OS = context.physical_mass<bar<l>::type>(indexOut1);
-   const double mL2OS = context.physical_mass<l>(indexOut2);
+   const double mHOS = context.physical_mass<Higgs>(indexIn);
+   const double mL1OS = context.physical_mass<bar<ChargedLepton>::type>(indexOut1);
+   const double mL2OS = context.physical_mass<ChargedLepton>(indexOut2);
 
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mHOS);

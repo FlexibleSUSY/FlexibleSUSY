@@ -1,25 +1,25 @@
 template <>
-double CLASSNAME::get_partial_width<Ah, g, g>(
+double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       const context_base& context,
-      const typename field_indices<Ah>::type& in_idx,
-      const typename field_indices<g>::type& out1_idx,
-      const typename field_indices<g>::type& out2_idx)
+      const typename field_indices<PseudoscalarHiggs>::type& in_idx,
+      const typename field_indices<Gluon>::type& out1_idx,
+      const typename field_indices<Gluon>::type& out2_idx)
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<Ah,g,g>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const auto amp = calculate_amplitude<Ah, g, g>(context, in_idx, out1_idx, out2_idx);
-   const double mAh = context.physical_mass<Ah>(in_idx);
-   static constexpr double ps {1/(8.*Pi)};
+   const auto amp = calculate_amplitude<PseudoscalarHiggs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
+   const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
+   constexpr double ps {1./(8.*Pi)};
    static constexpr double ps_symmetry {0.5};
-   static constexpr double color_fact = squared_color_generator<Ah, g, g>();
+   constexpr double color_fact = squared_color_generator<PseudoscalarHiggs, Gluon, Gluon>();
    const double flux = 0.5/mAh;
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
    // higher order QCD corrections
-   const double tau = Sqr(mAh/(2.*context.mass<u>({2})));
+   const double tau = Sqr(mAh/(2.*context.mass<UpTypeQuark>({2})));
    if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
       // number of active light flavours
       static constexpr int Nf = 5;
@@ -29,10 +29,10 @@ double CLASSNAME::get_partial_width<Ah, g, g>(
       const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
-      const auto AHGGVertex = Vertex<bar<u>::type, u, Ah>::evaluate(indices, context);
+      const auto AHGGVertex = Vertex<bar<UpTypeQuark>::type, UpTypeQuark, PseudoscalarHiggs>::evaluate(indices, context);
       std::complex<double> const AHGGVertexVal = 0.5*(-AHGGVertex.left() + AHGGVertex.right());
 
-      const double tau = Sqr(mAh/(2.*context.mass<u>({2})));
+      const double tau = Sqr(mAh/(2.*context.mass<UpTypeQuark>({2})));
 
       const std::complex<double> A12_A = 2.*f(tau)/tau;
       // LO width comming only from the top-loop
@@ -45,7 +45,7 @@ double CLASSNAME::get_partial_width<Ah, g, g>(
          97/4. - 7/6.*Nf + (33-2*Nf)/6.*LH
       };
 
-      const double mt {context.mass<u>({2})};
+      const double mt {context.mass<UpTypeQuark>({2})};
       const double Lt = std::log(Sqr(mu/mt));
       // eq. D10 of 2207.01032 and 23 of 9807241
       const double deltaNNLO {

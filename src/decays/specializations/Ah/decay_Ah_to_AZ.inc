@@ -1,16 +1,16 @@
 template <>
-double CLASSNAME::get_partial_width<Ah, A, Z>(
+double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, ZBoson>(
       const context_base& context,
-      const typename field_indices<Ah>::type& in_idx,
-      const typename field_indices<A>::type& out1_idx,
-      const typename field_indices<Z>::type& out2_idx)
+      const typename field_indices<PseudoscalarHiggs>::type& in_idx,
+      const typename field_indices<Photon>::type& out1_idx,
+      const typename field_indices<ZBoson>::type& out2_idx)
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<Ah,A,Z>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Photon,ZBoson>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const auto amp = calculate_amplitude<Ah, A, Z>(context, in_idx, out1_idx, out2_idx);
-   const double mAH = context.physical_mass<Ah>(in_idx);
+   const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, ZBoson>(context, in_idx, out1_idx, out2_idx);
+   const double mAH = context.physical_mass<PseudoscalarHiggs>(in_idx);
    const double mZ = qedqcd.displayPoleMZ();
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mAH)));
    const double flux = 0.5/mAH;
