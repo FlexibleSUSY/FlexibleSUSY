@@ -134,7 +134,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
       const std::array<int, 3> dquark_pdgs = {1, 3, 5};
-      higgstools_input.add_coupling(field_as_string<Ah>(indexIn),
+      higgstools_input.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
          {dquark_pdgs.at(indexOut1.at(0)), -dquark_pdgs.at(indexOut2.at(0))},
          1i*std::sqrt(result)
       );

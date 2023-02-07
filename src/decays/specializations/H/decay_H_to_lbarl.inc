@@ -45,7 +45,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
       static constexpr std::array<int, 3> clep_pdgs = {11, 13, 15};
       higgstools_input.add_coupling(
-         field_as_string<H>(indexIn), {-clep_pdgs.at(indexOut1.at(0)), clep_pdgs.at(indexOut2.at(0))},
+         field_as_string<Higgs>(indexIn), {-clep_pdgs.at(indexOut1.at(0)), clep_pdgs.at(indexOut2.at(0))},
          std::sqrt(res_S) + 1i*std::sqrt(res_P)
       );
    }
