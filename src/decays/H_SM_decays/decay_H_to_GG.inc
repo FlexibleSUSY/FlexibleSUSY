@@ -7,9 +7,9 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
 {
    const auto amp = calculate_amplitude<Higgs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<Higgs>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
-   constexpr double color_fact = squared_color_generator<Higgs, Gluon, Gluon>();
+   static constexpr double ps {1./(8.*Pi)};
+   static constexpr double ps_symmetry {1./2.};
+   static constexpr double color_fact = squared_color_generator<Higgs, Gluon, Gluon>();
    const double flux = 0.5/mH;
 
    // full LO (SM+BSM) result
