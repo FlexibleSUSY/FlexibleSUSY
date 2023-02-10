@@ -11,7 +11,7 @@ remove_block="$UTILSDIR/remove_slha_block.awk"
 semi_analytic_model="THDMIIEWSBAtMZSemiAnalytic"
 two_scale_model="THDMII"
 
-semi_analytic_slha="$BASEDIR/../model_files/${semi_analytic_model}/LesHouches.in.${semi_analytic_model}"
+semi_analytic_slha="$BASEDIR/model_files/${semi_analytic_model}/LesHouches.in.${semi_analytic_model}"
 semi_analytic_input="$BASEDIR/test_${semi_analytic_model}_spectrum.in.spc"
 semi_analytic_output="$BASEDIR/test_${semi_analytic_model}_spectrum.out.spc"
 two_scale_slha="$BASEDIR/../model_files/${two_scale_model}/LesHouches.in.${two_scale_model}"
