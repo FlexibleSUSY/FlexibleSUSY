@@ -1,21 +1,21 @@
 template <>
-double CLASSNAME::get_partial_width<H, G, G>(
+double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       const context_base& context,
-      const typename field_indices<H>::type& in_idx,
-      const typename field_indices<G>::type& out1_idx,
-      const typename field_indices<G>::type& out2_idx) const
+      const typename field_indices<Higgs>::type& in_idx,
+      const typename field_indices<Gluon>::type& out1_idx,
+      const typename field_indices<Gluon>::type& out2_idx) const
 {
-   const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);
-   const double mH = context.physical_mass<H>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
-   constexpr double color_fact = squared_color_generator<H, G, G>();
+   const auto amp = calculate_amplitude<Higgs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<Higgs>(in_idx);
+   static constexpr double ps {1./(8.*Pi)};
+   static constexpr double ps_symmetry {1./2.};
+   static constexpr double color_fact = squared_color_generator<Higgs, Gluon, Gluon>();
    const double flux = 0.5/mH;
 
    // full LO (SM+BSM) result
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
-   const double mt {context.mass<uq>({2})};
+   const double mt {context.mass<UpTypeQuark>({2})};
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
    if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
@@ -25,7 +25,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
-      const auto HGGVertex = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
+      const auto HGGVertex = Vertex<bar<UpTypeQuark>::type, UpTypeQuark, Higgs>::evaluate(indices, context);
       std::complex<double> const HGGVertexSVal = 0.5*(HGGVertex.left() + HGGVertex.right());
 
       // eq. 2.46 of 0503172
@@ -118,10 +118,10 @@ double CLASSNAME::get_partial_width<H, G, G>(
          const double Gamma_SM_LO_P = mH/(18.*Power3(Pi))*std::norm(alpha_s_5f * HGGVertexValP*sqrt(tau) * 3./4*A12_A);
 
          const double deltaNLO_P {
-            97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
+            97/4. - 7/6.*Nf + (33-2*Nf)/6.*LH
          };
 
-         const double mt {context.mass<uq>({2})};
+         const double mt {context.mass<UpTypeQuark>({2})};
          const double Lt = std::log(Sqr(mu/mt));
          // eq. D10 of 2207.01032 and 23 of 9807241
          const double deltaNNLO_P {

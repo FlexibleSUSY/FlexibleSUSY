@@ -45,6 +45,9 @@ double b22bar(double p, double m1, double m2, double q) noexcept;
 
 double d1_b0(double p2, double m2a, double m2b) noexcept;
 
+// Re[A0(x, q)] with squared arguments
+double rea0(double x, double q) noexcept;
+
 } // namespace softsusy
 
 #endif

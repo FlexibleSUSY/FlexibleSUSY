@@ -121,7 +121,7 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy, NoScale,
-           {{0, FlexibleSUSYObservable`aMuon},
+           {{0, FlexibleSUSYObservable`AMM[Fm]},
             {1, FlexibleSUSYObservable`aMuonGM2Calc},
             {2, FlexibleSUSYObservable`aMuonGM2CalcUncertainty} } },
    {ALPHA, {{ArcSin[Pole[ZH[2,2]]]}}},
