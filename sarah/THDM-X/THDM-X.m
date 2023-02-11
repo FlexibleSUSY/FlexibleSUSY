@@ -22,13 +22,10 @@
 
 Off[General::spell]
 
-Model`Name = "THDMII";
-Model`NameLaTeX ="Two Higgs Doublet Model II";
-Model`Authors = "F.Staub";
-Model`Date = "2015-11-16";
-
-(* 2014-11-06: Changed sign in Lagrangian *)
-(* 2015-11-16: added conj[H1].H2 term *)
+Model`Name = "THDMX";
+Model`NameLaTeX ="Two Higgs Doublet Model X";
+Model`Authors = "A.Voigt";
+Model`Date = "2023-02-11";
 
 (*-------------------------------------------*)
 (*   Particle Content*)
