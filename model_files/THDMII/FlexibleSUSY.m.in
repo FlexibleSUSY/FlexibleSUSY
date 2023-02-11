@@ -69,9 +69,6 @@ ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy, {
          {21, FlexibleSUSYObservable`AMM[Fe[2]]},
          {22, FlexibleSUSYObservable`AMMUncertainty[Fe[2]]},
-         {23, FlexibleSUSYObservable`EDM[Fe[1]]},
-         {24, FlexibleSUSYObservable`EDM[Fe[2]]},
-         {25, FlexibleSUSYObservable`EDM[Fe[3]]},
          {26, FlexibleSUSYObservable`aMuonGM2Calc},
          {27, FlexibleSUSYObservable`aMuonGM2CalcUncertainty}
       }
