@@ -663,12 +663,6 @@ double calculate_Mh2_shift_2l(
    self_energy += Re(model.self_energy_hh_1loop_deriv_p2( p ) * mh2_shift_1l);
    
 
-/*   const auto Mh2_loop = (calculate_mh2_0l(model) - self_energy_2l - Eigen::Matrix<double,2,2>(tadpole_2l.asDiagonal())).eval();
-
-   Eigen::Array<double,2,1> Mh2_pole;
-   fs_diagonalize_hermitian(Mh2_loop, Mh2_pole);
-*/
-
 @calculateMHiggsPoleOneMomentumIteration@
  
    const double mh2_shift = Mh2_pole - mh2_0l;
@@ -725,36 +719,6 @@ double calculate_Mh2_shift_2l(
 
 
 } // anonymous namespace
-
-
-
-/**
- * Calculates SM tree-level parameters (g1, g2, g3, Yu, Yd,
- * Ye, v) by performing a tree-level matching from the MSSM to the
- * SM
- *
- * @param model MSSM parameters
- * @param sm SM parameters
- *
- * @return SM with tree-level parameters
- * 
- *
-standard_model::Standard_model
-calculate_sm_0l(const @ModelName@_mass_eigenstates& model, int idx) {
-  standard_model::Standard_model sm_0l;
-  sm_0l.set_precision(model.get_precision());
-  sm_0l.set_scale(model.get_scale());
-
-  auto model_0l = model;
-  model_0l.get_problems().clear();
-  model_0l.calculate_DRbar_masses();
-
-  match_high_to_low_scale_sm_0l( sm_0l, model_0l, idx);
-
-  return sm_0l;
-}
-*/
-
 
 
 
@@ -844,7 +808,6 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    const double g3_1l = AbsSqrt(4. * Pi * alpha_s) * (1. - 0.5 * delta_alpha_s) /
                        standard_model_info::normalization_g3;
 
-// const double delta_gy = g1_1l * standard_model_info::normalization_g1 - gy;
    const double delta_g2 = g2_1l * standard_model_info::normalization_g2 - g2;
    const double vev_1l =
       2 * Sqrt(mW2) / g2 * (1 - delta_g2 / g2 + 0.5 * delta_mW2 / mW2);
@@ -905,7 +868,6 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
       const @ModelName@_mass_eigenstates& model_input, int idx)
 {
 
-
    static const double gauge_less = 1e-10;              
    // approximates the gaugeless limit for gauge couplings
 
@@ -916,7 +878,7 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    model_gl.set_g2(gauge_less /  @ModelName@_info::normalization_g2);
    
    auto model_no_g3 = model_gl;
-   model_no_g3.set_g3(gauge_less / @ModelName@_info::normalization_g1);
+   model_no_g3.set_g3(gauge_less / @ModelName@_info::normalization_g3);
 
    model_gl.calculate_DRbar_masses();
    model_no_g3.calculate_DRbar_masses();
