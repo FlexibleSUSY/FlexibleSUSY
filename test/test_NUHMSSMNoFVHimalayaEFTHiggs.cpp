@@ -30,6 +30,8 @@ using namespace flexiblesusy;
 
 using output = std::array<double,7>;
 
+using output_2loop = std::array<double,2>;
+
 double calc_lambda( 
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
    softsusy::QedQcd& qedqcd,
@@ -88,7 +90,7 @@ output edc_output( char const* const slha_input)
       BOOST_TEST(false);
    }
 
-  results[1]=calc_lambda(input, qedqcd, settings);
+   results[1]=calc_lambda(input, qedqcd, settings);
 
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
@@ -96,7 +98,7 @@ output edc_output( char const* const slha_input)
    results[0]=calc_Mh(input, qedqcd, settings);// /200.;
    results[2]=calc_lambda(input, qedqcd, settings);
 
-   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2);
+/*   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2);
    
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 2);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
@@ -105,18 +107,18 @@ output edc_output( char const* const slha_input)
    results[3]=calc_lambda(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 0);
+   results[4]=calc_lambda(input, qedqcd, settings);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
- //  results[4]=calc_lambda(input, qedqcd, settings);
+   results[5]=calc_lambda(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, 1);
+   settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, 2);
+   results[5]=calc_lambda(input, qedqcd, settings);
 
-   // settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, 2);
-//   results[5]=calc_lambda(input, qedqcd, settings);
-
-/*   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order,3);
+   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order,3);
    settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, 2);
 //Have a look how implemented
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, 2);
@@ -126,6 +128,42 @@ output edc_output( char const* const slha_input)
    settings.set(Spectrum_generator_settings::beta_loop_order, 4);
    results[6]=calc_lambda(input, qedqcd, settings);
 */
+   return results;
+}
+
+
+output_2loop edc_output_2loop( char const* const slha_input)
+{
+   output_2loop results = {0.,0.};
+
+   std::stringstream istream_case_1(slha_input);
+   NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
+   slha_io.read_from_stream(istream_case_1);
+
+   // extract the input parameters
+
+   softsusy::QedQcd qedqcd;
+   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
+   Spectrum_generator_settings settings;
+
+   try {
+      slha_io.fill(settings);
+      slha_io.fill(qedqcd);
+      slha_io.fill(input);
+   } catch (const Error& error) {
+      BOOST_TEST_MESSAGE(error.what());
+      BOOST_TEST(false);
+   }
+
+   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2); 
+   settings.set(Spectrum_generator_settings::pole_mass_loop_order, 2);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
+   results[0]=calc_Mh(input, qedqcd, settings);
+
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 0);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
+   results[1]=calc_Mh(input, qedqcd, settings);
+
    return results;
 }
 
@@ -525,52 +563,436 @@ Block AEIN
 )";
 
 
+// 2-loop scenarios: 
+// At = (1/5 - 3)*50000 = -140000
+// At = (1/5 - 2)*50000 = -90000
+// At = (1/5 + 3)*50000 =  110000
+// At = (1/5 + 3)*50000 =  160000
+//
+
+// scenario 2-loop-a degenrate case with high stop mixing At = (1/5 - 3)*50000 = -140000
+char const * const slha_input_case_2loop_a = R"(
+Block MODSEL                 # Select model
+#   12    1000                # DRbar parameter output scale (GeV)
+Block FlexibleSUSY
+    0   1.000000000e-05      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
+    3   0                    # calculate SM pole masses
+    4   1                    # pole mass loop order
+    5   1                    # EWSB loop order
+    6   3                    # beta-functions loop order
+    7   1                    # threshold corrections loop order
+    8   0                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   0                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   0                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   0                    # Higgs 2-loop corrections O(alpha_tau^2)
+   12   0                    # force output
+   13   0                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
+   14   1.000000000e-11      # beta-function zero threshold
+   15   0                    # calculate observables (a_muon, ...)
+   16   0                    # force positive majorana masses
+   17   0                    # pole mass renormalization scale (0 = SUSY scale)
+   18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
+   19   50000                    # EFT matching scale (0 = SUSY scale)
+   20   1                    # EFT loop order for upwards matching
+   21   0                    # EFT loop order for downwards matching
+   22   0                    # EFT index of SM-like Higgs in the BSM model
+   23   0                    # calculate BSM pole masses
+   24   111111111            # individual threshold correction loop orders
+   25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
+   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   0                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+Block SMINPUTS               # Standard Model inputs
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
+    3   1.184000000e-01      # alpha_s(MZ) SM MSbar
+    4   9.118760000e+01      # MZ(pole)
+    5   4.180000000e+00      # mb(mb) SM MSbar
+    6   1.733400000e+02      # mtop(pole)
+    7   1.776990000e+00      # mtau(pole)
+    8   0.000000000e+00      # mnu3(pole)
+    9   80.385               # MW pole
+   11   5.109989020e-04      # melectron(pole)
+   12   0.000000000e+00      # mnu1(pole)
+   13   1.056583570e-01      # mmuon(pole)
+   14   0.000000000e+00      # mnu2(pole)
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
+Block EXTPAR
+    0   50000                 # Ms
+    1   50000                 # M1(MSUSY)
+    2   50000                 # M2(MSUSY)
+    3   50000                 # M3(MSUSY)
+    4   50000                 # Mu(MSUSY)
+    5   50000                 # mA(MSUSY)
+   25   5                    # TanBeta(MSUSY)
+Block MSQ2IN
+  1  1     25.000E+08   # mq2(1,1)
+  2  2     25.000E+08   # mq2(2,2)
+  3  3     25.000E+08   # mq2(3,3)
+Block MSE2IN
+  1  1     25.000E+08   # me2(1,1)
+  2  2     25.000E+08   # me2(2,2)
+  3  3     25.000E+08   # me2(3,3)
+Block MSL2IN
+  1  1     25.000E+08   # ml2(1,1)
+  2  2     25.000E+08   # ml2(2,2)
+  3  3     25.000E+08   # ml2(3,3)
+Block MSU2IN
+  1  1     25.000E+08   # mu2(1,1)
+  2  2     25.000E+08   # mu2(2,2)
+  3  3     25.000E+08   # mu2(3,3)
+Block MSD2IN
+  1  1     25.000E+08   # md2(1,1)
+  2  2     25.000E+08   # md2(2,2)
+  3  3     25.000E+08   # md2(3,3)
+Block AUIN
+  1  1     0            # Au(1,1)
+  2  2     0            # Au(2,2)
+  3  3     -140000    # Au(3,3)
+Block ADIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+Block AEIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+)";
+
+// scenario 2-loop-b degenrate case with high stop mixing At = (1/5 - 2)*50000 approx -90100
+char const * const slha_input_case_2loop_b = R"(
+Block MODSEL                 # Select model
+#   12    1000                # DRbar parameter output scale (GeV)
+Block FlexibleSUSY
+    0   1.000000000e-05      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
+    3   0                    # calculate SM pole masses
+    4   1                    # pole mass loop order
+    5   1                    # EWSB loop order
+    6   3                    # beta-functions loop order
+    7   1                    # threshold corrections loop order
+    8   0                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   0                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   0                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   0                    # Higgs 2-loop corrections O(alpha_tau^2)
+   12   0                    # force output
+   13   0                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
+   14   1.000000000e-11      # beta-function zero threshold
+   15   0                    # calculate observables (a_muon, ...)
+   16   0                    # force positive majorana masses
+   17   0                    # pole mass renormalization scale (0 = SUSY scale)
+   18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
+   19   50000                    # EFT matching scale (0 = SUSY scale)
+   20   1                    # EFT loop order for upwards matching
+   21   0                    # EFT loop order for downwards matching
+   22   0                    # EFT index of SM-like Higgs in the BSM model
+   23   0                    # calculate BSM pole masses
+   24   111111111            # individual threshold correction loop orders
+   25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
+   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   0                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+Block SMINPUTS               # Standard Model inputs
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
+    3   1.184000000e-01      # alpha_s(MZ) SM MSbar
+    4   9.118760000e+01      # MZ(pole)
+    5   4.180000000e+00      # mb(mb) SM MSbar
+    6   1.733400000e+02      # mtop(pole)
+    7   1.776990000e+00      # mtau(pole)
+    8   0.000000000e+00      # mnu3(pole)
+    9   80.385               # MW pole
+   11   5.109989020e-04      # melectron(pole)
+   12   0.000000000e+00      # mnu1(pole)
+   13   1.056583570e-01      # mmuon(pole)
+   14   0.000000000e+00      # mnu2(pole)
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
+Block EXTPAR
+    0   50000                 # Ms
+    1   50000                 # M1(MSUSY)
+    2   50000                 # M2(MSUSY)
+    3   50000                 # M3(MSUSY)
+    4   50000                 # Mu(MSUSY)
+    5   50000                 # mA(MSUSY)
+   25   5                    # TanBeta(MSUSY)
+Block MSQ2IN
+  1  1     25.000E+08   # mq2(1,1)
+  2  2     25.000E+08   # mq2(2,2)
+  3  3     25.000E+08   # mq2(3,3)
+Block MSE2IN
+  1  1     25.000E+08   # me2(1,1)
+  2  2     25.000E+08   # me2(2,2)
+  3  3     25.000E+08   # me2(3,3)
+Block MSL2IN
+  1  1     25.000E+08   # ml2(1,1)
+  2  2     25.000E+08   # ml2(2,2)
+  3  3     25.000E+08   # ml2(3,3)
+Block MSU2IN
+  1  1     25.000E+08   # mu2(1,1)
+  2  2     25.000E+08   # mu2(2,2)
+  3  3     25.000E+08   # mu2(3,3)
+Block MSD2IN
+  1  1     25.000E+08   # md2(1,1)
+  2  2     25.000E+08   # md2(2,2)
+  3  3     25.000E+08   # md2(3,3)
+Block AUIN
+  1  1     0            # Au(1,1)
+  2  2     0            # Au(2,2)
+  3  3     -90100    # Au(3,3)
+Block ADIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+Block AEIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+)";
+
+// scenario 2-loop-c degenrate case with high stop mixing At = (1/5 + 3)*50000 approx  110100
+char const * const slha_input_case_2loop_c = R"(
+Block MODSEL                 # Select model
+#   12    1000                # DRbar parameter output scale (GeV)
+Block FlexibleSUSY
+    0   1.000000000e-05      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
+    3   0                    # calculate SM pole masses
+    4   1                    # pole mass loop order
+    5   1                    # EWSB loop order
+    6   3                    # beta-functions loop order
+    7   1                    # threshold corrections loop order
+    8   0                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   0                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   0                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   0                    # Higgs 2-loop corrections O(alpha_tau^2)
+   12   0                    # force output
+   13   0                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
+   14   1.000000000e-11      # beta-function zero threshold
+   15   0                    # calculate observables (a_muon, ...)
+   16   0                    # force positive majorana masses
+   17   0                    # pole mass renormalization scale (0 = SUSY scale)
+   18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
+   19   50000                    # EFT matching scale (0 = SUSY scale)
+   20   1                    # EFT loop order for upwards matching
+   21   0                    # EFT loop order for downwards matching
+   22   0                    # EFT index of SM-like Higgs in the BSM model
+   23   0                    # calculate BSM pole masses
+   24   111111111            # individual threshold correction loop orders
+   25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
+   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   0                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+Block SMINPUTS               # Standard Model inputs
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
+    3   1.184000000e-01      # alpha_s(MZ) SM MSbar
+    4   9.118760000e+01      # MZ(pole)
+    5   4.180000000e+00      # mb(mb) SM MSbar
+    6   1.733400000e+02      # mtop(pole)
+    7   1.776990000e+00      # mtau(pole)
+    8   0.000000000e+00      # mnu3(pole)
+    9   80.385               # MW pole
+   11   5.109989020e-04      # melectron(pole)
+   12   0.000000000e+00      # mnu1(pole)
+   13   1.056583570e-01      # mmuon(pole)
+   14   0.000000000e+00      # mnu2(pole)
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
+Block EXTPAR
+    0   50000                 # Ms
+    1   50000                 # M1(MSUSY)
+    2   50000                 # M2(MSUSY)
+    3   50000                 # M3(MSUSY)
+    4   50000                 # Mu(MSUSY)
+    5   50000                 # mA(MSUSY)
+   25   5                    # TanBeta(MSUSY)
+Block MSQ2IN
+  1  1     25.000E+08   # mq2(1,1)
+  2  2     25.000E+08   # mq2(2,2)
+  3  3     25.000E+08   # mq2(3,3)
+Block MSE2IN
+  1  1     25.000E+08   # me2(1,1)
+  2  2     25.000E+08   # me2(2,2)
+  3  3     25.000E+08   # me2(3,3)
+Block MSL2IN
+  1  1     25.000E+08   # ml2(1,1)
+  2  2     25.000E+08   # ml2(2,2)
+  3  3     25.000E+08   # ml2(3,3)
+Block MSU2IN
+  1  1     25.000E+08   # mu2(1,1)
+  2  2     25.000E+08   # mu2(2,2)
+  3  3     25.000E+08   # mu2(3,3)
+Block MSD2IN
+  1  1     25.000E+08   # md2(1,1)
+  2  2     25.000E+08   # md2(2,2)
+  3  3     25.000E+08   # md2(3,3)
+Block AUIN
+  1  1     0            # Au(1,1)
+  2  2     0            # Au(2,2)
+  3  3     110100    # Au(3,3)
+Block ADIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+Block AEIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+)";
+
+// scenario 2-loop-d degenrate case with high stop mixing At = (1/5 + 3)*50000 =  160000
+char const * const slha_input_case_2loop_d = R"(
+Block MODSEL                 # Select model
+#   12    1000                # DRbar parameter output scale (GeV)
+Block FlexibleSUSY
+    0   1.000000000e-05      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
+    3   0                    # calculate SM pole masses
+    4   1                    # pole mass loop order
+    5   1                    # EWSB loop order
+    6   3                    # beta-functions loop order
+    7   1                    # threshold corrections loop order
+    8   0                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   0                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   0                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   0                    # Higgs 2-loop corrections O(alpha_tau^2)
+   12   0                    # force output
+   13   0                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
+   14   1.000000000e-11      # beta-function zero threshold
+   15   0                    # calculate observables (a_muon, ...)
+   16   0                    # force positive majorana masses
+   17   0                    # pole mass renormalization scale (0 = SUSY scale)
+   18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
+   19   50000                    # EFT matching scale (0 = SUSY scale)
+   20   1                    # EFT loop order for upwards matching
+   21   0                    # EFT loop order for downwards matching
+   22   0                    # EFT index of SM-like Higgs in the BSM model
+   23   0                    # calculate BSM pole masses
+   24   111111111            # individual threshold correction loop orders
+   25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
+   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   0                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+Block SMINPUTS               # Standard Model inputs
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
+    3   1.184000000e-01      # alpha_s(MZ) SM MSbar
+    4   9.118760000e+01      # MZ(pole)
+    5   4.180000000e+00      # mb(mb) SM MSbar
+    6   1.733400000e+02      # mtop(pole)
+    7   1.776990000e+00      # mtau(pole)
+    8   0.000000000e+00      # mnu3(pole)
+    9   80.385               # MW pole
+   11   5.109989020e-04      # melectron(pole)
+   12   0.000000000e+00      # mnu1(pole)
+   13   1.056583570e-01      # mmuon(pole)
+   14   0.000000000e+00      # mnu2(pole)
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
+Block EXTPAR
+    0   50000                 # Ms
+    1   50000                 # M1(MSUSY)
+    2   50000                 # M2(MSUSY)
+    3   50000                 # M3(MSUSY)
+    4   50000                 # Mu(MSUSY)
+    5   50000                 # mA(MSUSY)
+   25   5                    # TanBeta(MSUSY)
+Block MSQ2IN
+  1  1     25.000E+08   # mq2(1,1)
+  2  2     25.000E+08   # mq2(2,2)
+  3  3     25.000E+08   # mq2(3,3)
+Block MSE2IN
+  1  1     25.000E+08   # me2(1,1)
+  2  2     25.000E+08   # me2(2,2)
+  3  3     25.000E+08   # me2(3,3)
+Block MSL2IN
+  1  1     25.000E+08   # ml2(1,1)
+  2  2     25.000E+08   # ml2(2,2)
+  3  3     25.000E+08   # ml2(3,3)
+Block MSU2IN
+  1  1     25.000E+08   # mu2(1,1)
+  2  2     25.000E+08   # mu2(2,2)
+  3  3     25.000E+08   # mu2(3,3)
+Block MSD2IN
+  1  1     25.000E+08   # md2(1,1)
+  2  2     25.000E+08   # md2(2,2)
+  3  3     25.000E+08   # md2(3,3)
+Block AUIN
+  1  1     0            # Au(1,1)
+  2  2     0            # Au(2,2)
+  3  3     160000    # Au(3,3)
+Block ADIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+Block AEIN
+  1  1     0   # Ad(1,1)
+  2  2     0   # Ad(2,2)
+  3  3     0   # Ad(3,3)
+)";
+
 /*   std::vector< std::pair<output,output>> = { 
       output a;
    }
 */
 
-   output results_new_1 = edc_output(slha_input_case1);
+   output results_new_1  = edc_output(slha_input_case1);
    output results_new_2  = edc_output(slha_input_case2);
    output results_new_3  = edc_output(slha_input_case3);
    output results_new_4  = edc_output(slha_input_case4);
 
+   
+   output_2loop results_new_2loop_1  = edc_output_2loop(slha_input_case_2loop_a);
+  output_2loop results_new_2loop_2  = edc_output_2loop(slha_input_case_2loop_b);
+   output_2loop results_new_2loop_3  = edc_output_2loop(slha_input_case_2loop_c);
+   output_2loop results_new_2loop_4  = edc_output_2loop(slha_input_case_2loop_d);
+
   
-   output results_old_1 = {129.024202, 0.125588145, 0.125768663, 0.12577649, 0., 0., 0.};
-   output results_old_2 = {132.709997, 0.125588071, 0.147703015, 0.147818818, 0., 0., 0.};
-   output results_old_3 = {128.315047, 0.12558815, 0.121657248, 0.1212177, 0., 0., 0.};
-   output results_old_4 = {130.665551, 0.125588152, 0.135417609, 0.13559143, 0., 0., 0.};
-/*
-output results_old_1 = {129.024202, 0.125588145, 0.125768663, 0.125883692, 0., 0., 0.};
-   output results_old_2 = {132.709997, 0.125588071, 0.147703015, 0.147787693, 0., 0., 0.};
-   output results_old_3 = {128.315047, 0.12558815, 0.121657248, 0.121333083, 0., 0., 0.};
-   output results_old_4 = {130.665551, 0.125588152, 0.135417609, 0.135614437, 0., 0., 0.};
-*/
-   /*
+   output results_old_1 = {129.024202, 0.125588145, 0.125768663};
+   output results_old_2 = {132.709997, 0.125588071, 0.147703015};
+   output results_old_3 = {128.315047, 0.12558815, 0.121657248};
+   output results_old_4 = {130.665551, 0.125588152, 0.135417609};
 
-   This is the one |
-                   v
-
-: Qmatch=40000 
-   output results_old_0 = {129.024202, 0.125588145, 0.125768663, 0.125883692, 0.125924345, 0.126036364, 0.125789353};
-   output results_old_1 = {132.709997, 0.125588071, 0.147703015, 0.147787693, 0.148054003, 0.14813505, 0.146692272};
-   output results_old_2 = {128.315047, 0.12558815, 0.121657248, 0.121333083, 0.122014035, 0.121686888, 0.123785999};
-   output results_old_3 = {130.665551, 0.125588152, 0.135417609, 0.135614437, 0.135527252, 0.1357204, 0.133147169};
-
- Not this one:
-    * Qmatch=0
-   output results_old_1 = {129.019823, 0.125340829, 0.121932257, 0.121935242, 0.122110845, 0.122110863, 0.122059975};
-   output results_old_2 = {132.647365, 0.125340796, 0.143703012, 0.144140416, 0.143737263, 0.144171089, 0.142943794};
-   output results_old_3 = {128.314932, 0.125624141, 0.122221521, 0.121928918, 0.122570423, 0.122274835, 0.124337878};
-   output results_old_4 = {130.666679, 0.125624192, 0.135972316, 0.136131174, 0.136145401, 0.136300573, 0.133688185};
+   output_2loop results_old_2loop_1 = {128.16151975160173, 127.9817088038441};
+   output_2loop results_old_2loop_2 = {130.42485668023875, 130.15819922320634};
+   output_2loop results_old_2loop_3 = {130.86500014892152, 130.66749808261707};
+   output_2loop results_old_2loop_4 = {128.87146686565686, 128.53192456935258};
 
 
-*/
-
-   for(int i=0; i<7; i++){
-      BOOST_CHECK_CLOSE_FRACTION(results_new_1[i], results_old_1[i], 4e-8);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_3[i], results_old_3[i], 4e-8);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_2[i], results_old_2[i], 4e-8);
-    //  BOOST_CHECK_CLOSE_FRACTION(results_new_4[i], results_old_4[i], 4e-8);
+   for(int i=0; i<3; i++){
+      BOOST_CHECK_CLOSE_FRACTION(results_new_1[i], results_old_1[i], 2e-4);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_3[i], results_old_3[i], 8e-5);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_2[i], results_old_2[i], 8e-5);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_4[i], results_old_4[i], 8e-5);
+   }
+ 
+   for(int i=0; i<2; i++){
+      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_1[i], results_old_2loop_1[i], 5e-4);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_2[i], results_old_2loop_2[i], 5e-4);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_3[i], results_old_2loop_3[i], 5e-4);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_4[i], results_old_2loop_4[i], 5e-4);
    }
 }

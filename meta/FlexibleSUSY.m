@@ -1437,7 +1437,11 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             setRunningDownLeptonMasses = "", setYukawas = "",
             calculateMUpQuarkPole1L = "", calculateMDownQuarkPole1L = "",
             calculateMDownLeptonPole1L = "",
-            calculateMHiggsPoleOneMomentumIteration = ""},
+            calculateMHiggsPoleOneMomentumIteration = "",
+            callMatch3Loop = "",
+            threeLoopLambdaMatching = "",
+            callMatch2LoopTopMass = "",
+            createMt2Loop = ""},
            If[FlexibleSUSY`FlexibleEFTHiggs === True,
               If[Head[susyScaleMatching] === List,
                  userMatching = Constraint`ApplyConstraints[susyScaleMatching];
@@ -1459,6 +1463,13 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setRunningDownLeptonMasses        = FlexibleEFTHiggsMatching`CalculateRunningDownLeptonMasses[];
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
               calculateMHiggsPoleOneMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleOneMomentumIteration[SARAH`HiggsBoson];
+          If[ FlexibleSUSY`UseHiggs3LoopMSSM === True, 
+              threeLoopLambdaMatching =  FlexibleEFTHiggsMatching`Create3LoopMatching[];
+              callMatch3Loop =  FlexibleEFTHiggsMatching`Call3LoopMatching[];
+              createMt2Loop =  FlexibleEFTHiggsMatching`CreateMt2Loop[];
+              callMatch2LoopTopMass =  FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[]
+            ];
+
               calculateMUpQuarkPole1L    = FlexibleEFTHiggsMatching`CalculateMUpQuarkPole1L[];
               calculateMDownQuarkPole1L  = FlexibleEFTHiggsMatching`CalculateMDownQuarkPole1L[];
               calculateMDownLeptonPole1L = FlexibleEFTHiggsMatching`CalculateMDownLeptonPole1L[];
@@ -1477,6 +1488,10 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@applyUserMatching@"       -> IndentText[IndentText[WrapLines[userMatching]]],
                          "@calculateMHiggsPoleOneMomentumIteration@" -> IndentText[calculateMHiggsPoleOneMomentumIteration],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
+                         "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
+                         "@callMatch3Loop@" -> IndentText[callMatch3Loop],
+                         "@createMt2Loop@" -> IndentText[createMt2Loop],
+                         "@callMatch2LoopTopMass@" -> IndentText[callMatch2LoopTopMass],
                          Sequence @@ GeneralReplacementRules[]
                        } ];
         ];
@@ -1626,7 +1641,7 @@ CreateDefaultEWSBSolverConstructor[solvers_List] :=
 
 ParameterAppearsExactlyOnceIn[eqs_List, par_] :=
     Length[Select[eqs, (!FreeQ[#, par])&]] === 1;
-
+(*
 criterionFun[string_String, particle_] := StringMatchQ[string, __~~"self_energy_"<>particle<>"_1loop("~~__];
 
 replaceWithDeriv[input_, particles_, separator_] := 
@@ -1636,13 +1651,15 @@ replaceWithDeriv[input_, particles_, separator_] :=
 	          	temp = Select[manyFun, criterionFun[#1, elem]&];
 	          	temp = StringReplace[temp, {
 		       	      "self_energy_"<>elem<>"_1loop("->"self_energy_deriv_"<>elem<>"_1loop(",
-			      "B0("->"B0("}];
+			      "A0("->"A0_deriv_p2(",
+                              "B0("->"B0_deriv_p2(", 
+                              "G0("->"G0_deriv_p2("}];
    		        temp = #<>separator&/@temp;
 		        AppendTo[res, temp];
 	       , {elem, particles}];
 	       StringJoin[Flatten[res, 1]]
    ];
-
+*)
 WriteModelClass[massMatrices_List, ewsbEquations_List,
                 parametersFixedByEWSB_List, ewsbSubstitutions_List,
                 nPointFunctions_List, vertexRules_List, phases_List,
@@ -1765,6 +1782,12 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
              ];
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
               {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{SARAH`HiggsBoson}];
+              (*
+ If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{SARAH`HiggsBoson}];
+
+
+                 *)
               threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
 #ifdef ENABLE_HIMALAYA
 #include \"himalaya/HierarchyCalculator.hpp\"
@@ -1790,15 +1813,11 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
 
 
 
-         selfEnergyDerivPrototypes = replaceWithDeriv[selfEnergyPrototypes, {"hh", "Ah"}, ";\n"];
+
+           (*  selfEnergyDerivPrototypes = replaceWithDeriv[selfEnergyPrototypes, {"hh", "Ah"}, ";\n"];
          selfEnergyDerivFunctions = replaceWithDeriv[selfEnergyFunctions, {"hh", "Ah"}, "}\n\n"];
-
+           *)
            (*           Put[{selfEnergyPrototypes, selfEnergyFunctions},"~/vova.txt"];*)
-(*selfEnergyDerivPrototypes,*) 
-           (*    {selfEnergyDerivFunctions} = SelfEnergies`CreateLoopSelfEnergiesDeriv[{SARAH`HiggsBoson, SARAH`PseudoScalar}];*)
-
-           
-
            
            phasesDefinition             = Phases`CreatePhasesDefinition[phases];
            phasesGetterSetters          = Phases`CreatePhasesGetterSetters[phases];
@@ -1977,7 +1996,9 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@[override]selfEnergyPrototypes@" -> IndentText[FunctionModifiers`MakeOverride[selfEnergyPrototypes]],
                             "@selfEnergyFunctions@"       -> selfEnergyFunctions,
                             "@selfEnergyDerivPrototypes@" -> selfEnergyDerivPrototypes,
-                            "@selfEnergyDerivFunctions@"  -> selfEnergyDerivFunctions,
+                            "@[abstract]selfEnergyDerivPrototypes@" -> IndentText[FunctionModifiers`MakeAbstract[selfEnergyDerivPrototypes]],
+                            "@[override]selfEnergyDerivPrototypes@" -> IndentText[FunctionModifiers`MakeOverride[selfEnergyDerivPrototypes]],
+                             "@selfEnergyDerivFunctions@"  -> selfEnergyDerivFunctions,
                             "@twoLoopTadpolePrototypes@"  -> IndentText[twoLoopTadpolePrototypes],
                             "@twoLoopTadpoleFunctions@"   -> twoLoopTadpoleFunctions,
                             "@twoLoopSelfEnergyPrototypes@" -> IndentText[twoLoopSelfEnergyPrototypes],
