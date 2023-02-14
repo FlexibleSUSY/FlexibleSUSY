@@ -27,6 +27,10 @@ namespace two_loop {
 double BarrZeeLoopFPS(double);
 /// Barr-Zee 2-loop function with fermion loop
 double BarrZeeLoopFS(double);
+/// Barr-Zee 2-loop function with fermion loop
+double BarrZeeLoopFPSZ(double, double);
+/// Barr-Zee 2-loop function with fermion loop
+double BarrZeeLoopFSZ(double, double);
 /// Barr-Zee 2-loop function with scalar loop
 double BarrZeeLoopS(double);
 /// Barr-Zee 2-loop function with vector

@@ -71,6 +71,42 @@ double BarrZeeLoopFS(double z)
 }
 
 /**
+ * Barr-Zee 2-loop function with fermion loop and pseudoscalar and Z
+ * boson mediators.
+ *
+ * @param x squared mass ratio (mf/ms)^2.
+ * @param y squared mass ratio (mf/mz)^2.
+ */
+double BarrZeeLoopFPSZ(double x, double y)
+{
+   if (x < 0 || y < 0) {
+      throw OutOfBoundsError("BarrZeeLoopFPSZ: arguments must not be negative.");
+   } else if (x == y) {
+      return 0; // @todo(alex) improve limit
+   }
+
+   return y*(BarrZeeLoopFPS(x) - BarrZeeLoopFPS(y))/(y - x);
+}
+
+/**
+ * Barr-Zee 2-loop function with fermion loop and scalar and Z boson
+ * mediators.
+ *
+ * @param x squared mass ratio (mf/ms)^2.
+ * @param y squared mass ratio (mf/mz)^2.
+ */
+double BarrZeeLoopFSZ(double x, double y)
+{
+   if (x < 0 || y < 0) {
+      throw OutOfBoundsError("BarrZeeLoopFSZ: arguments must not be negative.");
+   } else if (x == y) {
+      return 0; // @todo(alex) improve limit
+   }
+
+   return y*(BarrZeeLoopFS(x) - BarrZeeLoopFS(y))/(y - x);
+}
+
+/**
  * Barr-Zee 2-loop function with scalar loop (arXiv:1502.04199 Eq 27).
  *
  * @param z squared mass ratio
