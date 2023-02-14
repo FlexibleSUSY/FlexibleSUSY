@@ -28,7 +28,8 @@ namespace amm_loop_functions {
 namespace two_loop {
 
 /**
- * Barr-Zee 2-loop function with fermion loop (arXiv:1502.04199 Eq 26).
+ * Barr-Zee 2-loop function with fermion loop and pseudoscalar and
+ * photon mediators (arXiv:1502.04199 Eq 26).
  *
  * @param z squared mass ratio
 */
@@ -55,7 +56,8 @@ double BarrZeeLoopFPS(double z)
 }
 
 /**
- * Barr-Zee 2-loop function with fermion loop (arXiv:1502.04199 Eq 25).
+ * Barr-Zee 2-loop function with fermion loop and scalar and photon
+ * mediators (arXiv:1502.04199 Eq 25).
  *
  * @param z squared mass ratio.
  */
@@ -107,7 +109,8 @@ double BarrZeeLoopFSZ(double x, double y)
 }
 
 /**
- * Barr-Zee 2-loop function with scalar loop (arXiv:1502.04199 Eq 27).
+ * Barr-Zee 2-loop function with scalar loop and scalar and photon
+ * mediators (arXiv:1502.04199 Eq 27).
  *
  * @param z squared mass ratio
  */
@@ -123,7 +126,8 @@ double BarrZeeLoopS(double z)
 }
 
 /**
- * Barr-Zee 2-loop function with vector loop (arXiv:1502.04199 Eq 28).
+ * Barr-Zee 2-loop function with vector loop and scalar and photon
+ * mediators (arXiv:1502.04199 Eq 28).
  *
  * @param z squared mass ratio
  */
