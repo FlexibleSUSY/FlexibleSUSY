@@ -507,8 +507,8 @@ Lepton, Fermion, Scalar
                const double x = Sqr(fermionMass / scalarMass);
                const double y = Sqr(fermionMass / zMass);
 
-               const double part1 = coeffA * BarrZeeLoopFSZ(x, y);
-               const double part2 = coeffB * BarrZeeLoopFPSZ(x, y);
+               const double part1 = coeffA == 0 ? 0 : coeffA * BarrZeeLoopFSZ(x, y);
+               const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPSZ(x, y);
 
                const double preFactor = -4 * twoLoop * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
