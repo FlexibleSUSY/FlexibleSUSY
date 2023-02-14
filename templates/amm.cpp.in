@@ -48,18 +48,20 @@ double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
 
 /**
  * @class AMMBarrZeeFermionLoop
- * @brief A template that calculate contributions to the
- *        anomalous magnetic dipole moment of a given particle in
- *        a BarrZee diagram with a fermion loop and scalar/Photon exchange
- *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (1))
- * @tparam Args Specifies in order the field of which to
- *              calculate the electric magnetic moment,
- *              the photon emitter and the exchange particle
- *              in a BarrZee diagram where the photon emitter
- *              is a Fermion and the exchange particle a scalar particle.
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous magnetic dipole moment of a given particle in a
+ *        Barr-Zee diagram with a fermion loop and scalar and photon
+ *        exchange particles (see arXiv:1502.04199 Figure 2, (1)).
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              electric magnetic moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a Fermion and one exchange particle
+ *              a scalar particle (the other is a photon).
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarrZee diagram with fields given by
+ * dipole moment of a Barr-Zee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
@@ -70,19 +72,21 @@ struct AMMBarrZeeFermionLoop {
 };
 
 /**
- * @class AMMBarrZeeFermionZLoop
- * @brief A template that calculate contributions to the
- *        anomalous magnetic dipole moment of a given particle in
- *        a BarrZee diagram with a fermion loop and scalar/Z-boson exchange
- *        particle.
- * @tparam Args Specifies in order the field of which to
- *              calculate the electric magnetic moment,
- *              the photon emitter and the exchange particle
- *              in a BarrZee diagram where the photon emitter
- *              is a Fermion and the exchange particle a scalar particle.
+ * @class AMMBarrZeeFermionLoopZ
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous magnetic dipole moment of a given particle in a
+ *        Barr-Zee diagram with a fermion loop and scalar and Z-boson
+ *        exchange particles.
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              electric magnetic moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a Fermion and one exchange particle
+ *              a scalar particle (the other is a Z-boson).
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarrZee diagram with fields given by
+ * dipole moment of a Barr-Zee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
@@ -94,18 +98,20 @@ struct AMMBarrZeeFermionLoopZ {
 
 /**
  * @class AMMBarrZeeScalarLoop
- * @brief A template that calculate contributions to the
- *        anomalous dipole moment of a given particle in
- *        a BarrZee diagram with a scalar loop and scalar exchange
- *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (2))
- * @tparam Args Specifies in order the field of which to
- *              calculate the magnetic dipole moment,
- *              the photon emitter and the exchange particle
- *              in a BarrZee diagram where the photon emitter
- *              is a scalar particle and the exchange particle a scalar particle.
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous dipole moment of a given particle in a Barr-Zee
+ *        diagram with a scalar loop and scalar and photon exchange
+ *        particles (see arXiv:1502.04199 Figure 2, (2)).
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              magnetic dipole moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a scalar particle and one exchange
+ *              particle a scalar particle (the other is a photon).
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarrZee diagram with fields given by
+ * dipole moment of a Barr-Zee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
@@ -117,18 +123,20 @@ struct AMMBarrZeeScalarLoop {
 
 /**
  * @class AMMBarrZeeVectorLoop
- * @brief A template that calculate contributions to the
- *        anomalous dipole moment of a given particle in
- *        a BarrZee diagram with a scalar loop and scalar exchange
- *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (3))
- * @tparam Args Specifies in order the field of which to
- *              calculate the magnetic dipole moment,
- *              the photon emitter and the exchange particle
- *              in a BarrZee diagram where the photon emitter
- *              is a scalar particle and the exchange particle a scalar particle.
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous dipole moment of a given particle in a Barr-Zee
+ *        diagram with a vector boson loop and scalar and photon
+ *        exchange particles (see arXiv:1502.04199 Figure 2, (3)).
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              magnetic dipole moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a scalar particle and one exchange
+ *              particle a scalar particle (the other is a photon).
  *
  * This template evaluates the contribution to the magnetic
- * dipole moment of a BarrZee diagram with fields given by
+ * dipole moment of a Barr-Zee diagram with fields given by
  * \a Args.
  */
 template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
@@ -308,6 +316,7 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
 
    return delta_amu_scale;
 }
+
 // spliting templated function into header and cpp
 // https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
 @calculateAUncertaintyForwardDeclaration@
