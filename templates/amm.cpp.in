@@ -346,7 +346,7 @@ Lepton, Fermion, Scalar
 
    for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<FermionVertex>()) {
-          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
+         const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
          if (leptonIndices != indices) {
             continue;
@@ -437,7 +437,6 @@ Lepton, Fermion, Scalar
       for (const auto& index2: index_range<FermionVertex>()) {
          for (const auto& indexLeptonZ: index_range<LeptonZVertex>()) {
             for (const auto& indexFermionZ: index_range<FermionZVertex>()) {
-
                const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
                if (leptonIndices != indices) {
@@ -542,7 +541,7 @@ Lepton, ChargedScalar, NeutralScalar
 
    for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<ScalarVertex>()) {
-          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
+         const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
          if (leptonIndices != indices) {
             continue;
@@ -614,7 +613,7 @@ Lepton, Vector, Scalar
 
    for (const auto& index1: index_range<LeptonVertex>()) {
       for (const auto& index2: index_range<VectorVertex>()) {
-          const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
+         const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
 
          if (leptonIndices != indices) {
             continue;
