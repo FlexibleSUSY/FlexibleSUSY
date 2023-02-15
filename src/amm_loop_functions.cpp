@@ -21,7 +21,7 @@
 #include "Cl2.hpp"
 #include "Li2.hpp"
 #include <cmath>
-#include <complex>
+#include <limits>
 
 namespace flexiblesusy {
 namespace amm_loop_functions {
@@ -39,6 +39,10 @@ double BarrZeeLoopFPS(double z)
       throw OutOfBoundsError("BarrZeeLoopFPS: argument must not be negative.");
    } else if (z == 0) {
       return 0;
+   } else if (z < std::numeric_limits<double>::epsilon()) {
+      const double pi26 = 1.6449340668482264; // Pi^2/6
+      const double lz = std::log(z);
+      return z*(pi26 + 0.5*lz*lz);
    } else if (z < 0.25) {
       const double y = std::sqrt(1 - 4*z); // 0 < y < 1
       const double c = -4.9348022005446793; // -Pi^2/2
