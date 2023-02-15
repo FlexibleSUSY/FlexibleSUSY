@@ -86,10 +86,10 @@ double BarrZeeLoopFPSZ(double x, double y)
    } else if (y == 0) {
       return 0;
    } else if (x == y) {
-      if (y == 0.25) {
+      if (x == 0.25) {
          return -0.29543145370663021; // (1 - Log[16])/6
       }
-      return (BarrZeeLoopFS(y) + 2*y)/(1 - 4*y);
+      return (BarrZeeLoopFS(x) + 2*x)/(1 - 4*x);
    }
 
    return y*(BarrZeeLoopFPS(x) - BarrZeeLoopFPS(y))/(y - x);
