@@ -115,29 +115,11 @@ double BarrZeeLoopFSZ(double x, double y)
    } else if (x == y) {
       if (x == 0.25) {
          return 0.20456854629336979; // -2/3*(-1 + Log[2])
-      } else if (x >= 1e17) {
-         return 1./3;
-      } else if (x >= 1e7) {
-         const double ix = 1/x;
-         return 1./3 - 11./300*ix - 1./20*ix*std::log(x);
-      } else if (x >= 1e5) {
-         const double ix = 1/x;
-         const double ix2 = ix*ix;
-         const double lx = std::log(x);
-         return 1./3 - 11./300*ix - 1./20*ix*lx - 463./22050*ix2 - 2./105*ix2*lx;
-      } else if (x >= 1e4) {
-         const double ix = 1/x;
-         const double ix2 = ix*ix;
-         const double ix3 = ix2*ix;
-         const double lx = std::log(x);
-         return 1./3 - 11./300*ix - 1./20*ix*lx - 463./22050*ix2 - 2./105*ix2*lx - 761./105840*ix3 - 1./168*lx*ix3;
       } else if (x >= 1e3) {
          const double ix = 1/x;
-         const double ix2 = ix*ix;
-         const double ix3 = ix2*ix;
-         const double ix4 = ix2*ix2;
          const double lx = std::log(x);
-         return 1./3 - 11./300*ix - 1./20*ix*lx - 463./22050*ix2 - 2./105*ix2*lx - 761./105840*ix3 - 1./168*lx*ix3 - 8707./4.002075e6*ix4 - 2./1155*lx*ix4;
+         return 1./3 + ix*(-11./300 - 1./20*lx + ix*(-463./22050 - 2./105*lx
+            + ix*(-761./105840 - 1./168*lx - 8707./4.002075e6*ix - 2./1155*lx*ix)));
       }
       return (x*(3 - 12*x - 2*(-1 + 3*x)*std::log(x))
               + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFPS(x)
