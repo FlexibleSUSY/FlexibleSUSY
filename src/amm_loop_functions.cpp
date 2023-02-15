@@ -109,7 +109,12 @@ double BarrZeeLoopFSZ(double x, double y)
    } else if (y == 0) {
       return 0;
    } else if (x == y) {
-      return 0; // @todo(alex) correcting limit
+      if (x == 0.25) {
+         return 0.20456854629336979; // -2/3*(-1 + Log[2])
+      }
+      return (x*(3 - 12*x - 2*(-1 + 3*x)*std::log(x))
+              + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFPS(x)
+         )/(1 - 4*x);
    }
 
    return y*(BarrZeeLoopFS(x) - BarrZeeLoopFS(y))/(y - x);
