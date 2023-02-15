@@ -122,3 +122,24 @@ BOOST_AUTO_TEST_CASE( test_FPSZ )
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
+
+/**
+ * Compares the Barr-Zee 2-loop function FSZ with generated data.
+ */
+BOOST_AUTO_TEST_CASE( test_FSZ )
+{
+   using namespace flexiblesusy;
+   using namespace amm_loop_functions::two_loop;
+   const double eps = 1e-13;
+   const auto data = test::read_from_file<double>(
+      std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "FSZ.txt");
+
+   for (const auto d: data) {
+      BOOST_REQUIRE(d.size() == 3);
+      const double x = d.at(0);
+      const double y = d.at(1);
+      const double expected = d.at(2);
+      const double value = 2*BarrZeeLoopFSZ(x, y);
+      BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
+   }
+}
