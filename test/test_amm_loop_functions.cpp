@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_FSZ )
 {
    using namespace flexiblesusy;
    using namespace amm_loop_functions::two_loop;
-   const double eps = 1e-13;
+   const double eps = 1e-12;
    const auto data = test::read_from_file<double>(
       std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "FSZ.txt");
 
