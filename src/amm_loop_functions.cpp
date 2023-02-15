@@ -83,8 +83,13 @@ double BarrZeeLoopFPSZ(double x, double y)
 {
    if (x < 0 || y < 0) {
       throw OutOfBoundsError("BarrZeeLoopFPSZ: arguments must not be negative.");
+   } else if (y == 0) {
+      return 0;
    } else if (x == y) {
-      return 0; // @todo(alex) improve limit
+      if (y == 0.25) {
+         return -0.29543145370663021; // (1 - Log[16])/6
+      }
+      return (BarrZeeLoopFS(y) + 2*y)/(1 - 4*y);
    }
 
    return y*(BarrZeeLoopFPS(x) - BarrZeeLoopFPS(y))/(y - x);
