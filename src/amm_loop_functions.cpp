@@ -90,7 +90,11 @@ double BarrZeeLoopFPSZ(double x, double y)
    } else if (y == 0) {
       return 0;
    } else if (x == y) {
-      if (x == 0.25) {
+      if (x < std::numeric_limits<double>::epsilon()) {
+         const double pi26 = 1.6449340668482264; // Pi^2/6
+         const double lx = std::log(x);
+         return -x*(1 + pi26 + lx*(1 + 0.5*lx));
+      } else if (x == 0.25) {
          return -0.29543145370663021; // (1 - Log[16])/6
       }
       return (BarrZeeLoopFS(x) + 2*x)/(1 - 4*x);
