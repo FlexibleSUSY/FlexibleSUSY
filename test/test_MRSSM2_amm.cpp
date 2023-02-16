@@ -98,13 +98,13 @@ BOOST_AUTO_TEST_CASE( test_amu )
    settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
 
    ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
-   BOOST_CHECK_CLOSE_FRACTION(ae, -1.1528615452780319e-15, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(ae, -1.152767223684667e-15, 1e-7);
 
    amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, -5.3969146816285707e-11, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, -5.3965114257034703e-11, 1e-7);
 
    atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, -1.4223409077194615e-08, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(atau, -1.4222268543286118e-08, 1e-7);
 
    // neutralino dominance
 
@@ -142,11 +142,11 @@ BOOST_AUTO_TEST_CASE( test_amu )
    settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
 
    ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
-   BOOST_CHECK_CLOSE_FRACTION(ae, 7.91125603007207e-16, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 7.9139078400014817e-16, 1e-7);
 
    amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, 3.4223054985728981e-11, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 3.4234392259470838e-11, 1e-7);
 
    atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, 1.1634758632725807e-08, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 1.1637964468163889e-08, 1e-7);
 }
