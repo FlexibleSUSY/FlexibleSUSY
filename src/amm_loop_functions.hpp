@@ -24,11 +24,11 @@ namespace amm_loop_functions {
 namespace two_loop {
 
 /// Barr-Zee 2-loop function with fermion loop
-double BarrZeeLoopFPS(double);
+double BarrZeeLoopFP(double);
 /// Barr-Zee 2-loop function with fermion loop
 double BarrZeeLoopFS(double);
 /// Barr-Zee 2-loop function with fermion loop
-double BarrZeeLoopFPSZ(double, double);
+double BarrZeeLoopFPZ(double, double);
 /// Barr-Zee 2-loop function with fermion loop
 double BarrZeeLoopFSZ(double, double);
 /// Barr-Zee 2-loop function with scalar loop

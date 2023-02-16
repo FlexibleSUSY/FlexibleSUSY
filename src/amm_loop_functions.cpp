@@ -33,10 +33,10 @@ namespace two_loop {
  *
  * @param z squared mass ratio
 */
-double BarrZeeLoopFPS(double z)
+double BarrZeeLoopFP(double z)
 {
    if (z < 0) {
-      throw OutOfBoundsError("BarrZeeLoopFPS: argument must not be negative.");
+      throw OutOfBoundsError("BarrZeeLoopFP: argument must not be negative.");
    } else if (z == 0) {
       return 0;
    } else if (z < std::numeric_limits<double>::epsilon()) {
@@ -73,7 +73,7 @@ double BarrZeeLoopFS(double z)
       return 0;
    }
 
-   return (2*z - 1)*BarrZeeLoopFPS(z) - z*(2 + std::log(z));
+   return (2*z - 1)*BarrZeeLoopFP(z) - z*(2 + std::log(z));
 }
 
 /**
@@ -83,10 +83,10 @@ double BarrZeeLoopFS(double z)
  * @param x squared mass ratio (mf/ms)^2.
  * @param y squared mass ratio (mf/mz)^2.
  */
-double BarrZeeLoopFPSZ(double x, double y)
+double BarrZeeLoopFPZ(double x, double y)
 {
    if (x < 0 || y < 0) {
-      throw OutOfBoundsError("BarrZeeLoopFPSZ: arguments must not be negative.");
+      throw OutOfBoundsError("BarrZeeLoopFPZ: arguments must not be negative.");
    } else if (y == 0) {
       return 0;
    } else if (x == y) {
@@ -100,7 +100,7 @@ double BarrZeeLoopFPSZ(double x, double y)
       return (BarrZeeLoopFS(x) + 2*x)/(1 - 4*x);
    }
 
-   return y*(BarrZeeLoopFPS(x) - BarrZeeLoopFPS(y))/(y - x);
+   return y*(BarrZeeLoopFP(x) - BarrZeeLoopFP(y))/(y - x);
 }
 
 /**
@@ -126,7 +126,7 @@ double BarrZeeLoopFSZ(double x, double y)
             + ix*(-761./105840 - 1./168*lx - 8707./4.002075e6*ix - 2./1155*lx*ix)));
       }
       return (x*(3 - 12*x - 2*(-1 + 3*x)*std::log(x))
-              + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFPS(x)
+              + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFP(x)
          )/(1 - 4*x);
    }
 
@@ -147,7 +147,7 @@ double BarrZeeLoopS(double z)
       return 0;
    }
 
-   return 1 + 0.5*std::log(z) - BarrZeeLoopFPS(z);
+   return 1 + 0.5*std::log(z) - BarrZeeLoopFP(z);
 }
 
 /**
@@ -164,7 +164,7 @@ double BarrZeeLoopV(double z)
       return 0; // actually -inf; return 0 to avoid propagation of inf
    }
 
-   return (17./2 - 15*z)*BarrZeeLoopFPS(z) + (0.5 + 7.5*z)*(2 + std::log(z));
+   return (17./2 - 15*z)*BarrZeeLoopFP(z) + (0.5 + 7.5*z)*(2 + std::log(z));
 }
 
 } // namespace two_loop

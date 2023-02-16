@@ -397,7 +397,7 @@ Lepton, Fermion, Scalar
          const double massRatioSquared = Sqr(fermionMass / scalarMass);
 
          const double part1 = coeffA == 0 ? 0 : coeffA * BarrZeeLoopFS(massRatioSquared);
-         const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPS(massRatioSquared);
+         const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFP(massRatioSquared);
 
          const double preFactor = 4 * twoLoop * Sqr(unit_charge(context) * fermionChargeCount)
             * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
@@ -508,7 +508,7 @@ Lepton, Fermion, Scalar
                const double y = Sqr(fermionMass / zMass);
 
                const double part1 = coeffA == 0 ? 0 : coeffA * BarrZeeLoopFSZ(x, y);
-               const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPSZ(x, y);
+               const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPZ(x, y);
 
                const double preFactor = -4 * twoLoop * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;

@@ -6,14 +6,14 @@
 #include "read_data.hpp"
 
 /**
- * Compares the Barr-Zee 2-loop function FPS (arXiv:1502.04199 Eq 26)
+ * Compares the Barr-Zee 2-loop function FP (arXiv:1502.04199 Eq 26)
  * with generated data.
  *
  * Note: The data has been taken from GM2Calc, where Eq. (70) from
  * arXiv:hep-ph/0609168 is implemented, which differs by
  * Eq. (26) from arXiv:1502.04199 by a factor 2.
  */
-BOOST_AUTO_TEST_CASE( test_FPS )
+BOOST_AUTO_TEST_CASE( test_FP )
 {
    using namespace flexiblesusy;
    using namespace amm_loop_functions::two_loop;
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( test_FPS )
       BOOST_REQUIRE(d.size() == 2);
       const double x = d.at(0);
       const double expected = d.at(1);
-      const double value = 2*BarrZeeLoopFPS(x); // note the factor 2
+      const double value = 2*BarrZeeLoopFP(x); // note the factor 2
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
@@ -103,22 +103,22 @@ BOOST_AUTO_TEST_CASE( test_V )
 }
 
 /**
- * Compares the Barr-Zee 2-loop function FPSZ with generated data.
+ * Compares the Barr-Zee 2-loop function FPZ with generated data.
  */
-BOOST_AUTO_TEST_CASE( test_FPSZ )
+BOOST_AUTO_TEST_CASE( test_FPZ )
 {
    using namespace flexiblesusy;
    using namespace amm_loop_functions::two_loop;
    const double eps = 1e-13;
    const auto data = test::read_from_file<double>(
-      std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "FPSZ.txt");
+      std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "FPZ.txt");
 
    for (const auto d: data) {
       BOOST_REQUIRE(d.size() == 3);
       const double x = d.at(0);
       const double y = d.at(1);
       const double expected = d.at(2);
-      const double value = 2*BarrZeeLoopFPSZ(x, y);
+      const double value = 2*BarrZeeLoopFPZ(x, y);
       BOOST_CHECK_CLOSE_FRACTION(value, expected, eps);
    }
 }
