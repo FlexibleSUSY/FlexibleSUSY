@@ -485,13 +485,7 @@ Lepton, Fermion, Scalar
 
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
-
-               // @todo(alex): create a separate loop function to properly handle a potential division by zero
                const auto zMass = context.mass<ZBoson>({ });
-
-               if (is_zero(zMass - scalarMass, 3e-13)) {
-                  continue;
-               }
 
                static constexpr double fermionChargeCount =
                   Fermion::electric_charge / Lepton::electric_charge;
@@ -510,10 +504,11 @@ Lepton, Fermion, Scalar
                const double coeffA = std::real((zrf + zlf) * (zrm + zlm));
                const double coeffB = std::real((zlf - zrf) * (zrm - zlm));
 
-               const double massRatioSquared = Sqr(fermionMass / scalarMass);
+               const double x = Sqr(fermionMass / scalarMass);
+               const double y = Sqr(fermionMass / zMass);
 
-               const double part1 = coeffA * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFS(massRatioSquared) - BarrZeeLoopFS(Sqr(fermionMass / zMass)));
-               const double part2 = coeffB * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarrZeeLoopFPS(massRatioSquared) - BarrZeeLoopFPS(Sqr(fermionMass / zMass)));
+               const double part1 = coeffA == 0 ? 0 : coeffA * BarrZeeLoopFSZ(x, y);
+               const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPSZ(x, y);
 
                const double preFactor = -4 * twoLoop * fermionChargeCount * gvm * gvf
                   * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;

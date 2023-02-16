@@ -21,14 +21,15 @@
 #include "Cl2.hpp"
 #include "Li2.hpp"
 #include <cmath>
-#include <complex>
+#include <limits>
 
 namespace flexiblesusy {
 namespace amm_loop_functions {
 namespace two_loop {
 
 /**
- * Barr-Zee 2-loop function with fermion loop (arXiv:1502.04199 Eq 26).
+ * Barr-Zee 2-loop function with fermion loop and pseudoscalar and
+ * photon mediators (arXiv:1502.04199 Eq 26).
  *
  * @param z squared mass ratio
 */
@@ -38,9 +39,13 @@ double BarrZeeLoopFPS(double z)
       throw OutOfBoundsError("BarrZeeLoopFPS: argument must not be negative.");
    } else if (z == 0) {
       return 0;
+   } else if (z < std::numeric_limits<double>::epsilon()) {
+      constexpr double pi26 = 1.6449340668482264; // Pi^2/6
+      const double lz = std::log(z);
+      return z*(pi26 + 0.5*lz*lz);
    } else if (z < 0.25) {
       const double y = std::sqrt(1 - 4*z); // 0 < y < 1
-      const double c = -4.9348022005446793; // -Pi^2/2
+      constexpr double c = -4.9348022005446793; // -Pi^2/2
       const double q = (1 + y)/(1 - y);
       const double lq = std::log(q);
       return z/y*(2*Li2(1 + q) - lq*(std::log(z) - 0.5*lq) + c);
@@ -55,7 +60,8 @@ double BarrZeeLoopFPS(double z)
 }
 
 /**
- * Barr-Zee 2-loop function with fermion loop (arXiv:1502.04199 Eq 25).
+ * Barr-Zee 2-loop function with fermion loop and scalar and photon
+ * mediators (arXiv:1502.04199 Eq 25).
  *
  * @param z squared mass ratio.
  */
@@ -71,7 +77,65 @@ double BarrZeeLoopFS(double z)
 }
 
 /**
- * Barr-Zee 2-loop function with scalar loop (arXiv:1502.04199 Eq 27).
+ * Barr-Zee 2-loop function with fermion loop and pseudoscalar and Z
+ * boson mediators.
+ *
+ * @param x squared mass ratio (mf/ms)^2.
+ * @param y squared mass ratio (mf/mz)^2.
+ */
+double BarrZeeLoopFPSZ(double x, double y)
+{
+   if (x < 0 || y < 0) {
+      throw OutOfBoundsError("BarrZeeLoopFPSZ: arguments must not be negative.");
+   } else if (y == 0) {
+      return 0;
+   } else if (x == y) {
+      if (x < std::numeric_limits<double>::epsilon()) {
+         constexpr double pi26 = 1.6449340668482264; // Pi^2/6
+         const double lx = std::log(x);
+         return -x*(1 + pi26 + lx*(1 + 0.5*lx));
+      } else if (x == 0.25) {
+         return -0.29543145370663021; // (1 - Log[16])/6
+      }
+      return (BarrZeeLoopFS(x) + 2*x)/(1 - 4*x);
+   }
+
+   return y*(BarrZeeLoopFPS(x) - BarrZeeLoopFPS(y))/(y - x);
+}
+
+/**
+ * Barr-Zee 2-loop function with fermion loop and scalar and Z boson
+ * mediators.
+ *
+ * @param x squared mass ratio (mf/ms)^2.
+ * @param y squared mass ratio (mf/mz)^2.
+ */
+double BarrZeeLoopFSZ(double x, double y)
+{
+   if (x < 0 || y < 0) {
+      throw OutOfBoundsError("BarrZeeLoopFSZ: arguments must not be negative.");
+   } else if (y == 0) {
+      return 0;
+   } else if (x == y) {
+      if (x == 0.25) {
+         return 0.20456854629336979; // -2/3*(-1 + Log[2])
+      } else if (x >= 1e3) {
+         const double ix = 1/x;
+         const double lx = std::log(x);
+         return 1./3 + ix*(-11./300 - 1./20*lx + ix*(-463./22050 - 2./105*lx
+            + ix*(-761./105840 - 1./168*lx - 8707./4.002075e6*ix - 2./1155*lx*ix)));
+      }
+      return (x*(3 - 12*x - 2*(-1 + 3*x)*std::log(x))
+              + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFPS(x)
+         )/(1 - 4*x);
+   }
+
+   return y*(BarrZeeLoopFS(x) - BarrZeeLoopFS(y))/(y - x);
+}
+
+/**
+ * Barr-Zee 2-loop function with scalar loop and scalar and photon
+ * mediators (arXiv:1502.04199 Eq 27).
  *
  * @param z squared mass ratio
  */
@@ -87,7 +151,8 @@ double BarrZeeLoopS(double z)
 }
 
 /**
- * Barr-Zee 2-loop function with vector loop (arXiv:1502.04199 Eq 28).
+ * Barr-Zee 2-loop function with vector loop and scalar and photon
+ * mediators (arXiv:1502.04199 Eq 28).
  *
  * @param z squared mass ratio
  */
