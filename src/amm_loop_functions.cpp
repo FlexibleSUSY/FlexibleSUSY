@@ -93,14 +93,14 @@ double BarrZeeLoopFPZ(double x, double y)
       if (x < std::numeric_limits<double>::epsilon()) {
          constexpr double pi26 = 1.6449340668482264; // Pi^2/6
          const double lx = std::log(x);
-         return -x*(1 + pi26 + lx*(1 + 0.5*lx));
+         return x*(1 + pi26 + lx*(1 + 0.5*lx));
       } else if (x == 0.25) {
-         return -0.29543145370663021; // (1 - Log[16])/6
+         return 0.29543145370663021; // (Log[16] - 1)/6
       }
-      return (BarrZeeLoopFS(x) + 2*x)/(1 - 4*x);
+      return (BarrZeeLoopFS(x) + 2*x)/(4*x - 1);
    }
 
-   return y*(BarrZeeLoopFP(x) - BarrZeeLoopFP(y))/(y - x);
+   return y*(BarrZeeLoopFP(x) - BarrZeeLoopFP(y))/(x - y);
 }
 
 /**
@@ -118,19 +118,19 @@ double BarrZeeLoopFSZ(double x, double y)
       return 0;
    } else if (x == y) {
       if (x == 0.25) {
-         return 0.20456854629336979; // -2/3*(-1 + Log[2])
+         return -0.20456854629336979; // 2/3*(Log[2] - 1)
       } else if (x >= 1e3) {
          const double ix = 1/x;
          const double lx = std::log(x);
-         return 1./3 + ix*(-11./300 - 1./20*lx + ix*(-463./22050 - 2./105*lx
-            + ix*(-761./105840 - 1./168*lx - 8707./4.002075e6*ix - 2./1155*lx*ix)));
+         return -1./3 + ix*(11./300 + 1./20*lx + ix*(463./22050 + 2./105*lx
+            + ix*(761./105840 + 1./168*lx + 8707./4.002075e6*ix + 2./1155*lx*ix)));
       }
       return (x*(3 - 12*x - 2*(-1 + 3*x)*std::log(x))
               + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFP(x)
-         )/(1 - 4*x);
+         )/(4*x - 1);
    }
 
-   return y*(BarrZeeLoopFS(x) - BarrZeeLoopFS(y))/(y - x);
+   return y*(BarrZeeLoopFS(x) - BarrZeeLoopFS(y))/(x - y);
 }
 
 /**
