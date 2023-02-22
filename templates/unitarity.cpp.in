@@ -1,0 +1,68 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_unitarity.cpp
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_unitarity.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_context_base.hpp"
+
+#include "minimizer.hpp"
+#include "wrappers.hpp"
+
+#include <algorithm>
+#include <array>
+#include <functional>
+
+namespace flexiblesusy {
+namespace @ModelName@_unitarity {
+
+double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
+   constexpr size_t size = @scatteringPairsLength@;
+   std::array<std::array<std::function<double(double)>, size>, size> matrix = {};
+   std::array<std::function<double(double)>, size> row_temp = {};
+   const double sChan = 1.;
+   const double tChan = 1.;
+   const double uChan = 1.;
+   const double qChan = 1.;
+
+   using namespace @ModelName@_cxx_diagrams::fields;
+
+@scatteringElements@
+   std::array<std::array<double, size>, size> max_eigenvalues = {};
+
+   for (int i=0; i<size; i++) {
+      for (int j=i; j<size; j++) {
+         auto f = [&matrix, i, j](Eigen::Matrix<double, 1, 1> sqrtS) { return -std::abs(matrix[i][j](sqrtS[0])); };
+         Minimizer<1> minimizer(f, 100, 1e-5);
+         Eigen::Matrix<double, 1, 1> start;
+         start << 10000;
+         const int status = minimizer.minimize(start);
+         const auto minimum_point = minimizer.get_solution();
+      }
+   }
+
+}
+
+} // namespace @ModelName@_unitarity
+} // namespace flexiblesusy

@@ -25,6 +25,7 @@
 #include "@ModelName@_spectrum_generator.hpp"
 #include "@ModelName@_utilities.hpp"
 @decaysIncludes@
+#include "@ModelName@_unitarity.hpp"
 
 @solverIncludes@
 #include "physical_input.hpp"
