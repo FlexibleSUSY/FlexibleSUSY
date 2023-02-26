@@ -318,6 +318,7 @@ endif
 ifeq ($(WITH_CE6SSM), yes)
 TEST_SRC += \
 		$(DIR)/test_CE6SSM_ewsb.cpp \
+		$(DIR)/test_CE6SSM_gmm2.cpp \
 		$(DIR)/test_CE6SSM_semi_analytic_solutions.cpp
 endif
 
@@ -354,6 +355,11 @@ ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecay.cpp
 endif
+endif
+
+ifeq ($(ENABLE_GM2CALC) $(WITH_THDMII),yes yes)
+TEST_SH += \
+		$(DIR)/test_THDMII_GM2Calc.sh
 endif
 
 ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
@@ -620,7 +626,8 @@ endif
 
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMCPV_ewsb.cpp
+		$(DIR)/test_CMSSMCPV_ewsb.cpp \
+		$(DIR)/test_CMSSMCPV_edm.cpp
 endif
 ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -1135,6 +1142,8 @@ $(DIR)/test_CMSSMLowPrecision.x: $(LIBCMSSMLowPrecision)
 
 $(DIR)/test_CMSSMCPV_ewsb.x: $(LIBCMSSMCPV)
 
+$(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
+
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
 $(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.x: $(LIBMSSMEFTHiggs)
@@ -1248,6 +1257,8 @@ $(DIR)/test_CNMSSM_consistent_solutions.x: $(LIBCNMSSM) $(LIBNMSSM)
 
 $(DIR)/test_CE6SSM_ewsb.x: $(LIBCE6SSM)
 
+$(DIR)/test_CE6SSM_gmm2.x: $(LIBCE6SSM)
+
 $(DIR)/test_CE6SSM_semi_analytic_solutions.x: $(LIBCE6SSM)
 
 $(DIR)/test_CE6SSM_consistent_solutions.x: $(LIBCE6SSM) $(LIBE6SSM)
@@ -1313,7 +1324,7 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
+		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)

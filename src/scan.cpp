@@ -17,6 +17,8 @@
 // ====================================================================
 
 #include "scan.hpp"
+#include "error.hpp"
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 
@@ -29,9 +31,9 @@ namespace flexiblesusy {
 
 /**
  * Returns vector with number_of_steps floating point values between
- * start and stop.  The endpoint is excluded.
+ * start (included) and stop (excluded).  The endpoint is excluded.
  *
- * @param start smallest value
+ * @param start smallest value (included)
  * @param stop largest value (excluded)
  * @param number_of_steps number of values
  *
@@ -44,8 +46,7 @@ std::vector<double> float_range(double start, double stop,
    std::vector<double> result(number_of_steps);
 
    for (std::size_t i = 0; i < number_of_steps; ++i) {
-      const double point = start + i * step_size;
-      result[i] = point;
+      result[i] = start + i*step_size;
    }
 
    return result;
@@ -53,11 +54,11 @@ std::vector<double> float_range(double start, double stop,
 
 /**
  * Returns vector with number_of_steps floating point values between
- * start and stop.  The values are logarithmically distributed,
- * i.e. the difference of the logarithm of two consecutive points is
- * constant.  The endpoint is excluded.
+ * start (included) and stop (excluded).  The values are
+ * logarithmically distributed, i.e. the difference of the logarithm
+ * of two consecutive points is constant.  The endpoint is excluded.
  *
- * @param start smallest value
+ * @param start smallest value (included)
  * @param stop largest value (excluded)
  * @param number_of_steps number of values
  *
@@ -66,17 +67,65 @@ std::vector<double> float_range(double start, double stop,
 std::vector<double> float_range_log(double start, double stop,
                                     std::size_t number_of_steps)
 {
-   if (number_of_steps == 0)
-      return std::vector<double>();
-
-   const double step_size = (log(stop) - log(start)) / number_of_steps;
-   std::vector<double> result(number_of_steps);
-   result[0] = start;
-
-   for (std::size_t i = 1; i < number_of_steps; ++i) {
-      const double point = exp(step_size + log(result[i-1]));
-      result[i] = point;
+   if (start <= 0 || stop <= 0) {
+      throw flexiblesusy::OutOfBoundsError("float_range_log: interval boundaries must be > 0.");
    }
+
+   const double log_start = std::log(start);
+   const double log_stop = std::log(stop);
+   auto result = float_range(log_start, log_stop, number_of_steps);
+
+   std::transform(result.begin(), result.end(), result.begin(),
+                  [] (double x) { return std::exp(x); });
+
+   return result;
+}
+
+/**
+ * Returns vector with (number_of_divisions + 1) floating point values
+ * between (including) start and (including) stop.
+ *
+ * @param start smallest value (included)
+ * @param stop largest value (included)
+ * @param number_of_divisions number of divisions
+ *
+ * @return vector of floating point values
+ */
+std::vector<double> subdivide(double start, double stop,
+                              std::size_t number_of_divisions)
+{
+   if (number_of_divisions == 0) {
+      throw flexiblesusy::OutOfBoundsError("subdivide: number_of_divisions must be > 0.");
+   }
+
+   auto result = float_range(start, stop, number_of_divisions);
+   result.push_back(stop);
+   result.shrink_to_fit();
+
+   return result;
+}
+
+/**
+ * Returns vector with (number_of_divisions + 1) floating point values
+ * between (including) start and (including) stop with logarithmic
+ * spacing.
+ *
+ * @param start smallest value (included)
+ * @param stop largest value (included)
+ * @param number_of_divisions number of divisions
+ *
+ * @return vector of floating point values
+ */
+std::vector<double> subdivide_log(double start, double stop,
+                                  std::size_t number_of_divisions)
+{
+   if (number_of_divisions == 0) {
+      throw flexiblesusy::OutOfBoundsError("subdivide_log: number_of_divisions must be > 0.");
+   }
+
+   auto result = float_range_log(start, stop, number_of_divisions);
+   result.push_back(stop);
+   result.shrink_to_fit();
 
    return result;
 }

@@ -1,16 +1,16 @@
 // CP-even Higgs to charged leptons
 
 template <>
-double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
+double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLepton>(
    const context_base& context,
-   typename field_indices<H>::type const& indexIn,
-   typename field_indices<bar<lep>::type>::type const& indexOut1,
-   typename field_indices<lep>::type const& indexOut2) const
+   typename field_indices<Higgs>::type const& indexIn,
+   typename field_indices<bar<ChargedLepton>::type>::type const& indexOut1,
+   typename field_indices<ChargedLepton>::type const& indexOut2) const
 {
 
-   const double mHOS = context.physical_mass<H>(indexIn);
-   const double mL1OS = context.physical_mass<bar<lep>::type>(indexOut1);
-   const double mL2OS = context.physical_mass<lep>(indexOut2);
+   const double mHOS = context.physical_mass<Higgs>(indexIn);
+   const double mL1OS = context.physical_mass<bar<ChargedLepton>::type>(indexOut1);
+   const double mL2OS = context.physical_mass<ChargedLepton>(indexOut2);
 
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mHOS);
@@ -19,7 +19,7 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
 
    // matrix element squared
    const auto amp =
-      calculate_amplitude<hh, typename bar<lep>::type, lep>(context, indexIn, indexOut1, indexOut2);
+      calculate_amplitude<hh, typename bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
    const auto amp2 = amp.square();
 
    // flux * phase space factor * symmetry factor * |matrix element|^2

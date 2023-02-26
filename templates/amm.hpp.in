@@ -18,13 +18,13 @@
 
 
 /**
- * @file @ModelName@_a_muon.hpp
+ * @file @ModelName@_amm.hpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_A_MUON_H
-#define @ModelName@_A_MUON_H
+#ifndef @ModelName@_AMM_H
+#define @ModelName@_AMM_H
 
 namespace softsusy {
    class QedQcd;
@@ -33,19 +33,21 @@ namespace softsusy {
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_a_muon {
+namespace @ModelName@_amm {
 /**
-* @fn calculate_a_muon
-* @brief Calculates \f$a_\mu = (g-2)_\mu/2\f$ of the muon.
+* @fn calculate_amm
+* @brief Calculates \f$a = Delta(g-2)/2\f$ of the lepton.
 */
-double calculate_a_muon(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd);
+template <typename Lepton>
+double calculate_amm(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@);
 
 /**
-* @fn calculate_a_muon_uncertainty
-* @brief Calculates \f$\Delta a_\mu\f$ of the muon.
+* @fn calculate_amm_uncertainty
+* @brief Calculates uncertainty of \f$\Delta a\f$ of the lepton.
 */
-double calculate_a_muon_uncertainty(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd);
-} // namespace @ModelName@_a_muon
+template <typename Lepton>
+double calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@);
+} // namespace @ModelName@_amm
 } // namespace flexiblesusy
 
 #endif

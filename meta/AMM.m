@@ -20,13 +20,13 @@
 
 *)
 
-BeginPackage["AMuon`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`", "LoopMasses`"}];
+BeginPackage["AMM`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`", "LoopMasses`"}];
 
-AMuonGetMuon::usage="";
-AMuonGetMSUSY::usage="";
-AMuonContributingGraphs::usage="";
-AMuonContributingDiagramsForGraph::usage="";
+AMMGetMSUSY::usage="";
+AMMContributingGraphs::usage="";
+AMMContributingDiagramsForGraph::usage="";
 CXXEvaluatorForDiagramFromGraph::usage="";
+AMMForwardDeclaration::usage = "";
 
 Begin["`Private`"];
 
@@ -41,22 +41,12 @@ barZeeGraph = {{0,0,0,1,0,0,0,0},
 
 contributingGraphs = {barZeeGraph};
 
-AMuonContributingGraphs[] := contributingGraphs;
+AMMContributingGraphs[] := contributingGraphs;
 
-AMuonGetMuon[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultiplet[]] =!= 1,
-                TreeMasses`GetSMMuonLeptonMultiplet[],
-                Cases[SARAH`ParticleDefinitions[FlexibleSUSY`FSEigenstates],
-                      {p_, {Description -> "Muon", ___}} -> p, 1][[1]]
-               ];
-
-GetCXXMuonIndex[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultiplet[]] =!= 1,
-                        1,
-                        Null];
-
-AMuonContributingDiagramsForGraph[graph_] :=
+AMMContributingDiagramsForGraph[graph_, field_] :=
   Module[{diagrams},
     diagrams = CXXDiagrams`FeynmanDiagramsOfType[graph,
-         {1 -> AMuonGetMuon[], 2 -> SARAH`AntiField[AMuonGetMuon[]], 3 -> GetPhoton[]}];
+         {1 -> field, 2 -> SARAH`AntiField[field], 3 -> GetPhoton[]}];
 
     Select[diagrams,IsDiagramSupported[graph,#] &]
  ]
@@ -102,22 +92,22 @@ CXXEvaluatorForDiagramFromGraph[diagram_, barZeeGraph] :=
   ];
 
 CXXEvaluatorBZFL[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeFermionLoop<" <>
+  "AMMBarZeeFermionLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZFLZ[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeFermionLoopZ<" <>
+  "AMMBarZeeFermionLoopZ<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZSL[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeScalarLoop<" <>
+  "AMMBarZeeScalarLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZVL[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeVectorLoop<" <>
+  "AMMBarZeeVectorLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
@@ -132,7 +122,7 @@ GetMinMass[particle_] :=
              ]
           ];
 
-AMuonGetMSUSY[] :=
+AMMGetMSUSY[] :=
     Module[{susyParticles},
            susyParticles = Select[TreeMasses`GetSusyParticles[], IsElectricallyCharged];
            If[susyParticles === {},
@@ -142,6 +132,12 @@ AMuonGetMSUSY[] :=
               ");"
              ]
           ];
+
+AMMForwardDeclaration[field_Symbol, functionName_String] :=
+"template double " <> FlexibleSUSY`FSModelName <> "_amm::" <> functionName <> "<" <>
+   CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
+   ">(" <>
+   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
 
 End[];
 EndPackage[];

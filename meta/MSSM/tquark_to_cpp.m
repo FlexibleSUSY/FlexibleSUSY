@@ -32,7 +32,7 @@ MGl = mgl; MT = mt;
 (* SX = 2 mt Xt; s2t = SX / (mmst1 - mmst2); *)
 fin[0, args__] := fin[args, mmu];
 
-Simp[expr_] := Simplify[expr] //.
+Simp[expr_, Op_:Simplify] := Op[expr] //.
     {
         Power[x_,n_] /; n > 0 :> Symbol["pow" <> ToString[n]][x],
         Power[x_,-2]          :> 1/Symbol["pow" <> ToString[2]][x],
@@ -43,7 +43,7 @@ Simp[expr_] := Simplify[expr] //.
         Log[x_/y_]            :> Symbol["log" <> ToString[x] <> ToString[y]]
     };
 
-ToCPP[expr_] := ToString[Simp[expr], CForm];
+ToCPP[expr_, Op_:Simplify] := ToString[Simp[expr, Op], CForm];
 
 (* ******* calculate limits ******* *)
 
@@ -374,7 +374,6 @@ double dMt_over_mt_2loop_qcd(const Parameters& pars)
 double dMt_over_mt_2loop_susy(const Parameters& pars)
 {
    const double g34    = pow4(pars.g3);
-   const double Xt     = pars.xt;
    const double mt     = pars.mt;
    const double mgl    = shift_mg(pars.mg, pars.mst1, pars.mst2);
    const double mmu    = pow2(pars.Q);
@@ -386,8 +385,8 @@ double dMt_over_mt_2loop_susy(const Parameters& pars)
    const double SX     = 2*mt*pars.xt;
    const double s2t    = SX / (mmst1 - mmst2);
 
-   if (is_equal(mmst1, mmst2, mmt) && is_equal(mmst1, mmgl, mmt) &&
-       is_equal(mmst1, mmsusy, mmt) && is_equal(std::abs(Xt), 0., 1e-1)) {
+   if (is_equal(mmst1, mmst2, mmt) && is_equal(mmst1, pow2(pars.mg), mmt) &&
+       is_equal(mmst1, mmsusy, mmt)) {
       const double logmmsusymmu = std::log(mmsusy/mmu);
       const double logmmtmmu    = std::log(mmt/mmu);
 
@@ -404,7 +403,7 @@ double dMt_over_mt_2loop_susy(const Parameters& pars)
    const double logmmglmmu   = std::log(mmgl/mmu );
 
    const double result =
-" <> WrapLines @ IndentText[ToCPP[t2l - t2lqcd] <> ";"] <> "
+" <> WrapLines @ IndentText[ToCPP[t2l - t2lqcd, Collect[#, {g3}]&] <> ";"] <> "
 
    return result * g34 * twoLoop;
 }

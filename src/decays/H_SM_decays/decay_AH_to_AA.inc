@@ -1,16 +1,16 @@
 template <>
-double CLASSNAME::get_partial_width<AH, A, A>(
+double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       const context_base& context,
-      const typename field_indices<AH>::type& in_idx,
-      const typename field_indices<A>::type& out1_idx,
-      const typename field_indices<A>::type& out2_idx) const
+      const typename field_indices<PseudoscalarHiggs>::type& in_idx,
+      const typename field_indices<Photon>::type& out1_idx,
+      const typename field_indices<Photon>::type& out2_idx) const
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<AH,A,A>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Photon,Photon>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const auto amp = calculate_amplitude<AH, A, A>(context, in_idx, out1_idx, out2_idx);
-   const double mH = context.physical_mass<AH>(in_idx);
+   const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<PseudoscalarHiggs>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};
    const double flux = 0.5/mH;
