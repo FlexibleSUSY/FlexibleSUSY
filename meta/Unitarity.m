@@ -44,7 +44,7 @@ ExpressionToCPPLambda[expr_] := Module[{params = Parameters`FindAllParametersCla
    newExpr = ToString@CForm[newExpr];
    (* in expressions from SARAH masses are denoted as pmass(X)
       this converts them to proper C++ form *)
-   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i_ ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[i] <> "})"];
+   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:Except[")"].. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[i] <> "})"];
    newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"]..  ~~ ")" :> "context.mass<" <> f <> ">({})"];
 
 If[expr === 0,
@@ -69,7 +69,7 @@ GetScatteringMatrix[] := Module[{result},
    InitUnitarity[];
    (*RemoveParticlesFromScattering={Se , Sv, Sd, Su};*)
 
-   a0 = (*Simplify[*)BuildScatteringMatrix(*, {s>0}]*);
+   a0 = Outer[GetScatteringDiagrams[#1 -> #2]&, scatteringPairs, scatteringPairs, 1];
 
    result = "";
    For[i=1, i<=Length[a0], i++,

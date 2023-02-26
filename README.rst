@@ -45,7 +45,8 @@ modification, extension and reuse.
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
   (or later), please cite [2204.05285]_.
 
-  If you use unitarity constraints please cite [XXXX.XXXXX]_ and [1805.07306_].
+  If you use unitarity constraints please cite [XXXX.XXXXX]_ and necessarily
+  [1805.07306_].
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
