@@ -385,7 +385,7 @@ double dMt_over_mt_2loop_susy(const Parameters& pars)
    const double SX     = 2*mt*pars.xt;
    const double s2t    = SX / (mmst1 - mmst2);
 
-   if (is_equal(mmst1, mmst2, mmt) && is_equal(mmst1, mmgl, mmt) &&
+   if (is_equal(mmst1, mmst2, mmt) && is_equal(mmst1, pow2(pars.mg), mmt) &&
        is_equal(mmst1, mmsusy, mmt)) {
       const double logmmsusymmu = std::log(mmsusy/mmu);
       const double logmmtmmu    = std::log(mmt/mmu);
