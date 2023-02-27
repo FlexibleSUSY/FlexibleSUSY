@@ -11,9 +11,9 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
 
    const auto amp = calculate_amplitude<PseudoscalarHiggs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
    const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
+   static constexpr double ps {1/(8.*Pi)};
    static constexpr double ps_symmetry {0.5};
-   constexpr double color_fact = squared_color_generator<PseudoscalarHiggs, Gluon, Gluon>();
+   static constexpr double color_fact = squared_color_generator<PseudoscalarHiggs, Gluon, Gluon>();
    const double flux = 0.5/mAh;
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();

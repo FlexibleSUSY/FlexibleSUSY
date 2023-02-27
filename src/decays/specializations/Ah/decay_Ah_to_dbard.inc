@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
    const double mAOS = context.physical_mass<PseudoscalarHiggs>(indexIn);
    const double flux = 1./(2.*mAOS);
 
-   constexpr double color_factor = squared_color_generator<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>();
+   static constexpr double color_factor = squared_color_generator<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {

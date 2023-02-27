@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// This file has been generated at Wed 17 Jun 2020 11:16:10
+// This file has been generated at Sun 26 Feb 2023 12:30:46
 // with the script "tquark_to_cpp.m".
 
 #ifndef MSSM_TWO_LOOP_SQCD_MT_H

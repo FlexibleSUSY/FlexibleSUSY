@@ -1,7 +1,6 @@
-
 FSModelName = "@CLASSNAME@";
 FSEigenstates = SARAH`EWSB;
-FSDefaultSARAHModel = "THDM-II";
+FSDefaultSARAHModel = "THDM-X";
 
 OnlyLowEnergyFlexibleSUSY = True;
 
@@ -77,7 +76,7 @@ ExtraSLHAOutputBlocks = {
 
 (* input parameters for GM2Calc, see [arxiv:2110.13238] *)
 FSGM2CalcInput = {
-    yukawaType -> 2,
+    yukawaType -> 3,
     lambda1 -> 2 Lambda1,
     lambda2 -> 2 Lambda2,
     lambda3 -> Lambda3,
@@ -99,4 +98,3 @@ FSGM2CalcInput = {
 };
 
 FSCalculateDecays = True;
-FSDecayParticles = {hh, Ah, Hm, Fu};
