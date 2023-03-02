@@ -38,6 +38,11 @@
 namespace flexiblesusy {
 namespace @ModelName@_unitarity {
 
+inline double Sqrt2(int i, int j) {
+   // 1/Sqrt[2] or 1
+   return i==j ? 0.707106781186547524 : 1;
+}
+
 double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
    constexpr size_t size = @scatteringPairsLength@;
    std::array<std::array<std::function<double(double, int, int, int, int)>, size>, size> matrix = {};
