@@ -20,14 +20,14 @@
 
 *)
 
-BeginPackage["Unitarity`", {"SARAH`", "Parameters`", "CConversion`"}];
+BeginPackage["Unitarity`", {"SARAH`", "Parameters`", "CConversion`", "TreeMasses`"}];
 
 GetScatteringMatrix::usage = "";
 
 Begin["`Private`"];
 
 (* return a C++ lambda computing a given scattering eigenvalue in function of sqrt(s) *)
-ExpressionToCPPLambda[expr_] := Module[{params = Parameters`FindAllParametersClassified[expr], paramsCPP, mixingCPP},
+ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Parameters`FindAllParametersClassified[expr], paramsCPP, mixingCPP},
 
    (* CPP definitions of parameters present in the expression *)
    paramsCPP =
@@ -48,8 +48,8 @@ ExpressionToCPPLambda[expr_] := Module[{params = Parameters`FindAllParametersCla
    newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"]..  ~~ ")" :> "context.mass<" <> f <> ">({})"];
 
 If[expr === 0,
-"[](double sqrtS) { return 0.; };\n\n",
-"[&model" <> If[!FreeQ[expr, sChan], ",sChan", ""] <> If[!FreeQ[expr, tChan], ",tChan", ""] <> If[!FreeQ[expr, uChan], ",uChan", ""] <> If[!FreeQ[expr, qChan], ",qChan", ""] <> "](double sqrtS) {
+"[](double sqrtS, int in1, int in2, int out1, int out2) { return 0.; };\n\n",
+"[&model" <> If[!FreeQ[expr, sChan], ",sChan", ""] <> If[!FreeQ[expr, tChan], ",tChan", ""] <> If[!FreeQ[expr, uChan], ",uChan", ""] <> If[!FreeQ[expr, qChan], ",qChan", ""] <> "](double sqrtS, int in1, int in2, int out1, int out2) {
       auto model_ = model;
       // couplings should be evaluated at the renormalization scale sqrt(s)
       // see comment around eq. 20 of 1805.07306
@@ -57,6 +57,7 @@ If[expr === 0,
       model_.solve_ewsb();
       const double s = Sqr(sqrtS);
       const " <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::context_base context {model_};\n" <>
+      "if (sqrtS < context.mass<" <> ToString[fstates[[1]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[1]]]>1, "{out1}", "{}"] <> ") + context.mass<" <> ToString[fstates[[2]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[2]]]>1, "{out2}", "{}"] <> ")) return 0.;\n" <>
       paramsCPP <>
       mixingCPP <>
       (* TODO: can this really be complex? *)
@@ -75,10 +76,10 @@ GetScatteringMatrix[] := Module[{result},
    For[i=1, i<=Length[a0], i++,
       For[j=i, j<=Length[a0[[i]]], j++,
          result = result <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
-                  "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]]]
+                  "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]], scatteringPairs[[i]], scatteringPairs[[j]]]
       ]
    ];
-   result
+   {SparseArray[a0]["NonzeroPositions"], Dimensions[a0][[1]], result}
 ];
 
 End[];
