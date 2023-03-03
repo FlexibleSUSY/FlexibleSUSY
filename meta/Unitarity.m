@@ -67,11 +67,13 @@ If[expr === 0,
 ]
 ];
 
-GetScatteringMatrix[] := Module[{result},
+GetScatteringMatrix[] := Module[{result, generationSizes},
    InitUnitarity[];
    (*RemoveParticlesFromScattering={Se , Sv, Sd, Su};*)
 
    a0 = Outer[GetScatteringDiagrams[#1 -> #2]&, scatteringPairs, scatteringPairs, 1];
+   generationSizes = Table[{i, j}, {i,1, Length[scatteringPairs]}, {j,1, Length[scatteringPairs]}];
+   generationSizes = Apply[Join[TreeMasses`GetDimension /@ scatteringPairs[[#1]], TreeMasses`GetDimension /@ scatteringPairs[[#2]]]&, generationSizes, {2}];
 
    result = "";
    For[i=1, i<=Length[a0], i++,
@@ -80,7 +82,7 @@ GetScatteringMatrix[] := Module[{result},
                   "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]], scatteringPairs[[i]], scatteringPairs[[j]]]
       ]
    ];
-   {SparseArray[a0]["NonzeroPositions"], Dimensions[a0][[1]], result}
+   {SparseArray[a0]["NonzeroPositions"], Dimensions[a0][[1]], generationSizes, result}
 ];
 
 End[];

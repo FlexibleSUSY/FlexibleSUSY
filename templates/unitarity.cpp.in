@@ -57,14 +57,19 @@ double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
 @scatteringElements@
    std::array<std::array<double, size>, size> max_eigenvalues = {};
 
+   constexpr std::array<std::array<std::array<int, 4>, size>, size> generationSizes =
+      @generationSizes@;
+
    for (int i=0; i<size; i++) {
       for (int j=i; j<size; j++) {
          @skipZeros@
-         // @todo: loop over cartesian product of all external state indices
-         // getting a single vector of all maximal scattering values
-         // select the biggest one
+         std::array<int, 4>  externalGenerationSizes = generationSizes[i][j];
          // suply indices in mathematica counting (starting from 1)
-         std::function<double(double)> f = std::bind(matrix[i][j], std::placeholders::_1, 1, 1, 1, 1);
+         for (int iIn1 = 1; iIn1 <= externalGenerationSizes[0]; ++iIn1) {
+         for (int iIn2 = 1; iIn2 <= externalGenerationSizes[1]; ++iIn2) {
+         for (int iOut1 = 1; iOut1 <= externalGenerationSizes[2]; ++iOut1) {
+         for (int iOut2 = 1; iOut2 <= externalGenerationSizes[3]; ++iOut2) {
+         std::function<double(double)> f = std::bind(matrix[i][j], std::placeholders::_1, iIn1, iIn2, iOut1, iOut2);
 
          int status;
          int iter = 0, max_iter = 100;
@@ -120,6 +125,7 @@ double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
          gsl_min_fminimizer_free (s);
       }
    }
+         }}}}
    for (int i=0; i<size; i++) {
       for (int j=i; j<size; j++) {
          std::cout << max_eigenvalues[i][j] << std::endl;

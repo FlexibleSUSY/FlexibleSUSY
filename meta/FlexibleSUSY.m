@@ -2508,6 +2508,7 @@ WriteUnitarityClass[files_List] :=
         {"@scatteringPairsLength@" -> ToString@matrix[[2]],
          "@skipZeros@" -> "if (!(" <> StringRiffle["(i==" <> ToString[First@#-1] <> " && j==" <> ToString[Last@#-1] <> ")"& /@ First@matrix, "||"] <> ")) continue;",
          "@scatteringElements@" -> TextFormatting`IndentText[Last@matrix],
+         "@generationSizes@" -> ToString[{{#}& /@ matrix[[3]]}],
       Sequence @@ GeneralReplacementRules[]
         }];
     ];
