@@ -36,7 +36,7 @@ ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Pa
             " = model_.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ (Parameters`FSModelParameters /. params)
       ];
    (* definition of mixing matrices *)
-   mixingCPP = ("auto " <> ToString[#] <> " = [&model_] (int i, int j) { return model_.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i,j); };\n")& /@ (Parameters`FSOutputParameters /. params);
+   mixingCPP = ("auto " <> ToString[#] <> " = [&model_] (int i, int j) { return model_.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ (Parameters`FSOutputParameters /. params);
 
    (* replace input parameters with their FS names *)
    newExpr = expr /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
@@ -44,7 +44,8 @@ ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Pa
    newExpr = ToString@CForm[newExpr];
    (* in expressions from SARAH masses are denoted as pmass(X)
       this converts them to proper C++ form *)
-   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:Except[")"].. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[i] <> "})"];
+   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:DigitCharacter.. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[ToExpression[i]-1] <> "})"];
+   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:Except[")"].. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[i] <> "-1})"];
    newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"]..  ~~ ")" :> "context.mass<" <> f <> ">({})"];
 
 If[expr === 0,
@@ -57,7 +58,7 @@ If[expr === 0,
       model_.solve_ewsb();
       const double s = Sqr(sqrtS);
       const " <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::context_base context {model_};\n" <>
-      "if (sqrtS < context.mass<" <> ToString[fstates[[1]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[1]]]>1, "{out1}", "{}"] <> ") + context.mass<" <> ToString[fstates[[2]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[2]]]>1, "{out2}", "{}"] <> ")) return 0.;\n" <>
+      "if (sqrtS < context.mass<" <> ToString[fstates[[1]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[1]]]>1, "{out1-1}", "{}"] <> ") + context.mass<" <> ToString[fstates[[2]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[2]]]>1, "{out2-1}", "{}"] <> ")) return 0.;\n" <>
       paramsCPP <>
       mixingCPP <>
       (* TODO: can this really be complex? *)

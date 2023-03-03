@@ -63,7 +63,8 @@ double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
          // @todo: loop over cartesian product of all external state indices
          // getting a single vector of all maximal scattering values
          // select the biggest one
-         std::function<double(double)> f = std::bind(matrix[i][j], std::placeholders::_1, -1, -1, -1, -1);
+         // suply indices in mathematica counting (starting from 1)
+         std::function<double(double)> f = std::bind(matrix[i][j], std::placeholders::_1, 1, 1, 1, 1);
 
          int status;
          int iter = 0, max_iter = 100;
