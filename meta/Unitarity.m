@@ -39,8 +39,9 @@ ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Pa
    mixingCPP = ("auto " <> ToString[#] <> " = [&model_] (int i, int j) { return model_.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ (Parameters`FSOutputParameters /. params);
 
    (* replace input parameters with their FS names *)
-   newExpr = expr /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
+   newExpr = Simplify[expr, Assumptions->s>0] /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
    newExpr = newExpr /. Susyno`LieGroups`conj -> Conj;
+   newExpr = newExpr //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start, stop, exp];
    newExpr = ToString@CForm[newExpr];
    (* in expressions from SARAH masses are denoted as pmass(X)
       this converts them to proper C++ form *)
