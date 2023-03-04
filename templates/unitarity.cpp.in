@@ -34,20 +34,32 @@
 #include <gsl/gsl_min.h>
 #include <algorithm>
 #include <array>
+#include <Eigen/SparseCore>
 #include <functional>
 
 namespace flexiblesusy {
 namespace @ModelName@_unitarity {
+
+static constexpr int size = @scatteringPairsLength@;
 
 inline double Sqrt2(int i, int j) {
    // 1/Sqrt[2] or 1
    return i==j ? 0.707106781186547524 : 1;
 }
 
+// s -> infinity limit
+double max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates& model) {
+   Eigen::SparseMatrix<double> matrix(size, size);
+
+   @infiniteSMatrix@
+
+   matrix.makeCompressed();
+   return matrix.coeffs().maxCoeff();
+}
+
 double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
-   constexpr size_t size = @scatteringPairsLength@;
+   static constexpr int size = @scatteringPairsLength@;
    std::array<std::array<std::function<double(double, int, int, int, int)>, size>, size> matrix = {};
-   std::array<std::function<double(double)>, size> row_temp = {};
    const int sChan = 1;
    const int tChan = 1;
    const int uChan = 1;

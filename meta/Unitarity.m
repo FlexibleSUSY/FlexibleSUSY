@@ -36,6 +36,38 @@ replacePMASS[expr_] := Module[{temp},
    temp
 ];
 
+InfiniteS[a0Input_, generationSizes_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0},
+   (* CPP definitions of parameters present in the expression *)
+   paramsCPP =
+      StringJoin[
+         ("const auto " <> ToString@CConversion`ToValidCSymbol[#] <>
+            " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ (Parameters`FSModelParameters /. params)
+      ];
+   (* definition of mixing matrices *)
+   mixingCPP = ("auto " <> ToString[#] <> " = [&model] (int i, int j) { return model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ (Parameters`FSOutputParameters /. params);
+
+   (* replace input parameters with their FS names *)
+   a0 = a0Input /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
+   resultInfinite = "";
+   For[i=1, i<=Length[a0], i++,
+      For[j=i, j<=Length[a0[[i]]], j++,
+         If[a0[[i,j]] =!= 0,
+            resultInfinite = resultInfinite <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
+                     If[generationSizes[[i,j,1]] > 1, "for (int in1 = 1; in1 <= " <> ToString[generationSizes[[i,j,1]]] <> "; ++in1) {\n", ""] <>
+                     If[generationSizes[[i,j,2]] > 1, "for (int in2 = 1; in2 <= " <> ToString[generationSizes[[i,j,2]]] <> "; ++in2) {\n", ""] <>
+                     If[generationSizes[[i,j,3]] > 1, "for (int out1 = 1; out1 <= " <> ToString[generationSizes[[i,j,3]]] <> "; ++out1) {\n", ""] <>
+                     If[generationSizes[[i,j,4]] > 1, "for (int out2 = 1; out2 <= " <> ToString[generationSizes[[i,j,4]]] <> "; ++out2) {\n", ""] <>
+                     "matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = std::max(std::abs(" <> ToString@CForm[a0[[i,j]]] <> "), matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> "));\n" <>
+                     If[generationSizes[[i,j,1]] > 1, "}\n", ""] <>
+                     If[generationSizes[[i,j,2]] > 1, "}\n", ""] <>
+                     If[generationSizes[[i,j,3]] > 1, "}\n", ""] <>
+                     If[generationSizes[[i,j,4]] > 1, "}\n", ""]
+         ]
+      ]
+   ];
+   paramsCPP <> mixingCPP <> resultInfinite
+];
+
 (* return a C++ lambda computing a given scattering eigenvalue in function of sqrt(s) *)
 ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Parameters`FindAllParametersClassified[expr], paramsCPP, mixingCPP},
 
@@ -73,24 +105,24 @@ If[temp =!= 0,
 }\n",
 ""
 ]] <>
-With[{temp = Simplify@Coefficient[newExpr, sChan]},
+With[{temp = Coefficient[newExpr, sChan]},
 If[temp =!= 0,
 "if (sChan) {
-   res += " <> replacePMASS@temp <> ";
+   res += " <> If[FreeQ[temp, Susyno`LieGroups`conj], "", "std::real("] <> replacePMASS@temp <> If[FreeQ[temp, Susyno`LieGroups`conj], "", ")"] <> ";
 }\n",
 ""
 ]] <>
-With[{temp = Simplify@Coefficient[newExpr, tChan]},
+With[{temp = Coefficient[newExpr, tChan]},
 If[temp =!= 0,
 "if (tChan) {
-   res += " <> replacePMASS@temp <> ";
+   res += " <> If[FreeQ[temp, Susyno`LieGroups`conj], "", "std::real("] <> replacePMASS@temp <> If[FreeQ[temp, Susyno`LieGroups`conj], "", ")"] <> ";
 }\n",
 ""
 ]] <>
-With[{temp = Simplify@Coefficient[newExpr, uChan]},
+With[{temp = Coefficient[newExpr, uChan]},
 If[temp =!= 0,
 "if (uChan) {
-   res += " <> replacePMASS@temp <> ";
+   res += " <> If[FreeQ[temp, Susyno`LieGroups`conj], "", "std::real("] <> replacePMASS@temp <> If[FreeQ[temp, Susyno`LieGroups`conj], "", ")"] <> ";
 }\n",
 ""
 ]] <>
@@ -98,24 +130,27 @@ If[temp =!= 0,
    };\n\n"
 ];
 
-GetScatteringMatrix[] := Module[{result, generationSizes},
+GetScatteringMatrix[] := Module[{result, generationSizes, a0, a0InfiniteS},
    InitUnitarity[];
    (*RemoveParticlesFromScattering={Se , Sv, Sd, Su};*)
 
    a0 = Outer[GetScatteringDiagrams[#1 -> #2]&, scatteringPairs, scatteringPairs, 1];
+   a0InfiniteS = Map[Limit[# /. qChan -> 1 /. sChan|tChan|uChan -> 0, Susyno`LieGroups`s->Infinity]&, a0, {2}];
    generationSizes = Table[{i, j}, {i,1, Length[scatteringPairs]}, {j,1, Length[scatteringPairs]}];
    generationSizes = Apply[Join[TreeMasses`GetDimension /@ scatteringPairs[[#1]], TreeMasses`GetDimension /@ scatteringPairs[[#2]]]&, generationSizes, {2}];
-
-   result = "";
+   resultFinite = "";
+   resultInfinite = "";
    For[i=1, i<=Length[a0], i++,
       For[j=i, j<=Length[a0[[i]]], j++,
          If[a0[[i,j]] =!= 0,
-            result = result <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
-                     "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]], scatteringPairs[[i]], scatteringPairs[[j]]]
+            resultFinite = resultFinite <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
+                     "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]], scatteringPairs[[i]], scatteringPairs[[j]]];
+            resultInfinite = resultInfinite <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
+                     "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ToString@CForm[a0InfiniteS[[i,j]]] <> ";\n";
          ]
       ]
    ];
-   {SparseArray[a0]["NonzeroPositions"], Dimensions[a0][[1]], generationSizes, result}
+   {SparseArray[a0]["NonzeroPositions"], Dimensions[a0][[1]], generationSizes, InfiniteS[a0InfiniteS, generationSizes], resultFinite}
 ];
 
 End[];

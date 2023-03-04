@@ -2509,6 +2509,7 @@ WriteUnitarityClass[files_List] :=
          "@skipZeros@" -> "if (!(" <> StringRiffle["(i==" <> ToString[First@#-1] <> " && j==" <> ToString[Last@#-1] <> ")"& /@ First@matrix, "||"] <> ")) continue;",
          "@scatteringElements@" -> TextFormatting`IndentText[Last@matrix],
          "@generationSizes@" -> ToString[{{#}& /@ matrix[[3]]}],
+         "@infiniteSMatrix@" -> matrix[[4]],
       Sequence @@ GeneralReplacementRules[]
         }];
     ];

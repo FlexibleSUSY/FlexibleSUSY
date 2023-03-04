@@ -32,6 +32,7 @@ class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_unitarity {
 double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates&);
+double max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates&);
 
 } // namespace @ModelName@_unitarity
 } // namespace flexiblesusy
