@@ -53,8 +53,6 @@ ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Pa
    newExpr = newExpr /. Susyno`LieGroups`conj -> Conj;
    newExpr = newExpr //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start, stop, exp];
 
-If[expr === 0,
-"[](double sqrtS, int in1, int in2, int out1, int out2) { return 0.; };\n\n",
 "[&model" <> If[!FreeQ[expr, sChan], ",sChan", ""] <> If[!FreeQ[expr, tChan], ",tChan", ""] <> If[!FreeQ[expr, uChan], ",uChan", ""] <> If[!FreeQ[expr, qChan], ",qChan", ""] <> "](double sqrtS, int in1, int in2, int out1, int out2) {
       auto model_ = model;
       // couplings should be evaluated at the renormalization scale sqrt(s)
@@ -98,7 +96,6 @@ If[temp =!= 0,
 ]] <>
 "     return " <> If[FreeQ[expr, Susyno`LieGroups`conj], "res", "std::real(res)"] <> ";
    };\n\n"
-]
 ];
 
 GetScatteringMatrix[] := Module[{result, generationSizes},
@@ -112,8 +109,10 @@ GetScatteringMatrix[] := Module[{result, generationSizes},
    result = "";
    For[i=1, i<=Length[a0], i++,
       For[j=i, j<=Length[a0[[i]]], j++,
-         result = result <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
-                  "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]], scatteringPairs[[i]], scatteringPairs[[j]]]
+         If[a0[[i,j]] =!= 0,
+            result = result <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
+                     "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]], scatteringPairs[[i]], scatteringPairs[[j]]]
+         ]
       ]
    ];
    {SparseArray[a0]["NonzeroPositions"], Dimensions[a0][[1]], generationSizes, result}
