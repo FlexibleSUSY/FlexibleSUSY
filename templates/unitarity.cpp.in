@@ -48,10 +48,10 @@ double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
    constexpr size_t size = @scatteringPairsLength@;
    std::array<std::array<std::function<double(double, int, int, int, int)>, size>, size> matrix = {};
    std::array<std::function<double(double)>, size> row_temp = {};
-   const double sChan = 1.;
-   const double tChan = 1.;
-   const double uChan = 1.;
-   const double qChan = 1.;
+   const int sChan = 1;
+   const int tChan = 1;
+   const int uChan = 1;
+   const int qChan = 1;
 
    using namespace @ModelName@_cxx_diagrams::fields;
 

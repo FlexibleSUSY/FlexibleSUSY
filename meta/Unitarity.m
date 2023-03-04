@@ -26,6 +26,16 @@ GetScatteringMatrix::usage = "";
 
 Begin["`Private`"];
 
+replacePMASS[expr_] := Module[{temp},
+   temp = ToString@CForm[expr];
+   (* in expressions from SARAH masses are denoted as pmass(X)
+      this converts them to proper C++ form *)
+   temp = StringReplace[temp, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:DigitCharacter.. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[ToExpression[i]-1] <> "})"];
+   temp = StringReplace[temp, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:Except[")"].. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[i] <> "-1})"];
+   temp = StringReplace[temp, "pmass(" ~~ f:Except[")"]..  ~~ ")" :> "context.mass<" <> f <> ">({})"];
+   temp
+];
+
 (* return a C++ lambda computing a given scattering eigenvalue in function of sqrt(s) *)
 ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Parameters`FindAllParametersClassified[expr], paramsCPP, mixingCPP},
 
@@ -39,15 +49,9 @@ ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Pa
    mixingCPP = ("auto " <> ToString[#] <> " = [&model_] (int i, int j) { return model_.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ (Parameters`FSOutputParameters /. params);
 
    (* replace input parameters with their FS names *)
-   newExpr = Simplify[expr, Assumptions->s>0] /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
+   newExpr = expr /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
    newExpr = newExpr /. Susyno`LieGroups`conj -> Conj;
    newExpr = newExpr //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start, stop, exp];
-   newExpr = ToString@CForm[newExpr];
-   (* in expressions from SARAH masses are denoted as pmass(X)
-      this converts them to proper C++ form *)
-   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:DigitCharacter.. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[ToExpression[i]-1] <> "})"];
-   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:Except[")"].. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[i] <> "-1})"];
-   newExpr = StringReplace[newExpr, "pmass(" ~~ f:Except[")"]..  ~~ ")" :> "context.mass<" <> f <> ">({})"];
 
 If[expr === 0,
 "[](double sqrtS, int in1, int in2, int out1, int out2) { return 0.; };\n\n",
@@ -63,7 +67,36 @@ If[expr === 0,
       paramsCPP <>
       mixingCPP <>
       (* TODO: can this really be complex? *)
-"     return " <> If[FreeQ[expr, Susyno`LieGroups`conj], newExpr, "std::real(" <> newExpr <> ")"] <> ";
+"double res = 0.;\n" <>
+With[{temp = Simplify@Coefficient[newExpr, qChan]},
+If[temp =!= 0,
+"if (qChan) {
+   res += " <> replacePMASS@temp <> ";
+}\n",
+""
+]] <>
+With[{temp = Simplify@Coefficient[newExpr, sChan]},
+If[temp =!= 0,
+"if (sChan) {
+   res += " <> replacePMASS@temp <> ";
+}\n",
+""
+]] <>
+With[{temp = Simplify@Coefficient[newExpr, tChan]},
+If[temp =!= 0,
+"if (tChan) {
+   res += " <> replacePMASS@temp <> ";
+}\n",
+""
+]] <>
+With[{temp = Simplify@Coefficient[newExpr, uChan]},
+If[temp =!= 0,
+"if (uChan) {
+   res += " <> replacePMASS@temp <> ";
+}\n",
+""
+]] <>
+"     return " <> If[FreeQ[expr, Susyno`LieGroups`conj], "res", "std::real(res)"] <> ";
    };\n\n"
 ]
 ];
