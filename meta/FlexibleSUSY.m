@@ -2502,15 +2502,12 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
    ];
 
 WriteUnitarityClass[files_List] :=
-    Module[{},
-      matrix = Unitarity`GetScatteringMatrix[];
+    Module[{res},
+      res = Unitarity`GetScatteringMatrix[];
       WriteOut`ReplaceInFiles[files,
-        {"@scatteringPairsLength@" -> ToString@matrix[[2]],
-         "@skipZeros@" -> "if (!(" <> StringRiffle["(i==" <> ToString[First@#-1] <> " && j==" <> ToString[Last@#-1] <> ")"& /@ First@matrix, "||"] <> ")) continue;",
-         "@scatteringElements@" -> TextFormatting`IndentText[Last@matrix],
-         "@generationSizes@" -> ToString[{{#}& /@ matrix[[3]]}],
-         "@infiniteSMatrix@" -> matrix[[4]],
-      Sequence @@ GeneralReplacementRules[]
+        {"@scatteringPairsLength@" -> ToString@res[[1]],
+         "@infiniteSMatrix@" -> res[[2]],
+         Sequence @@ GeneralReplacementRules[]
         }];
     ];
 

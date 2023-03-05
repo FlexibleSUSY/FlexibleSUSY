@@ -20,23 +20,13 @@
 
 *)
 
-BeginPackage["Unitarity`", {"SARAH`", "Parameters`", "CConversion`", "TreeMasses`"}];
+BeginPackage["Unitarity`", {"SARAH`", "Parameters`", "CConversion`", "TreeMasses`", "TextFormatting`", "Vertices`", "CXXDiagrams`"}];
 
 GetScatteringMatrix::usage = "";
 
 Begin["`Private`"];
 
-replacePMASS[expr_] := Module[{temp},
-   temp = ToString@CForm[expr];
-   (* in expressions from SARAH masses are denoted as pmass(X)
-      this converts them to proper C++ form *)
-   temp = StringReplace[temp, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:DigitCharacter.. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[ToExpression[i]-1] <> "})"];
-   temp = StringReplace[temp, "pmass(" ~~ f:Except[")"].. ~~ "(" ~~ i:Except[")"].. ~~ "))" :> "context.mass<" <> f <> ">({" <> ToString[i] <> "-1})"];
-   temp = StringReplace[temp, "pmass(" ~~ f:Except[")"]..  ~~ ")" :> "context.mass<" <> f <> ">({})"];
-   temp
-];
-
-InfiniteS[a0Input_, generationSizes_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0},
+InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0},
    (* CPP definitions of parameters present in the expression *)
    paramsCPP =
       StringJoin[
@@ -48,109 +38,44 @@ InfiniteS[a0Input_, generationSizes_] := Module[{params = Parameters`FindAllPara
 
    (* replace input parameters with their FS names *)
    a0 = a0Input /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
+   a0 = a0 /. Susyno`LieGroups`conj -> Conj;
+   a0 = a0 //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start, stop, exp];
+   (* only for test
+   a0 = a0 /. Delta[c1_?SarahColorIndexQ, c2_?SarahColorIndexQ] :> 1;*)
    resultInfinite = "";
    For[i=1, i<=Length[a0], i++,
       For[j=i, j<=Length[a0[[i]]], j++,
          If[a0[[i,j]] =!= 0,
-            resultInfinite = resultInfinite <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
-                     If[generationSizes[[i,j,1]] > 1, "for (int in1 = 1; in1 <= " <> ToString[generationSizes[[i,j,1]]] <> "; ++in1) {\n", ""] <>
-                     If[generationSizes[[i,j,2]] > 1, "for (int in2 = 1; in2 <= " <> ToString[generationSizes[[i,j,2]]] <> "; ++in2) {\n", ""] <>
-                     If[generationSizes[[i,j,3]] > 1, "for (int out1 = 1; out1 <= " <> ToString[generationSizes[[i,j,3]]] <> "; ++out1) {\n", ""] <>
-                     If[generationSizes[[i,j,4]] > 1, "for (int out2 = 1; out2 <= " <> ToString[generationSizes[[i,j,4]]] <> "; ++out2) {\n", ""] <>
-                     "matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = std::max(std::abs(" <> ToString@CForm[a0[[i,j]]] <> "), matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> "));\n" <>
+            resultInfinite = resultInfinite <> "// " <> ToString[FSScatteringPairs[[i]]] <> "->" <> ToString[FSScatteringPairs[[j]]] <> "\n" <>
+                     If[generationSizes[[i,j,1]] > 1, "for (int in1=1; in1<=" <> CXXNameOfField[First@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in1) {\n", ""] <>
+                     If[generationSizes[[i,j,2]] > 1, "for (int in2=1; in2<=" <> CXXNameOfField[Last@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in2) {\n", ""] <>
+                     If[generationSizes[[i,j,3]] > 1, "for (int out1=1; out1<=" <> CXXNameOfField[First@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out1) {\n", ""] <>
+                     If[generationSizes[[i,j,4]] > 1, "for (int out2=1; out2<=" <> CXXNameOfField[Last@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out2) {\n", ""] <>
+                     "matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = std::max(\n" <> TextFormatting`IndentText["std::abs(std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]]] <> ")),\nmatrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")\n"] <> ");\n" <>
                      If[generationSizes[[i,j,1]] > 1, "}\n", ""] <>
                      If[generationSizes[[i,j,2]] > 1, "}\n", ""] <>
                      If[generationSizes[[i,j,3]] > 1, "}\n", ""] <>
-                     If[generationSizes[[i,j,4]] > 1, "}\n", ""]
+                     If[generationSizes[[i,j,4]] > 1, "}\n", ""] <> "\n"
          ]
       ]
    ];
-   paramsCPP <> mixingCPP <> resultInfinite
+   TextFormatting`IndentText[paramsCPP <> "\n" <> mixingCPP <> "\n" <> resultInfinite]
 ];
 
-(* return a C++ lambda computing a given scattering eigenvalue in function of sqrt(s) *)
-ExpressionToCPPLambda[expr__, istates_List, fstates_List] := Module[{params = Parameters`FindAllParametersClassified[expr], paramsCPP, mixingCPP},
-
-   (* CPP definitions of parameters present in the expression *)
-   paramsCPP =
-      StringJoin[
-         ("const auto " <> ToString@CConversion`ToValidCSymbol[#] <>
-            " = model_.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ (Parameters`FSModelParameters /. params)
-      ];
-   (* definition of mixing matrices *)
-   mixingCPP = ("auto " <> ToString[#] <> " = [&model_] (int i, int j) { return model_.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ (Parameters`FSOutputParameters /. params);
-
-   (* replace input parameters with their FS names *)
-   newExpr = expr /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
-   newExpr = newExpr /. Susyno`LieGroups`conj -> Conj;
-   newExpr = newExpr //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start, stop, exp];
-
-"[&model" <> If[!FreeQ[expr, sChan], ",sChan", ""] <> If[!FreeQ[expr, tChan], ",tChan", ""] <> If[!FreeQ[expr, uChan], ",uChan", ""] <> If[!FreeQ[expr, qChan], ",qChan", ""] <> "](double sqrtS, int in1, int in2, int out1, int out2) {
-      auto model_ = model;
-      // couplings should be evaluated at the renormalization scale sqrt(s)
-      // see comment around eq. 20 of 1805.07306
-      model_.run_to(sqrtS);
-      model_.solve_ewsb();
-      const double s = Sqr(sqrtS);
-      const " <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::context_base context {model_};\n" <>
-      "if (sqrtS < context.mass<" <> ToString[fstates[[1]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[1]]]>1, "{out1-1}", "{}"] <> ") + context.mass<" <> ToString[fstates[[2]] /. Susyno`LieGroups`conj->Identity] <> ">(" <> If[TreeMasses`GetDimension[fstates[[2]]]>1, "{out2-1}", "{}"] <> ")) return 0.;\n" <>
-      paramsCPP <>
-      mixingCPP <>
-      (* TODO: can this really be complex? *)
-"double res = 0.;\n" <>
-With[{temp = Simplify@Coefficient[newExpr, qChan]},
-If[temp =!= 0,
-"if (qChan) {
-   res += " <> replacePMASS@temp <> ";
-}\n",
-""
-]] <>
-With[{temp = Coefficient[newExpr, sChan]},
-If[temp =!= 0,
-"if (sChan) {
-   res += " <> If[FreeQ[temp, Susyno`LieGroups`conj], "", "std::real("] <> replacePMASS@temp <> If[FreeQ[temp, Susyno`LieGroups`conj], "", ")"] <> ";
-}\n",
-""
-]] <>
-With[{temp = Coefficient[newExpr, tChan]},
-If[temp =!= 0,
-"if (tChan) {
-   res += " <> If[FreeQ[temp, Susyno`LieGroups`conj], "", "std::real("] <> replacePMASS@temp <> If[FreeQ[temp, Susyno`LieGroups`conj], "", ")"] <> ";
-}\n",
-""
-]] <>
-With[{temp = Coefficient[newExpr, uChan]},
-If[temp =!= 0,
-"if (uChan) {
-   res += " <> If[FreeQ[temp, Susyno`LieGroups`conj], "", "std::real("] <> replacePMASS@temp <> If[FreeQ[temp, Susyno`LieGroups`conj], "", ")"] <> ";
-}\n",
-""
-]] <>
-"     return " <> If[FreeQ[expr, Susyno`LieGroups`conj], "res", "std::real(res)"] <> ";
-   };\n\n"
-];
-
-GetScatteringMatrix[] := Module[{result, generationSizes, a0, a0InfiniteS},
+GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs},
    InitUnitarity[];
-   (*RemoveParticlesFromScattering={Se , Sv, Sd, Su};*)
 
-   a0 = Outer[GetScatteringDiagrams[#1 -> #2]&, scatteringPairs, scatteringPairs, 1];
+   (* only color neutral final states *)
+   FSScatteringPairs = Select[scatteringPairs, (TreeMasses`GetColorRepresentation /@ #) == {S,S}&];
+
+   a0 = Outer[GetScatteringDiagrams[#1 -> #2]&, FSScatteringPairs, FSScatteringPairs, 1];
+   (* obviously 's' lives in Susyno`LieGroups` *)
    a0InfiniteS = Map[Limit[# /. qChan -> 1 /. sChan|tChan|uChan -> 0, Susyno`LieGroups`s->Infinity]&, a0, {2}];
-   generationSizes = Table[{i, j}, {i,1, Length[scatteringPairs]}, {j,1, Length[scatteringPairs]}];
-   generationSizes = Apply[Join[TreeMasses`GetDimension /@ scatteringPairs[[#1]], TreeMasses`GetDimension /@ scatteringPairs[[#2]]]&, generationSizes, {2}];
-   resultFinite = "";
-   resultInfinite = "";
-   For[i=1, i<=Length[a0], i++,
-      For[j=i, j<=Length[a0[[i]]], j++,
-         If[a0[[i,j]] =!= 0,
-            resultFinite = resultFinite <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
-                     "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ExpressionToCPPLambda[a0[[i,j]], scatteringPairs[[i]], scatteringPairs[[j]]];
-            resultInfinite = resultInfinite <> "// " <> ToString[scatteringPairs[[i]]] <> "->" <> ToString[scatteringPairs[[j]]] <> "\n" <>
-                     "matrix[" <> ToString[i-1] <> "][" <> ToString[j-1] <> "] = " <> ToString@CForm[a0InfiniteS[[i,j]]] <> ";\n";
-         ]
-      ]
-   ];
-   {SparseArray[a0]["NonzeroPositions"], Dimensions[a0][[1]], generationSizes, InfiniteS[a0InfiniteS, generationSizes], resultFinite}
+
+   generationSizes = Table[{i, j}, {i, Length[FSScatteringPairs]}, {j, Length[FSScatteringPairs]}];
+   generationSizes = Apply[Join[TreeMasses`GetDimension /@ FSScatteringPairs[[#1]], TreeMasses`GetDimension /@ FSScatteringPairs[[#2]]]&, generationSizes, {2}];
+
+   {Length[FSScatteringPairs], InfiniteS[a0InfiniteS, generationSizes, FSScatteringPairs]}
 ];
 
 End[];
