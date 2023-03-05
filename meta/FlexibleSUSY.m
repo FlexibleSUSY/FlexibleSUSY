@@ -215,6 +215,7 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
+FSUnitarityConstraints = True;
 
 (* Standard Model input parameters (SLHA input parameters) *)
 (* {parameter, {"block", entry}, type}                     *)
@@ -426,6 +427,7 @@ ReplaceSymbolsInUserInput[rules_] :=
            IMEXTPAR                              = IMEXTPAR                              /. rules;
            FlexibleSUSY`ExtraSLHAOutputBlocks    = FlexibleSUSY`ExtraSLHAOutputBlocks    /. rules;
            FlexibleSUSY`FSCalculateDecays        = FlexibleSUSY`FSCalculateDecays        /. rules;
+           FlexibleSUSY`FSUnitarityConstraints   = FlexibleSUSY`FSUnitarityConstraints   /. rules;
            FlexibleSUSY`FSDecayParticles         = FlexibleSUSY`FSDecayParticles         /. rules;
            FlexibleSUSY`FSExtraInputParameters   = FlexibleSUSY`FSExtraInputParameters   /. rules;
            FlexibleSUSY`FSAuxiliaryParameterInfo = FlexibleSUSY`FSAuxiliaryParameterInfo /. rules;
@@ -2503,7 +2505,7 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
 
 WriteUnitarityClass[files_List] :=
     Module[{res},
-      res = Unitarity`GetScatteringMatrix[];
+      res = If[FSUnitarityConstraints, Unitarity`GetScatteringMatrix[], {0, ""}];
       WriteOut`ReplaceInFiles[files,
         {"@scatteringPairsLength@" -> ToString@res[[1]],
          "@infiniteSMatrix@" -> res[[2]],
@@ -2822,6 +2824,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
                             "@fillSLHAIO@" -> fillSLHAIO,
                             "@decaySetttingsOverride@" -> IndentText[decaySetttingsOverride],
+                            "@calculateUnitarity@" -> If[FSUnitarityConstraints, "std::cout << " <> ModelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models)) << std::endl;\n", ""],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
