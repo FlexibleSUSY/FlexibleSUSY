@@ -31,7 +31,10 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
    paramsCPP =
       StringJoin[
          ("const auto " <> ToString@CConversion`ToValidCSymbol[#] <>
-            " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ (Parameters`FSModelParameters /. params)
+            " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ Select[Parameters`FSModelParameters /. params, GetParameterDimensions[#] === {1}&]
+      ];
+   paramsCPP = paramsCPP <> StringJoin[
+         ("auto " <> ToString[#] <> " = [&model] (int i, int j) { return model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ Select[Parameters`FSModelParameters /. params, Length[GetParameterDimensions[#]]===2&]
       ];
    (* definition of mixing matrices *)
    mixingCPP = ("auto " <> ToString[#] <> " = [&model] (int i, int j) { return model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ (Parameters`FSOutputParameters /. params);
