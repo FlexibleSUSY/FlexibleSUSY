@@ -503,6 +503,20 @@ ReplaceSymbolsInUserInput[rules_] :=
               ];
               FlexibleSUSY`FSCalculateDecays = False
            ];
+
+           With[{sarahVersion = DecomposeVersionString[SA`Version],
+                 minimRequired = {4, 13, 0}},
+              If[FlexibleSUSY`FSUnitarityConstraints && (sarahVersion[[1]] < minimRequired[[1]] ||
+              (sarahVersion[[1]] == minimRequired[[1]] &&
+               sarahVersion[[2]] < minimRequired[[2]]) ||
+              (sarahVersion[[1]] == minimRequired[[1]] &&
+               sarahVersion[[2]] == minimRequired[[2]] &&
+               sarahVersion[[3]] < minimRequired[[3]])),
+                 Print["Warning: using SARAH version ", SA`Version, " but unitarity calculation requires ", StringRiffle[ToString/@minimRequired, "."]];
+                 Print["         Disabling unitarity calculation."];
+                 FlexibleSUSY`FSUnitarityConstraints = False;
+              ];
+           ];
           ];
 
 CheckSARAHVersion[] :=
