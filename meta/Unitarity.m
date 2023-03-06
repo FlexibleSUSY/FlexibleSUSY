@@ -26,23 +26,19 @@ GetScatteringMatrix::usage = "";
 
 Begin["`Private`"];
 
-InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0},
+InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0, decrementIndices},
    (* CPP definitions of parameters present in the expression *)
    paramsCPP =
       StringJoin[
          ("const auto " <> ToString@CConversion`ToValidCSymbol[#] <>
-            " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ Select[Parameters`FSModelParameters /. params, GetParameterDimensions[#] === {1}&]
+            " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ Join[Parameters`FSModelParameters /. params, Parameters`FSOutputParameters /. params]
       ];
-   paramsCPP = paramsCPP <> StringJoin[
-         ("auto " <> ToString@CConversion`ToValidCSymbol@# <> " = [&model] (int i, int j) { return model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ Select[Parameters`FSModelParameters /. params, Length[GetParameterDimensions[#]]===2&]
-      ];
-   (* definition of mixing matrices *)
-   mixingCPP = ("auto " <> ToString@CConversion`ToValidCSymbol@# <> " = [&model] (int i, int j) { return model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "(i-1,j-1); };\n")& /@ (Parameters`FSOutputParameters /. params);
+   decrementIndices = (#[i_, j_] /; Or@@(IntegerQ/@{i,j}) :> #@@(If[IntegerQ@#, #-1, #]& /@ {i, j}))& /@ Select[Join[Parameters`FSModelParameters /. params, Parameters`FSOutputParameters /. params], Length[GetParameterDimensions[#]]===2&];
 
    (* replace input parameters with their FS names *)
    a0 = a0Input /. Thread[(Parameters`FSModelParameters /. params) -> CConversion`ToValidCSymbol /@ (Parameters`FSModelParameters /. params)];
    a0 = a0 /. Susyno`LieGroups`conj -> Conj;
-   a0 = a0 //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start, stop, exp];
+   a0 = a0 //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start-1, stop-1, exp];
    (* only for test
    a0 = a0 /. Delta[c1_?SarahColorIndexQ, c2_?SarahColorIndexQ] :> 1;*)
    resultInfinite = "";
@@ -51,11 +47,11 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
          If[a0[[i,j]] =!= 0,
             resultInfinite = resultInfinite <> "// " <> ToString[FSScatteringPairs[[i]]] <> "->" <> ToString[FSScatteringPairs[[j]]] <> "\n" <>
                      "{\n" <>
-                     If[generationSizes[[i,j,1]] > 1, "for (int in1=1; in1<=" <> CXXNameOfField[First@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in1) {\n", ""] <>
-                     If[generationSizes[[i,j,2]] > 1, "for (int in2=1; in2<=" <> CXXNameOfField[Last@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in2) {\n", ""] <>
-                     If[generationSizes[[i,j,3]] > 1, "for (int out1=1; out1<=" <> CXXNameOfField[First@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out1) {\n", ""] <>
-                     If[generationSizes[[i,j,4]] > 1, "for (int out2=1; out2<=" <> CXXNameOfField[Last@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out2) {\n", ""] <>
-                        TextFormatting`IndentText["double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]]] <> ");\n"] <>
+                     If[generationSizes[[i,j,1]] > 1, "for (int in1=0; in1<" <> CXXNameOfField[First@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in1) {\n", ""] <>
+                     If[generationSizes[[i,j,2]] > 1, "for (int in2=0; in2<" <> CXXNameOfField[Last@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in2) {\n", ""] <>
+                     If[generationSizes[[i,j,3]] > 1, "for (int out1=0; out1<" <> CXXNameOfField[First@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out1) {\n", ""] <>
+                     If[generationSizes[[i,j,4]] > 1, "for (int out2=0; out2<" <> CXXNameOfField[Last@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out2) {\n", ""] <>
+                        TextFormatting`IndentText["double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]] /. decrementIndices ] <> ");\n"] <>
                         TextFormatting`IndentText["if (std::abs(matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")) < std::abs(temp)) {\n" <>
                            TextFormatting`IndentText["matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = temp;\n"] <>
                            "}\n"] <>
@@ -63,11 +59,11 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
                      If[generationSizes[[i,j,2]] > 1, "}\n", ""] <>
                      If[generationSizes[[i,j,3]] > 1, "}\n", ""] <>
                      If[generationSizes[[i,j,4]] > 1, "}\n", ""] <> "\n" <>
-                     "}"
+                     "}\n"
          ]
       ]
    ];
-   TextFormatting`IndentText[paramsCPP <> "\n" <> mixingCPP <> "\n" <> resultInfinite]
+   TextFormatting`IndentText[paramsCPP <> "\n" <> resultInfinite]
 ];
 
 GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs},
