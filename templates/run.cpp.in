@@ -98,7 +98,6 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
 
 @calculateDecaysForModel@
 
-@calculateUnitarity@
    const bool show_result = !problems.have_problem() ||
       spectrum_generator_settings.get(Spectrum_generator_settings::force_output);
    // SLHA output
@@ -111,6 +110,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
                Spectrum_generator_settings::force_positive_masses));
          slha_io.set_spectrum(models);
          slha_io.set_extra(std::get<0>(models), scales, observables, spectrum_generator_settings);
+         @calculateUnitarity@
       }
 
 @setDecaysSLHAOutput@

@@ -510,6 +510,24 @@ void @ModelName@_slha_io::set_extra(
 @writeExtraSLHAOutputBlock@
 }
 
+void @ModelName@_slha_io::set_unitarity_infinite_s(
+   const @ModelName@_slha& model,
+   std::pair<bool, double> const& unitarity,
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings)
+{
+
+   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
+      {
+         std::ostringstream block;
+         block << "Block FlexibleSUSYUnitarity Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+               << FORMAT_ELEMENT(0, unitarity.first, "Tree-level unitarity limits fulfilled or not")
+               << FORMAT_ELEMENT(1, unitarity.second, "max(|re(a0)|)");
+         slha_io.set_block(block);
+      }
+   }
+
+}
+
 /**
  * Write SLHA object to given output.  If output == "-", then the SLHA
  * object is written to std::cout.  Otherwise, output is interpreted

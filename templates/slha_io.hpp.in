@@ -32,6 +32,7 @@
 #include <Eigen/Core>
 #include <string>
 #include <tuple>
+#include <utility>
 
 namespace flexiblesusy {
 
@@ -94,6 +95,7 @@ public:
    void set_spinfo(const Problems&);
    void set_spinfo(const std::vector<std::string>&, const std::vector<std::string>&);
    void set_print_imaginary_parts_of_majorana_mixings(bool);
+   void set_unitarity_infinite_s(const @ModelName@_slha&, std::pair<bool, double> const&, const flexiblesusy::Spectrum_generator_settings&);
    void write_to(const std::string&) const;
    void write_to_file(const std::string&) const;
    void write_to_stream() const;
