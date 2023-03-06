@@ -40,6 +40,11 @@ inline double Sqrt2(int i, int j) {
    return i==j ? 0.707106781186547524 : 1;
 }
 
+inline bool is_unitarity_fulfilled(Eigen::SparseMatrix<double> const& m) {
+   // if max(|re(a0)|) < 1/2 then the point is allowed
+   return m.coeffs().abs().maxCoeff() <= 0.5;
+}
+
 // s -> infinity limit
 std::pair<bool, Eigen::SparseMatrix<double>> max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates& model) {
    Eigen::SparseMatrix<double> matrix(size, size);
@@ -48,8 +53,7 @@ std::pair<bool, Eigen::SparseMatrix<double>> max_scattering_eigenvalue_infinite_
 
 @infiniteSMatrix@
    matrix.makeCompressed();
-   // if max(|re(a0)|) < 1/2 point is allowed
-   return {matrix.coeffs().abs().maxCoeff() <= 0.5, matrix};
+   return {is_unitarity_fulfilled(matrix), matrix};
 }
 
 } // namespace @ModelName@_unitarity
