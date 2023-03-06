@@ -28,13 +28,15 @@
 
 #include "@ModelName@_mass_eigenstates.hpp"
 
+#include <Eigen/SparseCore>
+
 #include <utility>
 
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_unitarity {
-std::pair<bool, double> max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates&);
+std::pair<bool, Eigen::SparseMatrix<double>> max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates&);
 
 } // namespace @ModelName@_unitarity
 } // namespace flexiblesusy

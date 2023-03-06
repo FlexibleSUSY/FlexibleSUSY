@@ -30,8 +30,6 @@
 #include "sum.hpp"
 #include "wrappers.hpp"
 
-#include <Eigen/SparseCore>
-
 namespace flexiblesusy {
 namespace @ModelName@_unitarity {
 
@@ -43,15 +41,15 @@ inline double Sqrt2(int i, int j) {
 }
 
 // s -> infinity limit
-std::pair<bool, double> max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates& model) {
+std::pair<bool, Eigen::SparseMatrix<double>> max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates& model) {
    Eigen::SparseMatrix<double> matrix(size, size);
 
    using namespace @ModelName@_cxx_diagrams::fields;
 
 @infiniteSMatrix@
    matrix.makeCompressed();
-   double res = matrix.coeffs().maxCoeff();
-   return {res <= 0.5, res};
+   // if max(|re(a0)|) < 1/2 point is allowed
+   return {matrix.coeffs().abs().maxCoeff() <= 0.5, matrix};
 }
 
 } // namespace @ModelName@_unitarity

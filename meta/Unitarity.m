@@ -50,15 +50,20 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
       For[j=i, j<=Length[a0[[i]]], j++,
          If[a0[[i,j]] =!= 0,
             resultInfinite = resultInfinite <> "// " <> ToString[FSScatteringPairs[[i]]] <> "->" <> ToString[FSScatteringPairs[[j]]] <> "\n" <>
+                     "{\n" <>
                      If[generationSizes[[i,j,1]] > 1, "for (int in1=1; in1<=" <> CXXNameOfField[First@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in1) {\n", ""] <>
                      If[generationSizes[[i,j,2]] > 1, "for (int in2=1; in2<=" <> CXXNameOfField[Last@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in2) {\n", ""] <>
                      If[generationSizes[[i,j,3]] > 1, "for (int out1=1; out1<=" <> CXXNameOfField[First@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out1) {\n", ""] <>
                      If[generationSizes[[i,j,4]] > 1, "for (int out2=1; out2<=" <> CXXNameOfField[Last@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out2) {\n", ""] <>
-                     "matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = std::max(\n" <> TextFormatting`IndentText["std::abs(std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]]] <> ")),\nmatrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")\n"] <> ");\n" <>
-                     If[generationSizes[[i,j,1]] > 1, "}\n", ""] <>
+                        TextFormatting`IndentText["double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]]] <> ");\n"] <>
+                        TextFormatting`IndentText["if (std::abs(matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")) < std::abs(temp)) {\n" <>
+                           TextFormatting`IndentText["matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = temp;\n"] <>
+                           "}\n"] <>
+   If[generationSizes[[i,j,1]] > 1, "}\n", ""] <>
                      If[generationSizes[[i,j,2]] > 1, "}\n", ""] <>
                      If[generationSizes[[i,j,3]] > 1, "}\n", ""] <>
-                     If[generationSizes[[i,j,4]] > 1, "}\n", ""] <> "\n"
+                     If[generationSizes[[i,j,4]] > 1, "}\n", ""] <> "\n" <>
+                     "}"
          ]
       ]
    ];
