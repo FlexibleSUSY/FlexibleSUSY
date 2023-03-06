@@ -205,7 +205,8 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_spectrum.cpp \
 		$(DIR)/test_CMSSM_susy_scale_constraint.cpp \
 		$(DIR)/test_CMSSM_weinberg_angle.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle_meta.cpp
+		$(DIR)/test_CMSSM_weinberg_angle_meta.cpp \
+		$(DIR)/test_CMSSM_unitarity.cpp
 TEST_SH += \
 		$(DIR)/test_CMSSM_gluino.sh
 endif
@@ -1221,6 +1222,8 @@ $(DIR)/test_SMSU3_low_scale_constraint.x: $(LIBSMSU3)
 $(DIR)/test_NSM_low_scale_constraint.x: $(LIBNSM)
 
 $(DIR)/test_VCMSSM_ewsb.x: $(LIBVCMSSM) $(LIBCMSSM)
+
+$(DIR)/test_CMSSM_unitarity.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSMSemiAnalytic_ewsb.x: $(LIBCMSSMSemiAnalytic)
 
