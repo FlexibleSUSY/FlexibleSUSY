@@ -2839,8 +2839,8 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@fillSLHAIO@" -> fillSLHAIO,
                             "@decaySetttingsOverride@" -> IndentText[decaySetttingsOverride],
                             "@calculateUnitarity@" -> If[FSUnitarityConstraints,
-         "auto unitarityMatrix = " <> FSModelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n" <>
-                               "slha_io.set_unitarity_infinite_s(std::get<0>(models), {unitarityMatrix.first, unitarityMatrix.second.coeffs().abs().maxCoeff()}, spectrum_generator_settings);", ""],
+                               "auto unitarityMatrix = " <> FSModelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n" <>
+                               "slha_io.set_unitarity_infinite_s(std::get<0>(models).get_scale(), {unitarityMatrix.first, unitarityMatrix.second.coeffs().abs().maxCoeff()}, spectrum_generator_settings);", ""],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
