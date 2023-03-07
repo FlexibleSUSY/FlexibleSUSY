@@ -45,21 +45,48 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
    For[i=1, i<=Length[a0], i++,
       For[j=i, j<=Length[a0[[i]]], j++,
          If[a0[[i,j]] =!= 0,
-            resultInfinite = resultInfinite <> "// " <> ToString[FSScatteringPairs[[i]]] <> "->" <> ToString[FSScatteringPairs[[j]]] <> "\n" <>
-                     "{\n" <>
-                     If[generationSizes[[i,j,1]] > 1, "for (int in1=0; in1<" <> CXXNameOfField[First@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in1) {\n", ""] <>
-                     If[generationSizes[[i,j,2]] > 1, "for (int in2=0; in2<" <> CXXNameOfField[Last@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in2) {\n", ""] <>
-                     If[generationSizes[[i,j,3]] > 1, "for (int out1=0; out1<" <> CXXNameOfField[First@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out1) {\n", ""] <>
-                     If[generationSizes[[i,j,4]] > 1, "for (int out2=0; out2<" <> CXXNameOfField[Last@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out2) {\n", ""] <>
-                        TextFormatting`IndentText["double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]] /. decrementIndices ] <> ");\n"] <>
-                        TextFormatting`IndentText["if (std::abs(matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")) < std::abs(temp)) {\n" <>
-                           TextFormatting`IndentText["matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = temp;\n"] <>
-                           "}\n"] <>
-   If[generationSizes[[i,j,1]] > 1, "}\n", ""] <>
-                     If[generationSizes[[i,j,2]] > 1, "}\n", ""] <>
-                     If[generationSizes[[i,j,3]] > 1, "}\n", ""] <>
-                     If[generationSizes[[i,j,4]] > 1, "}\n", ""] <> "\n" <>
-                     "}\n"
+            resultInfinite = resultInfinite <> "\n// " <> ToString[FSScatteringPairs[[i]]] <> "->" <> ToString[FSScatteringPairs[[j]]] <> "\n" <>
+                     If[Count[generationSizes[[i,j]], x_/;x>1] === 0, "{\n", ""] <>
+                        If[generationSizes[[i,j,1]] > 1,
+                           "for (int in1=0; in1<" <> CXXNameOfField[First@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in1) {\n",
+                           ""
+                        ] <>
+                        If[generationSizes[[i,j,2]] > 1,
+                           Nest[TextFormatting`IndentText, "for (int in2=0; in2<" <> CXXNameOfField[Last@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++in2) {\n", If[generationSizes[[i,j,1]] > 1, 1, 0]],
+                           ""
+                        ] <>
+                        If[generationSizes[[i,j,3]] > 1,
+                           Nest[TextFormatting`IndentText, "for (int out1=0; out1<" <> CXXNameOfField[First@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out1) {\n", If[generationSizes[[i,j,1]] > 1, 1, 0] +If[generationSizes[[i,j,2]] > 1, 1, 0] ],
+                           ""
+                        ] <>
+                        If[generationSizes[[i,j,4]] > 1,
+                           Nest[TextFormatting`IndentText, "for (int out2=0; out2<" <> CXXNameOfField[Last@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations; ++out2) {\n", If[generationSizes[[i,j,1]] > 1, 1, 0] +If[generationSizes[[i,j,2]] > 1, 1, 0] + If[generationSizes[[i,j,3]] > 1, 1, 0]],
+                           ""
+                        ] <>
+                        Nest[
+                           TextFormatting`IndentText,
+                              "double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]] /. decrementIndices] <> ");\n" <>
+                              "if (std::abs(matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")) < std::abs(temp)) {\n" <>
+                                 TextFormatting`IndentText["matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = temp;\n"] <>
+                              "}\n",
+                           If[MemberQ[{0, 1}, Count[generationSizes[[i,j]], x_/;x>1]], 1, Count[generationSizes[[i,j]], x_/;x>1]]
+                        ] <>
+                        If[generationSizes[[i,j,4]] > 1,
+                           Nest[TextFormatting`IndentText, "}\n", If[generationSizes[[i,j,1]] > 1, 1, 0] +If[generationSizes[[i,j,2]] > 1, 1, 0] + If[generationSizes[[i,j,3]] > 1, 1, 0]],
+                           ""
+                        ] <>
+                        If[generationSizes[[i,j,3]] > 1,
+                           Nest[TextFormatting`IndentText, "}\n", If[generationSizes[[i,j,1]] > 1, 1, 0] +If[generationSizes[[i,j,2]] > 1, 1, 0] ],
+                           ""
+                        ] <>
+                        If[generationSizes[[i,j,2]] > 1,
+                           Nest[TextFormatting`IndentText, "}\n", If[generationSizes[[i,j,1]] > 1, 1, 0]],
+                           ""
+                        ] <>
+                        If[Count[generationSizes[[i,j]], x_/;x>1] ===0 || generationSizes[[i,j, 1]] > 1,
+                           "}\n",
+                           ""
+                        ]
          ]
       ]
    ];
