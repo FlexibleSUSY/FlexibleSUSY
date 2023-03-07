@@ -856,6 +856,19 @@ void SLHA_io::set_FlexibleDecay_settings(const FlexibleDecay_settings& settings)
    set_block(ss);
 }
 
+void SLHA_io::set_unitarity_infinite_s(
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
+   bool allowed, double max_eigenvalue, double scale)
+{
+   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
+      std::ostringstream block;
+      block << "Block FlexibleSUSYUnitarity Q= " << FORMAT_SCALE(scale) << '\n'
+            << FORMAT_ELEMENT(0, allowed, "Tree-level unitarity limits fulfilled or not")
+            << FORMAT_ELEMENT(1, max_eigenvalue, "max(|re(a0)|)");
+      set_block(block);
+   }
+}
+
 void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd)
 {
    std::ostringstream ss;

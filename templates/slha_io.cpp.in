@@ -178,6 +178,13 @@ void @ModelName@_slha_io::set_FlexibleDecay_settings(const FlexibleDecay_setting
    slha_io.set_FlexibleDecay_settings(settings);
 }
 
+void @ModelName@_slha_io::set_unitarity_infinite_s(
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
+   bool allowed, double max_eigenvalue, double scale)
+{
+   slha_io.set_unitarity_infinite_s(spectrum_generator_settings, allowed, max_eigenvalue, scale);
+}
+
 /**
  * Stores the SMINPUTS input parameters in the SLHA object.
  *
@@ -508,24 +515,6 @@ void @ModelName@_slha_io::set_extra(
    }
 
 @writeExtraSLHAOutputBlock@
-}
-
-void @ModelName@_slha_io::set_unitarity_infinite_s(
-   double scale,
-   std::pair<bool, double> const& unitarity,
-   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings)
-{
-
-   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
-      {
-         std::ostringstream block;
-         block << "Block FlexibleSUSYUnitarity Q= " << FORMAT_SCALE(scale) << '\n'
-               << FORMAT_ELEMENT(0, unitarity.first, "Tree-level unitarity limits fulfilled or not")
-               << FORMAT_ELEMENT(1, unitarity.second, "max(|re(a0)|)");
-         slha_io.set_block(block);
-      }
-   }
-
 }
 
 /**
