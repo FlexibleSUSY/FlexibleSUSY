@@ -65,7 +65,7 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
                         ] <>
                         Nest[
                            TextFormatting`IndentText,
-                              "double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]] /. decrementIndices] <> ");\n" <>
+                              WrapLines["double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]] /. decrementIndices] <> ");\n"] <>
                               "if (std::abs(matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")) < std::abs(temp)) {\n" <>
                                  TextFormatting`IndentText["matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = temp;\n"] <>
                               "}\n",
