@@ -35,18 +35,21 @@ namespace @ModelName@_unitarity {
 
 static constexpr int size = @scatteringPairsLength@;
 
-inline double Sqrt2(int i, int j) {
+inline
+double Sqrt2(int i, int j) {
    // 1/Sqrt[2] or 1
    return i==j ? 0.707106781186547524 : 1;
 }
 
-inline bool is_unitarity_fulfilled(Eigen::SparseMatrix<double> const& m) {
-   // if max(|re(a0)|) < 1/2 then the point is allowed
+inline
+bool is_unitarity_fulfilled(Eigen::SparseMatrix<double> const& m) {
+   // if max(|re(a0)|) <= 1/2 then the point is allowed
    return m.coeffs().abs().maxCoeff() <= 0.5;
 }
 
 // s -> infinity limit
-std::pair<bool, Eigen::SparseMatrix<double>> max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates& model) {
+std::pair<bool, Eigen::SparseMatrix<double>>
+max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates& model) {
    Eigen::SparseMatrix<double> matrix(size, size);
 
    using namespace @ModelName@_cxx_diagrams::fields;
