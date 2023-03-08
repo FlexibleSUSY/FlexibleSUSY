@@ -48,15 +48,15 @@ bool is_unitarity_fulfilled(Eigen::SparseMatrix<double> const& m) {
 }
 
 // s -> infinity limit
-std::pair<bool, Eigen::SparseMatrix<double>>
-max_scattering_eigenvalue_infinite_s(const @ModelName@_mass_eigenstates& model) {
+std::tuple<bool, double, Eigen::SparseMatrix<double>>
+max_scattering_eigenvalue_infinite_s(@ModelName@_mass_eigenstates const& model) {
    Eigen::SparseMatrix<double> matrix(size, size);
 
    using namespace @ModelName@_cxx_diagrams::fields;
 
 @infiniteSMatrix@
    matrix.makeCompressed();
-   return {is_unitarity_fulfilled(matrix), matrix};
+   return {is_unitarity_fulfilled(matrix), model.get_scale(), matrix};
 }
 
 } // namespace @ModelName@_unitarity
