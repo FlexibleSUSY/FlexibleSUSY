@@ -18,23 +18,23 @@
 
 
 /**
- * @file @ModelName@_muon_gm2_wrapper.cpp
+ * @file @ModelName@_muon_amm_wrapper.cpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#include "@ModelName@_lepton_gm2_wrapper.hpp"
+#include "@ModelName@_lepton_amm_wrapper.hpp"
 #include "@ModelName@_amm.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
 namespace flexiblesusy {
-namespace MRSSM2_lepton_gm2_wrapper {
+namespace @ModelName@_lepton_amm_wrapper {
 
 using namespace @ModelName@_cxx_diagrams;
 
-@gm2WrapperDef@
+@ammWrapperDef@
 
-@gm2UncWrapperDef@
+@ammUncWrapperDef@
 
 }
 }

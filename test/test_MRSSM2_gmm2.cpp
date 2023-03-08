@@ -26,7 +26,7 @@
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "MRSSM2_amm.hpp"
-#include "MRSSM2_lepton_gm2_wrapper.hpp"
+#include "MRSSM2_lepton_amm_wrapper.hpp"
 #include "cxx_qft/MRSSM2_qft.hpp"
 
 using namespace flexiblesusy;
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
 
    auto amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, -8.1719300481437495e-11, 1e-7);
-   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_amm_wrapper::calculate_Fe_amm(m, qedqcd, 1), 1e-16);
    double damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(damu, 9.070380471705522e-13, 1e-7);
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
 
    amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 6.2743365882975202e-12, 1e-7);
-   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_gm2_wrapper::calculate_Fe_gm2(m, qedqcd, 1), 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_amm_wrapper::calculate_Fe_amm(m, qedqcd, 1), 1e-16);
 
    atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, 2);
    BOOST_CHECK_CLOSE_FRACTION(atau, 3.7317209742717716e-09, 1e-7);
