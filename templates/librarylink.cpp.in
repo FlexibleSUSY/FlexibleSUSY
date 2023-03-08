@@ -40,6 +40,7 @@
 #include "standard_model_two_scale_model.hpp"
 #include "lowe.h"
 @decaysIncludes@
+@unitarityIncludes@
 
 #include <mathlink.h>
 #include "mathlink_utils.hpp"
@@ -154,6 +155,7 @@ public:
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
    virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) = 0;
 @calculateDecaysVirtualFunc@
+@calculateUnitarityVirtualFunc@
 };
 
 template <typename Solver_type>
@@ -175,6 +177,7 @@ public:
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
    virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) override;
 @calculateSpectrumDecaysPrototype@
+@calculateSpectrumUnitarityPrototype@
 private:
    std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
    Spectrum_generator_problems problems{};   ///< spectrum generator problems
@@ -215,6 +218,7 @@ public:
    void check_spectrum(MLINK link) const;
    void calculate_model_observables();
 @calculateModelDecaysPrototype@
+@calculateModelUnitarityPrototype@
    double get_model_scale() const {
       check_spectrum_pointer();
       return spectrum->get_model_scale();
@@ -666,6 +670,7 @@ void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
    observables = calculate_observables(std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
 }
 @calculateSpectrumDecaysFunction@
+@calculateSpectrumUnitarityFunction@
 /******************************************************************/
 
 template <typename Solver_type>
@@ -742,6 +747,7 @@ void Model_data::calculate_model_observables()
    spectrum->calculate_model_observables(qedqcd, physical_input);
 }
 @calculateModelDecaysFunction@
+@calculateModelUnitarityFunction@
 /******************************************************************/
 
 template <typename Element_t>
@@ -1164,4 +1170,5 @@ DLLEXPORT int FS@ModelName@CalculateObservables(
    return LIBRARY_NO_ERROR;
 }
 @mathlinkDecaysCalculationFunction@
+@mathlinkUnitarityCalculationFunction@
 } // extern "C"

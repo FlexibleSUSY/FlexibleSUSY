@@ -2881,6 +2881,8 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
+            unitarityIncludes = "",
+            mathlinkUnitarityCalculationFunction = "", calculateSpectrumUnitarityPrototype = "", calculateSpectrumUnitarityFunction = "", calculateUnitarityVirtualFunc = "", loadCalculateUnitarityFunction = "",calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
             decayIndex = "const Index_t n_fd_settings = 0;"},
@@ -2906,6 +2908,20 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               defaultSolverType = "-1",
               defaultSolverType = GetBVPSolverSLHAOptionKey[FlexibleSUSY`FSBVPSolvers[[1]]];
              ];
+           If[FSUnitarityConstraints,
+              mathlinkUnitarityCalculationFunction = FSMathLink`CreateMathLinkUnitarityCalculation[FlexibleSUSY`FSModelName];
+              unitarityIncludes = "#include \"" <> FlexibleSUSY`FSModelName <> "_unitarity.hpp\"";
+              {calculateSpectrumUnitarityPrototype, calculateSpectrumUnitarityFunction} =
+                  FSMathLink`CreateSpectrumUnitarityCalculation[FlexibleSUSY`FSModelName];
+              {calculateModelUnitarityPrototype, calculateModelUnitarityFunction} =
+                  FSMathLink`CreateModelUnitarityCalculation[FlexibleSUSY`FSModelName];
+              calculateUnitarityVirtualFunc = FSMathLink`CreateSpectrumUnitarityInterface[FlexibleSUSY`FSModelName];
+              loadCalculateUnitarityFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CalculateUnitarity\", LinkObject, LinkObject];\n";
+              calculateUnitarityMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::error = \"`1`\";\n" <>
+                                        "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::warning = \"`1`\";\n";
+           ];
            If[FlexibleSUSY`FSCalculateDecays,
               decaysData = FlexibleSUSY`FSModelName <> "_decays decays{};              ///< decays";
               getDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysGetterInterface[FlexibleSUSY`FSModelName];
@@ -2988,6 +3004,15 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
                             "@fillFDSettings@" -> fillFDSettings,
                             "@decayIndex@" -> decayIndex,
+                            "@calculateUnitarityVirtualFunc@" -> IndentText[calculateUnitarityVirtualFunc],
+                            "@calculateSpectrumUnitarityPrototype@" -> IndentText[calculateSpectrumUnitarityPrototype],
+                            "@calculateSpectrumUnitarityFunction@" -> calculateSpectrumUnitarityFunction,
+                            "@calculateModelUnitarityPrototype@" -> IndentText[calculateModelUnitarityPrototype],
+                            "@calculateModelUnitarityFunction@" -> calculateModelUnitarityFunction,
+                            "@mathlinkUnitarityCalculationFunction@" -> mathlinkUnitarityCalculationFunction,
+                            "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
+                            "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
+                            "@unitarityIncludes@" -> unitarityIncludes,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];

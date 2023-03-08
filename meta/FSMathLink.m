@@ -38,6 +38,10 @@ CreateModelDecaysCalculation::usage="";
 CreateMathLinkDecaysCalculation::usage="";
 FillDecaysSLHAData::usage="";
 PutDecays::usage="";
+CreateSpectrumUnitarityInterface::usage="";
+CreateSpectrumUnitarityCalculation::usage="";
+CreateModelUnitarityCalculation::usage="";
+CreateMathLinkUnitarityCalculation::usage="";
 
 Begin["`Private`"];
 
@@ -245,6 +249,9 @@ CreateModelDecaysCalculationName[] := CreateSpectrumDecaysCalculationName[];
 CreateSpectrumDecaysInterface[modelName_] :=
     "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) = 0;";
 
+CreateSpectrumUnitarityInterface[modelName_] :=
+    "virtual std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity() = 0;";
+
 CreateSpectrumDecaysCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
@@ -256,6 +263,21 @@ CreateSpectrumDecaysCalculation[modelName_] :=
                       "void " <> modelName <> "_spectrum_impl<Solver_type>::" <>
                       CreateSpectrumDecaysCalculationName[] <> "(\n" <>
                       TextFormatting`IndentText[args <> ")\n"] <> "{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <> function;
+           {prototype, function}
+          ];
+
+CreateSpectrumUnitarityInterface[modelName_] :=
+    "virtual std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity() = 0;";
+
+CreateSpectrumUnitarityCalculation[modelName_] :=
+    Module[{prototype = "", args = "", body = "", function = ""},
+           prototype = "virtual std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity();\n";
+           args = "";
+           body = "return " <> modelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n";
+           function = "template <typename Solver_type>\n" <>
+                      "std::tuple<bool, double, Eigen::SparseMatrix<double>> " <> modelName <> "_spectrum_impl<Solver_type>::calculate_unitarity() {\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <> function;
            {prototype, function}
@@ -282,6 +304,17 @@ CreateModelDecaysCalculation[modelName_] :=
                         ] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> CreateModelDecaysCalculationName[] <> "()\n{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           {prototype, function}
+          ];
+
+CreateModelUnitarityCalculation[modelName_] :=
+    Module[{prototype = "", body = "", function = ""},
+           prototype = "std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity();\n";
+           body = "check_spectrum_pointer();\n" <>
+                  "return spectrum->calculate_unitarity();\n";
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
+                      "std::tuple<bool, double, Eigen::SparseMatrix<double>> Model_data::calculate_unitarity()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
            {prototype, function}
           ];
@@ -417,6 +450,35 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
       data.put_decays(link);
    } catch (const flexiblesusy::Error& e) {
       put_message(link, \"FS" <> modelName <> "CalculateDecays\", \"error\", e.what());
+      put_error_output(link);
+   }
+
+   return LIBRARY_NO_ERROR;
+}\n";
+
+CreateMathLinkUnitarityCalculation[modelName_] :=
+    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
+DLLEXPORT int FS" <> modelName <> "CalculateUnitarity(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::" <> modelName <> "_librarylink;
+
+   if (!check_number_of_args(link, 1, \"FS" <> modelName <> "CalculateUnitarity\"))
+      return LIBRARY_TYPE_ERROR;
+
+   const auto hid = get_handle_from(link);
+
+   try {
+      auto& data = find_data(hid);
+      const auto res = data.calculate_unitarity();
+      MLPutFunction(link, \"List\", 1);
+      MLPutRule(link, \"" <> modelName <> "\");
+      MLPutFunction(link, \"List\", 3);
+      MLPutRuleTo(link, std::get<0>(res), \"FlexibleSUSYUnitarity`Allowed\");
+      MLPutRuleTo(link, std::get<1>(res), \"FlexibleSUSYUnitarity`Scale\");
+      MLPutRuleTo(link, std::get<2>(res).coeffs().abs().maxCoeff(), \"FlexibleSUSYUnitarity`MaxAbsReEigen\");
+   } catch (const flexiblesusy::Error& e) {
+      put_message(link, \"FS" <> modelName <> "CalculateUnitarity\", \"error\", e.what());
       put_error_output(link);
    }
 
