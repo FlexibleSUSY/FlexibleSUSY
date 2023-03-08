@@ -2508,7 +2508,7 @@ WriteAMMClass[fields_List, files_List] :=
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPoleMass,
-            BarrZeeLeptonIdx, gm2WrapperDecl, gm2WrapperDef, gm2UncWrapperDecl, gm2UncWrapperDef},
+            BarrZeeLeptonIdx, ammWrapperDecl, ammWrapperDef, ammUncWrapperDecl, ammUncWrapperDef},
 
       calculation =
          If[Length[fields] =!= 0,
@@ -2572,15 +2572,15 @@ TextFormatting`IndentText[
 
       BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
 
-      gm2WrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
-      gm2UncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
-      gm2WrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+      ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      ammWrapperDef = StringRiffle[
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
    return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
-      gm2UncWrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_gm2_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+      ammUncWrapperDef = StringRiffle[
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
    return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
@@ -2597,10 +2597,10 @@ TextFormatting`IndentText[
          "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
          "@AMMBarZeeCalculation@" -> TextFormatting`IndentText[barZee],
-         "@gm2WrapperDecl@" -> gm2WrapperDecl,
-         "@gm2WrapperDef@" -> gm2WrapperDef,
-         "@gm2UncWrapperDecl@" -> gm2UncWrapperDecl,
-         "@gm2UncWrapperDef@" -> gm2UncWrapperDef,
+         "@ammWrapperDecl@" -> ammWrapperDecl,
+         "@ammWrapperDef@" -> ammWrapperDef,
+         "@ammUncWrapperDecl@" -> ammUncWrapperDecl,
+         "@ammUncWrapperDef@" -> ammUncWrapperDef,
          Sequence @@ GeneralReplacementRules[]
         }];
 
@@ -5163,12 +5163,12 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ammFields,
               {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.hpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.hpp"}]},
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_amm_wrapper.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_amm_wrapper.hpp"}]},
                {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]},
-               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_gm2_wrapper.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_gm2_wrapper.cpp"}]}}];
+               {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_amm_wrapper.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_amm_wrapper.cpp"}]}}];
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
