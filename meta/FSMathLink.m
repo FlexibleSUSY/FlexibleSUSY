@@ -475,7 +475,7 @@ DLLEXPORT int FS" <> modelName <> "CalculateUnitarity(
       MLPutRule(link, \"" <> modelName <> "\");
       MLPutFunction(link, \"List\", 3);
       MLPutRuleTo(link, std::get<0>(res), \"FlexibleSUSYUnitarity`Allowed\");
-      MLPutRuleTo(link, std::get<1>(res), \"FlexibleSUSYUnitarity`Scale\");
+      MLPutRuleTo(link, std::get<1>(res), \"FlexibleSUSYUnitarity`RenormalizationScale\");
       MLPutRuleTo(link, std::get<2>(res).coeffs().abs().maxCoeff(), \"FlexibleSUSYUnitarity`MaxAbsReEigen\");
    } catch (const flexiblesusy::Error& e) {
       put_message(link, \"FS" <> modelName <> "CalculateUnitarity\", \"error\", e.what());
