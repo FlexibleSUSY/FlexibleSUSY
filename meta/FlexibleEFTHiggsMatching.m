@@ -26,7 +26,6 @@ CalculateMHiggsPoleOneMomentumIteration::usage = "";
 Create3LoopMatching::usage = "";
 CallMatch2LoopTopMass::usage = "";
 CreateMt2Loop::usage = "";
-Call3LoopMatching::usage = "";
 CalculateRunningUpQuarkMasses::usage = "";
 CalculateRunningDownQuarkMasses::usage = "";
 CalculateRunningDownLeptonMasses::usage = "";
@@ -53,9 +52,7 @@ Mh2_pole = M_pole(idx);"
 
 Create3LoopMatching[] :=
 Module[{},
-"void match_high_to_low_scale_sm_3l(Standard_model& sm, 
-    const NUHMSSMNoFVHimalayaEFTHiggs_mass_eigenstates& model_input, int idx)
-{ 
+"
    using namespace flexiblesusy::sm_twoloophiggs;
       
    static const double gauge_less = 1e-10; 
@@ -86,6 +83,10 @@ Module[{},
    match_high_to_low_scale_sm_1l(sm_1l_gl, model_gl, idx);
    match_high_to_low_scale_sm_1l(sm_1l_gl_g3less, model_no_g3, idx);
    match_high_to_low_scale_sm_2l(sm_2l, model, idx);
+
+   sm = sm_2l; 
+
+   // calculation of 3-loop threshold corrections below
       
    const double lambda_2l = sm_2l.get_Lambdax();
    double delta_lambda_3l = 0.;
@@ -133,36 +134,23 @@ Module[{},
       Eigen::Matrix<double, 2, 2>::Zero());
 
    try {
-      const auto mh2_tree = calculate_mh2_0l(model);
       self_energy_3l = Re(model_gl.self_energy_hh_3loop());
 
-    //const auto Mh2_loop = (calculate_mh2_tree_level(model_gl) - self_energy_3l).eval();
+      const auto Mh2_loop = (calculate_mh2_0l(model_gl) - self_energy_3l).eval();
 
-    const auto Mh2_loop = (mh2_tree - self_energy_3l).eval();
+      Eigen::Array<double, 2, 1> Mh2_pole;
+      fs_diagonalize_hermitian(Mh2_loop, Mh2_pole);
+      double mh2_bsm_shift = Mh2_pole(idx) - Sqr(model_gl.get_Mhh(idx));
 
-    Eigen::Array<double, 2, 1> Mh2_pole;
-    fs_diagonalize_hermitian(Mh2_loop, Mh2_pole);
-    double mh2_bsm_shift = Mh2_pole(idx) - Sqr(model_gl.get_Mhh(idx));
+      delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion) / v2;
+   } catch (const flexiblesusy::Error &e){}
 
-    delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion) / v2;
-    } catch (const flexiblesusy::Error &e){}
+   const double lambda_3l = lambda_2l + delta_lambda_3l;
+   sm.set_Lambdax(lambda_3l);
+   sm.calculate_DRbar_masses();    
+   "
+];
 
-    const double lambda_3l = lambda_2l + delta_lambda_3l;
-    sm.set_Lambdax(lambda_3l);
-    sm.calculate_DRbar_masses();
-}    
-      "
-      ];
-
-
-Call3LoopMatching[] :=
-Module[{},
-"case 3: {
-   match_high_to_low_scale_sm_3l(sm, model, idx);
-   return;
-} 
-"
-      ];
 
 CallMatch2LoopTopMass[] :=
 Module[{},

@@ -959,8 +959,13 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
 
 }
 
+void match_high_to_low_scale_sm_3l(Standard_model& sm, 
+    const @ModelName@_mass_eigenstates& model_input, int idx)
+{ 
+
 @threeLoopLambdaMatching@ 
 
+}
 
 
 /**
@@ -1003,17 +1008,22 @@ YdownLeptonsMSbar(0,0) = 0.;
       }
 
       case 1: {
-
          match_high_to_low_scale_sm_1l(sm, model, idx);
          return;
       }
 
       case 2: {
+         auto sm_1l = sm;
+         match_high_to_low_scale_sm_1l(sm_1l, model, idx);
          match_high_to_low_scale_sm_2l(sm, model, idx);
+         sm.set_Yu(2,2, sm_1l.get_Yu(2,2));
          return;
       }
 
-   @callMatch3Loop@
+      case 3: {
+         match_high_to_low_scale_sm_3l(sm, model, idx);
+         return;
+      }    
    }
 
    WARNING("Using only 2-loop-level matching, because 3-loop is not yet implemented.");

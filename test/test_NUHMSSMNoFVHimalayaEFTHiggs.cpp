@@ -48,6 +48,22 @@ double calc_lambda(
    return sm.get_Lambdax();
 }
 
+double calc_lambda_3loop(
+   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
+   softsusy::QedQcd& qedqcd,
+   Spectrum_generator_settings& settings)
+{
+
+   NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   const double Qmatch = 50000; 
+   auto sm  = spectrum_generator.get_sm();
+   sm.run_to(Qmatch);
+   return sm.get_Lambdax();
+}
+
 double calc_Mh( 
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
    softsusy::QedQcd& qedqcd,
@@ -165,6 +181,39 @@ output_2loop edc_output_2loop( char const* const slha_input)
    results[1]=calc_Mh(input, qedqcd, settings);
 
    return results;
+}
+
+
+double edc_output_3loop( char const* const slha_input)
+{
+   output_2loop results = {0.,0.};
+
+   std::stringstream istream_case_1(slha_input);
+   NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
+   slha_io.read_from_stream(istream_case_1);
+
+   // extract the input parameters
+
+   softsusy::QedQcd qedqcd;
+   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
+   Spectrum_generator_settings settings;
+
+   try {
+      slha_io.fill(settings);
+      slha_io.fill(qedqcd);
+      slha_io.fill(input);
+   } catch (const Error& error) {
+      BOOST_TEST_MESSAGE(error.what());
+      BOOST_TEST(false);
+   }
+
+
+   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 3); 
+   settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
+
+   return calc_lambda_3loop(input, qedqcd, settings);
 }
 
 
@@ -564,10 +613,10 @@ Block AEIN
 
 
 // 2-loop scenarios: 
-// At = (1/5 - 3)*50000 = -140000
-// At = (1/5 - 2)*50000 = -90000
-// At = (1/5 + 3)*50000 =  110000
-// At = (1/5 + 3)*50000 =  160000
+// a) At = (1/5 - 3)*50000 = -140000
+// b) At = (1/5 - 2)*50000 = -90000
+// c) At = (1/5 + 2)*50000 =  100000
+// d) At = (1/5 + 3)*50000 =  160000
 //
 
 // scenario 2-loop-a degenrate case with high stop mixing At = (1/5 - 3)*50000 = -140000
@@ -762,7 +811,7 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-// scenario 2-loop-c degenrate case with high stop mixing At = (1/5 + 3)*50000 approx  110100
+// scenario 2-loop-c degenrate case with high stop mixing At = (1/5 + 2)*50000 approx  110100
 char const * const slha_input_case_2loop_c = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
@@ -943,7 +992,7 @@ Block MSD2IN
 Block AUIN
   1  1     0            # Au(1,1)
   2  2     0            # Au(2,2)
-  3  3     160000    # Au(3,3)
+  3  3     160000       # Au(3,3)
 Block ADIN
   1  1     0   # Ad(1,1)
   2  2     0   # Ad(2,2)
@@ -966,9 +1015,12 @@ Block AEIN
 
    
    output_2loop results_new_2loop_1  = edc_output_2loop(slha_input_case_2loop_a);
-  output_2loop results_new_2loop_2  = edc_output_2loop(slha_input_case_2loop_b);
+   output_2loop results_new_2loop_2  = edc_output_2loop(slha_input_case_2loop_b);
    output_2loop results_new_2loop_3  = edc_output_2loop(slha_input_case_2loop_c);
    output_2loop results_new_2loop_4  = edc_output_2loop(slha_input_case_2loop_d);
+
+  output_2loop results_new_3loop  = {edc_output_3loop(slha_input_case_2loop_a),
+      edc_output_3loop(slha_input_case_2loop_d)};
 
   
    output results_old_1 = {129.024202, 0.125588145, 0.125768663};
@@ -981,6 +1033,8 @@ Block AEIN
    output_2loop results_old_2loop_3 = {130.86500014892152, 130.66749808261707};
    output_2loop results_old_2loop_4 = {128.87146686565686, 128.53192456935258};
 
+   output_2loop results_old_3loop = {0.11685905941993063, 0.12118666568388101};
+// 
 
    for(int i=0; i<3; i++){
       BOOST_CHECK_CLOSE_FRACTION(results_new_1[i], results_old_1[i], 2e-4);
@@ -994,5 +1048,6 @@ Block AEIN
       BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_2[i], results_old_2loop_2[i], 5e-4);
       BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_3[i], results_old_2loop_3[i], 5e-4);
       BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_4[i], results_old_2loop_4[i], 5e-4);
+      BOOST_CHECK_CLOSE_FRACTION(results_new_3loop[i], results_old_3loop[i], 5e-5);
    }
 }

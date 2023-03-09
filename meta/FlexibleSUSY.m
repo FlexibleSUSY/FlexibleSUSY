@@ -1438,8 +1438,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             calculateMUpQuarkPole1L = "", calculateMDownQuarkPole1L = "",
             calculateMDownLeptonPole1L = "",
             calculateMHiggsPoleOneMomentumIteration = "",
-            callMatch3Loop = "",
-            threeLoopLambdaMatching = "",
+            threeLoopLambdaMatching = "throw SetupError(\"3-loop matching not enabled.\");",
             callMatch2LoopTopMass = "",
             createMt2Loop = ""},
            If[FlexibleSUSY`FlexibleEFTHiggs === True,
@@ -1465,7 +1464,6 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               calculateMHiggsPoleOneMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleOneMomentumIteration[SARAH`HiggsBoson];
           If[ FlexibleSUSY`UseHiggs3LoopMSSM === True, 
               threeLoopLambdaMatching =  FlexibleEFTHiggsMatching`Create3LoopMatching[];
-              callMatch3Loop =  FlexibleEFTHiggsMatching`Call3LoopMatching[];
               createMt2Loop =  FlexibleEFTHiggsMatching`CreateMt2Loop[];
               callMatch2LoopTopMass =  FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[]
             ];
@@ -1489,7 +1487,6 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@calculateMHiggsPoleOneMomentumIteration@" -> IndentText[calculateMHiggsPoleOneMomentumIteration],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
-                         "@callMatch3Loop@" -> IndentText[callMatch3Loop],
                          "@createMt2Loop@" -> IndentText[createMt2Loop],
                          "@callMatch2LoopTopMass@" -> IndentText[callMatch2LoopTopMass],
                          Sequence @@ GeneralReplacementRules[]
