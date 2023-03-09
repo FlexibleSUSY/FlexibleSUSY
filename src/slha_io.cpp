@@ -864,7 +864,7 @@ void SLHA_io::set_unitarity_infinite_s(
       std::ostringstream block;
       block << "Block FlexibleSUSYUnitarity Q= " << FORMAT_SCALE(scale) << '\n'
             << FORMAT_ELEMENT(0, allowed, "Tree-level unitarity limits fulfilled or not")
-            << FORMAT_ELEMENT(1, max_eigenvalue, "max(|re(a0)|)");
+            << FORMAT_ELEMENT(1, max_eigenvalue, "max(|re(eigenvalues(a0))|)");
       set_block(block);
    }
 }

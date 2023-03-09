@@ -28,7 +28,7 @@
 
 #include "@ModelName@_mass_eigenstates.hpp"
 
-#include <Eigen/SparseCore>
+#include <Eigen/Core>
 
 #include <tuple>
 
@@ -37,7 +37,7 @@ class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_unitarity {
 
-std::tuple<bool, double, Eigen::SparseMatrix<double>>
+std::tuple<bool, double, double, Eigen::MatrixXcd>
 max_scattering_eigenvalue_infinite_s(@ModelName@_mass_eigenstates const&);
 
 } // namespace @ModelName@_unitarity

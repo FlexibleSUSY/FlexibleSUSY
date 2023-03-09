@@ -26,7 +26,9 @@ GetScatteringMatrix::usage = "";
 
 Begin["`Private`"];
 
-InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0, decrementIndices},
+FSScatteringPairsSizes[pairs_] := Map[TreeMasses`GetDimension, pairs, {2}];
+
+InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0, decrementIndices, removeFactor=16*Pi},
    (* CPP definitions of parameters present in the expression *)
    paramsCPP =
       StringJoin[
@@ -42,6 +44,7 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
    (* only for test
    a0 = a0 /. Delta[c1_?SarahColorIndexQ, c2_?SarahColorIndexQ] :> 1;*)
    resultInfinite = "";
+   fsScatteringPairsSizes = FSScatteringPairsSizes[FSScatteringPairs];
    For[i=1, i<=Length[a0], i++,
       For[j=i, j<=Length[a0[[i]]], j++,
          If[a0[[i,j]] =!= 0,
@@ -65,11 +68,32 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
                         ] <>
                         Nest[
                            TextFormatting`IndentText,
-                              WrapLines["double temp = std::real(" <> ToString@CForm[FullSimplify[a0[[i,j]]] /. decrementIndices] <> ");\n"] <>
-                              "if (std::abs(matrix.coeff(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ")) < std::abs(temp)) {\n" <>
-                                 TextFormatting`IndentText["matrix.coeffRef(" <> ToString[i-1] <> ", " <> ToString[j-1] <> ") = temp;\n"] <>
-                              "}\n",
-                           If[MemberQ[{0, 1}, Count[generationSizes[[i,j]], x_/;x>1]], 1, Count[generationSizes[[i,j]], x_/;x>1]]
+                              WrapLines["const std::complex<double> temp = " <> ToString@CForm[FullSimplify[removeFactor*a0[[i,j]]] /. decrementIndices] <> ";\n"] <>
+                                    With[
+                                    {
+                                       rowIdxStr = ToString[Plus@@Times@@@FSScatteringPairsSizes[Take[FSScatteringPairs, i-1]]] <> If[generationSizes[[i,j,1]] > 1, "+in1", ""] <>
+                                          If[generationSizes[[i,j,2]] > 1,
+                                             "+in2" <>
+                                                If[generationSizes[[i,j,1]] > 1,
+                                                   "*" <> CXXNameOfField[First@FSScatteringPairs[[i]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations",
+                                                   ""
+                                                ],
+                                             ""
+                                          ],
+                                       columnIdxStr=ToString[Plus@@Times@@@FSScatteringPairsSizes[Take[FSScatteringPairs, j-1]]] <> If[generationSizes[[i,j,3]] > 1, "+out1", ""] <>
+                                          If[generationSizes[[i,j,4]] > 1,
+                                             "+out2" <>
+                                                If[generationSizes[[i,j,3]] > 1,
+                                                   "*" <> CXXNameOfField[First@FSScatteringPairs[[j]] /. Susyno`LieGroups`conj -> Identity] <> "::numberOfGenerations",
+                                                   ""
+                                                ],
+                                             ""
+                                          ]
+                                    },
+                                    "matrix.coeffRef(" <> rowIdxStr <> ", " <> columnIdxStr <> ") = temp;\n" <>
+                                    If[ToExpression[rowIdxStr] =!= ToExpression[columnIdxStr], If[!IntegerQ@ToExpression[rowIdxStr] || !IntegerQ@ToExpression[columnIdxStr], "if (" <> rowIdxStr <> " != " <> columnIdxStr <> ") ", ""] <> "matrix.coeffRef(" <> columnIdxStr <> ", " <> rowIdxStr <> ") = temp;\n", ""]
+                                 ],
+                              If[MemberQ[{0, 1}, Count[generationSizes[[i,j]], x_/;x>1]], 1, Count[generationSizes[[i,j]], x_/;x>1]]
                         ] <>
                         If[generationSizes[[i,j,4]] > 1,
                            Nest[TextFormatting`IndentText, "}\n", If[generationSizes[[i,j,1]] > 1, 1, 0] +If[generationSizes[[i,j,2]] > 1, 1, 0] + If[generationSizes[[i,j,3]] > 1, 1, 0]],
@@ -93,7 +117,7 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
    TextFormatting`IndentText[paramsCPP <> "\n" <> resultInfinite]
 ];
 
-GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs},
+GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs, FSScatteringPairsSizes},
    InitUnitarity[];
 
    (* only color neutral final states *)
@@ -105,8 +129,9 @@ GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringP
 
    generationSizes = Table[{i, j}, {i, Length[FSScatteringPairs]}, {j, Length[FSScatteringPairs]}];
    generationSizes = Apply[Join[TreeMasses`GetDimension /@ FSScatteringPairs[[#1]], TreeMasses`GetDimension /@ FSScatteringPairs[[#2]]]&, generationSizes, {2}];
+   FSScatteringPairsSizes = Map[TreeMasses`GetDimension, FSScatteringPairs, {2}];
 
-   {Length[FSScatteringPairs], InfiniteS[a0InfiniteS, generationSizes, FSScatteringPairs]}
+   {Plus@@Times@@@FSScatteringPairsSizes, InfiniteS[a0InfiniteS, generationSizes, FSScatteringPairs]}
 ];
 
 End[];

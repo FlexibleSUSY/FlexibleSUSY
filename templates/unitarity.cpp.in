@@ -30,6 +30,8 @@
 #include "sum.hpp"
 #include "wrappers.hpp"
 
+#include <Eigen/Eigenvalues>
+
 namespace flexiblesusy {
 namespace @ModelName@_unitarity {
 
@@ -38,25 +40,36 @@ static constexpr int size = @scatteringPairsLength@;
 inline
 double Sqrt2(int i, int j) {
    // 1/Sqrt[2] or 1
-   return i==j ? 0.707106781186547524 : 1;
+   return i==j ? oneOverSqrt2 : 1;
 }
 
 inline
-bool is_unitarity_fulfilled(Eigen::SparseMatrix<double> const& m) {
-   // if max(|re(a0)|) <= 1/2 then the point is allowed
-   return m.coeffs().abs().maxCoeff() <= 0.5;
+bool is_unitarity_fulfilled(double eigenval) {
+   // best eigenvalue <= 1/2 then the point is allowed
+   return eigenval <= 0.5;
+}
+
+inline
+double best_eigenvalue_abs(Eigen::MatrixXcd const& m) {
+   // max(|re(eigenvalues(a0))|)
+   return m.eigenvalues().unaryExpr(
+         [](std::complex<double> const& el) {return std::real(el);}
+      ).cwiseAbs().maxCoeff();
 }
 
 // s -> infinity limit
-std::tuple<bool, double, Eigen::SparseMatrix<double>>
+std::tuple<bool, double, double, Eigen::MatrixXcd>
 max_scattering_eigenvalue_infinite_s(@ModelName@_mass_eigenstates const& model) {
-   Eigen::SparseMatrix<double> matrix(size, size);
+   Eigen::MatrixXcd matrix = Eigen::MatrixXcd::Zero(size, size);
 
    using namespace @ModelName@_cxx_diagrams::fields;
 
 @infiniteSMatrix@
-   matrix.makeCompressed();
-   return {is_unitarity_fulfilled(matrix), model.get_scale(), matrix};
+   // reinstate factor 1/(16*Pi) that was removed from temp values
+   matrix = matrix.unaryExpr([](std::complex<double> const& el) { return oneOver16Pi*el; });
+
+   double best_eigenval = best_eigenvalue_abs(matrix);
+   return {is_unitarity_fulfilled(best_eigenval), model.get_scale(), best_eigenval, matrix};
 }
 
 } // namespace @ModelName@_unitarity

@@ -250,7 +250,7 @@ CreateSpectrumDecaysInterface[modelName_] :=
     "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) = 0;";
 
 CreateSpectrumUnitarityInterface[modelName_] :=
-    "virtual std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity() = 0;";
+    "virtual std::tuple<bool, double, double, Eigen::MatrixXcd> calculate_unitarity() = 0;";
 
 CreateSpectrumDecaysCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
@@ -269,15 +269,15 @@ CreateSpectrumDecaysCalculation[modelName_] :=
           ];
 
 CreateSpectrumUnitarityInterface[modelName_] :=
-    "virtual std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity() = 0;";
+    "virtual std::tuple<bool, double, double, Eigen::MatrixXcd> calculate_unitarity() = 0;";
 
 CreateSpectrumUnitarityCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
-           prototype = "virtual std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity();\n";
+           prototype = "virtual std::tuple<bool, double, double, Eigen::MatrixXcd> calculate_unitarity();\n";
            args = "";
            body = "return " <> modelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n";
            function = "template <typename Solver_type>\n" <>
-                      "std::tuple<bool, double, Eigen::SparseMatrix<double>> " <> modelName <> "_spectrum_impl<Solver_type>::calculate_unitarity() {\n" <>
+                      "std::tuple<bool, double, double, Eigen::MatrixXcd> " <> modelName <> "_spectrum_impl<Solver_type>::calculate_unitarity() {\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <> function;
            {prototype, function}
@@ -310,11 +310,11 @@ CreateModelDecaysCalculation[modelName_] :=
 
 CreateModelUnitarityCalculation[modelName_] :=
     Module[{prototype = "", body = "", function = ""},
-           prototype = "std::tuple<bool, double, Eigen::SparseMatrix<double>> calculate_unitarity();\n";
+           prototype = "std::tuple<bool, double, double, Eigen::MatrixXcd> calculate_unitarity();\n";
            body = "check_spectrum_pointer();\n" <>
                   "return spectrum->calculate_unitarity();\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
-                      "std::tuple<bool, double, Eigen::SparseMatrix<double>> Model_data::calculate_unitarity()\n{\n" <>
+                      "std::tuple<bool, double, double, Eigen::MatrixXcd> Model_data::calculate_unitarity()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
            {prototype, function}
           ];
@@ -476,7 +476,7 @@ DLLEXPORT int FS" <> modelName <> "CalculateUnitarity(
       MLPutFunction(link, \"List\", 3);
       MLPutRuleTo(link, std::get<0>(res), \"FlexibleSUSYUnitarity`Allowed\");
       MLPutRuleTo(link, std::get<1>(res), \"FlexibleSUSYUnitarity`RenormalizationScale\");
-      MLPutRuleTo(link, std::get<2>(res).coeffs().abs().maxCoeff(), \"FlexibleSUSYUnitarity`MaxAbsReEigen\");
+      MLPutRuleTo(link, std::get<2>(res), \"FlexibleSUSYUnitarity`MaxAbsReEigen\");
    } catch (const flexiblesusy::Error& e) {
       put_message(link, \"FS" <> modelName <> "CalculateUnitarity\", \"error\", e.what());
       put_error_output(link);
