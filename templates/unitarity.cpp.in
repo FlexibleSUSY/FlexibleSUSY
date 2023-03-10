@@ -72,7 +72,7 @@ max_scattering_eigenvalue_infinite_s(@ModelName@_mass_eigenstates const& model) 
    // reinstate factor 1/(16*Pi) that was removed from temp values
    matrix = matrix.unaryExpr([](std::complex<double> const& el) { return oneOver16Pi*el; });
 
-   double best_eigenval = best_eigenvalue_abs(matrix);
+   const double best_eigenval = best_eigenvalue_abs(matrix);
    return {is_unitarity_fulfilled(best_eigenval), model.get_scale(), best_eigenval, matrix};
 }
 
