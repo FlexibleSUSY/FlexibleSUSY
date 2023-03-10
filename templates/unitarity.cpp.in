@@ -62,7 +62,7 @@ double best_eigenvalue_abs(Eigen::MatrixXcd const& m) {
 }
 
 // s -> infinity limit
-std::tuple<bool, double, double, Eigen::MatrixXcd>
+UnitarityInfiniteS
 max_scattering_eigenvalue_infinite_s(@ModelName@_mass_eigenstates const& model) {
    Eigen::MatrixXcd matrix = Eigen::MatrixXcd::Zero(size, size);
 

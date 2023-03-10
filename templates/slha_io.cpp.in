@@ -178,13 +178,7 @@ void @ModelName@_slha_io::set_FlexibleDecay_settings(const FlexibleDecay_setting
    slha_io.set_FlexibleDecay_settings(settings);
 }
 
-void @ModelName@_slha_io::set_unitarity_infinite_s(
-   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
-   bool allowed, double max_eigenvalue, double scale)
-{
-   slha_io.set_unitarity_infinite_s(spectrum_generator_settings, allowed, max_eigenvalue, scale);
-}
-
+@setUnitarity@
 /**
  * Stores the SMINPUTS input parameters in the SLHA object.
  *

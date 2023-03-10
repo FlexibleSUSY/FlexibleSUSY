@@ -211,6 +211,7 @@ public:
    void put_observables(MLINK link) const;
    void put_slha(MLINK link) const;
 @putDecaysPrototype@
+@putUnitarityPrototype@
    void put_problems(MLINK link) const;
    void put_warnings(MLINK link) const;
    void put_model_spectra(MLINK link) const;
@@ -231,6 +232,7 @@ private:
    FlexibleDecay_settings flexibledecay_settings {}; ///< FlexibleDecay settings
    SLHA_io::Modsel modsel{};                 ///< MODSEL input
    std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr};  ///< spectrum information
+   @unitarityData@
 
    @ModelName@_slha_io get_slha_io() const;
 
@@ -526,6 +528,7 @@ void Model_data::put_warnings(MLINK link) const
       settings.get(Spectrum_generator_settings::force_positive_masses));
 
    spectrum->fill_slha_io(slha_io, settings, flexibledecay_settings);
+   @setUnitarity@
 
    return slha_io;
 }
@@ -705,6 +708,7 @@ void Model_data::put_observables(MLINK link) const
    MLEndPacket(link);
 }
 @putDecaysFunction@
+@putUnitarity@
 /******************************************************************/
 
 void Model_data::check_spectrum(MLINK link) const

@@ -2839,8 +2839,8 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@fillSLHAIO@" -> fillSLHAIO,
                             "@decaySetttingsOverride@" -> IndentText[decaySetttingsOverride],
                             "@calculateUnitarity@" -> If[FSUnitarityConstraints,
-                                 "auto unitarityMatrix = " <> FSModelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n" <>
-                                  "slha_io.set_unitarity_infinite_s(spectrum_generator_settings, std::get<0>(unitarityMatrix), std::get<2>(unitarityMatrix), std::get<1>(unitarityMatrix));",
+                                 "const auto unitarityStruct = " <> FSModelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n" <>
+                                  "slha_io.set_unitarity_infinite_s(spectrum_generator_settings, unitarityStruct);",
                                   ""
                                ],
                             Sequence @@ GeneralReplacementRules[]
@@ -2881,7 +2881,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
-            unitarityIncludes = "",
+            unitarityIncludes = "", setUnitarity = "", unitarityData = "", putUnitarity = "", putUnitarityPrototype = "",
             mathlinkUnitarityCalculationFunction = "", calculateSpectrumUnitarityPrototype = "", calculateSpectrumUnitarityFunction = "", calculateUnitarityVirtualFunc = "", loadCalculateUnitarityFunction = "",calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
@@ -2921,6 +2921,20 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                                             "CalculateUnitarity\", LinkObject, LinkObject];\n";
               calculateUnitarityMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::warning = \"`1`\";\n";
+              setUnitarity = "slha_io.set_unitarity_infinite_s(settings, unitarityData);";
+              unitarityData = "UnitarityInfiniteS unitarityData = {};";
+              putUnitarityPrototype = "void put_unitarity(MLINK link) const;";
+              putUnitarity = "void Model_data::put_unitarity(MLINK link) const
+{
+
+   MLPutFunction(link, \"List\", 1);
+   MLPutRule(link, \"" <> FlexibleSUSY`FSModelName <> "\");
+   MLPutFunction(link, \"List\", 3);
+   MLPutRuleTo(link, unitarityData.allowed, \"FlexibleSUSYUnitarity`Allowed\");
+   MLPutRuleTo(link, unitarityData.renScale, \"FlexibleSUSYUnitarity`RenormalizationScale\");
+   MLPutRuleTo(link, unitarityData.maxAbsReEigenval, \"FlexibleSUSYUnitarity`MaxAbsReEigen\");
+   MLEndPacket(link);
+};"
            ];
            If[FlexibleSUSY`FSCalculateDecays,
               decaysData = FlexibleSUSY`FSModelName <> "_decays decays{};              ///< decays";
@@ -3013,6 +3027,10 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
                             "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
                             "@unitarityIncludes@" -> unitarityIncludes,
+                            "@setUnitarity@" -> setUnitarity,
+                            "@unitarityData@" -> unitarityData,
+                            "@putUnitarityPrototype@" -> putUnitarityPrototype,
+                            "@putUnitarity@" -> putUnitarity,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -3088,7 +3106,8 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             numberOfDRbarBlocks, drBarBlockNames,
             setDecaysPrototypes = "", setDecaysFunctions = "",
             fillDecaysDataPrototypes = "", fillDecaysDataFunctions = "",
-            decaysHeaderIncludes = "", useDecaysData = ""
+            decaysHeaderIncludes = "", useDecaysData = "",
+            setUnitarity = "", setUnitarityInc = "", unitarityIncludes = ""
            },
            particles = DeleteDuplicates @ Flatten[TreeMasses`GetMassEigenstate /@ massMatrices];
            susyParticles = Select[particles, (!TreeMasses`IsSMParticle[#])&];
@@ -3145,6 +3164,22 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
            drBarBlockNames      = WriteOut`GetDRbarBlockNames[lesHouchesParameters];
            gaugeCouplingNormalizationDecls = WriteOut`GetGaugeCouplingNormalizationsDecls[SARAH`Gauge];
            gaugeCouplingNormalizationDefs  = WriteOut`GetGaugeCouplingNormalizationsDefs[SARAH`Gauge];
+           If[FSUnitarityConstraints,
+              setUnitarity =
+"void " <> FlexibleSUSY`FSModelName <> "_slha_io::set_unitarity_infinite_s(
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings, UnitarityInfiniteS const& unitarity)
+{
+   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
+      std::ostringstream block;
+      block << \"Block FlexibleSUSYUnitarity Q= \" << FORMAT_SCALE(unitarity.renScale) << '\\n'
+            << FORMAT_ELEMENT(0, unitarity.allowed, \"Tree-level unitarity limits fulfilled or not\")
+            << FORMAT_ELEMENT(1, unitarity.maxAbsReEigenval, \"max(|re(eigenvalues(a0))|)\");
+      slha_io.set_block(block);
+   }
+}";
+              setUnitarityInc = "void set_unitarity_infinite_s(const Spectrum_generator_settings&, UnitarityInfiniteS const&);";
+              unitarityIncludes = "#include \"" <> FlexibleSUSY`FSModelName <> "_unitarity.hpp\""
+           ];
            If[FlexibleSUSY`FSCalculateDecays,
               setDecaysPrototypes = WriteOut`CreateSetDecaysPrototypes[FlexibleSUSY`FSModelName];
               setDecaysFunctions = WriteOut`CreateSetDecaysFunctions[FlexibleSUSY`FSModelName];
@@ -3208,6 +3243,9 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@useDecaysData@"                   -> useDecaysData,
                             "@numberOfNeutralGoldstones@"       -> IndentText["static constexpr int number_of_neutral_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]]-1] <> ";"],
                             "@numberOfChargedGoldstones@"       -> IndentText["static constexpr int number_of_charged_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]-1] <> ";"],
+                            "@setUnitarityInc@" -> setUnitarityInc,
+                            "@setUnitarity@" -> setUnitarity,
+                            "@unitarityIncludes@" -> unitarityIncludes,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];

@@ -26,8 +26,6 @@
 #ifndef @ModelName@_UNITARITY_H
 #define @ModelName@_UNITARITY_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
-
 #include <Eigen/Core>
 
 #include <tuple>
@@ -35,9 +33,16 @@
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 
+struct UnitarityInfiniteS {
+   bool allowed;
+   double renScale;
+   double maxAbsReEigenval;
+   Eigen::MatrixXcd scatteringMatrix;
+};
+
 namespace @ModelName@_unitarity {
 
-std::tuple<bool, double, double, Eigen::MatrixXcd>
+UnitarityInfiniteS
 max_scattering_eigenvalue_infinite_s(@ModelName@_mass_eigenstates const&);
 
 } // namespace @ModelName@_unitarity
