@@ -37,6 +37,8 @@ namespace @ModelName@_unitarity {
 
 static constexpr int size = @scatteringPairsLength@;
 
+namespace {
+
 inline
 double Sqrt2(int i, int j) {
    // 1/Sqrt[2] or 1
@@ -55,6 +57,8 @@ double best_eigenvalue_abs(Eigen::MatrixXcd const& m) {
    return m.eigenvalues().unaryExpr(
          [](std::complex<double> const& el) {return std::real(el);}
       ).cwiseAbs().maxCoeff();
+}
+
 }
 
 // s -> infinity limit
