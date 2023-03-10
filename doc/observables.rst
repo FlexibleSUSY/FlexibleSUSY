@@ -24,4 +24,4 @@ List of observables computed by ``FlexibleSUSY``
   - LO order (tree-level or loop-induced) decays of Higgs scalars into non-SM state
   - LO order (tree-level or loop-induced) decays of non-Higgs scalars
 
-- Unitarity costraints
+- Unitarity constraints
