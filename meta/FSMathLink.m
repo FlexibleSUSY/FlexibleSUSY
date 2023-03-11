@@ -273,7 +273,7 @@ CreateSpectrumUnitarityInterface[modelName_] :=
 
 CreateSpectrumUnitarityCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
-           prototype = "virtual UnitarityInfiniteS calculate_unitarity();\n";
+           prototype = "virtual UnitarityInfiniteS calculate_unitarity() override;\n";
            args = "";
            body = "return " <> modelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n";
            function = "template <typename Solver_type>\n" <>
