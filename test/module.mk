@@ -784,7 +784,8 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m
+		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_unitarity.m
 endif
 ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
