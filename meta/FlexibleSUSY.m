@@ -2882,7 +2882,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
             unitarityIncludes = "", setUnitarity = "", unitarityData = "", putUnitarity = "", putUnitarityPrototype = "",
-            mathlinkUnitarityCalculationFunction = "", calculateSpectrumUnitarityPrototype = "", calculateSpectrumUnitarityFunction = "", calculateUnitarityVirtualFunc = "", loadCalculateUnitarityFunction = "",calculateUnitarityMessages = "",
+            mathlinkUnitarityCalculationFunction = "", calculateSpectrumUnitarityPrototype = "", calculateSpectrumUnitarityFunction = "", calculateUnitarityVirtualFunc = "", loadCalculateUnitarityFunction = "",calculateUnitarityMessages = "", calculateModelUnitarityPrototype = "", calculateModelUnitarityFunction = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
             decayIndex = "const Index_t n_fd_settings = 0;"},
