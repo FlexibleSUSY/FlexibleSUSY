@@ -543,6 +543,7 @@ TEST_META += \
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
+		$(DIR)/test_SM_unitarity.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
 		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
@@ -1210,6 +1211,8 @@ $(DIR)/test_SM_two_loop_spectrum.x: $(LIBSM)
 $(DIR)/test_SM_mw_calculation.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
+
+$(DIR)/test_SM_unitarity.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle_meta.x: $(LIBSM)
 
