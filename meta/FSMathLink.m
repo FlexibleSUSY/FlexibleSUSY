@@ -249,9 +249,6 @@ CreateModelDecaysCalculationName[] := CreateSpectrumDecaysCalculationName[];
 CreateSpectrumDecaysInterface[modelName_] :=
     "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) = 0;";
 
-CreateSpectrumUnitarityInterface[modelName_] :=
-    "virtual UnitarityInfiniteS calculate_unitarity() = 0;";
-
 CreateSpectrumDecaysCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
