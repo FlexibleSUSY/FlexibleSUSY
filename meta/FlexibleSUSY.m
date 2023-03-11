@@ -513,7 +513,7 @@ CheckSARAHVersion[] :=
               Quit[1];
              ];
            sarahVersion = Utils`DecomposeVersionString[SA`Version];
-           If[!Utils`VersionOrder[sarahVersion, minimRequired],
+           If[!TrueQ@Utils`VersionOrderGtEqThan[sarahVersion, minimRequired],
               Print["Error: SARAH version ", SA`Version, " no longer supported!"];
               Print["Please use version ", ToVersionString[minimRequired],
                     " or higher"];

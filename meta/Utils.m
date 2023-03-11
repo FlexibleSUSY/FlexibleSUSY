@@ -170,7 +170,7 @@ MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c+
 FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
 
 DecomposeVersionString::usage = "Return a list for string containing a version number";
-VersionOrder::usage = "";
+VersionOrderGtEqThan::usage = "Checks if version is >= than a given one";
 
 Begin["`Private`"];
 
@@ -450,7 +450,7 @@ FSPermutationSign[perm___] :=
 DecomposeVersionString[version_String] :=
     ToExpression /@ StringSplit[version, "."];
 
-VersionOrder[version_List, minimRequired_List] /;
+VersionOrderGtEqThan[version_List, minimRequired_List] /;
    Length[version] ===3 && Length[minimRequired] ===3 && And@@(IntegerQ /@ Join[version, minimRequired]) :=
       !(version[[1]] < minimRequired[[1]] ||
            (version[[1]] == minimRequired[[1]] &&
