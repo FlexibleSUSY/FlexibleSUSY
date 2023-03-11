@@ -169,6 +169,9 @@ Warning: This function may ignore empty lines.";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
 
+DecomposeVersionString::usage = "Return a list for string containing a version number";
+VersionOrder::usage = "";
+
 Begin["`Private`"];
 
 AppendOrReplaceInList[values_List, elem_, test_:SameQ] :=
@@ -443,6 +446,18 @@ FSPermutationSign[perm_?PermutationCyclesQ] :=
     Apply[Times, (-1)^(Length /@ First[perm] - 1)];
 FSPermutationSign[perm___] :=
     (Print[perm, " is not a permutation in disjoint cyclic form."];Quit[1]);
+
+DecomposeVersionString[version_String] :=
+    ToExpression /@ StringSplit[version, "."];
+
+VersionOrder[version_List, minimRequired_List] /;
+   Length[version] ===3 && Length[minimRequired] ===3 && And@@(IntegerQ /@ Join[version, minimRequired]) :=
+      !(version[[1]] < minimRequired[[1]] ||
+           (version[[1]] == minimRequired[[1]] &&
+            version[[2]] < minimRequired[[2]]) ||
+              (version[[1]] == minimRequired[[1]] &&
+               version[[2]] == minimRequired[[2]] &&
+               version[[3]] < minimRequired[[3]]));
 
 End[];
 
