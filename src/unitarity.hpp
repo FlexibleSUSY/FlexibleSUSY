@@ -23,20 +23,20 @@
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_UNITARITY_H
-#define @ModelName@_UNITARITY_H
+#ifndef UNITARITY_H
+#define UNITARITY_H
 
-#include "unitarity.hpp"
+#include <Eigen/Core>
 
 namespace flexiblesusy {
-class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_unitarity {
+struct UnitarityInfiniteS {
+   bool allowed;
+   double renScale;
+   double maxAbsReEigenval;
+   Eigen::MatrixXcd scatteringMatrix;
+};
 
-UnitarityInfiniteS
-max_scattering_eigenvalue_infinite_s(@ModelName@_mass_eigenstates const&);
-
-} // namespace @ModelName@_unitarity
 } // namespace flexiblesusy
 
 #endif
