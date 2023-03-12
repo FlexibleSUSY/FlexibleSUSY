@@ -158,4 +158,14 @@ TestEquality[FSPermutationSign[Cycles[{{1,2}}]], -1];
 TestEquality[FSPermutationSign[Cycles[{{1,3,2}}]], 1];
 TestEquality[FSPermutationSign[Cycles[{{1,3,2},{5,6}}]], -1];
 
+TestEquality[DecomposeVersionString["1.2.3"], {1,2,3}];
+
+TestEquality[VersionOrderGtEqThan[{1,2,3}, {1,2,2}], True];
+TestEquality[VersionOrderGtEqThan[{1,2,3}, {1,2,4}], False];
+TestEquality[VersionOrderGtEqThan[{1,2,0}, {1,1,3}], True];
+TestEquality[VersionOrderGtEqThan[{1,2,3}, {1,4,2}], False];
+TestEquality[VersionOrderGtEqThan[{2,0,0}, {1,2,3}], True];
+TestEquality[VersionOrderGtEqThan[{1,3,3}, {2,2,2}], False];
+TestEquality[VersionOrderGtEqThan[{1,2,3}, {1,2,3}], True];
+
 PrintTestSummary[];
