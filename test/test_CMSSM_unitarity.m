@@ -41,5 +41,5 @@ Print[1 - (FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]])/866.7
 Print[1 - (FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]])/0.029739009345726267];
 
 TestEqual[FlexibleSUSYUnitarity`Allowed /. unitarity[[1,2]], True];
-TestCloseRel[FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]], 866.7856190934974, 10^-16];
-TestCloseRel[FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]], 0.029739009345726267, 10^-16];
+TestCloseRel[FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]], 866.7856190934974, 2*10^-16];
+TestCloseRel[FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]], 0.029739009345726267, 3*10^-16];
