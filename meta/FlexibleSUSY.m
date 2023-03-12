@@ -406,9 +406,6 @@ HaveEWSBSolver[solver_] := MemberQ[FlexibleSUSY`FSEWSBSolvers, solver];
 
 HaveBVPSolver[solver_] := MemberQ[FlexibleSUSY`FSBVPSolvers, solver];
 
-DecomposeVersionString[version_String] :=
-    ToExpression /@ StringSplit[version, "."];
-
 ToVersionString[{major_Integer, minor_Integer, patch_Integer}] :=
     ToString[major] <> "." <> ToString[minor] <> "." <> ToString[patch];
 
@@ -515,13 +512,8 @@ CheckSARAHVersion[] :=
               Print["   Did you run configure?"];
               Quit[1];
              ];
-           sarahVersion = DecomposeVersionString[SA`Version];
-           If[sarahVersion[[1]] < minimRequired[[1]] ||
-              (sarahVersion[[1]] == minimRequired[[1]] &&
-               sarahVersion[[2]] < minimRequired[[2]]) ||
-              (sarahVersion[[1]] == minimRequired[[1]] &&
-               sarahVersion[[2]] == minimRequired[[2]] &&
-               sarahVersion[[3]] < minimRequired[[3]]),
+           sarahVersion = Utils`DecomposeVersionString[SA`Version];
+           If[!TrueQ@Utils`VersionOrderGtEqThan[sarahVersion, minimRequired],
               Print["Error: SARAH version ", SA`Version, " no longer supported!"];
               Print["Please use version ", ToVersionString[minimRequired],
                     " or higher"];
