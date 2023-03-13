@@ -18,13 +18,13 @@
 
 
 /**
- * @file @ModelName@_gm2_wrapper.hpp
+ * @file @ModelName@_amm_wrapper.hpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_LEPTON_GM2_WRAPPER_H
-#define @ModelName@_LEPTON_GM2_WRAPPER_H
+#ifndef @ModelName@_LEPTON_AMM_WRAPPER_H
+#define @ModelName@_LEPTON_AMM_WRAPPER_H
 
 namespace softsusy {
    class QedQcd;
@@ -34,20 +34,20 @@ namespace flexiblesusy {
 class Spectrum_generator_settings;
 class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_lepton_gm2_wrapper {
+namespace @ModelName@_lepton_amm_wrapper {
 /**
 * @fn calculate_amm
 * @brief Calculates \f$a = Delta(g-2)/2\f$ of the lepton.
 */
-@gm2WrapperDecl@
+@ammWrapperDecl@
 
 /**
 * @fn calculate_amm_uncertainty
 * @brief Calculates uncertainty of \f$\Delta a\f$ of the muon.
 */
-@gm2UncWrapperDecl@
+@ammUncWrapperDecl@
 
-} // namespace @ModelName@_gm2_wrapper
+} // namespace @ModelName@_amm_wrapper
 } // namespace flexiblesusy
 
 #endif

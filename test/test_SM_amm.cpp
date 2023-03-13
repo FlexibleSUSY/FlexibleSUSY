@@ -36,7 +36,6 @@ BOOST_AUTO_TEST_CASE( test_zero )
 {
    SM_input_parameters input;
    input.LambdaIN = 0.25;
-   input.Qin = 1000;
 
    SM<Two_scale> sm;
    setup_SM_const(sm, input);
