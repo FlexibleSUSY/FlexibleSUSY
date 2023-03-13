@@ -266,15 +266,15 @@ CreateSpectrumDecaysCalculation[modelName_] :=
           ];
 
 CreateSpectrumUnitarityInterface[modelName_] :=
-    "virtual UnitarityInfiniteS calculate_unitarity() = 0;";
+    "virtual void calculate_unitarity() = 0;";
 
 CreateSpectrumUnitarityCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
-           prototype = "virtual UnitarityInfiniteS calculate_unitarity() override;\n";
+           prototype = "virtual void calculate_unitarity() override;\n";
            args = "";
-           body = "return " <> modelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n";
+           body = "unitarityData = " <> modelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n";
            function = "template <typename Solver_type>\n" <>
-                      "UnitarityInfiniteS " <> modelName <> "_spectrum_impl<Solver_type>::calculate_unitarity() {\n" <>
+                      "void " <> modelName <> "_spectrum_impl<Solver_type>::calculate_unitarity() {\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <> function;
            {prototype, function}
@@ -309,7 +309,7 @@ CreateModelUnitarityCalculation[modelName_] :=
     Module[{prototype = "", body = "", function = ""},
            prototype = "void calculate_unitarity();\n";
            body = "check_spectrum_pointer();\n" <>
-                  "unitarityData = spectrum->calculate_unitarity();\n";
+                  "spectrum->calculate_unitarity();\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::calculate_unitarity()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";

@@ -150,6 +150,7 @@ public:
    virtual double get_model_scale() const = 0;
    virtual const @ModelName@_observables& get_observables() const = 0;
 @getDecaysVirtualFunc@
+@getUnitarityVirtualFunc@
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
@@ -172,6 +173,7 @@ public:
    virtual double get_model_scale() const override { return std::get<0>(models).get_scale(); }
    virtual const @ModelName@_observables& get_observables() const override { return observables; }
 @getSpectrumDecays@
+@getSpectrumUnitarity@
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
@@ -183,6 +185,7 @@ private:
    Spectrum_generator_problems problems{};   ///< spectrum generator problems
    @ModelName@_scales scales{};              ///< scale information
    @ModelName@_observables observables{};    ///< observables
+@unitarityData@
 @decaysData@
 };
 
@@ -232,7 +235,6 @@ private:
    FlexibleDecay_settings flexibledecay_settings {}; ///< FlexibleDecay settings
    SLHA_io::Modsel modsel{};                 ///< MODSEL input
    std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr};  ///< spectrum information
-   @unitarityData@
 
    @ModelName@_slha_io get_slha_io() const;
 
@@ -528,7 +530,6 @@ void Model_data::put_warnings(MLINK link) const
       settings.get(Spectrum_generator_settings::force_positive_masses));
 
    spectrum->fill_slha_io(slha_io, settings, flexibledecay_settings);
-   @setUnitarity@
 
    return slha_io;
 }
@@ -689,6 +690,7 @@ void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& s
       slha_io.set_extra(std::get<0>(models), scales, observables, settings);
    }
 
+@setUnitarity@
 @fillDecaysSLHA@
 }
 
