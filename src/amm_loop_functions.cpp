@@ -89,13 +89,15 @@ double BarrZeeLoopFPZ(double x, double y)
       throw OutOfBoundsError("BarrZeeLoopFPZ: arguments must not be negative.");
    } else if (y == 0) {
       return 0;
-   } else if (x == y) {
+   } else if (std::abs(1 - x/y) < 1e-10) {
       if (x < std::numeric_limits<double>::epsilon()) {
          constexpr double pi26 = 1.6449340668482264; // Pi^2/6
          const double lx = std::log(x);
-         return x*(1 + pi26 + lx*(1 + 0.5*lx));
-      } else if (x == 0.25) {
-         return 0.29543145370663021; // (Log[16] - 1)/6
+         return x*(pi26 + lx*(1 + 0.5*lx));
+      } else if (std::abs(x - 0.25) < 1e-10) {
+         const double d = x - 0.25;
+         // (Log[16] - 1)/6 + O(x - 1/4)
+         return 0.29543145370663021 + d*(-0.43634516296530417 + 0.93849646984528333*d);
       }
       return (BarrZeeLoopFS(x) + 2*x)/(4*x - 1);
    }
