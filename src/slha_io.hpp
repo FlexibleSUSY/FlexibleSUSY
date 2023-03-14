@@ -20,6 +20,7 @@
 #define SLHA_IO_H
 
 #include "slha_format.hpp"
+#include "unitarity.hpp"
 
 #include <complex>
 #include <functional>
@@ -149,6 +150,7 @@ public:
    void set_settings(const Spectrum_generator_settings&);
    void set_FlexibleDecay_settings(const FlexibleDecay_settings&);
    void set_sminputs(const softsusy::QedQcd&);
+   void set_unitarity_infinite_s(Spectrum_generator_settings const&, UnitarityInfiniteS const&);
    void write_to_file(const std::string&) const;
    void write_to_stream() const;
    void write_to_stream(std::ostream&) const;

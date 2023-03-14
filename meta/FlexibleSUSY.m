@@ -3100,7 +3100,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             setDecaysPrototypes = "", setDecaysFunctions = "",
             fillDecaysDataPrototypes = "", fillDecaysDataFunctions = "",
             decaysHeaderIncludes = "", useDecaysData = "",
-            setUnitarity = "", setUnitarityInc = "", unitarityIncludes = ""
+            unitarityIncludes = ""
            },
            particles = DeleteDuplicates @ Flatten[TreeMasses`GetMassEigenstate /@ massMatrices];
            susyParticles = Select[particles, (!TreeMasses`IsSMParticle[#])&];
@@ -3158,19 +3158,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
            gaugeCouplingNormalizationDecls = WriteOut`GetGaugeCouplingNormalizationsDecls[SARAH`Gauge];
            gaugeCouplingNormalizationDefs  = WriteOut`GetGaugeCouplingNormalizationsDefs[SARAH`Gauge];
            If[FSUnitarityConstraints,
-              setUnitarity =
-"void " <> FlexibleSUSY`FSModelName <> "_slha_io::set_unitarity_infinite_s(
-   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings, UnitarityInfiniteS const& unitarity)
-{
-   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
-      std::ostringstream block;
-      block << \"Block FlexibleSUSYUnitarity Q= \" << FORMAT_SCALE(unitarity.renScale) << '\\n'
-            << FORMAT_ELEMENT(0, unitarity.allowed, \"Tree-level unitarity limits fulfilled or not\")
-            << FORMAT_ELEMENT(1, unitarity.maxAbsReEigenval, \"max(|re(eigenvalues(a0))|)\");
-      slha_io.set_block(block);
-   }
-}";
-              setUnitarityInc = "void set_unitarity_infinite_s(const Spectrum_generator_settings&, UnitarityInfiniteS const&);";
               unitarityIncludes = "#include \"" <> FlexibleSUSY`FSModelName <> "_unitarity.hpp\""
            ];
            If[FlexibleSUSY`FSCalculateDecays,
@@ -3236,8 +3223,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@useDecaysData@"                   -> useDecaysData,
                             "@numberOfNeutralGoldstones@"       -> IndentText["static constexpr int number_of_neutral_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]]-1] <> ";"],
                             "@numberOfChargedGoldstones@"       -> IndentText["static constexpr int number_of_charged_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]-1] <> ";"],
-                            "@setUnitarityInc@" -> setUnitarityInc,
-                            "@setUnitarity@" -> setUnitarity,
                             "@unitarityIncludes@" -> unitarityIncludes,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
