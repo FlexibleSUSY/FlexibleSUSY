@@ -38,10 +38,6 @@ CreateModelDecaysCalculation::usage="";
 CreateMathLinkDecaysCalculation::usage="";
 FillDecaysSLHAData::usage="";
 PutDecays::usage="";
-CreateSpectrumUnitarityInterface::usage="";
-CreateSpectrumUnitarityCalculation::usage="";
-CreateModelUnitarityCalculation::usage="";
-CreateMathLinkUnitarityCalculation::usage="";
 
 Begin["`Private`"];
 
@@ -265,21 +261,6 @@ CreateSpectrumDecaysCalculation[modelName_] :=
            {prototype, function}
           ];
 
-CreateSpectrumUnitarityInterface[modelName_] :=
-    "virtual void calculate_unitarity() = 0;";
-
-CreateSpectrumUnitarityCalculation[modelName_] :=
-    Module[{prototype = "", args = "", body = "", function = ""},
-           prototype = "virtual void calculate_unitarity() override;\n";
-           args = "";
-           body = "unitarityData = " <> modelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n";
-           function = "template <typename Solver_type>\n" <>
-                      "void " <> modelName <> "_spectrum_impl<Solver_type>::calculate_unitarity() {\n" <>
-                      TextFormatting`IndentText[body] <> "}\n";
-           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <> function;
-           {prototype, function}
-          ];
-
 CreateModelDecaysCalculation[modelName_] :=
     Module[{prototype = "", body = "", function = ""},
            prototype = "void " <> CreateModelDecaysCalculationName[] <> "();\n";
@@ -301,17 +282,6 @@ CreateModelDecaysCalculation[modelName_] :=
                         ] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> CreateModelDecaysCalculationName[] <> "()\n{\n" <>
-                      TextFormatting`IndentText[body] <> "}\n";
-           {prototype, function}
-          ];
-
-CreateModelUnitarityCalculation[modelName_] :=
-    Module[{prototype = "", body = "", function = ""},
-           prototype = "void calculate_unitarity();\n";
-           body = "check_spectrum_pointer();\n" <>
-                  "spectrum->calculate_unitarity();\n";
-           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
-                      "void Model_data::calculate_unitarity()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
            {prototype, function}
           ];
@@ -447,30 +417,6 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
       data.put_decays(link);
    } catch (const flexiblesusy::Error& e) {
       put_message(link, \"FS" <> modelName <> "CalculateDecays\", \"error\", e.what());
-      put_error_output(link);
-   }
-
-   return LIBRARY_NO_ERROR;
-}\n";
-
-CreateMathLinkUnitarityCalculation[modelName_] :=
-    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
-DLLEXPORT int FS" <> modelName <> "CalculateUnitarity(
-   WolframLibraryData /* libData */, MLINK link)
-{
-   using namespace flexiblesusy::" <> modelName <> "_librarylink;
-
-   if (!check_number_of_args(link, 1, \"FS" <> modelName <> "CalculateUnitarity\"))
-      return LIBRARY_TYPE_ERROR;
-
-   const auto hid = get_handle_from(link);
-
-   try {
-      auto& data = find_data(hid);
-      data.calculate_unitarity();
-      data.put_unitarity(link);
-   } catch (const flexiblesusy::Error& e) {
-      put_message(link, \"FS" <> modelName <> "CalculateUnitarity\", \"error\", e.what());
       put_error_output(link);
    }
 

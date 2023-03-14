@@ -2868,8 +2868,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
-            unitarityIncludes = "", setUnitarity = "", unitarityData = "", putUnitarity = "", putUnitarityPrototype = "",
-            mathlinkUnitarityCalculationFunction = "", calculateSpectrumUnitarityPrototype = "", calculateSpectrumUnitarityFunction = "", calculateUnitarityVirtualFunc = "", loadCalculateUnitarityFunction = "",calculateUnitarityMessages = "", calculateModelUnitarityPrototype = "", calculateModelUnitarityFunction = "", getSpectrumUnitarity = "", getUnitarityVirtualFunc="",
+            setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
             decayIndex = "const Index_t n_fd_settings = 0;"},
@@ -2896,36 +2895,12 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               defaultSolverType = GetBVPSolverSLHAOptionKey[FlexibleSUSY`FSBVPSolvers[[1]]];
              ];
            If[FSUnitarityConstraints,
-              mathlinkUnitarityCalculationFunction = FSMathLink`CreateMathLinkUnitarityCalculation[FlexibleSUSY`FSModelName];
-              unitarityIncludes = "#include \"" <> FlexibleSUSY`FSModelName <> "_unitarity.hpp\"";
-              {calculateSpectrumUnitarityPrototype, calculateSpectrumUnitarityFunction} =
-                  FSMathLink`CreateSpectrumUnitarityCalculation[FlexibleSUSY`FSModelName];
-              {calculateModelUnitarityPrototype, calculateModelUnitarityFunction} =
-                  FSMathLink`CreateModelUnitarityCalculation[FlexibleSUSY`FSModelName];
-              calculateUnitarityVirtualFunc = FSMathLink`CreateSpectrumUnitarityInterface[FlexibleSUSY`FSModelName];
               loadCalculateUnitarityFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CalculateUnitarity\", LinkObject, LinkObject];\n";
               calculateUnitarityMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::warning = \"`1`\";\n";
               setUnitarity = "slha_io.set_unitarity_infinite_s(settings, unitarityData);";
-              unitarityData = "UnitarityInfiniteS unitarityData = {};";
-              putUnitarityPrototype = "void put_unitarity(MLINK link) const;";
-              getSpectrumUnitarity = "virtual const UnitarityInfiniteS& get_unitarity() const { return unitarityData; };";
-              getUnitarityVirtualFunc = "virtual const UnitarityInfiniteS& get_unitarity() const = 0;";
-              putUnitarity = "void Model_data::put_unitarity(MLINK link) const
-{
-
-   check_spectrum_pointer();
-   const UnitarityInfiniteS unitarityData = spectrum->get_unitarity();
-   MLPutFunction(link, \"List\", 1);
-   MLPutRule(link, \"" <> FlexibleSUSY`FSModelName <> "\");
-   MLPutFunction(link, \"List\", 3);
-   MLPutRuleTo(link, unitarityData.allowed, \"FlexibleSUSYUnitarity`Allowed\");
-   MLPutRuleTo(link, unitarityData.renScale, \"FlexibleSUSYUnitarity`RenormalizationScale\");
-   MLPutRuleTo(link, unitarityData.maxAbsReEigenval, \"FlexibleSUSYUnitarity`MaxAbsReEigen\");
-   MLEndPacket(link);
-};"
            ];
            If[FlexibleSUSY`FSCalculateDecays,
               decaysData = FlexibleSUSY`FSModelName <> "_decays decays{};              ///< decays";
@@ -3009,21 +2984,9 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
                             "@fillFDSettings@" -> fillFDSettings,
                             "@decayIndex@" -> decayIndex,
-                            "@calculateUnitarityVirtualFunc@" -> IndentText[calculateUnitarityVirtualFunc],
-                            "@calculateSpectrumUnitarityPrototype@" -> IndentText[calculateSpectrumUnitarityPrototype],
-                            "@calculateSpectrumUnitarityFunction@" -> calculateSpectrumUnitarityFunction,
-                            "@calculateModelUnitarityPrototype@" -> IndentText[calculateModelUnitarityPrototype],
-                            "@calculateModelUnitarityFunction@" -> calculateModelUnitarityFunction,
-                            "@mathlinkUnitarityCalculationFunction@" -> mathlinkUnitarityCalculationFunction,
                             "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
                             "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
-                            "@unitarityIncludes@" -> unitarityIncludes,
                             "@setUnitarity@" -> setUnitarity,
-                            "@unitarityData@" -> unitarityData,
-                            "@putUnitarityPrototype@" -> putUnitarityPrototype,
-                            "@putUnitarity@" -> putUnitarity,
-                            "@getSpectrumUnitarity@" -> getSpectrumUnitarity,
-                            "@getUnitarityVirtualFunc@" -> getUnitarityVirtualFunc,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
