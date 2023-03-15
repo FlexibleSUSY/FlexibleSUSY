@@ -123,8 +123,8 @@ double BarrZeeLoopFSZ(double x, double y)
       throw OutOfBoundsError("BarrZeeLoopFSZ: arguments must not be negative.");
    } else if (y == 0) {
       return 0;
-   } else if (std::abs(1 - x/y) < 1e-9) {
-      if (std::abs(x - 0.25) < 1e-9) {
+   } else if (std::abs(1 - x/y) < 1e-7) {
+      if (std::abs(x - 0.25) < 1e-7) {
          const double d = x - 0.25;
          // 2/3*(Log[2] - 1) + O(x - 1/4)
          return -0.20456854629336979 + d*(0.30903548889591250 - 0.67527189418658333*d);
@@ -132,7 +132,7 @@ double BarrZeeLoopFSZ(double x, double y)
          const double ix = 1/x;
          const double lx = std::log(x);
          return -1./3 + ix*(11./300 + 1./20*lx + ix*(463./22050 + 2./105*lx
-            + ix*(761./105840 + 1./168*lx + 8707./4.002075e6*ix + 2./1155*lx*ix)));
+            + ix*(761./105840 + 1./168*lx + ix*(8707./4.002075e6 + 2./1155*lx))));
       }
       return (x*(3 - 12*x - 2*(-1 + 3*x)*std::log(x))
               + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFP(x)
