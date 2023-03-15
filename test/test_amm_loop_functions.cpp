@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( test_FS )
 {
    using namespace flexiblesusy;
    using namespace amm_loop_functions::two_loop;
-   const double eps = 1e-14;
+   const double eps = 5e-14;
    const auto data = test::read_from_file<double>(
       std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "fS.txt");
 

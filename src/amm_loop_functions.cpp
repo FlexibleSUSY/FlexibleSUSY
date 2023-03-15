@@ -71,6 +71,11 @@ double BarrZeeLoopFS(double z)
       throw OutOfBoundsError("BarrZeeLoopFS: argument must not be negative.");
    } else if (z == 0) {
       return 0;
+   } if (z > 1e2) {
+      const double lz = std::log(z);
+      const double iz = 1/z;
+      return (-13./18 - 1./3*lz) + iz*(-26./300 - 15./300*lz
+         + iz*(-673./44100 - 420./44100*lz + iz*(-971./317520 - 630./317520*lz)));
    }
 
    return (2*z - 1)*BarrZeeLoopFP(z) - z*(2 + std::log(z));
