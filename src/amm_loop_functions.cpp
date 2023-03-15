@@ -118,9 +118,11 @@ double BarrZeeLoopFSZ(double x, double y)
       throw OutOfBoundsError("BarrZeeLoopFSZ: arguments must not be negative.");
    } else if (y == 0) {
       return 0;
-   } else if (x == y) {
-      if (x == 0.25) {
-         return -0.20456854629336979; // 2/3*(Log[2] - 1)
+   } else if (std::abs(1 - x/y) < 1e-9) {
+      if (std::abs(x - 0.25) < 1e-9) {
+         const double d = x - 0.25;
+         // 2/3*(Log[2] - 1) + O(x - 1/4)
+         return -0.20456854629336979 + d*(0.30903548889591250 - 0.67527189418658333*d);
       } else if (x >= 1e3) {
          const double ix = 1/x;
          const double lx = std::log(x);
