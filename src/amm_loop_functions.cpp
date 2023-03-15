@@ -171,7 +171,7 @@ double BarrZeeLoopV(double z)
       throw OutOfBoundsError("BarrZeeLoopV: argument must not be negative.");
    } else if (z == 0) {
       return 0; // actually -inf; return 0 to avoid propagation of inf
-   } if (z > 1e2) {
+   } if (z >= 1e2) {
       const double lz = std::log(z);
       const double iz = 1/z;
       return 89./12 + 42./12*lz + iz*(284./360 + 165./360*lz
