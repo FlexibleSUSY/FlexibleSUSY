@@ -171,6 +171,14 @@ double BarrZeeLoopV(double z)
       throw OutOfBoundsError("BarrZeeLoopV: argument must not be negative.");
    } else if (z == 0) {
       return 0; // actually -inf; return 0 to avoid propagation of inf
+   } if (z > 1e2) {
+      const double lz = std::log(z);
+      const double iz = 1/z;
+      return 89./12 + 42./12*lz + iz*(284./360 + 165./360*lz
+         + iz*(6199./44100 + 3885./44100*lz
+         + iz*(30017./1.0584e6 + 19530./1.0584e6*lz
+         + iz*(83351./1.37214e7 + 55440./1.37214e7*lz
+         + iz*(34978051./2.597186592e10 + 23603580./2.597186592e10*lz)))));
    }
 
    return (17./2 - 15*z)*BarrZeeLoopFP(z) + (0.5 + 7.5*z)*(2 + std::log(z));
