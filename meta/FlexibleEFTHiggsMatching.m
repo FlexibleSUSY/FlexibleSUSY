@@ -51,7 +51,9 @@ Mh2_pole = M_pole(idx);"
       ];
 
 Create3LoopMatching[] :=
-Module[{},
+Module[{g1str = CConversion`ToValidCSymbolString[SARAH`hyperchargeCoupling],
+g2str = CConversion`ToValidCSymbolString[SARAH`leftCoupling],
+g3str = ToString[TreeMasses`GetStrongCoupling[]]},
 "
    using namespace flexiblesusy::sm_twoloophiggs;
       
@@ -61,10 +63,10 @@ Module[{},
    auto model = model_input;
    auto model_gl = model;
    model_gl.get_problems().clear();
-   model_gl.set_g1(gauge_less / NUHMSSMNoFVHimalayaEFTHiggs_info::normalization_g1);
-   model_gl.set_g2(gauge_less / NUHMSSMNoFVHimalayaEFTHiggs_info::normalization_g2);
+   model_gl.set_" <> g1str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g1);
+   model_gl.set_" <> g2str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g2);
    auto model_no_g3 = model_gl; 
-   model_no_g3.set_g3(gauge_less / NUHMSSMNoFVHimalayaEFTHiggs_info::normalization_g3);
+   model_no_g3.set_" <> g3str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g3);
    model_gl.calculate_DRbar_masses();
    model_no_g3.calculate_DRbar_masses();
    model.calculate_DRbar_masses();
@@ -91,43 +93,43 @@ Module[{},
    const double lambda_2l = sm_2l.get_Lambdax();
    double delta_lambda_3l = 0.;
 
-   double v2 = Sqr(sm_0l_gl.get_v());
-   double yt = sm_0l_gl.get_Yu(2, 2);
-   double yt2 = Sqr(yt);
-   double gs = sm_0l_gl.get_g3();
-   double gs2 = Sqr(gs);
-   double gs4 = Sqr(gs2);
-   double MS = Sqrt(model_gl.get_MSt(0) * model_gl.get_MSt(1));
-   double Q2 = Sqr(sm_0l_gl.get_scale());
-   double mt = model_gl.get_MFt();
-   double mt2 = Sqr(mt);
-   double logmt = Log(mt2 / Q2);
-   double logmt2 = Sqr(Log(mt2 / Q2));
-   double logmt3 = logmt * logmt2;
-   double k = 1. / Power(4 * Pi, 2);
-   double k2 = 1. / Power(4 * Pi, 4);
-   double k3 = 1. / Power(4 * Pi, 6);
+   const double v2 = Sqr(sm_0l_gl.get_v());
+   const double yt = sm_0l_gl.get_Yu(2, 2);
+   const double yt2 = Sqr(yt);
+   const double gs = sm_0l_gl.get_g3();
+   const double gs2 = Sqr(gs);
+   const double gs4 = Sqr(gs2);
+   const double MS = Sqrt(model_gl.get_MSt(0) * model_gl.get_MSt(1));
+   const double Q2 = Sqr(sm_0l_gl.get_scale());
+   const double mt = model_gl.get_MFt();
+   const double mt2 = Sqr(mt);
+   const double logmt = Log(mt2 / Q2);
+   const double logmt2 = Sqr(Log(mt2 / Q2));
+   const double logmt3 = logmt * logmt2;
+   const double k = oneOver16PiSqr;
+   const double k2 = twoLoop;
+   const double k3 = threeLoop;
 
-   double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_g3less.get_Yu(2, 2);
-   double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
-   double sqr_delta_yt_1l = Sqr(delta_yt_1l);
-   double delta_g3_1l = sm_1l.get_g3() - sm_0l_gl.get_g3();
+   const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_g3less.get_Yu(2, 2);
+   const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
+   const double sqr_delta_yt_1l = Sqr(delta_yt_1l);
+   const double delta_g3_1l = sm_1l.get_g3() - sm_0l_gl.get_g3();
 
-   double S1_deriv_yt = delta_mh_1loop_at_sm_deriv_yt(0, sm_0l_gl.get_scale(),
+   const double S1_deriv_yt = delta_mh_1loop_at_sm_deriv_yt(0, sm_0l_gl.get_scale(),
                                                      sm_0l_gl.get_MFu(2),
                                                      sm_0l_gl.get_Yu(2, 2)) * delta_yt_2l;
   
-   double S1_deriv_yt2 =
+   const double S1_deriv_yt2 =
       -0.5 * (24 * k * mt2 * (7. + 6. * logmt)) * sqr_delta_yt_1l;
-   double S2_deriv_yt =
+   const double S2_deriv_yt =
       (64. * k2 * gs2 * mt2 * yt * (1. + 8. * logmt + 6. * logmt2)) *
       delta_yt_1l;
-   double S2_deriv_gs =
+   const double S2_deriv_gs =
       (64. * k2 * gs * mt2 * yt2 * logmt * (1. + 3. * logmt)) * delta_g3_1l;
 
-   double mh2_conversion =
-      S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs;
-   double mh2_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
+   const double mh2_conversion =
+      S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs;           // sum in eq.(4.26c) JHEP07(2020)197
+   const double mh2_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
 
    // calculate 2L self-energy using tree-level parameters
    Eigen::Matrix<double, 2, 2> self_energy_3l(
@@ -140,9 +142,9 @@ Module[{},
 
       Eigen::Array<double, 2, 1> Mh2_pole;
       fs_diagonalize_hermitian(Mh2_loop, Mh2_pole);
-      double mh2_bsm_shift = Mh2_pole(idx) - Sqr(model_gl.get_Mhh(idx));
+      const double mh2_bsm_shift = Mh2_pole(idx) - Sqr(model_gl.get_Mhh(idx));
 
-      delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion) / v2;
+      delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion) / v2;   // eq. (4.28d) JHEP07(2020)197
    } catch (const flexiblesusy::Error &e){}
 
    const double lambda_3l = lambda_2l + delta_lambda_3l;
@@ -163,10 +165,14 @@ sm.set_Yu(2, 2, (Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v));
 ];
 
 CreateMt2Loop[] :=
-Module[{},
+Module[{g3str =  ToString[TreeMasses`GetStrongCoupling[]], 
+mglustr = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]],
+md2str = CConversion`RValueToCFormString[SARAH`SoftDown],
+mq2str = CConversion`RValueToCFormString[SARAH`SoftSquark],
+mtstr = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]] },
 "double calculate_MFt_MSbar_2loop(
    const standard_model::Standard_model &sm_0l,
-   const NUHMSSMNoFVHimalayaEFTHiggs_mass_eigenstates &model_0l) {
+   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates &model_0l) {
    auto model = model_0l;
    auto sm = sm_0l;
 
@@ -176,54 +182,54 @@ Module[{},
    model.set_top_QCD_order(1);
 
    double mst_1, mst_2, theta_t;
-   model.calculate_MTopSquark_3rd_generation(mst_1, mst_2, theta_t);
+   model."<> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <>";
 
-   double Q2 = Sqr(model.get_scale());
-   double mt = model.get_MFt();
-   double mt2 = Sqr(mt);
-   double gs = model.get_g3();
-   double gs2 = Sqr(model.get_g3());
-   double alpha_s = gs2 / (4. * Pi);
+   const double Q2 = Sqr(model.get_scale());
+   const double mt = sm_0l.get_MFu(2);   // is equal to the top quark mass in the MSSM
+   const double mt2 = Sqr(mt);
+   const double gs = model.get_" <> g3str <> "();
+   const double gs2 = Sqr(gs);
+   const double alpha_s = gs2 / (4. * Pi);
 
-   double k = 1. / Power(4 * Pi, 2);
-   double logmt = Log(mt2 / Q2);
-   double yt_SM = sm.get_Yu(2, 2);
+   const double k = oneOver16PiSqr;
+   const double logmt = Log(mt2 / Q2);
+   const double yt_SM = sm.get_Yu(2, 2);
 
    mssm_twoloop_mt::Parameters pars;
    pars.g3 = gs;
    pars.mt = mt;
-   pars.mg = model.get_MGlu();
+   pars.mg = model.get_" <> mglustr <> "();
    pars.mst1 = mst_1;
    pars.mst2 = mst_2;
-   pars.msusy = Sqrt(Sqrt(Abs(model.get_md2(2, 2)))) *
-                Sqrt(Sqrt(Abs(model.get_mq2(2, 2))));
+   pars.msusy = Sqrt(Sqrt(Abs(model.get_" <> md2str <> "(2, 2)))) *
+                Sqrt(Sqrt(Abs(model.get_" <> mq2str <> "(2, 2))));
    pars.xt = Sin(2 * theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt);
    pars.Q = model.get_scale();
 
-   double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model_0l);
+   const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model_0l);
 
    // top mass contribution at O(as) in MSSM and SM
-   double sqcd_1l_over_mt = mssm_twoloop_mt::dMt_over_mt_1loop(pars);
-   double qcd_1l_SM_over_mt =
+   const double sqcd_1l_over_mt = mssm_twoloop_mt::dMt_over_mt_1loop(pars);
+   const double qcd_1l_SM_over_mt =
       0.008443431970194815 * (4. - 3. * Log(mt2 / Q2)) * gs2;
 
    // top mass contribution at O(as) SM subscript
-   double qcd1l_mt = -4. / 3. * k * gs2 * mt * (2. + 3. * logmt);
-   double qcd1l_gs = 8. / 3. * k * gs2 * mt * (4. - 3. * logmt);
+   const double qcd1l_mt = -4. / 3. * k * gs2 * mt * (2. + 3. * logmt);
+   const double qcd1l_gs = 8. / 3. * k * gs2 * mt * (4. - 3. * logmt);
 
-   double delta_mt_over_mt = sqcd_1l_over_mt - qcd_1l_SM_over_mt;
-   double delta_gs_over_gs = -0.5 * delta_alpha_s;
+   const double delta_mt_over_mt = sqcd_1l_over_mt - qcd_1l_SM_over_mt;
+   const double delta_gs_over_gs = -0.5 * delta_alpha_s;
 
-   double mfcon = delta_mt_over_mt * qcd1l_mt + delta_gs_over_gs * qcd1l_gs;
+   const double mfcon = delta_mt_over_mt * qcd1l_mt + delta_gs_over_gs * qcd1l_gs;
 
-   model.calculate_MFt_pole();
+   model."<> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <>"();
    sm.calculate_MFu_pole();
 
-   const auto Mf_bsm = model.get_physical().MFt;
+   const auto Mf_bsm = model.get_physical()."<> mtstr <>";
    const auto Mf_sm = sm.get_physical().MFu(2);
    const auto mf_sm_0l = sm.get_MFu(2);
 
-   double mf_sm = Mf_bsm - Mf_sm + mf_sm_0l - mfcon;
+   const double mf_sm = Mf_bsm - Mf_sm + mf_sm_0l - mfcon;   // eq. (4.18b)  JHEP07(2020)197
 
    return Abs(mf_sm);
 }
