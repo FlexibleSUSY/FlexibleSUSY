@@ -88,7 +88,7 @@ namespace {
 
    double xlogx(double x) noexcept
    {
-      if (x < 0.) {
+      if (x <= 0.) {
          return 0.;
       }
 
