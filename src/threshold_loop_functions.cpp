@@ -88,7 +88,7 @@ namespace {
 
    double xlogx(double x) noexcept
    {
-      if (is_zero(x, 1e-14)) {
+      if (x < 0.) {
          return 0.;
       }
 
@@ -1949,6 +1949,7 @@ namespace {
    }
 
    /// u < 1 && v < 1, lambda^2(u,v) > 0; note: phi_pos(u,v) = phi_pos(v,u)
+   /// Davydychev Eq.(4.10)
    double phi_pos(double u, double v) noexcept
    {
       const double eps = 1.0e-7;
@@ -1987,6 +1988,7 @@ namespace {
    }
 
    /// lambda^2(u,v) < 0; note: phi_neg(u,v) = phi_neg(v,u)
+   /// Davydychev Eq.(4.15)
    double phi_neg(double u, double v) noexcept
    {
       const double eps = 1.0e-7;
