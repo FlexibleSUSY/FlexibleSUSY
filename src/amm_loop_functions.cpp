@@ -27,6 +27,17 @@ namespace flexiblesusy {
 namespace amm_loop_functions {
 namespace two_loop {
 
+namespace {
+
+void sort(double& x, double& y)
+{
+   if (x > y) {
+      std::swap(x, y);
+   }
+}
+
+} // anonymous namespace
+
 /**
  * Barr-Zee 2-loop function with fermion loop and pseudoscalar and
  * photon mediators (arXiv:1502.04199 Eq 26).
@@ -92,22 +103,24 @@ double BarrZeeLoopFPZ(double x, double y)
 {
    if (x < 0 || y < 0) {
       throw OutOfBoundsError("BarrZeeLoopFPZ: arguments must not be negative.");
-   } else if (y == 0) {
-      return 0;
-   } else if (std::abs(1 - x/y) < 1e-10) {
-      if (x < std::numeric_limits<double>::epsilon()) {
-         constexpr double pi26 = 1.6449340668482264; // Pi^2/6
-         const double lx = std::log(x);
-         return x*(pi26 + lx*(1 + 0.5*lx));
-      } else if (std::abs(x - 0.25) < 1e-10) {
-         const double d = x - 0.25;
-         // (Log[16] - 1)/6 + O(x - 1/4)
-         return 0.29543145370663021 + d*(-0.43634516296530417 + 0.93849646984528333*d);
-      }
-      return (BarrZeeLoopFS(x) + 2*x)/(4*x - 1);
    }
 
-   return y*(BarrZeeLoopFP(x) - BarrZeeLoopFP(y))/(x - y);
+   sort(x, y);
+
+   constexpr double eps = 1e-8;
+
+   if (x == 0 || y == 0) {
+      return 0;
+   } else if (std::abs(1 - x/y) < eps) {
+      if (std::abs(x - 0.25) < eps) {
+         // const double d = x - 0.25;
+         // -(1 + 2*Log[2])/6 + O(x - 1/4)
+         return -0.39771572685331510 - 0.87269032593060833*(x - 0.25);
+      }
+      return x*(2*BarrZeeLoopFP(x) + std::log(x))/(1 - 4*x);
+   }
+
+   return (y*BarrZeeLoopFP(x) - x*BarrZeeLoopFP(y))/(x - y);
 }
 
 /**
