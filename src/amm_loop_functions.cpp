@@ -113,7 +113,6 @@ double BarrZeeLoopFPZ(double x, double y)
       return 0;
    } else if (std::abs(1 - x/y) < eps) {
       if (std::abs(x - 0.25) < eps) {
-         // const double d = x - 0.25;
          // -(1 + 2*Log[2])/6 + O(x - 1/4)
          return -0.39771572685331510 - 0.87269032593060833*(x - 0.25);
       }
