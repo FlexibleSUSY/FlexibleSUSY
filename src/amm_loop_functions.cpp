@@ -133,25 +133,31 @@ double BarrZeeLoopFSZ(double x, double y)
 {
    if (x < 0 || y < 0) {
       throw OutOfBoundsError("BarrZeeLoopFSZ: arguments must not be negative.");
-   } else if (y == 0) {
+   }
+
+   sort(x, y);
+
+   constexpr double eps = 1e-8;
+
+   if (x == 0 || y == 0) {
       return 0;
-   } else if (std::abs(1 - x/y) < 1e-7) {
-      if (std::abs(x - 0.25) < 1e-7) {
-         const double d = x - 0.25;
-         // 2/3*(Log[2] - 1) + O(x - 1/4)
-         return -0.20456854629336979 + d*(0.30903548889591250 - 0.67527189418658333*d);
+   } else if (std::abs(1 - x/y) < eps) {
+      if (std::abs(x - 0.25) < eps) {
+         // (-1 + 4*Log[2])/6 + O(x - 1/4)
+         return 0.29543145370663021 + 0.61807097779182499*(x - 0.25);
       } else if (x >= 1e3) {
          const double ix = 1/x;
          const double lx = std::log(x);
-         return -1./3 + ix*(11./300 + 1./20*lx + ix*(463./22050 + 2./105*lx
-            + ix*(761./105840 + 1./168*lx + ix*(8707./4.002075e6 + 2./1155*lx))));
+         return 7./18 + 1./3*lx
+            + ix*(37./300 + 1./10*lx
+            + ix*(533./14700 + 1./35*lx
+            + ix*(1627./158760 + 1./126*lx
+            + ix*(18107./6.40332e6 + 1./462*lx))));
       }
-      return (x*(3 - 12*x - 2*(-1 + 3*x)*std::log(x))
-              + (1 + 6*x*(-1 + 2*x))*BarrZeeLoopFP(x)
-         )/(4*x - 1);
+      return x*(1 - 4*x + 4*x*BarrZeeLoopFP(x) + std::log(x)*(1 - 2*x))/(4*x - 1);
    }
 
-   return y*(BarrZeeLoopFS(x) - BarrZeeLoopFS(y))/(x - y);
+   return (y*BarrZeeLoopFS(x) - x*BarrZeeLoopFS(y))/(x - y);
 }
 
 /**
