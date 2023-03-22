@@ -60,7 +60,7 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 3-loop corrections O(alpha_t^3)",
    "Higgs 4-loop corrections O(alpha_t alpha_s^3)",
    "loop library type (0 = Softsusy)",
-   "calculate amm (0 = no, 1 = 1L+2L QED, 2 = 1L+2L QED + 2L Barr-Zee)"
+   "calculate amm (0 = no, 1 = 1L, 1.5 = 1L+2L(QED), 2 = 1L+2L(QED) + 2L(Barr-Zee))"
 };
 
 bool is_integer(double value)
