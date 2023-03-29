@@ -36,7 +36,7 @@
 #include "sm_threeloophiggs.hpp"
 #include "sm_fourloophiggs.hpp"
 #include "sm_threeloophiggs.hpp"
-#include "mssm_twoloop_mt.hpp"
+@includeMSSMTwoLoopTopMassHeader@
 using namespace flexiblesusy::standard_model;
 
 namespace flexiblesusy {
@@ -868,17 +868,32 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
       const @ModelName@_mass_eigenstates& model_input, int idx)
 {
 
+      #ifdef MODELPARAMETER  
+   #undef MODELPARAMETER
+   #endif 
+   #define MODELPARAMETER(p) model_gl.get_##p();
+
+
+
    static const double gauge_less = 1e-10;              
    // approximates the gaugeless limit for gauge couplings
 
    auto model    = model_input;
    auto model_gl = model;
    model_gl.get_problems().clear();
-   model_gl.set_g1(gauge_less / @ModelName@_info::normalization_g1);
-   model_gl.set_g2(gauge_less /  @ModelName@_info::normalization_g2);
-   
+@setGaugeLessLimit@
+
+
+
+
+   #ifdef MODELPARAMETER  
+   #undef MODELPARAMETER
+   #endif 
+   #define MODELPARAMETER(p) model.get_##p();
+
    auto model_no_g3 = model_gl;
    model_no_g3.set_g3(gauge_less / @ModelName@_info::normalization_g3);
+
 
    model_gl.calculate_DRbar_masses();
    model_no_g3.calculate_DRbar_masses();

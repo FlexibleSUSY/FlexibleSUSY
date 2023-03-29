@@ -1440,6 +1440,8 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             calculateMHiggsPoleOneMomentumIteration = "",
             threeLoopLambdaMatching = "throw SetupError(\"3-loop matching not enabled.\");",
             callMatch2LoopTopMass = "",
+            setGaugeLessLimit = "",
+            includeMSSMTwoLoopTopMassHeader = "",
             createMt2Loop = ""},
            If[FlexibleSUSY`FlexibleEFTHiggs === True,
               If[Head[susyScaleMatching] === List,
@@ -1461,11 +1463,13 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setRunningDownQuarkMasses         = FlexibleEFTHiggsMatching`CalculateRunningDownQuarkMasses[];
               setRunningDownLeptonMasses        = FlexibleEFTHiggsMatching`CalculateRunningDownLeptonMasses[];
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
+              setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetGaugeLessLimit["model_gl"];
               calculateMHiggsPoleOneMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleOneMomentumIteration[SARAH`HiggsBoson];
           If[ FlexibleSUSY`UseHiggs3LoopMSSM === True, 
               threeLoopLambdaMatching =  FlexibleEFTHiggsMatching`Create3LoopMatching[];
               createMt2Loop =  FlexibleEFTHiggsMatching`CreateMt2Loop[];
-              callMatch2LoopTopMass =  FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[]
+              callMatch2LoopTopMass =  FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[];
+              includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
             ];
 
               calculateMUpQuarkPole1L    = FlexibleEFTHiggsMatching`CalculateMUpQuarkPole1L[];
@@ -1489,6 +1493,8 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
                          "@createMt2Loop@" -> IndentText[createMt2Loop],
                          "@callMatch2LoopTopMass@" -> IndentText[callMatch2LoopTopMass],
+                         "@setGaugeLessLimit@" -> IndentText[setGaugeLessLimit], 
+                         "@includeMSSMTwoLoopTopMassHeader@" -> includeMSSMTwoLoopTopMassHeader,
                          Sequence @@ GeneralReplacementRules[]
                        } ];
         ];
