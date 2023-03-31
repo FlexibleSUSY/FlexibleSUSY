@@ -25,10 +25,11 @@
 BeginPackage["SelfEnergies`", {"SARAH`", "TextFormatting`", "CConversion`", "TreeMasses`", "Parameters`", "Vertices`", "Utils`"}];
 
 FSSelfEnergy::usage="self-energy head";
-FSSelfEnergyDerivative::usage="self-energy p2 derivatives head";
-DB0;
-DG0;
-DA0;
+
+FSSelfEnergyDerivative::usage="head for derivative of self-energy w.r.t. p^2";
+
+(* symbols for derivative of B0 and G0 loop functions w.r.t. p^2 *)
+{ DB0, DG0 }
 
 FSHeavySelfEnergy::usage="head for self-energy w/o BSM particles";
 FSHeavyRotatedSelfEnergy::usage="head for self-energy w/o BSM particles in mass eigenstate basis";
@@ -625,17 +626,20 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
                {p,d} = CreateNPointFunctionMatrix[nPointFunctions[[k]]];
                prototypes = prototypes <> p;
                defs = defs <> d;
-              ];
-          (* create derivatives of Higgs selfenergies w.r.t. p^2 *)
-          derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]]/.{FSSelfEnergy->FSSelfEnergyDerivative, A0-> SelfEnergies`DA0, B0->SelfEnergies`DB0, G0->SelfEnergies`DG0};
-          (*derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]]/.{FSSelfEnergy->FSSelfEnergyDerivative, SelfEnergies`A0->DA0, B0->SelfEnergies`DB0, G0->SelfEnergies`DG0};
-     *)      {p,d} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
+           ];
+           (* create derivatives of Higgs selfenergies w.r.t. p^2 *)
+           derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]] /. {
+               FSSelfEnergy -> FSSelfEnergyDerivative,
+               A0[__] -> 0,
+               B0 -> SelfEnergies`DB0,
+               G0 -> SelfEnergies`DG0
+           };
+           {p,d} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
            prototypes = prototypes <> p;
            defs = defs <> d;
            {p,d} = CreateNPointFunctionMatrix[First[derivatives]];
            prototypes = prototypes <> p;
            defs = defs <> d;
- 
            Utils`StopProgressBar[Length[nPointFunctions]];
            {prototypes, defs}
           ];

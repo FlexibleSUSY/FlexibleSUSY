@@ -197,8 +197,6 @@ private:
 
    double DG0(double, double, double) const noexcept;
    double DB0(double, double, double) const noexcept;
-
-   double DA0(double) const noexcept;
    // DR-bar masses
 @physicalMassesDef@
    // DR-bar mixing matrices

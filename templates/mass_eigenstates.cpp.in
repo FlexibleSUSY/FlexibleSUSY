@@ -467,51 +467,33 @@ double CLASSNAME::G0(double p, double m1, double m2) const noexcept
    ).real();
 }
 
-
-/**
- * wrapper routines for derivatives of passarino Veltman functions 
- * @note: They take squared arguments!
- */
-
-double CLASSNAME::DA0(double m) const noexcept
-{
-   return 0.;
-}
-
+/// derivative of B0(p^2, m1^2, m2^2) w.r.t. p^2
+/// @todo(alex): refine
 double CLASSNAME::DB0(double p2, double m2a, double m2b) const noexcept
 {
    double DB0 = 0;
-   double m4a = m2a * m2a; 
-   double m4b = m2b * m2b; 
+   const double m4a = m2a * m2a;
+   const double m4b = m2b * m2b;
 
-   if( ( std::abs(m2a) < 0.0001) !=  (std::abs(m2b) < 0.0001) ) {
-      DB0 = (m4a - m4b )
-	    /(2. * pow( (m2a -  m2b), 3));
-      return DB0;
-   } 
-   else if ( ( std::abs(m2a) < 0.0001) &&  (std::abs(m2b) < 0.0001) ) {
+   if ((std::abs(m2a) < 0.0001) != (std::abs(m2b) < 0.0001)) {
+      DB0 = (m4a - m4b)/(2*pow(m2a - m2b, 3));
+   } else if ((std::abs(m2a) < 0.0001) && (std::abs(m2b) < 0.0001)) {
       DB0 = 0.;
-      return DB0;
-   }  
-   else if( std::abs(m2b - m2a) < 0.001  ){
-      DB0 = (m2a-m2b)/(12.* m4a) + 1./(6. * m2a ) ;
-   } 
-
-   else{
-      DB0 = (m4a - m4b + 2. * m2a * m2b * log(m2b/m2a) )
-	    /(2. * pow( (m2a -  m2b), 3));
+   } else if (std::abs(m2b - m2a) < 0.001) {
+      DB0 = (m2a - m2b)/(12*m4a) + 1./(6*m2a);
+   } else {
+      DB0 = (m4a - m4b + 2*m2a*m2b*std::log(m2b/m2a))/(2*pow(m2a - m2b, 3));
    }
-
    return DB0;
 }
 
+/// derivative of G0(p^2, m1^2, m2^2) w.r.t. p^2
 double CLASSNAME::DG0(double p2, double m2a, double m2b) const noexcept
 {
    const double scl2 = Sqr(get_scale());
    return Loop_library::get().B0(p2, m2a, m2b, scl2).real()
-	    +  (p2 - m2a - m2b) * DB0(p2, m2a, m2b);
+      + (p2 - m2a - m2b) * DB0(p2, m2a, m2b);
 }
-
 
 /**
  * routine which finds the @RenScheme@ mass eigenstates and mixings.
