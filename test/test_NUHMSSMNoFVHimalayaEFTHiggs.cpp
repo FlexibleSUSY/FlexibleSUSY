@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_NUHMSSM_top_down_EFTHiggs
+#define BOOST_TEST_MODULE test_NUHMSSMNoFVHimalayaEFTHiggs
 
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>

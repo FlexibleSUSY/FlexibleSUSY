@@ -165,10 +165,12 @@ ifeq ($(WITH_NMSSMEFTHiggsShooting), yes)
 TEST_SRC += \
 		$(DIR)/test_NMSSMEFTHiggsShooting.cpp
 endif
+
 ifeq ($(WITH_NUHMSSMNoFVHimalayaEFTHiggs),yes)
 TEST_SRC += \
 		$(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.cpp
 endif
+
 endif
 
 ifeq ($(ENABLE_LOOPTOOLS), yes)
@@ -190,8 +192,6 @@ ifneq ($(findstring two_scale,$(SOLVERS)),)
 TEST_SRC += \
 		$(DIR)/test_two_scale_running_precision.cpp \
 		$(DIR)/test_two_scale_solver.cpp
-
-
 
 ifeq ($(WITH_SOFTSUSY),yes)
 TEST_SRC += \
@@ -1337,7 +1337,7 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 
 # general test rule
 $(DIR)/test_%.x: $(DIR)/test_%.o
-		@$(MSG)		@$(MSG)
+		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
 		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
 
