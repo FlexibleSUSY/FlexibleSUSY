@@ -32,7 +32,11 @@
 #include "global_thread_pool.hpp"
 #endif
 #include <cmath>
-
+#include "sm_twoloophiggs.hpp"
+#include "sm_threeloophiggs.hpp"
+#include "sm_fourloophiggs.hpp"
+#include "sm_threeloophiggs.hpp"
+@includeMSSMTwoLoopTopMassHeader@
 using namespace flexiblesusy::standard_model;
 
 namespace flexiblesusy {
@@ -47,7 +51,419 @@ namespace @ModelName@_standard_model_matching {
 #define Pole(p) model.get_physical().p
 #define SCALE model.get_scale()
 
+#define HIGGS_2LOOP_CORRECTION_AT_AS    get_loop_corrections().higgs_at_as
+#define HIGGS_2LOOP_CORRECTION_AB_AS    get_loop_corrections().higgs_ab_as
+
+#define HIGGS_2LOOP_CORRECTION_AT_AT   get_loop_corrections().higgs_at_at
 namespace {
+
+
+
+
+/**
+ * Calculates squared Higgs pole mass in the SM,
+ * \f$(M_h^{\text{SM}})^2\f$.
+ *
+ * @param sm_0l SM parameters with tree-level lambda
+ *
+ * @return squared Higgs pole mass in the SM
+ */
+double calculate_Mh2_pole(const Standard_model& sm_0l)
+{
+   const double p = sm_0l.get_Mhh();
+   const double self_energy = Re(sm_0l.self_energy_hh_1loop(p));
+   const double tadpole = Re(sm_0l.tadpole_hh_1loop() / sm_0l.get_v());
+   const double mh2_tree = Sqr(sm_0l.get_Mhh());
+   const double Mh2_pole = mh2_tree - self_energy + tadpole;
+
+   return Mh2_pole;
+}
+
+/**
+ * Calculates tadpoles over vevs (at given fixed loop order)
+ *
+ * @param model model parameters
+ * @param loop_order loop order
+ *
+ * @return tadpole at loop order
+ */
+Eigen::Matrix<double,@numberOfEWSBEquations@,1> calculate_tadpole_over_vevs(
+   @ModelName@_mass_eigenstates model, int loop_order)
+{
+   if (loop_order == 0) {
+      model.set_ewsb_loop_order(loop_order);
+      return model.tadpole_equations_over_vevs();
+   }
+
+   model.set_ewsb_loop_order(loop_order);
+   const auto tadpole_lo = model.tadpole_equations_over_vevs(); // nL
+
+   model.set_ewsb_loop_order(loop_order - 1);
+   const auto tadpole_lom1 = model.tadpole_equations_over_vevs(); // (n-1)L
+
+   return (tadpole_lo - tadpole_lom1).eval();
+}
+
+double calculate_MW_pole_1l(const Standard_model& sm_0l)
+{
+   const double mw = sm_0l.get_MVWp();
+   const double p = sm_0l.get_MVWp();
+   const double self_energy = Re(sm_0l.self_energy_VWp_1loop(p));
+   const double M_loop = Sqr(mw) - self_energy;
+
+   return SignedAbsSqrt(M_loop);
+}
+
+double calculate_MW_pole_1l(const @ModelName@_mass_eigenstates& model_0l)
+{
+   const double mw = model_0l.get_M@VectorW(0)@;
+   const double p = model_0l.get_M@VectorW(0)@;
+   const double self_energy = Re(model_0l.self_energy_@VectorW@_1loop(p));
+   const double M_loop = Sqr(mw) - self_energy;
+
+   return SignedAbsSqrt(M_loop);
+}
+
+double calculate_MZ_pole_1l(const Standard_model& sm_0l)
+{
+   const double mz = sm_0l.get_MVZ();
+   const double p = sm_0l.get_MVZ();
+   const double self_energy = Re(sm_0l.self_energy_VZ_1loop(p));
+   const double M_loop = Sqr(mz) - self_energy;
+
+   return SignedAbsSqrt(M_loop);
+}
+
+double calculate_MZ_pole_1l(const @ModelName@_mass_eigenstates& model_0l)
+{
+   const double mz = model_0l.get_M@VectorZ(0)@;
+   const double p = model_0l.get_M@VectorZ(0)@;
+   const double self_energy = Re(model_0l.self_energy_@VectorZ@_1loop(p));
+   const double M_loop = Sqr(mz) - self_energy;
+
+   return SignedAbsSqrt(M_loop);
+}
+
+double calculate_MW_DRbar_1l(
+   const Standard_model& sm_0l,
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   const double MW_sm = calculate_MW_pole_1l(sm_0l);
+   const double MW_bsm = calculate_MW_pole_1l(model_0l);
+   const double mw2 = Sqr(MW_bsm) - Sqr(MW_sm) + Sqr(sm_0l.get_MVWp());
+
+   return AbsSqrt(mw2);
+}
+
+double calculate_MZ_DRbar_1l(
+   const Standard_model& sm_0l,
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   const double MZ_sm = calculate_MZ_pole_1l(sm_0l);
+   const double MZ_bsm = calculate_MZ_pole_1l(model_0l);
+   const double mz2 = Sqr(MZ_bsm) - Sqr(MZ_sm) + Sqr(sm_0l.get_MVZ());
+
+   return AbsSqrt(mz2);
+}
+
+
+
+double calculate_delta_alpha_em(double alpha_em, const @ModelName@_mass_eigenstates& model)
+{
+   const double currentScale = model.get_scale();
+   double delta_alpha_em = 0.;
+
+@alphaEM1Lmatching@
+
+   return delta_alpha_em;
+}
+
+double calculate_delta_alpha_s(double alpha_s, const @ModelName@_mass_eigenstates& model)
+{
+   const double currentScale = model.get_scale();
+   double delta_alpha_s = 0.;
+
+@alphaS1Lmatching@
+
+   return delta_alpha_s;
+}
+
+Eigen::Matrix<double,3,3> calculate_MFu_DRbar_0l(const @ModelName@_mass_eigenstates& model)
+{
+   Eigen::Matrix<double,3,3> mf = ZEROMATRIX(3,3);
+
+@setRunningUpQuarkMasses@
+
+   return mf;
+}
+
+Eigen::Matrix<double,3,3> calculate_MFd_DRbar_0l(const @ModelName@_mass_eigenstates& model)
+{
+   Eigen::Matrix<double,3,3> mf = ZEROMATRIX(3,3);
+
+@setRunningDownQuarkMasses@
+
+   return mf;
+}
+
+Eigen::Matrix<double,3,3> calculate_MFe_DRbar_0l(const @ModelName@_mass_eigenstates& model)
+{
+   Eigen::Matrix<double,3,3> mf = ZEROMATRIX(3,3);
+
+@setRunningDownLeptonMasses@
+
+   return mf;
+}
+
+double calculate_MFu_pole_1l(
+   int i,
+   const Standard_model& sm_0l)
+{
+   const double p = sm_0l.get_MFu(i);
+   const auto self_energy_1  = Re(sm_0l.self_energy_Fu_1loop_1(p));
+   const auto self_energy_PL = Re(sm_0l.self_energy_Fu_1loop_PL(p));
+   const auto self_energy_PR = Re(sm_0l.self_energy_Fu_1loop_PR(p));
+   const auto M_tree = sm_0l.get_mass_matrix_Fu();
+   const auto M_loop = (M_tree - self_energy_PR * M_tree
+                        - M_tree * self_energy_PL - self_energy_1).eval();
+
+   Eigen::Array<double,3,1> MFu_pole;
+   fs_svd(M_loop, MFu_pole);
+
+   return MFu_pole(i);
+}
+
+double calculate_MFd_pole_1l(
+   int i,
+   const Standard_model& sm_0l)
+{
+   const double p = sm_0l.get_MFd(i);
+   const auto self_energy_1  = Re(sm_0l.self_energy_Fd_1loop_1(p));
+   const auto self_energy_PL = Re(sm_0l.self_energy_Fd_1loop_PL(p));
+   const auto self_energy_PR = Re(sm_0l.self_energy_Fd_1loop_PR(p));
+   const auto M_tree = sm_0l.get_mass_matrix_Fd();
+   const auto M_loop = (M_tree - self_energy_PR * M_tree
+                        - M_tree * self_energy_PL - self_energy_1).eval();
+
+   Eigen::Array<double,3,1> MFd_pole;
+   fs_svd(M_loop, MFd_pole);
+
+   return MFd_pole(i);
+}
+
+double calculate_MFe_pole_1l(
+   int i,
+   const Standard_model& sm_0l)
+{
+   const double p = sm_0l.get_MFe(i);
+   const auto self_energy_1  = Re(sm_0l.self_energy_Fe_1loop_1(p));
+   const auto self_energy_PL = Re(sm_0l.self_energy_Fe_1loop_PL(p));
+   const auto self_energy_PR = Re(sm_0l.self_energy_Fe_1loop_PR(p));
+   const auto M_tree = sm_0l.get_mass_matrix_Fe();
+   const auto M_loop = (M_tree - self_energy_PR * M_tree
+                        - M_tree * self_energy_PL - self_energy_1).eval();
+
+   Eigen::Array<double,3,1> MFe_pole;
+   fs_svd(M_loop, MFe_pole);
+
+   return MFe_pole(i);
+}
+
+double calculate_MFu_pole_1l(
+   int i,
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   double m_pole = 0.;
+
+@calculateMUpQuarkPole1L@
+
+   return m_pole;
+}
+
+double calculate_MFd_pole_1l(
+   int i,
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   double m_pole = 0.;
+
+@calculateMDownQuarkPole1L@
+
+   return m_pole;
+}
+
+double calculate_MFe_pole_1l(
+   int i,
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   double m_pole = 0.;
+
+@calculateMDownLeptonPole1L@
+
+   return m_pole;
+}
+
+Eigen::Matrix<double,3,3> calculate_MFu_pole_1l(const Standard_model& sm_0l)
+{
+   Eigen::Matrix<double,3,1> M_pole;
+
+#ifdef ENABLE_THREADS
+   auto M_0 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFu_pole_1l(0, sm_0l); });
+   auto M_1 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFu_pole_1l(1, sm_0l); });
+   auto M_2 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFu_pole_1l(2, sm_0l); });
+   M_pole << M_0.get(), M_1.get(), M_2.get();
+#else
+   M_pole << calculate_MFu_pole_1l(0, sm_0l),
+             calculate_MFu_pole_1l(1, sm_0l),
+             calculate_MFu_pole_1l(2, sm_0l);
+#endif
+
+   return M_pole.asDiagonal();
+}
+
+Eigen::Matrix<double,3,3> calculate_MFd_pole_1l(const Standard_model& sm_0l)
+{
+   Eigen::Matrix<double,3,1> M_pole;
+
+#ifdef ENABLE_THREADS
+   auto M_0 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFd_pole_1l(0, sm_0l); });
+   auto M_1 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFd_pole_1l(1, sm_0l); });
+   auto M_2 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFd_pole_1l(2, sm_0l); });
+   M_pole << M_0.get(), M_1.get(), M_2.get();
+#else
+   M_pole << calculate_MFd_pole_1l(0, sm_0l),
+             calculate_MFd_pole_1l(1, sm_0l),
+             calculate_MFd_pole_1l(2, sm_0l);
+#endif
+
+   return M_pole.asDiagonal();
+}
+
+Eigen::Matrix<double,3,3> calculate_MFe_pole_1l(const Standard_model& sm_0l)
+{
+   Eigen::Matrix<double,3,1> M_pole;
+
+#ifdef ENABLE_THREADS
+   auto M_0 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFe_pole_1l(0, sm_0l); });
+   auto M_1 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFe_pole_1l(1, sm_0l); });
+   auto M_2 = global_thread_pool().run_packaged_task([&sm_0l]{ return calculate_MFe_pole_1l(2, sm_0l); });
+   M_pole << M_0.get(), M_1.get(), M_2.get();
+#else
+   M_pole << calculate_MFe_pole_1l(0, sm_0l),
+             calculate_MFe_pole_1l(1, sm_0l),
+             calculate_MFe_pole_1l(2, sm_0l);
+#endif
+
+   return M_pole.asDiagonal();
+}
+
+Eigen::Matrix<double,3,3> calculate_MFu_pole_1l(
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   Eigen::Matrix<double,3,1> M_pole;
+
+#ifdef ENABLE_THREADS
+   auto M_0 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFu_pole_1l(0, model_0l); });
+   auto M_1 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFu_pole_1l(1, model_0l); });
+   auto M_2 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFu_pole_1l(2, model_0l); });
+   M_pole << M_0.get(), M_1.get(), M_2.get();
+#else
+   M_pole << calculate_MFu_pole_1l(0, model_0l),
+             calculate_MFu_pole_1l(1, model_0l),
+             calculate_MFu_pole_1l(2, model_0l);
+#endif
+
+   return M_pole.asDiagonal();
+}
+
+Eigen::Matrix<double,3,3> calculate_MFd_pole_1l(
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   Eigen::Matrix<double,3,1> M_pole;
+
+#ifdef ENABLE_THREADS
+   auto M_0 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFd_pole_1l(0, model_0l); });
+   auto M_1 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFd_pole_1l(1, model_0l); });
+   auto M_2 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFd_pole_1l(2, model_0l); });
+   M_pole << M_0.get(), M_1.get(), M_2.get();
+#else
+   M_pole << calculate_MFd_pole_1l(0, model_0l),
+             calculate_MFd_pole_1l(1, model_0l),
+             calculate_MFd_pole_1l(2, model_0l);
+#endif
+
+   return M_pole.asDiagonal();
+}
+
+Eigen::Matrix<double,3,3> calculate_MFe_pole_1l(
+   const @ModelName@_mass_eigenstates& model_0l)
+{
+   Eigen::Matrix<double,3,1> M_pole;
+
+#ifdef ENABLE_THREADS
+   auto M_0 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFe_pole_1l(0, model_0l); });
+   auto M_1 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFe_pole_1l(1, model_0l); });
+   auto M_2 = global_thread_pool().run_packaged_task([&model_0l]{ return calculate_MFe_pole_1l(2, model_0l); });
+   M_pole << M_0.get(), M_1.get(), M_2.get();
+#else
+   M_pole << calculate_MFe_pole_1l(0, model_0l),
+             calculate_MFe_pole_1l(1, model_0l),
+             calculate_MFe_pole_1l(2, model_0l);
+#endif
+
+   return M_pole.asDiagonal();
+}
+
+
+Eigen::Matrix<double, 3, 3>
+calculate_MFu_DRbar_1l(
+   const Standard_model& sm_0l,
+   const @ModelName@_mass_eigenstates& model) {
+  Eigen::Matrix<double, 3, 3> mf_sm_1l = ZEROMATRIX(3, 3);
+
+  const auto Mf_sm = calculate_MFu_pole_1l(sm_0l);
+  const auto Mf_bsm = calculate_MFu_pole_1l(model);
+  const auto mf_sm_0l =
+      calculate_MFu_DRbar_0l(model); // treelevel matching
+
+  mf_sm_1l = Mf_bsm - Mf_sm + mf_sm_0l;
+
+  return Abs(mf_sm_1l);
+}
+
+Eigen::Matrix<double, 3, 3>
+calculate_MFd_DRbar_1l(
+   const Standard_model& sm_0l,
+   const @ModelName@_mass_eigenstates& model) {
+  Eigen::Matrix<double, 3, 3> mf_sm_1l = ZEROMATRIX(3, 3);
+
+  const auto Mf_sm = calculate_MFd_pole_1l(sm_0l);
+  const auto Mf_bsm = calculate_MFd_pole_1l(model);
+  const auto mf_sm_0l =
+      calculate_MFd_DRbar_0l(model); // treelevel matching
+
+  mf_sm_1l = Mf_bsm - Mf_sm + mf_sm_0l;
+
+  return Abs(mf_sm_1l);
+}
+
+Eigen::Matrix<double, 3, 3>
+calculate_MFe_DRbar_1l(
+   const Standard_model& sm_0l,
+   const @ModelName@_mass_eigenstates& model) {
+  Eigen::Matrix<double, 3, 3> mf_sm_1l = ZEROMATRIX(3, 3);
+
+  const auto Mf_sm = calculate_MFe_pole_1l(sm_0l);
+  const auto Mf_bsm = calculate_MFe_pole_1l(model);
+  const auto mf_sm_0l =
+      calculate_MFe_DRbar_0l(model); // treelevel matching
+
+  mf_sm_1l = Mf_bsm - Mf_sm + mf_sm_0l;
+
+  return Abs(mf_sm_1l);
+}
+
+
+
 
 /// calculates quartic Higgs coupling of SM at 0l
 double calculate_lambda_0l(
@@ -61,34 +477,250 @@ double calculate_lambda_0l(
    return lambda;
 }
 
-Eigen::Matrix<double,3,3> calculate_MFu_DRbar_tree_level(const @ModelName@_mass_eigenstates& model)
-{
-   Eigen::Matrix<double,3,3> mf = ZEROMATRIX(3,3);
 
-@setRunningUpQuarkMasses@
+/**
+ * Calculates SM pole mass at 1l.
+ */
+double calculate_Mh2_pole_1l(const standard_model::Standard_model &sm_0l) {
+   const double p = sm_0l.get_Mhh();
+   const double self_energy = Re(sm_0l.self_energy_hh_1loop(p));
+   const double tadpole = Re(sm_0l.tadpole_hh_1loop() / sm_0l.get_v());
+   const double mh2_tree = Sqr(sm_0l.get_Mhh());
+   const double Mh2_pole = mh2_tree - self_energy + tadpole;
 
-   return mf;
+   return Mh2_pole;
 }
 
-Eigen::Matrix<double,3,3> calculate_MFd_DRbar_tree_level(const @ModelName@_mass_eigenstates& model)
+
+/**
+ * Calculates tree-level Higgs mass matrix in the NUHMSSMNoFVHimalaya without
+ * including tadpoles implicitly.  This is achieved by solving the
+ * EWSB equations at tree-level in order to avoid the inclusion of
+ * loop tadpoles.
+ *
+ * @param model NUHMSSMNoFVHimalaya parameters
+ * @return tree-level Higgs mass matrix in the NUHMSSMNoFVHimalaya w/o tadpoles
+ */
+auto calculate_mh2_0l(@ModelName@_mass_eigenstates model) -> decltype(model.get_mass_matrix_@HiggsBoson@())
 {
-   Eigen::Matrix<double,3,3> mf = ZEROMATRIX(3,3);
-
-@setRunningDownQuarkMasses@
-
-   return mf;
+   model.solve_ewsb_tree_level_custom();
+   return model.get_mass_matrix_@HiggsBoson@();
 }
 
-Eigen::Matrix<double,3,3> calculate_MFe_DRbar_tree_level(const @ModelName@_mass_eigenstates& model)
-{
-   Eigen::Matrix<double,3,3> mf = ZEROMATRIX(3,3);
+/**
+ * Calculates BSM pole mass at 1l.
+ */
 
-@setRunningDownLeptonMasses@
+double calculate_Mh2_pole_1l( const @ModelName@_mass_eigenstates& model,
+                             int idx) {
 
-   return mf;
+   // calculate tree-level mass matrix
+   const auto mh2_tree = calculate_mh2_0l(model);
+
+   // calculate 1L self-energy using tree-level parameters
+   const double p = model.get_M@HiggsBoson(idx)@;
+   const auto self_energy = Re(model.self_energy_hh_1loop(p));
+
+   // calculate 1L tadpoles using tree-level parameters
+   const auto tadpole = calculate_tadpole_over_vevs(model, 1);
+
+   double Mh2_pole = 0.;
+
+@calculateMHiggsPoleOneMomentumIteration@
+
+   return Mh2_pole;
 }
+
+double calculate_mh_DRbar_1l(const standard_model::Standard_model sm_0l,
+                             const @ModelName@_mass_eigenstates &model,
+                             int idx) {
+   const double mh2_sm = Sqr(sm_0l.get_Mhh());
+   const double Mh2_sm = calculate_Mh2_pole_1l(sm_0l);
+   const double Mh2_bsm = calculate_Mh2_pole_1l(model, idx);
+
+   const double mh2_1l = Mh2_bsm - Mh2_sm + mh2_sm;
+
+   return AbsSqrt(mh2_1l);
+}
+
+double calculate_lambda_1l(const @ModelName@_mass_eigenstates& model,
+                           const standard_model::Standard_model sm_0l,
+                           standard_model::Standard_model sm_1l, int idx) {
+   const double v = sm_0l.get_v();
+   const double delta_v = (sm_1l.get_v()) - v;
+   const double v2 = Sqr(sm_0l.get_v());
+   const double mh2_SM = Sqr(calculate_mh_DRbar_1l(sm_0l, model, idx));
+
+   const double lambda1l =
+      mh2_SM / v2 - 2 * Sqr(model.get_M@HiggsBoson(idx)@) / v2 * delta_v / v;
+
+   return lambda1l;
+}
+
+
+
+double calculate_Mh2_shift_1l_2l(
+   const standard_model::Standard_model& sm)
+{
+   using namespace flexiblesusy::sm_twoloophiggs;
+
+   auto sm_1l = sm;
+
+   int nrows = sm.get_Yu().rows();
+   int ncols = sm.get_Yu().cols();
+
+   for(int i = 0; i<nrows;i++){
+      for(int k = 0; k<ncols;k++){
+
+         if (sm.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+            continue;
+         }
+         sm_1l.set_Yu(i,k,.0);
+         sm_1l.set_Yd(i,k,.0);
+         sm_1l.set_Ye(i,k,.0);
+      }
+   }
+
+
+   sm_1l.calculate_DRbar_masses();
+
+
+   const double mh2_tree = Sqr(sm.get_Mhh());
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(sm_1l) - mh2_tree;
+
+   return mh2_shift_1l;
+}
+
+double calculate_Mh2_shift_1l_2l(
+       const @ModelName@_mass_eigenstates& model, int idx)
+{
+
+   auto model_1l = model;
+
+   int nrows = model.get_@UpYukawa@().rows();
+   int ncols = model.get_@UpYukawa@().cols();
+
+   for(int i = 0; i<nrows;i++){
+      for(int k = 0; k<ncols;k++){
+
+         if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+            continue;
+         }
+         model_1l.set_@UpYukawa@(i,k,.0);
+         model_1l.set_@TrilinearUp@(i,k,.0);
+         model_1l.set_@DownYukawa@(i,k,.0);
+         model_1l.set_@TrilinearDown@(i,k,.0);
+         model_1l.set_@ElectronYukawa@(i,k,.0);
+         model_1l.set_@TrilinearLepton@(i,k,.0);
+      }
+   }
+
+
+   model_1l.calculate_DRbar_masses();
+ 
+   const double mh2_tree = Sqr(model_1l.get_M@HiggsBoson(idx)@);
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(model_1l,idx) - mh2_tree;
+  
+   return mh2_shift_1l;
+}
+
+double calculate_Mh2_shift_2l(
+   const @ModelName@_mass_eigenstates &model_gl,
+   int idx)
+{
+   auto model = model_gl;
+   const double p = 0.;
+
+   // calculate 2L self-energy using tree-level parameters
+   auto self_energy = Re(model.self_energy_hh_2loop());
+   const auto tadpole = calculate_tadpole_over_vevs(model, 2);
+
+   int nrows = model.get_@UpYukawa@().rows();
+   int ncols = model.get_@UpYukawa@().cols();
+
+   for(int i = 0; i<nrows;i++){
+      for(int k = 0; k<ncols;k++){
+
+         if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+            continue;
+         }
+         model.set_@UpYukawa@(i,k,.0);
+         model.set_@DownYukawa@(i,k,.0);
+         model.set_@ElectronYukawa@(i,k,.0);
+         model.set_@TrilinearUp@(i,k,.0);          
+         model.set_@TrilinearDown@(i,k,.0);
+         model.set_@TrilinearLepton@(i,k,.0); 
+      }
+   }
+
+   model.calculate_DRbar_masses();
+
+   const auto mh2_tree = calculate_mh2_0l(model);
+   const double mh2_0l = Sqr(model.get_M@HiggsBoson(idx)@);
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(model,idx) - mh2_0l;
+   double Mh2_pole = 0.;
+
+   self_energy += Re(model.self_energy_hh_1loop_deriv_p2( p ) * mh2_shift_1l);
+   
+
+@calculateMHiggsPoleOneMomentumIteration@
+ 
+   const double mh2_shift = Mh2_pole - mh2_0l;
+   
+   return mh2_shift;
+}
+
+
+double calculate_Mh2_shift_2l(
+   const standard_model::Standard_model& sm, 
+   const @ModelName@_mass_eigenstates& model,
+   int idx)
+{
+   using namespace flexiblesusy::sm_twoloophiggs;
+   const double p = 0.;
+   const double mh2_shift_1l = calculate_Mh2_shift_1l_2l(model, idx);
+   auto sm_2l = sm;
+   const double self_energy_2l = Re(sm_2l.self_energy_hh_2loop(p));
+   
+   //  tadpoles are within selfenergy
+   double mh2_shift = -self_energy_2l;
+   int nrows = sm.get_Yu().rows();
+   int ncols = sm.get_Yu().cols();
+
+   for(int i = 0; i<nrows;i++){
+      for(int k = 0; k<ncols;k++){
+
+         if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+            continue;
+         }
+         sm_2l.set_Yu(i,k,.0);
+         sm_2l.set_Yd(i,k,.0);
+         sm_2l.set_Ye(i,k,.0);
+      }
+   }
+   sm_2l.calculate_DRbar_masses();
+
+   //  tadpoles are within selfenergy
+   if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
+
+          mh2_shift =  - self_energy_2l
+               	      + (delta_mh_1loop_at_sm_deriv_p2(p, sm_2l.get_scale(), sm_2l.get_MFu(2),
+		         sm_2l.get_Yu(2,2)) 
+		       + delta_mh_1loop_ab_sm_deriv_p2(p, sm_2l.get_scale(), sm_2l.get_MFd(2),
+		         sm_2l.get_Yd(2,2))
+		       + delta_mh_1loop_atau_sm_deriv_p2(p, sm_2l.get_scale(), sm_2l.get_MFe(2),
+		         sm_2l.get_Ye(2,2)) ) *  (mh2_shift_1l);
+   }
+
+   return mh2_shift;
+}
+
+@createMt2Loop@
+
 
 } // anonymous namespace
+
+
 
 /**
  * Calculates \f$\lambda(Q)\f$ at the tree level from the lightest
@@ -98,7 +730,9 @@ Eigen::Matrix<double,3,3> calculate_MFe_DRbar_tree_level(const @ModelName@_mass_
  * @param model_input @ModelName@ parameters
  * @param idx Higgs index (in mass ordered Higgs multiplet)
  */
-void match_high_to_low_scale_model_tree_level(
+
+
+void match_high_to_low_scale_sm_0l(
    Standard_model& sm, const @ModelName@_mass_eigenstates& model_input, int idx)
 {
    auto model = model_input;
@@ -111,11 +745,11 @@ void match_high_to_low_scale_model_tree_level(
    const double mW = model.get_M@VectorW(0)@;
    const double v  = 2.*mW/g2 ;
 
-   model.calculate_DRbar_masses();
+ //  model.calculate_DRbar_masses();
 
-   const auto upQuarksDRbar    = calculate_MFu_DRbar_tree_level(model);
-   const auto downQuarksDRbar  = calculate_MFd_DRbar_tree_level(model);
-   const auto downLeptonsDRbar = calculate_MFe_DRbar_tree_level(model);
+   const auto upQuarksDRbar    = calculate_MFu_DRbar_0l(model);
+   const auto downQuarksDRbar  = calculate_MFd_DRbar_0l(model);
+   const auto downLeptonsDRbar = calculate_MFe_DRbar_0l(model);
 
    sm.set_Yu(1.4142135623730951/v*upQuarksDRbar);
    sm.set_Yd(1.4142135623730951/v*downQuarksDRbar);
@@ -126,6 +760,229 @@ void match_high_to_low_scale_model_tree_level(
    sm.calculate_DRbar_masses();
 }
 
+
+void match_high_to_low_scale_sm_1l(Standard_model& sm, 
+      const @ModelName@_mass_eigenstates& model_input, int idx)
+{
+
+   auto model = model_input;
+   auto sm_0l = sm;
+
+   match_high_to_low_scale_sm_0l(sm_0l, model, idx);
+
+   const double gy = sm_0l.get_g1() * standard_model_info::normalization_g1;
+   const double g2 = sm_0l.get_g2() * standard_model_info::normalization_g2;
+
+   const double gy_2 =
+      Sqr(sm_0l.get_g1() * standard_model_info::normalization_g1);
+   const double g2_2 =
+      Sqr(sm_0l.get_g2() * standard_model_info::normalization_g2);
+   const double g3_2 =
+      Sqr(sm_0l.get_g3() * standard_model_info::normalization_g3);
+   const double v = sm_0l.get_v();
+
+   const double alpha_em = gy_2 * g2_2 / (4. * Pi * (gy_2 + g2_2));
+   const double alpha_s = g3_2 / (4. * Pi);
+   const double delta_alpha_em = calculate_delta_alpha_em(alpha_em, model);
+   const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model);
+
+   const double mW2_1l = Sqr(calculate_MW_DRbar_1l(sm_0l, model));
+   const double mZ2_1l = Sqr(calculate_MZ_DRbar_1l(sm_0l, model));
+
+   const double mW2 = Sqr(model.get_M@VectorW(0)@);
+   const double mZ2 = Sqr(model.get_M@VectorZ(0)@);
+   const double delta_mZ2 = mZ2_1l - mZ2;
+   const double delta_mW2 = mW2_1l - mW2;
+
+   const double sThetaW2 = 1 - Sqr(sm_0l.get_MVWp() / sm_0l.get_MVZ());
+   const double delta_sThetaW2 = delta_mZ2 * mW2 / (Sqr(mZ2)) - delta_mW2 / mZ2;
+
+   const double g1_1l =
+      AbsSqrt(4. * Pi * alpha_em * mZ2 / mW2) *
+      (1. + 0.5 * (-delta_alpha_em + delta_sThetaW2 * mZ2 / mW2)) /
+      standard_model_info::normalization_g1;
+   const double g2_1l =
+      AbsSqrt(4. * Pi * alpha_em / (sThetaW2)) *
+      (1. + 0.5 * (-delta_alpha_em - delta_sThetaW2 / sThetaW2)) /
+      standard_model_info::normalization_g2;
+   const double g3_1l = AbsSqrt(4. * Pi * alpha_s) * (1. - 0.5 * delta_alpha_s) /
+                       standard_model_info::normalization_g3;
+
+   const double delta_g2 = g2_1l * standard_model_info::normalization_g2 - g2;
+   const double vev_1l =
+      2 * Sqrt(mW2) / g2 * (1 - delta_g2 / g2 + 0.5 * delta_mW2 / mW2);
+   const double delta_vev = vev_1l - v;
+
+   sm.set_g1(g1_1l);
+   sm.set_g2(g2_1l);
+   sm.set_g3(g3_1l);
+   sm.set_v(vev_1l);
+
+
+   Eigen::Matrix<double, 3, 3> YupQuarksMSbar = sm_0l.get_Yu();
+   Eigen::Matrix<double, 3, 3> YdownQuarksMSbar = sm_0l.get_Yd();
+   Eigen::Matrix<double, 3, 3> YdownLeptonsMSbar = sm_0l.get_Ye();
+
+   Eigen::Matrix<double, 3, 3> upQuarksDRbar1l =
+      calculate_MFu_DRbar_1l(sm_0l, model);
+   Eigen::Matrix<double, 3, 3> downQuarksDRbar1l =
+      calculate_MFd_DRbar_1l(sm_0l, model);
+   Eigen::Matrix<double, 3, 3> downLeptonsDRbar1l =
+      calculate_MFe_DRbar_1l(sm_0l, model);
+
+  /*
+YupQuarksMSbar(1,1) = 0.;
+YupQuarksMSbar(0,0) = 0.;
+YdownQuarksMSbar(0,0) = 0.;
+YdownLeptonsMSbar(1,1) = 0.;
+YdownQuarksMSbar(1,1) = 0.;
+YdownLeptonsMSbar(0,0) = 0.;
+
+
+upQuarksDRbar1l(1,1) = 0.;
+upQuarksDRbar1l(0,0) = 0.;
+downQuarksDRbar1l(0,0) = 0.;
+downQuarksDRbar1l(1,1) = 0.;
+downLeptonsDRbar1l(1,1) = 0.;
+downLeptonsDRbar1l(0,0) = 0.;
+*/
+
+   sm.set_Yu(1.4142135623730951 / v * upQuarksDRbar1l -
+               YupQuarksMSbar * delta_vev / v);
+   sm.set_Yd(1.4142135623730951 / v * downQuarksDRbar1l -
+               YdownQuarksMSbar * delta_vev / v);
+   sm.set_Ye(1.4142135623730951 / v * downLeptonsDRbar1l -
+               YdownLeptonsMSbar * delta_vev / v);
+
+
+   sm.set_Lambdax(calculate_lambda_1l(model, sm_0l, sm, idx));
+   sm.calculate_DRbar_masses();
+   sm.get_problems().add(sm_0l.get_problems());
+
+}
+
+
+
+
+void match_high_to_low_scale_sm_2l(Standard_model& sm, 
+      const @ModelName@_mass_eigenstates& model_input, int idx)
+{
+
+      #ifdef MODELPARAMETER  
+   #undef MODELPARAMETER
+   #endif 
+   #define MODELPARAMETER(p) model_gl.get_##p();
+
+
+
+   static const double gauge_less = 1e-10;              
+   // approximates the gaugeless limit for gauge couplings
+
+   auto model    = model_input;
+   auto model_gl = model;
+   model_gl.get_problems().clear();
+@setGaugeLessLimit@
+
+
+
+
+   #ifdef MODELPARAMETER  
+   #undef MODELPARAMETER
+   #endif 
+   #define MODELPARAMETER(p) model.get_##p();
+
+   auto model_no_g3 = model_gl;
+   model_no_g3.set_g3(gauge_less / @ModelName@_info::normalization_g3);
+
+
+   model_gl.calculate_DRbar_masses();
+   model_no_g3.calculate_DRbar_masses();
+   model.calculate_DRbar_masses();
+   
+   auto sm_0l    = sm;
+   auto sm_1l    = sm;
+   auto sm_0l_gl = sm;
+   auto sm_1l_gl = sm;
+   auto sm_0l_no_g3 = sm;
+   auto sm_1l_no_g3 = sm;
+
+   match_high_to_low_scale_sm_0l(sm_0l, model, idx);
+   match_high_to_low_scale_sm_1l(sm_1l, model, idx);
+   match_high_to_low_scale_sm_0l(sm_0l_gl, model_gl, idx);
+   match_high_to_low_scale_sm_1l(sm_1l_gl, model_gl, idx);
+   match_high_to_low_scale_sm_0l(sm_0l_no_g3, model_no_g3, idx);
+   match_high_to_low_scale_sm_1l(sm_1l_no_g3, model_no_g3, idx);
+
+   const double v              = sm_0l.get_v();
+   const double v2             = Sqr(sm_0l.get_v());
+   const double lambda_1l      = sm_1l.get_Lambdax();
+
+
+   double delta_yt       = 0.;
+   double delta_yb       = 0.;
+   double delta_ytau     = 0.;
+   double delta_v_gl     = 0.;
+   double p              = 0.;
+ 
+   if(model.HIGGS_2LOOP_CORRECTION_AT_AS){
+      delta_yt  += sm_1l_gl.get_Yu(2,2) - sm_1l_no_g3.get_Yu(2,2);
+   }
+
+   if(model.HIGGS_2LOOP_CORRECTION_AB_AS){
+      delta_yb  += sm_1l_gl.get_Yd(2,2) - sm_1l_no_g3.get_Yd(2,2);
+   }
+
+
+   if(model.HIGGS_2LOOP_CORRECTION_AT_AT){
+      delta_yt       += sm_1l_no_g3.get_Yu(2,2) - sm_0l_gl.get_Yu(2,2);
+      delta_yb       += sm_1l_no_g3.get_Yd(2,2) - sm_0l_gl.get_Yd(2,2) ;
+      delta_ytau     += sm_1l.get_Ye(2,2) - sm_0l_gl.get_Ye(2,2);
+      delta_v_gl     += sm_1l.get_v() - v;
+   }	
+
+   const double mh2_bsm_shift   = calculate_Mh2_shift_2l( model_gl, idx); 
+   const double mh2_sm_shift    = calculate_Mh2_shift_2l(sm_0l_gl, model_gl, idx); 
+   const double mh2_1l_sm_shift  = calculate_Mh2_shift_1l_2l(sm_0l_gl); 
+   const double mh2_1l_bsm_shift = calculate_Mh2_shift_1l_2l(model_gl, idx); 
+
+   double delta_mh_1l_gl = 0.;
+
+   using namespace flexiblesusy::sm_twoloophiggs;
+   const double mh2_conversion = delta_mh_1loop_at_sm_deriv_yt(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFu(2),
+		     sm_0l_gl.get_Yu(2,2)) *  delta_yt
+	             +  delta_mh_1loop_ab_sm_deriv_yb(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFd(2),
+		     sm_0l_gl.get_Yd(2,2)) *  delta_yb
+	             + delta_mh_1loop_atau_sm_deriv_ytau(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFe(2),
+		     sm_0l_gl.get_Ye(2,2)) *  delta_ytau
+                     + (  delta_mh_1loop_at_sm_deriv_v(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFu(2),
+		          sm_0l_gl.get_Yu(2,2))  
+		        + delta_mh_1loop_ab_sm_deriv_v(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFd(2),
+		          sm_0l_gl.get_Yd(2,2))
+              	        + delta_mh_1loop_atau_sm_deriv_v(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFe(2),
+		          sm_0l_gl.get_Ye(2,2))) *  delta_v_gl;
+
+  
+   const double lambda_2l  = lambda_1l + (mh2_bsm_shift - mh2_sm_shift - mh2_conversion )/ v2 
+	                     -2.* delta_v_gl /( v * v2 ) * (mh2_1l_bsm_shift - mh2_1l_sm_shift);
+
+
+   sm = sm_1l;
+   sm.set_Lambdax(lambda_2l);
+   @callMatch2LoopTopMass@
+
+   sm.calculate_DRbar_masses();
+
+}
+
+void match_high_to_low_scale_sm_3l(Standard_model& sm, 
+    const @ModelName@_mass_eigenstates& model_input, int idx)
+{ 
+
+@threeLoopLambdaMatching@ 
+
+}
+
+
 /**
  * Calculates \f$\lambda(Q)\f$ at the 1-loop level from the lightest
  * CP-even Higgs boson mass of the @ModelName@ by requiring that the
@@ -135,18 +992,58 @@ void match_high_to_low_scale_model_tree_level(
  * @param model @ModelName@ parameters
  * @param loop_order downwards matching loop order
  * @param idx Higgs index (in mass ordered Higgs multiplet)
+ * /match_high_to_low_scale_sm_0l
  */
 void match_high_to_low_scale_model(
-   Standard_model& sm, const @ModelName@_mass_eigenstates& model, int loop_order, int idx)
+   Standard_model& sm, const @ModelName@_mass_eigenstates& model1, int loop_order, int idx)
 {
-   if (loop_order == 0) {
-      match_high_to_low_scale_model_tree_level(sm, model, idx);
-      return;
+
+ auto model =model1;
+/*
+  Eigen::Matrix<double, 3, 3> YupQuarksMSbar = model.get_@UpYukawa@();
+  Eigen::Matrix<double, 3, 3> YdownQuarksMSbar = model.get_@DownYukawa@();
+  Eigen::Matrix<double, 3, 3> YdownLeptonsMSbar = model.get_@ElectronYukawa@();
+
+YupQuarksMSbar(1,1) = 0.;
+YupQuarksMSbar(0,0) = 0.;
+YdownQuarksMSbar(0,0) = 0.;
+YdownLeptonsMSbar(1,1) = 0.;
+YdownQuarksMSbar(1,1) = 0.;
+YdownLeptonsMSbar(0,0) = 0.;
+
+  model.set_@UpYukawa@(YupQuarksMSbar);
+  model.set_@DownYukawa@(YdownQuarksMSbar);
+  model.set_@ElectronYukawa@(YdownLeptonsMSbar);
+*/
+
+   switch (loop_order){
+      case 0: {
+         match_high_to_low_scale_sm_0l(sm, model, idx);
+         return;
+      }
+
+      case 1: {
+         match_high_to_low_scale_sm_1l(sm, model, idx);
+         return;
+      }
+
+      case 2: {
+         auto sm_1l = sm;
+         match_high_to_low_scale_sm_1l(sm_1l, model, idx);
+         match_high_to_low_scale_sm_2l(sm, model, idx);
+         sm.set_Yu(2,2, sm_1l.get_Yu(2,2));
+         return;
+      }
+
+      case 3: {
+         match_high_to_low_scale_sm_3l(sm, model, idx);
+         return;
+      }    
    }
 
-   WARNING("Using only tree-level matching, because 1-loop is not yet implemented.");
-   match_high_to_low_scale_model_tree_level(sm, model, idx);
-   // match_high_to_low_scale_model_1loop(sm, model, idx);
+   WARNING("Using only 2-loop-level matching, because 3-loop is not yet implemented.");
+   //sm =  calculate_sm_0l( model, idx);
+   // match_high_to_low_scale_model_1l(sm, model, idx);
 }
 
 /**
@@ -169,6 +1066,7 @@ void match_low_to_high_scale_model_tree_level(
       const double VEV = sm.get_v();
 
 @applyUserMatching@
+
    }
 
    Eigen::Matrix<double, 3, 3> upQuarksDRbar    = ZEROMATRIX(3,3);

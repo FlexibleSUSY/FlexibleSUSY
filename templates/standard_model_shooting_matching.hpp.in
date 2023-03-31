@@ -27,7 +27,13 @@
 namespace flexiblesusy {
 namespace @ModelName@_standard_model_matching {
 
-void match_high_to_low_scale_model_tree_level(
+//standard_model::Standard_model calculate_sm_0l(const @ModelName@_mass_eigenstates& model, int idx);
+
+void match_high_to_low_scale_sm_0l(
+   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+
+
+void match_high_to_low_scale_sm_1l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
 
 void match_high_to_low_scale_model(
@@ -40,5 +46,7 @@ void impose_user_matching(@ModelName@_mass_eigenstates&, double);
 
 } // namespace @ModelName@_standard_model_matching
 } // namespace flexiblesusy
+
+//match_high_to_low_scale_sm_0l
 
 #endif
