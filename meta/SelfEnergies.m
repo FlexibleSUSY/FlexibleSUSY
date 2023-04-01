@@ -119,7 +119,6 @@ GetField[selfEnergy_SelfEnergies`FSSelfEnergy] :=
 GetField[selfEnergy_SelfEnergies`FSSelfEnergyDerivative] :=
     selfEnergy[[1]];
 
-
 GetField[selfEnergy_SelfEnergies`FSHeavySelfEnergy] :=
     selfEnergy[[1]];
 
@@ -478,7 +477,6 @@ CreateSelfEnergyFunctionName[field_, loops_] :=
 CreateSelfEnergyDerivativeFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_deriv_p2";
 
-
 CreateHeavySelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_heavy";
 
@@ -630,7 +628,7 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
            If[ValueQ[SARAH`HiggsBoson],
               derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]] /. {
-                  FSSelfEnergy -> FSSelfEnergyDerivative,
+                  FSSelfEnergy -> SelfEnergies`FSSelfEnergyDerivative,
                   A0[__] -> 0,
                   B0 -> SelfEnergies`DB0,
                   G0 -> SelfEnergies`DG0
