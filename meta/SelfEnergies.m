@@ -627,19 +627,25 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
                prototypes = prototypes <> p;
                defs = defs <> d;
            ];
-           (* create derivatives of Higgs selfenergies w.r.t. p^2 *)
-           derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]] /. {
-               FSSelfEnergy -> FSSelfEnergyDerivative,
-               A0[__] -> 0,
-               B0 -> SelfEnergies`DB0,
-               G0 -> SelfEnergies`DG0
-           };
-           {p,d} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
-           prototypes = prototypes <> p;
-           defs = defs <> d;
-           {p,d} = CreateNPointFunctionMatrix[First[derivatives]];
-           prototypes = prototypes <> p;
-           defs = defs <> d;
+           (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
+           If[ValueQ[SARAH`HiggsBoson],
+              derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]] /. {
+                  FSSelfEnergy -> FSSelfEnergyDerivative,
+                  A0[__] -> 0,
+                  B0 -> SelfEnergies`DB0,
+                  G0 -> SelfEnergies`DG0
+              };
+              Switch[Length[derivatives],
+                     0, Print["Error: no Higgs boson self-energy found."],
+                     1, {p,d} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
+                        prototypes = prototypes <> p;
+                        defs = defs <> d;
+                        {p,d} = CreateNPointFunctionMatrix[First[derivatives]];
+                        prototypes = prototypes <> p;
+                        defs = defs <> d;,
+                     _, Print["Error: multiple Higgs boson self-energies found."]
+              ];
+           ];
            Utils`StopProgressBar[Length[nPointFunctions]];
            {prototypes, defs}
           ];
