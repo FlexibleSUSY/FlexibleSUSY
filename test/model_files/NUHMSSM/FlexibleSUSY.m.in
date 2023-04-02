@@ -1,0 +1,82 @@
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = MSSM;
+
+(* input parameters *)
+
+MINPAR = { {1, m0},
+           {2, m12},
+           {3, TanBeta},
+           {4, Sign[\[Mu]]},
+           {5, Azero}
+    };
+
+EXTPAR = {
+	   {1, mHd2In},
+	   {2, mHu2In}
+    };
+
+EWSBOutputParameters = { B[\[Mu]], \[Mu] };
+
+SUSYScale = Sqrt[Product[M[Su[i]]^(Abs[ZU[i,3]]^2 + Abs[ZU[i,6]]^2), {i,6}]];
+
+SUSYScaleFirstGuess = Sqrt[m0^2 + 4 m12^2];
+
+SUSYScaleInput = {};
+
+HighScale = g1 == g2;
+
+HighScaleFirstGuess = 2.0 10^16;
+
+HighScaleInput={
+   {T[Ye], Azero*Ye},
+   {T[Yd], Azero*Yd},
+   {T[Yu], Azero*Yu},
+   {mHd2, mHd2In},
+   {mHu2, mHu2In},
+   {mq2, UNITMATRIX[3] m0^2},
+   {ml2, UNITMATRIX[3] m0^2},
+   {md2, UNITMATRIX[3] m0^2},
+   {mu2, UNITMATRIX[3] m0^2},
+   {me2, UNITMATRIX[3] m0^2},
+   {MassB, m12},
+   {MassWB,m12},
+   {MassG,m12}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic},
+   {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+   {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
+};
+
+InitialGuessAtLowScale = {
+   {vd, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+   {vu, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtHighScale = {
+   {\[Mu]   , 1.0},
+   {B[\[Mu]], 0.0}
+};
+
+UseHiggs2LoopMSSM = True;
+EffectiveMu = \[Mu];
+UseMSSM3LoopRGEs = True;
+
+PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh, Ah, Hpm};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
