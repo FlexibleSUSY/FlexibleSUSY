@@ -146,7 +146,7 @@ double rea0(double x, double q) noexcept
       return 0;
    }
 
-   return x * (1 - std::log(std::abs(x)/q));
+   return x * (1 - 2*std::log(std::sqrt(std::abs(x/q))));
 }
 
 double ffn(double p, double m1, double m2, double q) noexcept {
