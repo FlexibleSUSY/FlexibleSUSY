@@ -219,6 +219,35 @@ double b0(double p, double m1, double m2, double q) noexcept
         + 2.0 * m12 * std::log(m2/m1) / (m12 - m22);
 }
 
+/**
+ * derivative of B0(p^2, m1^2, m2^2) w.r.t. p^2
+ *
+ * @todo(alex): refine
+ *
+ * @param p2 squared momentum
+ * @param m2a squared mass
+ * @param m2b squared mass
+ *
+ * @return d B0(p^2, m1^2, m2^2) / d p^2
+ */
+double db0(double p2, double m2a, double m2b) noexcept
+{
+   double DB0 = 0;
+   const double m4a = m2a * m2a;
+   const double m4b = m2b * m2b;
+
+   if ((std::abs(m2a) < 0.0001) != (std::abs(m2b) < 0.0001)) {
+      DB0 = (m4a - m4b)/(2*pow3(m2a - m2b, 3));
+   } else if ((std::abs(m2a) < 0.0001) && (std::abs(m2b) < 0.0001)) {
+      DB0 = 0.;
+   } else if (std::abs(m2b - m2a) < 0.001) {
+      DB0 = (m2a - m2b)/(12*m4a) + 1./(6*m2a);
+   } else {
+      DB0 = (m4a - m4b + 2*m2a*m2b*std::log(m2b/m2a))/(2*pow(m2a - m2b, 3));
+   }
+   return DB0;
+}
+
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!
 double b1(double p, double m1, double m2, double q) noexcept
 {
