@@ -1507,7 +1507,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@calculateMHiggsPoleOneMomentumIteration@" -> IndentText[calculateMHiggsPoleOneMomentumIteration],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
-                         "@createMt2Loop@" -> IndentText[createMt2Loop],
+                         "@createMt2Loop@" -> createMt2Loop,
                          "@callMatch2LoopTopMass@" -> IndentText[callMatch2LoopTopMass],
                          "@setGaugeLessLimit@" -> IndentText[setGaugeLessLimit], 
                          "@includeMSSMTwoLoopTopMassHeader@" -> includeMSSMTwoLoopTopMassHeader,
