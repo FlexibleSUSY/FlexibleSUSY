@@ -45,7 +45,7 @@ constexpr double TOL = 1e-4;
 constexpr double dabs(double a) noexcept { return a >= 0. ? a : -a; }
 constexpr double sqr(double a) noexcept { return a*a; }
 constexpr double pow3(double a) noexcept { return a*a*a; }
-constexpr double pow6(double a) noexcept { return a*a*a*a*a*a; }
+constexpr double pow6(double a) noexcept { return sqr(pow3(a)); }
 
 constexpr bool is_zero(double m, double tol) noexcept
 {
@@ -232,20 +232,14 @@ double b0(double p, double m1, double m2, double q) noexcept
  */
 double db0(double p2, double m2a, double m2b) noexcept
 {
-   double DB0 = 0;
-   const double m4a = m2a * m2a;
-   const double m4b = m2b * m2b;
-
    if ((std::abs(m2a) < 0.0001) != (std::abs(m2b) < 0.0001)) {
-      DB0 = (m4a - m4b)/(2*pow3(m2a - m2b, 3));
+      return (sqr(m2a) - sqr(m2b))/(2*pow3(m2a - m2b));
    } else if ((std::abs(m2a) < 0.0001) && (std::abs(m2b) < 0.0001)) {
-      DB0 = 0.;
+      return 0;
    } else if (std::abs(m2b - m2a) < 0.001) {
-      DB0 = (m2a - m2b)/(12*m4a) + 1./(6*m2a);
-   } else {
-      DB0 = (m4a - m4b + 2*m2a*m2b*std::log(m2b/m2a))/(2*pow(m2a - m2b, 3));
+      return (m2a - m2b)/(12*sqr(m2a)) + 1./(6*m2a);
    }
-   return DB0;
+   return (sqr(m2a) - sqr(m2b) + 2*m2a*m2b*std::log(m2b/m2a))/(2*pow3(m2a - m2b));
 }
 
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!
