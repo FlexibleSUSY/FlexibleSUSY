@@ -230,7 +230,7 @@ double b0(double p, double m1, double m2, double q) noexcept
  *
  * @return d B0(p^2, m1^2, m2^2) / d p^2
  */
-double db0(double s, double x, double y) noexcept
+double db0(double /* s */, double x, double y) noexcept
 {
    if ((std::abs(x) < 0.0001) != (std::abs(y) < 0.0001)) {
       return (x + y)/(2*sqr(x - y));
