@@ -220,26 +220,26 @@ double b0(double p, double m1, double m2, double q) noexcept
 }
 
 /**
- * derivative of B0(p^2, m1^2, m2^2) w.r.t. p^2 at p^2 = 0
+ * derivative of B0(p^2, m1^2, m2^2) w.r.t. p^2
  *
- * @todo(alex): refine
+ * @note Currently the function is evaluated at p^2 = 0.
  *
- * @param p2 squared momentum
- * @param m2a squared mass
- * @param m2b squared mass
+ * @param s squared momentum
+ * @param x squared mass
+ * @param y squared mass
  *
- * @return d B0(p^2, m1^2, m2^2) / d p^2 at p^2 = 0
+ * @return d B0(p^2, m1^2, m2^2) / d p^2
  */
-double db0(double p2, double m2a, double m2b) noexcept
+double db0(double s, double x, double y) noexcept
 {
-   if ((std::abs(m2a) < 0.0001) != (std::abs(m2b) < 0.0001)) {
-      return (m2a + m2b)/(2*sqr(m2a - m2b));
-   } else if ((std::abs(m2a) < 0.0001) && (std::abs(m2b) < 0.0001)) {
+   if ((std::abs(x) < 0.0001) != (std::abs(y) < 0.0001)) {
+      return (x + y)/(2*sqr(x - y));
+   } else if ((std::abs(x) < 0.0001) && (std::abs(y) < 0.0001)) {
       return 0;
-   } else if (std::abs(m2b - m2a) < 0.001) {
-      return (1./12*(1 - m2b/m2a) + 1./6)/m2a;
+   } else if (std::abs(y - x) < 0.001) {
+      return (1./12*(1 - y/x) + 1./6)/x;
    }
-   return ((m2a - m2b)*(m2a + m2b) + 2*m2a*m2b*std::log(m2b/m2a))/(2*pow3(m2a - m2b));
+   return ((x - y)*(x + y) + 2*x*y*std::log(y/x))/(2*pow3(x - y));
 }
 
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!
