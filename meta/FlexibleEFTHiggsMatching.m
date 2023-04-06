@@ -57,8 +57,8 @@ Create3LoopMatching[] :=
             g3str = CConversion`ToValidCSymbolString[TreeMasses`GetStrongCoupling[]]},
 "\
 using namespace flexiblesusy::sm_twoloophiggs;
-   
-static const double gauge_less = 1e-10; 
+
+static const double gauge_less = 1e-10;
 // approximates the gaugeless limit for gauge couplings
 
 auto model = model_input;
@@ -66,7 +66,7 @@ auto model_gl = model;
 model_gl.get_problems().clear();
 model_gl.set_" <> g1str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g1);
 model_gl.set_" <> g2str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g2);
-auto model_no_g3 = model_gl; 
+auto model_no_g3 = model_gl;
 model_no_g3.set_" <> g3str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g3);
 model_gl.calculate_DRbar_masses();
 model_no_g3.calculate_DRbar_masses();
@@ -87,10 +87,10 @@ match_high_to_low_scale_sm_1l(sm_1l_gl, model_gl, idx);
 match_high_to_low_scale_sm_1l(sm_1l_gl_g3less, model_no_g3, idx);
 match_high_to_low_scale_sm_2l(sm_2l, model, idx);
 
-sm = sm_2l; 
+sm = sm_2l;
 
 // calculation of 3-loop threshold corrections below
-   
+
 const double lambda_2l = sm_2l.get_Lambdax();
 double delta_lambda_3l = 0.;
 
@@ -150,18 +150,15 @@ try {
 
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 sm.set_Lambdax(lambda_3l);
-sm.calculate_DRbar_masses();    
-"
+sm.calculate_DRbar_masses();"
 ];
 
 
 CallMatch2LoopTopMass[] :=
-"
-const double delta_vev = sm_1l.get_v() - sm_0l.get_v();
+"const double delta_vev = sm_1l.get_v() - sm_0l.get_v();
 const double yt_0l = sm_0l.get_Yu(2,2);
 const double mt_2l = calculate_MFt_MSbar_2loop(sm_0l, model);
-sm.set_Yu(2, 2, (Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v));
-"
+sm.set_Yu(2, 2, (Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v));"
 
 CreateMt2Loop[] :=
 Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]], 

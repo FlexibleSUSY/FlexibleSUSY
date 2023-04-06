@@ -44,6 +44,7 @@ namespace flexiblesusy {
 static constexpr double Pi             = 3.141592653589793;
 static constexpr double oneOver16Pi    = 0.019894367886486917; // 1/(16 Pi)
 static constexpr double oneOver16PiSqr = 6.332573977646110963e-03;
+static constexpr double oneOver4Pi     = 0.079577471545947668; // 1/(4 Pi)
 static constexpr double oneLoop        = 6.332573977646110963e-03;
 static constexpr double twoLoop        = 4.010149318236068752e-05;
 static constexpr double threeLoop      = 2.539456721913701978e-07;

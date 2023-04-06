@@ -592,12 +592,12 @@ double calculate_Mh2_shift_1l_2l(
          if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
             continue;
          }
-         model_1l.set_@UpYukawa@(i,k,.0);
-         model_1l.set_@TrilinearUp@(i,k,.0);
-         model_1l.set_@DownYukawa@(i,k,.0);
-         model_1l.set_@TrilinearDown@(i,k,.0);
-         model_1l.set_@ElectronYukawa@(i,k,.0);
-         model_1l.set_@TrilinearLepton@(i,k,.0);
+         model_1l.set_@UpYukawa@(i, k, 0.);
+         model_1l.set_@TrilinearUp@(i, k, 0.);
+         model_1l.set_@DownYukawa@(i, k, 0.);
+         model_1l.set_@TrilinearDown@(i, k, 0.);
+         model_1l.set_@ElectronYukawa@(i, k, 0.);
+         model_1l.set_@TrilinearLepton@(i, k, 0.);
       }
    }
 
@@ -669,15 +669,14 @@ double calculate_Mh2_shift_2l(
    const int nrows = sm.get_Yu().rows();
    const int ncols = sm.get_Yu().cols();
 
-   for(int i = 0; i<nrows;i++){
-      for(int k = 0; k<ncols;k++){
-
+   for(int i = 0; i < nrows; i++) {
+      for(int k = 0; k < ncols; k++) {
          if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
             continue;
          }
-         sm_2l.set_Yu(i,k,.0);
-         sm_2l.set_Yd(i,k,.0);
-         sm_2l.set_Ye(i,k,.0);
+         sm_2l.set_Yu(i, k, 0.);
+         sm_2l.set_Yd(i, k, 0.);
+         sm_2l.set_Ye(i, k, 0.);
       }
    }
    sm_2l.calculate_DRbar_masses();
@@ -747,8 +746,8 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    const double g3_2 = Sqr(sm_0l.get_g3() * standard_model_info::normalization_g3);
    const double v = sm_0l.get_v();
 
-   const double alpha_em = gy_2*g2_2/(4*Pi*(gy_2 + g2_2));
-   const double alpha_s = g3_2/(4*Pi);
+   const double alpha_em = oneOver4Pi*gy_2*g2_2/(gy_2 + g2_2);
+   const double alpha_s = oneOver4Pi*g3_2;
    const double delta_alpha_em = calculate_delta_alpha_em(alpha_em, model);
    const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model);
 
