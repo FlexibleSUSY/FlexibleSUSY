@@ -1,0 +1,179 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = "GrimusNeufeld";
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+(* Input parameters *)
+
+MINPAR = {
+  {1, Lambda1IN},
+  {2, Lambda2IN},
+  {3, Lambda3IN},
+  {4, Lambda4IN},
+  {5, Lambda5IN},
+  {9, M222IN}
+};
+
+EXTPAR = {
+  {0, Qin}
+};
+
+(* With this empty list the "realness" of parameters are treated like in SARAH *)
+RealParameters = {};
+
+(* Additional parameters for real and imaginary parts of complex parameters *)
+FSAuxiliaryParameterInfo = {
+  (*The part for having complex input matrices*)
+  {Theta122313, {InputParameter -> True,
+    ParameterDimensions -> {3},
+    LesHouches -> Theta122313IN
+  }},
+  {deltaCP, {InputParameter -> True,
+    ParameterDimensions -> {1},
+    LesHouches -> deltaCP
+  }},
+  {deltaM2, {InputParameter -> True,
+    ParameterDimensions -> {1},
+    LesHouches -> deltaM2
+  }},
+  {Inverted, {InputParameter -> True,
+    ParameterDimensions -> {1},
+    LesHouches -> Inverted
+  }},
+  {MnuIN, {InputParameter -> True,
+    ParameterDimensions -> {4},
+    LesHouches -> MnuIN
+  }},
+  {ROPhiIN, {
+    InputParameter -> True,
+    ParameterDimensions -> {3},
+    LesHouches -> ROPhiIN}},
+  {AuxL, {ParameterDimensions -> {1}}},
+  {AuxZ, {ParameterDimensions -> {1}}}
+};
+
+TreeLevelEWSBSolution = List @@@ {
+  M112 -> - (Lambda1 * v^3 + 2 * tadpole[1]) / (2 * v)
+};
+
+EWSBOutputParameters = {M112};
+
+EWSBInitialGuess = {
+  {M112, - v^2 Lambda1 / 2 }
+};
+
+SUSYScale = Qin;
+
+SUSYScaleFirstGuess = Qin;
+
+Module[{mA2, mH2, B0, m32, negativeRegionQ, sign, Lam,
+  r, w22, w32, R22, R32, z, w32p, OIO, PMNS, U,
+  Y1, Y2, Y1p, Y2p, zp, if
+},
+  mA2 = M222IN + 1 / 2 (Lambda3IN + Lambda4IN - Lambda5IN)v^2;
+  mH2 = M222IN + 1 / 2 (Lambda3IN + Lambda4IN + Lambda5IN)v^2;
+  B0[m2_] := m2 Log[MnuIN[4]^2 / m2] / (m2 - MnuIN[4]^2);
+  Lam = MnuIN[4] / (32 Pi^2) (B0@mA2 - B0@mH2);
+  m32 = MnuIN[3] / MnuIN[2];
+
+  OIO = (1 - Inverted) * IdentityMatrix[3] + {
+    {0, 0, Inverted},
+    {Inverted, 0, 0},
+    {0, Inverted, 0}
+  };
+  PMNS = {
+    {1, 0, 0},
+    {0, Cos[Theta122313[2]], Sin[Theta122313[2]]},
+    {0, -Sin[Theta122313[2]], Cos[Theta122313[2]]}
+  } . {
+    {Cos[Theta122313[3]], 0, Exp[-I deltaCP] Sin[Theta122313[3]]},
+    {0, 1, 0},
+    {-Exp[I deltaCP] Sin[Theta122313[3]], 0, Cos[Theta122313[3]]}
+  } . {
+    {Cos[Theta122313[1]], Sin[Theta122313[1]], 0},
+    {-Sin[Theta122313[1]], Cos[Theta122313[1]], 0},
+    {0, 0, 1}
+  } . DiagonalMatrix[{1, Exp[I deltaM2], 1}];
+  U = OIO . ConjugateTranspose@PMNS;
+
+  R22 = Cos[r] Exp[I w22];
+  R32 = Sin[r] Exp[I w32];
+  z = Re[R22^2 + m32 R32^2];
+  w32p = If[r == 0, 0, -0.5 ArcSin[Cot[r]^2 Sin[2 w22] / m32]];
+
+  Y1 = I Exp[-I ROPhiIN@3] Sqrt[2 MnuIN@3 MnuIN@4 / (Abs[z] v^2)] *
+      {0, -R32, R22}.U;
+  Y2 = Sign[Lam] Sqrt[MnuIN[2] / Abs[z Lam]] {0, R22, m32 R32}.U;
+
+  {Y1p, Y2p, zp} = {Y1, Y2, z} /. w32 -> w32p /. {r -> ROPhiIN@1, w22 -> ROPhiIN@2};
+
+  negativeRegionQ = And[Abs@ROPhiIN@1 < ArcTan[1 / Sqrt@m32], Pi / 4 < Abs@ROPhiIN@2];
+
+  (* Note: the last is true because we redefine coordinate system. *)
+  sign = If[Lam > 0, negativeRegionQ, !negativeRegionQ];
+  if[a_] := If[sign, -I Sign[ROPhiIN@2] a, a];
+
+  SUSYScaleInput = {
+    {Lambda1, Lambda1IN},
+    {Lambda2, Lambda2IN},
+    {Lambda3, Lambda3IN},
+    {Lambda4, Lambda4IN},
+    {Lambda5, Lambda5IN},
+    {M222, M222IN},
+    {Mm, MnuIN[4] - MnuIN[3] / Abs@zp}
+  };
+
+  LowScaleInput = {
+    {v, LowEnergyConstant[vev]},
+    {Yu1, Automatic},
+    {Yd1, Automatic},
+    {Ye1, Automatic},
+    {AuxL, Lam},
+    {AuxZ, Abs@zp},
+    {Yn1[1], if@Y1p[[1]]},
+    {Yn1[2], if@Y1p[[2]]},
+    {Yn1[3], if@Y1p[[3]]},
+    {Yn2[1], if@Y2p[[1]]},
+    {Yn2[2], if@Y2p[[2]]},
+    {Yn2[3], if@Y2p[[3]]}
+  };
+];
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+InitialGuessAtLowScale = {
+  {v, LowEnergyConstant[vev]},
+  {Yu1, Automatic},
+  {Yd1, Automatic},
+  {Ye1, Automatic}
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision = {hh, Hm};
+MediumPoleMassPrecision = {};
+LowPoleMassPrecision = {Fv};
+
+ExtraSLHAOutputBlocks = {
+  {LZ, {
+    {0, AuxL},
+    {1, AuxZ}
+  }
+  },
+  {FlexibleSUSYLowEnergy, {
+    {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
+    {27, FlexibleSUSYObservable`BrLToLGamma[Fe[3] -> {Fe[1], VP}]},
+    {28, FlexibleSUSYObservable`BrLToLGamma[Fe[3] -> {Fe[2], VP}]}(*,
+    {31, FlexibleSUSYObservable`BrLTo3L[Fe@2 -> {Fe@1, Fe@1, SARAH`bar@Fe@1}, All, 1]},
+    {32, FlexibleSUSYObservable`BrLTo3L[Fe@3 -> {Fe@2, Fe@2, SARAH`bar@Fe@2}, All, 1]},
+    {33, FlexibleSUSYObservable`BrLTo3L[Fe@3 -> {Fe@2, Fe@1, SARAH`bar@Fe@1}, All, 1]},
+    {34, FlexibleSUSYObservable`BrLTo3L[Fe@3 -> {Fe@1, Fe@2, SARAH`bar@Fe@2}, All, 1]},
+    {35, FlexibleSUSYObservable`BrLTo3L[Fe@3 -> {Fe@1, Fe@1, SARAH`bar@Fe@1}, All, 1]},
+    {41, FlexibleSUSYObservable`LToLConversion[Fe@2 -> Fe@1, Al, All, 1]}*)
+  }
+  }
+};
+
+FSCalculateDecays = False;

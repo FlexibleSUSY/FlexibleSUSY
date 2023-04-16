@@ -448,8 +448,8 @@ DoFastDiagonalization[particle_Symbol /; IsFermion[particle], _] :=
                                  ] <>
                        "}\n" <>
                        "const " <> selfEnergyMatrixCType <> " M_tree(" <> massMatrixStr <> "());\n" <>
-                       "const " <> selfEnergyMatrixCType <> " delta_M(- self_energy_PR * M_tree " <>
-                       "- M_tree * self_energy_PL - self_energy_1);\n";
+                       "const " <> selfEnergyMatrixCType <> " delta_M(- self_energy_PR.conjugate() * M_tree " <>
+                       "- M_tree * self_energy_PL.conjugate() - self_energy_1.conjugate());\n";
               If[IsMajoranaFermion[particle],
                  result = result <>
                           "const " <> selfEnergyMatrixCType <>
