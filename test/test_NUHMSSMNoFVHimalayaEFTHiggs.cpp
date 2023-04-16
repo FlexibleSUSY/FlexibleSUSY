@@ -216,9 +216,6 @@ output_3loop edc_output_3loop( char const* const slha_input)
 }
 
 
-BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
-{
-
 // scenario 1 degenrate case with vanishing stop mixing At = (1/10 + 0)*50000 = 5000
    char const * const slha_input_case1 = R"(
 Block MODSEL                 # Select model
@@ -609,7 +606,6 @@ Block AEIN
   2  2     0   # Ad(2,2)
   3  3     0   # Ad(3,3)
 )";
-
 
 // 2-loop scenarios: 
 // a) At = (1/5 - 3)*50000 = -140000
@@ -1002,6 +998,9 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
+
+BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
+{
    const struct Data_1loop {
       char const * const slha = nullptr;
       output out{};
@@ -1019,7 +1018,11 @@ Block AEIN
          BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
       }
    }
+}
 
+
+BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
+{
    const struct Data_2loop {
       char const * const slha = nullptr;
       output_2loop out{};
@@ -1037,7 +1040,11 @@ Block AEIN
          BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
       }
    }
+}
 
+
+BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
+{
    const struct Data_3loop {
       char const * const slha = nullptr;
       output_3loop out{};
