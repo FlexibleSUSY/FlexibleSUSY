@@ -20,7 +20,6 @@
 #define BOOST_TEST_MODULE test_NUHMSSMNoFVHimalayaEFTHiggs
 
 #include <boost/test/unit_test.hpp>
-#include <cstdlib>
 #include <tuple>
 #include "lowe.h"
 #include "NUHMSSMNoFVHimalayaEFTHiggs_shooting_spectrum_generator.hpp"
@@ -79,7 +78,7 @@ double calc_Mh(
    spectrum_generator.run(qedqcd, input);
    auto sm  = spectrum_generator.get_sm();
 
-   double Q_pole = settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ? settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :  qedqcd.displayPoleMt();
+   const double Q_pole = settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ? settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :  qedqcd.displayPoleMt();
 
    sm.run_to(Q_pole);
    sm.solve_ewsb();
@@ -114,7 +113,7 @@ extract_slha_input(char const * const slha_input)
 
 
 /// calculate output for 1-loop test
-Output_1loop edc_output_1loop(char const * const slha_input)
+Output_1loop calc_output_1loop(char const * const slha_input)
 {
    Spectrum_generator_settings settings;
    softsusy::QedQcd qedqcd;
@@ -135,7 +134,7 @@ Output_1loop edc_output_1loop(char const * const slha_input)
 
 
 /// calculate output for 2-loop test
-Output_2loop edc_output_2loop(char const * const slha_input)
+Output_2loop calc_output_2loop(char const * const slha_input)
 {
    Spectrum_generator_settings settings;
    softsusy::QedQcd qedqcd;
@@ -159,7 +158,7 @@ Output_2loop edc_output_2loop(char const * const slha_input)
 
 
 /// calculate output for 3-loop test
-Output_3loop edc_output_3loop(char const * const slha_input)
+Output_3loop calc_output_3loop(char const * const slha_input)
 {
    Spectrum_generator_settings settings;
    softsusy::QedQcd qedqcd;
@@ -975,7 +974,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
    };
 
    for (const auto& d: data) {
-      const auto output = edc_output_1loop(d.slha_input);
+      const auto output = calc_output_1loop(d.slha_input);
       for (int i = 0; i < d.expected_output.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
       }
@@ -997,7 +996,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
    };
 
    for (const auto& d: data) {
-      const auto output = edc_output_2loop(d.slha_input);
+      const auto output = calc_output_2loop(d.slha_input);
       for (int i = 0; i < d.expected_output.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
       }
@@ -1017,7 +1016,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
    };
 
    for (const auto& d: data) {
-      const auto output = edc_output_3loop(d.slha_input);
+      const auto output = calc_output_3loop(d.slha_input);
       for (int i = 0; i < d.expected_output.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
       }
