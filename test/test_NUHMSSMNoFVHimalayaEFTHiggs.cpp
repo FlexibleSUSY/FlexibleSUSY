@@ -999,18 +999,18 @@ Block AEIN
 
 BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
 {
-   const struct Data_1loop {
+   const struct Data {
       char const * const slha = nullptr;
       output out{};
       double eps{0.0};
-   } data_1loop[] = {
+   } data[] = {
       {slha_input_case_1, {129.024202, 0.125588145, 0.125768663}, 2e-4},
       {slha_input_case_2, {132.709997, 0.125588071, 0.147703015}, 8e-5},
       {slha_input_case_3, {128.315047, 0.12558815 , 0.121657248}, 8e-5},
       {slha_input_case_4, {130.665551, 0.125588152, 0.135417609}, 8e-5},
    };
 
-   for (const auto& d: data_1loop) {
+   for (const auto& d: data) {
       const auto out = edc_output(d.slha);
       for (int i = 0; i < d.out.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
@@ -1021,18 +1021,18 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
 
 BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
 {
-   const struct Data_2loop {
+   const struct Data {
       char const * const slha = nullptr;
       output_2loop out{};
       double eps{0.0};
-   } data_2loop[] = {
+   } data[] = {
       {slha_input_case_1_2loop, {128.16151975160173, 127.9817088038441 }, 5e-4},
       {slha_input_case_2_2loop, {130.42485668023875, 130.15819922320634}, 5e-4},
       {slha_input_case_3_2loop, {130.86500014892152, 130.66749808261707}, 5e-4},
       {slha_input_case_4_2loop, {128.87146686565686, 128.53192456935258}, 5e-4},
    };
 
-   for (const auto& d: data_2loop) {
+   for (const auto& d: data) {
       const auto out = edc_output_2loop(d.slha);
       for (int i = 0; i < d.out.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
@@ -1043,16 +1043,16 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
 
 BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
 {
-   const struct Data_3loop {
+   const struct Data {
       char const * const slha = nullptr;
       output_3loop out{};
       double eps{0.0};
-   } data_3loop[] = {
+   } data[] = {
       {slha_input_case_1_2loop, {0.11685905941993063}, 5e-5},
       {slha_input_case_4_2loop, {0.12118666568388101}, 5e-5},
    };
 
-   for (const auto& d: data_3loop) {
+   for (const auto& d: data) {
       const auto out = edc_output_3loop(d.slha);
       for (int i = 0; i < d.out.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
