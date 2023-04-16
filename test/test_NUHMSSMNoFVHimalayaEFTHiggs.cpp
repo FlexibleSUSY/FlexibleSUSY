@@ -21,6 +21,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
+#include <tuple>
 #include "lowe.h"
 #include "NUHMSSMNoFVHimalayaEFTHiggs_shooting_spectrum_generator.hpp"
 #include "NUHMSSMNoFVHimalayaEFTHiggs_slha_io.hpp"
@@ -87,14 +88,13 @@ double calc_Mh(
 }
 
 
-/// calculate output for 1-loop test
-Output_1loop edc_output_1loop(char const * const slha_input)
+/// extracts SLHA input
+std::tuple<Spectrum_generator_settings, softsusy::QedQcd, NUHMSSMNoFVHimalayaEFTHiggs_input_parameters>
+extract_slha_input(char const * const slha_input)
 {
-   Output_1loop results{};
-
-   std::stringstream istream_case_1(slha_input);
+   std::stringstream istr(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
-   slha_io.read_from_stream(istream_case_1);
+   slha_io.read_from_stream(istr);
 
    softsusy::QedQcd qedqcd;
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
@@ -109,6 +109,20 @@ Output_1loop edc_output_1loop(char const * const slha_input)
       BOOST_TEST(false);
    }
 
+   return {settings, qedqcd, input};
+}
+
+
+/// calculate output for 1-loop test
+Output_1loop edc_output_1loop(char const * const slha_input)
+{
+   Spectrum_generator_settings settings;
+   softsusy::QedQcd qedqcd;
+   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
+
+   std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
+
+   Output_1loop results{};
    results.at(1) = calc_lambda(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
@@ -123,24 +137,13 @@ Output_1loop edc_output_1loop(char const * const slha_input)
 /// calculate output for 2-loop test
 Output_2loop edc_output_2loop(char const * const slha_input)
 {
-   Output_2loop results{};
-
-   std::stringstream istream_case_1(slha_input);
-   NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
-   slha_io.read_from_stream(istream_case_1);
-
+   Spectrum_generator_settings settings;
    softsusy::QedQcd qedqcd;
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
-   Spectrum_generator_settings settings;
 
-   try {
-      slha_io.fill(settings);
-      slha_io.fill(qedqcd);
-      slha_io.fill(input);
-   } catch (const Error& error) {
-      BOOST_TEST_MESSAGE(error.what());
-      BOOST_TEST(false);
-   }
+   std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
+
+   Output_2loop results{};
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2); 
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 2);
@@ -158,24 +161,13 @@ Output_2loop edc_output_2loop(char const * const slha_input)
 /// calculate output for 3-loop test
 Output_3loop edc_output_3loop(char const * const slha_input)
 {
-   Output_3loop results{};
-
-   std::stringstream istream_case_1(slha_input);
-   NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
-   slha_io.read_from_stream(istream_case_1);
-
+   Spectrum_generator_settings settings;
    softsusy::QedQcd qedqcd;
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
-   Spectrum_generator_settings settings;
 
-   try {
-      slha_io.fill(settings);
-      slha_io.fill(qedqcd);
-      slha_io.fill(input);
-   } catch (const Error& error) {
-      BOOST_TEST_MESSAGE(error.what());
-      BOOST_TEST(false);
-   }
+   std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
+
+   Output_3loop results{};
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 3); 
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
