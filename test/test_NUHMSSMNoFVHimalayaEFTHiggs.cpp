@@ -1015,32 +1015,36 @@ Block AEIN
    };
 
    for (const auto& d: data_1loop) {
-      output out = edc_output(d.slha);
-      for (int i = 0; i < 3; i++) {
+      const auto out = edc_output(d.slha);
+      for (int i = 0; i < d.out.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
       }
    }
 
-   output_2loop results_new_2loop_1  = edc_output_2loop(slha_input_case_2loop_a);
-   output_2loop results_new_2loop_2  = edc_output_2loop(slha_input_case_2loop_b);
-   output_2loop results_new_2loop_3  = edc_output_2loop(slha_input_case_2loop_c);
-   output_2loop results_new_2loop_4  = edc_output_2loop(slha_input_case_2loop_d);
+   const struct Data_2loop {
+      char const * const slha = nullptr;
+      output_2loop out{};
+      double eps{0.0};
+   } data_2loop[] = {
+      {slha_input_case_2loop_a, {128.16151975160173, 127.9817088038441 }, 5e-4},
+      {slha_input_case_2loop_b, {130.42485668023875, 130.15819922320634}, 5e-4},
+      {slha_input_case_2loop_c, {130.86500014892152, 130.66749808261707}, 5e-4},
+      {slha_input_case_2loop_d, {128.87146686565686, 128.53192456935258}, 5e-4},
+   };
 
-  output_2loop results_new_3loop  = {edc_output_3loop(slha_input_case_2loop_a),
-      edc_output_3loop(slha_input_case_2loop_d)};
+   for (const auto& d: data_2loop) {
+      const auto out = edc_output_2loop(d.slha);
+      for (int i = 0; i < d.out.size(); i++) {
+         BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
+      }
+   }
 
-   output_2loop results_old_2loop_1 = {128.16151975160173, 127.9817088038441};
-   output_2loop results_old_2loop_2 = {130.42485668023875, 130.15819922320634};
-   output_2loop results_old_2loop_3 = {130.86500014892152, 130.66749808261707};
-   output_2loop results_old_2loop_4 = {128.87146686565686, 128.53192456935258};
+  output_2loop results_new_3loop = {edc_output_3loop(slha_input_case_2loop_a),
+     edc_output_3loop(slha_input_case_2loop_d)};
 
    output_2loop results_old_3loop = {0.11685905941993063, 0.12118666568388101};
 
    for(int i=0; i<2; i++){
-      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_1[i], results_old_2loop_1[i], 5e-4);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_2[i], results_old_2loop_2[i], 5e-4);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_3[i], results_old_2loop_3[i], 5e-4);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_4[i], results_old_2loop_4[i], 5e-4);
       BOOST_CHECK_CLOSE_FRACTION(results_new_3loop[i], results_old_3loop[i], 5e-5);
    }
 }
