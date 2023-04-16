@@ -27,10 +27,9 @@
 #include "wrappers.hpp"
 using namespace flexiblesusy;
 
-
 using output = std::array<double,7>;
-
 using output_2loop = std::array<double,2>;
+using output_3loop = std::array<double,1>;
 
 double calc_lambda( 
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
@@ -184,7 +183,7 @@ output_2loop edc_output_2loop( char const* const slha_input)
 }
 
 
-double edc_output_3loop( char const* const slha_input)
+output_3loop edc_output_3loop( char const* const slha_input)
 {
    output_2loop results = {0.,0.};
 
@@ -213,7 +212,7 @@ double edc_output_3loop( char const* const slha_input)
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
 
-   return calc_lambda_3loop(input, qedqcd, settings);
+   return { calc_lambda_3loop(input, qedqcd, settings) };
 }
 
 
@@ -1040,16 +1039,16 @@ Block AEIN
    }
 
    const struct Data_3loop {
-      char const * const slha1 = nullptr;
-      char const * const slha2 = nullptr;
-      output_2loop out{};
+      char const * const slha = nullptr;
+      output_3loop out{};
       double eps{0.0};
    } data_3loop[] = {
-      {slha_input_case_2loop_a, slha_input_case_2loop_d, {0.11685905941993063, 0.12118666568388101}, 5e-5},
+      {slha_input_case_2loop_a, {0.11685905941993063}, 5e-5},
+      {slha_input_case_2loop_d, {0.12118666568388101}, 5e-5},
    };
 
    for (const auto& d: data_3loop) {
-      const auto out = output_2loop{ edc_output_3loop(d.slha1), edc_output_3loop(d.slha2) };
+      const auto out = edc_output_3loop(d.slha);
       for (int i = 0; i < d.out.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
       }
