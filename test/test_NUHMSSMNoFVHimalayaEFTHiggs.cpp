@@ -25,50 +25,54 @@
 #include "NUHMSSMNoFVHimalayaEFTHiggs_shooting_spectrum_generator.hpp"
 #include "NUHMSSMNoFVHimalayaEFTHiggs_slha_io.hpp"
 #include "wrappers.hpp"
+
 using namespace flexiblesusy;
 
-using Output_1loop = std::array<double,7>;
+using Output_1loop = std::array<double,3>;
 using Output_2loop = std::array<double,2>;
 using Output_3loop = std::array<double,1>;
 
-double calc_lambda( 
-   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
-   softsusy::QedQcd& qedqcd,
-   Spectrum_generator_settings& settings)
-{
 
+/// calculate lambda at the precision given in `settings'
+double calc_lambda(
+   const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
+   const softsusy::QedQcd& qedqcd,
+   const Spectrum_generator_settings& settings)
+{
    NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
-   const double Qmatch = 40000; 
+   const double Qmatch = 40000;
    auto sm  = spectrum_generator.get_sm();
    sm.run_to(Qmatch);
    return sm.get_Lambdax();
 }
 
+
+/// calculate lambda at the precision given in `settings'
 double calc_lambda_3loop(
-   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
-   softsusy::QedQcd& qedqcd,
-   Spectrum_generator_settings& settings)
+   const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
+   const softsusy::QedQcd& qedqcd,
+   const Spectrum_generator_settings& settings)
 {
-
    NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
-   const double Qmatch = 50000; 
+   const double Qmatch = 50000;
    auto sm  = spectrum_generator.get_sm();
    sm.run_to(Qmatch);
    return sm.get_Lambdax();
 }
 
-double calc_Mh( 
-   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
-   softsusy::QedQcd& qedqcd,
-   Spectrum_generator_settings& settings)
-{
 
+/// calculate Mh
+double calc_Mh(
+   const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
+   const softsusy::QedQcd& qedqcd,
+   const Spectrum_generator_settings& settings)
+{
    NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
@@ -82,15 +86,15 @@ double calc_Mh(
    return sm.get_physical().Mhh;
 }
 
-Output_1loop edc_output( char const* const slha_input)
+
+/// calculate output for 1-loop test
+Output_1loop edc_output_1loop(char const * const slha_input)
 {
-   Output_1loop results = {0.,0.,0.,0.,0.,0.,0.};
+   Output_1loop results{};
 
    std::stringstream istream_case_1(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
    slha_io.read_from_stream(istream_case_1);
-
-   // extract the input parameters
 
    softsusy::QedQcd qedqcd;
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
@@ -105,57 +109,25 @@ Output_1loop edc_output( char const* const slha_input)
       BOOST_TEST(false);
    }
 
-   results[1]=calc_lambda(input, qedqcd, settings);
-
+   results.at(1) = calc_lambda(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
- 
-   results[0]=calc_Mh(input, qedqcd, settings);// /200.;
-   results[2]=calc_lambda(input, qedqcd, settings);
 
-/*   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2);
-   
-   settings.set(Spectrum_generator_settings::pole_mass_loop_order, 2);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, 1);
+   results.at(0) = calc_Mh(input, qedqcd, settings);
+   results.at(2) = calc_lambda(input, qedqcd, settings);
 
-   results[3]=calc_lambda(input, qedqcd, settings);
-
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 0);
-   results[4]=calc_lambda(input, qedqcd, settings);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
-   results[5]=calc_lambda(input, qedqcd, settings);
-
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, 1);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, 1);
-   settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, 2);
-   results[5]=calc_lambda(input, qedqcd, settings);
-
-   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order,3);
-   settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, 2);
-//Have a look how implemented
-   settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, 2);
-   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 3);
-   settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
-   settings.set(Spectrum_generator_settings::ewsb_loop_order, 3);
-   settings.set(Spectrum_generator_settings::beta_loop_order, 4);
-   results[6]=calc_lambda(input, qedqcd, settings);
-*/
    return results;
 }
 
 
-Output_2loop edc_output_2loop( char const* const slha_input)
+/// calculate output for 2-loop test
+Output_2loop edc_output_2loop(char const * const slha_input)
 {
-   Output_2loop results = {0.,0.};
+   Output_2loop results{};
 
    std::stringstream istream_case_1(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
    slha_io.read_from_stream(istream_case_1);
-
-   // extract the input parameters
 
    softsusy::QedQcd qedqcd;
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
@@ -173,25 +145,24 @@ Output_2loop edc_output_2loop( char const* const slha_input)
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2); 
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 2);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
-   results[0]=calc_Mh(input, qedqcd, settings);
+   results.at(0) = calc_Mh(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 0);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
-   results[1]=calc_Mh(input, qedqcd, settings);
+   results.at(1) = calc_Mh(input, qedqcd, settings);
 
    return results;
 }
 
 
-Output_3loop edc_output_3loop( char const* const slha_input)
+/// calculate output for 3-loop test
+Output_3loop edc_output_3loop(char const * const slha_input)
 {
-   Output_2loop results = {0.,0.};
+   Output_3loop results{};
 
    std::stringstream istream_case_1(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
    slha_io.read_from_stream(istream_case_1);
-
-   // extract the input parameters
 
    softsusy::QedQcd qedqcd;
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
@@ -206,13 +177,14 @@ Output_3loop edc_output_3loop( char const* const slha_input)
       BOOST_TEST(false);
    }
 
-
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 3); 
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
 
-   return { calc_lambda_3loop(input, qedqcd, settings) };
+   results.at(0) = calc_lambda_3loop(input, qedqcd, settings);
+
+   return results;
 }
 
 
@@ -1011,7 +983,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
    };
 
    for (const auto& d: data) {
-      const auto output = edc_output(d.slha_input);
+      const auto output = edc_output_1loop(d.slha_input);
       for (int i = 0; i < d.expected_output.size(); i++) {
          BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
       }
