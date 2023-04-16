@@ -1039,12 +1039,19 @@ Block AEIN
       }
    }
 
-  output_2loop results_new_3loop = {edc_output_3loop(slha_input_case_2loop_a),
-     edc_output_3loop(slha_input_case_2loop_d)};
+   const struct Data_3loop {
+      char const * const slha1 = nullptr;
+      char const * const slha2 = nullptr;
+      output_2loop out{};
+      double eps{0.0};
+   } data_3loop[] = {
+      {slha_input_case_2loop_a, slha_input_case_2loop_d, {0.11685905941993063, 0.12118666568388101}, 5e-5},
+   };
 
-   output_2loop results_old_3loop = {0.11685905941993063, 0.12118666568388101};
-
-   for(int i=0; i<2; i++){
-      BOOST_CHECK_CLOSE_FRACTION(results_new_3loop[i], results_old_3loop[i], 5e-5);
+   for (const auto& d: data_3loop) {
+      const auto out = output_2loop{ edc_output_3loop(d.slha1), edc_output_3loop(d.slha2) };
+      for (int i = 0; i < d.out.size(); i++) {
+         BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
+      }
    }
 }
