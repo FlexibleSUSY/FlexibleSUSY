@@ -1003,17 +1003,24 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-/*   std::vector< std::pair<output,output>> = { 
-      output a;
+   const struct Data_1loop {
+      char const * const slha = nullptr;
+      output out{};
+      double eps{0.0};
+   } data_1loop[] = {
+      {slha_input_case1, {129.024202, 0.125588145, 0.125768663}, 2e-4},
+      {slha_input_case2, {132.709997, 0.125588071, 0.147703015}, 8e-5},
+      {slha_input_case3, {128.315047, 0.12558815 , 0.121657248}, 8e-5},
+      {slha_input_case4, {130.665551, 0.125588152, 0.135417609}, 8e-5},
+   };
+
+   for (const auto& d: data_1loop) {
+      output out = edc_output(d.slha);
+      for (int i = 0; i < 3; i++) {
+         BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
+      }
    }
-*/
 
-   output results_new_1  = edc_output(slha_input_case1);
-   output results_new_2  = edc_output(slha_input_case2);
-   output results_new_3  = edc_output(slha_input_case3);
-   output results_new_4  = edc_output(slha_input_case4);
-
-   
    output_2loop results_new_2loop_1  = edc_output_2loop(slha_input_case_2loop_a);
    output_2loop results_new_2loop_2  = edc_output_2loop(slha_input_case_2loop_b);
    output_2loop results_new_2loop_3  = edc_output_2loop(slha_input_case_2loop_c);
@@ -1022,27 +1029,13 @@ Block AEIN
   output_2loop results_new_3loop  = {edc_output_3loop(slha_input_case_2loop_a),
       edc_output_3loop(slha_input_case_2loop_d)};
 
-  
-   output results_old_1 = {129.024202, 0.125588145, 0.125768663};
-   output results_old_2 = {132.709997, 0.125588071, 0.147703015};
-   output results_old_3 = {128.315047, 0.12558815, 0.121657248};
-   output results_old_4 = {130.665551, 0.125588152, 0.135417609};
-
    output_2loop results_old_2loop_1 = {128.16151975160173, 127.9817088038441};
    output_2loop results_old_2loop_2 = {130.42485668023875, 130.15819922320634};
    output_2loop results_old_2loop_3 = {130.86500014892152, 130.66749808261707};
    output_2loop results_old_2loop_4 = {128.87146686565686, 128.53192456935258};
 
    output_2loop results_old_3loop = {0.11685905941993063, 0.12118666568388101};
-// 
 
-   for(int i=0; i<3; i++){
-      BOOST_CHECK_CLOSE_FRACTION(results_new_1[i], results_old_1[i], 2e-4);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_3[i], results_old_3[i], 8e-5);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_2[i], results_old_2[i], 8e-5);
-      BOOST_CHECK_CLOSE_FRACTION(results_new_4[i], results_old_4[i], 8e-5);
-   }
- 
    for(int i=0; i<2; i++){
       BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_1[i], results_old_2loop_1[i], 5e-4);
       BOOST_CHECK_CLOSE_FRACTION(results_new_2loop_2[i], results_old_2loop_2[i], 5e-4);
