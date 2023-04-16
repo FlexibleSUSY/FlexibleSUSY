@@ -27,9 +27,9 @@
 #include "wrappers.hpp"
 using namespace flexiblesusy;
 
-using output = std::array<double,7>;
-using output_2loop = std::array<double,2>;
-using output_3loop = std::array<double,1>;
+using Output_1loop = std::array<double,7>;
+using Output_2loop = std::array<double,2>;
+using Output_3loop = std::array<double,1>;
 
 double calc_lambda( 
    NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
@@ -82,9 +82,9 @@ double calc_Mh(
    return sm.get_physical().Mhh;
 }
 
-output edc_output( char const* const slha_input)
+Output_1loop edc_output( char const* const slha_input)
 {
-   output results = {0.,0.,0.,0.,0.,0.,0.};
+   Output_1loop results = {0.,0.,0.,0.,0.,0.,0.};
 
    std::stringstream istream_case_1(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
@@ -147,9 +147,9 @@ output edc_output( char const* const slha_input)
 }
 
 
-output_2loop edc_output_2loop( char const* const slha_input)
+Output_2loop edc_output_2loop( char const* const slha_input)
 {
-   output_2loop results = {0.,0.};
+   Output_2loop results = {0.,0.};
 
    std::stringstream istream_case_1(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
@@ -183,9 +183,9 @@ output_2loop edc_output_2loop( char const* const slha_input)
 }
 
 
-output_3loop edc_output_3loop( char const* const slha_input)
+Output_3loop edc_output_3loop( char const* const slha_input)
 {
-   output_2loop results = {0.,0.};
+   Output_2loop results = {0.,0.};
 
    std::stringstream istream_case_1(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
@@ -1000,8 +1000,8 @@ Block AEIN
 BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
 {
    const struct Data {
-      char const * const slha = nullptr;
-      output out{};
+      char const * const slha_input = nullptr;
+      Output_1loop expected_output{};
       double eps{0.0};
    } data[] = {
       {slha_input_case_1, {129.024202, 0.125588145, 0.125768663}, 2e-4},
@@ -1011,9 +1011,9 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
    };
 
    for (const auto& d: data) {
-      const auto out = edc_output(d.slha);
-      for (int i = 0; i < d.out.size(); i++) {
-         BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
+      const auto output = edc_output(d.slha_input);
+      for (int i = 0; i < d.expected_output.size(); i++) {
+         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
       }
    }
 }
@@ -1022,8 +1022,8 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
 BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
 {
    const struct Data {
-      char const * const slha = nullptr;
-      output_2loop out{};
+      char const * const slha_input = nullptr;
+      Output_2loop expected_output{};
       double eps{0.0};
    } data[] = {
       {slha_input_case_5, {128.16151975160173, 127.9817088038441 }, 5e-4},
@@ -1033,9 +1033,9 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
    };
 
    for (const auto& d: data) {
-      const auto out = edc_output_2loop(d.slha);
-      for (int i = 0; i < d.out.size(); i++) {
-         BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
+      const auto output = edc_output_2loop(d.slha_input);
+      for (int i = 0; i < d.expected_output.size(); i++) {
+         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
       }
    }
 }
@@ -1044,8 +1044,8 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
 BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
 {
    const struct Data {
-      char const * const slha = nullptr;
-      output_3loop out{};
+      char const * const slha_input = nullptr;
+      Output_3loop expected_output{};
       double eps{0.0};
    } data[] = {
       {slha_input_case_5, {0.11685905941993063}, 5e-5},
@@ -1053,9 +1053,9 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
    };
 
    for (const auto& d: data) {
-      const auto out = edc_output_3loop(d.slha);
-      for (int i = 0; i < d.out.size(); i++) {
-         BOOST_CHECK_CLOSE_FRACTION(out[i], d.out[i], d.eps);
+      const auto output = edc_output_3loop(d.slha_input);
+      for (int i = 0; i < d.expected_output.size(); i++) {
+         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
       }
    }
 }
