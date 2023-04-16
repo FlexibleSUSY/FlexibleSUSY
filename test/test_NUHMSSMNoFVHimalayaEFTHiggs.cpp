@@ -37,37 +37,20 @@ using Output_3loop = std::array<double,1>;
 double calc_lambda(
    const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
    const softsusy::QedQcd& qedqcd,
-   const Spectrum_generator_settings& settings)
+   const Spectrum_generator_settings& settings,
+   double Qmatch)
 {
    NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
-   const double Qmatch = 40000;
    auto sm  = spectrum_generator.get_sm();
    sm.run_to(Qmatch);
    return sm.get_Lambdax();
 }
 
 
-/// calculate lambda at the precision given in `settings'
-double calc_lambda_3loop(
-   const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
-   const softsusy::QedQcd& qedqcd,
-   const Spectrum_generator_settings& settings)
-{
-   NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
-   spectrum_generator.set_settings(settings);
-   spectrum_generator.run(qedqcd, input);
-
-   const double Qmatch = 50000;
-   auto sm  = spectrum_generator.get_sm();
-   sm.run_to(Qmatch);
-   return sm.get_Lambdax();
-}
-
-
-/// calculate Mh
+/// calculate Mh at the precision given in `settings'
 double calc_Mh(
    const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
    const softsusy::QedQcd& qedqcd,
@@ -121,13 +104,15 @@ Output_1loop calc_output_1loop(char const * const slha_input)
 
    std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
 
+   const double Qmatch = 40000;
+
    Output_1loop results{};
-   results.at(1) = calc_lambda(input, qedqcd, settings);
+   results.at(1) = calc_lambda(input, qedqcd, settings, Qmatch);
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
 
    results.at(0) = calc_Mh(input, qedqcd, settings);
-   results.at(2) = calc_lambda(input, qedqcd, settings);
+   results.at(2) = calc_lambda(input, qedqcd, settings, Qmatch);
 
    return results;
 }
@@ -168,12 +153,14 @@ Output_3loop calc_output_3loop(char const * const slha_input)
 
    Output_3loop results{};
 
+   const double Qmatch = 50000;
+
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 3); 
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
 
-   results.at(0) = calc_lambda_3loop(input, qedqcd, settings);
+   results.at(0) = calc_lambda(input, qedqcd, settings, Qmatch);
 
    return results;
 }
