@@ -217,7 +217,7 @@ output_3loop edc_output_3loop( char const* const slha_input)
 
 
 // scenario 1 degenrate case with vanishing stop mixing At = (1/10 + 0)*50000 = 5000
-   char const * const slha_input_case1 = R"(
+char const * const slha_input_case_1 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -313,7 +313,7 @@ Block AEIN
 )";
 
 // scenario 2 degenrate case with high stop mixing At = (1/10 - sqrt(6))*50000 = -117474.5
-char const * const slha_input_case2 = R"(
+char const * const slha_input_case_2 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -408,12 +408,11 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-  
 // scenario 3 non-degenrate case with vanishing stop mixing At = (1/10 - 0)*50000 = 5000
 // mQ3 = MS/2
 // mU3 = MS * 1.2
 // M3  = MS/4
-   char const * const slha_input_case3 = R"(
+char const * const slha_input_case_3 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -512,7 +511,7 @@ Block AEIN
 // mQ3 = MS/2
 // mU3 = MS * 1.2
 // M3  = MS/4
-  char const * const slha_input_case4 = R"(
+char const * const slha_input_case_4 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -612,10 +611,9 @@ Block AEIN
 // b) At = (1/5 - 2)*50000 = -90000
 // c) At = (1/5 + 2)*50000 =  100000
 // d) At = (1/5 + 3)*50000 =  160000
-//
 
-// scenario 2-loop-a degenrate case with high stop mixing At = (1/5 - 3)*50000 = -140000
-char const * const slha_input_case_2loop_a = R"(
+// scenario (1) 2-loop degenrate case with high stop mixing At = (1/5 - 3)*50000 = -140000
+char const * const slha_input_case_1_2loop = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -710,8 +708,8 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-// scenario 2-loop-b degenrate case with high stop mixing At = (1/5 - 2)*50000 approx -90100
-char const * const slha_input_case_2loop_b = R"(
+// scenario (2) 2-loop degenrate case with high stop mixing At = (1/5 - 2)*50000 approx -90100
+char const * const slha_input_case_2_2loop = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -806,8 +804,8 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-// scenario 2-loop-c degenrate case with high stop mixing At = (1/5 + 2)*50000 approx  110100
-char const * const slha_input_case_2loop_c = R"(
+// scenario (3) 2-loop degenrate case with high stop mixing At = (1/5 + 2)*50000 approx  110100
+char const * const slha_input_case_3_2loop = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -902,8 +900,8 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-// scenario 2-loop-d degenrate case with high stop mixing At = (1/5 + 3)*50000 =  160000
-char const * const slha_input_case_2loop_d = R"(
+// scenario (4) 2-loop degenrate case with high stop mixing At = (1/5 + 3)*50000 =  160000
+char const * const slha_input_case_4_2loop = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -1006,10 +1004,10 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
       output out{};
       double eps{0.0};
    } data_1loop[] = {
-      {slha_input_case1, {129.024202, 0.125588145, 0.125768663}, 2e-4},
-      {slha_input_case2, {132.709997, 0.125588071, 0.147703015}, 8e-5},
-      {slha_input_case3, {128.315047, 0.12558815 , 0.121657248}, 8e-5},
-      {slha_input_case4, {130.665551, 0.125588152, 0.135417609}, 8e-5},
+      {slha_input_case_1, {129.024202, 0.125588145, 0.125768663}, 2e-4},
+      {slha_input_case_2, {132.709997, 0.125588071, 0.147703015}, 8e-5},
+      {slha_input_case_3, {128.315047, 0.12558815 , 0.121657248}, 8e-5},
+      {slha_input_case_4, {130.665551, 0.125588152, 0.135417609}, 8e-5},
    };
 
    for (const auto& d: data_1loop) {
@@ -1028,10 +1026,10 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
       output_2loop out{};
       double eps{0.0};
    } data_2loop[] = {
-      {slha_input_case_2loop_a, {128.16151975160173, 127.9817088038441 }, 5e-4},
-      {slha_input_case_2loop_b, {130.42485668023875, 130.15819922320634}, 5e-4},
-      {slha_input_case_2loop_c, {130.86500014892152, 130.66749808261707}, 5e-4},
-      {slha_input_case_2loop_d, {128.87146686565686, 128.53192456935258}, 5e-4},
+      {slha_input_case_1_2loop, {128.16151975160173, 127.9817088038441 }, 5e-4},
+      {slha_input_case_2_2loop, {130.42485668023875, 130.15819922320634}, 5e-4},
+      {slha_input_case_3_2loop, {130.86500014892152, 130.66749808261707}, 5e-4},
+      {slha_input_case_4_2loop, {128.87146686565686, 128.53192456935258}, 5e-4},
    };
 
    for (const auto& d: data_2loop) {
@@ -1050,8 +1048,8 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
       output_3loop out{};
       double eps{0.0};
    } data_3loop[] = {
-      {slha_input_case_2loop_a, {0.11685905941993063}, 5e-5},
-      {slha_input_case_2loop_d, {0.12118666568388101}, 5e-5},
+      {slha_input_case_1_2loop, {0.11685905941993063}, 5e-5},
+      {slha_input_case_4_2loop, {0.12118666568388101}, 5e-5},
    };
 
    for (const auto& d: data_3loop) {
