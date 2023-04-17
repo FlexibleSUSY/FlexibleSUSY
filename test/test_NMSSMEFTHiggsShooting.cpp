@@ -20,19 +20,19 @@
 #define BOOST_TEST_MODULE test_NMSSMEFTHiggsShooting
 
 #include <boost/test/unit_test.hpp>
-#include <cstdlib>
+#include <tuple>
 #include "lowe.h"
 #include "NMSSMEFTHiggsShooting_shooting_spectrum_generator.hpp"
 #include "NMSSMEFTHiggsShooting_slha_io.hpp"
 #include "wrappers.hpp"
+
 using namespace flexiblesusy;
 
-
-using output = std::array<double,1>;
-
+using Output = std::array<double,1>;
 
 
-double calc_Mh( 
+/// calculate Mh at the precision given in `settings'
+double calc_Mh(
    NMSSMEFTHiggsShooting_input_parameters& input,
    softsusy::QedQcd& qedqcd,
    Spectrum_generator_settings& settings)
@@ -42,7 +42,7 @@ double calc_Mh(
    spectrum_generator.run(qedqcd, input);
    auto sm  = spectrum_generator.get_sm();
 
-   double Q_pole = settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ? settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :  qedqcd.displayPoleMt();
+   const double Q_pole = settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ? settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :  qedqcd.displayPoleMt();
 
    sm.run_to(Q_pole);
    sm.solve_ewsb();
@@ -50,15 +50,14 @@ double calc_Mh(
    return sm.get_physical().Mhh;
 }
 
-output edc_output( char const* const slha_input)
+
+/// extracts SLHA input
+std::tuple<Spectrum_generator_settings, softsusy::QedQcd, NMSSMEFTHiggsShooting_input_parameters>
+extract_slha_input(char const * const slha_input)
 {
-   output results = {0.};
-
-   std::stringstream istream_case_1(slha_input);
+   std::stringstream istr(slha_input);
    NMSSMEFTHiggsShooting_slha_io slha_io;
-   slha_io.read_from_stream(istream_case_1);
-
-   // extract the input parameters
+   slha_io.read_from_stream(istr);
 
    softsusy::QedQcd qedqcd;
    NMSSMEFTHiggsShooting_input_parameters input;
@@ -72,22 +71,30 @@ output edc_output( char const* const slha_input)
       BOOST_TEST_MESSAGE(error.what());
       BOOST_TEST(false);
    }
- 
-   results[0]=calc_Mh(input, qedqcd, settings);
 
+   return {settings, qedqcd, input};
+}
+
+
+/// calculate output for test
+Output calc_output(char const* const slha_input)
+{
+   Spectrum_generator_settings settings;
+   softsusy::QedQcd qedqcd;
+   NMSSMEFTHiggsShooting_input_parameters input;
+
+   std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
+
+   Output results{};
+
+   results.at(0) = calc_Mh(input, qedqcd, settings);
 
    return results;
 }
 
 
-
-
-BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
-{
-
-
 // scenario 1 degenrate case at vanishing stop mixing xt = 0
-char const * const slha_input_case1 = R"(
+char const * const slha_input_case_1 = R"(
 Block FlexibleSUSY
     0   1.000000000e-05      # precision goal
     1   0                    # max. iterations (0 = automatic)
@@ -185,7 +192,7 @@ Block AEIN
 )";
 
 // scenario 2 degenrate case with non-trivial mixing At = -4000 and approx MSSM-limit
-   char const * const slha_input_case2 = R"(
+char const * const slha_input_case_2 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
@@ -285,17 +292,21 @@ Block AEIN
 )";
 
 
+BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
+{
+   const struct Data {
+      char const * const slha_input = nullptr;
+      Output expected_output{};
+      double eps{0.0};
+   } data[] = {
+      {slha_input_case_1, {1.08559604e+02}, 1e-4}, // obtained from NMSSMEFTHiggs in EFT parametrization
+      {slha_input_case_2, {1.20086001e+02}, 1e-6}, // obtained from MSSMEFTHiggs2loop in full-model parametrization
+   };
 
-   output results_new_1  = edc_output(slha_input_case1);
-   output results_new_2  = edc_output(slha_input_case2);
-
-//obtained from NMSSMEFTHiggs in EFT parametrization (slha_input_case1)
-   output results_old_1loop = {1.08559604e+02 };
-
-//obtained from MSSMEFTHiggs2loop in full-model parametrization (slha_input_case2)
-   output results_old_2loop = { 1.20086001e+02  };
-
-   BOOST_CHECK_CLOSE_FRACTION(results_new_1[0], results_old_1loop[0], 1e-4);
-   BOOST_CHECK_CLOSE_FRACTION(results_new_2[0], results_old_2loop[0], 1e-6);
-
+   for (const auto& d: data) {
+      const auto output = calc_output(d.slha_input);
+      for (int i = 0; i < d.expected_output.size(); i++) {
+         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
+      }
+   }
 }
