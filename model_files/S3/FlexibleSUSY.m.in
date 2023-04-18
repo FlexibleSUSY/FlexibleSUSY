@@ -33,9 +33,9 @@ LowScaleFirstGuess = LowEnergyConstant[MZ];
 
 LowScaleInput = {
    {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
-   {Yu, Automatic},
-   {Yd, Automatic},
-   {Ye, Automatic}
+   {Yu, Sqrt[2] MatMul[upQuarksDRbar, CKM] / v},
+   {Yd, Sqrt[2] downQuarksDRbar / v},
+   {Ye, Sqrt[2] downLeptonsDRbar / v}
 };
 
 InitialGuessAtLowScale = {
