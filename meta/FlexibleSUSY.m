@@ -2062,8 +2062,13 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                        https://mathematica.stackexchange.com/questions/11595/package-found-with-needs-but-not-with-parallelneeds *)
                     $Path = contentOfPath;
                     (* don't pollute terminal with SARAH initialization message *)
-                    Block[{Print},
+                    Block[{Print,workingDirectory = Directory[]},
                        << SARAH`;
+                       SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
+                       SARAH`SARAH[InputDirectories] = {
+                          FileNameJoin[{workingDirectory, "sarah"}],
+                          ToFileName[{$sarahDir, "Models"}]
+                       };
                        Start@modelName;
                     ];,
                     DistributedContexts -> None
