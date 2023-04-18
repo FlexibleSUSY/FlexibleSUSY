@@ -6,16 +6,6 @@ Model`Authors = "Daniele Rizzo, Abhishek Chikkaballi Ramalingegowda and Wojciech
 Model`Date = "2023-04-17";
 
 (*-------------------------------------------*)
-(*Starting comment from SM implementation*)
-(* 2013-01-24: changed normalization of lambda term to convention of hep-ph/0207271 *)
-(* 2013-06-24: using new name conventions (without inital "S" and "F" for scalar and matter fields) *)
-(* 2013-09-01: changing to new conventions for FermionFields/MatterFields *)
-(* 2014-11-06: Changed sign in Lagrangian to fit standard conventions *)
-(* 2016-05-03: Changed sign of Yu *)
-
-
-
-(*-------------------------------------------*)
 (*   Particle Content*)
 (*-------------------------------------------*)
 
@@ -55,7 +45,7 @@ DEFINITION[GaugeES][LagrangianInput]= {
 
 
 LagNoHC = -mu2 conj[H].H - 1/2 \[Lambda] conj[H].H.conj[H].H;
-LagHC =  -(Yd q.d.conj[H] + Ye l.e.conj[H] + Yu q.u.H);
+LagHC =  -(Yd conj[H].d.q + Ye conj[H].e.l + Yu u.q.H);
 (*We are adding something here*)
 LagNoS3= -(mS3 conj[S3].S3 + lambdaS3 Delta[lef1,lef2] Delta[lef2b,lef3] Delta[lef3b,lef4] Delta[lef4b,lef1] conj[S3].S3.conj[S3].S3/8 + lambdaHS3 conj[S3].S3.conj[H].H/2);
 LagS3C = -(Sqrt[2] YS3L q.l.S3);
