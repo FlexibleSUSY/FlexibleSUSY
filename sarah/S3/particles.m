@@ -71,33 +71,28 @@ ParticleDefinitions[GaugeES] = {
                  OutputName -> {"Hp","Hm"},
                  ElectricCharge->1
                  }},  
-                 
-                 
-      {psi1,  { Description -> "Charged psi1", 
+
+      {psi1,  { Description -> "Charged psi1",
                  PDG -> {100},
-                 PDG.IX ->{0},
                  LaTeX -> {"\\psi_{1/3}","\\psi_{1/3}"},
                  OutputName -> "psi1",
                  ElectricCharge->1/3
-                 }},   
-      
-      {psi2,  { Description -> "Charged psi2", 
+                 }},
+
+      {psi2,  { Description -> "Charged psi2",
                  PDG -> {101},
-                 PDG.IX ->{0},
                  LaTeX -> {"\\psi_{4/3}","\\psi_{-4/3}"},
                  OutputName -> {"psi2","conjpsi2"},
                  ElectricCharge->{4/3,-4/3}
-                 }},      
-    
-      {psi3,  { Description -> "Charged psi3", 
+                 }},
+
+      {psi3,  { Description -> "Charged psi3",
                  PDG -> {102},
-                 PDG.IX ->{0},
                  LaTeX -> {"\\psi_{-2/3}","\\psi_{2/3}"},
                  OutputName -> "psi3",
                  ElectricCharge->{-2/3,2/3}
-                 }},                    
-                 
-      
+                 }},
+
       {VP,   { Description -> "Photon"}}, 
       {VZ,   { Description -> "Z-Boson",
       			 Goldstone -> Ah }}, 

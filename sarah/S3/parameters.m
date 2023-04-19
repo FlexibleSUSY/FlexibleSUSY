@@ -53,24 +53,28 @@ ParameterDefinitions = {
 
 {mS3,	    { Description -> "Mass of S3",
             LaTeX -> "m_{S3}",
-	        OutputName -> mS3 }},
+	         OutputName -> mS3 }
+},
 
-{lambdaS3,  { Description -> "Self-coupling of S3",
-            LaTeX -> "\\lambda_{S3}",
-	        OutputName -> lambdaS3,
-           LesHouches -> {LQMIX, 1} }},
-	        
-{lambdaHS3,  { Description -> "S3-H coupling",
-            LaTeX -> "\\lambda_{H-S3}",
-	        OutputName -> lambdaHS3,
-           LesHouches -> {LQMIX, 2}         }},
-	        
-{YS3L,  { Description -> "S3-Yukawa-Coupling",
-            LaTeX -> "Y_{S3}",
-            Real -> True,
-            LesHouches -> YS3L,
-	    OutputName -> YS3L }}
+{lambdaS3, { Description -> "Self-coupling of S3",
+             LaTeX -> "\\lambda_{S3}",
+             OutputName -> lambdaS3,
+             LesHouches -> {LQMIX, 1} }
+},
 
- }; 
- 
+{lambdaHS3, { Description -> "S3-H coupling",
+              LaTeX -> "\\lambda_{H-S3}",
+              OutputName -> lambdaHS3,
+              LesHouches -> {LQMIX, 2} }
+},
+
+{YS3L, { Description -> "S3-Yukawa-Coupling",
+         LaTeX -> "Y_{S3}",
+         Real -> True,
+         LesHouches -> YS3L,
+         OutputName -> YS3L }
+}
+
+};
+
 
