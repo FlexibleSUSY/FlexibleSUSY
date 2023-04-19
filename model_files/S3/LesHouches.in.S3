@@ -72,15 +72,15 @@ Block EXTPAR
    3   0.1   # lambdaS3Input
    4   0.1   # lambdaHS3Input
 Block YS3LIN
-   1   1   0   # YS3LInput(1,1)
-   1   2   0   # YS3LInput(1,2)
-   1   3   0   # YS3LInput(1,3)
-   2   1   0   # YS3LInput(2,1)
-   2   2   0   # YS3LInput(2,2)
-   2   3   1   # YS3LInput(2,3)
-   3   1   1   # YS3LInput(3,1)
-   3   2   1   # YS3LInput(3,2)
-   3   3   1   # YS3LInput(3,3)
+   1   1   0     # YS3LInput(1,1)
+   1   2   0     # YS3LInput(1,2)
+   1   3   0     # YS3LInput(1,3)
+   2   1   0     # YS3LInput(2,1)
+   2   2   0     # YS3LInput(2,2)
+   2   3   0.1   # YS3LInput(2,3)
+   3   1   0.01  # YS3LInput(3,1)
+   3   2   0.1   # YS3LInput(3,2)
+   3   3   0.1   # YS3LInput(3,3)
 Block FlexibleDecay
     0   1                    # calculate decays (0 = no, 1 = yes)
     1   1e-5                 # minimum BR to print
