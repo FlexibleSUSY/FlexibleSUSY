@@ -448,6 +448,9 @@ message -n "Searching for ${model_file} model file ... "
 
 if test -r "$model_file_dir/FlexibleSUSY.m.in"; then
     message "found ${model_file_dir}/FlexibleSUSY.m.in"
+elif test -r "test/$model_file_dir/FlexibleSUSY.m.in"; then
+    message "found test/${model_file_dir}/FlexibleSUSY.m.in"
+    model_file_dir="test/${model_file_dir}"
 else
     message "no found in ${model_file_dir}"
     echo "Error: No FlexibleSUSY model file found in ${model_file_dir}/"

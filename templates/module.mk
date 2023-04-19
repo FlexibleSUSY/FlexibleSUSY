@@ -43,8 +43,8 @@ BASE_TEMPLATES := \
 		$(DIR)/mass_eigenstates_decoupling_scheme.cpp.in \
 		$(DIR)/model.hpp.in \
 		$(DIR)/model_slha.hpp.in \
-		$(DIR)/lepton_gm2_wrapper.hpp.in \
-		$(DIR)/lepton_gm2_wrapper.cpp.in \
+		$(DIR)/lepton_amm_wrapper.hpp.in \
+		$(DIR)/lepton_amm_wrapper.cpp.in \
 		$(DIR)/observables.hpp.in \
 		$(DIR)/observables.cpp.in \
 		$(DIR)/physical.hpp.in \
