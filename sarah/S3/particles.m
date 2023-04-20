@@ -15,27 +15,27 @@ ParticleDefinitions[GaugeES] = {
                  FeynArtsNr -> 2,
                  LaTeX -> "H^+",
                  OutputName -> "Hp" }}, 
-     
-      {psi1, {   PDG -> {0},
-                 Width -> 0, 
+
+      {phi13, {  PDG -> {0},
+                 Width -> 0,
                  Mass -> Automatic,
                  FeynArtsNr -> 1,
-                 LaTeX -> "\\psi_{1/3}",
-                 OutputName -> "psi1"}},
-      
-      {psi2, {   PDG -> {0},
-                 Width -> 0, 
+                 LaTeX -> "\\phi_{1/3}",
+                 OutputName -> "phi1"}},
+
+      {phi23, {  PDG -> {0},
+                 Width -> 0,
                  Mass -> Automatic,
                  FeynArtsNr -> 1,
-                 LaTeX -> {"\\psi_{-2/3}","\\psi_{4/3}"},
-                 OutputName -> "psi2"}},
-      {psi3, {   PDG -> {0},
-                 Width -> 0, 
+                 LaTeX -> {"\\phi_{-2/3}","\\phi_{4/3}"},
+                 OutputName -> "phi2"}},
+      {phi43, {  PDG -> {0},
+                 Width -> 0,
                  Mass -> Automatic,
                  FeynArtsNr -> 1,
-                 LaTeX -> "\\psi_{4/3}",
-                 OutputName -> "psi3"}},
-    
+                 LaTeX -> "\\phi_{4/3}",
+                 OutputName -> "phi3"}},
+
       {VB,   { Description -> "B-Boson"}},                                                   
       {VG,   { Description -> "Gluon"}},          
       {VWB,  { Description -> "W-Bosons"}},          
@@ -72,25 +72,25 @@ ParticleDefinitions[GaugeES] = {
                  ElectricCharge->1
                  }},  
 
-      {psi1,  { Description -> "Charged psi1",
+      {phi13,  { Description -> "Phi 1/3",
                  PDG -> {100},
-                 LaTeX -> {"\\psi_{1/3}","\\psi_{1/3}"},
-                 OutputName -> "psi1",
+                 LaTeX -> {"\\phi_{1/3}","\\phi_{1/3}"},
+                 OutputName -> "phi1",
                  ElectricCharge->1/3
                  }},
 
-      {psi2,  { Description -> "Charged psi2",
+      {phi43,  { Description -> "Charged phi43",
                  PDG -> {101},
-                 LaTeX -> {"\\psi_{4/3}","\\psi_{-4/3}"},
-                 OutputName -> {"psi2","conjpsi2"},
+                 LaTeX -> {"\\phi_{4/3}","\\phi_{-4/3}"},
+                 OutputName -> {"phi2","conjphi2"},
                  ElectricCharge->{4/3,-4/3}
                  }},
 
-      {psi3,  { Description -> "Charged psi3",
+      {phi23,  { Description -> "Charged phi23",
                  PDG -> {102},
-                 LaTeX -> {"\\psi_{-2/3}","\\psi_{2/3}"},
-                 OutputName -> "psi3",
-                 ElectricCharge->{-2/3,2/3}
+                 LaTeX -> {"\\phi_{2/3}","\\phi_{-2/3}"},
+                 OutputName -> "phi23",
+                 ElectricCharge->{2/3,-2/3}
                  }},
 
       {VP,   { Description -> "Photon"}}, 

@@ -25,7 +25,7 @@ FermionFields[[5]] = {e, 3, conj[eR],       1, 1,  1};
 
 ScalarFields[[1]] =  {H, 1, {Hp, H0},     1/2, 2,  1};
 
-ScalarFields[[2]] =  {S3, 1, {{psi1/Sqrt[2], psi2}, {psi3, -psi1/Sqrt[2]}}, 1/3, 3, -3};
+ScalarFields[[2]] =  {S3, 1, {{phi13/Sqrt[2], phi43}, {phi23, -phi13/Sqrt[2]}}, 1/3, 3, -3};
 
 (*----------------------------------------------*)
 (*   DEFINITION                                 *)
