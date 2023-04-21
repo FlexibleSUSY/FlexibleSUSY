@@ -409,53 +409,79 @@ Eigen::Matrix<double,3,3> calculate_MFe_pole_1l(
 }
 
 
+/**
+ * Returns MS-bar masses of up-type quarks (MFu) in the SM, calculated
+ * via a 1-loop pole mass matching from MFu in the BSM.
+ *
+ * @param sm_0l SM at tree-level
+ * @param model BSM model
+ *
+ * @return MS-bar up-type quark masses in the SM at 1-loop level.
+ */
 Eigen::Matrix<double, 3, 3>
-calculate_MFu_DRbar_1l(
+calculate_MFu_SM_MSbar_1l(
    const Standard_model& sm_0l,
    const @ModelName@_mass_eigenstates& model)
 {
   Eigen::Matrix<double, 3, 3> mf_sm_1l = ZEROMATRIX(3, 3);
 
-  const auto Mf_sm = calculate_MFu_pole_1l(sm_0l);
-  const auto Mf_bsm = calculate_MFu_pole_1l(model);
-  const auto mf_sm_0l =
-      calculate_MFu_DRbar_0l(model); // treelevel matching
+  const auto Mf_sm_1l = calculate_MFu_pole_1l(sm_0l);
+  const auto Mf_bsm_1l = calculate_MFu_pole_1l(model);
+  const auto mf_sm_0l = calculate_MFu_DRbar_0l(model); // tree-level
 
-  mf_sm_1l = Mf_bsm - Mf_sm + mf_sm_0l;
+  mf_sm_1l = Mf_bsm_1l - Mf_sm_1l + mf_sm_0l;
 
   return Abs(mf_sm_1l);
 }
 
+
+/**
+ * Returns MS-bar masses of down-type quarks (MFd) in the SM,
+ * calculated via a 1-loop pole mass matching from MFd in the BSM.
+ *
+ * @param sm_0l SM at tree-level
+ * @param model BSM model
+ *
+ * @return MS-bar down-type quark masses in the SM at 1-loop level.
+ */
 Eigen::Matrix<double, 3, 3>
-calculate_MFd_DRbar_1l(
+calculate_MFd_SM_MSbar_1l(
    const Standard_model& sm_0l,
    const @ModelName@_mass_eigenstates& model)
 {
   Eigen::Matrix<double, 3, 3> mf_sm_1l = ZEROMATRIX(3, 3);
 
-  const auto Mf_sm = calculate_MFd_pole_1l(sm_0l);
-  const auto Mf_bsm = calculate_MFd_pole_1l(model);
-  const auto mf_sm_0l =
-      calculate_MFd_DRbar_0l(model); // treelevel matching
+  const auto Mf_sm_1l = calculate_MFd_pole_1l(sm_0l);
+  const auto Mf_bsm_1l = calculate_MFd_pole_1l(model);
+  const auto mf_sm_0l = calculate_MFd_DRbar_0l(model); // tree-level
 
-  mf_sm_1l = Mf_bsm - Mf_sm + mf_sm_0l;
+  mf_sm_1l = Mf_bsm_1l - Mf_sm_1l + mf_sm_0l;
 
   return Abs(mf_sm_1l);
 }
 
+
+/**
+ * Returns MS-bar masses of down-type (charged) leptons (MFe) in the
+ * SM, calculated via a 1-loop pole mass matching from MFe in the BSM.
+ *
+ * @param sm_0l SM at tree-level
+ * @param model BSM model
+ *
+ * @return MS-bar down-type charged lepton masses in the SM at 1-loop level.
+ */
 Eigen::Matrix<double, 3, 3>
-calculate_MFe_DRbar_1l(
+calculate_MFe_SM_MSbar_1l(
    const Standard_model& sm_0l,
    const @ModelName@_mass_eigenstates& model)
 {
   Eigen::Matrix<double, 3, 3> mf_sm_1l = ZEROMATRIX(3, 3);
 
-  const auto Mf_sm = calculate_MFe_pole_1l(sm_0l);
-  const auto Mf_bsm = calculate_MFe_pole_1l(model);
-  const auto mf_sm_0l =
-      calculate_MFe_DRbar_0l(model); // treelevel matching
+  const auto Mf_sm_1l = calculate_MFe_pole_1l(sm_0l);
+  const auto Mf_bsm_1l = calculate_MFe_pole_1l(model);
+  const auto mf_sm_0l = calculate_MFe_DRbar_0l(model); // tree-level
 
-  mf_sm_1l = Mf_bsm - Mf_sm + mf_sm_0l;
+  mf_sm_1l = Mf_bsm_1l - Mf_sm_1l + mf_sm_0l;
 
   return Abs(mf_sm_1l);
 }
@@ -776,27 +802,23 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    const double delta_g2 = g2_1l * standard_model_info::normalization_g2 - g2;
    const double vev_1l =
       2 * Sqrt(mW2) / g2 * (1 - delta_g2 / g2 + 0.5 * delta_mW2 / mW2);
-   const double delta_vev = vev_1l - v;
+   const double delta_v_1l = vev_1l - v;
 
    sm.set_g1(g1_1l);
    sm.set_g2(g2_1l);
    sm.set_g3(g3_1l);
    sm.set_v(vev_1l);
 
-   const Eigen::Matrix<double, 3, 3> YupQuarksMSbar = sm_0l.get_Yu();
-   const Eigen::Matrix<double, 3, 3> YdownQuarksMSbar = sm_0l.get_Yd();
-   const Eigen::Matrix<double, 3, 3> YdownLeptonsMSbar = sm_0l.get_Ye();
+   const Eigen::Matrix<double, 3, 3> Yu_SM_MSbar_0l = sm_0l.get_Yu();
+   const Eigen::Matrix<double, 3, 3> Yd_SM_MSbar_0l = sm_0l.get_Yd();
+   const Eigen::Matrix<double, 3, 3> Ye_SM_MSbar_0l = sm_0l.get_Ye();
+   const Eigen::Matrix<double, 3, 3> MFu_SM_MSbar_1l = calculate_MFu_SM_MSbar_1l(sm_0l, model);
+   const Eigen::Matrix<double, 3, 3> MFd_SM_MSbar_1l = calculate_MFd_SM_MSbar_1l(sm_0l, model);
+   const Eigen::Matrix<double, 3, 3> MFe_SM_MSbar_1l = calculate_MFe_SM_MSbar_1l(sm_0l, model);
 
-   const Eigen::Matrix<double, 3, 3> upQuarksDRbar1l = calculate_MFu_DRbar_1l(sm_0l, model);
-   const Eigen::Matrix<double, 3, 3> downQuarksDRbar1l = calculate_MFd_DRbar_1l(sm_0l, model);
-   const Eigen::Matrix<double, 3, 3> downLeptonsDRbar1l = calculate_MFe_DRbar_1l(sm_0l, model);
-
-   sm.set_Yu(1.4142135623730951 / v * upQuarksDRbar1l -
-               YupQuarksMSbar * delta_vev / v);
-   sm.set_Yd(1.4142135623730951 / v * downQuarksDRbar1l -
-               YdownQuarksMSbar * delta_vev / v);
-   sm.set_Ye(1.4142135623730951 / v * downLeptonsDRbar1l -
-               YdownLeptonsMSbar * delta_vev / v);
+   sm.set_Yu(1.4142135623730951 / v * MFu_SM_MSbar_1l - Yu_SM_MSbar_0l * delta_v_1l / v);
+   sm.set_Yd(1.4142135623730951 / v * MFd_SM_MSbar_1l - Yd_SM_MSbar_0l * delta_v_1l / v);
+   sm.set_Ye(1.4142135623730951 / v * MFe_SM_MSbar_1l - Ye_SM_MSbar_0l * delta_v_1l / v);
 
    sm.set_Lambdax(calculate_lambda_1l(model, sm_0l, sm, idx));
    sm.calculate_DRbar_masses();
