@@ -19,7 +19,7 @@ HighScale = Qin;
 
 HighScaleFirstGuess = Qin;
 
-HighScaleInput = {{λ, LambdaIN}};
+HighScaleInput = {{\[Lambda], LambdaIN}};
 
 SUSYScale = QEWSB;
 
