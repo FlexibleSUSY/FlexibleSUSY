@@ -89,6 +89,10 @@ std::pair<int, double> call_HiggsTools(
       // compute all the other masses
       sm.calculate_pole_masses();
 
+      if (std::abs(1. - sm.get_physical().Mhh/mass) > 1e-3) {
+         ERROR("Higgstools interface: cannot find a SM equivalent of " + el.particle + " with a mass " + std::to_string(mass) + " GeV (got " + std::to_string(sm.get_physical().Mhh) + ").");
+      }
+
       if (sm.get_physical().Mhh > 0) {
          // calculate decays in the SM equivalent
          flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
