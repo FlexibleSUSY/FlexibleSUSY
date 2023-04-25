@@ -87,7 +87,7 @@ std::pair<int, double> call_HiggsTools(
          sm.calculate_DRbar_masses(); // internaly calls solve_ewsb_tree_level()
          sm.solve_ewsb();
          sm.calculate_Mhh_pole();
-         return std::abs(sm.get_physical().Mhh - mass)/mass;
+         return std::abs(sm.get_physical().Mhh - mass);
       };
 
       int status;
@@ -132,9 +132,9 @@ std::pair<int, double> call_HiggsTools(
            a = gsl_min_fminimizer_x_lower (sGSL);
            b = gsl_min_fminimizer_x_upper (sGSL);
 
-          // determine mh with a relative error < 0.01%
+          // determine mh with a relative error < 0.1%
           status
-             = gsl_min_test_interval (a, b, 0.0, 1e-4);
+             = gsl_min_test_interval (a, b, 0.0, 1e-3);
 
           if (status == GSL_SUCCESS)
              printf ("Converged:\n");
