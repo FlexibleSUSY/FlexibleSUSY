@@ -161,6 +161,10 @@ std::pair<int, double> call_HiggsTools(
          const auto sm_input = sm_decays.get_higgstools_input();
 
          auto effc = HP::NeutralEffectiveCouplings {};
+
+         // fermion channels are given as complex numbers
+         // we normalize to real part of SM coupling
+
          // quarks
          effc.dd = std::abs(sm_input[0].dd) > 0 ? el.dd/sm_input[0].dd.real() : 0.;
          effc.uu = std::abs(sm_input[0].uu) > 0 ? el.uu/sm_input[0].uu.real() : 0.;
@@ -169,8 +173,8 @@ std::pair<int, double> call_HiggsTools(
          effc.bb = std::abs(sm_input[0].bb) > 0 ? el.bb/sm_input[0].bb.real() : 0.;
          effc.tt = std::abs(sm_input[0].tt) > 0 ? el.tt/sm_input[0].tt.real() : 0.;
          // leptons
-         effc.ee = std::abs(sm_input[0].ee) > 0 ? el.ee/sm_input[0].ee.real() : 0.;
-         effc.mumu = std::abs(sm_input[0].mumu) > 0 ? el.mumu/sm_input[0].mumu.real() : 0.;
+         effc.ee = std::abs(sm_input[0].ee)         > 0 ? el.ee/sm_input[0].ee.real()         : 0.;
+         effc.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
          effc.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
          // gauge bosons
          effc.WW = std::abs(sm_input[0].WW) > 0 ? el.WW/sm_input[0].WW : 0.;
@@ -179,7 +183,8 @@ std::pair<int, double> call_HiggsTools(
          effc.Zgam = std::abs(sm_input[0].Zgam) > 0 ? el.Zgam/sm_input[0].Zgam : 0.;
          effc.gg = std::abs(sm_input[0].gg) > 0 ? el.gg/sm_input[0].gg : 0.;
 
-         effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggsEW, calcggH, calcHgamgam);
+         effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+
          // effective coupligs are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
          // so taking a norm gives a total partial width
          s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu));
@@ -230,12 +235,12 @@ std::pair<int, double> call_HiggsTools(
    std::ofstream hb_output("HiggsBounds.out");
    hb_output << hbResult;
    hb_output.close();
-   std::cout << "All applied limits: obsRatio (expRatio)\n";
-   for (const auto &al : hbResult.appliedLimits) {
-      std::cout << al.limit()->id() << " " << al.limit()->processDesc()
-                << ": " << al.obsRatio() << " (" << al.expRatio() << ")"
-                << std::endl;
-   }
+   std::cout << hbResult;
+   // mimics the behavious of << operator
+   //for (const auto &[p, lim] : hbResult.selectedLimits) {
+   //   std::cout << p << ' ' << lim.obsRatio() << ' ' << lim.expRatio() << " # " << lim.limit()->to_string() << std::endl;
+   //}
+
 
    // HiggsSignals
    if (higgssignals_dataset.empty()) {
