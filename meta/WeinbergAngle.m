@@ -453,7 +453,7 @@ DeltaVBwave[includeGoldstones_:False] :=
            If[Length[neutrinofields] == 1,
               If[TreeMasses`GetDimension[neutrinofields[[1]]] != 3,
                  MuonDecayWorks = False;
-                 DebugPrint["Error: DeltaVBwave does not work since there are not 3 neutrinos"];
+                 DebugPrint["Error: DeltaVBwave does not work since there are not 3 neutrinos (but ", TreeMasses`GetDimension[neutrinofields[[1]]], ")"];
                  Return[{}]];
               neutrinoresult =
                  {WeinbergAngle`DeltaVB[{WeinbergAngle`fswave, {SARAH`gO1}, neutrinofields[[1]]},
