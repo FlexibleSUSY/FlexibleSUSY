@@ -61,8 +61,13 @@ std::pair<int, double> call_HiggsTools(
 
    for (auto const& el : bsm_input) {
 
-      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
       const double mass = el.mass;
+      // in the SM, λ = (mh/v)^2/2
+      // for mh = 700 this gives λ > 4
+      // it probably makes no sense to use coupling strengh modifiers in this case
+      if (mass > 700) continue;
+
+      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
       s.setMass(mass);
 
       // create a SM equivalent to the BSM model, with mhSM == mass
