@@ -29,12 +29,15 @@
 
 #include "HiggsTools_interface.hpp"
 #include "decays/standard_model_decays.hpp"
-#include "minimizer.hpp"
 
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <functional>
+
+#include <gsl/gsl_min.h>
+#include <gsl/gsl_errno.h>
 
 namespace flexiblesusy {
 
@@ -72,21 +75,74 @@ std::pair<int, double> call_HiggsTools(
       sm.set_threshold_corrections(spectrum_generator_settings.get_threshold_corrections());
       sm.set_loop_corrections(spectrum_generator_settings.get_loop_corrections());
       sm.set_loops(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::beta_loop_order)));
+
       // set SM λ such that mhSM == mass
-      auto match_Higgs_mass = [&sm, mass](Eigen::Matrix<double,1,1> const& x) {
-         sm.set_Lambdax(x[0]);
+      auto match_Higgs_mass = [&sm, mass](double x) {
+         sm.set_Lambdax(x);
          sm.calculate_DRbar_masses(); // internaly calls solve_ewsb_tree_level()
          sm.solve_ewsb();
          sm.calculate_Mhh_pole();
-         return std::abs(sm.get_physical().Mhh - mass);
+         return std::abs(sm.get_physical().Mhh - mass)/mass;
       };
-      Minimizer<1> minimizer(match_Higgs_mass, 100, 1.0e-5);
-      Eigen::Matrix<double,1,1> start;
-      start << 1.;
-      const int status = minimizer.minimize(start);
-      const auto minimum_point = minimizer.get_solution();
-      // finally, after fixing lambda to a value giving mhSM == mass,
-      // compute all the other masses
+
+      int status;
+      int iter = 0, max_iter = 100;
+      const gsl_min_fminimizer_type *T;
+      gsl_min_fminimizer *sGSL;
+      double a = 0, b = 4;
+
+      double m = 0.5;
+
+      // hack to pass lambda to GSL
+      std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
+      gsl_function F = {
+         [](double d, void* vf) -> double {
+            auto& f = *static_cast<std::function<double(double)>*>(vf);
+            return f(d);
+         },
+         &f
+      };
+
+      T = gsl_min_fminimizer_brent;
+      sGSL = gsl_min_fminimizer_alloc (T);
+      gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+
+      printf ("using %s method\n",
+         gsl_min_fminimizer_name (sGSL));
+
+      printf ("%5s [%9s, %9s] %9s %10s %9s\n",
+         "iter", "lower", "upper", "min",
+         "err", "err(est)");
+
+      printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
+         iter, a, b,
+         m, b - a);
+
+      do
+      {
+           iter++;
+           status = gsl_min_fminimizer_iterate (sGSL);
+
+           m = gsl_min_fminimizer_x_minimum (sGSL);
+           a = gsl_min_fminimizer_x_lower (sGSL);
+           b = gsl_min_fminimizer_x_upper (sGSL);
+
+          // determine mh with a relative error < 0.01%
+          status
+             = gsl_min_test_interval (a, b, 0.0, 1e-4);
+
+          if (status == GSL_SUCCESS)
+             printf ("Converged:\n");
+
+             printf ("%5d [%.7f, %.7f] "
+                "%.7f %.7f\n",
+                iter, a, b,
+                m, b - a);
+      }
+      while (status == GSL_CONTINUE && iter < max_iter);
+
+      gsl_min_fminimizer_free (sGSL);
+
       sm.calculate_pole_masses();
 
       if (std::abs(1. - sm.get_physical().Mhh/mass) > 1e-3) {
