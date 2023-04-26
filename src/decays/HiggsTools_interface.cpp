@@ -63,8 +63,8 @@ std::pair<int, double> call_HiggsTools(
 
       const double mass = el.mass;
       // in the SM, λ = (mh/v)^2/2
-      // for mh = 700 this gives λ > 4
-      // it probably makes no sense to use coupling strengh modifiers in this case
+      // for mh > 700 GeV this gives λ > 4
+      // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
       if (mass > 700) continue;
 
       auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
@@ -94,9 +94,10 @@ std::pair<int, double> call_HiggsTools(
       int iter = 0, max_iter = 100;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
+      // find λ in range [0, 4]
       double a = 0, b = 4;
 
-      double m = 0.5;
+      double m = 0.1;
 
       // hack to pass lambda to GSL
       std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
@@ -108,7 +109,10 @@ std::pair<int, double> call_HiggsTools(
          &f
       };
 
+      // checked on a single point in the MRSSM2:
+      //    brent seems faster and more accurate than quad_golden
       T = gsl_min_fminimizer_brent;
+      //T = gsl_min_fminimizer_quad_golden;
       sGSL = gsl_min_fminimizer_alloc (T);
       gsl_min_fminimizer_set (sGSL, &F, m, a, b);
 
@@ -151,7 +155,7 @@ std::pair<int, double> call_HiggsTools(
       sm.calculate_pole_masses();
 
       if (std::abs(1. - sm.get_physical().Mhh/mass) > 1e-3) {
-         ERROR("Higgstools interface: cannot find a SM equivalent of " + el.particle + " with a mass " + std::to_string(mass) + " GeV (got " + std::to_string(sm.get_physical().Mhh) + ").");
+         throw Error("Higgstools interface: cannot find a SM equivalent of " + el.particle + " with a mass " + std::to_string(mass) + " GeV (got " + std::to_string(sm.get_physical().Mhh) + ").");
       }
 
       if (sm.get_physical().Mhh > 0) {
