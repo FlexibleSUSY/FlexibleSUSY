@@ -183,7 +183,16 @@ std::pair<int, double> call_HiggsTools(
          effc.Zgam = std::abs(sm_input[0].Zgam) > 0 ? el.Zgam/sm_input[0].Zgam : 0.;
          effc.gg = std::abs(sm_input[0].gg) > 0 ? el.gg/sm_input[0].gg : 0.;
 
-         effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+         effectiveCouplingInput(
+            s, effc,
+            // choosing reference model
+            // from HiggsTools manual (Sec. 4.1 of arXiv:2210.09332):
+            //    The option SMHiggs is the preferred choice for particles that have a mass comparable to the
+            //    top-quark mass or larger, whereas for a particle state at 125 GeV one should use SMHiggsEW
+            //    in order to include the QCD corrections beyond the NNLO.
+            (mass > 150 ? HP::ReferenceModel::SMHiggs : HP::ReferenceModel::SMHiggsEW),
+            calcggH, calcHgamgam
+         );
 
          // effective coupligs are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
          // so taking a norm gives a total partial width
