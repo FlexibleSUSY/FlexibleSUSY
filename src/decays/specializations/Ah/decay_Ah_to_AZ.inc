@@ -23,11 +23,5 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, ZBoson>(
       res *= alpha_em_0/alpha_em;
    }
 
-#ifdef ENABLE_HIGGSTOOLS
-   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      higgstools_input.add_coupling(field_as_string<PseudoscalarHiggs>(in_idx), {22, 23}, std::sqrt(res));
-   }
-#endif
-
    return res;
 }

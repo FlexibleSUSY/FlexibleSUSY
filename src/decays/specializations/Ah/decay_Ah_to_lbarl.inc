@@ -35,16 +35,5 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type,
       res *= 1. + get_alpha(context)/Pi*17./4.;
    }
 
-#ifdef ENABLE_HIGGSTOOLS
-   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      static constexpr std::array<int, 3> clep_pdgs = {11, 13, 15};
-      higgstools_input.add_coupling(
-            field_as_string<PseudoscalarHiggs>(indexIn),
-            {-clep_pdgs.at(indexOut1.at(0)), clep_pdgs.at(indexOut2.at(0))},
-            1i*std::sqrt(res)
-      );
-   }
-#endif
-
    return res;
 }

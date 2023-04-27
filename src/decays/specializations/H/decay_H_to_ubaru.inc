@@ -167,14 +167,5 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    const double result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
    const double result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
 
-
-#ifdef ENABLE_HIGGSTOOLS
-   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      static constexpr std::array<int, 3> uquark_pdgs = {2, 4, 6};
-      higgstools_input.add_coupling(field_as_string<Higgs>(indexIn),
-         {uquark_pdgs.at(indexOut1.at(0)), -uquark_pdgs.at(indexOut2.at(0))}, std::sqrt(result_S) + std::sqrt(result_P)*1i);
-   }
-#endif
-
    return result_S + result_P;
 }
