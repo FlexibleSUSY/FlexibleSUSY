@@ -1,22 +1,5 @@
 // special case for Higgs -> Z Z
 
-struct my_f_params {double mHOS; double mVOS; double GammaV;};
-
-double hVV_4body(double *q2, size_t dim, void *params)
-{
-  (void)(dim); /* avoid unused parameter warnings */
-  struct my_f_params * fp = (struct my_f_params *)params;
-  const double mHOS = fp->mHOS;
-  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
-  const double mVOS = fp->mVOS;
-  const double GammaV = fp->GammaV;
-  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
-  return
-     mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
-     * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
-     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
-}
-
 template <>
 double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
    const context_base& context,
@@ -42,7 +25,7 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
        (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
       // integrand
-      constexpr double GammaZ = 2.4952;
+      static constexpr double GammaZ = 2.4952;
       struct my_f_params params = {mHOS, mZOS, GammaZ};
       gsl_monte_function G = {&hVV_4body, 2, &params};
 
@@ -51,7 +34,7 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
       double xl[2] = {0, 0};
       double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
       // this gives relative error < 0.05%
-      constexpr size_t calls = 1'000'000;
+      static constexpr size_t calls = 1'000'000;
       double err;
       const gsl_rng_type *T = gsl_rng_default;
       gsl_rng *r = gsl_rng_alloc (T);
@@ -122,6 +105,12 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
       // flux * phase space factor * matrix element squared
       res = flux * ps * ps_symmetry * mat_elem_sq;
    }
+
+#ifdef ENABLE_HIGGSTOOLS
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+      higgstools_input.add_coupling(field_as_string<Higgs>(indexIn), {23, 23}, std::sqrt(res));
+   }
+#endif
 
    return res;
 }

@@ -10,10 +10,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
    }
 
    const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
-   const double mH = context.physical_mass<PseudoscalarHiggs>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
-   const double flux = 0.5/mH;
+   const double mAH = context.physical_mass<PseudoscalarHiggs>(in_idx);
+   static constexpr double ps {1./(8.*Pi)};
+   static constexpr double ps_symmetry {0.5};
+   const double flux = 0.5/mAH;
    auto res = flux * ps * ps_symmetry * amp.square();
 
    // use alpha_em in the Thomson limit
@@ -22,6 +22,12 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       const double alpha_em = get_alpha(context);
       res *= Sqr(alpha_em_0/alpha_em);
    }
+
+#ifdef ENABLE_HIGGSTOOLS
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+      higgstools_input.add_coupling(field_as_string<PseudoscalarHiggs>(in_idx), {22, 22}, std::sqrt(res));
+   }
+#endif
 
    return res;
 }
