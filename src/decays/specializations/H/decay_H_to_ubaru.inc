@@ -17,7 +17,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    const double mHOS = context.physical_mass<Higgs>(indexIn);
    const double flux = 1./(2.*mHOS);
 
-   constexpr double color_factor = squared_color_generator<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>();
+   static constexpr double color_factor = squared_color_generator<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
@@ -154,11 +154,27 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    }
 
    // low x limit
-   double result_DR =
-      flux * color_factor * phase_spaceDR * (amp2DR_S + amp2DR_P);
+   const double result_DR_S =
+      flux * color_factor * phase_spaceDR * amp2DR_S;
+   const double result_DR_P =
+      flux * color_factor * phase_spaceDR * amp2DR_P;
    // high x limit
-   double result_OS =
-      flux * color_factor * phase_spaceOS * (amp2OS_S + amp2OS_P);
+   const double result_OS_S =
+      flux * color_factor * phase_spaceOS * amp2OS_S;
+   const double result_OS_P =
+      flux * color_factor * phase_spaceOS * amp2OS_P;
 
-   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
+   const double result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
+   const double result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
+
+
+#ifdef ENABLE_HIGGSTOOLS
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+      static constexpr std::array<int, 3> uquark_pdgs = {2, 4, 6};
+      higgstools_input.add_coupling(field_as_string<Higgs>(indexIn),
+         {uquark_pdgs.at(indexOut1.at(0)), -uquark_pdgs.at(indexOut2.at(0))}, std::sqrt(result_S) + std::sqrt(result_P)*1i);
+   }
+#endif
+
+   return result_S + result_P;
 }
