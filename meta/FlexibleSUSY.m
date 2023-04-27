@@ -552,7 +552,6 @@ CheckDecaysOptions[] :=
             DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
-            FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. SARAH`bar|Susyno`LieGroups`conj -> Identity;
             If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles],
                Utils`FSFancyWarning[
                   "Requested decay of particles ",
@@ -2803,7 +2802,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@fillDecaySettings@" -> IndentText@IndentText@fillDecaySettings,
                             "@flexibleDecaySettingsVarInDef@" -> flexibleDecaySettingsVarInDef,
                             "@flexibleDecaySettingsVarInDecl@" -> flexibleDecaySettingsVarInDecl,
-                            "@calculateDecaysForModel@" -> calculateDecaysForModel,
+                            "@calculateDecaysForModel@" -> IndentText[calculateDecaysForModel],
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],

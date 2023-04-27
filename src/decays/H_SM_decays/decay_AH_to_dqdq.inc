@@ -1,5 +1,5 @@
 
-// specialization for the Ah -> Fd Fd case
+// specialization for the AH -> Fd Fd case
 
 template<>
 double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>(
@@ -129,17 +129,5 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
    double result_OS =
       flux * color_factor * phase_spaceOS * amp2OS_P;
 
-   const double result = (1-4.*xOS)*result_DR + 4*xOS*result_OS;
-
-#ifdef ENABLE_HIGGSTOOLS
-   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      const std::array<int, 3> dquark_pdgs = {1, 3, 5};
-      higgstools_input.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
-         {dquark_pdgs.at(indexOut1.at(0)), -dquark_pdgs.at(indexOut2.at(0))},
-         1i*std::sqrt(result)
-      );
-   }
-#endif
-
-   return result;
+   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
 }

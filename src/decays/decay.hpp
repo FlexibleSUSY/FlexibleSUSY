@@ -286,9 +286,6 @@ final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type c
    }
 }
 
-struct my_f_params {double mHOS; double mVOS; double GammaV;};
-double hVV_4body(double *q2, size_t dim, void *params);
-
 } // namespace flexiblesusy
 
 #endif
