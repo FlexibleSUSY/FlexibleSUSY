@@ -29,15 +29,15 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
-      const auto AHGGVertex = Vertex<bar<UpTypeQuark>::type, UpTypeQuark, PseudoscalarHiggs>::evaluate(indices, context);
-      std::complex<double> const AHGGVertexVal = 0.5*(-AHGGVertex.left() + AHGGVertex.right());
+      const auto AhGGVertex = Vertex<bar<UpTypeQuark>::type, UpTypeQuark, PseudoscalarHiggs>::evaluate(indices, context);
+      std::complex<double> const AhGGVertexVal = 0.5*(-AhGGVertex.left() + AhGGVertex.right());
 
       const double tau = Sqr(mAh/(2.*context.mass<UpTypeQuark>({2})));
 
       const std::complex<double> A12_A = 2.*f(tau)/tau;
       // LO width comming only from the top-loop
       // agrees up to a full double precision with autmatically generated one
-      const double Gamma_SM_LO_P = mAh/(18.*Power3(Pi))*std::norm(alpha_s_5f * AHGGVertexVal*sqrt(tau) * 3./4*A12_A);
+      const double Gamma_SM_LO_P = mAh/(18.*Power3(Pi))*std::norm(alpha_s_5f * AhGGVertexVal*sqrt(tau) * 3./4*A12_A);
 
       const double mu = mAh;
       const double LH = std::log(Sqr(mu/mAh));
