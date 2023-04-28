@@ -152,7 +152,7 @@ std::string strip_field_namespace(std::string const& s) {
 
 double hVV_4body(double *q2, size_t /* dim */, void *params)
 {
-  struct my_f_params * fp = (struct my_f_params *)params;
+  struct hVV_4body_params * fp = static_cast<struct hVV_4body_params*>(params);
   const double mHOS = fp->mHOS;
   if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
   const double mVOS = fp->mVOS;

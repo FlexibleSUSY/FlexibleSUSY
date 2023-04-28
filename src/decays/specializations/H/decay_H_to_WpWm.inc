@@ -16,7 +16,7 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
 
       // integrand
       static constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
-      struct my_f_params params = {mHOS, mWOS, GammaW};
+      struct hVV_4body_params params = {mHOS, mWOS, GammaW};
       gsl_monte_function G = { &hVV_4body, 2, &params };
 
       // setup integration

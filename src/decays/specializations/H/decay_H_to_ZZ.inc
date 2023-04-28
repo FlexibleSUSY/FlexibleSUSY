@@ -24,7 +24,7 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
 
       // integrand
       static constexpr double GammaZ = 2.4952;
-      struct my_f_params params = {mHOS, mZOS, GammaZ};
+      struct hVV_4body_params params = {mHOS, mZOS, GammaZ};
       gsl_monte_function G = {&hVV_4body, 2, &params};
 
       // setup integration
