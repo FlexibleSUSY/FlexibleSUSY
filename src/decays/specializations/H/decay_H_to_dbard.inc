@@ -1,6 +1,4 @@
-
-// template specialization for the H -> Fd Fd case
-template<>
+template <>
 double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark>(
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,
@@ -17,7 +15,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    const double mHOS = context.physical_mass<Higgs>(indexIn);
    const double flux = 1./(2.*mHOS);
 
-   constexpr double color_factor = squared_color_generator<Higgs,bar<DownTypeQuark>::type,DownTypeQuark>();
+   static constexpr double color_factor = squared_color_generator<Higgs,bar<DownTypeQuark>::type,DownTypeQuark>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
@@ -130,13 +128,13 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
 
                deltaqq_QCD_DR_P +=
                   2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-                  4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+                  4./3.*alpha_s_red*calc_DeltaAh(betaDR);
 
                deltaqq_QCD_OS_P =
-                  4./3. * alpha_s_red * calc_DeltaAH(betaOS);
+                  4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
                deltaqq_QED_OS_P =
-                  alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAH(betaOS);
+                  alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
 
                const auto gbHoVEV_P = HBBbarVertexDR_P/mdqDR;
                if (!is_zero(gbHoVEV_P)) {
@@ -154,11 +152,18 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    }
 
    // low x limit
-   double result_DR =
-      flux * color_factor * phase_spaceDR * (amp2DR_S + amp2DR_P);
+   const double result_DR_S =
+      flux * color_factor * phase_spaceDR * amp2DR_S;
+   const double result_DR_P =
+      flux * color_factor * phase_spaceDR * amp2DR_P;
    // high x limit
-   double result_OS =
-      flux * color_factor * phase_spaceOS * (amp2OS_S + amp2OS_P);
+   const double result_OS_S =
+      flux * color_factor * phase_spaceOS * amp2OS_S;
+   const double result_OS_P =
+      flux * color_factor * phase_spaceOS * amp2OS_P;
 
-   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
+   const double result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
+   const double result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
+
+   return result_S + result_P;
 }

@@ -10,10 +10,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, ZBoson>(
    }
 
    const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, ZBoson>(context, in_idx, out1_idx, out2_idx);
-   const double mH = context.physical_mass<PseudoscalarHiggs>(in_idx);
+   const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
    const double mZ = qedqcd.displayPoleMZ();
-   const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mH)));
-   const double flux = 0.5/mH;
+   const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mAh)));
+   const double flux = 0.5/mAh;
    auto res = flux * ps * amp.square();
 
    // use alpha_em in the Thomson limit
