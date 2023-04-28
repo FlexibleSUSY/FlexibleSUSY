@@ -71,6 +71,10 @@ void Command_line_options::parse(const Dynamic_array_view<char*>& args)
       } else if (option == "--model-info") {
          do_print_model_info = true;
          do_exit = true;
+      } else if (starts_with(option, "--higgssignals-dataset=")) {
+         higgssignals_dataset = option.substr(23);
+      } else if (starts_with(option, "--higgsbounds-dataset=")) {
+         higgsbounds_dataset = option.substr(22);
       } else if (option == "--version" || option == "-v") {
          print_version(std::cout);
          do_exit = true;
@@ -98,23 +102,25 @@ void Command_line_options::print_usage(std::ostream& ostr) const
 {
    ostr << "Usage: " << program << " [options]\n"
            "Options:\n"
-           "  --slha-input-file=<filename>      SLHA input file (default: )\n"
-           "                                    If <filename> is - then the"
-                                                " SLHA input\n"
-           "                                    is read from stdin.\n"
-           "  --slha-output-file=<filename>     SLHA output file (default: -)\n"
-           "                                    If <filename> is the empty string, then\n"
-           "                                    no SLHA output is written.\n"
-           "                                    If <filename> is - then the output is\n"
-           "                                    printed to stdout.\n"
-           "  --spectrum-output-file=<filename> file to write spectrum to\n"
-           "  --database-output-file=<filename> SQLite database file to write\n"
-           "                                    parameter point to\n"
-           "  --rgflow-output-file=<filename>   file to write rgflow to\n"
-           "  --build-info                      print build information\n"
-           "  --model-info                      print model information\n"
-           "  --help,-h                         print this help message\n"
-           "  --version,-v                      print program version"
+           "  --slha-input-file=<filename>       SLHA input file (default: )\n"
+           "                                     If <filename> is - then the"
+                                                 " SLHA input\n"
+           "                                     is read from stdin.\n"
+           "  --slha-output-file=<filename>      SLHA output file (default: -)\n"
+           "                                     If <filename> is the empty string, then\n"
+           "                                     no SLHA output is written.\n"
+           "                                     If <filename> is - then the output is\n"
+           "                                     printed to stdout.\n"
+           "  --spectrum-output-file=<filename>  file to write spectrum to\n"
+           "  --database-output-file=<filename>  SQLite database file to write\n"
+           "                                     parameter point to\n"
+           "  --higgsbounds-dataset=<directory>  Location of HiggsBounds dataset\n"
+           "  --higgssignals-dataset=<directory> Location of HiggsSignals dataset\n"
+           "  --rgflow-output-file=<filename>    file to write rgflow to\n"
+           "  --build-info                       print build information\n"
+           "  --model-info                       print model information\n"
+           "  --help,-h                          print this help message\n"
+           "  --version,-v                       print program version"
         << std::endl;
 }
 

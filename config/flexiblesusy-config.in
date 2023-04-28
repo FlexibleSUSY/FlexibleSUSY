@@ -24,6 +24,8 @@ gm2calcflags="@GM2CALCFLAGS@"
 gm2calclibs="@GM2CALCLIBS@"
 gslflags="@GSLFLAGS@"
 gsllibs="@GSLLIBS@"
+higgstoolsflags="@HIGGSTOOLSFLAGS@"
+higgstoolslibs="@HIGGSTOOLSLIBS@"
 himalayaflags="@HIMALAYAFLAGS@"
 himalayalibs="@HIMALAYALIBS@"
 ldflags="@LDFLAGS@"
@@ -128,6 +130,9 @@ create_include_directives_for_external_modules() {
     [ "x@ENABLE_GM2CALC@" = xyes ] && \
         incl="$incl $gm2calcflags"
 
+    [ "x@ENABLE_HIGGSTOOLS@" = xyes ] && \
+        incl="$incl $higgstoolsflags"
+
     [ "x@ENABLE_HIMALAYA@" = xyes ] && \
         incl="$incl $himalayaflags"
 
@@ -184,7 +189,7 @@ cppflags_without_modules=""
 cppflags=""
 flexiblesusy_libs="$(create_flexiblesusy_libs)"
 compile_cmd=""
-libs="$ldflags $flexiblesusy_libs $loopfunclibs $gm2calclibs $himalayalibs $gsllibs $boostthreadlibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs $futilibs"
+libs="$ldflags $flexiblesusy_libs $loopfunclibs $gm2calclibs $higgstoolslibs $himalayalibs $gsllibs $boostthreadlibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs $futilibs"
 modules="$(create_module_list)"
 
 help() {
@@ -210,6 +215,7 @@ Options:
   --enable-debug        Test if debug mode is enabled
   --enable-fflite       Test if FFlite is enabled
   --enable-gm2calc      Test if GM2Calc is enabled
+  --enable-higgstools   Test if HiggsTools is enabled
   --enable-himalaya     Test if Himalaya is enabled
   --enable-librarylink  Test if LibraryLink is enabled
   --enable-looptools    Test if LoopTools is enabled
@@ -230,6 +236,8 @@ Options:
   --gm2calclibs         Print GM2Calc library, GM2CALCLIBS
   --gslflags            Print compiler flags for GSL, GSLFLAGS
   --gsllibs             Print GSL libraries, GSLLIBS
+  --higgstoolsflags     Print compiler flags for HiggsTools, HIGGSTOOLSFLAGS
+  --higgstoolslibs      Print HiggsTools library, HIGGSTOOLSLIBS
   --himalayaflags       Print compiler flags for Himalaya, HIMALAYAFLAGS
   --himalayalibs        Print Himalaya library, HIMALAYALIBS
   --ldflags             Print flags for optional libraries, LDFLAGS
@@ -286,6 +294,8 @@ while test $# -gt 0; do
         --flibs)                 out="$out $flibs" ;;
         --gslflags)              out="$out $gslflags" ;;
         --gsllibs)               out="$out $gsllibs" ;;
+        --higgstoolsflags)       out="$out $higgstoolsflags" ;;
+        --higgstoolslibs)        out="$out $higgstoolslibs" ;;
         --himalayaflags)         out="$out $himalayaflags" ;;
         --himalayalibs)          out="$out $himalayalibs" ;;
         --ldflags)               out="$out $ldflags" ;;
@@ -329,6 +339,7 @@ while test $# -gt 0; do
         --enable-debug)               out="$out @ENABLE_DEBUG@" ;;
         --enable-fflite)              out="$out @ENABLE_FFLITE@" ;;
         --enable-gm2calc)             out="$out @ENABLE_GM2CALC@" ;;
+        --enable-higgstools)          out="$out @ENABLE_HIGGSTOOLS@" ;;
         --enable-himalaya)            out="$out @ENABLE_HIMALAYA@" ;;
         --enable-librarylink)         out="$out @ENABLE_LIBRARYLINK@" ;;
         --enable-looptools)           out="$out @ENABLE_LOOPTOOLS@" ;;
