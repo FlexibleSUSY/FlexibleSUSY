@@ -8,7 +8,6 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
 
    const double mHOS = context.physical_mass<Higgs>(indexIn);
    const double mWOS = context.physical_mass<WpBoson>(indexOut1);
-   std::cout << "mWOS: " << mWOS << '\n';
    const double x = Sqr(mWOS/mHOS);
    double res = 0;
 
