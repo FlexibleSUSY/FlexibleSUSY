@@ -1,7 +1,4 @@
-
-// specialization for the Ah -> Fd Fd case
-
-template<>
+template <>
 double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>(
    const context_base& context,
    typename field_indices<PseudoscalarHiggs>::type const& indexIn,

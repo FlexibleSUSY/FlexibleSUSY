@@ -1,6 +1,4 @@
-
-// template specialization for the H -> Fd Fd case
-template<>
+template <>
 double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark>(
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,

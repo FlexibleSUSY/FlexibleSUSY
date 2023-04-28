@@ -1,6 +1,4 @@
-// template specialization for the Ah -> Fu Fu case
-
-template<>
+template <>
 double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, UpTypeQuark>(
    const context_base& context,
    typename field_indices<PseudoscalarHiggs>::type const& indexIn,

@@ -1,5 +1,3 @@
-// CP-odd Higgs to charged leptons
-
 template <>
 double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type, ChargedLepton>(
    const context_base& context,

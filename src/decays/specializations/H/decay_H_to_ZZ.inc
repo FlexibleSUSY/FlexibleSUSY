@@ -1,5 +1,3 @@
-// special case for Higgs -> Z Z
-
 template <>
 double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
    const context_base& context,

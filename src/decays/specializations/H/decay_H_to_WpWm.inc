@@ -1,4 +1,3 @@
-// special case for H -> W+ W-
 template <>
 double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
    const context_base& context, typename field_indices<Higgs>::type const& indexIn,
