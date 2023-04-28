@@ -1,7 +1,4 @@
-
-// specialization for the Ah -> Fd Fd case
-
-template<>
+template <>
 double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>(
    const context_base& context,
    typename field_indices<PseudoscalarHiggs>::type const& indexIn,
@@ -91,13 +88,13 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
 
          deltaqq_QCD_DR_P +=
             2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-            4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+            4./3.*alpha_s_red*calc_DeltaAh(betaDR);
 
          const double deltaqq_QCD_OS_P =
-               4./3. * alpha_s_red * calc_DeltaAH(betaOS);
+               4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
          const double deltaqq_QED_OS_P =
-               alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAH(betaOS);
+               alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
 
          const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<DownTypeQuark>(indexOut1);
          double deltaPhi2_P = 0.;
@@ -110,10 +107,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAOS/mtpole));
                const double lq = std::log(xDR);
-               const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-               const auto AHttbar = Vertex<bar<UpTypeQuark>::type, UpTypeQuark, PseudoscalarHiggs>::evaluate(AHttindices, context);
-               const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
-               const auto gtHoVEV_P = AHttbar_P/context.mass<UpTypeQuark>({2});
+               const auto Ahttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+               const auto Ahttbar = Vertex<bar<UpTypeQuark>::type, UpTypeQuark, PseudoscalarHiggs>::evaluate(Ahttindices, context);
+               const auto Ahttbar_P = 0.5*(Ahttbar.right() - Ahttbar.left());
+               const auto gtHoVEV_P = Ahttbar_P/context.mass<UpTypeQuark>({2});
                deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
             }
          }

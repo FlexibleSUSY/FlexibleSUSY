@@ -1,6 +1,4 @@
-// template specialization for the H -> Fu Fu case
-
-template<>
+template <>
 double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,
@@ -108,13 +106,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
          if (info::is_CP_violating_Higgs_sector) {
             deltaqq_QCD_DR_P +=
                2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-               4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+               4./3.*alpha_s_red*calc_DeltaAh(betaDR);
 
             deltaqq_QCD_OS_P =
-               4./3. * alpha_s_red * calc_DeltaAH(betaOS);
+               4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
             deltaqq_QED_OS_P =
-               alpha_red * Sqr(UpTypeQuark::electric_charge) * calc_DeltaAH(betaOS);
+               alpha_red * Sqr(UpTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
          }
 
          double deltaPhi2_S = 0.;
@@ -166,7 +164,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 
    const double result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
    const double result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
-
 
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {

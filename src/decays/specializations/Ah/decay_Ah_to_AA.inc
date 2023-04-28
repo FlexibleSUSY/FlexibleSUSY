@@ -10,10 +10,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
    }
 
    const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
-   const double mAH = context.physical_mass<PseudoscalarHiggs>(in_idx);
+   const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
    static constexpr double ps {1./(8.*Pi)};
    static constexpr double ps_symmetry {0.5};
-   const double flux = 0.5/mAH;
+   const double flux = 0.5/mAh;
    auto res = flux * ps * ps_symmetry * amp.square();
 
    // use alpha_em in the Thomson limit

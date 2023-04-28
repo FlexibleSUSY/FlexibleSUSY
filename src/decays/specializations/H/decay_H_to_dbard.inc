@@ -1,6 +1,4 @@
-
-// template specialization for the H -> Fd Fd case
-template<>
+template <>
 double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark>(
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,
@@ -130,13 +128,13 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
 
                deltaqq_QCD_DR_P +=
                   2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-                  4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+                  4./3.*alpha_s_red*calc_DeltaAh(betaDR);
 
                deltaqq_QCD_OS_P =
-                  4./3. * alpha_s_red * calc_DeltaAH(betaOS);
+                  4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
                deltaqq_QED_OS_P =
-                  alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAH(betaOS);
+                  alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
 
                const auto gbHoVEV_P = HBBbarVertexDR_P/mdqDR;
                if (!is_zero(gbHoVEV_P)) {

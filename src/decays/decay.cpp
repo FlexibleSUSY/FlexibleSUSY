@@ -18,6 +18,7 @@
 
 #include "decay.hpp"
 #include "error.hpp"
+#include "wrappers.hpp"
 
 #include <boost/functional/hash.hpp>
 
@@ -90,7 +91,7 @@ void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, s
    // we later check if for channels with width < 0
    // |width/total_width| < threshold
    // for that it makes more sense to calculate total_width
-   // form sum of |width|
+   // as the sum of |width|
    total_width += std::abs(width);
 }
 
@@ -151,7 +152,7 @@ std::string strip_field_namespace(std::string const& s) {
 
 double hVV_4body(double *q2, size_t /* dim */, void *params)
 {
-  struct my_f_params * fp = (struct my_f_params *)params;
+  struct hVV_4body_params * fp = static_cast<struct hVV_4body_params*>(params);
   const double mHOS = fp->mHOS;
   if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
   const double mVOS = fp->mVOS;
@@ -207,6 +208,7 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
          }
       }
    }
+
 void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::complex<double> c) {
 
    auto found = std::find_if(
