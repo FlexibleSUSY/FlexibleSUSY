@@ -2187,12 +2187,14 @@ check_higgstools_incl() {
 }
 
 check_cxx17_support() {
+    local var
     # https://en.cppreference.com/w/cpp/compiler_support/17
-    case "$cxx_compiler_type" in
-       clang) return $(version_at_least "$cxx_compiler_version" "4.0.0") ;;
-       gcc)   return $(version_at_least "$cxx_compiler_version" "7.0.0") ;;
-       *)     return 1 ;;
+    case "${cxx_compiler_type}" in
+       clang)   var="$(version_at_least "${cxx_compiler_version}" "4.0.0")" ;;
+       gcc|gnu) var="$(version_at_least "${cxx_compiler_version}" "7.0.0")" ;;
+       *)       var=1 ;;
     esac
+    return ${var}
 }
 
 check_higgstools_libs() {
