@@ -2193,7 +2193,6 @@ check_cxx17_support() {
        gcc)   return $(version_at_least "$cxx_compiler_version" "7.0.0") ;;
        *)     return 1 ;;
     esac
-    echo$(version_at_least "$cxx_compiler_version" "7.0.0")
 }
 
 check_higgstools_libs() {
