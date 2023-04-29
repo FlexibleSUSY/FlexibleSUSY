@@ -2173,6 +2173,15 @@ check_higgstools_incl() {
     return 0
 }
 
+check_cxx17_support() {
+    # https://en.cppreference.com/w/cpp/compiler_support/17
+    case "$cxx_compiler_type" in
+       clang) return $(version_at_least "$cxx_compiler_version" "4.0.0") ;;
+       gcc)   return $(version_at_least "$cxx_compiler_version" "7.0.0") ;;
+       *)     return 0 ;;
+    esac
+}
+
 check_higgstools_libs() {
     check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
         local HIGGSTOOLSLIBS_="-lHiggsTools"
@@ -2186,11 +2195,19 @@ check_higgstools_libs() {
 }
 
 check_higgstools() {
-        if check_higgstools_incl && check_higgstools_libs ; then
-            enable_higgstools=yes
-         else
-            enable_higgstools=no
+    if test "x$enable_higgstools" = "xyes"; then
+        if check_cxx17_support ; then
+            if check_higgstools_incl && check_higgstools_libs ; then
+                enable_higgstools=yes
+            else
+                enable_higgstools=no
+            fi
+        else
+            message "Error: HiggsTools interface requires a C++17 compiler."
+            message "   Use gcc >= 7.0.0 or clang >= 4.0.0"
+            exit 1
         fi
+    fi
 }
 
 #_____________________________________________________________________
