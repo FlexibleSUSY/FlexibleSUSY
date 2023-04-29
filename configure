@@ -2191,13 +2191,14 @@ check_cxx17_support() {
     case "$cxx_compiler_type" in
        clang) return $(version_at_least "$cxx_compiler_version" "4.0.0") ;;
        gcc)   return $(version_at_least "$cxx_compiler_version" "7.0.0") ;;
-       *)     return 0 ;;
+       *)     return 1 ;;
     esac
+    echo$(version_at_least "$cxx_compiler_version" "7.0.0")
 }
 
 check_higgstools_libs() {
     check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
-    if test "x$found_hdr" = "x" ; then
+    if test "x$found_lib" = "x" ; then
         if test "x$enable_higgstools" = "xyes" ; then
             message "Error: The HiggsTools library must be installed if you want"
             message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
