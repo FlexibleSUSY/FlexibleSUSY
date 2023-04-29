@@ -2174,7 +2174,14 @@ check_higgstools_incl() {
             return 1
         fi
     else
-      HIGGSTOOLSFLAGS="-Imodel_specific/SM -I$higgstools_inc_dir"
+        if check_cxx17_support ; then
+            HIGGSTOOLSFLAGS="-Imodel_specific/SM -I$higgstools_inc_dir"
+            return 0
+        else
+             message "Error: HiggsTools interface requires a C++17 compiler."
+             message "   Use gcc >= 7.0.0 or clang >= 4.0.0"
+             exit 1
+        fi
     fi
     return 0
 }
@@ -2190,29 +2197,41 @@ check_cxx17_support() {
 
 check_higgstools_libs() {
     check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
-        local HIGGSTOOLSLIBS_="-lHiggsTools"
-        if [ -z "$higgstools_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
+    if test "x$found_hdr" = "x" ; then
+        if test "x$enable_higgstools" = "xyes" ; then
+            message "Error: The HiggsTools library must be installed if you want"
+            message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
+            message "   You can use the --with-higgstools-libdir option to specify the"
+            message "   location of the HiggsTools library."
+            exit 1
         else
-            HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
+            return 1
         fi
-        return 0
-}
-
-check_higgstools() {
-    if test "x$enable_higgstools" = "xyes"; then
+    else
         if check_cxx17_support ; then
-            if check_higgstools_incl && check_higgstools_libs ; then
-                enable_higgstools=yes
+            local HIGGSTOOLSLIBS_="-lHiggsTools"
+            if [ -z "$higgstools_lib_dir" ]; then
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
             else
-                enable_higgstools=no
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
             fi
+            return 0
         else
             message "Error: HiggsTools interface requires a C++17 compiler."
             message "   Use gcc >= 7.0.0 or clang >= 4.0.0"
             exit 1
         fi
+    fi
+    return 0
+}
+
+check_higgstools() {
+    if check_higgstools_incl && check_higgstools_libs ; then
+        enable_higgstools=yes
+    else
+        enable_higgstools=no
     fi
 }
 
