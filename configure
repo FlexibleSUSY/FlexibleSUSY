@@ -1804,7 +1804,7 @@ check_cxxflags() {
     # transitional solution before we officially move to C++17
     # if compiler supports it, use C++17
     if contains "${CXXFLAGS}" "-std=c++14" &&  check_cxx17_support ; then
-        CXXFLAGS="${CXXFLAGS/-std=c++14/-std=c++17}"
+        CXXFLAGS=$(echo "${CXXFLAGS}" | tr c++14 c++17)
     fi
 }
 
