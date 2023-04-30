@@ -561,6 +561,10 @@ CheckDecaysOptions[] :=
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ]
          ]
+      ];
+      (* if present, replace H- with H+ since specializations are only for H+ *)
+      If[MemberQ[FlexibleSUSY`FSDecayParticles, TreeMasses`GetChargedHiggsBoson[]] && GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0,
+         FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. TreeMasses`GetChargedHiggsBoson[] -> Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]];
       ]
    ];
 
