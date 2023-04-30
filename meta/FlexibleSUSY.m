@@ -2065,7 +2065,13 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                           FileNameJoin[{workingDirectory, "sarah"}],
                           ToFileName[{$sarahDir, "Models"}]
                        };
+                       (* SARAH looks for models in dirs in SARAH`SARAH[InputDirectories] list.
+                          If the model doesn't exist in any particular location mathematica prints a
+                          FileByteCount::fdnfnd warning. This is harmless because at this point in
+                          the code we know that the model does exist at least somewhere. *)
+                       Off[FileByteCount::fdnfnd];
                        Start@modelName;
+                       On[FileByteCount::fdnfnd];
                     ];,
                     DistributedContexts -> None
                  ];
