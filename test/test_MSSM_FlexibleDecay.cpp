@@ -763,4 +763,11 @@ Block MSOFT Q= 8.64566212E+02
    // hh(2) -> hh(1) hh(1)
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_hhhh(&m, 1, 0, 0),
                               0.0055271603394791615, 5e-13);
+
+   // Hp -> hh(1) W+
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_conjHpm_to_hhconjVWm(&m, 1, 1),
+                              0., 1e-16);
+   // Hp -> hh(0) W+
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_conjHpm_to_hhconjVWm(&m, 1, 0),
+                              0.0010228054918600532, 3e-16);
 }

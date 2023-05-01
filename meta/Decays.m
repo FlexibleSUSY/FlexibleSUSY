@@ -2072,6 +2072,14 @@ SelectUpQuarkDownQuarkFinalState[decays_List] :=
            result
           ];
 
+SelectHiggsWFinalState[decays_List] :=
+    Module[{higgsSymbol = TreeMasses`GetHiggsBoson[], WpSymbol = If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]],  result = {}},
+           If[higgsSymbol =!= Null && WpSymbol =!= Null,
+              result = SelectDecayByFinalState[{higgsSymbol, WpSymbol}, decays];
+             ];
+           result
+          ];
+
 SelectWWFinalState[decays_List] :=
     Module[{wBosonSymbol = TreeMasses`GetWBoson[], result = {}},
            If[wBosonSymbol =!= Null,
@@ -2403,6 +2411,16 @@ CreateChargedHiggsToUpQuarkDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, mo
        {declaration, function}
     ];
 
+CreateChargedHiggsToHiggsW[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+       decay = SelectHiggsWFinalState[decaysList];
+       If[decay =!= {},
+          decay = First[decay];
+          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+       ];
+       {declaration, function}
+    ];
+
 CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{higgsDecays, specializations = {}},
            higgsDecays = GetHiggsBosonDecays[particleDecays];
@@ -2444,7 +2462,8 @@ CreateChargedHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] 
            If[chargedHiggsDecays =!= {},
               chargedHiggsDecays = First[chargedHiggsDecays];
               specializations = {
-                                 CreateChargedHiggsToUpQuarkDownQuarkPartialWidth[chargedHiggsDecays, modelName]
+                                 CreateChargedHiggsToUpQuarkDownQuarkPartialWidth[chargedHiggsDecays, modelName],
+                                 CreateChargedHiggsToHiggsW[chargedHiggsDecays, modelName]
                                  };
              ];
            specializations

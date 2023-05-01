@@ -337,4 +337,10 @@ Block UERMIX
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVP(&m, 1), 2.5449279204866726e-06, 3e-12);
    // Ah -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 5.4527502926727843e-07, 8e-12);
+
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_conjHm_to_barFdFu(&m, 1, 2, 2), 0.98978161175305701, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_conjHm_to_barFdFu(&m, 1, 2, 2), 0.99148855001500602, 1e-15);
+
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_conjHm_to_hhconjVWm(&m, 1, 1), 3.3419065873612581, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_conjHm_to_hhconjVWm(&m, 1, 0), 0.085035905977153506, 1e-15);
 }

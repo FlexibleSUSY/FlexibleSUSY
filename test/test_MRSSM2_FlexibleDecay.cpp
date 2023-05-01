@@ -747,6 +747,11 @@ Block IMVCKM Q= 1.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.00027252978357707359, 5e-12);
 
+   // Hp -> hh(1) W+
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_conjHpm_to_hhconjVWm(&m, 1, 1),
+                              0., 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_conjHpm_to_hhconjVWm(&m, 1, 0),
+                              3.7435618344417529e-05, 1e-16);
    // ------------ loop-induces decays ------------
 
    // h -> gamma gamma
