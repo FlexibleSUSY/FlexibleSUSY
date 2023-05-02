@@ -856,8 +856,11 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    // approximates the gaugeless limit for gauge couplings
    static const double gauge_less = 1e-10;
 
-   auto model = model_input;
-   model.calculate_DRbar_masses();
+   const auto model = [&] {
+      auto model = model_input;
+      model.calculate_DRbar_masses();
+      return model;
+   }();
    const auto model_gl = make_gaugeless_g1_g2(model_input, gauge_less);
    const auto model_no_g3 = make_gaugeless_g3(model_gl, gauge_less);
 
