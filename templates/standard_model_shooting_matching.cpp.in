@@ -825,8 +825,9 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    sm.get_problems().add(sm_0l.get_problems());
 }
 
-/// returns model in gaugeless limit g1 = g2 = 0
-@ModelName@_mass_eigenstates make_gaugeless_g1_g2(const @ModelName@_mass_eigenstates& model_, double gauge_less)
+/// returns a copy of the given model in the gaugeless limit g1 = g2 = 0
+@ModelName@_mass_eigenstates make_gaugeless_g1_g2(
+   const @ModelName@_mass_eigenstates& model_, double gauge_less)
 {
    auto model = model_;
    model.get_problems().clear();
@@ -838,8 +839,9 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    return model;
 }
 
-/// returns model in gaugeless limit g3 = 0
-@ModelName@_mass_eigenstates make_gaugeless_g3(const @ModelName@_mass_eigenstates& model_, double gauge_less)
+/// returns a copy of the given model in the gaugeless limit g3 = 0
+@ModelName@_mass_eigenstates make_gaugeless_g3(
+   const @ModelName@_mass_eigenstates& model_, double gauge_less)
 {
    auto model = model_;
 
