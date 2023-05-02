@@ -954,7 +954,6 @@ void match_high_to_low_scale_sm_3l(Standard_model& sm,
  * @param model @ModelName@ parameters
  * @param loop_order downwards matching loop order
  * @param idx Higgs index (in mass ordered Higgs multiplet)
- * /match_high_to_low_scale_sm_0l
  */
 void match_high_to_low_scale_model(
    Standard_model& sm, const @ModelName@_mass_eigenstates& model1, int loop_order, int idx)
