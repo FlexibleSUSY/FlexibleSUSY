@@ -56,21 +56,16 @@ Create3LoopMatching[] :=
             g2str = CConversion`ToValidCSymbolString[SARAH`leftCoupling],
             g3str = CConversion`ToValidCSymbolString[TreeMasses`GetStrongCoupling[]]},
 "\
-using namespace flexiblesusy::sm_twoloophiggs;
-
-static const double gauge_less = 1e-10;
 // approximates the gaugeless limit for gauge couplings
+static const double gauge_less = 1e-10;
 
-auto model = model_input;
-auto model_gl = model;
-model_gl.get_problems().clear();
-model_gl.set_" <> g1str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g1);
-model_gl.set_" <> g2str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g2);
-auto model_no_g3 = model_gl;
-model_no_g3.set_" <> g3str <> "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_g3);
-model_gl.calculate_DRbar_masses();
-model_no_g3.calculate_DRbar_masses();
-model.calculate_DRbar_masses();
+const auto model = [&] {
+   auto model = model_input;
+   model.calculate_DRbar_masses();
+   return model;
+}();
+const auto model_gl = make_gaugeless_g1_g2(model_input, gauge_less);
+const auto model_no_g3 = make_gaugeless_g3(model_gl, gauge_less);
 
 auto sm_0l = sm;
 auto sm_1l = sm;
@@ -92,7 +87,6 @@ sm = sm_2l;
 // calculation of 3-loop threshold corrections below
 
 const double lambda_2l = sm_2l.get_Lambdax();
-double delta_lambda_3l = 0.;
 
 const double v2 = Sqr(sm_0l_gl.get_v());
 const double yt = sm_0l_gl.get_Yu(2, 2);
@@ -101,11 +95,12 @@ const double gs = sm_0l_gl.get_g3();
 const double gs2 = Sqr(gs);
 const double gs4 = Sqr(gs2);
 const double MS = Sqrt(model_gl.get_MSt(0) * model_gl.get_MSt(1));
-const double Q2 = Sqr(sm_0l_gl.get_scale());
+const double Q = sm_0l_gl.get_scale();
+const double Q2 = Sqr(Q);
 const double mt = model_gl.get_MFt();
 const double mt2 = Sqr(mt);
 const double logmt = Log(mt2 / Q2);
-const double logmt2 = Sqr(Log(mt2 / Q2));
+const double logmt2 = Sqr(logmt);
 const double logmt3 = logmt * logmt2;
 const double k = oneOver16PiSqr;
 const double k2 = twoLoop;
@@ -116,25 +111,27 @@ const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
 const double sqr_delta_yt_1l = Sqr(delta_yt_1l);
 const double delta_g3_1l = sm_1l.get_g3() - sm_0l_gl.get_g3();
 
-const double S1_deriv_yt = delta_mh_1loop_at_sm_deriv_yt(0, sm_0l_gl.get_scale(),
+const double S1_deriv_yt =
+   sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(0, Q,
                                                   sm_0l_gl.get_MFu(2),
                                                   sm_0l_gl.get_Yu(2, 2)) * delta_yt_2l;
 
 const double S1_deriv_yt2 =
-   -0.5 * (24 * k * mt2 * (7. + 6. * logmt)) * sqr_delta_yt_1l;
+   -0.5 * (24 * k * mt2 * (7 + 6*logmt)) * sqr_delta_yt_1l;
 const double S2_deriv_yt =
-   (64. * k2 * gs2 * mt2 * yt * (1. + 8. * logmt + 6. * logmt2)) *
+   (64. * k2 * gs2 * mt2 * yt * (1 + 8*logmt + 6*logmt2)) *
    delta_yt_1l;
 const double S2_deriv_gs =
-   (64. * k2 * gs * mt2 * yt2 * logmt * (1. + 3. * logmt)) * delta_g3_1l;
+   (64. * k2 * gs * mt2 * yt2 * logmt * (1 + 3*logmt)) * delta_g3_1l;
 
 const double mh2_conversion =
-   S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs;           // sum in eq.(4.26c) JHEP07(2020)197
+   S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs; // sum in eq.(4.26c) JHEP07(2020)197
 const double mh2_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
 
-// calculate 2L self-energy using tree-level parameters
-Eigen::Matrix<double, 2, 2> self_energy_3l(
-   Eigen::Matrix<double, 2, 2>::Zero());
+// 3-loop self-energy, calculated using tree-level parameters
+Eigen::Matrix<double, 2, 2> self_energy_3l(Eigen::Matrix<double, 2, 2>::Zero());
+
+double delta_lambda_3l = 0;
 
 try {
    self_energy_3l = Re(model_gl.self_energy_hh_3loop());
@@ -146,7 +143,7 @@ try {
    const double mh2_bsm_shift = Mh2_pole(idx) - Sqr(model_gl.get_Mhh(idx));
 
    delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion) / v2;   // eq. (4.28d) JHEP07(2020)197
-} catch (const flexiblesusy::Error &e){}
+} catch (const flexiblesusy::Error& e){}
 
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 sm.set_Lambdax(lambda_3l);
