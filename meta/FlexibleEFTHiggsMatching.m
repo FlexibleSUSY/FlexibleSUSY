@@ -111,21 +111,23 @@ const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
 const double sqr_delta_yt_1l = Sqr(delta_yt_1l);
 const double delta_g3_1l = sm_1l.get_g3() - sm_0l_gl.get_g3();
 
+// 1st derivative of 1-loop SM contribution to Mh w.r.t. yt, times Delta yt(2l)
 const double S1_deriv_yt =
    sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(0, Q,
                                                   sm_0l_gl.get_MFu(2),
                                                   sm_0l_gl.get_Yu(2, 2)) * delta_yt_2l;
-
+// 2nd derivative of 1-loop SM contribution to Mh w.r.t. yt, times [Delta yt(1l)]^2
 const double S1_deriv_yt2 =
-   -0.5 * (24 * k * mt2 * (7 + 6*logmt)) * sqr_delta_yt_1l;
+   -0.5*(24*k*mt2*(7 + 6*logmt)) * sqr_delta_yt_1l;
+// 1st derivative of 2-loop SM contribution to Mh w.r.t. yt, times Delta yt(1l)
 const double S2_deriv_yt =
-   (64. * k2 * gs2 * mt2 * yt * (1 + 8*logmt + 6*logmt2)) *
-   delta_yt_1l;
+   64*k2*gs2*mt2*yt*(1 + 8*logmt + 6*logmt2) * delta_yt_1l;
+// 1st derivative of 2-loop SM contribution to Mh w.r.t. g3, times Delta g3(1l)
 const double S2_deriv_gs =
-   (64. * k2 * gs * mt2 * yt2 * logmt * (1 + 3*logmt)) * delta_g3_1l;
+   64*k2*gs*mt2*yt2*logmt*(1 + 3*logmt) * delta_g3_1l;
 
-const double mh2_conversion =
-   S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs; // sum in eq.(4.26c) JHEP07(2020)197
+// sum on the r.h.s. in Eq.(4.26c) JHEP07(2020)197
+const double mh2_conversion = S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs;
 const double mh2_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
 
 // 3-loop self-energy, calculated using tree-level parameters
