@@ -844,7 +844,7 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    auto model = model_;
 
    model.get_problems().clear();
-   model.set_g3(gauge_less / @ModelName@_info::normalization_g3); /// @todo(alex): generalize
+   model.set_@strongCoupling@(gauge_less / @ModelName@_info::normalization_@strongCoupling@);
    model.calculate_DRbar_masses();
 
    return model;
