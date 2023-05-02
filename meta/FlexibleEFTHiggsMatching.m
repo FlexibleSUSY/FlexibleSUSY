@@ -404,25 +404,26 @@ SetGaugeLessLimit[struct_String] :=
             g2str = CConversion`ToValidCSymbolString[SARAH`leftCoupling],
             lambda = Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"],
             kappa = Parameters`GetParameterFromDescription["Singlet Self-Interaction"],
+            vs = Parameters`GetParameterFromDescription["Singlet-VEV"],
             vSexpr = GetSingletVEVInTermsOf[FlexibleSUSY`MuInput]},
            (* set g1 = 0 *)
            If[ValueQ[SARAH`hyperchargeCoupling],
-              result = result <> Parameters`SetParameter[SARAH`hyperchargeCoupling, "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g1str <> ")", struct <> "."];
+              result = result <> Parameters`SetParameter[SARAH`hyperchargeCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g1str, struct <> "."];
              ];
            (* set g2 = 0 *)
            If[ValueQ[SARAH`leftCoupling],
-              result = result <> Parameters`SetParameter[SARAH`leftCoupling, "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g2str <> ")", struct <> "."];
+              result = result <> Parameters`SetParameter[SARAH`leftCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g2str, struct <> "."];
              ];
            (* set lambda = 0 *)
-           If[lambda =!= Null && vSexpr =!= Null,
-              result = result <> "\n" <> struct <>".set_"<> CConversion`ToValidCSymbolString[lambda] <>"(gauge_less);";
-              result = result <> "\n" <> struct <>".set_TLambdax(Re(INPUTPARAMETER(ALambdaInput)*gauge_less));";
-              result = result <> "\n" <> Parameters`CreateLocalConstRefs[vSexpr];
-              result = result <> "\n" <> struct <>".set_vS("<>CConversion`RValueToCFormString[vSexpr]  <>");";
+           If[lambda =!= Null && vs =!= Null && vSexpr =!= Null,
+              result = result <> Parameters`SetParameter[lambda, "gauge_less", struct <> "."];
+              result = result <> Parameters`SetParameter[SARAH`T[lambda], "INPUTPARAMETER(ALambdaInput)*gauge_less", struct <> "."];
+              result = result <> Parameters`CreateLocalConstRefs[vSexpr];
+              result = result <> Parameters`SetParameter[vs, vSexpr, struct <> "."];
            ];
            (* set kappa = 0 *)
            If[kappa =!= Null,
-              result = result <> "\n" <> struct <>".set_"<> CConversion`ToValidCSymbolString[kappa] <>"(gauge_less);";
+              result = result <> Parameters`SetParameter[kappa, "gauge_less", struct <> "."];
            ];
            result
     ];
