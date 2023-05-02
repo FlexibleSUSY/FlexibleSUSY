@@ -35,7 +35,7 @@ CalculateMDownLeptonPole1L::usage = "";
 FillSMFermionPoleMasses::usage = "";
 GetFixedBSMParameters::usage="Returns a list of the BSM parameters fixed by matching SM -> BSM.";
 SetBSMParameters::usage = "";
-SetGaugeLessLimit::usage = "";
+SetGaugeLessLimit::usage = "applies gauge-less limit to given model";
 
 Begin["`Private`"];
 
@@ -384,41 +384,48 @@ SetBSMParameters[susyScaleMatching_List, higgsMassMatrix_, struct_String:""] :=
            StringJoin[SetBSMParameterAtLoopOrder[#[[1]], #[[2]], struct]& /@ Utils`Zip[pars, loopOrder]]
           ];
 
+(* solve given relation between the effective mu parameter muEff
+   and the singlet VEV for the singlet VEV *)
 GetSingletVEVInTermsOf[muEff_] :=
-  Module[{vs = GetParameterFromDescription["Singlet-VEV"]},
-    First[vs /. Solve[muEff == FlexibleSUSY`EffectiveMu, vs]]
+  Module[{vs = Parameters`GetParameterFromDescription["Singlet-VEV"]},
+         If[vs === Null,
+            vs,
+            First[vs /. Solve[muEff == FlexibleSUSY`EffectiveMu, vs]]
+           ]
   ]; 
 
 (* @TODO: generalize gaugeless limit for any model 
    Set all dimensionless parameter to zero except (yt, yb, ytau, g3) in the MSSM.  
    In other models, need to check which 2-loop contributions to Mh are available.
-    *)   
-     
+ *)
 SetGaugeLessLimit[struct_String] :=
-    Module[{result, 
+    Module[{result = "",
             g1str = CConversion`ToValidCSymbolString[SARAH`hyperchargeCoupling],
             g2str = CConversion`ToValidCSymbolString[SARAH`leftCoupling],
             lambda = Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"],
             kappa = Parameters`GetParameterFromDescription["Singlet Self-Interaction"],
             vSexpr = GetSingletVEVInTermsOf[FlexibleSUSY`MuInput]},
-    result = "\
-      " <> struct <>".set_"<> g1str <>"(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_"<> g1str <>");
-      " <> struct <>".set_"<> g2str <>"(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_"<> g2str <>");";
-      If[lambda =!= Null, 
-         result = result <> "\n"<> struct <>".set_"<> CConversion`ToValidCSymbolString[lambda] <>"(gauge_less);";
-         result = result <> "\n"<> struct <>".set_TLambdax(Re(INPUTPARAMETER(ALambdaInput)*gauge_less));";
-         result = result <> "\n"<> Parameters`CreateLocalConstRefs[vSexpr];
-         result = result <> "\n"<> struct <>".set_vS("<>CConversion`RValueToCFormString[vSexpr]  <>");";
-
-      ];
-      
-      If[kappa =!= Null, 
-         result = result <> "\n"<> struct <>".set_"<> CConversion`ToValidCSymbolString[kappa] <>"(gauge_less);";
-      ];
-      result
+           (* set g1 = 0 *)
+           If[ValueQ[SARAH`hyperchargeCoupling],
+              result = result <> Parameters`SetParameter[SARAH`hyperchargeCoupling, "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g1str <> ")", struct <> "."];
+             ];
+           (* set g2 = 0 *)
+           If[ValueQ[SARAH`leftCoupling],
+              result = result <> Parameters`SetParameter[SARAH`leftCoupling, "(gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g2str <> ")", struct <> "."];
+             ];
+           (* set lambda = 0 *)
+           If[lambda =!= Null && vSexpr =!= Null,
+              result = result <> "\n" <> struct <>".set_"<> CConversion`ToValidCSymbolString[lambda] <>"(gauge_less);";
+              result = result <> "\n" <> struct <>".set_TLambdax(Re(INPUTPARAMETER(ALambdaInput)*gauge_less));";
+              result = result <> "\n" <> Parameters`CreateLocalConstRefs[vSexpr];
+              result = result <> "\n" <> struct <>".set_vS("<>CConversion`RValueToCFormString[vSexpr]  <>");";
+           ];
+           (* set kappa = 0 *)
+           If[kappa =!= Null,
+              result = result <> "\n" <> struct <>".set_"<> CConversion`ToValidCSymbolString[kappa] <>"(gauge_less);";
+           ];
+           result
     ];
-
-
 
 End[];
 

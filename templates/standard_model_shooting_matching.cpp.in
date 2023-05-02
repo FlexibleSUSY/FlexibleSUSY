@@ -852,6 +852,7 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    return model;
 }
 
+/// calculates SM parameters `sm' from @ModelName@ parameters at 2-loop level
 void match_high_to_low_scale_sm_2l(Standard_model& sm,
    const @ModelName@_mass_eigenstates& model_input, int idx)
 {
