@@ -724,18 +724,18 @@ double calculate_Mh2_shift_2l(
 } // anonymous namespace
 
 /**
- * Calculates \f$\lambda(Q)\f$ at the tree level from the lightest
- * CP-even Higgs boson mass of the @ModelName@.
+ * Calculates all SM couplings at the tree level from the given
+ * high-scale model parameters. In particular \f$\lambda\f$ is fixed
+ * from the mass of the Higgs boson with index `idx` from the
+ * high-scale model @ModelName@.
  *
- * @param sm Standard Model parameters
- * @param model_input @ModelName@ parameters
- * @param idx Higgs index (in mass ordered Higgs multiplet)
+ * @param sm Standard Model parameters (to be modified)
+ * @param model high-scale model parameters (@ModelName@)
+ * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
  */
 void match_high_to_low_scale_sm_0l(
-   Standard_model& sm, const @ModelName@_mass_eigenstates& model_input, int idx)
+   Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
 {
-   auto model = model_input;
-
    sm.set_g1(model.get_@hyperchargeCoupling@()*@ModelName@_info::normalization_@hyperchargeCoupling@/standard_model_info::normalization_g1);
    sm.set_g2(model.get_@leftCoupling@()*@ModelName@_info::normalization_@leftCoupling@/standard_model_info::normalization_g2);
    sm.set_g3(model.get_@strongCoupling@()*@ModelName@_info::normalization_@strongCoupling@/standard_model_info::normalization_g3);
@@ -756,10 +756,19 @@ void match_high_to_low_scale_sm_0l(
    sm.calculate_DRbar_masses();
 }
 
-void match_high_to_low_scale_sm_1l(Standard_model& sm,
-      const @ModelName@_mass_eigenstates& model_input, int idx)
+/**
+ * Calculates all SM couplings at the 1-loop level from the given
+ * high-scale model parameters. In particular \f$\lambda\f$ is fixed
+ * from the mass of the Higgs boson with index `idx` from the
+ * high-scale model @ModelName@ at 1-loop.
+ *
+ * @param sm Standard Model parameters (to be modified)
+ * @param model high-scale model parameters (@ModelName@)
+ * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
+ */
+void match_high_to_low_scale_sm_1l(
+   Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
 {
-   auto model = model_input;
    auto sm_0l = sm;
 
    match_high_to_low_scale_sm_0l(sm_0l, model, idx);
