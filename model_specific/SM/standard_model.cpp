@@ -865,19 +865,19 @@ void Standard_model::initial_guess_for_parameters(const softsusy::QedQcd& qedqcd
    upQuarksDRbar(0,0) = mu_guess;
    upQuarksDRbar(1,1) = mc_guess;
    upQuarksDRbar(2,2) = mt_guess;
-   Yu = -((1.4142135623730951*upQuarksDRbar) / v).transpose();
+   Yu = -(sqrt2*upQuarksDRbar/v).transpose();
 
    Eigen::Matrix<double,3,3> downQuarksDRbar(Eigen::Matrix<double,3,3>::Zero());
    downQuarksDRbar(0,0) = md_guess;
    downQuarksDRbar(1,1) = ms_guess;
    downQuarksDRbar(2,2) = mb_guess;
-   Yd = ((1.4142135623730951*downQuarksDRbar)/v).transpose();
+   Yd = (sqrt2*downQuarksDRbar/v).transpose();
 
    Eigen::Matrix<double,3,3> downLeptonsDRbar(Eigen::Matrix<double,3,3>::Zero());
    downLeptonsDRbar(0,0) = me_guess;
    downLeptonsDRbar(1,1) = mm_guess;
    downLeptonsDRbar(2,2) = mtau_guess;
-   Ye = ((1.4142135623730951*downLeptonsDRbar)/v).transpose();
+   Ye = (sqrt2*downLeptonsDRbar/v).transpose();
 
    Lambdax = Sqr(MH) / Sqr(v);
 
@@ -1133,7 +1133,7 @@ void Standard_model::calculate_Yu_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mt > 0)
       upQuarksDRbar(2,2) = calculate_MFu_DRbar(qedqcd.displayPoleMt(), 2);
 
-   Yu = -((1.4142135623730951*upQuarksDRbar)/v).transpose();
+   Yu = -(sqrt2*upQuarksDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Yd_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1146,7 +1146,7 @@ void Standard_model::calculate_Yd_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mb > 0)
       downQuarksDRbar(2,2) = calculate_MFd_DRbar(qedqcd.displayMass(softsusy::mBottom), 2);
 
-   Yd = ((1.4142135623730951*downQuarksDRbar)/v).transpose();
+   Yd = (sqrt2*downQuarksDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Ye_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1164,7 +1164,7 @@ void Standard_model::calculate_Ye_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mtau > 0)
       downLeptonsDRbar(2,2) = calculate_MFe_DRbar(qedqcd.displayMass(softsusy::mTau), 2);
 
-   Ye = ((1.4142135623730951*downLeptonsDRbar)/v).transpose();
+   Ye = (sqrt2*downLeptonsDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Lambdax_DRbar()
