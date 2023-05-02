@@ -825,28 +825,25 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    sm.get_problems().add(sm_0l.get_problems());
 }
 
+/// returns model in gaugeless limit
+@ModelName@_mass_eigenstates make_gaugeless(const @ModelName@_mass_eigenstates& model_, double gauge_less)
+{
+   auto model = model_;
+   model.get_problems().clear();
+
+@setGaugeLessLimit@
+
+   return model;
+}
+
 void match_high_to_low_scale_sm_2l(Standard_model& sm,
       const @ModelName@_mass_eigenstates& model_input, int idx)
 {
-   // apply gaugeless limit
-#ifdef MODELPARAMETER
-#undef MODELPARAMETER
-#endif
-#define MODELPARAMETER(p) model_gl.get_##p();
-
    // approximates the gaugeless limit for gauge couplings
    static const double gauge_less = 1e-10;
 
    auto model    = model_input;
-   auto model_gl = model;
-   model_gl.get_problems().clear();
-@setGaugeLessLimit@
-
-#ifdef MODELPARAMETER
-#undef MODELPARAMETER
-#endif
-#define MODELPARAMETER(p) model.get_##p();
-
+   auto model_gl = make_gaugeless(model_input, gauge_less);
    auto model_no_g3 = model_gl;
    model_no_g3.set_g3(gauge_less / @ModelName@_info::normalization_g3);
 
