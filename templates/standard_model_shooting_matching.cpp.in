@@ -851,7 +851,7 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
 }
 
 void match_high_to_low_scale_sm_2l(Standard_model& sm,
-      const @ModelName@_mass_eigenstates& model_input, int idx)
+   const @ModelName@_mass_eigenstates& model_input, int idx)
 {
    // approximates the gaugeless limit for gauge couplings
    static const double gauge_less = 1e-10;
@@ -879,7 +879,7 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    match_high_to_low_scale_sm_1l(sm_1l_no_g3, model_no_g3, idx);
 
    const double v         = sm_0l.get_v();
-   const double v2        = Sqr(sm_0l.get_v());
+   const double v2        = Sqr(v);
    const double lambda_1l = sm_1l.get_Lambdax();
 
    double delta_yt   = 0;
@@ -889,11 +889,11 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    double p          = 0;
 
    if (model.HIGGS_2LOOP_CORRECTION_AT_AS) {
-      delta_yt  += sm_1l_gl.get_Yu(2,2) - sm_1l_no_g3.get_Yu(2,2);
+      delta_yt += sm_1l_gl.get_Yu(2,2) - sm_1l_no_g3.get_Yu(2,2);
    }
 
    if (model.HIGGS_2LOOP_CORRECTION_AB_AS) {
-      delta_yb  += sm_1l_gl.get_Yd(2,2) - sm_1l_no_g3.get_Yd(2,2);
+      delta_yb += sm_1l_gl.get_Yd(2,2) - sm_1l_no_g3.get_Yd(2,2);
    }
 
    if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
@@ -908,25 +908,25 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    const double mh2_1l_sm_shift  = calculate_Mh2_shift_1l_2l(sm_0l_gl);
    const double mh2_1l_bsm_shift = calculate_Mh2_shift_1l_2l(model_gl, idx);
 
-   double delta_mh_1l_gl = 0.;
+   const double Q = sm_0l_gl.get_scale();
+   const double mt = sm_0l_gl.get_MFu(2);
+   const double mb = sm_0l_gl.get_MFd(2);
+   const double mtau = sm_0l_gl.get_MFe(2);
+   const double yt = sm_0l_gl.get_Yu(2,2);
+   const double yb = sm_0l_gl.get_Yd(2,2);
+   const double ytau = sm_0l_gl.get_Ye(2,2);
 
-   using namespace flexiblesusy::sm_twoloophiggs;
+   const double mh2_conversion =
+      + delta_yt * sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(p, Q, mt, yt)
+      + delta_yb * sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_yb(p, Q, mb, yb)
+      + delta_ytau * sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_ytau(p, Q, mtau, ytau)
+      + delta_v_gl * (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_v(p, Q, mt, yt)
+                      + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_v(p, Q, mb, yb)
+                      + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_v(p, Q, mtau, ytau));
 
-   const double mh2_conversion = delta_mh_1loop_at_sm_deriv_yt(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFu(2),
-		     sm_0l_gl.get_Yu(2,2)) *  delta_yt
-	             +  delta_mh_1loop_ab_sm_deriv_yb(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFd(2),
-		     sm_0l_gl.get_Yd(2,2)) *  delta_yb
-	             + delta_mh_1loop_atau_sm_deriv_ytau(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFe(2),
-		     sm_0l_gl.get_Ye(2,2)) *  delta_ytau
-                     + (  delta_mh_1loop_at_sm_deriv_v(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFu(2),
-		          sm_0l_gl.get_Yu(2,2))
-		        + delta_mh_1loop_ab_sm_deriv_v(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFd(2),
-		          sm_0l_gl.get_Yd(2,2))
-              	        + delta_mh_1loop_atau_sm_deriv_v(p, sm_0l_gl.get_scale(), sm_0l_gl.get_MFe(2),
-		          sm_0l_gl.get_Ye(2,2))) *  delta_v_gl;
-
-   const double lambda_2l  = lambda_1l + (mh2_bsm_shift - mh2_sm_shift - mh2_conversion )/ v2
-	                     -2.* delta_v_gl /( v * v2 ) * (mh2_1l_bsm_shift - mh2_1l_sm_shift);
+   const double lambda_2l
+      = lambda_1l + (mh2_bsm_shift - mh2_sm_shift - mh2_conversion)/v2
+        - 2*delta_v_gl/(v*v2)*(mh2_1l_bsm_shift - mh2_1l_sm_shift);
 
    sm = sm_1l;
    sm.set_Lambdax(lambda_2l);
