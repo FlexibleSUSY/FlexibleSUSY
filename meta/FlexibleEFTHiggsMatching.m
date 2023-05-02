@@ -144,7 +144,7 @@ const double delta_lambda_3l = [&] {
       // Eq.(4.28d) JHEP07(2020)197
       delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion)/v2;
    } catch (const flexiblesusy::Error& e) {
-      VERBOSE_MSG(\"Error: Calculation of 3-loop Higgs pole mass in the " <> ToString[FlexibleSUSY`FSModelName] <> " at the matching scale failed.\");
+      VERBOSE_MSG(\"Error: Calculation of 3-loop Higgs pole mass in the gauge-less limit in the " <> ToString[FlexibleSUSY`FSModelName] <> " at the matching scale failed: \" << e.what());
       sm.get_problems().flag_bad_mass(standard_model_info::hh);
    }
    return delta_lambda_3l;
