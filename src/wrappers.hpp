@@ -56,6 +56,7 @@ static constexpr double zeta3          = 1.2020569031595943; // Zeta[3]
 static constexpr double zeta4          = 1.0823232337111382; // Zeta[4]
 static constexpr double zeta5          = 1.0369277551433699; // Zeta[5]
 static constexpr double ln2            = 0.69314718055994531;
+static constexpr double sqrt2          = 1.4142135623730950; // Sqrt[2]
 
 // Abs /////////////////////////////////////////////////////////////////
 

@@ -742,14 +742,14 @@ void match_high_to_low_scale_sm_0l(
 
    const double g2 = sm.get_g2() * standard_model_info::normalization_g2;
    const double mW = model.get_M@VectorW(0)@;
-   const double v = 2*mW/g2 ;
+   const double v = 2*mW/g2;
    const auto upQuarksDRbar    = calculate_MFu_DRbar_0l(model);
    const auto downQuarksDRbar  = calculate_MFd_DRbar_0l(model);
    const auto downLeptonsDRbar = calculate_MFe_DRbar_0l(model);
 
-   sm.set_Yu(1.4142135623730951/v*upQuarksDRbar);
-   sm.set_Yd(1.4142135623730951/v*downQuarksDRbar);
-   sm.set_Ye(1.4142135623730951/v*downLeptonsDRbar);
+   sm.set_Yu(sqrt2/v*upQuarksDRbar);
+   sm.set_Yd(sqrt2/v*downQuarksDRbar);
+   sm.set_Ye(sqrt2/v*downLeptonsDRbar);
    sm.set_v(v);
    sm.set_Lambdax(calculate_lambda_0l(model, sm, idx));
 
@@ -816,9 +816,9 @@ void match_high_to_low_scale_sm_1l(Standard_model& sm,
    const Eigen::Matrix<double, 3, 3> MFd_SM_MSbar_1l = calculate_MFd_SM_MSbar_1l(sm_0l, model);
    const Eigen::Matrix<double, 3, 3> MFe_SM_MSbar_1l = calculate_MFe_SM_MSbar_1l(sm_0l, model);
 
-   sm.set_Yu(1.4142135623730951 / v * MFu_SM_MSbar_1l - Yu_SM_MSbar_0l * delta_v_1l / v);
-   sm.set_Yd(1.4142135623730951 / v * MFd_SM_MSbar_1l - Yd_SM_MSbar_0l * delta_v_1l / v);
-   sm.set_Ye(1.4142135623730951 / v * MFe_SM_MSbar_1l - Ye_SM_MSbar_0l * delta_v_1l / v);
+   sm.set_Yu(sqrt2 / v * MFu_SM_MSbar_1l - Yu_SM_MSbar_0l * delta_v_1l / v);
+   sm.set_Yd(sqrt2 / v * MFd_SM_MSbar_1l - Yd_SM_MSbar_0l * delta_v_1l / v);
+   sm.set_Ye(sqrt2 / v * MFe_SM_MSbar_1l - Ye_SM_MSbar_0l * delta_v_1l / v);
 
    sm.set_Lambdax(calculate_lambda_1l(model, sm_0l, sm, idx));
    sm.calculate_DRbar_masses();
