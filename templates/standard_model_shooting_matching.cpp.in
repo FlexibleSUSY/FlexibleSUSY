@@ -849,6 +849,19 @@ void match_high_to_low_scale_sm_1l(
    sm.get_problems().add(sm_0l.get_problems());
 }
 
+namespace {
+
+/// wrapper around `match_high_to_low_scale_sm_1l' that returns a copy
+Standard_model match_high_to_low_scale_sm_1l_copy(
+   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
+{
+   auto sm_1l = sm;
+   match_high_to_low_scale_sm_1l(sm_1l, model, idx);
+   return sm_1l;
+}
+
+} // anonymous namespace
+
 /// returns a copy of the given model in the gaugeless limit g1 = g2 = 0
 @ModelName@_mass_eigenstates make_gaugeless_g1_g2(
    const @ModelName@_mass_eigenstates& model_)
@@ -888,16 +901,12 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    const auto model_gl = make_gaugeless_g1_g2(model_input);
    const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
-   auto sm_1l    = sm;
-   auto sm_1l_gl = sm;
-   auto sm_1l_no_g3 = sm;
-
    const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
-   match_high_to_low_scale_sm_1l(sm_1l, model, idx);
+   const auto sm_1l = match_high_to_low_scale_sm_1l_copy(sm, model, idx);
    const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(sm, model_gl, idx);
-   match_high_to_low_scale_sm_1l(sm_1l_gl, model_gl, idx);
+   const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(sm, model_gl, idx);
    const auto sm_0l_no_g3 = match_high_to_low_scale_sm_0l_copy(sm, model_no_g3, idx);
-   match_high_to_low_scale_sm_1l(sm_1l_no_g3, model_no_g3, idx);
+   const auto sm_1l_no_g3 = match_high_to_low_scale_sm_1l_copy(sm, model_no_g3, idx);
 
    const double v         = sm_0l.get_v();
    const double v2        = Sqr(v);
