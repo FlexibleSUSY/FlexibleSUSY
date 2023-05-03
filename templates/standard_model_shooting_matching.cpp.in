@@ -760,6 +760,19 @@ void match_high_to_low_scale_sm_0l(
    sm.calculate_DRbar_masses();
 }
 
+namespace {
+
+/// wrapper around `match_high_to_low_scale_sm_0l' that returns a copy
+Standard_model match_high_to_low_scale_sm_0l_copy(
+   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
+{
+   auto sm_0l = sm;
+   match_high_to_low_scale_sm_0l(sm_0l, model, idx);
+   return sm_0l;
+}
+
+} // anonymous namespace
+
 /**
  * Calculates all SM couplings at the 1-loop level from the given
  * high-scale model parameters. In particular \f$\lambda\f$ is fixed
@@ -773,9 +786,7 @@ void match_high_to_low_scale_sm_0l(
 void match_high_to_low_scale_sm_1l(
    Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
 {
-   auto sm_0l = sm;
-
-   match_high_to_low_scale_sm_0l(sm_0l, model, idx);
+   const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
 
    const double gy = sm_0l.get_g1() * standard_model_info::normalization_g1;
    const double g2 = sm_0l.get_g2() * standard_model_info::normalization_g2;
@@ -877,18 +888,15 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    const auto model_gl = make_gaugeless_g1_g2(model_input);
    const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
-   auto sm_0l    = sm;
    auto sm_1l    = sm;
-   auto sm_0l_gl = sm;
    auto sm_1l_gl = sm;
-   auto sm_0l_no_g3 = sm;
    auto sm_1l_no_g3 = sm;
 
-   match_high_to_low_scale_sm_0l(sm_0l, model, idx);
+   const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
    match_high_to_low_scale_sm_1l(sm_1l, model, idx);
-   match_high_to_low_scale_sm_0l(sm_0l_gl, model_gl, idx);
+   const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(sm, model_gl, idx);
    match_high_to_low_scale_sm_1l(sm_1l_gl, model_gl, idx);
-   match_high_to_low_scale_sm_0l(sm_0l_no_g3, model_no_g3, idx);
+   const auto sm_0l_no_g3 = match_high_to_low_scale_sm_0l_copy(sm, model_no_g3, idx);
    match_high_to_low_scale_sm_1l(sm_1l_no_g3, model_no_g3, idx);
 
    const double v         = sm_0l.get_v();
