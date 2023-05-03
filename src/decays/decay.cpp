@@ -18,6 +18,7 @@
 
 #include "decay.hpp"
 #include "error.hpp"
+#include "wrappers.hpp"
 
 #include <boost/functional/hash.hpp>
 
@@ -90,7 +91,7 @@ void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, s
    // we later check if for channels with width < 0
    // |width/total_width| < threshold
    // for that it makes more sense to calculate total_width
-   // form sum of |width|
+   // as the sum of |width|
    total_width += std::abs(width);
 }
 
@@ -147,6 +148,20 @@ std::string strip_field_namespace(std::string const& s) {
    } else {
       return result;
    }
+}
+
+double hVV_4body(double *q2, size_t /* dim */, void *params)
+{
+  struct hVV_4body_params * fp = static_cast<struct hVV_4body_params*>(params);
+  const double mHOS = fp->mHOS;
+  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
+  const double mVOS = fp->mVOS;
+  const double GammaV = fp->GammaV;
+  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
+  return
+     mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
 }
 
 } // namespace flexiblesusy

@@ -1,5 +1,3 @@
-// special case for H -> W+ W-
-
 template <>
 double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
    const context_base& context, typename field_indices<Higgs>::type const& indexIn,
@@ -17,8 +15,8 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
        (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
       // integrand
-      constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
-      struct my_f_params params = {mHOS, mWOS, GammaW};
+      static constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
+      struct hVV_4body_params params = {mHOS, mWOS, GammaW};
       gsl_monte_function G = { &hVV_4body, 2, &params };
 
       // setup integration
@@ -26,7 +24,7 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
       double xl[2] = {0, 0};
       double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
       // this gives relative error < 0.05%
-      constexpr size_t calls = 1'000'000;
+      static constexpr size_t calls = 1'000'000;
       double err;
       const gsl_rng_type *T = gsl_rng_default;
       gsl_rng *r = gsl_rng_alloc (T);
@@ -39,7 +37,7 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
       gsl_rng_free (r);
 
       // prefactor
-      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
+      const auto indices = concatenate(indexIn, indexOut1, indexOut2);
       const auto ghWW =
          Vertex<Higgs, WpBoson, WmBoson>::evaluate(indices, context).value();
 
@@ -66,7 +64,7 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
       }
       res = 1./(768.*Power3(Pi)*mHOS) * RT(x)/x;
 
-      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
+      const auto indices = concatenate(indexIn, indexOut1, indexOut2);
       const auto ghWW =
          Vertex<Higgs, WpBoson, WmBoson>::evaluate(indices, context).value();
 
@@ -77,9 +75,9 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
       res *= std::norm(ghWW*gWud);
 
       // multiply by number of final states
-      constexpr double NLF = 3;  // number of lepton flavours
-      constexpr double Nc = 3;   // number of colors
-      constexpr double NQF = 2;  // number of quark flavours
+      static constexpr double NLF = 3;  // number of lepton flavours
+      static constexpr double Nc = 3;   // number of colors
+      static constexpr double NQF = 2;  // number of quark flavours
       res *= NLF + Nc*NQF;
 
    // two-body decay for mH > 2 mW

@@ -553,6 +553,7 @@ CheckDecaysOptions[] :=
             DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
+            FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. SARAH`bar|Susyno`LieGroups`conj -> Identity;
             If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles],
                Utils`FSFancyWarning[
                   "Requested decay of particles ",
@@ -2121,7 +2122,13 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                           FileNameJoin[{workingDirectory, "sarah"}],
                           ToFileName[{$sarahDir, "Models"}]
                        };
+                       (* SARAH looks for models in dirs in SARAH`SARAH[InputDirectories] list.
+                          If the model doesn't exist in any particular location mathematica prints a
+                          FileByteCount::fdnfnd warning. This is harmless because at this point in
+                          the code we know that the model does exist at least somewhere. *)
+                       Off[FileByteCount::fdnfnd];
                        Start@modelName;
+                       On[FileByteCount::fdnfnd];
                     ];,
                     DistributedContexts -> None
                  ];
@@ -2873,7 +2880,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@fillDecaySettings@" -> IndentText@IndentText@fillDecaySettings,
                             "@flexibleDecaySettingsVarInDef@" -> flexibleDecaySettingsVarInDef,
                             "@flexibleDecaySettingsVarInDecl@" -> flexibleDecaySettingsVarInDecl,
-                            "@calculateDecaysForModel@" -> IndentText[calculateDecaysForModel],
+                            "@calculateDecaysForModel@" -> calculateDecaysForModel,
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
