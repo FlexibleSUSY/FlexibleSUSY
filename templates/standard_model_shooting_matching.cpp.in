@@ -57,6 +57,9 @@ namespace @ModelName@_standard_model_matching {
 
 namespace {
 
+/// approximates the gaugeless limit for gauge couplings
+static constexpr double gauge_less = 1e-10;
+
 /**
  * Calculates squared Higgs pole mass in the SM,
  * \f$(M_h^{\text{SM}})^2\f$.
@@ -607,7 +610,7 @@ double calculate_Mh2_shift_1l_2l(
 }
 
 double calculate_Mh2_shift_1l_2l(
-       const @ModelName@_mass_eigenstates& model, int idx)
+   const @ModelName@_mass_eigenstates& model, int idx)
 {
    auto model_1l = model;
    const int nrows = model.get_@UpYukawa@().rows();
@@ -836,7 +839,7 @@ void match_high_to_low_scale_sm_1l(
 
 /// returns a copy of the given model in the gaugeless limit g1 = g2 = 0
 @ModelName@_mass_eigenstates make_gaugeless_g1_g2(
-   const @ModelName@_mass_eigenstates& model_, double gauge_less)
+   const @ModelName@_mass_eigenstates& model_)
 {
    auto model = model_;
    model.get_problems().clear();
@@ -850,7 +853,7 @@ void match_high_to_low_scale_sm_1l(
 
 /// returns a copy of the given model in the gaugeless limit g3 = 0
 @ModelName@_mass_eigenstates make_gaugeless_g3(
-   const @ModelName@_mass_eigenstates& model_, double gauge_less)
+   const @ModelName@_mass_eigenstates& model_)
 {
    auto model = model_;
 
@@ -865,16 +868,13 @@ void match_high_to_low_scale_sm_1l(
 void match_high_to_low_scale_sm_2l(Standard_model& sm,
    const @ModelName@_mass_eigenstates& model_input, int idx)
 {
-   // approximates the gaugeless limit for gauge couplings
-   static const double gauge_less = 1e-10;
-
    const auto model = [&] {
       auto model = model_input;
       model.calculate_DRbar_masses();
       return model;
    }();
-   const auto model_gl = make_gaugeless_g1_g2(model_input, gauge_less);
-   const auto model_no_g3 = make_gaugeless_g3(model_gl, gauge_less);
+   const auto model_gl = make_gaugeless_g1_g2(model_input);
+   const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
    auto sm_0l    = sm;
    auto sm_1l    = sm;

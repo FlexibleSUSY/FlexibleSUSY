@@ -52,16 +52,13 @@ Mh2_pole = M_pole(idx);"
       ];
 
 Create3LoopMatching[] :=
-"// approximates the gaugeless limit for gauge couplings
-static const double gauge_less = 1e-10;
-
-const auto model = [&] {
+"const auto model = [&] {
    auto model = model_input;
    model.calculate_DRbar_masses();
    return model;
 }();
-const auto model_gl = make_gaugeless_g1_g2(model_input, gauge_less);
-const auto model_no_g3 = make_gaugeless_g3(model_gl, gauge_less);
+const auto model_gl = make_gaugeless_g1_g2(model_input);
+const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
 auto sm_0l = sm;
 auto sm_1l = sm;
