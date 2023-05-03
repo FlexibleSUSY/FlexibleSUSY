@@ -639,7 +639,7 @@ double calculate_Mh2_shift_1l_2l(
 }
 
 double calculate_Mh2_shift_2l(
-   const @ModelName@_mass_eigenstates &model_gl,
+   const @ModelName@_mass_eigenstates& model_gl,
    int idx)
 {
    auto model = model_gl;
@@ -670,10 +670,10 @@ double calculate_Mh2_shift_2l(
 
    const auto mh2_tree = calculate_mh2_0l(model);
    const double mh2_0l = Sqr(model.get_M@HiggsBoson(idx)@);
-   const double mh2_shift_1l = calculate_Mh2_pole_1l(model,idx) - mh2_0l;
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(model, idx) - mh2_0l;
    double Mh2_pole = 0.;
 
-   self_energy += Re(model.self_energy_hh_1loop_deriv_p2( p ) * mh2_shift_1l);
+   self_energy += Re(model.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
 
 @calculateMHiggsPoleOneMomentumIteration@
 
@@ -687,13 +687,12 @@ double calculate_Mh2_shift_2l(
    const @ModelName@_mass_eigenstates& model,
    int idx)
 {
-   using namespace flexiblesusy::sm_twoloophiggs;
    const double p = 0.;
    const double mh2_shift_1l = calculate_Mh2_shift_1l_2l(model, idx);
    auto sm_2l = sm;
    const double self_energy_2l = Re(sm_2l.self_energy_hh_2loop(p));
 
-   //  tadpoles are within selfenergy
+   // tadpoles are within selfenergy
    double mh2_shift = -self_energy_2l;
    const int nrows = sm.get_Yu().rows();
    const int ncols = sm.get_Yu().cols();
@@ -710,12 +709,14 @@ double calculate_Mh2_shift_2l(
    }
    sm_2l.calculate_DRbar_masses();
 
-   //  tadpoles are within selfenergy
+   const double Q = sm_2l.get_scale();
+
+   // tadpoles are within selfenergy
    if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
       mh2_shift = -self_energy_2l
-         + (delta_mh_1loop_at_sm_deriv_p2(p, sm_2l.get_scale(), sm_2l.get_MFu(2), sm_2l.get_Yu(2,2)) 
-            + delta_mh_1loop_ab_sm_deriv_p2(p, sm_2l.get_scale(), sm_2l.get_MFd(2), sm_2l.get_Yd(2,2))
-            + delta_mh_1loop_atau_sm_deriv_p2(p, sm_2l.get_scale(), sm_2l.get_MFe(2), sm_2l.get_Ye(2,2))
+         + (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm_2l.get_MFu(2), sm_2l.get_Yu(2,2)) 
+            + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm_2l.get_MFd(2), sm_2l.get_Yd(2,2))
+            + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm_2l.get_MFe(2), sm_2l.get_Ye(2,2))
             ) * mh2_shift_1l;
    }
 
