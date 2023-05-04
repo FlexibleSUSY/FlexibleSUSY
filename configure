@@ -2175,7 +2175,7 @@ check_higgstools_incl() {
         fi
     else
         if check_cxx17_support ; then
-            HIGGSTOOLSFLAGS="-Imodel_specific/SM -I$higgstools_inc_dir"
+            HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
             return 0
         else
              message "Error: HiggsTools interface requires a C++17 compiler."
@@ -2217,7 +2217,7 @@ check_higgstools_libs() {
                 HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
             else
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
+                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
             fi
             return 0
         else
