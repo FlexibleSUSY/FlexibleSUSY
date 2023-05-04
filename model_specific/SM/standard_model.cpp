@@ -195,11 +195,6 @@ void Standard_model::set_loop_corrections(const Loop_corrections& loop_correctio
    loop_corrections = loop_corrections_;
 }
 
-void Standard_model::set_top_QCD_order(int loop_order_plus)
-{
-   loop_corrections.top_qcd = loop_order_plus;
-}
-
 const Loop_corrections& Standard_model::get_loop_corrections() const
 {
    return loop_corrections;

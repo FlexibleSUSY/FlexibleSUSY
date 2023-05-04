@@ -173,9 +173,9 @@ Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]],
    auto sm = sm_0l;
 
    sm.set_pole_mass_loop_order(2);
-   sm.set_top_QCD_order(1);
+   set_top_QCD_order(sm, 1);
    model.set_pole_mass_loop_order(2);
-   model.set_top_QCD_order(1);
+   set_top_QCD_order(model, 1);
 
    double mst_1, mst_2, theta_t;
    model." <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";

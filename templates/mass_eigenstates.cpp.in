@@ -140,12 +140,6 @@ const Loop_corrections& CLASSNAME::get_loop_corrections() const
    return loop_corrections;
 }
 
-
-void CLASSNAME::set_top_QCD_order(int loop_order_plus)
-{
-   loop_corrections.top_qcd = loop_order_plus;
-}
-
 void CLASSNAME::set_threshold_corrections(const Threshold_corrections& tc)
 {
    threshold_corrections = tc;

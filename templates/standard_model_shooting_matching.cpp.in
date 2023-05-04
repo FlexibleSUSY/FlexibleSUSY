@@ -60,6 +60,22 @@ namespace {
 /// approximates the gaugeless limit for gauge couplings
 static constexpr double gauge_less = 1e-10;
 
+
+void set_top_QCD_order(Standard_model& sm, int loop_order)
+{
+   auto loop_corrections = sm.get_loop_corrections();
+   loop_corrections.top_qcd = loop_order;
+   sm.set_loop_corrections(loop_corrections);
+}
+
+
+void set_top_QCD_order(@ModelName@_mass_eigenstates& model, int loop_order)
+{
+   auto loop_corrections = model.get_loop_corrections();
+   loop_corrections.top_qcd = loop_order;
+   model.set_loop_corrections(loop_corrections);
+}
+
 /**
  * Calculates squared Higgs pole mass in the SM,
  * \f$(M_h^{\text{SM}})^2\f$.
