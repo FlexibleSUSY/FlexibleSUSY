@@ -2189,8 +2189,11 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
 
            solver =
               Switch[First@FlexibleSUSY`FSBVPSolvers,
-                 TwoScaleSolver, "Two_scale",
-                 SemiAnalyticSolver, "Semi_analytic"
+                 FlexibleSUSY`TwoScaleSolver, "Two_scale",
+                 FlexibleSUSY`SemiAnalyticSolver, "Semi_analytic",
+                 FlexibleSUSY`ShootingSolver, "Shooting",
+                 FlexibleSUSY`LatticeSolver, "Lattice",
+                 _, Print["Error: invalid BVP solver requested: ", solver]; Quit[1];
               ];
 
            WriteOut`ReplaceInFiles[files,
