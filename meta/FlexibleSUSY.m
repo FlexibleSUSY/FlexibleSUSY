@@ -2187,14 +2187,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
 
            bsmParticleAliasList = Decays`CreateBSMParticleAliasList["fields"];
 
-           solver =
-              Switch[First@FlexibleSUSY`FSBVPSolvers,
-                 FlexibleSUSY`TwoScaleSolver, "Two_scale",
-                 FlexibleSUSY`SemiAnalyticSolver, "Semi_analytic",
-                 FlexibleSUSY`ShootingSolver, "Shooting",
-                 FlexibleSUSY`LatticeSolver, "Lattice",
-                 _, Print["Error: invalid BVP solver requested: ", solver]; Quit[1];
-              ];
+           solver = GetBVPSolverTemplateParameter[First@FlexibleSUSY`FSBVPSolvers];
 
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
