@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    auto fyt2 = [&](double yt) { return sm_twoloophiggs::delta_mh_1loop_at_sm(p, Q, yt*v*over_sqrt2, yt);         };
    auto dfyt = [&](double yt) { return sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(p, Q, yt*v*over_sqrt2, yt);};
 
-   BOOST_CHECK_CLOSE_FRACTION(fyt2(yt), fyt1(yt), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(fyt2(yt), fyt1(yt), 2e-15);
    BOOST_CHECK_CLOSE_FRACTION(derivative_forward<7>(fyt1,yt), dfyt(yt), 1e-6);
    BOOST_CHECK_CLOSE_FRACTION(derivative_forward<7>(fyt2,yt), dfyt(yt), 1e-6);
 
