@@ -31,10 +31,12 @@ New features
         }
      };
 
-* Added calculation of vector diagram contributions to leptons
+* Added 1-loop vector diagram contributions to leptons
   :math:`$(g-2)/2$`, EDMs and to :math:`$b \to s \gamma$`.
 
   Thanks to Douglas Jacob.
+
+* Added 2-loop Barr-Zee contributions to leptons :math:`$(g-2)/2$`.
 
 Fixed bugs
 ----------
