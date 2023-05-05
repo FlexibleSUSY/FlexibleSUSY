@@ -21,6 +21,7 @@
 #define @ModelName@_OBSERVABLES_H
 
 #include "observable_problems.hpp"
+#include "spectrum_generator_settings.hpp"
 #include <string>
 #include <vector>
 #include <Eigen/Core>
@@ -35,7 +36,7 @@ class @ModelName@_mass_eigenstates;
 class Physical_input;
 
 struct @ModelName@_observables {
-   static const int NUMBER_OF_OBSERVABLES = @numberOfObservables@;
+   static constexpr int NUMBER_OF_OBSERVABLES = @numberOfObservables@;
 
    @ModelName@_observables();
    Eigen::ArrayXd get() const; ///< returns vector of all observables
@@ -49,11 +50,11 @@ struct @ModelName@_observables {
 
 @ModelName@_observables calculate_observables(
    const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&,
-   const Physical_input&);
+   const Physical_input&, const Spectrum_generator_settings&);
 
 @ModelName@_observables calculate_observables(
    const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&,
-   const Physical_input&, double scale);
+   const Physical_input&, const Spectrum_generator_settings&, double scale);
 
 } // namespace flexiblesusy
 

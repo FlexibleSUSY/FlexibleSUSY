@@ -44,7 +44,7 @@ settings = {
     betaZeroThreshold -> 1.*10^-11,
     forcePositiveMasses -> 0,
     poleMassScale -> 0.,
-    parameterOutputScale -> 0.
+    parameterOutputScale -> 0.,
     loopLibrary -> -1
 };
 
@@ -148,7 +148,7 @@ TestCloseRel[BMu /. slhaData, B[\[Mu]] /. specML, delta];
 
 delta = 1*^-6;
 
-TestCloseRel[aMuon  /. slhaData, FlexibleSUSYObservable`aMuon /. obsML, delta];
+TestCloseRel[aMuon  /. slhaData, FlexibleSUSYObservable`AMM[Fe[2]] /. obsML, delta];
 
 TestEquality[CMSSM /. probML, {}];
 TestEquality[CMSSM /. warnML, {}];

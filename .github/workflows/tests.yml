@@ -124,7 +124,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.13.0
+      image: navir/opensuseleap-for-flexiblesusy:0.15.2
 
     strategy:
       fail-fast: false
@@ -134,8 +134,8 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.10'
-      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya'
-      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic'
+      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3'
 
     steps:
 
@@ -278,7 +278,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
+          name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
           path: |
             config.*
             test/test_*.log

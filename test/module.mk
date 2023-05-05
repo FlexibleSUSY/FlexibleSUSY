@@ -48,6 +48,7 @@ endif
 ################################################################################
 
 TEST_SRC := \
+		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_array_view.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_ckm.cpp \
@@ -265,7 +266,7 @@ endif
 
 ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_gmm2.cpp \
+		$(DIR)/test_MRSSM2_amm.cpp \
 		$(DIR)/test_MRSSM2_mw_calculation.cpp \
 		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
 endif
@@ -310,6 +311,7 @@ endif
 ifeq ($(WITH_CE6SSM), yes)
 TEST_SRC += \
 		$(DIR)/test_CE6SSM_ewsb.cpp \
+		$(DIR)/test_CE6SSM_amm.cpp \
 		$(DIR)/test_CE6SSM_semi_analytic_solutions.cpp
 endif
 
@@ -346,6 +348,11 @@ ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecay.cpp
 endif
+endif
+
+ifeq ($(ENABLE_GM2CALC) $(WITH_THDMII),yes yes)
+TEST_SH += \
+		$(DIR)/test_THDMII_GM2Calc.sh
 endif
 
 ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
@@ -398,7 +405,7 @@ TEST_META += \
 		$(DIR)/test_munuSSM_TreeMasses.m
 
 TEST_SRC += \
-		$(DIR)/test_munuSSM_gmm2.cpp
+		$(DIR)/test_munuSSM_amm.cpp
 endif
 
 ifeq ($(WITH_munuSSM) $(WITH_munuSSMSemiAnalytic), yes yes)
@@ -535,7 +542,7 @@ TEST_META += \
 		$(DIR)/test_SM_vvvv.m
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
-		$(DIR)/test_SM_gmm2.cpp \
+		$(DIR)/test_SM_amm.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
 		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
@@ -612,7 +619,8 @@ endif
 
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMCPV_ewsb.cpp
+		$(DIR)/test_CMSSMCPV_ewsb.cpp \
+		$(DIR)/test_CMSSMCPV_edm.cpp
 endif
 ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -826,6 +834,8 @@ endif
 endif
 
 $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
+
+$(DIR)/test_amm_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/amm_loop_functions\""
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
@@ -1064,7 +1074,7 @@ $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
 
-$(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
+$(DIR)/test_MRSSM2_amm.x: $(LIBMRSSM2)
 
 $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
 
@@ -1122,6 +1132,8 @@ $(DIR)/test_CMSSMLowPrecision.x: $(LIBCMSSMLowPrecision)
 
 $(DIR)/test_CMSSMCPV_ewsb.x: $(LIBCMSSMCPV)
 
+$(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
+
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
 $(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.x: $(LIBMSSMEFTHiggs)
@@ -1175,7 +1187,7 @@ $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 
 $(DIR)/test_SM_beta_functions.x: $(LIBSM)
 
-$(DIR)/test_SM_gmm2.x: $(LIBSM)
+$(DIR)/test_SM_amm.x: $(LIBSM)
 
 $(DIR)/test_SM_higgs_loop_corrections.x: $(LIBSM)
 
@@ -1233,6 +1245,8 @@ $(DIR)/test_CNMSSM_consistent_solutions.x: $(LIBCNMSSM) $(LIBNMSSM)
 
 $(DIR)/test_CE6SSM_ewsb.x: $(LIBCE6SSM)
 
+$(DIR)/test_CE6SSM_amm.x: $(LIBCE6SSM)
+
 $(DIR)/test_CE6SSM_semi_analytic_solutions.x: $(LIBCE6SSM)
 
 $(DIR)/test_CE6SSM_consistent_solutions.x: $(LIBCE6SSM) $(LIBE6SSM)
@@ -1245,7 +1259,7 @@ $(DIR)/test_lowNUHMSSMSemiAnalytic_semi_analytic_solutions.x: $(LIBlowNUHMSSMSem
 
 $(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.x: $(LIBlowNUHMSSMSemiAnalytic) $(LIBlowNUHMSSM)
 
-$(DIR)/test_munuSSM_gmm2.x: $(LIBmunuSSM)
+$(DIR)/test_munuSSM_amm.x: $(LIBmunuSSM)
 
 $(DIR)/test_munuSSMSemiAnalytic_ewsb.x: $(LIBmunuSSMSemiAnalytic)
 
@@ -1298,7 +1312,7 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
+		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)

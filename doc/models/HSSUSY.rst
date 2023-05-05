@@ -93,7 +93,7 @@ threshold corrections in FlexibleSUSY.
 EWSB scale
 ``````````
 
-The Higgs and W boson pole masses, :math:`M_h` and :math:`M_Z` are
+The Higgs and W boson pole masses, :math:`M_h` and :math:`M_W` are
 calculated at the scale :math:`M_{\text{EWSB}}`, which is an input
 parameter.  We recommend to set :math:`M_{\text{EWSB}} = M_t`.
 

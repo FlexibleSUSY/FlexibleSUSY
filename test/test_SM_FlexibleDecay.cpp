@@ -58,14 +58,14 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
                               0.0023811031255194888, 2e-15);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
-                              0.00011734084746332317, 2e-16);
+                              0.00011737301687946969, 2e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00026184531343741851, 1e-15);
    // h -> W+ W-
    // BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
    //                            0.00088266545237025511, 1e-14);, 1e-14);
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VWpconjVWp(&m),
                               0.00096256841980060836, 1e-3);
    // h -> Z Z
    // BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
