@@ -59,7 +59,8 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 3-loop corrections O(alpha_t^2 alpha_s)",
    "Higgs 3-loop corrections O(alpha_t^3)",
    "Higgs 4-loop corrections O(alpha_t alpha_s^3)",
-   "loop library type (0 = Softsusy)"
+   "loop library type (0 = Softsusy)",
+   "calculate amm (0 = no, 1 = 1L, 1.5 = 1L+2L(QED), 2 = 1L+2L(QED) + 2L(Barr-Zee))"
 };
 
 bool is_integer(double value)
@@ -104,6 +105,15 @@ void assert_le(double value, double upper_bound, const char* quantity)
    if (value > upper_bound) {
       throw SetupError(std::string(quantity) +
                        " must be lower than or equal to " +
+                       flexiblesusy::to_string(upper_bound));
+   }
+}
+
+void assert_lt(double value, double upper_bound, const char* quantity)
+{
+   if (value >= upper_bound) {
+      throw SetupError(std::string(quantity) +
+                       " must be lower than " +
                        flexiblesusy::to_string(upper_bound));
    }
 }
@@ -251,6 +261,10 @@ void Spectrum_generator_settings::set(Settings o, double value)
       assert_ge(value, -1, descriptions.at(o).c_str());
       assert_le(value, 3,  descriptions.at(o).c_str());
       break;
+   case calculate_amm: // 32 [double >= 0 and < 3]
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      assert_lt(value, 3,  descriptions.at(o).c_str());
+      break;
    default:
       break;
    }
@@ -300,6 +314,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
  * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)  |
+ * | calculate_amm                    | 0(no),1(1L),1.5(1L+2LQED),2(1L+2LQED+Barr-Zee)  | 2 (= 1L+2LQED+Barr-Zee)|
  */
 void Spectrum_generator_settings::reset()
 {
@@ -336,6 +351,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
    values[loop_library]                     = -1.; // -1 = (set via environment FLEXIBLESUSY_LOOP_LIBRARY)
+   values[calculate_amm]                    = 2.0;
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const
