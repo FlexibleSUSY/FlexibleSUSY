@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_munuSSM_gmm2
+#define BOOST_TEST_MODULE test_munuSSM_amm
 
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
@@ -132,12 +132,27 @@ Block YVIN
 
    using munuSSM_cxx_diagrams::fields::Cha;
 
-   const double ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 0);
+   // 1L + 2L QED
+   settings.set(Spectrum_generator_settings::calculate_amm, 1.5);
+
+   double ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 0);
    BOOST_CHECK_CLOSE_FRACTION(ae, 1.9396185303343256e-14, 1e-6);
 
-   const double amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 1);
+   double amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 3.4828450683984162e-09, 1e-6);
 
-   const double atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, 1.7900444477375544e-05, 1e-6);
+   double atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 4.267632639874129e-09, 1e-6);
+
+   // 1L + 2L QED + Barr-Zee
+   settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
+
+   ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 0);
+   BOOST_CHECK_CLOSE_FRACTION(ae, 2.5218691792737217e-11, 1e-6);
+
+   amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 1);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 7.9670657692902487e-09, 1e-6);
+
+   atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, settings, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 2.0286513240989139e-05, 1e-6);
 }

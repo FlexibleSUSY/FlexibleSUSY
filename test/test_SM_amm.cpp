@@ -17,12 +17,13 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_SM_gmm2
+#define BOOST_TEST_MODULE test_SM_amm
 
 #include <boost/test/unit_test.hpp>
 
 #include "test_SM.hpp"
 
+#include "spectrum_generator_settings.hpp"
 #include "lowe.h"
 
 #include "SM_two_scale_model.hpp"
@@ -42,11 +43,13 @@ BOOST_AUTO_TEST_CASE( test_zero )
 
    softsusy::QedQcd qedqcd;
 
+   Spectrum_generator_settings settings;
+
    using SM_cxx_diagrams::fields::Fe;
 
-   const double ae = SM_amm::calculate_amm<Fe>(sm, qedqcd, 0);
-   const double amu = SM_amm::calculate_amm<Fe>(sm, qedqcd, 1);
-   const double atau = SM_amm::calculate_amm<Fe>(sm, qedqcd, 2);
+   const double ae = SM_amm::calculate_amm<Fe>(sm, qedqcd, settings, 0);
+   const double amu = SM_amm::calculate_amm<Fe>(sm, qedqcd, settings, 1);
+   const double atau = SM_amm::calculate_amm<Fe>(sm, qedqcd, settings, 2);
 
    BOOST_CHECK_SMALL(ae, 1e-15);
    BOOST_CHECK_SMALL(amu, 1e-15);
