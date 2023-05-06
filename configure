@@ -1800,12 +1800,6 @@ check_cxxflags() {
             CXXFLAGS="${CXXFLAGS} -U__STRICT_ANSI__"
 	} ;;
     esac
-
-    # transitional solution before we officially move to C++17
-    # if compiler supports it, use C++17
-    if contains "${CXXFLAGS}" "-std=c++14" &&  check_cxx17_support ; then
-        CXXFLAGS=$(echo "${CXXFLAGS}" | tr c++14 c++17)
-    fi
 }
 
 #_____________________________________________________________________
@@ -2174,27 +2168,10 @@ check_higgstools_incl() {
             return 1
         fi
     else
-        if check_cxx17_support ; then
-            HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
-            return 0
-        else
-             message "Error: HiggsTools interface requires a C++17 compiler."
-             message "   Use gcc >= 7.0.0 or clang >= 4.0.0"
-             exit 1
-        fi
+        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
+        return 0
     fi
     return 0
-}
-
-check_cxx17_support() {
-    local var
-    # https://en.cppreference.com/w/cpp/compiler_support/17
-    case "${cxx_compiler_type}" in
-       clang)   var="$(version_at_least "${cxx_compiler_version}" "4.0.0")" ;;
-       gcc|gnu) var="$(version_at_least "${cxx_compiler_version}" "7.0.0")" ;;
-       *)       var=1 ;;
-    esac
-    return ${var}
 }
 
 check_higgstools_libs() {
@@ -2210,21 +2187,15 @@ check_higgstools_libs() {
             return 1
         fi
     else
-        if check_cxx17_support ; then
-            local HIGGSTOOLSLIBS_="-lHiggsTools"
-            if [ -z "$higgstools_lib_dir" ]; then
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
-            else
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
-            fi
-            return 0
+        local HIGGSTOOLSLIBS_="-lHiggsTools"
+        if [ -z "$higgstools_lib_dir" ]; then
+            # assume that the linker will look in the default paths
+            HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
         else
-            message "Error: HiggsTools interface requires a C++17 compiler."
-            message "   Use gcc >= 7.0.0 or clang >= 4.0.0"
-            exit 1
+            # assume that the linker will look in the default paths
+            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
         fi
+        return 0
     fi
     return 0
 }
