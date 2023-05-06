@@ -4,6 +4,9 @@ FlexibleSUSY 2.X.X [X, X X]
 New features
 ------------
 
+* Moved to C++17. This increased the minimal supported version of compilers to
+  g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
+
 * Allow user to calculate the anomalous magnetic moment of the muon
   :math:`$a_\mu$` in 2HDM-like models with `GM2Calc 2`_
   [`2110.13238 <https://arxiv.org/abs/2110.13238>`_].  See the
