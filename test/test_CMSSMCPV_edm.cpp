@@ -24,6 +24,7 @@
 #include "CMSSMCPV_two_scale_spectrum_generator.hpp"
 #include "CMSSMCPV_slha_io.hpp"
 #include "CMSSMCPV_edm.hpp"
+#include "cxx_qft/CMSSMCPV_qft.hpp"
 
 using namespace flexiblesusy;
 

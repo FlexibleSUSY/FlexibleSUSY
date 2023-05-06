@@ -37,9 +37,7 @@ namespace detail
    template<typename T, typename F, int... Is>
    void for_each(T&& t, F f, seq<Is...>)
    {
-      // @todo: uncomment after the transition to c++17
-      // [[maybe_unused]]
-      auto l = { (f(std::get<Is>(t)), 0)... };
+      [[maybe_unused]] auto l = { (f(std::get<Is>(t)), 0)... };
    }
 } // namespace detail
 
