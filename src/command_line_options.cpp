@@ -134,8 +134,8 @@ void Command_line_options::reset()
  *
  * @return true if the string str starts with prefix, false otherwise
  */
-bool Command_line_options::starts_with(const std::string& str,
-                                       const std::string& prefix)
+bool Command_line_options::starts_with(std::string_view str,
+                                       std::string_view prefix)
 {
    return !str.compare(0, prefix.size(), prefix);
 }
@@ -151,7 +151,7 @@ bool Command_line_options::starts_with(const std::string& str,
  * @return true, if str starts with prefix, false otherwise
  */
 bool Command_line_options::get_parameter_value(const std::string& str,
-                                               const std::string& prefix,
+                                               std::string_view prefix,
                                                double& parameter)
 {
    if (starts_with(str, prefix)) {
@@ -172,7 +172,7 @@ bool Command_line_options::get_parameter_value(const std::string& str,
  * @return true, if str starts with prefix, false otherwise
  */
 bool Command_line_options::get_parameter_value(const std::string& str,
-                                               const std::string& prefix,
+                                               std::string_view prefix,
                                                int& parameter)
 {
    if (starts_with(str, prefix)) {
