@@ -15,6 +15,7 @@ Block FlexibleSUSY
    11   0                    # Higgs 2-loop corrections O(alpha_tau^2)
    15   0                    # calculate observables (a_muon, ...)
    31   0                    # loop library (0 = softsusy)
+   32   2                    # loop level to calculate AMM
 Block SMINPUTS               # Standard Model inputs
     1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
     2   1.166378700e-05      # G_Fermi

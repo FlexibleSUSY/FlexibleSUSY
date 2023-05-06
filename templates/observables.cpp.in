@@ -112,6 +112,7 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
 @ModelName@_observables calculate_observables(const @ModelName@_mass_eigenstates& model,
                                               const softsusy::QedQcd& qedqcd,
                                               const Physical_input& physical_input,
+                                              const Spectrum_generator_settings& settings,
                                               double scale)
 {
    auto model_at_scale = model;
@@ -134,12 +135,13 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
       }
    }
 
-   return calculate_observables(model_at_scale, qedqcd, physical_input);
+   return calculate_observables(model_at_scale, qedqcd, physical_input, settings);
 }
 
 @ModelName@_observables calculate_observables(const @ModelName@_mass_eigenstates& model,
                                               const softsusy::QedQcd& qedqcd,
-                                              const Physical_input& physical_input)
+                                              const Physical_input& physical_input,
+                                              const Spectrum_generator_settings& settings)
 {
    @ModelName@_observables observables;
 

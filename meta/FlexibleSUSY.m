@@ -2069,7 +2069,13 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                           FileNameJoin[{workingDirectory, "sarah"}],
                           ToFileName[{$sarahDir, "Models"}]
                        };
+                       (* SARAH looks for models in dirs in SARAH`SARAH[InputDirectories] list.
+                          If the model doesn't exist in any particular location mathematica prints a
+                          FileByteCount::fdnfnd warning. This is harmless because at this point in
+                          the code we know that the model does exist at least somewhere. *)
+                       Off[FileByteCount::fdnfnd];
                        Start@modelName;
+                       On[FileByteCount::fdnfnd];
                     ];,
                     DistributedContexts -> None
                  ];
@@ -2547,11 +2553,13 @@ WriteAMMClass[fields_List, files_List] :=
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,
             barZee = barZee <>
-               "valBarZee += std::complex<double> " <> ToString @ N[
-                  ReIm @ CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
-               CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
-                  graphs[[i]]
-                ], 16] <> " * " <>
+               "val += " <> ToString @ N[
+                  With[{colFac = CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
+                                    CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
+                                    graphs[[i]]
+                                 ]},
+                     If[Im[colFac] == 0, colFac, Print["Error: Colour prefactor of a Barr-Zee diagram should be real!"]; Quit[1]]
+                  ], 16] <> " * " <>
                 ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
                 "::value({" <> leptonIndex <> "}, context, qedqcd);\n"
          ];
@@ -2584,22 +2592,22 @@ TextFormatting`IndentText[
 
       BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
 
-      ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
-      ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammWrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
-   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd, settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
       ammUncWrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
-   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+   return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd, settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
 
       WriteOut`ReplaceInFiles[files,
         {"@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
-         "@AMMCalculation@"       -> TextFormatting`IndentText[calculation],
+         "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 2],
          "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
@@ -2608,7 +2616,7 @@ TextFormatting`IndentText[
          "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
-         "@AMMBarZeeCalculation@" -> TextFormatting`IndentText[barZee],
+         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 2],
          "@ammWrapperDecl@" -> ammWrapperDecl,
          "@ammWrapperDef@" -> ammWrapperDef,
          "@ammUncWrapperDecl@" -> ammUncWrapperDecl,

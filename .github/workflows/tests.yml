@@ -76,7 +76,6 @@ jobs:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |
           ./configure \
-            --with-cxxflags="-std=c++14 -fPIC" \
             --with-cxx=$CXXCOMPILER \
             --with-optional-modules=test \
             --with-loop-libraries=collier,looptools \
@@ -214,8 +213,7 @@ jobs:
             --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
-            --enable-librarylink \
-            --with-cxxflags="-std=c++17 -O2 -fPIC -Wall -Wpedantic -pipe"
+            --enable-librarylink
           make showbuild
 
       - name: Make
