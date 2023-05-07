@@ -1,5 +1,4 @@
-FlexibleSUSY 2.8.0 []
-==================================
+FlexibleSUSY 2.8.0 [X, X X]
 
 New features
 ------------
@@ -10,13 +9,8 @@ New features
 
 * Added SM one-loop QCD corrections to :math:`$H^+ \to t \bar{b}$`
 
-* Possibility to compute in selected models 2-body top quark decays, including one-loop SM QCD corrections to :math:`$t \to b W^+$` and :math:`$t \to b W^+`
-
-FlexibleSUSY 2.X.X [X, X X]
-==================================
-
-New features
-------------
+* Possibility to compute in selected models 2-body top quark decays,
+  including one-loop SM QCD corrections to :math:`$t \to b W^+$` and :math:`$t \to b W^+`.
 
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
@@ -54,6 +48,8 @@ New features
   Thanks to Douglas Jacob.
 
 * Added 2-loop Barr-Zee contributions to leptons :math:`$(g-2)/2$`.
+
+  Thanks to Felix Reichenbach and Alexander Voigt.
 
 Fixed bugs
 ----------
