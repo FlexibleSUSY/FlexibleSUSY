@@ -75,13 +75,10 @@ double calc_mw_SM(double mh)
 
 BOOST_AUTO_TEST_CASE( test_decoupling )
 {
-   double mw1, mw2, mw5, mw10;
-   double mh1, mh2, mh5, mh10;
-
-   std::tie(mw1, mh1) = calc_mw_mh_MRSSM2(1000);
-   std::tie(mw2, mh2) = calc_mw_mh_MRSSM2(2000);
-   std::tie(mw5, mh5) = calc_mw_mh_MRSSM2(5000);
-   std::tie(mw10, mh10) = calc_mw_mh_MRSSM2(10000);
+   const auto [mw1, mh1] = calc_mw_mh_MRSSM2(1000);
+   const auto [mw2, mh2] = calc_mw_mh_MRSSM2(2000);
+   const auto [mw5, mh5] = calc_mw_mh_MRSSM2(5000);
+   const auto [mw10, mh10] = calc_mw_mh_MRSSM2(10000);
 
    BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 5.0e-4);
 
