@@ -1988,6 +1988,8 @@ GetHiggsBosonDecays[particleDecays_List] :=
     If[TreeMasses`GetHiggsBoson[] =!= Null, Select[particleDecays, (First[#] === TreeMasses`GetHiggsBoson[])&], {}];
 GetPseudoscalarHiggsBosonDecays[particleDecays_List] :=
     If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null, Select[particleDecays, (First[#] === TreeMasses`GetPseudoscalarHiggsBoson[])&], {}];
+GetUpQuarkDecays[particleDecays_List] :=
+    Select[particleDecays, (First[#] === First@TreeMasses`GetSMUpQuarks[])&];
 
 SelectDecayByFinalState[finalState_List, decays_List] :=
     Select[decays, (Sort[GetFinalState[#]] === Sort[finalState])&];
@@ -2007,6 +2009,22 @@ SelectChargedLeptonChargedLeptonFinalState[decays_List] :=
        If[chargedLeptonSymbol =!= Null,
           result = SelectDecayByFinalState[{chargedLeptonSymbol, SARAH`AntiField[chargedLeptonSymbol]}, decays];
        ];
+       result
+    ];
+
+SelectChargedHiggsDownQuarkFinalState[decays_List] :=
+    Module[{downQuarkSymbol, chargedHiggsSymbol, result = {}},
+       downQuarkSymbol = First@TreeMasses`GetSMDownQuarks[];
+       chargedHiggsSymbol = If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] > 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]];
+       result = SelectDecayByFinalState[{downQuarkSymbol, chargedHiggsSymbol}, decays];
+       result
+    ];
+
+SelectWBosonDownQuarkFinalState[decays_List] :=
+    Module[{downQuarkSymbol, wBosonSymbol, result = {}},
+       downQuarkSymbol = First@TreeMasses`GetSMDownQuarks[];
+       wBosonSymbol = If[GetElectricCharge[TreeMasses`GetWBoson[]] > 0, TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]];
+       result = SelectDecayByFinalState[{downQuarkSymbol, wBosonSymbol}, decays];
        result
     ];
 
@@ -2381,6 +2399,26 @@ CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, d
        {declaration, function}
     ];
 
+CreateUpQuarkToChargedHiggsDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+       decay = SelectChargedHiggsDownQuarkFinalState[decaysList];
+       If[decay =!= {},
+          decay = First[decay];
+          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+       ];
+       {declaration, function}
+    ];
+
+CreateUpQuarkToWBosonDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+       decay = SelectWBosonDownQuarkFinalState[decaysList];
+       If[decay =!= {},
+          decay = First[decay];
+          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+       ];
+       {declaration, function}
+    ];
+
 CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{higgsDecays, specializations = {}},
            higgsDecays = GetHiggsBosonDecays[particleDecays];
@@ -2416,10 +2454,24 @@ CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelNa
            specializations
           ];
 
+
+CreateUpQuarkDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
+    Module[{upQuarkDecays, specializations = {}},
+           upQuarkDecays = GetUpQuarkDecays[particleDecays];
+           If[upQuarkDecays =!= {},
+              upQuarkDecays = First@upQuarkDecays;
+              specializations = {CreateUpQuarkToChargedHiggsDownQuarkPartialWidth[upQuarkDecays, modelName],
+                                 CreateUpQuarkToWBosonDownQuarkPartialWidth[upQuarkDecays, modelName]
+                                 }
+           ];
+           specializations
+          ];
+
 CreatePartialWidthSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations},
            specializations = CreateHiggsDecayPartialWidthSpecializations[particleDecays, modelName];
            specializations = Join[specializations, CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays, modelName]];
+           specializations = Join[specializations, CreateUpQuarkDecayPartialWidthSpecializations[particleDecays, modelName]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            If[specializations =!= {}, specializations = Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]];
            specializations
