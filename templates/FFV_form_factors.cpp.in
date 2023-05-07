@@ -22,14 +22,15 @@
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#include <complex>
-#include <valarray>
-
+#include "@ModelName@_FFV_form_factors.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "concatenate.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "ffv_loop_functions.hpp"
 #include "wrappers.hpp"
+
+#include <complex>
+#include <valarray>
 
 using namespace flexiblesusy;
 using namespace flexiblesusy::ffv_loop_functions::one_loop;
@@ -137,7 +138,7 @@ struct FFV_FFV {
 };
 
 /**
- * @class FFV_VGF
+ * @class FFV_VSF
  * @brief A template that calculates contributions to the FFV form
  *        factors of a given particle in a one loop diagram
  *        specified by a vector emitter and an exchange particle.
@@ -162,7 +163,7 @@ struct FFV_VSF {
 };
 
 /**
- * @class FFV_GVF
+ * @class FFV_SVF
  * @brief A template that calculates contributions to the FFV form
  *        factors of a given particle in a one loop diagram
  *        specified by a vector emitter and an exchange particle.
@@ -191,16 +192,11 @@ struct FFV_SVF {
 namespace flexiblesusy {
 namespace @ModelName@_FFV_form_factors {
 
-/*
-template <typename F1, template typename F2, template V>
-std::valarray<std::complex<double>>
-calculate_form_factors(int, int, const @ModelName@_mass_eigenstates&, bool);
-*/
-
 @FFVFormFactors_InterfaceDefinitions@
 
 @TemplateWrapper_InterfaceDefinitions@
-}
+
+} // namespace @ModelName@_FFV_form_factors
 } // namespace flexiblesusy
 
 namespace {
@@ -217,7 +213,7 @@ namespace {
 */
 
 
-// emit massless vector boson from the internal scalar line
+/// emit massless vector boson from the internal scalar line
 template <class Fj, class Fi, class V, class SA, class SB, class F>
 std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
    const typename field_indices<Fj>::type& indices_in,
@@ -225,7 +221,6 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
    context_base const& context,
    bool discard_SM_contributions)
 {
-
    static_assert(
       std::is_same<SA, SB>::type::value,
       "Internal scalars in the FFV_SSF instantiation must be of the same type."
@@ -239,31 +234,39 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
    const auto mj = context.mass<Fj>(indices_in);
    const auto mi = context.mass<Fi>(indices_out);
 
+   std::valarray<std::complex<double>> res{0.0, 0.0, 0.0, 0.0};
+
    // loop over all possible particle generations attached to both vertices
-   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjSBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFS>()) {
 
          // cycle if generations of external fermions  are different then requested
          const auto jFieldIndices = VertexFBarFjSBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFS::template indices_of_field<0>(indexOut);
-         if (jFieldIndices != indices_in || iFieldIndices != indices_out)
+
+         if (jFieldIndices != indices_in || iFieldIndices != indices_out) {
             continue;
+         }
 
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjSBar::template indices_of_field<0>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFS::template indices_of_field<2>(indexOut);
-         if (fermionFieldIndicesIn != fermionFieldIndicesOut)
+
+         if (fermionFieldIndicesIn != fermionFieldIndicesOut) {
             continue;
+         }
 
          // match indices of the scalar in the loop
          const auto scalarFieldIndicesIn = VertexFBarFjSBar::template indices_of_field<1>(indexIn);
          const auto scalarIndicesOut = VertexFiBarFS::template indices_of_field<1>(indexOut);
-         if (scalarFieldIndicesIn != scalarIndicesOut)
+
+         if (scalarFieldIndicesIn != scalarIndicesOut) {
             continue;
+         }
 
          if (discard_SM_contributions) {
-            if (cxx_diagrams::isSMField<SA>(scalarFieldIndicesIn) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<SA>(scalarFieldIndicesIn) &&
+                cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -281,8 +284,8 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
          const auto LoopFunctionB = FB(x);
          const auto LoopFunctionC = FC(x);
 
-         // TODO: check the sign convention of this coupling
-         std::complex<double> vector_boson_coupling {-vertexEmit.value(1,0)};
+         // @todo: check the sign convention of this coupling
+         const std::complex<double> vector_boson_coupling{-vertexEmit.value(1,0)};
 
          // eq. 15 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A1L =
@@ -292,7 +295,6 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
             - vertexOut.left() * vertexIn.right() * LoopFunctionB/12.
             - vertexOut.left()* vertexIn.left() * mF/mj * LoopFunctionC/3.
             - mi/mj * vertexOut.right() * vertexIn.left() * LoopFunctionB/12.;
-
          // eq. 15 & 16 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
          const std::complex<double> A1R =
             - 1./18. * vertexOut.left() * vertexIn.right() * LoopFunctionA;
@@ -305,14 +307,14 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor
             * std::valarray<std::complex<double>> {A1L, A1R, A2L, A2R};
-
       }
    }
 
    return res;
 }
 
-// emit massless vector boson from the internal fermion line
+
+/// emit massless vector boson from the internal fermion line
 template <class Fj, class Fi, class V, class FA, class FB, class S>
 std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
    const typename field_indices<Fj>::type& indices_in,
@@ -320,7 +322,6 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
    context_base const& context,
    bool discard_SM_contributions)
 {
-
    static_assert(
       std::is_same<FA, FB>::type::value,
       "Internal fermions in the FFV_FFS instantiation must be of the same type."
@@ -334,29 +335,37 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
    const auto mj = context.mass<Fj>(indices_in);
    const auto mi = context.mass<Fi>(indices_out);
 
+   std::valarray<std::complex<double>> res{0.0, 0.0, 0.0, 0.0};
+
    // loop over all possible particle generations attached to both vertices
-   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjSBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFS>()) {
 
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjSBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFS::template indices_of_field<0>(indexOut);
-         if (jFieldIndices != indices_in || iFieldIndices != indices_out)
+
+         if (jFieldIndices != indices_in || iFieldIndices != indices_out) {
             continue;
+         }
 
          const auto fermionFieldIndicesIn = VertexFBarFjSBar::template indices_of_field<1>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFS::template indices_of_field<1>(indexOut);
-         if (fermionFieldIndicesIn != fermionFieldIndicesOut )
+
+         if (fermionFieldIndicesIn != fermionFieldIndicesOut) {
             continue;
+         }
 
          const auto scalarFieldIndicesIn = VertexFBarFjSBar::template indices_of_field<0>(indexIn);
          const auto scalarIndicesOut = VertexFiBarFS::template indices_of_field<2>(indexOut);
-         if (scalarFieldIndicesIn != scalarIndicesOut)
+
+         if (scalarFieldIndicesIn != scalarIndicesOut) {
             continue;
+         }
 
          if (discard_SM_contributions) {
-            if (cxx_diagrams::isSMField<S>(scalarFieldIndicesIn) && cxx_diagrams::isSMField<FA>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<S>(scalarFieldIndicesIn) &&
+                cxx_diagrams::isSMField<FA>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -374,7 +383,7 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
          const auto LoopFunctionE = FE(x);
          const auto LoopFunctionF = FF(x);
 
-         std::complex<double> vector_boson_coupling {vertexEmit.left()};
+         const std::complex<double> vector_boson_coupling{vertexEmit.left()};
 
          // eq. 18 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A1L =
@@ -384,7 +393,6 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
             - vertexOut.left() * vertexIn.right() * LoopFunctionE/12.0
             - vertexOut.left()* vertexIn.left() * mF/mj * LoopFunctionF * 2./3.
             - mi/mj * vertexOut.right() * vertexIn.left() * LoopFunctionE/12.0;
-
          // eq. 18 & 18 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
          const std::complex<double> A1R =
             - 1./18. * vertexOut.left() * vertexIn.right() * LoopFunctionD;
@@ -397,14 +405,14 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor
             * std::valarray<std::complex<double>> {A1L, A1R, A2L, A2R};
-
       }
    }
 
    return res;
 }
 
-// emit massless vector boson from the internal vector line in a fermion-vector loop
+
+/// emit massless vector boson from the internal vector line in a fermion-vector loop
 template <class Fj, class Fi, class P, class VA, class VB, class F>
 std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
    const typename field_indices<Fj>::type& indices_in,
@@ -412,7 +420,6 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
    context_base const& context,
    bool discard_SM_contributions)
 {
-
    static_assert(
        std::is_same<VA, VB>::type::value,
        "Internal vectors in the FFV_VVF instantiation must be of the same type."
@@ -427,32 +434,40 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
    const auto mj = context.mass<Fj>(indices_in);
    const auto mi = context.mass<Fi>(indices_out);
 
+   std::valarray<std::complex<double>> res{0.0, 0.0, 0.0, 0.0};
+
    // loop over all possible particle generations attached to both vertices
-   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjVBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFV>()) {
 
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjVBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFV::template indices_of_field<0>(indexOut);
-         if (jFieldIndices != indices_in || iFieldIndices != indices_out)
+
+         if (jFieldIndices != indices_in || iFieldIndices != indices_out) {
             continue;
+         }
 
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<0>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFV::template indices_of_field<2>(indexOut);
-         if (fermionFieldIndicesIn != fermionFieldIndicesOut)
+
+         if (fermionFieldIndicesIn != fermionFieldIndicesOut) {
             continue;
+         }
 
          // match indices of the vector in the loop
          const auto vectorFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<1>(indexIn);
          const auto vectorFieldIndicesOut = VertexFiBarFV::template indices_of_field<1>(indexOut);
-         if (vectorFieldIndicesIn != vectorFieldIndicesOut)
+
+         if (vectorFieldIndicesIn != vectorFieldIndicesOut) {
             continue;
+         }
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (cxx_diagrams::isSMField<VA>(vectorFieldIndicesIn) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<VA>(vectorFieldIndicesIn) &&
+                cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -472,7 +487,7 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
 
          // triple gauge boson vertex
          // need to check that the sign and function call are correct
-         std::complex<double> vector_boson_coupling {-vertexEmit.value( cxx_diagrams::TripleVectorVertex::even_permutation{} )};
+         const std::complex<double> vector_boson_coupling {-vertexEmit.value(cxx_diagrams::TripleVectorVertex::even_permutation{})};
 
          const std::complex<double> A1L =
             vertexIn.left() * vertexOut.left() * LoopFunctionH / 18.;
@@ -480,7 +495,6 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
             3. * mF/mj * vertexIn.left() * vertexOut.right() * LoopFunctionK
             + mi/mj * vertexIn.left() * vertexOut.left() * LoopFunctionJ / 6.
             + vertexIn.right() * vertexOut.right() * LoopFunctionJ / 6.;
-
          const std::complex<double> A1R =
             vertexIn.right() * vertexOut.right() * LoopFunctionH / 18.;
          const std::complex<double> A2R =
@@ -491,15 +505,14 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
          const std::complex<double> massFactor = Power2(1.0/mV);
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
-
       }
    }
 
    return res;
-
 }
 
-// emit massless vector boson from the internal vector line in a fermion-vector loop
+
+/// emit massless vector boson from the internal vector line in a fermion-vector loop
 template <class Fj, class Fi, class P, class FA, class FB, class V>
 std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
    const typename field_indices<Fj>::type& indices_in,
@@ -507,7 +520,6 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
    context_base const& context,
    bool discard_SM_contributions)
 {
-
    static_assert(
       std::is_same<FA, FB>::type::value,
       "Internal fermions in the FFV_FFV instantiation must be of the same type."
@@ -522,32 +534,40 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
    const auto mj = context.mass<Fj>(indices_in);
    const auto mi = context.mass<Fi>(indices_out);
 
+   std::valarray<std::complex<double>> res{0.0, 0.0, 0.0, 0.0};
+
    // loop over all possible particle generations attached to both vertices
-   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjVBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFV>()) {
 
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjVBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFV::template indices_of_field<0>(indexOut);
-         if (jFieldIndices != indices_in || iFieldIndices != indices_out)
+
+         if (jFieldIndices != indices_in || iFieldIndices != indices_out) {
             continue;
+         }
 
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<1>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFV::template indices_of_field<1>(indexOut);
-         if (fermionFieldIndicesIn != fermionFieldIndicesOut)
+
+         if (fermionFieldIndicesIn != fermionFieldIndicesOut) {
             continue;
+         }
 
          // match indices of the vector in the loop
          const auto vectorFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<0>(indexIn);
          const auto vectorFieldIndicesOut = VertexFiBarFV::template indices_of_field<2>(indexOut);
-         if (vectorFieldIndicesIn != vectorFieldIndicesOut)
+
+         if (vectorFieldIndicesIn != vectorFieldIndicesOut) {
             continue;
+         }
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (cxx_diagrams::isSMField<FA>(fermionFieldIndicesIn) && cxx_diagrams::isSMField<V>(vectorFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<FA>(fermionFieldIndicesIn) &&
+                cxx_diagrams::isSMField<V>(vectorFieldIndicesIn)) {
                continue;
             }
          }
@@ -565,21 +585,21 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
          const auto LoopFunctionL = FL(x);
          const auto LoopFunctionM = FM(x);
 
-	     std::complex<double> vector_boson_coupling {vertexEmit.left()};
+         const std::complex<double> vector_boson_coupling{vertexEmit.left()};
 
          const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * LoopFunctionL / 9.;
          const std::complex<double> A2L =
             - 4. * mF/mj * vertexIn.left() * vertexOut.right() * LoopFunctionC / 3.
             + mi/mj * vertexIn.left() * vertexOut.left() * LoopFunctionM / 3.
             + vertexIn.right() * vertexOut.right() * LoopFunctionM / 3.;
-
          const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * LoopFunctionL / 9.;
          const std::complex<double> A2R =
             - 4. * mF/mj * vertexIn.right() * vertexOut.left() * LoopFunctionC / 3.
             + mi/mj * vertexIn.right() * vertexOut.right() * LoopFunctionM / 3.
             + vertexIn.left() * vertexOut.left() * LoopFunctionM / 3.;
 
-	     std::complex<double> massFactor = 0.0;
+         std::complex<double> massFactor = 0.0;
+
          if (std::isinf(x)) {
             massFactor = Power2(1.0/mF);
          } else {
@@ -587,15 +607,14 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
          }
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
-
       }
    }
 
    return res;
-
 }
 
-// emit massless vector boson from the internal vector line in a fermion-vector loop
+
+/// emit massless vector boson from the internal vector line in a fermion-vector loop
 template <class Fj, class Fi, class P, class VA, class GB, class F>
 std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
    const typename field_indices<Fj>::type& indices_in,
@@ -603,7 +622,6 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
    context_base const& context,
    bool discard_SM_contributions)
 {
-
    // do not assert that VA and GB are the same
    // static_assert(
    //     std::is_same<VA, GB>::type::value,
@@ -618,32 +636,41 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
    // mass of incoming fermion
    const auto mj = context.mass<Fj>(indices_in);
 
+   std::valarray<std::complex<double>> res{0.0, 0.0, 0.0, 0.0};
+
    // loop over all possible particle generations attached to both vertices
-   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjVBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFG>()) {
 
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjVBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFG::template indices_of_field<0>(indexOut);
-         if (jFieldIndices != indices_in || iFieldIndices != indices_out)
+
+         if (jFieldIndices != indices_in || iFieldIndices != indices_out) {
             continue;
+         }
 
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<0>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFG::template indices_of_field<2>(indexOut);
-         if (fermionFieldIndicesIn != fermionFieldIndicesOut)
+
+         if (fermionFieldIndicesIn != fermionFieldIndicesOut) {
             continue;
+         }
 
          // cannot match indices if scalar is not would-be-goldstone corresponding to vector
          const auto vectorFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<1>(indexIn);
          const auto goldstoneFieldIndicesOut = VertexFiBarFG::template indices_of_field<1>(indexOut);
-         // if (vectorFieldIndicesIn != goldstoneFieldIndicesOut)
-         //   continue;
+
+         // if (vectorFieldIndicesIn != goldstoneFieldIndicesOut) {
+         //    continue;
+         // }
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (cxx_diagrams::isSMField<VA>(vectorFieldIndicesIn) && cxx_diagrams::isSMField<GB>(goldstoneFieldIndicesOut) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<VA>(vectorFieldIndicesIn) &&
+                cxx_diagrams::isSMField<GB>(goldstoneFieldIndicesOut) &&
+                cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -663,11 +690,10 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
-         std::complex<double> vector_boson_coupling {-vertexEmit.value()};
+         const std::complex<double> vector_boson_coupling{-vertexEmit.value()};
 
          const std::complex<double> A1L = 0.;
          const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.left() * LoopFunctionN;
-
          const std::complex<double> A1R = 0.;
          const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.right() * LoopFunctionN;
 
@@ -678,10 +704,10 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
    }
 
    return res;
-
 }
 
-// emit massless vector boson from the internal vector line in a fermion-vector loop
+
+/// emit massless vector boson from the internal vector line in a fermion-vector loop
 template <class Fj, class Fi, class P, class GA, class VB, class F>
 std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
    const typename field_indices<Fj>::type& indices_in,
@@ -689,7 +715,6 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
    context_base const& context,
    bool discard_SM_contributions)
 {
-
    // do not assert that GA and VB are the same
    // static_assert(
    //     std::is_same<GA, VB>::type::value,
@@ -704,32 +729,41 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
    // mass of incoming fermion
    const auto mj = context.mass<Fj>(indices_in);
 
+   std::valarray<std::complex<double>> res{0.0, 0.0, 0.0, 0.0};
+
    // loop over all possible particle generations attached to both vertices
-   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjGBar>()) {
       for (const auto& indexOut: index_range<VertexFiBarFV>()) {
 
          // cycle if generations of external fermions are different then requested
          const auto jFieldIndices = VertexFBarFjGBar::template indices_of_field<2>(indexIn);
          const auto iFieldIndices = VertexFiBarFV::template indices_of_field<0>(indexOut);
-         if (jFieldIndices != indices_in || iFieldIndices != indices_out)
+
+         if (jFieldIndices != indices_in || iFieldIndices != indices_out) {
             continue;
+         }
 
          // match indices of the fermion in the loop
          const auto fermionFieldIndicesIn = VertexFBarFjGBar::template indices_of_field<0>(indexIn);
          const auto fermionFieldIndicesOut = VertexFiBarFV::template indices_of_field<2>(indexOut);
-         if (fermionFieldIndicesIn != fermionFieldIndicesOut)
+
+         if (fermionFieldIndicesIn != fermionFieldIndicesOut) {
             continue;
+         }
 
          // cannot match indices if scalar is not would-be-goldstone corresponding to vector
          const auto goldstoneFieldIndicesIn = VertexFBarFjGBar::template indices_of_field<1>(indexIn);
          const auto vectorFieldIndicesOut = VertexFiBarFV::template indices_of_field<1>(indexOut);
-         // if (goldstoneFieldIndicesIn != vectorFieldIndicesOut)
+
+         // if (goldstoneFieldIndicesIn != vectorFieldIndicesOut) {
          //    continue;
+         // }
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (cxx_diagrams::isSMField<GA>(goldstoneFieldIndicesIn) && cxx_diagrams::isSMField<VB>(vectorFieldIndicesOut) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<GA>(goldstoneFieldIndicesIn) &&
+                cxx_diagrams::isSMField<VB>(vectorFieldIndicesOut) &&
+                cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -749,11 +783,10 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
-         std::complex<double> vector_boson_coupling {-vertexEmit.value()};
+         const std::complex<double> vector_boson_coupling{-vertexEmit.value()};
 
          const std::complex<double> A1L = 0.;
          const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.right() * LoopFunctionN;
-
          const std::complex<double> A1R = 0.;
          const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.left() * LoopFunctionN;
 
@@ -764,8 +797,6 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
    }
 
    return res;
-
 }
-
 
 } // anonymous namespace
