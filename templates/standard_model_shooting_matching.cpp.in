@@ -810,9 +810,10 @@ void match_high_to_low_scale_sm_1l(
    const double gy_2 = Sqr(sm_0l.get_g1() * standard_model_info::normalization_g1);
    const double g2_2 = Sqr(sm_0l.get_g2() * standard_model_info::normalization_g2);
    const double g3_2 = Sqr(sm_0l.get_g3() * standard_model_info::normalization_g3);
+   const double e_2 = gy_2*g2_2/(gy_2 + g2_2);
    const double v = sm_0l.get_v();
 
-   const double alpha_em = oneOver4Pi*gy_2*g2_2/(gy_2 + g2_2);
+   const double alpha_em = oneOver4Pi*e_2;
    const double alpha_s = oneOver4Pi*g3_2;
    const double delta_alpha_em = calculate_delta_alpha_em(alpha_em, model);
    const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model);
@@ -825,18 +826,18 @@ void match_high_to_low_scale_sm_1l(
    const double delta_mZ2 = mZ2_1l - mZ2;
    const double delta_mW2 = mW2_1l - mW2;
 
-   const double sThetaW2 = 1 - Sqr(sm_0l.get_MVWp() / sm_0l.get_MVZ());
-   const double delta_sThetaW2 = delta_mZ2 * mW2 / (Sqr(mZ2)) - delta_mW2 / mZ2;
+   const double sin2_ThetaW = 1 - Sqr(sm_0l.get_MVWp() / sm_0l.get_MVZ());
+   const double delta_sin2_ThetaW = delta_mZ2 * mW2 / Sqr(mZ2) - delta_mW2 / mZ2;
 
    const double g1_1l =
-      AbsSqrt(4. * Pi * alpha_em * mZ2 / mW2) *
-      (1. + 0.5 * (-delta_alpha_em + delta_sThetaW2 * mZ2 / mW2)) /
+      AbsSqrt(e_2 * mZ2 / mW2) *
+      (1 + 0.5 * (-delta_alpha_em + delta_sin2_ThetaW * mZ2 / mW2)) /
       standard_model_info::normalization_g1;
    const double g2_1l =
-      AbsSqrt(4. * Pi * alpha_em / (sThetaW2)) *
-      (1. + 0.5 * (-delta_alpha_em - delta_sThetaW2 / sThetaW2)) /
+      AbsSqrt(e_2 / sin2_ThetaW) *
+      (1 + 0.5 * (-delta_alpha_em - delta_sin2_ThetaW / sin2_ThetaW)) /
       standard_model_info::normalization_g2;
-   const double g3_1l = AbsSqrt(4. * Pi * alpha_s) * (1. - 0.5 * delta_alpha_s) /
+   const double g3_1l = AbsSqrt(g3_2) * (1 - 0.5 * delta_alpha_s) /
                        standard_model_info::normalization_g3;
 
    const double delta_g2 = g2_1l * standard_model_info::normalization_g2 - g2;
