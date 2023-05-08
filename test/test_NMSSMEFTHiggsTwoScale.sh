@@ -128,7 +128,7 @@ BLOCK EXTPAR	 	 #
 65	200.	 	 #
 "
 
-input_NMSSMEFTHiggs="
+input_NMSSMEFTHiggsTwoScale="
 Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
@@ -230,12 +230,12 @@ error=0
 
 # run TP3
 MhlowNMSSM=$(run_sg "$MODELDIR/lowNMSSM/run_lowNMSSM.x" "$input_lowNMSSM")
-MhNMSSMEFTHiggs=$(run_sg "$MODELDIR/NMSSMEFTHiggs/run_NMSSMEFTHiggs.x" "$input_NMSSMEFTHiggs")
+MhNMSSMEFTHiggsTwoScale=$(run_sg "$MODELDIR/NMSSMEFTHiggsTwoScale/run_NMSSMEFTHiggsTwoScale.x" "$input_NMSSMEFTHiggsTwoScale")
 
 echo "Mh in the lowNMSSM  : $MhlowNMSSM"
-echo "Mh in the NMSSMEFTHiggs: $MhNMSSMEFTHiggs"
+echo "Mh in the NMSSMEFTHiggsTwoScale: $MhNMSSMEFTHiggsTwoScale"
 
-CHECK_EQUAL_FRACTION "$MhlowNMSSM" "$MhNMSSMEFTHiggs" "0.007" || error=$(expr $error + 1)
+CHECK_EQUAL_FRACTION "$MhlowNMSSM" "$MhNMSSMEFTHiggsTwoScale" "0.007" || error=$(expr $error + 1)
 
 if [ "x$error" != "x0" ] ; then
     echo "Test FAILED: There were $error errors."

@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
       Output expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_1, {1.08559604e+02}, 1e-4}, // obtained from NMSSMEFTHiggs in EFT parametrization
+      {slha_input_case_1, {1.08559604e+02}, 1e-4}, // obtained from NMSSMEFTHiggsTwoScale in EFT parametrization
       {slha_input_case_2, {1.20086001e+02}, 1e-6}, // obtained from MSSMEFTHiggs2loop in full-model parametrization
    };
 

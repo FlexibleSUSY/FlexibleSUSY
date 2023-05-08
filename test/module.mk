@@ -735,9 +735,9 @@ TEST_SH += \
 		$(DIR)/test_MSSMNoFVEFTHiggs.sh
 endif
 
-ifeq ($(WITH_NMSSMEFTHiggs) $(WITH_lowNMSSM),yes yes)
+ifeq ($(WITH_NMSSMEFTHiggsTwoScale) $(WITH_lowNMSSM),yes yes)
 TEST_SH += \
-		$(DIR)/test_NMSSMEFTHiggs.sh
+		$(DIR)/test_NMSSMEFTHiggsTwoScale.sh
 endif
 
 ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
