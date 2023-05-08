@@ -806,10 +806,11 @@ void match_high_to_low_scale_sm_1l(
 
    const double gy = sm_0l.get_g1() * standard_model_info::normalization_g1;
    const double g2 = sm_0l.get_g2() * standard_model_info::normalization_g2;
+   const double g3 = sm_0l.get_g3() * standard_model_info::normalization_g3;
 
-   const double gy_2 = Sqr(sm_0l.get_g1() * standard_model_info::normalization_g1);
-   const double g2_2 = Sqr(sm_0l.get_g2() * standard_model_info::normalization_g2);
-   const double g3_2 = Sqr(sm_0l.get_g3() * standard_model_info::normalization_g3);
+   const double gy_2 = Sqr(gy);
+   const double g2_2 = Sqr(g2);
+   const double g3_2 = Sqr(g3);
    const double e_2 = gy_2*g2_2/(gy_2 + g2_2);
    const double v = sm_0l.get_v();
 
