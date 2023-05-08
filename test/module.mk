@@ -162,9 +162,9 @@ ifneq ($(findstring shooting,$(SOLVERS)),)
 TEST_SRC += \
 		$(DIR)/test_shooting_solver.cpp
 
-ifeq ($(WITH_NMSSMEFTHiggsShooting), yes)
+ifeq ($(WITH_NMSSMEFTHiggs), yes)
 TEST_SRC += \
-		$(DIR)/test_NMSSMEFTHiggsShooting.cpp
+		$(DIR)/test_NMSSMEFTHiggs.cpp
 endif
 
 ifeq ($(WITH_NUHMSSMNoFVHimalayaEFTHiggs),yes)
@@ -1160,7 +1160,7 @@ $(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
 
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
-$(DIR)/test_NMSSMEFTHiggsShooting.x: $(LIBNMSSMEFTHiggsShooting)
+$(DIR)/test_NMSSMEFTHiggs.x: $(LIBNMSSMEFTHiggs)
 
 $(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.x: $(LIBNUHMSSMNoFVHimalayaEFTHiggs)
 

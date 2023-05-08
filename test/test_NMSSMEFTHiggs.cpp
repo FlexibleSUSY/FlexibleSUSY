@@ -17,13 +17,13 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_NMSSMEFTHiggsShooting
+#define BOOST_TEST_MODULE test_NMSSMEFTHiggs
 
 #include <boost/test/unit_test.hpp>
 #include <tuple>
 #include "lowe.h"
-#include "NMSSMEFTHiggsShooting_shooting_spectrum_generator.hpp"
-#include "NMSSMEFTHiggsShooting_slha_io.hpp"
+#include "NMSSMEFTHiggs_shooting_spectrum_generator.hpp"
+#include "NMSSMEFTHiggs_slha_io.hpp"
 #include "wrappers.hpp"
 
 using namespace flexiblesusy;
@@ -33,11 +33,11 @@ using Output = std::array<double,1>;
 
 /// calculate Mh at the precision given in `settings'
 double calc_Mh(
-   NMSSMEFTHiggsShooting_input_parameters& input,
+   NMSSMEFTHiggs_input_parameters& input,
    softsusy::QedQcd& qedqcd,
    Spectrum_generator_settings& settings)
 {
-   NMSSMEFTHiggsShooting_spectrum_generator<Shooting> spectrum_generator;
+   NMSSMEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
    auto sm  = spectrum_generator.get_sm();
@@ -52,15 +52,15 @@ double calc_Mh(
 
 
 /// extracts SLHA input
-std::tuple<Spectrum_generator_settings, softsusy::QedQcd, NMSSMEFTHiggsShooting_input_parameters>
+std::tuple<Spectrum_generator_settings, softsusy::QedQcd, NMSSMEFTHiggs_input_parameters>
 extract_slha_input(char const * const slha_input)
 {
    std::stringstream istr(slha_input);
-   NMSSMEFTHiggsShooting_slha_io slha_io;
+   NMSSMEFTHiggs_slha_io slha_io;
    slha_io.read_from_stream(istr);
 
    softsusy::QedQcd qedqcd;
-   NMSSMEFTHiggsShooting_input_parameters input;
+   NMSSMEFTHiggs_input_parameters input;
    Spectrum_generator_settings settings;
 
    try {
@@ -81,7 +81,7 @@ Output calc_output(char const* const slha_input)
 {
    Spectrum_generator_settings settings;
    softsusy::QedQcd qedqcd;
-   NMSSMEFTHiggsShooting_input_parameters input;
+   NMSSMEFTHiggs_input_parameters input;
 
    std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
 
