@@ -21,7 +21,7 @@ double CLASSNAME::get_partial_width<UpTypeQuark, DownTypeQuark, Hp>(
    // higher order corrections
    if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
       // t -> b H^+
-      if(indexIn.at(0) == 2 && indexOut1.at(0) == 2) {
+      if(indexIn.at(0) == 2) {
          const double z = Sqr(mHp/mu);
          static constexpr double CF = 4./3.;
          // @todo: missing MSbar -> OS conversion term?
