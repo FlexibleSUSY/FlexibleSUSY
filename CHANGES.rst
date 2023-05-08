@@ -1,4 +1,4 @@
-FlexibleSUSY 2.X.X [X, X X]
+FlexibleSUSY 2.8.0 [X, X X]
 ==================================
 
 New features
@@ -40,6 +40,8 @@ New features
   Thanks to Douglas Jacob.
 
 * Added 2-loop Barr-Zee contributions to leptons :math:`$(g-2)/2$`.
+
+  Thanks to Felix Reichenbach and Alexander Voigt.
 
 Fixed bugs
 ----------

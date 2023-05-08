@@ -24,7 +24,7 @@
 
 BeginPackage["EDM`"];
 
-EDMForwardDeclaration::usage = "";
+EDMForwardDeclaration::usage = "Create forward declarations for EDM functions";
 
 Begin["`Private`"];
 
