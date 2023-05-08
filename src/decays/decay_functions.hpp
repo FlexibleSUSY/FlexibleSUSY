@@ -60,7 +60,7 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexce
 
 static constexpr double deltaqq_QCDxQED = 691/24. - 6*zeta3 - Sqr(Pi);
 
-double Delta_t(double);
+double Delta_tHpd(double);
 double Delta_tW(double) noexcept;
 } // namespace flexiblesusy
 

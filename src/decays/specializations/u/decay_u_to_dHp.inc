@@ -25,7 +25,7 @@ double CLASSNAME::get_partial_width<UpTypeQuark, DownTypeQuark, Hp>(
          const double z = Sqr(mHp/mu);
          static constexpr double CF = 4./3.;
          // @todo: missing MSbar -> OS conversion term?
-         result *= 1. + CF*get_alphas(context)/Pi*Delta_t(z);
+         result *= 1. + CF*get_alphas(context)/Pi*Delta_tHpd(z);
       }
    }
 

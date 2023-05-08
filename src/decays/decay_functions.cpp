@@ -307,7 +307,7 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
  * Computes 1-loop QCD correction to t -> H^+ b + X in the limit mb -> 0
  * as given in Eq. 2.5 of 2201.08139
  */
-double Delta_t(double z) {
+double Delta_tHpd(double z) {
    const double lnz = std::log(z);
    if (z < 0 || z >= 1) {
       throw std::invalid_argument("z must belong to [0, 1)");
