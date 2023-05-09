@@ -1473,7 +1473,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setRunningDownLeptonMasses        = FlexibleEFTHiggsMatching`CalculateRunningDownLeptonMasses[];
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
               setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetGaugeLessLimit["model"];
-              calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson];
+              calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
           If[ FlexibleSUSY`UseHiggs3LoopMSSM === True, 
               threeLoopLambdaMatching =  FlexibleEFTHiggsMatching`Create3LoopMatching[];
               createMt2Loop =  FlexibleEFTHiggsMatching`CreateMt2Loop[];

@@ -39,17 +39,15 @@ SetGaugeLessLimit::usage = "applies gauge-less limit to given model";
 
 Begin["`Private`"];
 
-CalculateMHiggsPoleNoMomentumIteration[particle_] :=
-    If[GetDimension[particle] == 1,
-       "Mh2_pole = mh2_tree - self_energy - tadpole(0);"
-       ,
-"const auto M_loop = (mh2_tree - self_energy - " <> CreateCType[TreeMasses`GetMassMatrixType[particle]] <> "(tadpole.asDiagonal())).eval();
+CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] /; (GetDimension[particle] == 1) :=
+    outVar <> " = mh2_tree - self_energy - tadpole(0);"
 
-" <> CreateCType[CConversion`ArrayType[CConversion`realScalarCType, GetDimension[particle]]] <> " M_pole;
-fs_diagonalize_hermitian(M_loop, M_pole);
+CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] :=
+"const auto mass_matrix = (mh2_tree - self_energy - " <> CreateCType[TreeMasses`GetMassMatrixType[particle]] <> "(tadpole.asDiagonal())).eval();
+" <> CreateCType[CConversion`ArrayType[CConversion`realScalarCType, GetDimension[particle]]] <> " eigenvalues;
+fs_diagonalize_hermitian(mass_matrix, eigenvalues);
+" <> outVar <> " = eigenvalues(idx);"
 
-Mh2_pole = M_pole(idx);"
-      ];
 
 Create3LoopMatching[] :=
 "const auto model = [&] {
