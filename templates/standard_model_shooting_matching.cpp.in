@@ -534,7 +534,7 @@ double calculate_lambda_0l(
  * @note The passed Standard Model parameters should have been
  * determined from the BSM parameters at tree-level.
  *
- * @param sm_0l Standard Model
+ * @param sm Standard Model parameters
  *
  * @return squared SM Higgs boson pole mass.
  */
