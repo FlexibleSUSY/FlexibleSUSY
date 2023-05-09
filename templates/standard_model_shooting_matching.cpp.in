@@ -592,30 +592,44 @@ double calculate_Mh2_pole_1l(const @ModelName@_mass_eigenstates& model, int idx)
    return Mh2_pole;
 }
 
-double calculate_mh_DRbar_1l(const standard_model::Standard_model sm_0l,
-                             const @ModelName@_mass_eigenstates &model,
-                             int idx)
+/**
+ * Calculates running MS-bar SM Higgs boson mass at 1-loop level from
+ * a 1-loop Higgs pole mass matching.
+ *
+ * @note The passed Standard Model parameters should have been
+ * determined from the BSM parameters at tree-level.
+ *
+ * @param sm Standard Model parameters
+ * @param model BSM model parameters
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return running SM Higgs boson mass at 1-loop
+ */
+double calculate_mh2_MSbar_1l(
+   const standard_model::Standard_model& sm,
+   const @ModelName@_mass_eigenstates& model,
+   int idx)
 {
-   const double mh2_sm = Sqr(sm_0l.get_Mhh());
-   const double Mh2_sm = calculate_Mh2_pole_1l(sm_0l);
+   const double mh2_sm = Sqr(sm.get_Mhh());
+   const double Mh2_sm = calculate_Mh2_pole_1l(sm);
    const double Mh2_bsm = calculate_Mh2_pole_1l(model, idx);
+   const double mh2_1l = Mh2_bsm - Mh2_sm + mh2_sm; // pole mass matching
 
-   const double mh2_1l = Mh2_bsm - Mh2_sm + mh2_sm;
-
-   return AbsSqrt(mh2_1l);
+   return mh2_1l;
 }
 
-double calculate_lambda_1l(const @ModelName@_mass_eigenstates& model,
-                           const standard_model::Standard_model sm_0l,
-                           standard_model::Standard_model sm_1l, int idx)
+double calculate_lambda_1l(
+   const @ModelName@_mass_eigenstates& model,
+   const standard_model::Standard_model& sm_0l,
+   const standard_model::Standard_model& sm_1l,
+   int idx)
 {
    const double v = sm_0l.get_v();
-   const double delta_v = (sm_1l.get_v()) - v;
-   const double v2 = Sqr(sm_0l.get_v());
-   const double mh2_SM = Sqr(calculate_mh_DRbar_1l(sm_0l, model, idx));
-
+   const double v2 = Sqr(v);
+   const double delta_v = sm_1l.get_v() - v;
+   const double mh2_SM = Sqr(AbsSqrt(calculate_mh2_MSbar_1l(sm_0l, model, idx)));
    const double lambda1l =
-      mh2_SM / v2 - 2 * Sqr(model.get_M@HiggsBoson(idx)@) / v2 * delta_v / v;
+      mh2_SM/v2 - 2*Sqr(model.get_M@HiggsBoson(idx)@)/v2*delta_v/v;
 
    return lambda1l;
 }
