@@ -58,20 +58,12 @@ Create3LoopMatching[] :=
 const auto model_gl = make_gaugeless_g1_g2(model_input);
 const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
-auto sm_0l = sm;
-auto sm_1l = sm;
-auto sm_0l_gl = sm;
-auto sm_1l_gl = sm;
-auto sm_0l_no_g3 = sm;
-auto sm_1l_gl_g3less = sm;
-auto sm_2l = sm;
-
-match_high_to_low_scale_sm_0l(sm_0l, model, idx);
-match_high_to_low_scale_sm_1l(sm_1l, model, idx);
-match_high_to_low_scale_sm_0l(sm_0l_gl, model_gl, idx);
-match_high_to_low_scale_sm_1l(sm_1l_gl, model_gl, idx);
-match_high_to_low_scale_sm_1l(sm_1l_gl_g3less, model_no_g3, idx);
-match_high_to_low_scale_sm_2l(sm_2l, model, idx);
+const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
+const auto sm_1l = match_high_to_low_scale_sm_1l_copy(sm, model, idx);
+const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(sm, model_gl, idx);
+const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(sm, model_gl, idx);
+const auto sm_1l_gl_g3less = match_high_to_low_scale_sm_1l_copy(sm, model_no_g3, idx);
+const auto sm_2l = match_high_to_low_scale_sm_2l_copy(sm, model, idx);
 
 sm = sm_2l;
 

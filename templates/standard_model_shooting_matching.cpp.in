@@ -1007,6 +1007,19 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
    sm.calculate_DRbar_masses();
 }
 
+namespace {
+
+/// wrapper around `match_high_to_low_scale_sm_2l' that returns a copy
+Standard_model match_high_to_low_scale_sm_2l_copy(
+   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
+{
+   auto sm_2l = sm;
+   match_high_to_low_scale_sm_2l(sm_2l, model, idx);
+   return sm_2l;
+}
+
+} // anonymous namespace
+
 void match_high_to_low_scale_sm_3l(Standard_model& sm,
     const @ModelName@_mass_eigenstates& model_input, int idx)
 {
