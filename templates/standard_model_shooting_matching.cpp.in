@@ -55,6 +55,11 @@ namespace @ModelName@_standard_model_matching {
 #define HIGGS_2LOOP_CORRECTION_AB_AS get_loop_corrections().higgs_ab_as
 #define HIGGS_2LOOP_CORRECTION_AT_AT get_loop_corrections().higgs_at_at
 
+namespace {
+
+/// approximates the gaugeless limit for gauge couplings
+static constexpr double gauge_less = 1e-10;
+
 void match_high_to_low_scale_sm_0l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
 
@@ -66,12 +71,6 @@ void match_high_to_low_scale_sm_2l(
 
 void match_high_to_low_scale_sm_3l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
-
-namespace {
-
-/// approximates the gaugeless limit for gauge couplings
-static constexpr double gauge_less = 1e-10;
-
 
 void set_top_QCD_order(Standard_model& sm, int loop_order)
 {
@@ -890,8 +889,6 @@ Standard_model match_high_to_low_scale_sm_2l_copy(
 
 @createMt2Loop@
 
-} // anonymous namespace
-
 /**
  * Calculates all SM couplings at the tree level from the given
  * high-scale model parameters. In particular \f$\lambda\f$ is fixed
@@ -1085,6 +1082,8 @@ void match_high_to_low_scale_sm_3l(Standard_model& sm,
 {
 @threeLoopLambdaMatching@
 }
+
+} // anonymous namespace
 
 /**
  * Calculates \f$\lambda(Q)\f$ at the 1-loop level from the lightest
