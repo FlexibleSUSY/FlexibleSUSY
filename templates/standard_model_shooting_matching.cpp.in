@@ -726,30 +726,12 @@ double calculate_Mh2_1l_shift(
 }
 
 /**
- * Calculates difference between BSM Higgs pole mass (calculated using
- * only 2-loop contributions (i.e. no inclusion of 1-loop
- * contributions) using the given BSM parameters) and the BSM Higgs
- * tree-level mass (calculated with the given BSM parameters at
- * tree-level).
- *
- * @note The given BSM model parameters should be in the gauge-less
- * limit (g1 = g2 = 0).
- *
- * @param model_gl BSM parameters
- * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
- *
- * @return Mh_pole^2 - mh_tree^2
+ * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
+ * contributions of O(at^2) shall be included later
  */
-double calculate_Mh2_2l_shift(
-   const @ModelName@_mass_eigenstates& model_gl,
-   int idx)
+@ModelName@_mass_eigenstates make_yukawaless(const @ModelName@_mass_eigenstates& model)
 {
-   // calculate 2-loop self-energy using tree-level parameters in the
-   // gauge-less limit (g1 = g2 = 0)
-   auto self_energy = Re(model_gl.self_energy_hh_2loop());
-   const auto tadpole = calculate_tadpole_over_vevs(model_gl, 2);
-
-   auto model_no_yuk = model_gl;
+   auto model_no_yuk = model;
 
    const int nrows = model_no_yuk.get_@UpYukawa@().rows();
    const int ncols = model_no_yuk.get_@UpYukawa@().cols();
@@ -772,12 +754,44 @@ double calculate_Mh2_2l_shift(
 
    model_no_yuk.calculate_DRbar_masses();
 
+   return model_no_yuk;
+}
+
+/**
+ * Calculates difference between BSM Higgs pole mass (calculated using
+ * only 2-loop contributions (i.e. no inclusion of 1-loop
+ * contributions) using the given BSM parameters) and the BSM Higgs
+ * tree-level mass (calculated with the given BSM parameters at
+ * tree-level).
+ *
+ * @note The given BSM model parameters should be in the gauge-less
+ * limit (g1 = g2 = 0).
+ *
+ * @param model_gl BSM parameters
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return Mh_pole^2 - mh_tree^2
+ */
+double calculate_Mh2_2l_shift(
+   const @ModelName@_mass_eigenstates& model_gl,
+   int idx)
+{
+   const auto model_no_yuk = make_yukawaless(model_gl);
    const auto mh2_tree = calculate_mh2_0l(model_no_yuk);
    const double mh2_0l = Sqr(model_no_yuk.get_M@HiggsBoson(idx)@);
    const double mh2_shift_1l = calculate_Mh2_pole_1l(model_no_yuk, idx) - mh2_0l;
    const double p = 0.;
 
-   self_energy += Re(model_no_yuk.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
+   // calculate 2-loop self-energy using tree-level parameters in the
+   // gauge-less limit (g1 = g2 = 0)
+   const auto self_energy_2l = Re(model_gl.self_energy_hh_2loop());
+   // calculate 2-loop contribution from momentum iteration using
+   // tree-level parameters in the gauge-less limit (g1 = g2 = 0) and
+   // Yukawa-less limit
+   const auto self_energy_2l_mom = Re(model_no_yuk.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
+
+   const auto self_energy = self_energy_2l + self_energy_2l_mom;
+   const auto tadpole = calculate_tadpole_over_vevs(model_gl, 2);
 
    double Mh2_pole = 0.;
 
