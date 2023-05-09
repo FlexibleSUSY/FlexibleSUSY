@@ -618,6 +618,17 @@ double calculate_mh2_MSbar_1l(
    return mh2_1l;
 }
 
+/**
+ * Calculates running MS-bar SM quartic Higgs coupling at 1-loop
+ * level.
+ *
+ * @param model BSM model parameters
+ * @param sm_0l Standard Model parameters from tree-level matching
+ * @param sm_1l Standard Model parameters from 1-loop level matching
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return 1-loop MS-bar quatic SM Higgs coupling
+ */
 double calculate_lambda_1l(
    const @ModelName@_mass_eigenstates& model,
    const standard_model::Standard_model& sm_0l,
