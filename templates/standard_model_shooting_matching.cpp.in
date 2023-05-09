@@ -576,6 +576,35 @@ calculate_MFe_SM_MSbar_1l(
 }
 
 /**
+ * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
+ * contributions of O(at^2) shall be included later
+ */
+standard_model::Standard_model make_yukawaless(const standard_model::Standard_model& sm)
+{
+   auto sm_yl = sm;
+
+   const int nrows = sm_yl.get_Yu().rows();
+   const int ncols = sm_yl.get_Yu().cols();
+
+   for (int i = 0; i < nrows; i++) {
+      for (int k = 0; k < ncols; k++) {
+         // keep 3rd generation Yukawa couplings when 2-loop
+         // contributions of O(at^2) shall be included later
+         if (sm_yl.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+            continue;
+         }
+         sm_yl.set_Yu(i, k, 0.);
+         sm_yl.set_Yd(i, k, 0.);
+         sm_yl.set_Ye(i, k, 0.);
+      }
+   }
+
+   sm_yl.calculate_DRbar_masses();
+
+   return sm_yl;
+}
+
+/**
  * Calculates quartic Higgs coupling of SM from the SM-like Higgs
  * boson mass in the BSM model using the tree-level relation.
  *
@@ -728,27 +757,9 @@ double calculate_lambda_1l(
 double calculate_Mh2_1l_shift(
    const standard_model::Standard_model& sm)
 {
-   auto sm_no_yuk = sm;
-   const int nrows = sm.get_Yu().rows();
-   const int ncols = sm.get_Yu().cols();
-
-   for (int i = 0; i < nrows; i++) {
-      for (int k = 0; k < ncols; k++) {
-         // keep 3rd generation Yukawa couplings when 2-loop
-         // contributions of O(at^2) shall be included later
-         if (sm.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
-            continue;
-         }
-         sm_no_yuk.set_Yu(i, k, 0.);
-         sm_no_yuk.set_Yd(i, k, 0.);
-         sm_no_yuk.set_Ye(i, k, 0.);
-      }
-   }
-
-   sm_no_yuk.calculate_DRbar_masses();
-
+   const auto sm_yl = make_yukawaless(sm);
    const double mh2_tree = Sqr(sm.get_Mhh());
-   const double mh2_shift_1l = calculate_Mh2_pole_1l(sm_no_yuk) - mh2_tree;
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(sm_yl) - mh2_tree;
 
    return mh2_shift_1l;
 }
@@ -826,34 +837,20 @@ double calculate_Mh2_2l_shift(
 {
    const double p = 0.;
    const double mh2_shift_1l = calculate_Mh2_1l_shift(model, idx);
-   auto sm_2l = sm;
-   const double self_energy_2l = Re(sm_2l.self_energy_hh_2loop(p));
+   const double self_energy_2l = Re(sm.self_energy_hh_2loop(p));
+   const auto sm_yl = make_yukawaless(sm);
 
-   // tadpoles are within selfenergy
+   // Higgs tadpoles are included in the self-energy
    double mh2_shift = -self_energy_2l;
-   const int nrows = sm.get_Yu().rows();
-   const int ncols = sm.get_Yu().cols();
-
-   for(int i = 0; i < nrows; i++) {
-      for(int k = 0; k < ncols; k++) {
-         if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
-            continue;
-         }
-         sm_2l.set_Yu(i, k, 0.);
-         sm_2l.set_Yd(i, k, 0.);
-         sm_2l.set_Ye(i, k, 0.);
-      }
-   }
-   sm_2l.calculate_DRbar_masses();
-
-   const double Q = sm_2l.get_scale();
 
    // tadpoles are within selfenergy
    if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
+      const double Q = sm_yl.get_scale();
+
       mh2_shift = -self_energy_2l
-         + (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm_2l.get_MFu(2), sm_2l.get_Yu(2,2)) 
-            + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm_2l.get_MFd(2), sm_2l.get_Yd(2,2))
-            + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm_2l.get_MFe(2), sm_2l.get_Ye(2,2))
+         + (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm_yl.get_MFu(2), sm_yl.get_Yu(2,2)) 
+            + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm_yl.get_MFd(2), sm_yl.get_Yd(2,2))
+            + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm_yl.get_MFe(2), sm_yl.get_Ye(2,2))
             ) * mh2_shift_1l;
    }
 
