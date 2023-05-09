@@ -684,48 +684,6 @@ double calculate_Mh2_1l_shift(
 }
 
 /**
- * Calculates difference between BSM Higgs pole mass (calculated at
- * 1-loop level with the given BSM parameters) and the BSM Higgs
- * tree-level mass (calculated with the given BSM parameters at
- * tree-level).
- *
- * @param model BSM parameters
- * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
- *
- * @return Mh_pole^2 - mh_tree^2
- */
-double calculate_Mh2_1l_shift(
-   const @ModelName@_mass_eigenstates& model, int idx)
-{
-   auto model_no_yuk = model;
-   const int nrows = model.get_@UpYukawa@().rows();
-   const int ncols = model.get_@UpYukawa@().cols();
-
-   for (int i = 0; i < nrows; i++) {
-      for (int k = 0; k < ncols; k++) {
-         // keep 3rd generation Yukawa couplings when 2-loop
-         // contributions of O(at^2) shall be included later
-         if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
-            continue;
-         }
-         model_no_yuk.set_@UpYukawa@(i, k, 0.);
-         model_no_yuk.set_@TrilinearUp@(i, k, 0.);
-         model_no_yuk.set_@DownYukawa@(i, k, 0.);
-         model_no_yuk.set_@TrilinearDown@(i, k, 0.);
-         model_no_yuk.set_@ElectronYukawa@(i, k, 0.);
-         model_no_yuk.set_@TrilinearLepton@(i, k, 0.);
-      }
-   }
-
-   model_no_yuk.calculate_DRbar_masses();
-
-   const double mh2_tree = Sqr(model_no_yuk.get_M@HiggsBoson(idx)@);
-   const double mh2_shift_1l = calculate_Mh2_pole_1l(model_no_yuk,idx) - mh2_tree;
-
-   return mh2_shift_1l;
-}
-
-/**
  * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
  * contributions of O(at^2) shall be included later
  */
@@ -755,6 +713,27 @@ double calculate_Mh2_1l_shift(
    model_yl.calculate_DRbar_masses();
 
    return model_yl;
+}
+
+/**
+ * Calculates difference between BSM Higgs pole mass (calculated at
+ * 1-loop level with the given BSM parameters) and the BSM Higgs
+ * tree-level mass (calculated with the given BSM parameters at
+ * tree-level).
+ *
+ * @param model BSM parameters
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return Mh_pole^2 - mh_tree^2
+ */
+double calculate_Mh2_1l_shift(
+   const @ModelName@_mass_eigenstates& model, int idx)
+{
+   const auto model_yl = make_yukawaless(model);
+   const double mh2_tree = Sqr(model_yl.get_M@HiggsBoson(idx)@);
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(model_yl,idx) - mh2_tree;
+
+   return mh2_shift_1l;
 }
 
 /**
@@ -797,9 +776,9 @@ double calculate_Mh2_2l_shift(
 
 @calculateMHiggsPoleNoMomentumIteration@
 
-   const double mh2_shift = Mh2_pole - mh2_0l;
+   const double mh2_shift_2l = Mh2_pole - mh2_0l;
 
-   return mh2_shift;
+   return mh2_shift_2l;
 }
 
 double calculate_Mh2_2l_shift(
