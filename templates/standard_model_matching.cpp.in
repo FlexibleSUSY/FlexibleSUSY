@@ -185,7 +185,7 @@ double calculate_Mh2_pole(
 
    double Mh2_pole = 0.;
 
-@calculateMHiggsPoleOneMomentumIteration@
+@calculateMHiggsPoleNoMomentumIteration@
 
    return Mh2_pole;
 }

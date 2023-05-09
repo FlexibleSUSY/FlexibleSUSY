@@ -505,40 +505,58 @@ calculate_MFe_SM_MSbar_1l(
   return Abs(mf_sm_1l);
 }
 
-/// calculates quartic Higgs coupling of SM at 0l
+/**
+ * Calculates quartic Higgs coupling of SM from the SM-like Higgs
+ * boson mass in the BSM model using the tree-level relation.
+ *
+ * @param model BSM model
+ * @param sm Standard Model
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return quartic Higgs coupling in the SM
+ */
 double calculate_lambda_0l(
    const @ModelName@_mass_eigenstates& model,
-   const standard_model::Standard_model sm,
+   const standard_model::Standard_model& sm,
    int idx)
 {
    const double v = sm.get_v();
-   const double lambda = Sqr(model.get_M@HiggsBoson(idx)@) / Sqr(v);
+   const double mh = model.get_M@HiggsBoson(idx)@;
+   const double lambda = Sqr(mh)/Sqr(v);
 
    return lambda;
 }
 
 /**
- * Calculates SM pole mass at 1l.
+ * Calculates SM Higgs boson pole mass at 1-loop level given the
+ * Standard Model parameters.
+ *
+ * @note The passed Standard Model parameters should have been
+ * determined from the BSM parameters at tree-level.
+ *
+ * @param sm_0l Standard Model
+ *
+ * @return squared SM Higgs boson pole mass.
  */
-double calculate_Mh2_pole_1l(const standard_model::Standard_model &sm_0l)
+double calculate_Mh2_pole_1l(const standard_model::Standard_model& sm)
 {
-   const double p = sm_0l.get_Mhh();
-   const double self_energy = Re(sm_0l.self_energy_hh_1loop(p));
-   const double tadpole = Re(sm_0l.tadpole_hh_1loop() / sm_0l.get_v());
-   const double mh2_tree = Sqr(sm_0l.get_Mhh());
+   const double p = sm.get_Mhh();
+   const double self_energy = Re(sm.self_energy_hh_1loop(p));
+   const double tadpole = Re(sm.tadpole_hh_1loop() / sm.get_v());
+   const double mh2_tree = Sqr(sm.get_Mhh());
    const double Mh2_pole = mh2_tree - self_energy + tadpole;
 
    return Mh2_pole;
 }
 
 /**
- * Calculates tree-level Higgs mass matrix in the NUHMSSMNoFVHimalaya without
- * including tadpoles implicitly.  This is achieved by solving the
- * EWSB equations at tree-level in order to avoid the inclusion of
- * loop tadpoles.
+ * Calculates tree-level Higgs mass matrix in the BSM model without
+ * including loop tadpoles implicitly.  This is achieved by solving
+ * the EWSB equations at tree-level in order to avoid the inclusion of
+ * (1-, 2-, 3-)loop tadpoles.
  *
- * @param model NUHMSSMNoFVHimalaya parameters
- * @return tree-level Higgs mass matrix in the NUHMSSMNoFVHimalaya w/o tadpoles
+ * @param model BSM model parameters
+ * @return tree-level Higgs mass matrix in the BSM w/o tadpoles
  */
 auto calculate_mh2_0l(@ModelName@_mass_eigenstates model) -> decltype(model.get_mass_matrix_@HiggsBoson@())
 {
@@ -547,24 +565,29 @@ auto calculate_mh2_0l(@ModelName@_mass_eigenstates model) -> decltype(model.get_
 }
 
 /**
- * Calculates BSM pole mass at 1l.
+ * Calculates BSM Higgs bson pole mass at 1-loop level.
+ *
+ * @param model BSM model parameters
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return squared BSM Higgs boson mass at 1-loop
  */
 double calculate_Mh2_pole_1l(const @ModelName@_mass_eigenstates& model, int idx)
 {
-
-   // calculate tree-level mass matrix
+   // calculate BSM Higgs mass matrix at tree-level
    const auto mh2_tree = calculate_mh2_0l(model);
 
-   // calculate 1L self-energy using tree-level parameters
+   // calculate 1-loop BSM Higgs self-energy using tree-level parameters
    const double p = model.get_M@HiggsBoson(idx)@;
    const auto self_energy = Re(model.self_energy_hh_1loop(p));
 
-   // calculate 1L tadpoles using tree-level parameters
+   // calculate 1-loop BSM Higgs tadpoles using tree-level parameters
    const auto tadpole = calculate_tadpole_over_vevs(model, 1);
 
    double Mh2_pole = 0.;
 
-@calculateMHiggsPoleOneMomentumIteration@
+   // calculate BSM Higgs mass at 1-loop level w/o momentum iteration
+@calculateMHiggsPoleNoMomentumIteration@
 
    return Mh2_pole;
 }
@@ -691,7 +714,7 @@ double calculate_Mh2_shift_2l(
 
    self_energy += Re(model.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
 
-@calculateMHiggsPoleOneMomentumIteration@
+@calculateMHiggsPoleNoMomentumIteration@
 
    const double mh2_shift = Mh2_pole - mh2_0l;
 

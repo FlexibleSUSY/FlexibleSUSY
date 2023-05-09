@@ -22,7 +22,7 @@
 
 BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopMasses`", "Constraint`", "ThresholdCorrections`", "Parameters`", "Utils`"}];
 
-CalculateMHiggsPoleOneMomentumIteration::usage = "";
+CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
 Create3LoopMatching::usage = "";
 CallMatch2LoopTopMass::usage = "";
 CreateMt2Loop::usage = "";
@@ -39,7 +39,7 @@ SetGaugeLessLimit::usage = "applies gauge-less limit to given model";
 
 Begin["`Private`"];
 
-CalculateMHiggsPoleOneMomentumIteration[particle_] :=
+CalculateMHiggsPoleNoMomentumIteration[particle_] :=
     If[GetDimension[particle] == 1,
        "Mh2_pole = mh2_tree - self_energy - tadpole(0);"
        ,
