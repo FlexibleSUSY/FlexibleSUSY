@@ -55,6 +55,18 @@ namespace @ModelName@_standard_model_matching {
 #define HIGGS_2LOOP_CORRECTION_AB_AS get_loop_corrections().higgs_ab_as
 #define HIGGS_2LOOP_CORRECTION_AT_AT get_loop_corrections().higgs_at_at
 
+void match_high_to_low_scale_sm_0l(
+   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+
+void match_high_to_low_scale_sm_1l(
+   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+
+void match_high_to_low_scale_sm_2l(
+   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+
+void match_high_to_low_scale_sm_3l(
+   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+
 namespace {
 
 /// approximates the gaugeless limit for gauge couplings
@@ -505,6 +517,65 @@ calculate_MFe_SM_MSbar_1l(
   return Abs(mf_sm_1l);
 }
 
+/// returns a copy of the given model in the gaugeless limit g1 = g2 = 0
+@ModelName@_mass_eigenstates make_gaugeless_g1_g2(
+   const @ModelName@_mass_eigenstates& model_)
+{
+   auto model = model_;
+   model.get_problems().clear();
+
+@setGaugeLessLimit@
+
+   model.calculate_DRbar_masses();
+
+   return model;
+}
+
+/// returns a copy of the given model in the gaugeless limit g3 = 0
+@ModelName@_mass_eigenstates make_gaugeless_g3(
+   const @ModelName@_mass_eigenstates& model_)
+{
+   auto model = model_;
+
+   model.get_problems().clear();
+   model.set_@strongCoupling@(gauge_less / @ModelName@_info::normalization_@strongCoupling@);
+   model.calculate_DRbar_masses();
+
+   return model;
+}
+
+/**
+ * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
+ * contributions of O(at^2) shall be included later
+ */
+@ModelName@_mass_eigenstates make_yukawaless(const @ModelName@_mass_eigenstates& model)
+{
+   auto model_yl = model;
+
+   const int nrows = model_yl.get_@UpYukawa@().rows();
+   const int ncols = model_yl.get_@UpYukawa@().cols();
+
+   for (int i = 0; i < nrows; i++) {
+      for (int k = 0; k < ncols; k++) {
+         // keep 3rd generation Yukawa couplings when 2-loop
+         // contributions of O(at^2) shall be included later
+         if (model_yl.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+            continue;
+         }
+         model_yl.set_@UpYukawa@(i, k, 0.);
+         model_yl.set_@DownYukawa@(i, k, 0.);
+         model_yl.set_@ElectronYukawa@(i, k, 0.);
+         model_yl.set_@TrilinearUp@(i, k, 0.);
+         model_yl.set_@TrilinearDown@(i, k, 0.);
+         model_yl.set_@TrilinearLepton@(i, k, 0.);
+      }
+   }
+
+   model_yl.calculate_DRbar_masses();
+
+   return model_yl;
+}
+
 /**
  * Calculates quartic Higgs coupling of SM from the SM-like Higgs
  * boson mass in the BSM model using the tree-level relation.
@@ -684,38 +755,6 @@ double calculate_Mh2_1l_shift(
 }
 
 /**
- * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
- * contributions of O(at^2) shall be included later
- */
-@ModelName@_mass_eigenstates make_yukawaless(const @ModelName@_mass_eigenstates& model)
-{
-   auto model_yl = model;
-
-   const int nrows = model_yl.get_@UpYukawa@().rows();
-   const int ncols = model_yl.get_@UpYukawa@().cols();
-
-   for (int i = 0; i < nrows; i++) {
-      for (int k = 0; k < ncols; k++) {
-         // keep 3rd generation Yukawa couplings when 2-loop
-         // contributions of O(at^2) shall be included later
-         if (model_yl.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
-            continue;
-         }
-         model_yl.set_@UpYukawa@(i, k, 0.);
-         model_yl.set_@DownYukawa@(i, k, 0.);
-         model_yl.set_@ElectronYukawa@(i, k, 0.);
-         model_yl.set_@TrilinearUp@(i, k, 0.);
-         model_yl.set_@TrilinearDown@(i, k, 0.);
-         model_yl.set_@TrilinearLepton@(i, k, 0.);
-      }
-   }
-
-   model_yl.calculate_DRbar_masses();
-
-   return model_yl;
-}
-
-/**
  * Calculates difference between BSM Higgs pole mass (calculated at
  * 1-loop level with the given BSM parameters) and the BSM Higgs
  * tree-level mass (calculated with the given BSM parameters at
@@ -822,6 +861,33 @@ double calculate_Mh2_2l_shift(
    return mh2_shift;
 }
 
+/// wrapper around `match_high_to_low_scale_sm_0l' that returns a copy
+Standard_model match_high_to_low_scale_sm_0l_copy(
+   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
+{
+   auto sm_0l = sm;
+   match_high_to_low_scale_sm_0l(sm_0l, model, idx);
+   return sm_0l;
+}
+
+/// wrapper around `match_high_to_low_scale_sm_1l' that returns a copy
+Standard_model match_high_to_low_scale_sm_1l_copy(
+   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
+{
+   auto sm_1l = sm;
+   match_high_to_low_scale_sm_1l(sm_1l, model, idx);
+   return sm_1l;
+}
+
+/// wrapper around `match_high_to_low_scale_sm_2l' that returns a copy
+Standard_model match_high_to_low_scale_sm_2l_copy(
+   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
+{
+   auto sm_2l = sm;
+   match_high_to_low_scale_sm_2l(sm_2l, model, idx);
+   return sm_2l;
+}
+
 @createMt2Loop@
 
 } // anonymous namespace
@@ -858,19 +924,6 @@ void match_high_to_low_scale_sm_0l(
 
    sm.calculate_DRbar_masses();
 }
-
-namespace {
-
-/// wrapper around `match_high_to_low_scale_sm_0l' that returns a copy
-Standard_model match_high_to_low_scale_sm_0l_copy(
-   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
-{
-   auto sm_0l = sm;
-   match_high_to_low_scale_sm_0l(sm_0l, model, idx);
-   return sm_0l;
-}
-
-} // anonymous namespace
 
 /**
  * Calculates all SM couplings at the 1-loop level from the given
@@ -950,46 +1003,6 @@ void match_high_to_low_scale_sm_1l(
    sm.get_problems().add(sm_0l.get_problems());
 }
 
-namespace {
-
-/// wrapper around `match_high_to_low_scale_sm_1l' that returns a copy
-Standard_model match_high_to_low_scale_sm_1l_copy(
-   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
-{
-   auto sm_1l = sm;
-   match_high_to_low_scale_sm_1l(sm_1l, model, idx);
-   return sm_1l;
-}
-
-} // anonymous namespace
-
-/// returns a copy of the given model in the gaugeless limit g1 = g2 = 0
-@ModelName@_mass_eigenstates make_gaugeless_g1_g2(
-   const @ModelName@_mass_eigenstates& model_)
-{
-   auto model = model_;
-   model.get_problems().clear();
-
-@setGaugeLessLimit@
-
-   model.calculate_DRbar_masses();
-
-   return model;
-}
-
-/// returns a copy of the given model in the gaugeless limit g3 = 0
-@ModelName@_mass_eigenstates make_gaugeless_g3(
-   const @ModelName@_mass_eigenstates& model_)
-{
-   auto model = model_;
-
-   model.get_problems().clear();
-   model.set_@strongCoupling@(gauge_less / @ModelName@_info::normalization_@strongCoupling@);
-   model.calculate_DRbar_masses();
-
-   return model;
-}
-
 /// calculates SM parameters `sm' from @ModelName@ parameters at 2-loop level
 void match_high_to_low_scale_sm_2l(Standard_model& sm,
    const @ModelName@_mass_eigenstates& model_input, int idx)
@@ -1066,19 +1079,6 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
 
    sm.calculate_DRbar_masses();
 }
-
-namespace {
-
-/// wrapper around `match_high_to_low_scale_sm_2l' that returns a copy
-Standard_model match_high_to_low_scale_sm_2l_copy(
-   const Standard_model& sm, const @ModelName@_mass_eigenstates& model, int idx)
-{
-   auto sm_2l = sm;
-   match_high_to_low_scale_sm_2l(sm_2l, model, idx);
-   return sm_2l;
-}
-
-} // anonymous namespace
 
 void match_high_to_low_scale_sm_3l(Standard_model& sm,
     const @ModelName@_mass_eigenstates& model_input, int idx)
