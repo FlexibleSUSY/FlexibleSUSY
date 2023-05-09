@@ -725,42 +725,61 @@ double calculate_Mh2_1l_shift(
    return mh2_shift_1l;
 }
 
-double calculate_Mh2_shift_2l(
+/**
+ * Calculates difference between BSM Higgs pole mass (calculated using
+ * only 2-loop contributions (i.e. no inclusion of 1-loop
+ * contributions) using the given BSM parameters) and the BSM Higgs
+ * tree-level mass (calculated with the given BSM parameters at
+ * tree-level).
+ *
+ * @note The given BSM model parameters should be in the gauge-less
+ * limit (g1 = g2 = 0).
+ *
+ * @param model_gl BSM parameters
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return Mh_pole^2 - mh_tree^2
+ */
+double calculate_Mh2_2l_shift(
    const @ModelName@_mass_eigenstates& model_gl,
    int idx)
 {
-   auto model = model_gl;
-   const double p = 0.;
+   // calculate 2-loop self-energy using tree-level parameters in the
+   // gauge-less limit (g1 = g2 = 0)
+   auto self_energy = Re(model_gl.self_energy_hh_2loop());
+   const auto tadpole = calculate_tadpole_over_vevs(model_gl, 2);
 
-   // calculate 2L self-energy using tree-level parameters
-   auto self_energy = Re(model.self_energy_hh_2loop());
-   const auto tadpole = calculate_tadpole_over_vevs(model, 2);
+   auto model_no_yuk = model_gl;
 
-   const int nrows = model.get_@UpYukawa@().rows();
-   const int ncols = model.get_@UpYukawa@().cols();
+   const int nrows = model_no_yuk.get_@UpYukawa@().rows();
+   const int ncols = model_no_yuk.get_@UpYukawa@().cols();
 
    for (int i = 0; i < nrows; i++) {
       for (int k = 0; k < ncols; k++) {
-         if (model.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+         // keep 3rd generation Yukawa couplings when 2-loop
+         // contributions of O(at^2) shall be included later
+         if (model_no_yuk.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
             continue;
          }
-         model.set_@UpYukawa@(i, k, 0.);
-         model.set_@DownYukawa@(i, k, 0.);
-         model.set_@ElectronYukawa@(i, k, 0.);
-         model.set_@TrilinearUp@(i, k, 0.);
-         model.set_@TrilinearDown@(i, k, 0.);
-         model.set_@TrilinearLepton@(i, k, 0.);
+         model_no_yuk.set_@UpYukawa@(i, k, 0.);
+         model_no_yuk.set_@DownYukawa@(i, k, 0.);
+         model_no_yuk.set_@ElectronYukawa@(i, k, 0.);
+         model_no_yuk.set_@TrilinearUp@(i, k, 0.);
+         model_no_yuk.set_@TrilinearDown@(i, k, 0.);
+         model_no_yuk.set_@TrilinearLepton@(i, k, 0.);
       }
    }
 
-   model.calculate_DRbar_masses();
+   model_no_yuk.calculate_DRbar_masses();
 
-   const auto mh2_tree = calculate_mh2_0l(model);
-   const double mh2_0l = Sqr(model.get_M@HiggsBoson(idx)@);
-   const double mh2_shift_1l = calculate_Mh2_pole_1l(model, idx) - mh2_0l;
+   const auto mh2_tree = calculate_mh2_0l(model_no_yuk);
+   const double mh2_0l = Sqr(model_no_yuk.get_M@HiggsBoson(idx)@);
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(model_no_yuk, idx) - mh2_0l;
+   const double p = 0.;
+
+   self_energy += Re(model_no_yuk.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
+
    double Mh2_pole = 0.;
-
-   self_energy += Re(model.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
 
 @calculateMHiggsPoleNoMomentumIteration@
 
@@ -769,7 +788,7 @@ double calculate_Mh2_shift_2l(
    return mh2_shift;
 }
 
-double calculate_Mh2_shift_2l(
+double calculate_Mh2_2l_shift(
    const standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model,
    int idx)
@@ -1022,8 +1041,8 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
       delta_v_gl += sm_1l.get_v() - v;
    }
 
-   const double mh2_bsm_shift    = calculate_Mh2_shift_2l( model_gl, idx);
-   const double mh2_sm_shift     = calculate_Mh2_shift_2l(sm_0l_gl, model_gl, idx);
+   const double mh2_bsm_shift    = calculate_Mh2_2l_shift( model_gl, idx);
+   const double mh2_sm_shift     = calculate_Mh2_2l_shift(sm_0l_gl, model_gl, idx);
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(sm_0l_gl);
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model_gl, idx);
 
