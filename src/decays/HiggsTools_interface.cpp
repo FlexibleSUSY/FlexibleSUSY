@@ -194,6 +194,7 @@ std::pair<int, double> call_HiggsTools(
             //    The option SMHiggs is the preferred choice for particles that have a mass comparable to the
             //    top-quark mass or larger, whereas for a particle state at 125 GeV one should use SMHiggsEW
             //    in order to include the QCD corrections beyond the NNLO.
+            // Threshold of 150 GeV choosen based on comment https://gitlab.com/higgsbounds/higgstools/-/releases/v1.0.1
             (mass > 150 ? HP::ReferenceModel::SMHiggs : HP::ReferenceModel::SMHiggsEW),
             calcggH, calcHgamgam
          );

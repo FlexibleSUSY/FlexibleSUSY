@@ -2453,7 +2453,6 @@ CreateChargedHiggsToUpQuarkDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, mo
        {declaration, function}
     ];
 
-
 CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{higgsDecays, specializations = {}},
            higgsDecays = GetHiggsBosonDecays[particleDecays];

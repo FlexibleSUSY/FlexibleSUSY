@@ -559,7 +559,7 @@ CheckDecaysOptions[] :=
                   Complement[FlexibleSUSY`FSDecayParticles, TreeMasses`GetParticles[]],
                   " which are not part of the model. Removing them."];
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
-            ];
+            ]
          ]
       ];
       (* if present, replace H- with H+ since specializations are only for H+ *)
