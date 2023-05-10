@@ -197,7 +197,7 @@ double calculate_MFt_MSbar_sm_2l(
    pars.mst2 = mst_2;
    pars.msusy = Sqrt(Sqrt(Abs(model.get_" <> md2str <> "(2, 2)))) *
                 Sqrt(Sqrt(Abs(model.get_" <> mq2str <> "(2, 2))));
-   pars.xt = Sin(2 * theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2 * pars.mt);
+   pars.xt = Sin(2*theta_t)*(Sqr(mst_1) - Sqr(mst_2))/(2*mt);
    pars.Q = Q;
 
    const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model_0l);
@@ -213,18 +213,19 @@ double calculate_MFt_MSbar_sm_2l(
    const double delta_mt_over_mt = sqcd_1l_over_mt - qcd_1l_SM_over_mt;
    const double delta_gs_over_gs = -0.5 * delta_alpha_s;
 
-   const double mfcon = delta_mt_over_mt * qcd1l_mt + delta_gs_over_gs * qcd1l_gs;
+   // 2-loop contribution from parameter conversion
+   const double mf_con = delta_mt_over_mt * qcd1l_mt + delta_gs_over_gs * qcd1l_gs;
 
    // calculate top quark pole masses in the BSM and in the SM
    model." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
    sm.calculate_MFu_pole();
 
-   const auto Mf_bsm = model.get_physical()."<> mtstr <>";
+   const auto Mf_bsm = model.get_physical()." <> mtstr <> ";
    const auto Mf_sm = sm.get_physical().MFu(2);
    const auto mf_sm_0l = sm.get_MFu(2);
 
    // determine SM MS-bar top quark mass from top quark pole mass matching
-   const double mf_sm = Mf_bsm - Mf_sm + mf_sm_0l - mfcon; // Eq.(4.18b) JHEP07(2020)197
+   const double mf_sm = Mf_bsm - Mf_sm + mf_sm_0l - mf_con; // Eq.(4.18b) JHEP07(2020)197
 
    return Abs(mf_sm);
 }"
