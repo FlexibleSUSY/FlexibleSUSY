@@ -836,18 +836,17 @@ double calculate_Mh2_2l_shift(
    int idx)
 {
    const double p = 0.;
-   const double mh2_shift_1l = calculate_Mh2_1l_shift(model, idx);
    const double self_energy_2l = Re(sm.self_energy_hh_2loop(p));
-   const auto sm_yl = make_yukawaless(sm);
 
    // Higgs tadpoles are included in the self-energy
    double mh2_shift = -self_energy_2l;
 
-   // tadpoles are within selfenergy
    if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
+      const auto sm_yl = make_yukawaless(sm);
+      const double mh2_shift_1l = calculate_Mh2_1l_shift(model, idx);
       const double Q = sm_yl.get_scale();
 
-      mh2_shift = -self_energy_2l
+      mh2_shift +=
          + (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm_yl.get_MFu(2), sm_yl.get_Yu(2,2)) 
             + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm_yl.get_MFd(2), sm_yl.get_Yd(2,2))
             + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm_yl.get_MFe(2), sm_yl.get_Ye(2,2))
