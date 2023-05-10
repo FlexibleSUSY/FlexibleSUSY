@@ -896,7 +896,7 @@ Standard_model match_high_to_low_scale_sm_2l_copy(
    return sm_2l;
 }
 
-@createMt2Loop@
+@createSMMt2LoopFunction@
 
 /**
  * Calculates all SM couplings at the tree level from the given

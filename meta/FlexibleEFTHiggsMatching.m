@@ -25,7 +25,7 @@ BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopM
 CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
 Create3LoopMatching::usage = "";
 CallMatch2LoopTopMass::usage = "";
-CreateMt2Loop::usage = "";
+CreateSMMt2LoopFunction::usage = "Creates a function that calculates the running MS-bar top quark mass in the SM from the BSM parameters";
 CalculateRunningUpQuarkMasses::usage = "";
 CalculateRunningDownQuarkMasses::usage = "";
 CalculateRunningDownLeptonMasses::usage = "";
@@ -146,18 +146,25 @@ sm.calculate_DRbar_masses();";
 CallMatch2LoopTopMass[] :=
 "const double delta_vev = sm_1l.get_v() - sm_0l.get_v();
 const double yt_0l = sm_0l.get_Yu(2,2);
-const double mt_2l = calculate_MFt_MSbar_2loop(sm_0l, model);
+const double mt_2l = calculate_MFt_MSbar_sm_2l(sm_0l, model);
 sm.set_Yu(2, 2, (Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v));"
 
-CreateMt2Loop[] :=
+CreateSMMt2LoopFunction[] :=
 Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]], 
         mglustr = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]],
         md2str = CConversion`RValueToCFormString[SARAH`SoftDown],
         mq2str = CConversion`RValueToCFormString[SARAH`SoftSquark],
         mtstr = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]]},
-"double calculate_MFt_MSbar_2loop(
-   const standard_model::Standard_model &sm_0l,
-   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates &model_0l)
+"/**
+ * Calculates running MS-bar SM top quark mass, given the BSM model parameters.
+ *
+ * @param sm_0l Standard Model parameters
+ * @param model_0l BSM model parameters
+ * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
+ */
+double calculate_MFt_MSbar_sm_2l(
+   const standard_model::Standard_model& sm_0l,
+   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model_0l)
 {
    auto model = model_0l;
    auto sm = sm_0l;
@@ -170,12 +177,13 @@ Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]],
    double mst_1, mst_2, theta_t;
    model." <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
 
-   const double Q2 = Sqr(model.get_scale());
-   const double mt = sm_0l.get_MFu(2);   // is equal to the top quark mass in the MSSM
+   const double Q = model.get_scale();
+   const double Q2 = Sqr(Q);
+   const double mt = sm_0l.get_MFu(2); // is equal to the top quark mass in the MSSM
    const double mt2 = Sqr(mt);
    const double gs = model.get_" <> g3str <> "();
    const double gs2 = Sqr(gs);
-   const double alpha_s = gs2 / (4. * Pi);
+   const double alpha_s = gs2*oneOver4Pi;
 
    const double k = oneOver16PiSqr;
    const double logmt = Log(mt2 / Q2);
@@ -189,33 +197,34 @@ Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]],
    pars.mst2 = mst_2;
    pars.msusy = Sqrt(Sqrt(Abs(model.get_" <> md2str <> "(2, 2)))) *
                 Sqrt(Sqrt(Abs(model.get_" <> mq2str <> "(2, 2))));
-   pars.xt = Sin(2 * theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt);
-   pars.Q = model.get_scale();
+   pars.xt = Sin(2 * theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2 * pars.mt);
+   pars.Q = Q;
 
    const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model_0l);
 
    // top mass contribution at O(as) in MSSM and SM
    const double sqcd_1l_over_mt = mssm_twoloop_mt::dMt_over_mt_1loop(pars);
-   const double qcd_1l_SM_over_mt =
-      0.008443431970194815 * (4. - 3. * Log(mt2 / Q2)) * gs2;
+   const double qcd_1l_SM_over_mt = k * gs2 * 4./3 * (4 - 3*Log(mt2 / Q2));
 
    // top mass contribution at O(as) SM subscript
-   const double qcd1l_mt = -4. / 3. * k * gs2 * mt * (2. + 3. * logmt);
-   const double qcd1l_gs = 8. / 3. * k * gs2 * mt * (4. - 3. * logmt);
+   const double qcd1l_mt = -4./3 * k * gs2 * mt * (2 + 3*logmt);
+   const double qcd1l_gs =  8./3 * k * gs2 * mt * (4 - 3*logmt);
 
    const double delta_mt_over_mt = sqcd_1l_over_mt - qcd_1l_SM_over_mt;
    const double delta_gs_over_gs = -0.5 * delta_alpha_s;
 
    const double mfcon = delta_mt_over_mt * qcd1l_mt + delta_gs_over_gs * qcd1l_gs;
 
-   model."<> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <>"();
+   // calculate top quark pole masses in the BSM and in the SM
+   model." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
    sm.calculate_MFu_pole();
 
    const auto Mf_bsm = model.get_physical()."<> mtstr <>";
    const auto Mf_sm = sm.get_physical().MFu(2);
    const auto mf_sm_0l = sm.get_MFu(2);
 
-   const double mf_sm = Mf_bsm - Mf_sm + mf_sm_0l - mfcon;   // eq. (4.18b)  JHEP07(2020)197
+   // determine SM MS-bar top quark mass from top quark pole mass matching
+   const double mf_sm = Mf_bsm - Mf_sm + mf_sm_0l - mfcon; // Eq.(4.18b) JHEP07(2020)197
 
    return Abs(mf_sm);
 }"

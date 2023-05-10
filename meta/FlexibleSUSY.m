@@ -1451,7 +1451,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             callMatch2LoopTopMass = "",
             setGaugeLessLimit = "",
             includeMSSMTwoLoopTopMassHeader = "",
-            createMt2Loop = ""},
+            createSMMt2LoopFunction = ""},
            If[FlexibleSUSY`FlexibleEFTHiggs === True,
               If[Head[susyScaleMatching] === List,
                  userMatching = Constraint`ApplyConstraints[susyScaleMatching];
@@ -1476,7 +1476,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
           If[ FlexibleSUSY`UseHiggs3LoopMSSM === True, 
               threeLoopLambdaMatching =  FlexibleEFTHiggsMatching`Create3LoopMatching[];
-              createMt2Loop =  FlexibleEFTHiggsMatching`CreateMt2Loop[];
+              createSMMt2LoopFunction =  FlexibleEFTHiggsMatching`CreateSMMt2LoopFunction[];
               callMatch2LoopTopMass =  FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[];
               includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
             ];
@@ -1500,7 +1500,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@calculateMHiggsPoleNoMomentumIteration@" -> IndentText[calculateMHiggsPoleNoMomentumIteration],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
-                         "@createMt2Loop@" -> createMt2Loop,
+                         "@createSMMt2LoopFunction@" -> createSMMt2LoopFunction,
                          "@callMatch2LoopTopMass@" -> IndentText[callMatch2LoopTopMass],
                          "@setGaugeLessLimit@" -> IndentText[setGaugeLessLimit], 
                          "@includeMSSMTwoLoopTopMassHeader@" -> includeMSSMTwoLoopTopMassHeader,
