@@ -187,7 +187,7 @@ double calculate_MFt_MSbar_sm_2l(
 
    const double k = oneOver16PiSqr;
    const double logmt = Log(mt2 / Q2);
-   const double yt_SM = sm.get_Yu(2, 2);
+   const double yt_SM = sm_0l.get_Yu(2, 2);
 
    mssm_twoloop_mt::Parameters pars;
    pars.g3 = gs;
