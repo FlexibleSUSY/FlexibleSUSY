@@ -786,6 +786,8 @@ double calculate_Mh2_1l_shift(
 }
 
 /**
+ * @brief Calculates pure 2-loop contributions to the BSM Higgs pole mass.
+ *
  * Calculates difference between BSM Higgs pole mass (calculated using
  * only 2-loop contributions (i.e. no inclusion of 1-loop
  * contributions) using the given BSM parameters) and the BSM Higgs
@@ -830,6 +832,18 @@ double calculate_Mh2_2l_shift(
    return mh2_shift_2l;
 }
 
+/**
+ * @brief Calculates pure 2-loop contributions to the SM Higgs pole mass.
+ *
+ * @note The given SM and BSM model parameters should be in the
+ * gauge-less limit (g1 = g2 = 0).
+ *
+ * @param sm SM parameters
+ * @param model BSM parameters
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return Mh_pole^2 - mh_tree^2 (only 2-loop terms)
+ */
 double calculate_Mh2_2l_shift(
    const standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model,
@@ -838,7 +852,7 @@ double calculate_Mh2_2l_shift(
    const double p = 0.;
    const double self_energy_2l = Re(sm.self_energy_hh_2loop(p));
 
-   // Higgs tadpoles are included in the self-energy
+   // Note: Higgs tadpoles are included in the self-energy
    double mh2_shift = -self_energy_2l;
 
    if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
@@ -846,11 +860,10 @@ double calculate_Mh2_2l_shift(
       const double mh2_shift_1l = calculate_Mh2_1l_shift(model, idx);
       const double Q = sm_yl.get_scale();
 
-      mh2_shift +=
-         + (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm_yl.get_MFu(2), sm_yl.get_Yu(2,2)) 
-            + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm_yl.get_MFd(2), sm_yl.get_Yd(2,2))
-            + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm_yl.get_MFe(2), sm_yl.get_Ye(2,2))
-            ) * mh2_shift_1l;
+      mh2_shift += mh2_shift_1l *
+         (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm_yl.get_MFu(2), sm_yl.get_Yu(2,2))
+          + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm_yl.get_MFd(2), sm_yl.get_Yd(2,2))
+          + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm_yl.get_MFe(2), sm_yl.get_Ye(2,2)));
    }
 
    return mh2_shift;
@@ -1040,7 +1053,7 @@ void match_high_to_low_scale_sm_2l(Standard_model& sm,
       delta_v_gl += sm_1l.get_v() - v;
    }
 
-   const double mh2_bsm_shift    = calculate_Mh2_2l_shift( model_gl, idx);
+   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(model_gl, idx);
    const double mh2_sm_shift     = calculate_Mh2_2l_shift(sm_0l_gl, model_gl, idx);
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(sm_0l_gl);
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model_gl, idx);
