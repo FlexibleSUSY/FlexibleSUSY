@@ -194,6 +194,27 @@ std::tuple<double, double, double> calculate_mstop(
 }
 
 /**
+ * Calculates top quark pole in the BSM model at 2-loop level, including
+ * 2-loop QCD contributions.
+ *
+ * @param model BSM model parameters
+ * @return 2-loop top quark mass in the BSM
+ */
+double calculate_Mt_bsm_2l(
+   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model)
+{
+   auto model_2l = model;
+   model_2l.set_pole_mass_loop_order(2);
+   set_top_QCD_order(model_2l, 1);
+
+   model_2l." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
+
+   const auto Mt_bsm = model_2l.get_physical()." <> mtstr <> ";
+
+   return Mt_bsm;
+}
+
+/**
  * Calculates running MS-bar SM top quark mass, given the BSM model parameters.
  *
  * @note The given SM and BSM model parameters should be in the
@@ -207,11 +228,6 @@ double calculate_MFt_MSbar_sm_2l(
    const standard_model::Standard_model& sm,
    const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model_0l)
 {
-   auto model = model_0l;
-
-   model.set_pole_mass_loop_order(2);
-   set_top_QCD_order(model, 1);
-
    const double Q = model_0l.get_scale();
    const double Q2 = Sqr(Q);
    const double mt = sm.get_MFu(2); // is equal to the top quark mass in the MSSM
@@ -242,7 +258,7 @@ double calculate_MFt_MSbar_sm_2l(
    const double sqcd_1l_over_mt = mssm_twoloop_mt::dMt_over_mt_1loop(pars);
    const double qcd_1l_SM_over_mt = k * g32 * 4./3 * (4 - 3*Log(mt2 / Q2));
 
-   // top mass contribution at O(as) SM subscript
+   // top mass contribution at O(as) in the SM
    const double qcd1l_mt = -4./3 * k * g32 * mt * (2 + 3*logmt);
    const double qcd1l_g3 =  8./3 * k * g32 * mt * (4 - 3*logmt);
 
@@ -254,9 +270,7 @@ double calculate_MFt_MSbar_sm_2l(
    const double mt_con = delta_mt_over_mt * qcd1l_mt + delta_g3_over_g3 * qcd1l_g3;
 
    // calculate top quark pole masses in the BSM and in the SM
-   model." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
-
-   const auto Mt_bsm = model.get_physical()." <> mtstr <> ";
+   const double Mt_bsm = calculate_Mt_bsm_2l(model_0l);
    const auto [mt_sm_0l, Mt_sm] = calculate_mt_sm_2l(sm);
 
    // determine SM MS-bar top quark mass from top quark pole mass matching
