@@ -179,6 +179,21 @@ std::tuple<double, double> calculate_mt_sm_2l(
 }
 
 /**
+ * Calculates stop masses and stop mixing angle.
+ *
+ * @param model BSM model parameters
+ * @return tuple (mst_1, mst_2, theta_t)
+ */
+std::tuple<double, double, double> calculate_mstop(
+   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model)
+{
+   double mst_1, mst_2, theta_t;
+   model." <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
+
+   return std::make_tuple(mst_1, mst_2, theta_t);
+}
+
+/**
  * Calculates running MS-bar SM top quark mass, given the BSM model parameters.
  *
  * @note The given SM and BSM model parameters should be in the
@@ -197,9 +212,6 @@ double calculate_MFt_MSbar_sm_2l(
    model.set_pole_mass_loop_order(2);
    set_top_QCD_order(model, 1);
 
-   double mst_1, mst_2, theta_t;
-   model_0l." <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
-
    const double Q = model_0l.get_scale();
    const double Q2 = Sqr(Q);
    const double mt = sm.get_MFu(2); // is equal to the top quark mass in the MSSM
@@ -211,6 +223,8 @@ double calculate_MFt_MSbar_sm_2l(
    const double k = oneOver16PiSqr;
    const double logmt = Log(mt2 / Q2);
    const double yt_SM = sm.get_Yu(2, 2);
+
+   const auto [mst_1, mst_2, theta_t] = calculate_mstop(model_0l);
 
    const mssm_twoloop_mt::Parameters pars{
       .g3 = g3,
