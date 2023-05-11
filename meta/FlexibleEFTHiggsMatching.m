@@ -198,13 +198,13 @@ double calculate_MFt_MSbar_sm_2l(
    set_top_QCD_order(model, 1);
 
    double mst_1, mst_2, theta_t;
-   model." <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
+   model_0l." <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
 
-   const double Q = model.get_scale();
+   const double Q = model_0l.get_scale();
    const double Q2 = Sqr(Q);
    const double mt = sm.get_MFu(2); // is equal to the top quark mass in the MSSM
    const double mt2 = Sqr(mt);
-   const double g3 = model.get_" <> g3str <> "();
+   const double g3 = model_0l.get_" <> g3str <> "();
    const double g32 = Sqr(g3);
    const double alpha_s = g32*oneOver4Pi;
 
@@ -215,11 +215,11 @@ double calculate_MFt_MSbar_sm_2l(
    const mssm_twoloop_mt::Parameters pars{
       .g3 = g3,
       .mt = mt,
-      .mg = model.get_" <> mglustr <> "(),
+      .mg = model_0l.get_" <> mglustr <> "(),
       .mst1 = mst_1,
       .mst2 = mst_2,
-      .msusy = Sqrt(Sqrt(Abs(model.get_" <> md2str <> "(2, 2)))) *
-               Sqrt(Sqrt(Abs(model.get_" <> mq2str <> "(2, 2)))),
+      .msusy = Sqrt(Sqrt(Abs(model_0l.get_" <> md2str <> "(2, 2)))) *
+               Sqrt(Sqrt(Abs(model_0l.get_" <> mq2str <> "(2, 2)))),
       .xt = Sin(2*theta_t)*(Sqr(mst_1) - Sqr(mst_2))/(2*mt),
       .Q = Q
    };
