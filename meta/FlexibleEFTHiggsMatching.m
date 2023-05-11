@@ -156,21 +156,44 @@ Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]],
         mq2str = CConversion`RValueToCFormString[SARAH`SoftSquark],
         mtstr = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]]},
 "/**
+ * Calculates SM top quark masses at tree-level and 2-loop level.
+ * Returns the tuple (mt, Mt) with mt being the SM tree-level top
+ * quark mass and Mt being the SM top quark pole mass calculated
+ * at 2-loop level (including 2-loop QCD contributions).
+ *
+ * @param sm Standard Model parameters
+ * @return tuple (mt, Mt)
+ */
+std::tuple<double, double> calculate_mt_sm_2l(
+   const standard_model::Standard_model& sm)
+{
+   auto sm_2l = sm;
+   sm_2l.set_pole_mass_loop_order(2);
+   set_top_QCD_order(sm_2l, 1);
+   sm_2l.calculate_MFu_pole();
+
+   const auto Mt = sm_2l.get_physical().MFu(2);
+   const auto mt = sm_2l.get_MFu(2);
+
+   return std::make_tuple(mt, Mt);
+}
+
+/**
  * Calculates running MS-bar SM top quark mass, given the BSM model parameters.
  *
- * @param sm_0l Standard Model parameters
+ * @note The given SM and BSM model parameters should be in the
+ * gauge-less limit (g1 = g2 = 0).
+ *
+ * @param sm Standard Model parameters
  * @param model_0l BSM model parameters
  * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
  */
 double calculate_MFt_MSbar_sm_2l(
-   const standard_model::Standard_model& sm_0l,
+   const standard_model::Standard_model& sm,
    const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model_0l)
 {
    auto model = model_0l;
-   auto sm = sm_0l;
 
-   sm.set_pole_mass_loop_order(2);
-   set_top_QCD_order(sm, 1);
    model.set_pole_mass_loop_order(2);
    set_top_QCD_order(model, 1);
 
@@ -179,7 +202,7 @@ double calculate_MFt_MSbar_sm_2l(
 
    const double Q = model.get_scale();
    const double Q2 = Sqr(Q);
-   const double mt = sm_0l.get_MFu(2); // is equal to the top quark mass in the MSSM
+   const double mt = sm.get_MFu(2); // is equal to the top quark mass in the MSSM
    const double mt2 = Sqr(mt);
    const double gs = model.get_" <> g3str <> "();
    const double gs2 = Sqr(gs);
@@ -187,7 +210,7 @@ double calculate_MFt_MSbar_sm_2l(
 
    const double k = oneOver16PiSqr;
    const double logmt = Log(mt2 / Q2);
-   const double yt_SM = sm_0l.get_Yu(2, 2);
+   const double yt_SM = sm.get_Yu(2, 2);
 
    mssm_twoloop_mt::Parameters pars;
    pars.g3 = gs;
@@ -214,20 +237,18 @@ double calculate_MFt_MSbar_sm_2l(
    const double delta_gs_over_gs = -0.5 * delta_alpha_s;
 
    // 2-loop contribution from parameter conversion
-   const double mf_con = delta_mt_over_mt * qcd1l_mt + delta_gs_over_gs * qcd1l_gs;
+   const double mt_con = delta_mt_over_mt * qcd1l_mt + delta_gs_over_gs * qcd1l_gs;
 
    // calculate top quark pole masses in the BSM and in the SM
    model." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
-   sm.calculate_MFu_pole();
 
-   const auto Mf_bsm = model.get_physical()." <> mtstr <> ";
-   const auto Mf_sm = sm.get_physical().MFu(2);
-   const auto mf_sm_0l = sm.get_MFu(2);
+   const auto Mt_bsm = model.get_physical()." <> mtstr <> ";
+   const auto [mt_sm_0l, Mt_sm] = calculate_mt_sm_2l(sm);
 
    // determine SM MS-bar top quark mass from top quark pole mass matching
-   const double mf_sm = Mf_bsm - Mf_sm + mf_sm_0l - mf_con; // Eq.(4.18b) JHEP07(2020)197
+   const double mt_sm = Mt_bsm - Mt_sm + mt_sm_0l - mt_con; // Eq.(4.18b) JHEP07(2020)197
 
-   return Abs(mf_sm);
+   return Abs(mt_sm);
 }"
 ];
 

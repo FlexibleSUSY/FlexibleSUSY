@@ -31,12 +31,12 @@
 #ifdef ENABLE_THREADS
 #include "global_thread_pool.hpp"
 #endif
-#include <cmath>
 #include "sm_twoloophiggs.hpp"
 #include "sm_threeloophiggs.hpp"
 #include "sm_fourloophiggs.hpp"
 #include "sm_threeloophiggs.hpp"
 @includeMSSMTwoLoopTopMassHeader@
+#include <tuple>
 
 using namespace flexiblesusy::standard_model;
 
