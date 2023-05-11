@@ -221,18 +221,18 @@ double calculate_Mt_bsm_2l(
  * gauge-less limit (g1 = g2 = 0).
  *
  * @param sm Standard Model parameters
- * @param model_0l BSM model parameters
+ * @param model BSM model parameters
  * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
  */
 double calculate_MFt_MSbar_sm_2l(
    const standard_model::Standard_model& sm,
-   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model_0l)
+   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model)
 {
-   const double Q = model_0l.get_scale();
+   const double Q = model.get_scale();
    const double Q2 = Sqr(Q);
    const double mt = sm.get_MFu(2); // is equal to the top quark mass in the MSSM
    const double mt2 = Sqr(mt);
-   const double g3 = model_0l.get_" <> g3str <> "();
+   const double g3 = model.get_" <> g3str <> "();
    const double g32 = Sqr(g3);
    const double alpha_s = g32*oneOver4Pi;
 
@@ -240,16 +240,16 @@ double calculate_MFt_MSbar_sm_2l(
    const double logmt = Log(mt2 / Q2);
    const double yt_SM = sm.get_Yu(2, 2);
 
-   const auto [mst_1, mst_2, theta_t] = calculate_mstop(model_0l);
+   const auto [mst_1, mst_2, theta_t] = calculate_mstop(model);
 
    const mssm_twoloop_mt::Parameters pars{
       .g3 = g3,
       .mt = mt,
-      .mg = model_0l.get_" <> mglustr <> "(),
+      .mg = model.get_" <> mglustr <> "(),
       .mst1 = mst_1,
       .mst2 = mst_2,
-      .msusy = Sqrt(Sqrt(Abs(model_0l.get_" <> md2str <> "(2, 2)))) *
-               Sqrt(Sqrt(Abs(model_0l.get_" <> mq2str <> "(2, 2)))),
+      .msusy = Sqrt(Sqrt(Abs(model.get_" <> md2str <> "(2, 2)))) *
+               Sqrt(Sqrt(Abs(model.get_" <> mq2str <> "(2, 2)))),
       .xt = Sin(2*theta_t)*(Sqr(mst_1) - Sqr(mst_2))/(2*mt),
       .Q = Q
    };
@@ -262,7 +262,7 @@ double calculate_MFt_MSbar_sm_2l(
    const double qcd1l_mt = -4./3 * k * g32 * mt * (2 + 3*logmt);
    const double qcd1l_g3 =  8./3 * k * g32 * mt * (4 - 3*logmt);
 
-   const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model_0l);
+   const double delta_alpha_s = calculate_delta_alpha_s(alpha_s, model);
    const double delta_mt_over_mt = sqcd_1l_over_mt - qcd_1l_SM_over_mt;
    const double delta_g3_over_g3 = -0.5 * delta_alpha_s;
 
@@ -270,7 +270,7 @@ double calculate_MFt_MSbar_sm_2l(
    const double mt_con = delta_mt_over_mt * qcd1l_mt + delta_g3_over_g3 * qcd1l_g3;
 
    // calculate top quark pole masses in the BSM and in the SM
-   const double Mt_bsm = calculate_Mt_bsm_2l(model_0l);
+   const double Mt_bsm = calculate_Mt_bsm_2l(model);
    const auto [mt_sm_0l, Mt_sm] = calculate_mt_sm_2l(sm);
 
    // determine SM MS-bar top quark mass from top quark pole mass matching
