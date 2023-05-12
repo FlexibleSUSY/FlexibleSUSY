@@ -92,13 +92,11 @@ const double k3 = threeLoop;
 const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_g3less.get_Yu(2, 2);
 const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
 const double sqr_delta_yt_1l = Sqr(delta_yt_1l);
-const double delta_g3_1l = sm_1l.get_g3() - sm_0l_gl.get_g3();
+const double delta_g3_1l = sm_1l.get_g3() - gs;
 
 // 1st derivative of 1-loop SM contribution to Mh w.r.t. yt, times Delta yt(2l)
 const double S1_deriv_yt =
-   sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(0, Q,
-                                                  sm_0l_gl.get_MFu(2),
-                                                  sm_0l_gl.get_Yu(2, 2)) * delta_yt_2l;
+   delta_yt_2l * sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(0, Q, sm_0l_gl.get_MFu(2), yt);
 // 2nd derivative of 1-loop SM contribution to Mh w.r.t. yt, times [Delta yt(1l)]^2
 const double S1_deriv_yt2 =
    -0.5*(24*k*mt2*(7 + 6*logmt)) * sqr_delta_yt_1l;
@@ -119,11 +117,11 @@ const double delta_lambda_3l = [&] {
    try {
       // 3-loop self-energy, calculated using tree-level parameters
       const auto self_energy_3l = Re(model_gl.self_energy_hh_3loop());
-      const auto Mh2_loop = (calculate_mh2_0l(model_gl) - self_energy_3l).eval();
+      const auto higgs_mass_matrix = (calculate_mh2_0l(model_gl) - self_energy_3l).eval();
 
       // calculate 3-loop Higgs pole mass in the gauge-less limit
       Eigen::Array<double, 2, 1> Mh2_pole;
-      fs_diagonalize_hermitian(Mh2_loop, Mh2_pole);
+      fs_diagonalize_hermitian(higgs_mass_matrix, Mh2_pole);
 
       // calculate 3-loop Higgs mass loop correction in the gauge-less limit
       const double mh2_bsm_shift = Mh2_pole(idx) - Sqr(model_gl.get_Mhh(idx));
