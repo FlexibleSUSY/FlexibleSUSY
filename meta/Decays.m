@@ -954,12 +954,16 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "break;\n"
                  ] <>
                  "}\n" <>
-                 "case 2:\n" <>
+                 "case 2: {\n" <>
                  TextFormatting`IndentText[
+                    "// decoupling scheme automatically reorders Goldstones to first\n" <>
+                    "// positions in tree-level mass and mixing matrices. The\n" <>
+                    "// non-decoupled model does not.\n" <>
+                    "model.reorder_DRbar_masses();\n" <>
                     "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
                     "break;\n"
                   ] <>
-                  "default:\n" <>
+                  "}\ndefault:\n" <>
                   TextFormatting`IndentText[
                      "throw SetupError(\"flag value is not supported\");\n"
                  ]
