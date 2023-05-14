@@ -2168,29 +2168,44 @@ check_higgstools_incl() {
             return 1
         fi
     else
-      HIGGSTOOLSFLAGS="-Imodel_specific/SM -I$higgstools_inc_dir"
+        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
+        return 0
     fi
     return 0
 }
 
 check_higgstools_libs() {
     check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
+    if test "x$found_lib" = "x" ; then
+        if test "x$enable_higgstools" = "xyes" ; then
+            message "Error: The HiggsTools library must be installed if you want"
+            message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
+            message "   You can use the --with-higgstools-libdir option to specify the"
+            message "   location of the HiggsTools library."
+            exit 1
+        else
+            return 1
+        fi
+    else
         local HIGGSTOOLSLIBS_="-lHiggsTools"
         if [ -z "$higgstools_lib_dir" ]; then
             # assume that the linker will look in the default paths
             HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
         else
-            HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
+            # assume that the linker will look in the default paths
+            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
         fi
         return 0
+    fi
+    return 0
 }
 
 check_higgstools() {
-        if check_higgstools_incl && check_higgstools_libs ; then
-            enable_higgstools=yes
-         else
-            enable_higgstools=no
-        fi
+    if check_higgstools_incl && check_higgstools_libs ; then
+        enable_higgstools=yes
+    else
+        enable_higgstools=no
+    fi
 }
 
 #_____________________________________________________________________
@@ -3356,10 +3371,8 @@ enable_defines() {
 
     if test "x$enable_higgstools" = "xyes" ; then
         DEFINE_ENABLE_HIGGSTOOLS="#define ENABLE_HIGGSTOOLS 1"
-        message "Enabling HiggsTools"
     else
         DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
-        message "Disabling HiggsTools"
     fi
     logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
 

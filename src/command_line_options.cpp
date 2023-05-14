@@ -111,16 +111,16 @@ void Command_line_options::print_usage(std::ostream& ostr) const
            "                                     no SLHA output is written.\n"
            "                                     If <filename> is - then the output is\n"
            "                                     printed to stdout.\n"
-           "  --spectrum-output-file=<filename>  file to write spectrum to\n"
+           "  --spectrum-output-file=<filename>  File to write spectrum to\n"
            "  --database-output-file=<filename>  SQLite database file to write\n"
            "                                     parameter point to\n"
            "  --higgsbounds-dataset=<directory>  Location of HiggsBounds dataset\n"
            "  --higgssignals-dataset=<directory> Location of HiggsSignals dataset\n"
-           "  --rgflow-output-file=<filename>    file to write rgflow to\n"
-           "  --build-info                       print build information\n"
-           "  --model-info                       print model information\n"
-           "  --help,-h                          print this help message\n"
-           "  --version,-v                       print program version"
+           "  --rgflow-output-file=<filename>    File to write rgflow to\n"
+           "  --build-info                       Print build information\n"
+           "  --model-info                       Print model information\n"
+           "  --help,-h                          Print this help message\n"
+           "  --version,-v                       Print program version"
         << std::endl;
 }
 
