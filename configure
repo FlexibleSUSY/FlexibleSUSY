@@ -2168,7 +2168,7 @@ check_higgstools_incl() {
             return 1
         fi
     else
-        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
+        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir -Imodel_specific/SM"
         return 0
     fi
     return 0
@@ -2193,7 +2193,7 @@ check_higgstools_libs() {
             HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
         else
             # assume that the linker will look in the default paths
-            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
+            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a"
         fi
         return 0
     fi
@@ -3371,8 +3371,10 @@ enable_defines() {
 
     if test "x$enable_higgstools" = "xyes" ; then
         DEFINE_ENABLE_HIGGSTOOLS="#define ENABLE_HIGGSTOOLS 1"
+        message "Enabling HiggsTools"
     else
         DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
+        message "Disabling HiggsTools"
     fi
     logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
 
