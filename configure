@@ -2190,10 +2190,10 @@ check_higgstools_libs() {
         local HIGGSTOOLSLIBS_="-lHiggsTools"
         if [ -z "$higgstools_lib_dir" ]; then
             # assume that the linker will look in the default paths
-            HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
+            HIGGSTOOLSLIBS="-Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
         else
             # assume that the linker will look in the default paths
-            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
+            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
         fi
         return 0
     fi
