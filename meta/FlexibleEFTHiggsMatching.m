@@ -23,7 +23,7 @@
 BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopMasses`", "Constraint`", "ThresholdCorrections`", "Parameters`", "Utils`"}];
 
 CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
-Create3LoopMatching::usage = "";
+Create3LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 3-loop level.";
 CallMatch2LoopTopMass::usage = "";
 CreateSMMt2LoopFunction::usage = "Creates a function that calculates the running MS-bar top quark mass in the SM from the BSM parameters";
 CalculateRunningUpQuarkMasses::usage = "";
@@ -49,23 +49,24 @@ fs_diagonalize_hermitian(mass_matrix, eigenvalues);
 " <> outVar <> " = eigenvalues(idx);"
 
 
-Create3LoopMatching[] :=
-"const auto model = [&] {
+Create3LoopMatching[inputModel_String, outputModel_String, higgsIndex_String] :=
+"// calculate running masses of the input model
+const auto model = [] (const auto& model_input) {
    auto model = model_input;
    model.calculate_DRbar_masses();
    return model;
-}();
-const auto model_gl = make_gaugeless_g1_g2(model_input);
+}(" <> inputModel <> ");
+const auto model_gl = make_gaugeless_g1_g2(model);
 const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
-const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
-const auto sm_1l = match_high_to_low_scale_sm_1l_copy(sm, model, idx);
-const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(sm, model_gl, idx);
-const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(sm, model_gl, idx);
-const auto sm_1l_gl_g3less = match_high_to_low_scale_sm_1l_copy(sm, model_no_g3, idx);
-const auto sm_2l = match_high_to_low_scale_sm_2l_copy(sm, model, idx);
+const auto sm_0l = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
+const auto sm_1l = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
+const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
+const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
+const auto sm_1l_gl_g3less = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_no_g3, " <> higgsIndex <> ");
+const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
 
-sm = sm_2l;
+" <> outputModel <> " = sm_2l;
 
 // calculation of 3-loop threshold corrections below
 
@@ -124,21 +125,21 @@ const double delta_lambda_3l = [&] {
       fs_diagonalize_hermitian(higgs_mass_matrix, Mh2_pole);
 
       // calculate 3-loop Higgs mass loop correction in the gauge-less limit
-      const double mh2_bsm_shift = Mh2_pole(idx) - Sqr(model_gl.get_Mhh(idx));
+      const double mh2_bsm_shift = Mh2_pole(" <> higgsIndex <> ") - Sqr(model_gl.get_Mhh(" <> higgsIndex <> "));
 
       // Eq.(4.28d) JHEP07(2020)197
       delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion)/v2;
    } catch (const flexiblesusy::Error& e) {
       VERBOSE_MSG(\"Error: Calculation of 3-loop Higgs pole mass in the gauge-less limit in the " <> ToString[FlexibleSUSY`FSModelName] <> " at the matching scale failed: \" << e.what());
-      sm.get_problems().flag_bad_mass(standard_model_info::hh);
+      " <> outputModel <> ".get_problems().flag_bad_mass(standard_model_info::hh);
    }
    return delta_lambda_3l;
 }();
 
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
-sm.set_Lambdax(lambda_3l);
-sm.calculate_DRbar_masses();";
+" <> outputModel <> ".set_Lambdax(lambda_3l);
+" <> outputModel <> ".calculate_DRbar_masses();";
 
 
 CallMatch2LoopTopMass[] :=

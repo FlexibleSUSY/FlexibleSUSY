@@ -1097,6 +1097,13 @@ void match_high_to_low_scale_sm_2l(
    sm.calculate_DRbar_masses();
 }
 
+/**
+ * Calculate SM parameters from BSM parameters at 3-loop level.
+ *
+ * @param SM (output) parameters (to be determined)
+ * @param BSM (input) parameters
+ * @param idx Higgs index (in mass ordered Higgs multiplet)
+ */
 void match_high_to_low_scale_sm_3l(
    standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model_input,
