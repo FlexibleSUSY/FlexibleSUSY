@@ -143,10 +143,7 @@ const double lambda_3l = lambda_2l + delta_lambda_3l;
 
 
 CallMatch2LoopTopMass[] :=
-"const double delta_vev = sm_1l.get_v() - sm_0l.get_v();
-const double yt_0l = sm_0l.get_Yu(2,2);
-const double mt_2l = calculate_MFt_MSbar_sm_2l(sm_0l, model);
-sm.set_Yu(2, 2, (Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v));"
+"sm.set_Yu(2, 2, calculate_yt_sm_2l(sm_0l, sm_1l, model));"
 
 CreateSMMt2LoopFunction[] :=
 Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]], 
@@ -276,6 +273,27 @@ double calculate_MFt_MSbar_sm_2l(
    const double mt_sm = Mt_bsm - Mt_sm + mt_sm_0l - mt_con; // Eq.(4.18b) JHEP07(2020)197
 
    return Abs(mt_sm);
+}
+
+/**
+ * Calculates SM top quark Yukawa coupling at 2-loop level.
+ *
+ * @param sm_0l SM parameters (determined from BSM parameters at tree-level)
+ * @param sm_1l SM parameters (determined from BSM parameters at 1-loop level)
+ * @param model BSM parameters
+ */
+double calculate_yt_sm_2l(
+   const standard_model::Standard_model& sm_0l,
+   const standard_model::Standard_model& sm_1l,
+   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model)
+{
+   const double delta_vev = sm_1l.get_v() - sm_0l.get_v();
+   const double yt_0l = sm_0l.get_Yu(2,2);
+   const double mt_2l = calculate_MFt_MSbar_sm_2l(sm_0l, model);
+   const double v     = sm_0l.get_v();
+   const double yt_2l = Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v;
+
+   return yt_2l;
 }"
 ];
 
