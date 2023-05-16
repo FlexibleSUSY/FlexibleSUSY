@@ -1474,17 +1474,17 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
               setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetGaugeLessLimit["model"];
               calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
-          If[ FlexibleSUSY`UseHiggs3LoopMSSM === True, 
-              threeLoopLambdaMatching =  FlexibleEFTHiggsMatching`Create3LoopMatching[];
-              createSMMt2LoopFunction =  FlexibleEFTHiggsMatching`CreateSMMt2LoopFunction[];
-              callMatch2LoopTopMass =  FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[];
-              includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
-            ];
+              If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
+		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", "idx"];
+		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMt2LoopFunction[];
+		 callMatch2LoopTopMass = FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[];
+		 includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
+              ];
 
               calculateMUpQuarkPole1L    = FlexibleEFTHiggsMatching`CalculateMUpQuarkPole1L[];
               calculateMDownQuarkPole1L  = FlexibleEFTHiggsMatching`CalculateMDownQuarkPole1L[];
               calculateMDownLeptonPole1L = FlexibleEFTHiggsMatching`CalculateMDownLeptonPole1L[];
-             ];
+           ];
            WriteOut`ReplaceInFiles[files,
                        { "@alphaS1Lmatching@"        -> IndentText[WrapLines[alphaS1Lmatching]],
                          "@alphaEM1Lmatching@"       -> IndentText[WrapLines[alphaEM1Lmatching]],

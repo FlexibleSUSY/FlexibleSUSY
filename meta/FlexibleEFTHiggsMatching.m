@@ -23,7 +23,7 @@
 BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopMasses`", "Constraint`", "ThresholdCorrections`", "Parameters`", "Utils`"}];
 
 CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
-Create3LoopMatching::usage = "";
+Create3LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 3-loop level.";
 CallMatch2LoopTopMass::usage = "";
 CreateSMMt2LoopFunction::usage = "Creates a function that calculates the running MS-bar top quark mass in the SM from the BSM parameters";
 CalculateRunningUpQuarkMasses::usage = "";
@@ -49,23 +49,24 @@ fs_diagonalize_hermitian(mass_matrix, eigenvalues);
 " <> outVar <> " = eigenvalues(idx);"
 
 
-Create3LoopMatching[] :=
-"const auto model = [&] {
+Create3LoopMatching[inputModel_String, outputModel_String, higgsIndex_String] :=
+"// calculate running masses of the input model
+const auto model = [] (const auto& model_input) {
    auto model = model_input;
    model.calculate_DRbar_masses();
    return model;
-}();
-const auto model_gl = make_gaugeless_g1_g2(model_input);
+}(" <> inputModel <> ");
+const auto model_gl = make_gaugeless_g1_g2(model);
 const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
-const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
-const auto sm_1l = match_high_to_low_scale_sm_1l_copy(sm, model, idx);
-const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(sm, model_gl, idx);
-const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(sm, model_gl, idx);
-const auto sm_1l_gl_g3less = match_high_to_low_scale_sm_1l_copy(sm, model_no_g3, idx);
-const auto sm_2l = match_high_to_low_scale_sm_2l_copy(sm, model, idx);
+const auto sm_0l = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
+const auto sm_1l = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
+const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
+const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
+const auto sm_1l_gl_g3less = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_no_g3, " <> higgsIndex <> ");
+const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
 
-sm = sm_2l;
+" <> outputModel <> " = sm_2l;
 
 // calculation of 3-loop threshold corrections below
 
@@ -125,7 +126,7 @@ const double mh2_bsm_shift = [] (standard_model::Standard_model& sm, const " <> 
       mh2_bsm_shift = Mh2_pole(idx) - Sqr(model.get_Mhh(idx));
    } catch (const flexiblesusy::Error& e) {
       VERBOSE_MSG(\"Error: Calculation of 3-loop Higgs pole mass in the gauge-less limit in the " <> ToString[FlexibleSUSY`FSModelName] <> " at the matching scale failed: \" << e.what());
-      sm.get_problems().flag_bad_mass(standard_model_info::hh);
+      " <> outputModel <> ".get_problems().flag_bad_mass(standard_model_info::hh);
    }
    return mh2_bsm_shift;
 }(sm, model_gl, idx);
@@ -134,15 +135,12 @@ const double mh2_bsm_shift = [] (standard_model::Standard_model& sm, const " <> 
 const double delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion)/v2;
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
-sm.set_Lambdax(lambda_3l);
-sm.calculate_DRbar_masses();";
+" <> outputModel <> ".set_Lambdax(lambda_3l);
+" <> outputModel <> ".calculate_DRbar_masses();";
 
 
 CallMatch2LoopTopMass[] :=
-"const double delta_vev = sm_1l.get_v() - sm_0l.get_v();
-const double yt_0l = sm_0l.get_Yu(2,2);
-const double mt_2l = calculate_MFt_MSbar_sm_2l(sm_0l, model);
-sm.set_Yu(2, 2, (Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v));"
+"sm.set_Yu(2, 2, calculate_yt_sm_2l(sm_0l, sm_1l, model));"
 
 CreateSMMt2LoopFunction[] :=
 Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]], 
@@ -272,6 +270,27 @@ double calculate_MFt_MSbar_sm_2l(
    const double mt_sm = Mt_bsm - Mt_sm + mt_sm_0l - mt_con; // Eq.(4.18b) JHEP07(2020)197
 
    return Abs(mt_sm);
+}
+
+/**
+ * Calculates SM top quark Yukawa coupling at 2-loop level.
+ *
+ * @param sm_0l SM parameters (determined from BSM parameters at tree-level)
+ * @param sm_1l SM parameters (determined from BSM parameters at 1-loop level)
+ * @param model BSM parameters
+ */
+double calculate_yt_sm_2l(
+   const standard_model::Standard_model& sm_0l,
+   const standard_model::Standard_model& sm_1l,
+   const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model)
+{
+   const double delta_vev = sm_1l.get_v() - sm_0l.get_v();
+   const double yt_0l = sm_0l.get_Yu(2,2);
+   const double mt_2l = calculate_MFt_MSbar_sm_2l(sm_0l, model);
+   const double v     = sm_0l.get_v();
+   const double yt_2l = Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v;
+
+   return yt_2l;
 }"
 ];
 

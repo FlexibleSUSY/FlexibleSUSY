@@ -1018,17 +1018,24 @@ void match_high_to_low_scale_sm_1l(
    sm.get_problems().add(sm_0l.get_problems());
 }
 
-/// calculates SM parameters `sm' from @ModelName@ parameters at 2-loop level
+/**
+ * Calculates SM parameters `sm' from @ModelName@ parameters at 2-loop level
+ *
+ * @param sm SM (output) parameters (to be determined)
+ * @param model_input BSM (input) parameters
+ * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
+ */
 void match_high_to_low_scale_sm_2l(
    standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model_input,
    int idx)
 {
-   const auto model = [&] {
+   // calculate running parameters of BSM model
+   const auto model = [] (const auto& model_input) {
       auto model = model_input;
       model.calculate_DRbar_masses();
       return model;
-   }();
+   }(model_input);
    const auto model_gl = make_gaugeless_g1_g2(model_input);
    const auto model_no_g3 = make_gaugeless_g3(model_gl);
 
@@ -1097,6 +1104,13 @@ void match_high_to_low_scale_sm_2l(
    sm.calculate_DRbar_masses();
 }
 
+/**
+ * Calculate SM parameters from BSM parameters at 3-loop level.
+ *
+ * @param SM (output) parameters (to be determined)
+ * @param BSM (input) parameters
+ * @param idx Higgs index (in mass ordered Higgs multiplet)
+ */
 void match_high_to_low_scale_sm_3l(
    standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model_input,
