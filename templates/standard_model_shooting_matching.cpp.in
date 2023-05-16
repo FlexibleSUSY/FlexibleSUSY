@@ -1205,12 +1205,7 @@ void match_low_to_high_scale_model_tree_level(
    model.set_@leftCoupling@(sm.get_g2()*standard_model_info::normalization_g2/@ModelName@_info::normalization_@leftCoupling@);
    model.set_@strongCoupling@(sm.get_g3()*standard_model_info::normalization_g3/@ModelName@_info::normalization_@strongCoupling@);
 
-   {
-      auto MODEL = &model;
-      const double VEV = sm.get_v();
-
-@applyUserMatching@
-   }
+   impose_user_matching(model, sm.get_v());
 
    Eigen::Matrix<double, 3, 3> upQuarksDRbar    = ZEROMATRIX(3,3);
    Eigen::Matrix<double, 3, 3> downQuarksDRbar  = ZEROMATRIX(3,3);
@@ -1228,6 +1223,9 @@ void match_low_to_high_scale_model_tree_level(
 /**
  * Imposes the user-defined matching conditions, defined in
  * MatchingScaleInput.
+ *
+ * @param model BSM model parameters (to be determined)
+ * @param VEV SM-like vacuum expectation value in the BSM model
  */
 void impose_user_matching(@ModelName@_mass_eigenstates& model, double VEV)
 {

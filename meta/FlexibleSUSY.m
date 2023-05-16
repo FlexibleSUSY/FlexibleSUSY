@@ -1496,7 +1496,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@calculateMDownQuarkPole1L@"  -> IndentText[calculateMDownQuarkPole1L],
                          "@calculateMDownLeptonPole1L@" -> IndentText[calculateMDownLeptonPole1L],
                          "@setYukawas@"              -> IndentText[WrapLines[setYukawas]],
-                         "@applyUserMatching@"       -> IndentText[IndentText[WrapLines[userMatching]]],
+                         "@applyUserMatching@"       -> IndentText[WrapLines[userMatching]],
                          "@calculateMHiggsPoleNoMomentumIteration@" -> IndentText[calculateMHiggsPoleNoMomentumIteration],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
