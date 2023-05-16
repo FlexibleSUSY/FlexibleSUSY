@@ -2199,24 +2199,24 @@ check_higgstools_libs() {
                 # assume that the linker will look in the default paths
                 HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
             fi
-	    elif [ "$extension" = "so" ] ; then
+        elif [ "$extension" = "so" ] ; then
             if [ "x$enable_static" = xyes ] ; then
-	            message "Warning: Requested creation of statically link executable but"
-		        message "         HiggsTools was compiled as a shared library."
-	        fi
-	        if [ -z "$higgstools_lib_dir" ]; then
+               message "Warning: Requested creation of statically link executable but"
+               message "         HiggsTools was compiled as a shared library."
+	         fi
+            if [ -z "$higgstools_lib_dir" ]; then
                 # assume that the linker will look in the default paths
                 HIGGSTOOLSLIBS="-Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
             else
                 # assume that the linker will look in the default paths
                 HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
             fi
-	    else
+       else
 	        message "Error: Cannot identify the type (static or shared) of"
 	        message "       HiggsTools library."
 	        exit 1
 	    fi
-        return 0
+       return 0
     fi
     return 0
 }
