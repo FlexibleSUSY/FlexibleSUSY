@@ -1153,19 +1153,17 @@ void match_high_to_low_scale_sm_3l(
  * CP-even Higgs boson mass of the @ModelName@ by requiring that the
  * 1-loop Higgs pole masses are equal in both models.
  *
- * @param sm Standard Model
- * @param model @ModelName@ parameters
- * @param loop_order downwards matching loop order
+ * @param sm Standard Model (output) parameters (to be determined)
+ * @param model @ModelName@ (input) parameters
+ * @param loop_order loop order at which the matching is performed
  * @param idx Higgs index (in mass ordered Higgs multiplet)
  */
 void match_high_to_low_scale_model(
    standard_model::Standard_model& sm,
-   const @ModelName@_mass_eigenstates& model1,
+   const @ModelName@_mass_eigenstates& model,
    int loop_order,
    int idx)
 {
-   auto model = model1;
-
    switch (loop_order) {
    case 0:
       match_high_to_low_scale_sm_0l(sm, model, idx);
