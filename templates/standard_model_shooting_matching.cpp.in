@@ -1151,10 +1151,9 @@ void match_high_to_low_scale_model(
    case 1:
       match_high_to_low_scale_sm_1l(sm, model, idx);
       break;
-   case 2: {
+   case 2:
       match_high_to_low_scale_sm_2l(sm, model, idx, 1);
       break;
-   }
    case 3:
       match_high_to_low_scale_sm_3l(sm, model, idx);
       break;
