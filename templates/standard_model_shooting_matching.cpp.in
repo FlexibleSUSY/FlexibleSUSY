@@ -67,6 +67,9 @@ void match_high_to_low_scale_sm_1l(
 void match_high_to_low_scale_sm_2l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int, int);
 
+void match_high_to_low_scale_sm_2l(
+   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+
 void match_high_to_low_scale_sm_3l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
 
@@ -1110,6 +1113,25 @@ void match_high_to_low_scale_sm_2l(
 }
 
 /**
+ * Calculates SM parameters `sm' from @ModelName@ parameters at 2-loop
+ * level.
+ *
+ * @note The top quark Yukawa coupling is determined at the 1-loop
+ * level.
+ *
+ * @param sm SM (output) parameters (to be determined)
+ * @param model BSM (input) parameters
+ * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
+ */
+void match_high_to_low_scale_sm_2l(
+   standard_model::Standard_model& sm,
+   const @ModelName@_mass_eigenstates& model,
+   int idx)
+{
+   match_high_to_low_scale_sm_2l(sm, model, idx, 1);
+}
+
+/**
  * Calculate SM parameters from BSM parameters at 3-loop level.
  *
  * @param SM (output) parameters (to be determined)
@@ -1152,7 +1174,7 @@ void match_high_to_low_scale_model(
       match_high_to_low_scale_sm_1l(sm, model, idx);
       break;
    case 2:
-      match_high_to_low_scale_sm_2l(sm, model, idx, 1);
+      match_high_to_low_scale_sm_2l(sm, model, idx);
       break;
    case 3:
       match_high_to_low_scale_sm_3l(sm, model, idx);
