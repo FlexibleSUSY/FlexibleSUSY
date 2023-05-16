@@ -1184,15 +1184,22 @@ void match_high_to_low_scale_model(
 
 /**
  * Calculates the gauge and Yukawa couplings and the SM-like VEV in
- * the @ModelName@ at the tree level from the known Standard Model
- * couplings and the SM vev.
+ * the BSM model @ModelName@ at the tree level from the known Standard
+ * Model couplings and the SM vev.
+ *
+ * @param model BSM model parameters (to be determined)
+ * @param sm_input Standard Model (input) parameters
  */
 void match_low_to_high_scale_model_tree_level(
    @ModelName@_mass_eigenstates& model,
    const standard_model::Standard_model& sm_input)
 {
-   auto sm = sm_input;
-   sm.calculate_DRbar_masses();
+   // calculate running SM masses
+   const auto sm = [] (const standard_model::Standard_model& sm_input) {
+      auto sm = sm_input;
+      sm.calculate_DRbar_masses();
+      return sm;
+   }(sm_input);
 
    model.set_@hyperchargeCoupling@(sm.get_g1()*standard_model_info::normalization_g1/@ModelName@_info::normalization_@hyperchargeCoupling@);
    model.set_@leftCoupling@(sm.get_g2()*standard_model_info::normalization_g2/@ModelName@_info::normalization_@leftCoupling@);
