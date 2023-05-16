@@ -65,7 +65,7 @@ void match_high_to_low_scale_sm_1l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
 
 void match_high_to_low_scale_sm_2l(
-   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int, int);
 
 void match_high_to_low_scale_sm_3l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
@@ -894,10 +894,11 @@ standard_model::Standard_model match_high_to_low_scale_sm_1l_copy(
 standard_model::Standard_model match_high_to_low_scale_sm_2l_copy(
    const standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model,
-   int idx)
+   int idx,
+   int yt_loop_order)
 {
    auto sm_2l = sm;
-   match_high_to_low_scale_sm_2l(sm_2l, model, idx);
+   match_high_to_low_scale_sm_2l(sm_2l, model, idx, yt_loop_order);
    return sm_2l;
 }
 
@@ -1024,11 +1025,13 @@ void match_high_to_low_scale_sm_1l(
  * @param sm SM (output) parameters (to be determined)
  * @param model_input BSM (input) parameters
  * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
+ * @param yt_loop_order loop order at which the SM top quark Yukawa coupling should be determined
  */
 void match_high_to_low_scale_sm_2l(
    standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model_input,
-   int idx)
+   int idx,
+   int yt_loop_order)
 {
    // calculate running parameters of BSM model
    const auto model = [] (const auto& model_input) {
@@ -1099,7 +1102,9 @@ void match_high_to_low_scale_sm_2l(
    sm = sm_1l;
    sm.set_Lambdax(lambda_2l);
 
+   if (yt_loop_order > 1) {
 @callMatch2LoopTopMass@
+   }
 
    sm.calculate_DRbar_masses();
 }
@@ -1147,10 +1152,7 @@ void match_high_to_low_scale_model(
       match_high_to_low_scale_sm_1l(sm, model, idx);
       break;
    case 2: {
-      auto sm_1l = sm;
-      match_high_to_low_scale_sm_1l(sm_1l, model, idx);
-      match_high_to_low_scale_sm_2l(sm, model, idx);
-      sm.set_Yu(2,2, sm_1l.get_Yu(2,2));
+      match_high_to_low_scale_sm_2l(sm, model, idx, 1);
       break;
    }
    case 3:

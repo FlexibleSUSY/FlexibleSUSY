@@ -1501,7 +1501,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
                          "@createSMMt2LoopFunction@" -> createSMMt2LoopFunction,
-                         "@callMatch2LoopTopMass@" -> IndentText[callMatch2LoopTopMass],
+                         "@callMatch2LoopTopMass@" -> IndentText[IndentText[callMatch2LoopTopMass]],
                          "@setGaugeLessLimit@" -> IndentText[setGaugeLessLimit], 
                          "@includeMSSMTwoLoopTopMassHeader@" -> includeMSSMTwoLoopTopMassHeader,
                          Sequence @@ GeneralReplacementRules[]
