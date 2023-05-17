@@ -54,11 +54,11 @@ std::size_t hash_decay(const Decay& decay)
 }
 
 Decay::Decay(
-   int pid_in_, std::initializer_list<int> pids_out_, double width_, std::string const& proc_string_)
-   : pid_in(pid_in_)
-   , pids_out(pids_out_)
-   , width(width_)
-   , proc_string(proc_string_)
+   int pid_in_, std::initializer_list<int> pids_out_, double width_, std::string&& proc_string_)
+   : pid_in{pid_in_}
+   , pids_out{pids_out_}
+   , width{width_}
+   , proc_string{std::move(proc_string_)}
 {
    std::sort(pids_out.begin(), pids_out.end());
 }
@@ -74,9 +74,9 @@ void Decays_list::clear()
    total_width = 0.;
 }
 
-void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, std::string const& proc_string)
+void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, std::string&& proc_string)
 {
-   const Decay decay(initial_pdg, pids_out, width, proc_string);
+   const Decay decay(initial_pdg, pids_out, width, std::move(proc_string));
    const auto decay_hash = hash_decay(decay);
 
    const auto pos = decays.find(decay_hash);

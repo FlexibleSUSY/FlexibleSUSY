@@ -33,7 +33,7 @@ namespace flexiblesusy {
 
 class Decay {
 public:
-   Decay(int, std::initializer_list<int>, double, std::string const&);
+   Decay(int, std::initializer_list<int>, double, std::string&&);
    ~Decay() = default;
    Decay(const Decay&) = default;
    Decay(Decay&&) = default;
@@ -84,7 +84,7 @@ public:
    std::size_t size() const noexcept { return decays.size(); }
 
    void clear();
-   void set_decay(double width, std::initializer_list<int> products, std::string const&);
+   void set_decay(double width, std::initializer_list<int> products, std::string&&);
    int get_particle_id() const { return initial_pdg; }
    const Decay& get_decay(std::initializer_list<int> products) const;
    double get_total_width() const { return total_width; }
