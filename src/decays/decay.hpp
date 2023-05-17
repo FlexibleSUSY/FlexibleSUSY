@@ -47,14 +47,14 @@ public:
    std::size_t get_final_state_size() const { return pids_out.size(); }
 
    double get_width() const { return width; }
-   std::string get_proc_string() const { return proc_string; }
+   std::string_view get_proc_string() const { return proc_string; }
    void set_width(double w) { width = w; }
 
 private:
    int pid_in{0};
    std::vector<int> pids_out{};
    double width{0.};
-   std::string proc_string;
+   std::string proc_string{};
 };
 
 std::size_t hash_decay(const Decay& decay);
