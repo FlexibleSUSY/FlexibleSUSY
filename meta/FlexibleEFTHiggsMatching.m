@@ -288,7 +288,7 @@ double calculate_yt_sm_2l(
    const double yt_0l = sm_0l.get_Yu(2,2);
    const double mt_2l = calculate_MFt_MSbar_sm_2l(sm_0l, model);
    const double v     = sm_0l.get_v();
-   const double yt_2l = Sqrt(2) * mt_2l / v - yt_0l * delta_vev / v;
+   const double yt_2l = sqrt2 * mt_2l / v - yt_0l * delta_vev / v;
 
    return yt_2l;
 }"
