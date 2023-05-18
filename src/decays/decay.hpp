@@ -33,7 +33,17 @@ namespace flexiblesusy {
 
 class Decay {
 public:
-   Decay(int, std::initializer_list<int>, double, std::string const&);
+
+template <typename T>
+   Decay(
+      int pid_in_, std::initializer_list<int> pids_out_, double width_, T&& proc_string_)
+      : pid_in{pid_in_}
+      , pids_out{pids_out_}
+      , width{width_}
+      , proc_string{std::forward<T>(proc_string_)}
+   {
+      std::sort(pids_out.begin(), pids_out.end());
+   }
    ~Decay() = default;
    Decay(const Decay&) = default;
    Decay(Decay&&) = default;
@@ -84,7 +94,29 @@ public:
    std::size_t size() const noexcept { return decays.size(); }
 
    void clear();
-   void set_decay(double width, std::initializer_list<int> products, std::string const&);
+
+   template <typename T>
+   void set_decay(double width, std::initializer_list<int> pids_out, T&& proc_string)
+   {
+      const Decay decay(initial_pdg, pids_out, width, std::forward<T>(proc_string));
+      const auto decay_hash = hash_decay(decay);
+
+      const auto pos = decays.find(decay_hash);
+      if (pos != std::end(decays)) {
+         total_width -= pos->second.get_width();
+         pos->second.set_width(width);
+      } else {
+         decays.insert(pos, std::make_pair(decay_hash, decay));
+      }
+
+      // some channels give small negative withs
+      // we later check if for channels with width < 0
+      // |width/total_width| < threshold
+      // for that it makes more sense to calculate total_width
+      // as the sum of |width|
+      total_width += std::abs(width);
+   }
+
    int get_particle_id() const { return initial_pdg; }
    const Decay& get_decay(std::initializer_list<int> products) const;
    double get_total_width() const { return total_width; }
