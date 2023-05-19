@@ -2211,12 +2211,12 @@ check_higgstools_libs() {
                 # assume that the linker will look in the default paths
                 HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
             fi
-       else
-	        message "Error: Cannot identify the type (static or shared) of"
-	        message "       HiggsTools library."
-	        exit 1
-	    fi
-       return 0
+        else
+	         message "Error: Cannot identify the type (static or shared) of"
+	         message "       HiggsTools library."
+	         exit 1
+	     fi
+        return 0
     fi
     return 0
 }
