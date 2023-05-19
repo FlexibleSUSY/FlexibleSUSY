@@ -2187,14 +2187,35 @@ check_higgstools_libs() {
             return 1
         fi
     else
+        local filename
+        filename=$(basename -- "$found_lib")
+        local extension="${filename##*.}"
         local HIGGSTOOLSLIBS_="-lHiggsTools"
-        if [ -z "$higgstools_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
+        if [ "$extension" = "a" ] ; then
+            if [ -z "$higgstools_lib_dir" ]; then
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+            else
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+            fi
+        elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
+            if [ "x$enable_static" = xyes ] ; then
+               message "Warning: Requested creation of statically link executable but"
+               message "         HiggsTools was compiled as a shared library."
+	         fi
+            if [ -z "$higgstools_lib_dir" ]; then
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
+            else
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+            fi
         else
-            # assume that the linker will look in the default paths
-            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a"
-        fi
+	         message "Error: Cannot identify the type (static or shared) of"
+	         message "       HiggsTools library."
+	         exit 1
+	     fi
         return 0
     fi
     return 0
