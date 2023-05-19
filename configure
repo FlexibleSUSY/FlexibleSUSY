@@ -2199,7 +2199,7 @@ check_higgstools_libs() {
                 # assume that the linker will look in the default paths
                 HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
             fi
-        elif [ "$extension" = "so" ] ; then
+        elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
             if [ "x$enable_static" = xyes ] ; then
                message "Warning: Requested creation of statically link executable but"
                message "         HiggsTools was compiled as a shared library."
