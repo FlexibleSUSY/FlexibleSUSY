@@ -2168,7 +2168,7 @@ check_higgstools_incl() {
             return 1
         fi
     else
-        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir -Imodel_specific/SM"
+        HIGGSTOOLSFLAGS="-Imodel_specific/SM -I$higgstools_inc_dir"
         return 0
     fi
     return 0
@@ -2194,10 +2194,10 @@ check_higgstools_libs() {
         if [ "$extension" = "a" ] ; then
             if [ -z "$higgstools_lib_dir" ]; then
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic"
             else
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic"
             fi
         elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
             if [ "x$enable_static" = xyes ] ; then
@@ -2206,10 +2206,10 @@ check_higgstools_libs() {
 	         fi
             if [ -z "$higgstools_lib_dir" ]; then
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
+                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
             else
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
             fi
         else
 	         message "Error: Cannot identify the type (static or shared) of"

@@ -95,7 +95,7 @@ std::pair<int, double> call_HiggsTools(
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 4]
-      double a = 0, b = 4;
+      double a = 0.001, b = 4;
 
       double m = 0.1;
 
