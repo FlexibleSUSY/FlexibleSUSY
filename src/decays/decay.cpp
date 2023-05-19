@@ -53,16 +53,6 @@ std::size_t hash_decay(const Decay& decay)
    return hash_pid_list(pid_in, pids_out);
 }
 
-Decay::Decay(
-   int pid_in_, std::initializer_list<int> pids_out_, double width_, std::string const& proc_string_)
-   : pid_in(pid_in_)
-   , pids_out(pids_out_)
-   , width(width_)
-   , proc_string(proc_string_)
-{
-   std::sort(pids_out.begin(), pids_out.end());
-}
-
 Decays_list::Decays_list(int initial_pdg_)
    : initial_pdg(initial_pdg_)
 {
@@ -72,27 +62,6 @@ void Decays_list::clear()
 {
    decays.clear();
    total_width = 0.;
-}
-
-void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, std::string const& proc_string)
-{
-   const Decay decay(initial_pdg, pids_out, width, proc_string);
-   const auto decay_hash = hash_decay(decay);
-
-   const auto pos = decays.find(decay_hash);
-   if (pos != std::end(decays)) {
-      total_width -= pos->second.get_width();
-      pos->second.set_width(width);
-   } else {
-      decays.insert(pos, std::make_pair(decay_hash, std::move(decay)));
-   }
-
-   // some channels give small negative withs
-   // we later check if for channels with width < 0
-   // |width/total_width| < threshold
-   // for that it makes more sense to calculate total_width
-   // as the sum of |width|
-   total_width += std::abs(width);
 }
 
 const Decay& Decays_list::get_decay(
