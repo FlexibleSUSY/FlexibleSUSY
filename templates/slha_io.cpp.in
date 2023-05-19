@@ -439,7 +439,7 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
          if (partial_width < 0 && !is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
             std::stringstream ss;
             ss << std::scientific << partial_width;
-            throw std::runtime_error("Error in " + channel.get_proc_string() + ": partial width is negative (" + ss.str() + " GeV).");
+            throw std::runtime_error("Error in " + std::string(channel.get_proc_string()) + ": partial width is negative (" + ss.str() + " GeV).");
          }
          else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
             branching_ratio = 0;

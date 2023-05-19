@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <iosfwd>
 #include <string>
+#include <string_view>
 
 namespace flexiblesusy {
 
@@ -59,16 +60,16 @@ public:
    void print_version(std::ostream&) const;
    void reset();
 
-   const std::string& get_database_output_file() const { return database_output_file; }
-   const std::string& get_slha_input_file() const { return slha_input_file; }
-   const std::string& get_slha_output_file() const { return slha_output_file; }
-   const std::string& get_program_name() const { return program; }
-   const std::string& get_rgflow_file() const { return rgflow_file; }
-   const std::string& get_spectrum_file() const { return spectrum_file; }
+   std::string_view get_database_output_file() { return database_output_file; }
+   std::string_view get_slha_input_file() { return slha_input_file; }
+   std::string_view get_slha_output_file() { return slha_output_file; }
+   std::string_view get_program_name() { return program; }
+   std::string_view get_rgflow_file() { return rgflow_file; }
+   std::string_view get_spectrum_file() { return spectrum_file; }
 
-   static bool get_parameter_value(const std::string&, const std::string&, double&);
-   static bool get_parameter_value(const std::string&, const std::string&, int&);
-   static bool starts_with(const std::string&, const std::string&);
+   static bool get_parameter_value(const std::string&, std::string_view, double&);
+   static bool get_parameter_value(const std::string&, std::string_view, int&);
+   static bool starts_with(std::string_view, std::string_view);
 
 private:
    bool do_exit{false};
