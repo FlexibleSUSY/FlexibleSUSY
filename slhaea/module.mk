@@ -16,9 +16,9 @@ all-$(MODNAME):
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(SLHAEA_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(SLHAEA_HDR) $(SLHAEA_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(SLHAEA_MK) $(SLHAEA_INSTALL_DIR)
+		$(Q)install -d $(SLHAEA_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(SLHAEA_HDR) $(SLHAEA_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(SLHAEA_MK) $(SLHAEA_INSTALL_DIR)
 endif
 
 clean-$(MODNAME):

@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 {(-13*g1^2*ht)/15 - 3*g2^2*ht - (16*g3^2*ht)/3 + (26*g1^2*M1*Yt)/15 + 
   6*g2^2*M2*Yt + (32*g3^2*M3*Yt)/3 + MatMul[ht, Adj[Yb], Yb] + 
   5*MatMul[ht, Adj[Yt], Yt] + 2*MatMul[Yt, Adj[Yb], hb] + 

@@ -11,6 +11,21 @@ CHECK_EQUAL_FRACTION() {
         exit 1
     fi
 
+    [ -z "$1" -o "x$1" = "x-" ] && {
+        echo "Error: CHECK_EQUAL_FRACTION: first argument is not a number: $1"
+        exit 1
+    }
+
+    [ -z "$2" -o "x$2" = "x-" ] && {
+        echo "Error: CHECK_EQUAL_FRACTION: second argument is not a number: $2"
+        exit 1
+    }
+
+    [ -z "$3" -o "x$3" = "x-" ] && {
+        echo "Error: CHECK_EQUAL_FRACTION: third argument is not a number: $3"
+        exit 1
+    }
+
     local num1="$(echo "$1" | sed -e 's/[eE]+*/*10^/')"
     local num2="$(echo "$2" | sed -e 's/[eE]+*/*10^/')"
     local frac="$(echo "$3" | sed -e 's/[eE]+*/*10^/')"

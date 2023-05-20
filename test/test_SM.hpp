@@ -26,9 +26,14 @@ void setup_SM_const(TSM& m, const TInput& input)
    Eigen::Matrix<double,3,3> Yu(Eigen::Matrix<double,3,3>::Zero()),
       Yd(Eigen::Matrix<double,3,3>::Zero()),
       Ye(Eigen::Matrix<double,3,3>::Zero());
+   Yu(0,0) = 0.001;
+   Yu(1,1) = 0.001;
    Yu(2,2) = 165.0   * root2 / vev;
+   Yd(0,0) = 0.001;
+   Yd(1,1) = 0.001;
    Yd(2,2) = 2.9     * root2 / vev;
-   Ye(1,1) = 0.1;
+   Ye(0,0) = 5.11e-4 * root2 / vev;
+   Ye(1,1) = 0.105  * root2 / vev;
    Ye(2,2) = 1.77699 * root2 / vev;
 
    m.set_scale(scale);

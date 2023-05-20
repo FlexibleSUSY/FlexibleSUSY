@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_susy_parameters.hpp"
 #include "wrappers.hpp"
@@ -39,7 +38,7 @@ namespace flexiblesusy {
 
 @betaOneLoop@
 
-   return beta_@parameterName@;
+   return oneLoop * beta_@parameterName@;
 }
 
 /**
@@ -55,7 +54,7 @@ namespace flexiblesusy {
 
 @betaTwoLoop@
 
-   return beta_@parameterName@;
+   return twoLoop * beta_@parameterName@;
 }
 
 /**
@@ -73,7 +72,43 @@ namespace flexiblesusy {
 
 @betaThreeLoop@
 
-   return beta_@parameterName@;
+   return threeLoop * beta_@parameterName@;
+}
+
+/**
+ * Calculates the 4-loop beta function of @parameterName@.
+ *
+ * @return 4-loop beta function
+ */
+@parameterType@ @ModelName@_susy_parameters::calc_beta_@parameterName@_4_loop(const Susy_traces& susy_traces) const
+{
+   DEFINE_PROJECTOR(3,3,3,3)
+
+@localDeclFourLoop@
+
+   @parameterType@ beta_@parameterName@;
+
+@betaFourLoop@
+
+   return fourLoop * beta_@parameterName@;
+}
+
+/**
+ * Calculates the 5-loop beta function of @parameterName@.
+ *
+ * @return 5-loop beta function
+ */
+@parameterType@ @ModelName@_susy_parameters::calc_beta_@parameterName@_5_loop(const Susy_traces& susy_traces) const
+{
+   DEFINE_PROJECTOR(3,3,3,3)
+
+@localDeclFiveLoop@
+
+   @parameterType@ beta_@parameterName@;
+
+@betaFiveLoop@
+
+   return fiveLoop * beta_@parameterName@;
 }
 
 } // namespace flexiblesusy

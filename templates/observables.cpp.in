@@ -16,37 +16,67 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_observables.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
-#include "@ModelName@_a_muon.hpp"
-#include "@ModelName@_effective_couplings.hpp"
-#include "gm2calc_interface.hpp"
+#include "@ModelName@_amm.hpp"
+#include "@ModelName@_edm.hpp"
+#include "@ModelName@_l_to_lgamma.hpp"
+#include "@ModelName@_b_to_s_gamma.hpp"
+#include "@ModelName@_f_to_f_conversion.hpp"
+#include "cxx_qft/@ModelName@_qft.hpp"
+#include "config.h"
 #include "eigen_utils.hpp"
 #include "numerics2.hpp"
 #include "wrappers.hpp"
 #include "lowe.h"
 #include "physical_input.hpp"
 
+#ifdef ENABLE_GM2CALC
+#include "gm2calc_interface.hpp"
+#endif
+
 #define MODEL model
-#define AMU a_muon
+#define AMM0(p) amm_ ## p
+#define AMM1(p,idx) amm_ ## p ## _ ## idx
+#define AMMUNCERTAINTY0(p) amm_uncertainty_ ## p
+#define AMMUNCERTAINTY1(p,idx) amm_uncertainty_ ## p ## _ ## idx
 #define AMUGM2CALC a_muon_gm2calc
 #define AMUGM2CALCUNCERTAINTY a_muon_gm2calc_uncertainty
+#define DERIVEDPARAMETER(p) model.p()
+#define EXTRAPARAMETER(p) model.get_##p()
+#define INPUTPARAMETER(p) model.get_input().p
+#define MODELPARAMETER(p) model.get_##p()
+#define PHASE(p) model.get_##p()
+#define LowEnergyConstant(p) Electroweak_constants::p
+#define STANDARDDEVIATION(p) Electroweak_constants::Error_##p
+#define Pole(p) model.get_physical().p
 #define EDM0(p) edm_ ## p
 #define EDM1(p,idx) edm_ ## p ## _ ## idx
-#define EFFCPHIGGSPHOTONPHOTON eff_cp_higgs_photon_photon
-#define EFFCPHIGGSGLUONGLUON eff_cp_higgs_gluon_gluon
-#define EFFCPPSEUDOSCALARPHOTONPHOTON eff_cp_pseudoscalar_photon_photon
-#define EFFCPPSEUDOSCALARGLUONGLUON eff_cp_pseudoscalar_gluon_gluon
+#define LToLGamma0(pIn, pOut, spec) pIn ## _to_ ## pOut ## _ ## spec
+#define LToLGamma1(pIn,idxIn,pOut,idxOut,spec) pIn ## idxIn ## _to_ ## pOut ## idxOut ## _ ## spec
+#define FToFConversion1(pIn,idxIn,pOut,idxOut,nuclei,qedqcd) pIn ## _to_ ## pOut ## _in_ ## nuclei
+#define BSGAMMA b_to_s_gamma
 
+#define ALPHA_EM_MZ qedqcd.displayAlpha(softsusy::ALPHA)
+#define ALPHA_EM_0 physical_input.get(Physical_input::alpha_em_0)
 #define ALPHA_S_MZ qedqcd.displayAlpha(softsusy::ALPHAS)
+#define MHPole physical_input.get(Physical_input::mh_pole)
 #define MWPole qedqcd.displayPoleMW()
 #define MZPole qedqcd.displayPoleMZ()
+#define MU2GeV qedqcd.displayMu2GeV()
+#define MS2GeV qedqcd.displayMs2GeV()
 #define MTPole qedqcd.displayPoleMt()
+#define MD2GeV qedqcd.displayMd2GeV()
+#define MCMC qedqcd.displayMcMc()
 #define MBMB qedqcd.displayMbMb()
-#define MTauPole qedqcd.displayPoleMtau()
+#define Mv1Pole qedqcd.displayNeutrinoPoleMass(1)
+#define Mv2Pole qedqcd.displayNeutrinoPoleMass(2)
+#define Mv3Pole qedqcd.displayNeutrinoPoleMass(3)
+#define MEPole qedqcd.displayPoleMel()
 #define MMPole qedqcd.displayPoleMmuon()
+#define MTauPole qedqcd.displayPoleMtau()
+#define CKMInput qedqcd.get_complex_ckm()
 
 namespace flexiblesusy {
 
@@ -82,21 +112,48 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
 @ModelName@_observables calculate_observables(const @ModelName@_mass_eigenstates& model,
                                               const softsusy::QedQcd& qedqcd,
                                               const Physical_input& physical_input,
+                                              const Spectrum_generator_settings& settings,
                                               double scale)
 {
    auto model_at_scale = model;
-   model_at_scale.run_to(scale);
 
-   return calculate_observables(model_at_scale, qedqcd, physical_input);
+   if (scale > 0.) {
+      try {
+         model_at_scale.run_to(scale);
+      } catch (const NonPerturbativeRunningError& e) {
+         @ModelName@_observables observables;
+         observables.problems.general.flag_non_perturbative_running(scale);
+         return observables;
+      } catch (const Error& e) {
+         @ModelName@_observables observables;
+         observables.problems.general.flag_thrown(e.what());
+         return observables;
+      } catch (const std::exception& e) {
+         @ModelName@_observables observables;
+         observables.problems.general.flag_thrown(e.what());
+         return observables;
+      }
+   }
+
+   return calculate_observables(model_at_scale, qedqcd, physical_input, settings);
 }
 
 @ModelName@_observables calculate_observables(const @ModelName@_mass_eigenstates& model,
                                               const softsusy::QedQcd& qedqcd,
-                                              const Physical_input& physical_input)
+                                              const Physical_input& physical_input,
+                                              const Spectrum_generator_settings& settings)
 {
    @ModelName@_observables observables;
 
+   try {
 @calculateObservables@
+   } catch (const NonPerturbativeRunningError& e) {
+      observables.problems.general.flag_non_perturbative_running(e.get_scale());
+   } catch (const Error& e) {
+      observables.problems.general.flag_thrown(e.what());
+   } catch (const std::exception& e) {
+      observables.problems.general.flag_thrown(e.what());
+   }
 
    return observables;
 }

@@ -44,11 +44,13 @@ HighScaleInput = {
     {T[Ye], Azero*Ye},
     {T[Yd], Azero*Yd},
     {T[Yu], Azero*Yu},
+    {T[Yv], Azero*Yv},
     {mq2, UNITMATRIX[3] m0^2},
     {ml2, UNITMATRIX[3] m0^2},
     {md2, UNITMATRIX[3] m0^2},
     {mu2, UNITMATRIX[3] m0^2},
     {me2, UNITMATRIX[3] m0^2},
+    {mvR2, UNITMATRIX[3] m0^2},
     {\[Lambda], LambdaInput},
     {T[\[Lambda]], ALambdaInput*\[Lambda]},
     {MassB, m12},
@@ -65,6 +67,7 @@ LowScaleInput = {
     {Yu, Automatic},
     {Yd, Automatic},
     {Ye, Automatic},
+    {Yv, Sqrt[2] neutrinoDRbar / vu},
     {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
     {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
 };
@@ -77,7 +80,8 @@ InitialGuessAtLowScale = {
    {ms2, LowEnergyConstant[MZ]^2},
    {Yu, Automatic},
    {Yd, Automatic},
-   {Ye, Automatic}
+   {Ye, Automatic},
+   {Yv, ZEROMATRIX[3,3]}
 };
 
 InitialGuessAtHighScale = {};
@@ -92,3 +96,6 @@ DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
+
+FSCalculateDecays = True;
+

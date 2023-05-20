@@ -37,14 +37,6 @@ InitialGuessAtLowScale = {
    {Ye, Automatic}
 };
 
-SMParticles = {
-    Electron, TopQuark, BottomQuark,
-    VectorP, VectorZ, VectorG, VectorW, Neutrino,
-    gP, gG, gZ, gWm, gWmC,
-    Hp, Ah, (* goldstones *)
-    hh (* Higgs *)
-};
-
 OnlyLowEnergyFlexibleSUSY = True;
 UseSM3LoopRGEs = True;
 

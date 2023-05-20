@@ -19,10 +19,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#include <functional>
 #include <iostream>
-#include <cstdlib>
-#include <cassert>
-#include "config.h"
 
 /**
  * The following message logger macros are available:
@@ -34,8 +32,7 @@
  * ERROR(message)
  * FATAL(message)        aborts program execution
  *
- * VERBOSE_MSG, DEBUG_MSG and INFO print to std::cout .
- * WARNING, ERROR and FATAL print to std::cerr .
+ * All macros print to std::cerr .
  *
  * All output can be disabled if ENABLE_SILENT is defined.
  *
@@ -48,179 +45,26 @@
 
 namespace flexiblesusy {
 
-enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
+void print_verbose(std::function<void()>&&, const char*, int);
+void print_debug(std::function<void()>&&, const char*, int);
+void print_info(std::function<void()>&&, const char*, int);
+void print_warning(std::function<void()>&&, const char*, int);
+void print_error(std::function<void()>&&, const char*, int);
+void print_fatal(std::function<void()>&&, const char*, int);
 
 } // namespace flexiblesusy
 
-#ifdef ENABLE_VERBOSE
-   #define VERBOSE_MSG(message) LOG(flexiblesusy::kVerbose, message)
-#else
-   #define VERBOSE_MSG(message)
-#endif
-
-#ifdef ENABLE_DEBUG
-   #define DEBUG_MSG(message) LOG(flexiblesusy::kDebug,   message)
-#else
-   #define DEBUG_MSG(message)
-#endif
-
-#define INFO(message)    LOG(flexiblesusy::kInfo,    message)
-#define WARNING(message) LOG(flexiblesusy::kWarning, message)
-#define ERROR(message)   LOG(flexiblesusy::kError,   message)
-
-#ifdef ENABLE_SILENT
-   #define FATAL(message)                             \
-      do {                                            \
-         exit(EXIT_FAILURE);                          \
-         assert(false);                               \
-      } while (0)
-#else
-   #define FATAL(message)                                             \
-      do {                                                            \
-         LOG(flexiblesusy::kFatal, message);                          \
-         std::cerr << "*** abort program execution" << std::endl;     \
-         exit(EXIT_FAILURE);                                          \
-         assert(false);                                               \
-      } while (0)
-#endif
-
-#ifdef ENABLE_SILENT
-   #define PRINT_PREFIX(level)
-#else
-   #define PRINT_PREFIX(level)                                        \
-      do {                                                            \
-         switch (level) {                                             \
-         case flexiblesusy::kWarning: std::cerr << "Warning: "; break;  \
-         case flexiblesusy::kError:   std::cerr << "Error: "; break;    \
-         case flexiblesusy::kFatal:   std::cerr << "Fatal: "; break;    \
-         default:                                                     \
-            break;                                                    \
-         }                                                            \
-      } while (0)
-#endif
-
-#ifdef ENABLE_SILENT
-   #define PRINT_FILE_LINE(level)
-#else
-   #define PRINT_FILE_LINE(level)                                     \
-      do {                                                            \
-         switch (level) {                                             \
-         case flexiblesusy::kFatal:                                   \
-            std::cerr << "(file: " << __FILE__                        \
-                      << ", line: " << __LINE__ << ") ";              \
-            break;                                                    \
-         default:                                                     \
-            break;                                                    \
-         }                                                            \
-      } while (0)
-#endif
-
-#ifdef ENABLE_SILENT
-   #define PRINT_COLOR_CODE(level)
-#else
-   #define PRINT_COLOR_CODE(level)                               \
-      do {                                                       \
-         switch (level) {                                        \
-         case flexiblesusy::kDebug:   std::cout << "\033[0;34m"; break; \
-         case flexiblesusy::kWarning: std::cerr << "\033[0;31m"; break; \
-         case flexiblesusy::kError:   std::cerr << "\033[1;31m"; break; \
-         case flexiblesusy::kFatal:   std::cerr << "\033[41;1;37m"; break; \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
-         default:                                                \
-            break;                                               \
-         }                                                       \
-      } while (0)
-#endif
-
-#ifdef ENABLE_SILENT
-   #define RESET_COLOR(level)
-#else
-   #define RESET_COLOR(level)                                    \
-      do {                                                       \
-         switch (level) {                                        \
-         case flexiblesusy::kDebug:                              \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
-            std::cout << "\033[0m";                              \
-            break;                                               \
-         case flexiblesusy::kWarning:                            \
-         case flexiblesusy::kError:                              \
-         case flexiblesusy::kFatal:                              \
-            std::cerr << "\033[0m";                              \
-            break;                                               \
-         default:                                                \
-            break;                                               \
-         }                                                       \
-      } while (0)
-#endif
-
-#ifdef ENABLE_SILENT
-   #define PRINT_MESSAGE(level, message)
-#else
-   #define PRINT_MESSAGE(level, message)                         \
-      do {                                                       \
-         switch (level) {                                        \
-         case flexiblesusy::kDebug:                              \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
-            std::cout << message;                                \
-            break;                                               \
-         case flexiblesusy::kWarning:                            \
-         case flexiblesusy::kError:                              \
-         case flexiblesusy::kFatal:                              \
-            std::cerr << message;                                \
-            break;                                               \
-         default:                                                \
-            break;                                               \
-         }                                                       \
-      } while (0)
-#endif
-
-#ifdef ENABLE_SILENT
-   #define PRINT_ENDL(level)
-#else
-   #define PRINT_ENDL(level)                                     \
-      do {                                                       \
-         switch (level) {                                        \
-         case flexiblesusy::kDebug:                              \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
-            std::cout << std::endl;                              \
-            break;                                               \
-         case flexiblesusy::kWarning:                            \
-         case flexiblesusy::kError:                              \
-         case flexiblesusy::kFatal:                              \
-            std::cerr << std::endl;                              \
-            break;                                               \
-         default:                                                \
-            break;                                               \
-         }                                                       \
-      } while (0)
-#endif
-
-#ifdef ENABLE_SILENT
-   #define LOG(level, message)
-#else
-   #ifdef ENABLE_COLOR_PRINTOUT
-      #define LOG(level, message)                                \
-      do {                                                       \
-         PRINT_COLOR_CODE(level);                                \
-         PRINT_PREFIX(level);                                    \
-         PRINT_FILE_LINE(level);                                 \
-         PRINT_MESSAGE(level, message);                          \
-         RESET_COLOR(level);                                     \
-         PRINT_ENDL(level);                                      \
-      } while (0)
-   #else
-      #define LOG(level, message)                  \
-      do {                                         \
-         PRINT_PREFIX(level);                      \
-         PRINT_FILE_LINE(level);                   \
-         PRINT_MESSAGE(level, message);            \
-         PRINT_ENDL(level);                        \
-      } while (0)
-   #endif
-#endif
+#define VERBOSE_MSG(msg)                                                       \
+   flexiblesusy::print_verbose([&] { std::cerr << msg; }, __FILE__, __LINE__)
+#define DEBUG_MSG(msg)                                                         \
+   flexiblesusy::print_debug([&] { std::cerr << msg; }, __FILE__, __LINE__)
+#define INFO(msg)                                                              \
+   flexiblesusy::print_info([&] { std::cerr << msg; }, __FILE__, __LINE__)
+#define WARNING(msg)                                                           \
+   flexiblesusy::print_warning([&] { std::cerr << msg; }, __FILE__, __LINE__)
+#define ERROR(msg)                                                             \
+   flexiblesusy::print_error([&] { std::cerr << msg; }, __FILE__, __LINE__)
+#define FATAL(msg)                                                             \
+   flexiblesusy::print_fatal([&] { std::cerr << msg; }, __FILE__, __LINE__)
 
 #endif

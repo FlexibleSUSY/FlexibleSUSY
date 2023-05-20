@@ -16,20 +16,25 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_two_scale_high_scale_constraint.hpp"
 #include "@ModelName@_two_scale_model.hpp"
 #include "@ModelName@_info.hpp"
+#include "config.h"
 #include "wrappers.hpp"
 #include "logger.hpp"
 #include "ew_input.hpp"
-#include "gsl_utils.hpp"
+#include "error.hpp"
 #include "minimizer.hpp"
 #include "raii.hpp"
 #include "root_finder.hpp"
 #include "threshold_loop_functions.hpp"
 #include "numerics2.hpp"
+
+#ifdef ENABLE_HIMALAYA
+#include "himalaya/HierarchyCalculator.hpp"
+#include "himalaya/version.hpp"
+#endif
 
 #include <cmath>
 #include <cerrno>
@@ -38,6 +43,7 @@
 namespace flexiblesusy {
 
 #define DERIVEDPARAMETER(p) model->p()
+#define EXTRAPARAMETER(p) model->get_##p()
 #define INPUTPARAMETER(p) model->get_input().p
 #define MODELPARAMETER(p) model->get_##p()
 #define PHASE(p) model->get_##p()
@@ -54,10 +60,52 @@ namespace flexiblesusy {
 #define MODEL model
 #define MODELCLASSNAME @ModelName@<Two_scale>
 
+#if defined(ENABLE_HIMALAYA) && Himalaya_VERSION_MAJOR >= 2
+#define FSHimalayaMh23L [&] () {                                        \
+      MODEL->calculate_DRbar_masses();                                  \
+                                                                        \
+      himalaya::Parameters pars;                                        \
+@fillHimalayaInput@
+                                                                        \
+      double lambda_3L = 0.;                                            \
+                                                                        \
+      try {                                                             \
+         const bool verbose = false;                                    \
+         himalaya::HierarchyCalculator hc(pars, verbose);               \
+                                                                        \
+         const auto ho = hc.calculateDMh3L(false);                      \
+                                                                        \
+         lambda_3L =                                                    \
+            lambda_3L_eft * (                                           \
+               ho.getDLambda(3)                                         \
+               + msbar_scheme*ho.getDLambdaDRbarPrimeToMSbarShift(3)    \
+               + lambda_3L_uncertainty*ho.getDLambdaUncertainty(3)      \
+            );                                                          \
+                                                                        \
+         VERBOSE_MSG("Himalaya top (hierarchy, Dlambda_3L) = ("         \
+                     << ho.getSuitableHierarchy() << ", "               \
+                     << lambda_3L <<")");                               \
+      } catch (const std::exception& e) {                               \
+         model->get_problems().flag_bad_mass(@ModelName@_info::@HiggsBoson@); \
+         WARNING(e.what());                                             \
+         VERBOSE_MSG(pars);                                             \
+      }                                                                 \
+                                                                        \
+      return lambda_3L;                                                 \
+   }()
+#else
+#define FSHimalayaMh23L [] () {                                         \
+      throw HimalayaError("The 3-loop corrections to lambda "           \
+                          "require Himalaya 2.0.0 (or higher), but "    \
+                          "FlexibleSUSY has not been configured with "  \
+                          "this Himalaya version!");                    \
+      return 0.;                                                        \
+   }()
+#endif
+
 @ModelName@_high_scale_constraint<Two_scale>::@ModelName@_high_scale_constraint(
    @ModelName@<Two_scale>* model_)
-   : Constraint<Two_scale>()
-   , model(model_)
+   : model(model_)
 {
    initialize();
 }
@@ -66,7 +114,7 @@ void @ModelName@_high_scale_constraint<Two_scale>::apply()
 {
    check_model_ptr();
 
-@temporarySetting@
+@initialSetting@
 
    update_scale();
 
@@ -104,7 +152,7 @@ const @ModelName@_input_parameters& @ModelName@_high_scale_constraint<Two_scale>
    return model;
 }
 
-void @ModelName@_high_scale_constraint<Two_scale>::set_model(Two_scale_model* model_)
+void @ModelName@_high_scale_constraint<Two_scale>::set_model(Model* model_)
 {
    model = cast_model<@ModelName@<Two_scale>*>(model_);
 }
@@ -133,23 +181,7 @@ void @ModelName@_high_scale_constraint<Two_scale>::update_scale()
 {
    check_model_ptr();
 
-   const double currentScale = model->get_scale();
-   const @ModelName@_soft_parameters beta_functions(model->calc_beta());
-
 @calculateScale@
-
-   if (errno == ERANGE) {
-#ifdef ENABLE_VERBOSE
-      ERROR("@ModelName@_high_scale_constraint<Two_scale>: Overflow error"
-            " during calculation of high scale: " << strerror(errno) << '\n'
-            << "   current scale = " << currentScale << '\n'
-            << "   new scale = " << scale << '\n'
-            << "   resetting scale to " << get_initial_scale_guess());
-#endif
-      scale = get_initial_scale_guess();
-      errno = 0;
-   }
-
 @restrictScale@
 }
 

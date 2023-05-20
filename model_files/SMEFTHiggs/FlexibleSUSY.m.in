@@ -1,0 +1,64 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = SM;
+OnlyLowEnergyFlexibleSUSY = True;
+FlexibleEFTHiggs = True;
+
+(* SM input parameters *)
+
+MINPAR = { {1, LambdaIN} };
+EXTPAR = { {0, Qin} };
+
+EWSBOutputParameters = { mu2 };
+
+SUSYScale = Qin;
+
+SUSYScaleFirstGuess = Qin;
+
+SUSYScaleInput = {
+    {\[Lambda], LambdaIN}
+};
+
+LowScale = LowEnergyConstant[MT];
+
+LowScaleFirstGuess = LowEnergyConstant[MT];
+
+(* N.B. LowScaleinput is not used by the EFTHiggs spectrum
+ calculation, but is needed for decoupling scheme used by
+ FlexibleDecay *)
+
+LowScaleInput = {
+    {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+    {Yu, Automatic},
+    {Yd, Automatic},
+    {Ye, Automatic},
+    FSSolveEWSBFor[EWSBOutputParameters]
+};
+
+InitialGuessAtSUSYScale = {
+    {v, LowEnergyConstant[vev]},
+    {Yu, Automatic},
+    {Yd, Automatic},
+    {Ye, Automatic}
+}
+
+MatchingScaleInput = {
+    {v, VEV}
+};
+
+UseSM3LoopRGEs = True;
+UseHiggs2LoopSM = True;
+UseHiggs3LoopSM = False;
+
+DefaultPoleMassPrecision = HighPrecision;
+HighPoleMassPrecision    = {hh};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+SARAH`ParameterDefinitions = Append[
+    Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
+    {SARAH`\[Lambda], { Description -> "SM Higgs Selfcouplings" } }
+];
+
+FSCalculateDecays = True;
+

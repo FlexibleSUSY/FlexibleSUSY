@@ -3,10 +3,6 @@ FSEigenstates = SARAH`EWSB;
 FSDefaultSARAHModel = MSSM;
 OnlyLowEnergyFlexibleSUSY = True;
 
-MINPAR = {
-    {4, Sign[\[Mu]]}
-};
-
 EXTPAR = {
     {0, MSUSY},
     {1, M1Input},
@@ -17,15 +13,39 @@ EXTPAR = {
     {25, TanBeta}
 };
 
-FSExtraInputParameters = {
-    {mq2Input, MSQ2IN, {3,3}}, (* 3x3 matrix *)
-    {mu2Input, MSU2IN, {3,3}}, (* 3x3 matrix *)
-    {md2Input, MSD2IN, {3,3}}, (* 3x3 matrix *)
-    {ml2Input, MSL2IN, {3,3}}, (* 3x3 matrix *)
-    {me2Input, MSE2IN, {3,3}}, (* 3x3 matrix *)
-    {AuInput, AUIN, {3,3}}, (* 3x3 matrix *)
-    {AdInput, ADIN, {3,3}}, (* 3x3 matrix *)
-    {AeInput, AEIN, {3,3}}  (* 3x3 matrix *)
+FSAuxiliaryParameterInfo = {
+    {mq2Input, { LesHouches -> MSQ2IN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } },
+    {mu2Input, { LesHouches -> MSU2IN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } },
+    {md2Input, { LesHouches -> MSD2IN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } },
+    {ml2Input, { LesHouches -> MSL2IN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } },
+    {me2Input, { LesHouches -> MSE2IN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } },
+    {AuInput,  { LesHouches -> AUIN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } },
+    {AdInput,  { LesHouches -> ADIN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } },
+    {AeInput,  { LesHouches -> AEIN,
+                 ParameterDimensions -> {3,3},
+                 InputParameter -> True
+               } }
 };
 
 EWSBOutputParameters = { mHd2, mHu2 };
@@ -136,3 +156,5 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[md2[2,2]]},
             {49, SignedAbsSqrt[md2[3,3]]} } }
 };
+
+FSCalculateDecays = True;

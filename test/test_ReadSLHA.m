@@ -1,7 +1,32 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 Needs["TestSuite`", "TestSuite.m"];
 Needs["ReadSLHA`", "ReadSLHA.m"];
 
 slha = "
+    1 1 1  10.1
+    2 2 2  20.2
+    3 3 3  30.3
 Block MODSEL                 # Select model
 #   12    1000                # parameter output scale (GeV)
 Block FlexibleSUSY
@@ -29,6 +54,13 @@ Block FlexibleSUSY
    21   1                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   1                    # calculate BSM pole masses
+   24   123111321            # individual threshold correction loop orders
+   25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
+   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   1                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
 Block FlexibleSUSYInput
     0   0.00729735           # alpha_em(0)
     1   125.09               # Mh pole
@@ -62,6 +94,12 @@ Block V
     1   10.1
     2   20.2
     3   a
+Block  V2
+    1   1.1
+    2   2.2
+Block
+    1   3.1
+    2   4.2
 Block M
     1 1  10.1
     1 2  1
@@ -81,6 +119,7 @@ pars = {
     {Qin  , {0}            , {EXTPAR, 0}},
     {QEWSB, {0}            , {EXTPAR, 1}},
     {V    , {3}            , V},
+    {V2   , {2}            , V2},
     {M    , {3, 3}         , M},
     {T3   , {3, 3, 3}      , T3},
     {T4   , {3, 3, 3, 3}   , T4},
@@ -92,6 +131,7 @@ values = ReadSLHAString[slha, pars];
 TestEquality[Qin /. values, 1.1];
 TestEquality[QEWSB /. values, 2.2];
 TestEquality[V /. values, {10.1, 20.2, 0}];
+TestEquality[V2 /. values, {1.1, 2.2}];
 TestEquality[M /. values, {{10.1, 1, 0}, {0, 20.2, 0}, {0, 0, 30.3}}];
 TestEquality[T3 /. values, {{{10.1, 0, 0}, {0, 0, 0}, {0, 0, 0}},
                             {{0, 0, 0}, {0, 20.2, 0}, {0, 0, 0}},

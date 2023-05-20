@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 Needs["TestSuite`", "TestSuite.m"];
 Needs["Utils`", "Utils.m"];
 Needs["CCompilerDriver`"];
@@ -52,7 +74,7 @@ CalculatePointFromAnalyticExpr[point_] :=
           ];
 
 CalculatePointNumerical[point_] :=
-    Module[{progr, exec},
+    Module[{progr, exec, fortComp},
            progr = "
 #include <stdio.h>
 #include <math.h>
@@ -107,11 +129,30 @@ int main(){
    return 0;
 }
 ";
+           fortComp =
+              Select[
+                 StringSplit@Import[File["flexiblesusy-config"]],
+                 StringMatchQ[#, "fc=" ~~ __] &
+              ];
+           If[Length[fortComp]===1,
+              fortComp = Last@StringSplit[First@fortComp, "="],
+              Print["Could not identify a Fortran compiler"]; Quit[1];
+           ];
+           fortComp = StringReplace[fortComp, "\"" -> ""];
            exec = CreateExecutable[
                progr, "exec",
-               "CompileOptions" -> "-I" <> FileNameJoin[{Directory[], "src"}],
-               "Libraries" -> {FileNameJoin[{Directory[], "src", "libflexisusy.a"}], "gfortran"}
-               (*, "ShellOutputFunction"->Print, "ShellCommandFunction"->Print *)
+               "CompileOptions" -> StringJoin[Riffle[
+                   {"-I" <> FileNameJoin[{Directory[], "src"}],
+                    "-I" <> FileNameJoin[{Directory[], "model_specific", "MSSM_higgs"}]},
+                   " "]],
+               "Libraries" -> {FileNameJoin[{Directory[], "model_specific", "MSSM_higgs", "libmodel_specific_MSSM_higgs.a"}],
+                               FileNameJoin[{Directory[], "src", "libflexisusy.a"}],
+                               Switch[fortComp,
+                                  "gfortran", "gfortran",
+                                  "ifort",    "imf",
+                                  _, Print["Unknown Fortran compiler " <> fortComp]; Quit[1]
+                               ]}
+               (* , "ShellOutputFunction"->Print, "ShellCommandFunction"->Print *)
            ];
            If[exec === $Failed,
               Print["Error: cannot create executable"];

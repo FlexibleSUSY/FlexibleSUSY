@@ -1,0 +1,669 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_amm.cpp
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_amm.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+
+#include "cxx_qft/@ModelName@_qft.hpp"
+#include "cxx_qft/@ModelName@_particle_aliases.hpp"
+#include "@ModelName@_FFV_form_factors.hpp"
+
+#include "amm_loop_functions.hpp"
+#include "lowe.h"
+#include "wrappers.hpp"
+#include "numerics2.hpp"
+#include "logger.hpp"
+#include "scan.hpp"
+#include "spectrum_generator_settings.hpp"
+
+using namespace flexiblesusy;
+using namespace @ModelName@_cxx_diagrams;
+
+namespace {
+
+template <typename Lepton>
+double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
+
+/**
+ * @class AMMBarrZeeFermionLoop
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous magnetic dipole moment of a given particle in a
+ *        Barr-Zee diagram with a fermion loop and scalar and photon
+ *        exchange particles (see arXiv:1502.04199 Figure 2, (1)).
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              electric magnetic moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a Fermion and one exchange particle
+ *              a scalar particle (the other is a photon).
+ *
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a Barr-Zee diagram with fields given by
+ * \a Args.
+ */
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarrZeeFermionLoop {
+   static double value(const typename field_indices<Lepton>::type& indices,
+                       const context_base& context,
+                       const softsusy::QedQcd& qedqcd);
+};
+
+/**
+ * @class AMMBarrZeeFermionLoopZ
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous magnetic dipole moment of a given particle in a
+ *        Barr-Zee diagram with a fermion loop and scalar and Z-boson
+ *        exchange particles.
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              electric magnetic moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a Fermion and one exchange particle
+ *              a scalar particle (the other is a Z-boson).
+ *
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a Barr-Zee diagram with fields given by
+ * \a Args.
+ */
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarrZeeFermionLoopZ {
+   static double value(const typename field_indices<Lepton>::type& indices,
+                       const context_base& context,
+                       const softsusy::QedQcd& qedqcd);
+};
+
+/**
+ * @class AMMBarrZeeScalarLoop
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous dipole moment of a given particle in a Barr-Zee
+ *        diagram with a scalar loop and scalar and photon exchange
+ *        particles (see arXiv:1502.04199 Figure 2, (2)).
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              magnetic dipole moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a scalar particle and one exchange
+ *              particle a scalar particle (the other is a photon).
+ *
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a Barr-Zee diagram with fields given by
+ * \a Args.
+ */
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarrZeeScalarLoop {
+   static double value(const typename field_indices<Lepton>::type& indices,
+                       const context_base& context,
+                       const softsusy::QedQcd& qedqcd);
+};
+
+/**
+ * @class AMMBarrZeeVectorLoop
+ *
+ * @brief A template that calculates the contributions to the
+ *        anomalous dipole moment of a given particle in a Barr-Zee
+ *        diagram with a vector boson loop and scalar and photon
+ *        exchange particles (see arXiv:1502.04199 Figure 2, (3)).
+ *
+ * @tparam Args Specifies in order the field of which to calculate the
+ *              magnetic dipole moment, the photon emitter and the
+ *              exchange particle in a Barr-Zee diagram where the
+ *              photon emitter is a scalar particle and one exchange
+ *              particle a scalar particle (the other is a photon).
+ *
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a Barr-Zee diagram with fields given by
+ * \a Args.
+ */
+template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
+struct AMMBarrZeeVectorLoop {
+   static double value(const typename field_indices<Lepton>::type& indices,
+                       const context_base& context,
+                       const softsusy::QedQcd& qedqcd);
+};
+
+double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
+{
+@AMMGetMSUSY@
+}
+
+void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
+{
+   const double precision_goal = model.get_precision();
+   const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
+   int it = 0;
+   double precision = 0.;
+   double MSUSY_old = 0., MSUSY_new = 0.;
+
+   VERBOSE_MSG("@ModelName@_amm: iterate to run to MSUSY ...");
+
+   do {
+      MSUSY_new = get_MSUSY(model);
+
+      if (MSUSY_new <= 0.)
+         return;
+
+      VERBOSE_MSG("@ModelName@_amm:    running to new MSUSY = " << MSUSY_new);
+
+      model.run_to(MSUSY_new);
+      model.calculate_DRbar_masses();
+
+      precision = MaxRelDiff(MSUSY_old, MSUSY_new);
+      MSUSY_old = MSUSY_new;
+   } while (precision > precision_goal && ++it < Nmax);
+
+   VERBOSE_MSG("@ModelName@_amm: iteration finished. MSUSY = " << MSUSY_new);
+
+   if (precision > precision_goal) {
+      WARNING("@ModelName@_amm: run_to_MSUSY(): "
+              "Iteration did not converge after " << Nmax
+              << " iterations (precision goal: " << precision_goal << ")");
+   }
+}
+
+@leptonPoleMass@
+
+template <typename Lepton>
+double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+{
+   VERBOSE_MSG("@ModelName@_amm: calculating a_mu at Q = " << model.get_scale());
+
+   context_base context{ model };
+
+   using namespace @ModelName@_cxx_diagrams::fields;
+
+   double val = 0.;
+
+   // 1L
+   if (settings.get(Spectrum_generator_settings::calculate_amm) > 0.5) {
+@AMMCalculation@
+
+      // Im[F2]/Re[F2] ~ 0
+      if (!is_zero((form_factors[2] + form_factors[3]).real())) {
+         double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
+         if (!is_zero(ratio)) {
+            ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[Fe]/Re[F2] = " + std::to_string(ratio));
+            return std::numeric_limits<double>::quiet_NaN();
+         }
+      }
+      // Im[F2] ~ 0
+      else {
+         if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
+            ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[F2] = " + std::to_string((form_factors[2] + form_factors[3]).imag()));
+            return std::numeric_limits<double>::quiet_NaN();
+         }
+      }
+
+      val +=
+         // vector form factor
+         0.5*(form_factors[2] + form_factors[3]).real()
+         // reinstate the mass that was factored out in definition of form factor
+         * context.mass<Lepton>({@extraIdxUsageNoComma@})
+         // factor out e/(2*lepton pole mass)
+         / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
+         // definition of photon momentum flow for g-2 is opposite than for form factors
+         * (-1.);
+   }
+
+   // 2L QED
+   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.25) {
+      // add 2-loop QED logarithms
+      val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
+   }
+
+   // Barr-Zee
+   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.75) {
+
+@AMMBarrZeeCalculation@
+   }
+
+   return val;
+}
+
+/// returns minimum and maximum a_mu when scale is varied by a factor 2
+template <typename Lepton>
+std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+{
+   auto scales = subdivide_log(0.5*model.get_scale(), 2*model.get_scale(), 6);
+
+   std::transform(scales.begin(), scales.end(), scales.begin(),
+                  [&model,&qedqcd,&settings@extraIdxUsage@] (double scale) {
+                     double amu = 0.;
+                     try {
+                        auto m = model;
+                        m.run_to(scale);
+                        m.get_physical().clear();
+                        m.calculate_DRbar_masses();
+                        m.solve_ewsb();
+                        amu = calculate_amm_impl<Lepton>(m, qedqcd, settings@extraIdxUsage@);
+                     }
+                     catch(const Error& e) {
+                        ERROR("@ModelName@_amm: scale variation: " << e.what_detailed());
+                     }
+                     return amu;
+                  });
+
+   const auto minmax = std::minmax_element(scales.cbegin(), scales.cend());
+
+   return std::make_pair(*(minmax.first), *(minmax.second));
+}
+
+} // anonymous namespace
+
+template <typename Lepton>
+double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+{
+   @ModelName@_mass_eigenstates model(model_);
+
+   VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu ...");
+
+   try {
+      run_to_MSUSY(model);
+      model.get_physical().clear();
+   } catch (const Error& e) {
+      ERROR("@ModelName@_amm:" << e.what_detailed());
+      return std::numeric_limits<double>::quiet_NaN();
+   }
+
+   return calculate_amm_impl<Lepton>(model, qedqcd, settings@extraIdxUsage@);
+}
+
+// spliting templated function into header and cpp
+// https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
+@calculateAForwardDeclaration@
+
+template <typename Lepton>
+double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+{
+   @ModelName@_mass_eigenstates model(model_);
+
+   VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu uncertainty ...");
+
+   try {
+      run_to_MSUSY(model);
+      model.get_physical().clear();
+   } catch (const Error& e) {
+      ERROR("@ModelName@_amm uncertainty: " << e.what_detailed());
+      return std::numeric_limits<double>::quiet_NaN();
+   }
+
+   const auto delta_amu_scale_minmax = vary_scale<Lepton>(model, qedqcd, settings@extraIdxUsage@);
+   const auto delta_amu_scale = std::abs(delta_amu_scale_minmax.second - delta_amu_scale_minmax.first);
+
+   return delta_amu_scale;
+}
+
+// spliting templated function into header and cpp
+// https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
+@calculateAUncertaintyForwardDeclaration@
+
+namespace {
+template <typename Lepton>
+double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
+{
+   const double MSUSY = Abs(get_MSUSY(context.model));
+   const double alpha_em = Sqr(Lepton::electric_charge * unit_charge(context))/(4*Pi);
+   const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
+
+   return qed_2L;
+}
+
+template<typename Lepton, class Fermion, class Scalar>
+double AMMBarrZeeFermionLoop<
+Lepton, Fermion, Scalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+{
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
+
+   using LeptonVertex = Vertex<
+                      Scalar,
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
+                      >;
+
+   using FermionVertex = Vertex<
+                         Scalar,
+                         Fermion,
+                         typename Fermion::lorentz_conjugate
+                         >;
+
+   double res = 0.0;
+
+   for (const auto& index1: index_range<LeptonVertex>()) {
+      for (const auto& index2: index_range<FermionVertex>()) {
+         const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
+
+         if (leptonIndices != indices) {
+            continue;
+         }
+
+         const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
+         const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
+
+         if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
+             cxx_diagrams::isSMField<Scalar>(scalarIndices)) {
+            continue;
+         }
+
+         if (scalarIndices != FermionVertex::template indices_of_field<0>(index2)) {
+            continue;
+         }
+
+         if (fermionIndices != FermionVertex::template indices_of_field<2>(index2)) {
+            continue;
+         }
+
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
+         const auto fermionVertex = FermionVertex::evaluate(index2, context);
+
+         const auto fermionMass = context.mass<Fermion>(fermionIndices);
+         const auto scalarMass = context.mass<Scalar>(scalarIndices);
+
+         static constexpr double fermionChargeCount =
+            Fermion::electric_charge / Lepton::electric_charge;
+
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
+         const std::complex<double> zrf = fermionVertex.right();
+         const std::complex<double> zlf = fermionVertex.left();
+
+         const double coeffA = std::real((zrf + zlf) * (zrm + zlm));
+         const double coeffB = std::real((zlf - zrf) * (zrm - zlm));
+
+         const double massRatioSquared = Sqr(fermionMass / scalarMass);
+
+         const double part1 = coeffA == 0 ? 0 : coeffA * BarrZeeLoopFS(massRatioSquared);
+         const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFP(massRatioSquared);
+
+         const double preFactor = 4 * twoLoop * Sqr(unit_charge(context) * fermionChargeCount)
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
+
+         res += preFactor * (part1 + part2);
+      }
+   }
+
+   return res;
+}
+
+template<typename Lepton, class Fermion, class Scalar>
+double AMMBarrZeeFermionLoopZ<
+Lepton, Fermion, Scalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+{
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
+
+   using LeptonVertex = Vertex<
+                      Scalar,
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
+                      >;
+
+   using LeptonZVertex = Vertex<
+                      ZBoson,
+                      Lepton,
+                      typename Lepton::lorentz_conjugate
+                      >;
+
+   using FermionVertex = Vertex<
+                         Scalar,
+                         Fermion,
+                         typename Fermion::lorentz_conjugate
+                         >;
+
+   using FermionZVertex = Vertex<
+                         ZBoson,
+                         typename Fermion::lorentz_conjugate,
+                         Fermion
+                         >;
+
+   double res = 0.0;
+
+   for (const auto& index1: index_range<LeptonVertex>()) {
+      for (const auto& index2: index_range<FermionVertex>()) {
+         for (const auto& indexLeptonZ: index_range<LeptonZVertex>()) {
+            for (const auto& indexFermionZ: index_range<FermionZVertex>()) {
+               const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
+
+               if (leptonIndices != indices) {
+                  continue;
+               }
+
+               if ((leptonIndices != LeptonZVertex::template indices_of_field<2>(indexLeptonZ)) ||
+                   (leptonIndices != LeptonZVertex::template indices_of_field<1>(indexLeptonZ))) {
+                  continue;
+               }
+
+               const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
+               const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
+
+               if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
+                   cxx_diagrams::isSMField<Scalar>(scalarIndices)) {
+                  continue;
+               }
+
+               if (scalarIndices != FermionVertex::template indices_of_field<0>(index2)) {
+                  continue;
+               }
+
+               if (fermionIndices != FermionVertex::template indices_of_field<2>(index2)) {
+                  continue;
+               }
+
+               if ((fermionIndices != FermionZVertex::template indices_of_field<2>(indexFermionZ)) ||
+                   (fermionIndices != FermionZVertex::template indices_of_field<1>(indexFermionZ))) {
+                  continue;
+               }
+
+               const auto leptonVertex = LeptonVertex::evaluate(index1, context);
+               const auto fermionVertex = FermionVertex::evaluate(index2, context);
+               const auto leptonZVertex = LeptonZVertex::evaluate(indexLeptonZ, context);
+               const auto fermionZVertex = FermionZVertex::evaluate(indexFermionZ, context);
+
+               const auto fermionMass = context.mass<Fermion>(fermionIndices);
+               const auto scalarMass = context.mass<Scalar>(scalarIndices);
+               const auto zMass = context.mass<ZBoson>({ });
+
+               static constexpr double fermionChargeCount =
+                  Fermion::electric_charge / Lepton::electric_charge;
+
+               const std::complex<double> zrm = leptonVertex.right();
+               const std::complex<double> zlm = leptonVertex.left();
+               const std::complex<double> zrf = fermionVertex.right();
+               const std::complex<double> zlf = fermionVertex.left();
+               const std::complex<double> zmzr = leptonZVertex.right();
+               const std::complex<double> zmzl = leptonZVertex.left();
+               const std::complex<double> zfzr = fermionZVertex.right();
+               const std::complex<double> zfzl = fermionZVertex.left();
+
+               const double gvm = 0.5*(zmzr.real() + zmzl.real());
+               const double gvf = 0.5*(zfzr.real() + zfzl.real());
+               const double coeffA = std::real((zrf + zlf) * (zrm + zlm));
+               const double coeffB = std::real((zlf - zrf) * (zrm - zlm));
+
+               const double x = Sqr(fermionMass / scalarMass);
+               const double y = Sqr(fermionMass / zMass);
+
+               const double part1 = coeffA == 0 ? 0 : coeffA * BarrZeeLoopFSZ(x, y);
+               const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPZ(x, y);
+
+               const double preFactor = 4 * twoLoop * fermionChargeCount * gvm * gvf
+                  * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
+
+               res += preFactor * (part1 + part2);
+            }
+         }
+      }
+   }
+
+   return res;
+}
+
+template<typename Lepton, class ChargedScalar, class NeutralScalar>
+double AMMBarrZeeScalarLoop<
+Lepton, ChargedScalar, NeutralScalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+{
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
+
+   using LeptonVertex = Vertex<
+                      NeutralScalar,
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
+                      >;
+
+   using ScalarVertex = Vertex<
+                         NeutralScalar,
+                         ChargedScalar,
+                         typename ChargedScalar::lorentz_conjugate
+                         >;
+
+   double res = 0.0;
+
+   for (const auto& index1: index_range<LeptonVertex>()) {
+      for (const auto& index2: index_range<ScalarVertex>()) {
+         const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
+
+         if (leptonIndices != indices) {
+            continue;
+         }
+
+         const auto neutralScalarIndices = LeptonVertex::template indices_of_field<0>(index1);
+         const auto chargedScalarIndices = ScalarVertex::template indices_of_field<1>(index2);
+
+         if (cxx_diagrams::isSMField<ChargedScalar>(chargedScalarIndices) &&
+             cxx_diagrams::isSMField<NeutralScalar>(neutralScalarIndices)) {
+            continue;
+         }
+
+         if (neutralScalarIndices != ScalarVertex::template indices_of_field<0>(index2)) {
+            continue;
+         }
+
+         if (chargedScalarIndices != ScalarVertex::template indices_of_field<2>(index2)) {
+            continue;
+         }
+
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
+         const auto scalarVertex = ScalarVertex::evaluate(index2, context);
+
+         const auto chargedScalarMass = context.mass<ChargedScalar>(chargedScalarIndices);
+         const auto neutralScalarMass = context.mass<NeutralScalar>(neutralScalarIndices);
+
+         static constexpr double scalarChargeCount =
+            ChargedScalar::electric_charge / Lepton::electric_charge;
+
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
+         const std::complex<double> zss = scalarVertex.value();
+
+         const double coeff = std::real((zrm + zlm) * zss);
+
+         const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
+
+         const double preFactor = 4 * twoLoop * Sqr(unit_charge(context) * scalarChargeCount)
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / Sqr(neutralScalarMass);
+
+         res += preFactor * coeff * BarrZeeLoopS(massRatioSquared);
+      }
+   }
+
+   return res;
+}
+
+template<typename Lepton, class Vector, class Scalar>
+double AMMBarrZeeVectorLoop<
+Lepton, Vector, Scalar
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+{
+   using namespace flexiblesusy::amm_loop_functions::two_loop;
+
+   using LeptonVertex = Vertex<
+                      Scalar,
+                      typename Lepton::lorentz_conjugate,
+                      Lepton
+                      >;
+
+   using VectorVertex = Vertex<
+                         Scalar,
+                         Vector,
+                         typename Vector::lorentz_conjugate
+                         >;
+
+   double res = 0.0;
+
+   for (const auto& index1: index_range<LeptonVertex>()) {
+      for (const auto& index2: index_range<VectorVertex>()) {
+         const auto leptonIndices = LeptonVertex::template indices_of_field<2>(index1);
+
+         if (leptonIndices != indices) {
+            continue;
+         }
+
+         const auto scalarIndices = LeptonVertex::template indices_of_field<0>(index1);
+         const auto vectorIndices = VectorVertex::template indices_of_field<1>(index2);
+
+         if (cxx_diagrams::isSMField<Vector>(vectorIndices) &&
+             cxx_diagrams::isSMField<Scalar>(scalarIndices)) {
+            continue;
+         }
+
+         if (scalarIndices != VectorVertex::template indices_of_field<0>(index2)) {
+            continue;
+         }
+
+         if (vectorIndices != VectorVertex::template indices_of_field<2>(index2)) {
+            continue;
+         }
+
+         const auto leptonVertex = LeptonVertex::evaluate(index1, context);
+         const auto vectorVertex = VectorVertex::evaluate(index2, context);
+
+         const auto vectorMass = context.mass<Vector>(vectorIndices);
+         const auto scalarMass = context.mass<Scalar>(scalarIndices);
+
+         static constexpr double vectorChargeCount =
+            Vector::electric_charge / Lepton::electric_charge;
+
+         const std::complex<double> zrm = leptonVertex.right();
+         const std::complex<double> zlm = leptonVertex.left();
+         const std::complex<double> zsv = vectorVertex.value();
+
+         const double coeff = std::real((zrm + zlm) * zsv);
+
+         const double massRatioSquared = Sqr(vectorMass / scalarMass);
+
+         const double preFactor = - 2 * twoLoop * Sqr(unit_charge(context) * vectorChargeCount)
+            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / Sqr(vectorMass);
+
+         res += preFactor * coeff * BarrZeeLoopV(massRatioSquared);
+      }
+   }
+
+   return res;
+}
+
+} // anonymous namespace

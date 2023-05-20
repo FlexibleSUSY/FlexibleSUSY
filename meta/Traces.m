@@ -1,3 +1,24 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
 
 BeginPackage["Traces`", {"SARAH`", "BetaFunction`", "CConversion`", "Parameters`"}];
 
@@ -60,10 +81,8 @@ GetTraceCType[trace_] :=
     CConversion`CreateCType[GetTraceType[trace]];
 
 FindMultipleTraces[list_List] :=
-    Module[{traces},
-           traces = Flatten[Cases[list, trace[__], Infinity]];
-           traces = (#[[1]])& /@ Select[Tally[traces], (#[[2]] > 1)&];
-           Return[traces];
+    Module[{traces = Flatten[Cases[list, trace[__], Infinity]]},
+           First /@ Select[Tally[traces], (#[[2]] > 1)&]
           ];
 
 FindAllTraces[list_List] :=
@@ -71,7 +90,9 @@ FindAllTraces[list_List] :=
 
 (* returns all traces appearing at a given loop level *)
 FindAllTracesAt[list_List, loopOrder_Integer] :=
-    DeleteDuplicates[Flatten[Cases[BetaFunction`GetBeta[#,loopOrder]& /@ list, trace[__], {0,Infinity}]]];
+    DeleteDuplicates[Flatten[
+        Cases[BetaFunction`GetBeta[#,loopOrder]& /@ list, trace[__], {0,Infinity}]
+    ]];
 
 (* returns traces appearing at a given loop level, but not below *)
 FindAllTracesOnlyAt[list_List, loopOrder_Integer] :=
@@ -82,34 +103,30 @@ FindAllTracesOnlyAt[list_List, loopOrder_Integer] :=
           ];
 
 CreateTraceRules[traces_List] :=
-    (Rule[#, ToValidCSymbol[#]])& /@ FindAllTraces[traces];
+    (Rule[#, CConversion`ToValidCSymbol[#]])& /@ FindAllTraces[traces];
 
 CreateLocalCopiesOfSARAHTraces[expr_, sarahTraces_List, structName_String] :=
-    Module[{defs = "", traces, traceExprs},
-           traces = FindSARAHTraces[expr, sarahTraces];
+    Module[{traces = FindSARAHTraces[expr, sarahTraces], traceExprs},
            tracesAndExprs = Select[sarahTraces, MemberQ[traces, GetSARAHTraceName[#]]&];
-           (defs = defs <> "const " <> GetTraceCType[GetSARAHTraceExpr[#]] <>
-            " " <> ToValidCSymbolString[GetSARAHTraceName[#]] <>
-            " = " <> structName <> "." <> ToValidCSymbolString[GetSARAHTraceName[#]] <>
-            ";\n")& /@ tracesAndExprs;
-           Return[defs];
+           StringJoin[("const " <> GetTraceCType[GetSARAHTraceExpr[#]] <>
+                       " " <> CConversion`ToValidCSymbolString[GetSARAHTraceName[#]] <>
+                       " = " <> structName <> "." <>
+                       CConversion`ToValidCSymbolString[GetSARAHTraceName[#]] <>
+                       ";\n")& /@ tracesAndExprs]
           ];
 
 CreateLocalCopiesOfTraces[list_List, structName_String] :=
-    Module[{defs = "", traces},
-           traces = FindAllTraces[list];
-           (defs = defs <> "const " <> GetTraceCType[#] <>
-            " " <> ToValidCSymbolString[#] <> " = " <>
-            structName <> "." <> ToValidCSymbolString[#] <> ";\n")& /@ traces;
-           Return[defs];
-          ];
+    StringJoin[("const " <> GetTraceCType[#] <>
+               " " <> CConversion`ToValidCSymbolString[#] <>
+               " = " <> structName <> "." <>
+               CConversion`ToValidCSymbolString[#] <> ";\n")& /@ FindAllTraces[list]];
 
 CreateTraceDefs[list_List] :=
-    StringJoin[(GetTraceCType[#] <> " " <> ToValidCSymbolString[#] <> "{};\n")& /@ FindAllTraces[list]];
+    StringJoin[(GetTraceCType[#] <> " " <> CConversion`ToValidCSymbolString[#] <> "{};\n")& /@ FindAllTraces[list]];
 
 CreateSARAHTraceDefs[list_List] :=
     StringJoin[(GetTraceCType[GetSARAHTraceExpr[#]] <> " " <>
-                ToValidCSymbolString[GetSARAHTraceName[#]] <> "{};\n")& /@ list];
+                CConversion`ToValidCSymbolString[GetSARAHTraceName[#]] <> "{};\n")& /@ list];
 
 CreateCastedTraceExprStr[expr_] :=
     CConversion`CastTo[RValueToCFormString[expr], GetTraceType[expr]];
@@ -117,19 +134,18 @@ CreateCastedTraceExprStr[expr_] :=
 CreateTraceCalculation[list_List, structName_String] :=
     Module[{traces, Def},
            traces = {FindAllTracesOnlyAt[list,1], FindAllTracesOnlyAt[list,2], FindAllTracesOnlyAt[list,3]};
-           Def[expr_] := (structName <> "." <> ToValidCSymbolString[expr] <>
+           Def[expr_] := (structName <> "." <> CConversion`ToValidCSymbolString[expr] <>
                           " = " <> CreateCastedTraceExprStr[expr] <> ";\n");
            StringJoin /@ Map[Def, traces, {2}]
           ];
 
 CreateSARAHTraceCalculation[list_List, structName_String] :=
-    Module[{defs = ""},
-           (defs = defs <> structName <> "." <> ToValidCSymbolString[GetSARAHTraceName[#]] <>
-            " = " <> CreateCastedTraceExprStr[GetSARAHTraceExpr[#]] <> ";\n")& /@ list;
-           defs = Parameters`CreateLocalConstRefsForInputParameters[list] <>
-                  "\n" <> defs;
-           Return[defs];
-          ];
+    Parameters`CreateLocalConstRefsForInputParameters[list] <>
+    "\n" <>
+    StringJoin[(structName <> "." <>
+               CConversion`ToValidCSymbolString[GetSARAHTraceName[#]] <>
+               " = " <> CreateCastedTraceExprStr[GetSARAHTraceExpr[#]] <>
+               ";\n")& /@ list];
 
 End[];
 

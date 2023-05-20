@@ -16,10 +16,10 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_physical.hpp"
-#include "slha_io.hpp"
+#include "mixings.hpp"
+#include "wrappers.hpp"
 
 #include <iostream>
 
@@ -56,7 +56,7 @@ Eigen::ArrayXd @ModelName@_physical::get() const
 {
    Eigen::ArrayXd pars(get_masses());
 
-@getPhysical@
+@getMixings@
 
    return pars;
 }
@@ -65,7 +65,7 @@ void @ModelName@_physical::set(const Eigen::ArrayXd& pars)
 {
    set_masses(pars);
 
-@setPhysical@
+@setMixings@
 }
 
 Eigen::ArrayXd @ModelName@_physical::get_masses() const

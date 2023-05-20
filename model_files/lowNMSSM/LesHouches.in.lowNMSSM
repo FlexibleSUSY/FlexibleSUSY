@@ -3,7 +3,7 @@ Block MODSEL                 # Select model
 Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
-    2   0                    # algorithm (0 = two_scale, 1 = lattice)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
     3   0                    # calculate SM pole masses
     4   2                    # pole mass loop order
     5   2                    # EWSB loop order
@@ -15,7 +15,7 @@ Block FlexibleSUSY
    11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
 Block SMINPUTS               # Standard Model inputs
     1     1.28962000E+02     # alpha_em^(-1)
-    2     1.16637000E-05     # G_F
+    2     1.16637870e-05     # G_Fermi
     3     1.18400000E-01     # alpha_s
     4     9.11876000E+01     # Mz
     5     4.19000000E+00     # m_b^MS(mb)

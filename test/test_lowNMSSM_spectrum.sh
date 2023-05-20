@@ -11,7 +11,7 @@ lowmssm_output="$BASEDIR/test_lowNMSSM_spectrum_lowNMSSM.out.spc"
 softsusy_output="$BASEDIR/test_lowNMSSM_spectrum_SoftsusyNMSSM.out.spc"
 rel_error="0.00005"
 
-softsusy_exe="$BASEDIR/../models/SoftsusyNMSSM/run_softpoint.x"
+softsusy_exe="$BASEDIR/../test/SOFTSUSY/run_softpoint.x"
 lowmssm_exe="$BASEDIR/../models/lowNMSSM/run_lowNMSSM.x"
 
 if test ! -x "$lowmssm_exe"; then

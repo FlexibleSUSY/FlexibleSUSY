@@ -16,14 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_standard_model_two_scale_matching.hpp"
 #include "@ModelName@_standard_model_matching.hpp"
 #include "@ModelName@_two_scale_model.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "error.hpp"
-#include "two_scale_constraint.hpp"
+#include "single_scale_constraint.hpp"
 
 namespace flexiblesusy {
 
@@ -55,7 +54,7 @@ double CLASSNAME::get_scale() const
    return scale_getter();
 }
 
-void CLASSNAME::set_models(Two_scale_model* low, Two_scale_model* high)
+void CLASSNAME::set_models(Model* low, Model* high)
 {
    eft = cast_model<standard_model::StandardModel<Two_scale>*>(low);
    model = cast_model<@ModelName@<Two_scale>*>(high);
@@ -153,7 +152,7 @@ double CLASSNAME::get_scale() const
    return scale_getter();
 }
 
-void CLASSNAME::set_models(Two_scale_model* high, Two_scale_model* low)
+void CLASSNAME::set_models(Model* high, Model* low)
 {
    eft = cast_model<standard_model::StandardModel<Two_scale>*>(low);
    model = cast_model<@ModelName@<Two_scale>*>(high);

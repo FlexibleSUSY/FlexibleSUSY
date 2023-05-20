@@ -52,16 +52,9 @@ InitialGuessAtHighScale = {
    {\[Lambda], LambdaIN}
 };
 
-SMParticles = {
-    Electron, TopQuark, BottomQuark,
-    VectorP, VectorZ, VectorG, VectorW, Neutrino,
-    gP, gG, gZ, gWm, gWmC,
-    Hp, Ah, (* goldstones *)
-    hh (* Higgs *)
-};
-
 UseSM3LoopRGEs = True;
 UseHiggs2LoopSM = True;
+UseHiggs3LoopSM = True;
 
 DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh};
@@ -72,3 +65,5 @@ SARAH`ParameterDefinitions = Append[
     Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
     {SARAH`\[Lambda], { Description -> "SM Higgs Selfcouplings" } }
 ];
+
+FSCalculateDecays = True;

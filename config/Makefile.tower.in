@@ -6,6 +6,7 @@ ABSBASEDIR      := @ABSBASEDIR@
 # Switches
 ENABLE_FFLITE    := @ENABLE_FFLITE@
 ENABLE_LOOPTOOLS := @ENABLE_LOOPTOOLS@
+ENABLE_COLLIER   := @ENABLE_COLLIER@
 ENABLE_THREADS   := @ENABLE_THREADS@
 
 MODULE_LIBEXT   := @MODULE_LIBEXT@
@@ -19,6 +20,7 @@ CONFIGDIR       := $(ABSBASEDIR)/config
 FLEXIDIR        := $(ABSBASEDIR)/src
 FFLITEDIR       := $(ABSBASEDIR)/fflite
 SLHAEADIR       := $(ABSBASEDIR)/slhaea
+SMHODIR         := $(ABSBASEDIR)/model_specific/SM
 
 INCMODEL1       := -I$(MODEL1DIR)
 INCMODEL2       := -I$(MODEL2DIR)
@@ -30,26 +32,24 @@ LIBMODEL1       := $(MODEL1DIR)/lib$(MODEL1)$(MODULE_LIBEXT)
 LIBMODEL2       := $(MODEL2DIR)/lib$(MODEL2)$(MODULE_LIBEXT)
 LIBFLEXI        := $(FLEXIDIR)/libflexisusy$(MODULE_LIBEXT)
 LIBFFLITE       := $(FFLITEDIR)/libfflite$(MODULE_LIBEXT)
+LIBSMHO         := $(SMHODIR)/libmodel_specific_SM$(MODULE_LIBEXT)
 
 # Variables for compilation
 CXX             := @CXX@
 CPPFLAGS        := @CPPFLAGS@ -I. $(INCCONFIG) $(INCFLEXI) \
-                   $(INCSLHAEA) $(INCMODEL1) $(INCMODEL2)
+                   $(INCSLHAEA) -I$(SMHODIR) $(INCMODEL1) $(INCMODEL2)
 CXXFLAGS        := @CXXFLAGS@
 CXX_DEP_GEN     := $(CXX)
 CXXFLAGS_DEP_GEN:= $(CXXFLAGS)
 FC              := @FC@
 FFLAGS          := @FFLAGS@
 FLIBS           := @FLIBS@
+FUTILIBS        := @FUTILIBS@
 FOR_DEP_GEN     := $(FC)
-BLASLIBS        := @BLASLIBS@
-BOOSTTESTLIBS   := @BOOSTTESTLIBS@
-BOOSTTHREADLIBS := @BOOSTTHREADLIBS@
 BOOSTFLAGS      := @BOOSTFLAGS@
 EIGENFLAGS      := @EIGENFLAGS@
 GSLLIBS         := @GSLLIBS@
 GSLFLAGS        := @GSLFLAGS@
-LAPACKLIBS      := @LAPACKLIBS@
 LOOPFUNCFLAGS   := @LOOPFUNCFLAGS@
 LOOPFUNCLIBS    := @LOOPFUNCLIBS@
 SQLITEFLAGS     := @SQLITEFLAGS@
@@ -70,6 +70,12 @@ TOWER_DEP := \
 
 TOWER_EXE := \
 		run_tower.x
+
+# set default shell
+SHELL = /bin/sh
+
+# disable built-in rules to improve speed
+MAKEFLAGS += -rR --include-dir=$(CURDIR)
 
 # returns file name with absolute path, taking whitespace in directory
 # names into account
@@ -94,12 +100,12 @@ distclean: clean
 
 $(TOWER_DEP) $(TOWER_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS)
 
-ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
+ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)$(ENABLE_COLLIER)))
 $(TOWER_DEP) $(TOWER_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
 endif
 
-$(TOWER_EXE): $(TOWER_OBJ) $(LIBMODEL1) $(LIBMODEL2) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS)
+$(TOWER_EXE): $(TOWER_OBJ) $(LIBMODEL1) $(LIBMODEL2) $(LIBSMHO) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(THREADLIBS) $(FLIBS) $(FUTILIBS) $(SQLITELIBS)
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean-dep)
@@ -119,6 +125,9 @@ endif
 %.d: %.f
 	$(FOR_DEP_GEN) $(CPPFLAGS) -cpp -MM -MP -MG $^ -MT '$*.o' | \
 	sed 's|.*\.o:|$*.o:|' > $@
+
+%.o: %.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 showbuild:
 	@echo "# package information"
@@ -146,14 +155,10 @@ showbuild:
 	@echo "FFLAGS             = $(FFLAGS)"
 	@echo "FLIBS              = $(FLIBS)"
 	@echo "FOR_DEP_GEN        = $(FOR_DEP_GEN)"
-	@echo "BLASLIBS           = $(BLASLIBS)"
-	@echo "BOOSTTESTLIBS      = $(BOOSTTESTLIBS)"
-	@echo "BOOSTTHREADLIBS    = $(BOOSTTHREADLIBS)"
 	@echo "BOOSTFLAGS         = $(BOOSTFLAGS)"
 	@echo "EIGENFLAGS         = $(EIGENFLAGS)"
 	@echo "GSLLIBS            = $(GSLLIBS)"
 	@echo "GSLFLAGS           = $(GSLFLAGS)"
-	@echo "LAPACKLIBS         = $(LAPACKLIBS)"
 	@echo "LOOPFUNCFLAGS      = $(LOOPFUNCFLAGS)"
 	@echo "LOOPFUNCLIBS       = $(LOOPFUNCLIBS)"
 	@echo "MODULE_LIBEXT      = $(MODULE_LIBEXT)"
@@ -163,4 +168,5 @@ showbuild:
 	@echo ""
 	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
 	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
+	@echo "ENABLE_COLLIER     = $(ENABLE_COLLIER)"
 	@echo "ENABLE_THREADS     = $(ENABLE_THREADS)"

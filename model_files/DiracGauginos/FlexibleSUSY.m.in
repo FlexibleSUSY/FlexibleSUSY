@@ -30,26 +30,24 @@ EXTPAR = {{1, MDBinput},
 	  {96, LTadInput}
 };
 
-FSExtraInputParameters = {};
-
 EWSBOutputParameters = {mHd2, mHu2, mS2, mT2};
 
 HighScale = mSUSY;
 
-HighScaleFirstGuess = mSUSY;  
+HighScaleFirstGuess = mSUSY;
 
-HighScaleInput = {{λ, LSinput},
-	          {T[λ], ALSinput*LSinput},
+HighScaleInput = {{\[Lambda], LSinput},
+	          {T[\[Lambda]], ALSinput*LSinput},
 		  {LT, LTinput},
 		  {T[LT], ALTinput*LTinput},
 		  {LS, LSTinput},
 		  {T[LS], ALSTinput*LSTinput},
-		  {κ, KapInput},
-		  {T[κ], AKapInput*KapInput},
+		  {\[Kappa], KapInput},
+		  {T[\[Kappa]], AKapInput*KapInput},
 		  {L1, TadInput},
 		  {L[L1], LTadInput},
-		  {B[μ], BMuInput},
-		  {μ, MuInput},
+		  {B[\[Mu]], BMuInput},
+		  {\[Mu], MuInput},
 		  {MS, MSinput},
 		  {MT, MTinput},
 		  {MO, MOinput},
@@ -103,7 +101,7 @@ InitialGuessAtLowScale = {
    {vu, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
    {Yu, Automatic},
    {Yd, Automatic},
-   {Ye, Automatic}   
+   {Ye, Automatic}
 };
 
 (* set to True to enable Pietro's 2L Higgs mass corrections
@@ -122,5 +120,15 @@ PotentialLSPParticles = {};
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYOutput, NoScale,
            {{1, Hold[SUSYScale]},
-            {2, Hold[LowScale]} } }
+            {2, Hold[LowScale]} } },
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+         {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+         {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+         {25, FlexibleSUSYObservable`EDM[Fe[3]]},
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+      }
+   }
 };
+
+FSCalculateDecays = True;

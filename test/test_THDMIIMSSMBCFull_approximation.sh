@@ -1,3 +1,4 @@
+#!/bin/sh
 BASEDIR=$(dirname $0)
 HOMEDIR="${BASEDIR}/.."
 
@@ -50,7 +51,7 @@ for m in ${models}; do
               > "${scanout2}"
     printf "done\n"
 
-    diff=$(diff -u "${scanout1}" "${scanout2}")
+    diff=$(numdiff --relative-tolerance=1.0e-8 --brief "${scanout1}" "${scanout2}" | sed '/^+++/d;/^$/d')
 
     if test "x${diff}" != "x" ; then
         echo "Error: scan output files are not equal:"

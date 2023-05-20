@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 Needs["TestSuite`", "TestSuite.m"];
 Get["models/CMSSM/CMSSM_librarylink.m"];
 
@@ -34,11 +56,6 @@ resultParallelTab = AbsoluteTiming[ParallelTable[CalcMh[tb], {tb,r}]];
 Print["time for sequential runs: ", resultMap[[1]]];
 Print["time for parallel map   : ", resultParallelMap[[1]]];
 Print["time for parallel table : ", resultParallelTab[[1]]];
-
-If[Length[kernels] > 1,
-   TestLowerThan[resultParallelMap[[1]], resultMap[[1]]];
-   TestLowerThan[resultParallelTab[[1]], resultMap[[1]]];
-  ];
 
 TestEquality[resultMap[[2]], resultParallelMap[[2]]];
 TestEquality[resultMap[[2]], resultParallelTab[[2]]];

@@ -16,15 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_two_scale_susy_scale_constraint.hpp"
 #include "@ModelName@_two_scale_model.hpp"
+#include "config.h"
 #include "wrappers.hpp"
 #include "logger.hpp"
 #include "error.hpp"
 #include "ew_input.hpp"
-#include "gsl_utils.hpp"
 #include "minimizer.hpp"
 #include "raii.hpp"
 #include "root_finder.hpp"
@@ -35,6 +34,7 @@
 namespace flexiblesusy {
 
 #define DERIVEDPARAMETER(p) model->p()
+#define EXTRAPARAMETER(p) model->get_##p()
 #define INPUTPARAMETER(p) model->get_input().p
 #define MODELPARAMETER(p) model->get_##p()
 #define PHASE(p) model->get_##p()
@@ -53,8 +53,7 @@ namespace flexiblesusy {
 
 @ModelName@_susy_scale_constraint<Two_scale>::@ModelName@_susy_scale_constraint(
    @ModelName@<Two_scale>* model_, const softsusy::QedQcd& qedqcd_)
-   : Constraint<Two_scale>()
-   , model(model_)
+   : model(model_)
    , qedqcd(qedqcd_)
 {
    initialize();
@@ -64,13 +63,14 @@ void @ModelName@_susy_scale_constraint<Two_scale>::apply()
 {
    check_model_ptr();
 
-@temporarySetting@
+@initialSetting@
 
    model->calculate_DRbar_masses();
    update_scale();
 
    // apply user-defined susy scale constraints
 @applyConstraint@
+@calculateSMHiggsPoleMass@
 }
 
 double @ModelName@_susy_scale_constraint<Two_scale>::get_scale() const
@@ -95,7 +95,7 @@ const @ModelName@_input_parameters& @ModelName@_susy_scale_constraint<Two_scale>
    return model;
 }
 
-void @ModelName@_susy_scale_constraint<Two_scale>::set_model(Two_scale_model* model_)
+void @ModelName@_susy_scale_constraint<Two_scale>::set_model(Model* model_)
 {
    model = cast_model<@ModelName@<Two_scale>*>(model_);
 }

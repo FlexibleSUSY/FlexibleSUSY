@@ -31,19 +31,19 @@ void print_all_info(std::ostream& ostr)
 {
    ostr <<
       "Version information\n"
-      "===================\n";
+      "===================\n\n";
    print_version_info(ostr);
 
    ostr <<
       "\n"
       "System information\n"
-      "==================\n";
+      "==================\n\n";
    print_system_info(ostr);
 
    ostr <<
       "\n"
       "Build information\n"
-      "=================\n";
+      "=================\n\n";
    print_build_info(ostr);
 }
 
@@ -68,6 +68,8 @@ void print_version_info(std::ostream& ostr)
       "Eigen version:                          " << EIGEN_WORLD_VERSION
         << '.' << EIGEN_MAJOR_VERSION << '.' << EIGEN_MINOR_VERSION << "\n"
       "GSL version:                            " << GSL_VERSION "\n"
+      "GM2Calc version:                        " << GM2CALC_VERSION "\n"
+      "Himalaya version:                       " << HIMALAYA_VERSION "\n"
       ;
 }
 
@@ -77,16 +79,20 @@ void print_build_info(std::ostream& ostr)
       "C++ compiler (CXX):                     " CXX "\n"
       "C++ compiler flags (CXXFLAGS):          " CXXFLAGS "\n"
       "C preprocessor flags (CPPFLAGS):        " CPPFLAGS "\n"
+      "COLLIER flags (COLLIERFLAGS):           " COLLIERFLAGS "\n"
+      "COLLIER libraries (COLLIERLIBS):        " COLLIERLIBS "\n"
       "Fortran compiler (FC):                  " FC "\n"
       "Fortran compiler flags (FFLAGS):        " FFLAGS "\n"
       "Fortran libraries (FLIBS):              " FLIBS "\n"
-      "BLAS library (BLASLIBS):                " BLASLIBS "\n"
       "Boost flags (BOOSTFLAGS):               " BOOSTFLAGS "\n"
       "Boost libraries:                        " BOOSTTESTLIBS " " BOOSTTHREADLIBS "\n"
       "Eigen flags (EIGENFLAGS):               " EIGENFLAGS "\n"
+      "Himalaya flags (HIMALAYAFLAGS):         " HIMALAYAFLAGS "\n"
+      "Himalaya libraries (HIMALAYALIBS):      " HIMALAYALIBS "\n"
       "GSL flags (GSLFLAGS):                   " GSLFLAGS "\n"
       "GSL libraries (GSLLIBS):                " GSLLIBS "\n"
-      "LAPACK library (LAPACKLIBS):            " LAPACKLIBS "\n"
+      "LibraryLink flags (LLFLAGS):            " LLFLAGS "\n"
+      "LibraryLink library (LLLIBS):           " LLLIBS "\n"
       "Loop function flags (LOOPFUNCFLAGS):    " LOOPFUNCFLAGS "\n"
       "Loop function libraries (LOOPFUNCLIBS): " LOOPFUNCLIBS "\n"
       "Additional flags (LDFLAGS):             " LDFLAGS "\n"
@@ -97,18 +103,88 @@ void print_build_info(std::ostream& ostr)
       "TSIL libraries (TSILLIBS):              " TSILLIBS "\n"
       "Thread libraries (THREADLIBS):          " THREADLIBS "\n"
       "\n"
-      "Debug mode:                             "
-#ifdef ENABLE_DEBUG
+      "Two-scale solver:                       "
+#ifdef ENABLE_TWO_SCALE_SOLVER
       "enabled"
 #else
       "disabled"
 #endif
       "\n"
-      "Multi-threading:                        "
-#ifdef ENABLE_THREADS
+      "Semi-analytic solver:                   "
+#ifdef ENABLE_SEMI_ANALYTIC_SOLVER
       "enabled"
 #else
       "disabled"
+#endif
+      "\n"
+      "Colored output:                         "
+#ifdef ENABLE_COLORS
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Debug output:                           "
+#ifdef ENABLE_DEBUG
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Silent output:                          "
+#ifdef ENABLE_SILENT
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Verbose output:                         "
+#ifdef ENABLE_VERBOSE
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use Boost.Numeric.Odeint:               "
+#ifdef ENABLE_ODEINT
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use FFlite:                             "
+#ifdef ENABLE_FFLITE
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use COLLIER:                            "
+#ifdef ENABLE_COLLIER
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use GM2Calc:                            "
+#ifdef ENABLE_GM2CALC
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use Himalaya:                           "
+#ifdef ENABLE_HIMALAYA
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use LibraryLink:                        "
+#ifdef ENABLE_LIBRARYLINK
+      "yes"
+#else
+      "no"
 #endif
       "\n"
       "Use LoopTools:                          "
@@ -118,8 +194,15 @@ void print_build_info(std::ostream& ostr)
       "no"
 #endif
       "\n"
-      "Use FFlite:                             "
-#ifdef ENABLE_FFLITE
+      "Use multi-threading:                    "
+#ifdef ENABLE_THREADS
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use <random> header:                    "
+#ifdef ENABLE_RANDOM
       "yes"
 #else
       "no"
@@ -139,7 +222,7 @@ void print_build_info(std::ostream& ostr)
       "no"
 #endif
       "\n"
-      "Eigenvalue error check:                 "
+      "Mass eigenvalue error check:            "
 #ifdef CHECK_EIGENVALUE_ERROR
       "yes"
 #else

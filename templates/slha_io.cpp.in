@@ -16,32 +16,43 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_input_parameters.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_model_slha.hpp"
+#include "@ModelName@_observables.hpp"
+#include "@ModelName@_physical.hpp"
+#include "ew_input.hpp"
 #include "logger.hpp"
-#include "wrappers.hpp"
+#include "observable_problems.hpp"
+#include "observable_problems_format_slha.hpp"
 #include "numerics2.hpp"
+#include "spectrum_generator_problems.hpp"
+#include "standard_model.hpp"
+#include "wrappers.hpp"
 #include "config.h"
+#include "spectrum_generator_settings.hpp"
 
 #include <array>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <iterator>
 #include <string>
 
 #define Pole(p) physical.p
 #define PHYSICAL(p) model.get_physical().p
 #define PHYSICAL_SLHA(p) model.get_physical_slha().p
 #define LOCALPHYSICAL(p) physical.p
+#define MODEL model
 #define MODELPARAMETER(p) model.get_##p()
 #define INPUTPARAMETER(p) input.p
 #define EXTRAPARAMETER(p) model.get_##p()
+#define OBSERVABLES observables
 #define DEFINE_PHYSICAL_PARAMETER(p) decltype(LOCALPHYSICAL(p)) p;
 #define LowEnergyConstant(p) Electroweak_constants::p
-
-using namespace softsusy;
+#define SCALES(p) scales.p
 
 namespace flexiblesusy {
 
@@ -59,6 +70,16 @@ void @ModelName@_slha_io::clear()
 void @ModelName@_slha_io::set_print_imaginary_parts_of_majorana_mixings(bool flag)
 {
    print_imaginary_parts_of_majorana_mixings = flag;
+}
+
+/**
+ * Reads DR-bar parameters, pole masses and mixing matrices from a
+ * SLHA output file.
+ */
+void @ModelName@_slha_io::fill(@ModelName@_slha& model) const
+{
+   fill(static_cast<@ModelName@_mass_eigenstates&>(model));
+   fill_physical(model.get_physical_slha());
 }
 
 /**
@@ -148,6 +169,16 @@ void @ModelName@_slha_io::set_settings(const Spectrum_generator_settings& settin
 }
 
 /**
+ * Stores the settings (FlexibleSUSY block) in the SLHA object.
+ *
+ * @param settings class of settings
+ */
+void @ModelName@_slha_io::set_FlexibleDecay_settings(const FlexibleDecay_settings& settings)
+{
+   slha_io.set_FlexibleDecay_settings(settings);
+}
+
+/**
  * Stores the SMINPUTS input parameters in the SLHA object.
  *
  * @param qedqcd class of Standard Model parameters
@@ -163,7 +194,18 @@ void @ModelName@_slha_io::set_sminputs(const softsusy::QedQcd& qedqcd)
  *
  * @param problems struct with parameter point problems
  */
-void @ModelName@_slha_io::set_spinfo(const Problems<@ModelName@_info::NUMBER_OF_PARTICLES, @ModelName@_info::NUMBER_OF_PARAMETERS>& problems)
+void @ModelName@_slha_io::set_spinfo(const Spectrum_generator_problems& problems)
+{
+   set_spinfo(problems.get_problem_strings(), problems.get_warning_strings());
+}
+
+/**
+ * Stores the spectrum generator information in the SPINFO block in
+ * the SLHA object.
+ *
+ * @param problems struct with parameter point problems
+ */
+void @ModelName@_slha_io::set_spinfo(const Problems& problems)
 {
    set_spinfo(problems.get_problem_strings(), problems.get_warning_strings());
 }
@@ -241,6 +283,234 @@ void @ModelName@_slha_io::set_pmns(
 }
 
 /**
+ * Stores the model (DR-bar) parameters in the SLHA object.
+ *
+ * @param model model class
+ */
+void @ModelName@_slha_io::set_model_parameters(const @ModelName@_slha& model)
+{
+@writeSLHAModelParametersBlocks@
+@writeSLHAPhasesBlocks@
+}
+
+void @ModelName@_slha_io::set_model_parameters(const standard_model::Standard_model& model)
+{
+   {
+      std::ostringstream block;
+      block << "Block SMGAUGE Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(1, (model.get_g1() * standard_model_info::normalization_g1), "gY")
+            << FORMAT_ELEMENT(2, (model.get_g2()), "g2")
+            << FORMAT_ELEMENT(3, (model.get_g3()), "g3")
+      ;
+      slha_io.set_block(block);
+   }
+   slha_io.set_block("SMYu", ToMatrix(model.get_Yu()), "Yu", model.get_scale());
+   slha_io.set_block("SMYd", ToMatrix(model.get_Yd()), "Yd", model.get_scale());
+   slha_io.set_block("SMYe", ToMatrix(model.get_Ye()), "Ye", model.get_scale());
+   {
+      std::ostringstream block;
+      block << "Block SMSM Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(1, (model.get_mu2()), "mu2")
+            << FORMAT_ELEMENT(2, (model.get_Lambdax()), "Lambdax")
+      ;
+      slha_io.set_block(block);
+   }
+   {
+      std::ostringstream block;
+      block << "Block SMHMIX Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(3, (model.get_v()), "v")
+      ;
+      slha_io.set_block(block);
+   }
+}
+
+void @ModelName@_slha_io::set_mass(const standard_model::Standard_model_physical& physical)
+{
+   std::ostringstream mass;
+
+   mass << "Block SMMASS\n"
+      << FORMAT_MASS(24, physical.MVWp, "VWp")
+      << FORMAT_MASS(21, physical.MVG, "VG")
+      << FORMAT_MASS(12, physical.MFv(0), "Fv(1)")
+      << FORMAT_MASS(14, physical.MFv(1), "Fv(2)")
+      << FORMAT_MASS(16, physical.MFv(2), "Fv(3)")
+      << FORMAT_MASS(25, physical.Mhh, "hh")
+      << FORMAT_MASS(1, physical.MFd(0), "Fd(1)")
+      << FORMAT_MASS(3, physical.MFd(1), "Fd(2)")
+      << FORMAT_MASS(5, physical.MFd(2), "Fd(3)")
+      << FORMAT_MASS(2, physical.MFu(0), "Fu(1)")
+      << FORMAT_MASS(4, physical.MFu(1), "Fu(2)")
+      << FORMAT_MASS(6, physical.MFu(2), "Fu(3)")
+      << FORMAT_MASS(11, physical.MFe(0), "Fe(1)")
+      << FORMAT_MASS(13, physical.MFe(1), "Fe(2)")
+      << FORMAT_MASS(15, physical.MFe(2), "Fe(3)")
+      << FORMAT_MASS(22, physical.MVP, "VP")
+      << FORMAT_MASS(23, physical.MVZ, "VZ")
+      ;
+
+   slha_io.set_block(mass);
+}
+
+void @ModelName@_slha_io::set_mixing_matrices(const standard_model::Standard_model_physical& physical)
+{
+   slha_io.set_block("SMUULMIX", physical.Vu, "Vu");
+   slha_io.set_block("SMUDLMIX", physical.Vd, "Vd");
+   slha_io.set_block("SMUURMIX", physical.Uu, "Uu");
+   slha_io.set_block("SMUDRMIX", physical.Ud, "Ud");
+   slha_io.set_block("SMUELMIX", physical.Ve, "Ve");
+   slha_io.set_block("SMUERMIX", physical.Ue, "Ue");
+}
+
+void @ModelName@_slha_io::set_spectrum(const standard_model::Standard_model& model)
+{
+   const auto& physical = model.get_physical();
+
+   set_model_parameters(model);
+   set_mass(physical);
+   set_mixing_matrices(physical);
+}
+
+/**
+ * Stores the decays calculation information in the DCINFO block
+ * in the SLHA object.
+ *
+ * @param problems struct with decays calculation problems
+ */
+void @ModelName@_slha_io::set_dcinfo(const FlexibleDecay_problems& problems)
+{
+   set_dcinfo(problems.get_problem_strings(), problems.get_warning_strings());
+}
+
+/**
+ * Stores given problems and warnings in the DCINFO block in the SLHA
+ * object.
+ *
+ * @param problems vector of problem strings
+ * @param warnings vector of warning strings
+ */
+void @ModelName@_slha_io::set_dcinfo(
+   const std::vector<std::string>& problems,
+   const std::vector<std::string>& warnings)
+{
+   std::ostringstream dcinfo;
+   dcinfo << "Block DCINFO\n"
+          << FORMAT_SPINFO(1, PKGNAME)
+          << FORMAT_SPINFO(2, FLEXIBLESUSY_VERSION);
+
+   for (const auto& s: warnings)
+      dcinfo << FORMAT_SPINFO(3, s);
+
+   for (const auto& s: problems)
+      dcinfo << FORMAT_SPINFO(4, s);
+
+   dcinfo << FORMAT_SPINFO(5, @ModelName@_info::model_name)
+          << FORMAT_SPINFO(9, SARAH_VERSION);
+
+   slha_io.set_block(dcinfo);
+}
+
+/**
+ * Stores the branching ratios for a given particle in the SLHA
+ * object.
+ *
+ * @param decays struct containing individual particle decays
+ */
+void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   const auto pdg = decays_list.get_particle_id();
+   const auto width = decays_list.get_total_width();
+   const std::string name = @ModelName@_info::get_particle_name_from_pdg(pdg);
+   if (std::isnan(width) || std::isinf(width)) {
+      throw std::runtime_error("Total width of " + name + " is " + std::to_string(width));
+   }
+
+   std::ostringstream decay;
+
+   decay << "DECAY "
+         << FORMAT_TOTAL_WIDTH(pdg, width, name + " decays");
+
+   if (!is_zero(width, 1e-100)) {
+      constexpr double NEGATIVE_BR_TOLERANCE = 1e-11;
+      const double MIN_BR_TO_PRINT = flexibledecay_settings.get(FlexibleDecay_settings::min_br_to_print);
+      std::vector<Decay> sorted_decays_list = sort_decays_list(decays_list);
+      for (const auto& channel : sorted_decays_list) {
+         auto const partial_width = channel.get_width();
+         auto branching_ratio = partial_width / width;
+         if (partial_width < 0 && !is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
+            std::stringstream ss;
+            ss << std::scientific << partial_width;
+            throw std::runtime_error("Error in " + channel.get_proc_string() + ": partial width is negative (" + ss.str() + " GeV).");
+         }
+         else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
+            branching_ratio = 0;
+         }
+         if (branching_ratio < MIN_BR_TO_PRINT) continue;
+         const auto final_state = channel.get_final_state_particle_ids();
+         std::string comment = "BR(" + name + " ->";
+         for (auto id : final_state) {
+            comment += " " + @ModelName@_info::get_particle_name_from_pdg(id);
+         }
+         comment += ")";
+
+         decay << format_decay(branching_ratio, final_state, comment);
+      }
+   }
+
+   slha_io.set_block(decay);
+}
+
+@setDecaysFunctions@
+@fillDecaysDataFunctions@
+
+/**
+ * Stores the model (DR-bar) parameters, masses and mixing matrices in
+ * the SLHA object.
+ *
+ * @param model model class in SLHA convention
+ */
+void @ModelName@_slha_io::set_spectrum(const @ModelName@_slha& model)
+{
+   const @ModelName@_physical physical(model.get_physical_slha());
+   const bool write_sm_masses = model.do_calculate_sm_pole_masses();
+
+   set_model_parameters(model);
+   set_mass(physical, write_sm_masses);
+   set_mixing_matrices(physical, write_sm_masses);
+
+   if (slha_io.get_modsel().quark_flavour_violated)
+      set_ckm(model.get_ckm_matrix(), model.get_scale());
+
+   if (slha_io.get_modsel().lepton_flavour_violated)
+      set_pmns(model.get_pmns_matrix(), model.get_scale());
+}
+
+/**
+ * Writes extra SLHA blocks
+ *
+ * @param model model class
+ * @param scales struct of boundary condition scales
+ * @param observables struct of observables
+ */
+void @ModelName@_slha_io::set_extra(
+   const @ModelName@_slha& model,
+   const @ModelName@_scales& scales,
+   const @ModelName@_observables& observables,
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings)
+{
+   const @ModelName@_physical physical(model.get_physical_slha());
+
+   if (observables.problems.have_problem()) {
+      std::ostringstream block;
+      block << "Block OBSINFO\n";
+      slha_format_problems_and_warnings(observables.problems,
+                                        std::ostream_iterator<std::string>(block));
+      slha_io.set_block(block);
+   }
+
+@writeExtraSLHAOutputBlock@
+}
+
+/**
  * Write SLHA object to given output.  If output == "-", then the SLHA
  * object is written to std::cout.  Otherwise, output is interpreted
  * as a file name
@@ -253,6 +523,21 @@ void @ModelName@_slha_io::write_to(const std::string& output) const
       write_to_stream(std::cout);
    else
       write_to_file(output);
+}
+
+void @ModelName@_slha_io::write_to_file(const std::string& file_name) const
+{
+   slha_io.write_to_file(file_name);
+}
+
+void @ModelName@_slha_io::write_to_stream() const
+{
+   write_to_stream(std::cout);
+}
+
+void @ModelName@_slha_io::write_to_stream(std::ostream& ostr) const
+{
+   slha_io.write_to_stream(ostr);
 }
 
 /**
@@ -303,19 +588,19 @@ void @ModelName@_slha_io::read_from_stream(std::istream& istr)
  */
 void @ModelName@_slha_io::fill(@ModelName@_input_parameters& input) const
 {
-   SLHA_io::Tuple_processor minpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor minpar_processor = [&input] (int key, double value) {
       return fill_minpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor extpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor extpar_processor = [&input] (int key, double value) {
       return fill_extpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor imminpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor imminpar_processor = [&input] (int key, double value) {
       return fill_imminpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor imextpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor imextpar_processor = [&input] (int key, double value) {
       return fill_imextpar_tuple(input, key, value);
    };
 
@@ -373,6 +658,17 @@ void @ModelName@_slha_io::fill(Physical_input& input) const
  * @param settings struct of spectrum generator settings to be filled
  */
 void @ModelName@_slha_io::fill(Spectrum_generator_settings& settings) const
+{
+   slha_io.fill(settings);
+}
+
+/**
+ * Fill struct of spectrum generator settings from SLHA object
+ * (FlexibleSUSY block)
+ *
+ * @param settings struct of spectrum generator settings to be filled
+ */
+void @ModelName@_slha_io::fill(FlexibleDecay_settings& settings) const
 {
    slha_io.fill(settings);
 }

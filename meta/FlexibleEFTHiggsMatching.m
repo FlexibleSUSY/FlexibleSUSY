@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopMasses`", "Constraint`", "ThresholdCorrections`", "Parameters`", "Utils`"}];
 
 CalculateMHiggsPoleOneMomentumIteration::usage = "";
@@ -8,6 +30,7 @@ CalculateMUpQuarkPole1L::usage = "";
 CalculateMDownQuarkPole1L::usage = "";
 CalculateMDownLeptonPole1L::usage = "";
 FillSMFermionPoleMasses::usage = "";
+GetFixedBSMParameters::usage="Returns a list of the BSM parameters fixed by matching SM -> BSM.";
 SetBSMParameters::usage = "";
 
 Begin["`Private`"];
@@ -155,6 +178,13 @@ FindMHiggsLoopOrderFor[par_, exprs_List, towerLoopOrder_] :=
            0
           ];
 
+GetFixedBSMParameters[susyScaleMatching_List] :=
+    Intersection[Join[{SARAH`hyperchargeCoupling, SARAH`leftCoupling, SARAH`strongCoupling,
+                       SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa},
+                      First /@ susyScaleMatching],
+                      Parameters`GetModelParameters[]
+                     ];
+
 SetBSMParameterAtLoopOrder[par_, lo_, struct_String] :=
     Module[{parName = CConversion`ToValidCSymbolString[par]},
            struct <> "set_" <> parName <> "(model_" <> ToString[lo] <> "l.get_" <> parName <> "());\n"
@@ -163,11 +193,7 @@ SetBSMParameterAtLoopOrder[par_, lo_, struct_String] :=
 SetBSMParameters[susyScaleMatching_List, higgsMassMatrix_, struct_String:""] :=
     Module[{pars, loopOrder},
            (* BSM parameters fixed by matching SM -> BSM *)
-           pars = Intersection[Join[{SARAH`hyperchargeCoupling, SARAH`leftCoupling, SARAH`strongCoupling,
-                                     SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa},
-                                    First /@ susyScaleMatching],
-                               Parameters`GetModelParameters[]
-                              ];
+           pars = GetFixedBSMParameters[susyScaleMatching];
            (* find matching loop orders for parameters for FlexibleEFTHiggs-1L *)
            loopOrder = FindMHiggsLoopOrderFor[#, {higgsMassMatrix, 0}, 1]& /@ pars;
            StringJoin[SetBSMParameterAtLoopOrder[#[[1]], #[[2]], struct]& /@ Utils`Zip[pars, loopOrder]]

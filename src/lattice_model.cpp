@@ -16,4 +16,4 @@ Real& Lattice_translator::y(size_t i)
     return f->y(T, m, i);
 }
 
-}
+} // namespace flexiblesusy

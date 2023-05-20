@@ -8,7 +8,6 @@
 #include "ew_input.hpp"
 #include "CMSSM_two_scale_model.hpp"
 #include "lowe.h"
-#include "utils.h"
 
 using namespace flexiblesusy;
 using namespace softsusy;
@@ -18,12 +17,12 @@ void ensure_tree_level_ewsb(CMSSM<Two_scale>& m)
    // ensure that the EWSB eqs. are satisfied (Drees p.222)
    const double vu = m.get_vu();
    const double vd = m.get_vd();
-   const double gY = m.get_g1() * sqrt(0.6);
+   const double gY = m.get_g1() * Sqrt(0.6);
    const double g2 = m.get_g2();
    const double Mu = m.get_Mu();
    const double BMu = m.get_BMu();
-   const double mHd2 = BMu*vu/vd - (sqr(gY) + sqr(g2))*(sqr(vd) - sqr(vu))/8. - sqr(Mu);
-   const double mHu2 = BMu*vd/vu + (sqr(gY) + sqr(g2))*(sqr(vd) - sqr(vu))/8. - sqr(Mu);
+   const double mHd2 = BMu*vu/vd - (Sqr(gY) + Sqr(g2))*(Sqr(vd) - Sqr(vu))/8. - Sqr(Mu);
+   const double mHu2 = BMu*vd/vu + (Sqr(gY) + Sqr(g2))*(Sqr(vd) - Sqr(vu))/8. - Sqr(Mu);
    m.set_mHd2(mHd2);
    m.set_mHu2(mHu2);
 }

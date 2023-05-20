@@ -22,17 +22,19 @@
 
 #include <Eigen/Dense>
 #include "constraint.hpp"
-#include "matching.hpp"
 #include "lattice_solver.hpp"
 
 namespace flexiblesusy {
+
+template <class T>
+class Matching;
 
 class Lattice;
 
 class Lattice_constraint {
 public:
     // Lattice_constraint() {}
-    virtual ~Lattice_constraint() {}
+    virtual ~Lattice_constraint() = default;
     virtual void init(RGFlow<Lattice> *flow) { f = flow; activate(); }
     virtual void deactivate();
     virtual void alloc_rows() = 0;
@@ -306,6 +308,6 @@ public:
 	{}
 };
 
-}
+} // namespace flexiblesusy
 
 #endif // lattice_constraint_hpp

@@ -16,10 +16,9 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
-#ifndef @ModelName@_STANDARD_MODEL_SPECTRUM_GENERATOR_H
-#define @ModelName@_STANDARD_MODEL_SPECTRUM_GENERATOR_H
+#ifndef @ModelName@_STANDARD_MODEL_TWO_SCALE_SPECTRUM_GENERATOR_H
+#define @ModelName@_STANDARD_MODEL_TWO_SCALE_SPECTRUM_GENERATOR_H
 
 #include "@ModelName@_spectrum_generator_interface.hpp"
 #include "@ModelName@_spectrum_generator.hpp"
@@ -41,15 +40,7 @@ class @ModelName@_spectrum_generator<Two_scale>
    : public @ModelName@_spectrum_generator_interface<Two_scale> {
 public:
    @ModelName@_spectrum_generator() = default;
-   virtual ~@ModelName@_spectrum_generator() {}
-
-   std::tuple<@ModelName@<Two_scale>, standard_model::StandardModel<Two_scale> > get_models() const
-   { return std::make_tuple(this->get_model(), eft); }
-   std::tuple<@ModelName@_slha<@ModelName@<Two_scale> >, standard_model::StandardModel<Two_scale> > get_models_slha() const
-   { return std::make_tuple(this->get_model_slha(), eft); }
-
-   const standard_model::StandardModel<Two_scale>& get_eft() const { return eft; }
-   standard_model::StandardModel<Two_scale>& get_eft() { return eft; }
+   virtual ~@ModelName@_spectrum_generator() = default;
 
    double get_high_scale() const { return 0.; }
    double get_susy_scale() const { return susy_scale; }
@@ -62,10 +53,10 @@ protected:
    virtual void run_except(const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
 
 private:
-   standard_model::StandardModel<Two_scale> eft{};
-   double susy_scale{0.}, low_scale{0.};
+   double susy_scale{0.};
+   double low_scale{0.};
 
-   void calculate_spectrum(double);
+   void calculate_spectrum(double, double);
    double get_eft_pole_mass_scale(double, double) const;
    double get_pole_mass_scale(double) const;
 };

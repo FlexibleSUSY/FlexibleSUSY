@@ -112,6 +112,6 @@ const double ms_MSbar = 115*MeV; // +- 20 MeV, m_s(m_c), hep-ph/0306217
 // This md was guessed from (2.9) and (3.2) in hep-ph/0306217.
 const double md_MSbar = 6*MeV;	// m_d^{bar MS} (m_c)
 
-}
+} // namespace flexiblesusy
 
 #endif // consts_hpp

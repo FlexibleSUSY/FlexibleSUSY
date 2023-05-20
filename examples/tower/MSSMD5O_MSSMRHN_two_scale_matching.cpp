@@ -23,7 +23,7 @@
 #include "ew_input.hpp"
 #include "wrappers.hpp"
 
-#include "two_scale_constraint.hpp" // for cast_model
+#include "model.hpp" // for cast_model
 #include "MSSMD5O_MSSMRHN_two_scale_matching.hpp"
 #include "MSSMD5O_two_scale_model.hpp"
 #include "MSSMRHN_two_scale_model.hpp"
@@ -164,7 +164,7 @@ double MSSMD5O_MSSMRHN_matching::get_initial_scale_guess() const
    return initial_scale_guess;
 }
 
-void MSSMD5O_MSSMRHN_matching::set_models(Two_scale_model *lower_, Two_scale_model *upper_)
+void MSSMD5O_MSSMRHN_matching::set_models(Model *lower_, Model *upper_)
 {
     lower = cast_model<MSSMD5O<Two_scale>*>(lower_);
     upper = cast_model<MSSMRHN<Two_scale>*>(upper_);
@@ -265,13 +265,11 @@ void MSSMD5O_MSSMRHN_matching::update_scale()
 }
 
 MSSMD5O_MSSMRHN_matching_up<Two_scale>::MSSMD5O_MSSMRHN_matching_up()
-   : Matching()
-   , matching()
+   : matching()
 {}
 
 MSSMD5O_MSSMRHN_matching_up<Two_scale>::MSSMD5O_MSSMRHN_matching_up(const MSSMD5O_input_parameters& input)
-   : Matching()
-   , matching(input)
+   : matching(input)
 {}
 
 void MSSMD5O_MSSMRHN_matching_up<Two_scale>::match()
@@ -285,7 +283,7 @@ double MSSMD5O_MSSMRHN_matching_up<Two_scale>::get_scale() const
 }
 
 void MSSMD5O_MSSMRHN_matching_up<Two_scale>::set_models(
-   Two_scale_model *lower, Two_scale_model *upper)
+   Model *lower, Model *upper)
 {
    matching.set_models(lower, upper);
 }
@@ -312,13 +310,11 @@ void MSSMD5O_MSSMRHN_matching_up<Two_scale>::reset()
 }
 
 MSSMD5O_MSSMRHN_matching_down<Two_scale>::MSSMD5O_MSSMRHN_matching_down()
-   : Matching()
-   , matching()
+   : matching()
 {}
 
 MSSMD5O_MSSMRHN_matching_down<Two_scale>::MSSMD5O_MSSMRHN_matching_down(const MSSMD5O_input_parameters& input)
-   : Matching()
-   , matching(input)
+   : matching(input)
 {}
 
 void MSSMD5O_MSSMRHN_matching_down<Two_scale>::match()
@@ -332,7 +328,7 @@ double MSSMD5O_MSSMRHN_matching_down<Two_scale>::get_scale() const
 }
 
 void MSSMD5O_MSSMRHN_matching_down<Two_scale>::set_models(
-   Two_scale_model *upper, Two_scale_model *lower)
+   Model *upper, Model *lower)
 {
    matching.set_models(lower, upper);
 }

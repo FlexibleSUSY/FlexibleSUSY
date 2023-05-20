@@ -21,7 +21,8 @@
 
 #include <Eigen/Core>
 
-#if EIGEN_VERSION_AT_LEAST(3,3,0)
+// disable Eigen tensor module as it does not compiler with clang 5.0
+#if 0 && EIGEN_VERSION_AT_LEAST(3,3,0)
 
 #include <unsupported/Eigen/CXX11/Tensor>
 

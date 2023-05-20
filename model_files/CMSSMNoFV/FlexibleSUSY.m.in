@@ -1,4 +1,3 @@
-
 FSModelName = "@CLASSNAME@";
 FSEigenstates = SARAH`EWSB;
 FSDefaultSARAHModel = MSSMNoFV;
@@ -11,6 +10,10 @@ MINPAR = {
     {3, TanBeta},
     {4, Sign[\[Mu]]},
     {5, Azero}
+};
+
+EXTPAR = {
+    {100, Mlow}
 };
 
 EWSBOutputParameters = { B[\[Mu]], \[Mu] };
@@ -41,9 +44,9 @@ HighScaleInput = {
    {MassG,m12}
 };
 
-LowScale = LowEnergyConstant[MZ];
+LowScale = If[Mlow != 0, Mlow, LowEnergyConstant[MZ]];
 
-LowScaleFirstGuess = LowEnergyConstant[MZ];
+LowScaleFirstGuess = If[Mlow != 0, Mlow, LowEnergyConstant[MZ]];
 
 LowScaleInput = {
    {Yu, Automatic},
@@ -70,15 +73,6 @@ UseHiggs2LoopMSSM = True;
 EffectiveMu = \[Mu];
 UseMSSM3LoopRGEs = True;
 
-(* low-energy input to determine weak mixing angle
- * Possible values: FSFermiConstant (default), FSMassW
- *)
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSWeakMixingAngleInput -> FSFermiConstant];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSelectronL -> Sum[conj[ZE[i,1]] ZE[i,1] M[Se[i]], {i,1,2}]];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSmuonL     -> Sum[conj[ZM[i,1]] ZM[i,1] M[Sm[i]], {i,1,2}]];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSelectronNeutrinoL -> M[SveL]];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSmuonNeutrinoL     -> M[SvmL]];
-
 PotentialLSPParticles = {
     Chi, SveL, SvmL, SvtL, Su, Sd, Sc, Ss, St, Sb,
     Se, Sm, Stau, Cha, Glu
@@ -95,14 +89,10 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-           {{0, FlexibleSUSYObservable`aMuon},
-            {1, FlexibleSUSYObservable`aMuonGM2Calc},
-            {2, FlexibleSUSYObservable`aMuonGM2CalcUncertainty} } },
-   {EFFHIGGSCOUPLINGS,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } },
+           {{0, FlexibleSUSYObservable`AMM[Fm]},
+            {1, FlexibleSUSYObservable`AMMUncertainty[Fm]},
+            {2, FlexibleSUSYObservable`aMuonGM2Calc},
+            {3, FlexibleSUSYObservable`aMuonGM2CalcUncertainty} } },
    {ALPHA, {{ArcSin[Pole[ZH[2,2]]]}}},
    {HMIX , {{1, \[Mu]},
             {2, vu / vd},
@@ -187,13 +177,4 @@ ExtraSLHAOutputBlocks = {
             {     15, Pole[M[Ftau]]   } } }
 };
 
-TopQuark    = Ft;
-BottomQuark = Fb;
-Neutrino    = Fvt;
-Electron    = Ftau;
-
-SMParticles = {
-    VectorP, VectorZ, VectorG, VectorW,
-    Fu, Fd, Fc, Fs, Ft, Fb, Fe, Fm, Ftau, Fve, Fvm, Fvt,
-    gG, gP, gZ, gWm, gWmC
-};
+FSCalculateDecays = False;

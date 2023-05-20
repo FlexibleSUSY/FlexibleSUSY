@@ -16,14 +16,17 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_INFO_H
 #define @ModelName@_INFO_H
 
+#include "names.hpp"
+
 #include <array>
 #include <iosfwd>
+#include <optional>
 #include <string>
+#include <utility>
 
 namespace flexiblesusy {
 
@@ -33,20 +36,56 @@ namespace @ModelName@_info {
 @parameterEnum@
 @particleMixingEnum@
 @inputParameterEnum@
+@extraParameterEnum@
 @gaugeCouplingNormalizationDecls@
+@numberOfNeutralGoldstones@
+@numberOfChargedGoldstones@
+
    extern const std::array<int, NUMBER_OF_PARTICLES> particle_multiplicities;
    extern const std::array<std::string, NUMBER_OF_PARTICLES> particle_names;
    extern const std::array<std::string, NUMBER_OF_PARTICLES> particle_latex_names;
    extern const std::array<std::string, NUMBER_OF_PARAMETERS> parameter_names;
    extern const std::array<std::string, NUMBER_OF_MIXINGS> particle_mixing_names;
    extern const std::array<std::string, NUMBER_OF_INPUT_PARAMETERS> input_parameter_names;
+   extern const std::array<std::string, NUMBER_OF_EXTRA_PARAMETERS> extra_parameter_names;
    extern const std::string model_name;
    constexpr bool is_low_energy_model = @isLowEnergyModel@;
    constexpr bool is_supersymmetric_model = @isSupersymmetricModel@;
    constexpr bool is_FlexibleEFTHiggs = @isFlexibleEFTHiggs@;
+   constexpr bool is_CP_violating_Higgs_sector {@isCPViolatingHiggsSector@};
 
+   int get_pdg_code_for_particle(Particles);
+   int get_pdg_code_for_particle(Particles, int);
+   std::string get_particle_name_from_pdg(int);
+   std::pair<std::string, std::optional<unsigned int>> get_multiplet_and_index_from_pdg(int);
    void print(std::ostream&);
-}
+
+   class @ModelName@_particle_names : public Names {
+   public:
+      virtual ~@ModelName@_particle_names() = default;
+      virtual const std::string& get(int index) const override {
+         return particle_names[index];
+      }
+      virtual int size() const override {
+         return NUMBER_OF_PARTICLES;
+      }
+   };
+
+   class @ModelName@_parameter_names : public Names {
+   public:
+      virtual ~@ModelName@_parameter_names() = default;
+      virtual const std::string& get(int index) const override {
+         return parameter_names[index];
+      }
+      virtual int size() const override {
+         return NUMBER_OF_PARAMETERS;
+      }
+   };
+
+   const @ModelName@_particle_names  particle_names_getter{};
+   const @ModelName@_parameter_names parameter_names_getter{};
+
+} // namespace @ModelName@_info
 
 } // namespace flexiblesusy
 

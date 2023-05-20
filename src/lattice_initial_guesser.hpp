@@ -35,6 +35,6 @@ protected:
     RGFlow<Lattice> *f;
 };
 
-}
+} // namespace flexiblesusy
 
 #endif // LATTICE_INITIAL_GUESSER_H

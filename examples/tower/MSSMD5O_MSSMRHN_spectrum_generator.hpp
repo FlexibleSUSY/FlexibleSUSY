@@ -19,6 +19,8 @@
 #ifndef MSSMD5O_MSSMRHN_SPECTRUM_GENERATOR_H
 #define MSSMD5O_MSSMRHN_SPECTRUM_GENERATOR_H
 
+#include "MSSMD5O_info.hpp"
+#include "MSSMD5O_two_scale_ewsb_solver.hpp"
 #include "MSSMD5O_two_scale_model.hpp"
 #include "MSSMD5O_two_scale_susy_scale_constraint.hpp"
 #include "MSSMD5O_two_scale_low_scale_constraint.hpp"
@@ -27,6 +29,7 @@
 
 #include "MSSMD5O_MSSMRHN_two_scale_matching.hpp"
 
+#include "MSSMRHN_two_scale_ewsb_solver.hpp"
 #include "MSSMRHN_two_scale_model.hpp"
 #include "MSSMRHN_two_scale_high_scale_constraint.hpp"
 #include "MSSMRHN_two_scale_convergence_tester.hpp"
@@ -34,12 +37,12 @@
 
 #include "MSSMD5O_MSSMRHN_two_scale_initial_guesser.hpp"
 
+#include "composite_convergence_tester.hpp"
 #include "coupling_monitor.hpp"
 #include "error.hpp"
 #include "numerics2.hpp"
 #include "two_scale_running_precision.hpp"
 #include "two_scale_solver.hpp"
-#include "two_scale_composite_convergence_tester.hpp"
 
 namespace flexiblesusy {
 
@@ -68,9 +71,7 @@ public:
    double get_matching_scale() const { return matching_scale; }
    const MSSMD5O<T>& get_model_1() const { return model_1; }
    const MSSMRHN<T>& get_model_2() const { return model_2; }
-   const Problems<MSSMD5O_info::NUMBER_OF_PARTICLES, MSSMD5O_info::NUMBER_OF_PARAMETERS>& get_problems() const {
-      return model_1.get_problems();
-   }
+   const Problems& get_problems() const { return model_1.get_problems(); }
    int get_exit_code() const { return get_problems().have_problem(); };
    void set_parameter_output_scale_1(double s) { parameter_output_scale_1 = s; }
    void set_precision_goal(double precision_goal_) { precision_goal = precision_goal_; }
@@ -128,9 +129,17 @@ void MSSMD5O_MSSMRHN_spectrum_generator<T>::run
    model_1.do_calculate_sm_pole_masses(calculate_sm_masses);
    model_1.set_loops(2);
 
+   MSSMD5O_ewsb_solver<T> ewsb_solver_1;
+   model_1.set_ewsb_solver(
+      std::make_shared<MSSMD5O_ewsb_solver<T> >(ewsb_solver_1));
+
    model_2.clear();
    model_2.set_input_parameters(input_2);
    model_2.set_loops(2);
+
+   MSSMRHN_ewsb_solver<T> ewsb_solver_2;
+   model_2.set_ewsb_solver(
+      std::make_shared<MSSMRHN_ewsb_solver<T> >(ewsb_solver_2));
 
    // needed for constraint::initialize()
    high_scale_constraint_2.set_model(&model_2);
@@ -150,7 +159,7 @@ void MSSMD5O_MSSMRHN_spectrum_generator<T>::run
       convergence_tester_1.set_max_iterations(max_iterations);
       convergence_tester_2.set_max_iterations(max_iterations);
    }
-   Composite_convergence_tester<T> convergence_tester;
+   Composite_convergence_tester convergence_tester;
    convergence_tester.add_convergence_tester(&convergence_tester_1);
    convergence_tester.add_convergence_tester(&convergence_tester_2);
 
@@ -190,7 +199,7 @@ void MSSMD5O_MSSMRHN_spectrum_generator<T>::run
          model_1.run_to(parameter_output_scale_1);
       }
    } catch (const NoConvergenceError&) {
-      model_1.get_problems().flag_no_convergence();
+      model_1.get_problems().flag_thrown("no convergence");
    } catch (const NonPerturbativeRunningError&) {
       model_1.get_problems().flag_no_perturbative();
    } catch (const Error& error) {
@@ -216,10 +225,17 @@ void MSSMD5O_MSSMRHN_spectrum_generator<T>::write_running_couplings_1(const std:
    MSSMD5O<T> tmp_model(model_1);
    tmp_model.run_to(low_scale_1);
 
-   MSSMD5O_parameter_getter parameter_getter;
-   Coupling_monitor<MSSMD5O<T>, MSSMD5O_parameter_getter>
-      coupling_monitor(tmp_model, parameter_getter);
+   // returns parameters at given scale
+   auto data_getter = [&tmp_model](double scale) {
+      tmp_model.run_to(scale);
+      return MSSMD5O_parameter_getter::get_parameters(tmp_model);
+   };
 
+   std::vector<std::string> parameter_names(
+      std::cbegin(MSSMD5O_info::parameter_names),
+      std::cend(MSSMD5O_info::parameter_names));
+
+   Coupling_monitor coupling_monitor(data_getter, parameter_names);
    coupling_monitor.run(low_scale_1, matching_scale, 100, true);
    coupling_monitor.write_to_file(filename);
 }

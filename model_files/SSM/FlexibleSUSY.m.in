@@ -14,7 +14,8 @@ EXTPAR = {
     {3, LambdaSinput},
     {4, Kappainput},
     {5, K1input},
-    {6, K2input}
+    {6, K2input},
+    {7, vSInput}
 };
 
 EWSBOutputParameters = { mu2, MS };
@@ -35,7 +36,9 @@ SUSYScale = QEWSB;
 
 SUSYScaleFirstGuess = QEWSB;
 
-SUSYScaleInput = {};
+SUSYScaleInput = {
+    {vS, vSInput}
+};
 
 LowScale = LowEnergyConstant[MZ];
 
@@ -55,14 +58,6 @@ InitialGuessAtLowScale = {
    {Ye, Automatic}
 };
 
-SMParticles = {
-    Electron, TopQuark, BottomQuark,
-    VectorP, VectorZ, VectorG, VectorW, Neutrino,
-    gP, gG, gZ, gWm, gWmC,
-    Hp, Ah, (* goldstones *)
-    hh (* Higgs *)
-};
-
 OnlyLowEnergyFlexibleSUSY = False;
 
 DefaultPoleMassPrecision = MediumPrecision;
@@ -70,3 +65,4 @@ HighPoleMassPrecision    = {hh};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
+FSCalculateDecays = True;

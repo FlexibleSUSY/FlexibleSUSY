@@ -92,6 +92,6 @@ private:
 		       const Real *w, const Real *x)> fxn_;
 };
 
-}
+} // namespace flexiblesusy
 
 #endif // lattice_numerical_constraint_hpp

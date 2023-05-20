@@ -3,7 +3,7 @@
 #define BOOST_TEST_MODULE test_CMSSMCKM_high_scale_constraint
 
 #include <boost/test/unit_test.hpp>
-#include "test.h"
+#include "test_legacy.hpp"
 #include <functional>
 #include <Eigen/Dense>
 
@@ -24,7 +24,6 @@ void setup(CMSSMCKM_input_parameters& input, DoubleVector& input2)
    const double M12 = 100.0;
    const double m0 = 250.0;
    const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
    const double vev = 246.0;
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
@@ -118,7 +117,6 @@ void setup(CMSSMCKM<Two_scale>& m, FlavourMssmSoftsusy& s)
    const double g1 = sqrt(4 * Pi * alpha1);
    const double g2 = sqrt(4 * Pi * alpha2);
    const double g3 = sqrt(4 * Pi * ALPHASMZ);
-   const double root2 = sqrt(2.0);
    const double vev = 246.0;
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
@@ -151,9 +149,9 @@ void setup(CMSSMCKM<Two_scale>& m, FlavourMssmSoftsusy& s)
    m.set_Mu(susyMu);
    m.set_BMu(BMu);
 
-   s.setYukawaMatrix(YU, ToDoubleMatrix(Yu.real()));
-   s.setYukawaMatrix(YD, ToDoubleMatrix(Yd.real()));
-   s.setYukawaMatrix(YE, ToDoubleMatrix(Ye.real()));
+   s.setYukawaMatrix(YU, ToDoubleMatrix(Yu.transpose().real()));
+   s.setYukawaMatrix(YD, ToDoubleMatrix(Yd.transpose().real()));
+   s.setYukawaMatrix(YE, ToDoubleMatrix(Ye.transpose().real()));
    s.setTanb(tanBeta);
    s.setHvev(vev);
    s.setGaugeCoupling(1, g1);
@@ -198,9 +196,9 @@ BOOST_AUTO_TEST_CASE( test_high_scale_constraint )
    BOOST_CHECK_CLOSE_FRACTION(m.get_MassG() , s.displayGaugino(2), 1.0e-10);
    BOOST_CHECK_CLOSE_FRACTION(m.get_MassWB(), s.displayGaugino(3), 1.0e-10);
 
-   TEST_CLOSE(ToDoubleMatrix(m.get_TYu().real()), s.displayTrilinear(UA), 1.0e-6);
-   TEST_CLOSE(ToDoubleMatrix(m.get_TYd().real()), s.displayTrilinear(DA), 1.0e-6);
-   TEST_CLOSE(ToDoubleMatrix(m.get_TYe().real()), s.displayTrilinear(EA), 1.0e-6);
+   TEST_CLOSE(ToDoubleMatrix(m.get_TYu().real()), s.displayTrilinear(UA).transpose(), 1.0e-6);
+   TEST_CLOSE(ToDoubleMatrix(m.get_TYd().real()), s.displayTrilinear(DA).transpose(), 1.0e-6);
+   TEST_CLOSE(ToDoubleMatrix(m.get_TYe().real()), s.displayTrilinear(EA).transpose(), 1.0e-6);
 
    for (int i = 0; i < 27; i++)
       slha2setTrilinear[i] = true;
@@ -222,7 +220,9 @@ BOOST_AUTO_TEST_CASE( test_high_scale_constraint )
    BOOST_CHECK_CLOSE_FRACTION(m.get_MassG() , s.displayGaugino(2), 1.0e-10);
    BOOST_CHECK_CLOSE_FRACTION(m.get_MassWB(), s.displayGaugino(3), 1.0e-10);
 
-   TEST_CLOSE(ToDoubleMatrix(m.get_TYu().real()), s.displayTrilinear(UA), 1.0e-6);
-   TEST_CLOSE(ToDoubleMatrix(m.get_TYd().real()), s.displayTrilinear(DA), 1.0e-6);
-   TEST_CLOSE(ToDoubleMatrix(m.get_TYe().real()), s.displayTrilinear(EA), 1.0e-6);
+   TEST_CLOSE(ToDoubleMatrix(m.get_TYu().real()), s.displayTrilinear(UA).transpose(), 1.0e-6);
+   TEST_CLOSE(ToDoubleMatrix(m.get_TYd().real()), s.displayTrilinear(DA).transpose(), 1.0e-6);
+   TEST_CLOSE(ToDoubleMatrix(m.get_TYe().real()), s.displayTrilinear(EA).transpose(), 1.0e-6);
+
+   BOOST_CHECK_EQUAL(gErrors, 0);
 }

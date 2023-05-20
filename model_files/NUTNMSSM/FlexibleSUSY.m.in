@@ -79,6 +79,7 @@ InitialGuessAtLowScale = {
 };
 
 InitialGuessAtHighScale = {};
+FSPerturbativityThreshold = N[4 Pi];
 
 UseHiggs2LoopNMSSM = True;
 EffectiveMu = \[Lambda] vS / Sqrt[2];
@@ -93,7 +94,7 @@ LowPoleMassPrecision     = {};
 
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
-           {{0, FlexibleSUSYObservable`aMuon} } },
+           {{0, FlexibleSUSYObservable`AMM[Fe[2]]} } },
    {FlexibleSUSYOutput, NoScale,
            {{0, Hold[HighScale]},
             {1, Hold[SUSYScale]},
@@ -106,3 +107,5 @@ ExtraSLHAOutputBlocks = {
             {5, \[Lambda] vS / Sqrt[2]},
             {10, ms2} } }
 };
+
+FSCalculateDecays = True;

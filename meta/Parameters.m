@@ -1,9 +1,37 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
 
 BeginPackage["Parameters`", {"SARAH`", "CConversion`", "Utils`", "Phases`"}];
 
 { FSModelParameters, FSInputParameters, FSOutputParameters,
   FSPhysicalOutputParameters, FSPhases, FSDerivedParameters,
   FSExtraParameters };
+
+ParameterDimensions::usage="option flag for setting the dimensions of an
+input or extra parameter";
+MassDimension::usage="option flag for setting the mass dimension of an
+input or extra parameter";
+InputParameter::usage="option flag for indicating parameter should be
+treated as an input parameter";
 
 FindSymbolDef::usage="";
 
@@ -15,12 +43,21 @@ CreateParameterSARAHNames::usage="";
 CreateParameterEnums::usage="";
 CreateInputParameterEnum::usage="";
 CreateInputParameterNames::usage="";
+CreateExtraParameterEnum::usage="";
+CreateExtraParameterNames::usage="";
 CreateStdVectorNamesAssignment::usage="";
 
+CreateExtraParameterArrayGetter::usage="";
+CreateExtraParameterArraySetter::usage="";
 CreateInputParameterArrayGetter::usage="";
 CreateInputParameterArraySetter::usage="";
+CreateModelParameterGetter::usage="";
+CreateModelParameterSetter::usage="";
+CreateDelegateModelParameterGetter::usage="";
 
 CreateEnumName::usage="Creates enum symbol for given parameter";
+CreateParameterEnumEntries::usage="Creates a list of enum symbols for
+a given parameter";
 DecomposeParameter::usage="decomposes parameter into its real components";
 
 SetParameter::usage="set model parameter";
@@ -28,6 +65,8 @@ SetSMParameter::usage="sets a SM input parameter in the QedQcd class";
 SetInputParameter::usage="set input parameter to value";
 AddInputParameters::usage="add an input parameter";
 AddExtraParameters::usage="add an extra parameter";
+RemoveExtraParameters::usage="removes a parameter from the list of
+known extra parameters";
 SetPhases::usage="sets field phases";
 GetPhases::usage="returns field phases";
 SetPhase::usage="sets a phase to a value";
@@ -49,7 +88,9 @@ SaveParameterLocally::usage="Save parameters in local variables";
 GetType::usage="";
 GetPhase::usage="";
 HasPhase::usage="";
+GetIntegerTypeFromDimension::usage="";
 GetRealTypeFromDimension::usage="";
+GetComplexTypeFromDimension::usage="";
 GetParameterDimensions::usage="";
 GetThirdGeneration::usage="returns parameter with third generation index";
 
@@ -62,12 +103,16 @@ IsRealExpression::usage="";
 IsMatrix::usage="returns True if parameter is a matrix";
 IsSymmetricMatrixParameter::usage="returns True if parameter is a matrix";
 IsTensor::usage="returns True if parameter is a matrix";
+IsParameter::usage="returns True if symbol is a model/input/output/phase parameter";
 IsModelParameter::usage="returns True if parameter is a model parameter";
 IsInputParameter::usage="returns True if parameter is an input parameter";
 IsOutputParameter::usage="returns True if parameter is a defined output parameter";
 IsIndex::usage="returns True if given symbol is an index";
 IsPhase::usage="returns True if given symbol is a phase";
 IsExtraParameter::usage="return True if parameter is an auxiliary parameter";
+IsGaugeCoupling::usage="returns True if parameter is a gauge coupling.";
+IsYukawaCoupling::usage="returns True if parameter is a Yukawa coupling.";
+IsVEV::usage="returns True if parameter is a VEV.";
 
 GetIndices::usage="returns list of indices from a given parameter";
 
@@ -79,6 +124,10 @@ SetModelParameters::usage="";
 SetOutputParameters::usage="";
 SetExtraParameters::usage="";
 
+ApplyAuxiliaryParameterInfo::usage="Saves input and extra parameter properties"
+
+CheckInputParameterDefinitions::usage="";
+
 GetInputParameters::usage="";
 GetInputParametersAndTypes::usage="";
 GetModelParameters::usage="";
@@ -87,12 +136,23 @@ GetExtraParameters::usage="";
 GetExtraParametersAndTypes::usage="";
 GetModelParametersWithMassDimension::usage="Returns model parameters
 with given mass dimension";
+GetParametersWithMassDimension::usage="Returns model, input and extra
+parameters with given mass dimension";
+GetModelParameterMassDimension::usage="Returns mass dimension for given
+model parameter";
 
-GetDependenceSPhenoSymbols::usage="Returns list of symbols for which a
- DependenceSPheno rule is defined";
+FindMacro::usage="Returns preprocessor macro for parameter";
+WrapPreprocessorMacroAround::usage="Applies preprocessor symbols
+to parameters";
+
+GetDependenceSPhenoSymbols::usage="Returns list of SARAH parameters
+ for which a DependenceSPheno rule is defined";
 
 GetDependenceSPhenoRules::usage="Returns list of replacement rules for
- symbols for which a DependenceSPheno rule is defined";
+ SARAH parameters for which a DependenceSPheno rule is defined";
+
+GetAllDependenceSPhenoRules::usage="Returns list of replacement rules
+ for all DependenceSPheno rules"
 
 GetOutputParameterDependencies::usage="Returns list of output
  parameters which appear in the given expression";
@@ -114,7 +174,22 @@ expression.";
 
 FillInputParametersFromTuples::usage="";
 
-DecreaseIndexLiterals::usage="";
+DecreaseIndexLiterals::usage="@note
+Definetly safe calls:
+	f[ { Head1[Int1] , Head2[Int2], ... } ]
+	f[ { Head1[Int1] , Head2[Int2], ... }, { HeadI1, HeadI2, ...} ]
+Possible calls:
+	1. f[ exprD ]
+	2. f[ exprD, listH ]
+where
+	#1 exprD is expression which probably contains subexpressions (at any level) of the form HeadOfExpression[SomeInteger]
+	#2 listH is List which has subexpressions (only at lowest level) of the form	HeadOfExpression
+Output:
+	1. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) of all InputParameters, ExtraParameters, allModelParameters, allOutputParameters and changes
+	   in exprD any HeadOfExpression1[SomeInteger] to HeadOfExpression1[SomeInteger-1]
+	2. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) in listH and changes
+	   in exprD any HeadOfExpression1[SomeInteger] to HeadOfExpression1[SomeInteger-1]
+";
 IncreaseIndexLiterals::usage="";
 
 DecreaseSumIndices::usage="";
@@ -130,6 +205,12 @@ given description string.";
 GetParticleFromDescription::usage="Returns particle symbol from a
 given description string.";
 GetPDGCodesForParticle::usage="Returns the PDG codes for a particle."
+CreatePDGCodeFromParticleCases::usage="Create list of switch cases setting PDG code
+for particles with no generation index.";
+CreatePDGCodeFromParticleIndexedCases::usage="Create list of switch cases settings PDG codes
+for particles with generation index.";
+CreateParticleMultipletNameAndIndexFromPDGCases::usage="Create list of switch cases getting particle name
+and optional index from integer PDG code.";
 
 NumberOfIndependentEntriesOfSymmetricMatrix::usage="Returns number of
 independent parameters of a real symmetric nxn matrix";
@@ -138,16 +219,14 @@ ExpandExpressions::usage="";
 AppendGenerationIndices::usage="";
 
 StripIndices::usage="removes indices from model parameter";
+CreateIndices::usage="creates indices in C++ expression for parameter";
 
 StripIndicesRules::usage="removes given indices from a symbol";
 
 StripSARAHIndicesRules::usage="removes SARAH-specific indices from a symbol";
 
-FilterOutLinearDependentEqs::usage="returns linear independent equations";
-
-FilterOutIndependentEqs::usage = "returns equations that depend on the
-given list of parameters.  I.e. equations, that do not depend on the
-given list of parameters are omitted from the output.";
+ReplaceAllRespectingSARAHHeads::usage="applies given rules, respecting
+SARAH heads SARAH`B, SARAH`L, SARAH`T and SARAH`Q";
 
 FindAllParameters::usage = "returns list of all parameters contained
 in the given expression";
@@ -166,6 +245,26 @@ allModelParameters = {};
 allOutputParameters = {};
 allPhases = {};
 
+(* list storing mass dimensions for input and extra parameters,    *)
+(* in the form {{0, {parameters ...}}, {1, {parameters ...}}, ...} *)
+extraMassDimensions = {};
+
+AddMassDimensionInfo[par_, dim_?IntegerQ] :=
+    Module[{massDimensions, pos, known},
+           massDimensions = First /@ extraMassDimensions;
+           If[!MemberQ[massDimensions, dim],
+              extraMassDimensions = Utils`ForceJoin[extraMassDimensions, {{dim, {par}}}];,
+              pos = Position[massDimensions, dim];
+              known = First[Extract[extraMassDimensions, pos]][[2]];
+              extraMassDimensions = ReplacePart[extraMassDimensions,
+                                                pos -> {dim, DeleteDuplicates[Join[known, {par}]]}];
+             ];
+          ];
+
+AddMassDimensionInfo[par_, dim_] :=
+    Print["Error: mass dimension for parameter ", par,
+          " must be a number"];
+
 GuessInputParameterType[Sign[par_]] :=
     CConversion`ScalarType[CConversion`integerScalarCType];
 GuessInputParameterType[FlexibleSUSY`Phase[par_]] :=
@@ -178,14 +277,11 @@ GuessExtraParameterType[Sign[par_]] :=
 GuessExtraParameterType[FlexibleSUSY`Phase[par_]] :=
     CConversion`ScalarType[CConversion`complexScalarCType];
 GuessExtraParameterType[par_] :=
-    If[IsRealParameter[par],
-       CConversion`ScalarType[CConversion`realScalarCType],
-       CConversion`ScalarType[CConversion`complexScalarCType]
-      ];
+    CConversion`ScalarType[CConversion`realScalarCType];
 
 UpdateParameterInfo[currentPars_List, {par_, block_, type_}] :=
     Module[{parNames, pos, updatedPars},
-           parNames = #[[1]]& /@ currentPars;
+           parNames = First /@ currentPars;
            If[!MemberQ[parNames, par],
               updatedPars = Utils`ForceJoin[currentPars, {{par, block, type}}];,
               pos = Position[parNames, par, 1];
@@ -200,7 +296,7 @@ UpdateParameterInfo[currentPars_List, {par_, block_, type_}] :=
 
 UpdateParameterInfo[currentPars_List, {par_, type_}] :=
     Module[{parNames, pos, updatedPars},
-           parNames = #[[1]]& /@ currentPars;
+           parNames = First /@ currentPars;
            If[!MemberQ[parNames, par],
               updatedPars = Utils`ForceJoin[currentPars, {{par, type}}];,
               pos = Position[parNames, par, 1];
@@ -211,6 +307,37 @@ UpdateParameterInfo[currentPars_List, {par_, type_}] :=
               AddRealParameter[par];
              ];
            Return[updatedPars];
+          ];
+
+SetStoredParameterSLHABlock[storedPars_List, par_, block_] :=
+    Module[{pos, updated, updatedPars},
+           pos = Position[storedPars, {par, __}];
+           updated = Extract[storedPars, pos];
+           If[MatchQ[block, {_, _}],
+              updated = ({First[#], {ToString[block[[1]]], block[[2]]}, #[[3]]})& /@ updated,
+              updated = ({First[#], ToString[block], #[[3]]})& /@ updated
+             ];
+           ReplacePart[storedPars, MapThread[Rule, {pos, updated}]]
+          ];
+
+SetStoredParameterType[storedPars_List, par_, type_] :=
+    Module[{pos, updated},
+           pos = Position[storedPars, {par, __}];
+           updated = Extract[storedPars, pos] /. {par, block_, oldType_} :> {par, block, type};
+           ReplacePart[storedPars, MapThread[Rule, {pos, updated}]]
+          ];
+
+SetStoredParameterDimensions[storedPars_List, par_, dims_] :=
+    Module[{pos, updated},
+           pos = Position[storedPars, {par, __}];
+           updated = Extract[storedPars, pos];
+           updated = ({First[#], #[[2]], If[CConversion`IsRealType[#[[3]]],
+                                          If[CConversion`IsIntegerType[#[[3]]],
+                                             GetIntegerTypeFromDimension[dims],
+                                             GetRealTypeFromDimension[dims]
+                                            ],
+                                          GetComplexTypeFromDimension[dims]]})& /@ updated;
+           ReplacePart[storedPars, MapThread[Rule, {pos, updated}]]
           ];
 
 AddInputParameterInfo[{par_, block_, type_}] :=
@@ -230,11 +357,14 @@ SetInputParameters[pars_List] :=
 
 AddInputParameters[pars_List] := AddInputParameterInfo /@ pars;
 
+AddExtraParameterInfo[{par_, block_, type_}] :=
+    allExtraParameters = UpdateParameterInfo[allExtraParameters, {par, block, type}];
+
 AddExtraParameterInfo[{par_, type_}] :=
-    allExtraParameters = UpdateParameterInfo[allExtraParameters, {par, type}];
+    allExtraParameters = UpdateParameterInfo[allExtraParameters, {par, {}, type}];
 
 AddExtraParameterInfo[par_] :=
-    AddExtraParameterInfo[{par, GuessExtraParameterType[par]}];
+    AddExtraParameterInfo[{par, {}, GuessExtraParameterType[par]}];
 
 SetExtraParameters[pars_List] :=
     (
@@ -243,6 +373,157 @@ SetExtraParameters[pars_List] :=
     )
 
 AddExtraParameters[pars_List] := AddExtraParameterInfo /@ pars;
+
+RemoveExtraParameters[par_] :=
+    allExtraParameters = DeleteCases[allExtraParameters, {par, __}];
+
+RemoveExtraParameters[pars_List] := RemoveExtraParameters /@ pars;
+
+SetInputParameterType[par_?IsInputParameter, type_] :=
+    allInputParameters = SetStoredParameterType[allInputParameters, par, type];
+
+SetInputParameterType[par_, type_] :=
+    Print["Error: ", par, " is not an input parameter!"];
+
+SetInputParameterDimensions[par_?IsInputParameter, dims_] :=
+    allInputParameters = SetStoredParameterDimensions[allInputParameters, par, dims];
+
+SetInputParameterDimensions[par_, dims_] :=
+    Print["Error: ", par, " is not an input parameter!"];
+
+SetInputParameterSLHABlock[par_?IsInputParameter, block_] :=
+    allInputParameters = SetStoredParameterSLHABlock[allInputParameters, par, block];
+
+SetInputParameterSLHABlock[par_, block_] :=
+    Print["Error: ", par, " is not an input parameter!"];
+
+SetExtraParameterType[par_?IsExtraParameter, type_] :=
+    allExtraParameters = SetStoredParameterType[allExtraParameters, par, type];
+
+SetExtraParameterType[par_, type_] :=
+    Print["Error: ", par, " is not a defined parameter!"];
+
+SetExtraParameterDimensions[par_?IsExtraParameter, dims_] :=
+    allExtraParameters = SetStoredParameterDimensions[allExtraParameters, par, dims];
+
+SetExtraParameterDimensions[par_, dims_] :=
+    Print["Error: ", par, " is not a defined parameter!"];
+
+SetExtraParameterSLHABlock[par_?IsExtraParameter, block_] :=
+    allExtraParameters = SetStoredParameterSLHABlock[allExtraParameters, par, block];
+
+SetExtraParameterSLHABlock[par_, block_] :=
+    Print["Error: ", par, " is not a defined parameter!"];
+
+ProcessParameterInfo[{parameter_ /; (IsModelParameter[parameter] || IsOutputParameter[parameter]), {__}}] :=
+    Block[{},
+       Utils`FSFancyWarning[
+          "The properties of ", parameter, " are set",
+          " in the SARAH model files and cannot be overridden.",
+          " Ignoring property settings for ", parameter
+       ];
+    ];
+
+ProcessParameterInfo[{parameter_?IsInputParameter, properties_List}] :=
+    Module[{i, inputBlock, ignored = {}, validProperties = properties, property, setting},
+           validProperties = Select[properties, (First[#] =!= InputParameter)&];
+           For[i = 1, i <= Length[validProperties], i++,
+               property = validProperties[[i, 1]];
+               setting = validProperties[[i, 2]];
+               Which[property === ParameterDimensions,
+                     SetInputParameterDimensions[parameter, setting],
+                     property === MassDimension,
+                     AddMassDimensionInfo[parameter, setting],
+                     property === SARAH`LesHouches,
+                     SetInputParameterSLHABlock[parameter, setting],
+                     True,
+                     Utils`FSFancyWarning[
+                        "Unrecognized property for parameter",
+                        " ", parameter,  ": ", property
+                     ];
+               ];
+           ];
+    ];
+
+ProcessParameterInfo[{parameter_?IsExtraParameter, properties_List}] :=
+    Module[{i, property, setting},
+           For[i = 1, i <= Length[properties], i++,
+               property = properties[[i, 1]];
+               setting = properties[[i, 2]];
+               Which[property === ParameterDimensions,
+                     SetExtraParameterDimensions[parameter, setting],
+                     property === MassDimension,
+                     AddMassDimensionInfo[parameter, setting],
+                     property === SARAH`LesHouches,
+                     SetExtraParameterSLHABlock[parameter, setting],
+                     property === InputParameter,
+                     Print["Error: ", parameter, " is defined as an input parameter"];
+                     Print["   but is being treated as an extra parameter."];
+                     Quit[1];,
+                     True,
+                     Utils`FSFancyWarning[
+                        "Unrecognized property for parameter",
+                        " ", parameter, ": ", property
+                     ];
+               ];
+           ];
+   ];
+
+ProcessParameterInfo[{parameter_, properties_List}] :=
+    Block[{inputOptions, isInput = False},
+          inputOptions = Select[properties, (First[#] === InputParameter)&];
+          If[inputOptions =!= {},
+             isInput = Last[Last[inputOptions]];
+            ];
+          If[isInput,
+             AddInputParameterInfo[parameter],
+             AddExtraParameterInfo[parameter]
+            ];
+          ProcessParameterInfo[{parameter, properties}];
+         ];
+
+ApplyAuxiliaryParameterInfo[properties_List] :=
+    ProcessParameterInfo /@ properties;
+
+CheckInputParameterDefinitions[] :=
+    Module[{i, par, blockName, type},
+           For[i = 1, i <= Length[allInputParameters], i++,
+               par = allInputParameters[[i,1]];
+               type = allInputParameters[[i,3]];
+               (* with the exception of phases, complex input parameters are not currently supported *)
+               If[!CConversion`IsRealType[type] && !MatchQ[par, FlexibleSUSY`Phase[_]],
+                  Print["Error: ", par, " is defined to be complex,"];
+                  Print["   but input parameters must be real."];
+                  Print["   Please define ", par, " to be a real parameter."];
+                  Quit[1];
+                 ];
+               If[MatchQ[allInputParameters[[i,2]], {_, _}],
+                  blockName = allInputParameters[[i,2,1]],
+                  blockName = allInputParameters[[i,2]]
+                 ];
+               blockName = ToString[blockName];
+               If[blockName === "MINPAR" || blockName === "EXTPAR" || blockName === "IMEXTPAR",
+                  If[!MatchQ[type, CConversion`ScalarType[_]],
+                     Print["Error: ", par, " must be defined as a scalar"];
+                     Print["   since it is defined in an SLHA1 input block."];
+                     Quit[1];
+                    ];
+                  If[MatchQ[par, FlexibleSUSY`Phase[_]],
+                     If[type =!= CConversion`ScalarType[CConversion`complexScalarCType],
+                        Print["Error: ", par, " must be defined as a complex scalar"];
+                        Print["   since it is defined in an SLHA1 input block."];
+                        Quit[1];
+                       ];,
+                     If[type =!= CConversion`ScalarType[CConversion`realScalarCType] &&
+                        type =!= CConversion`ScalarType[CConversion`integerScalarCType],
+                        Print["Error: ", par, " must be defined as a real scalar"];
+                        Print["   since it is defined in an SLHA1 input block."];
+                        Quit[1];
+                       ];
+                    ];
+                 ];
+              ];
+          ];
 
 SetModelParameters[pars_List] := allModelParameters = DeleteDuplicates[pars];
 SetOutputParameters[pars_List] := allOutputParameters = DeleteDuplicates[pars];
@@ -281,11 +562,10 @@ FindSymbolDef[sym_, opt_:DependenceNum] :=
               Return[0];
              ];
            If[Length[symDef] > 1,
-              Print["Warning: ", sym, " defined multiple times"];
-             ];
-           symDef = symDef[[1]];
-           Return[symDef];
-          ];
+              Utils`FSFancyWarning[sym, " defined multiple times"];
+           ];
+           symDef[[1]]
+    ];
 
 FindAllParametersFromList[expr_, parameters_List] :=
     Module[{symbols, compactExpr},
@@ -302,7 +582,7 @@ FindAllParametersFromList[expr_, parameters_List] :=
                  Cases[compactExpr, SARAH`Q[a_]     /; MemberQ[parameters,SARAH`Q[a]] :> SARAH`Q[a], {0,Infinity}]
                }]];
            (* remove parameters found from compactExpr *)
-           compactExpr = compactExpr /. (RuleDelayed[#, CConversion`ToValidCSymbolString[#]]& /@ symbols);
+           compactExpr = compactExpr /. (RuleDelayed[#, Evaluate[CConversion`ToValidCSymbolString[#]]]& /@ symbols);
            (* find all parameters without SARAH head in compactExpr *)
            symbols = Join[symbols,
                { Cases[compactExpr, a_Symbol /; MemberQ[parameters,a], {0,Infinity}],
@@ -314,7 +594,7 @@ FindAllParametersFromList[expr_, parameters_List] :=
           ];
 
 (* Returns all parameters within an expression *)
-FindAllParameters[expr_] :=
+FindAllParameters[expr_, exceptions_:{}] :=
     Module[{allParameters, allOutPars},
            allOutPars = DeleteDuplicates[Flatten[
                Join[allOutputParameters,
@@ -325,11 +605,12 @@ FindAllParameters[expr_] :=
                Join[allModelParameters, allOutPars,
                     GetInputParameters[], Phases`GetArg /@ allPhases,
                     GetDependenceSPhenoSymbols[], GetExtraParameters[]]];
+           allParameters = DeleteCases[allParameters, p_ /; MemberQ[exceptions, p]];
            FindAllParametersFromList[expr, allParameters]
           ];
 
-FindAllParametersClassified[expr_] :=
-    Module[{symbols = DeleteDuplicates[Flatten[FindAllParameters[expr]]],
+FindAllParametersClassified[expr_, exceptions_:{}] :=
+    Module[{symbols = DeleteDuplicates[Flatten[FindAllParameters[expr, exceptions]]],
             inputPars, modelPars, outputPars, extraPars,
             poleMasses, phases, depNum, allOutPars},
            allOutPars = DeleteDuplicates[Flatten[
@@ -357,6 +638,27 @@ FindAllParametersClassified[expr_] :=
                FSDerivedParameters -> depNum,
                FSExtraParameters -> extraPars
            }
+          ];
+
+ReplaceAllRespectingSARAHHeads[expr_, rules_] :=
+    Module[{pars, parsWithoutHeads, removeHeadsRules,
+            uniqueRules, uniqueExpr, uniqueSubs},
+           pars = Parameters`FindAllParameters[First /@ rules];
+           removeHeadsRules = { SARAH`L[p_][__] :> p, SARAH`L[p_] :> p,
+                                SARAH`B[p_][__] :> p, SARAH`B[p_] :> p,
+                                SARAH`T[p_][__] :> p, SARAH`T[p_] :> p,
+                                SARAH`Q[p_][__] :> p, SARAH`Q[p_] :> p
+                              };
+           parsWithoutHeads = DeleteDuplicates[pars /. removeHeadsRules];
+           uniqueRules = DeleteDuplicates @ Flatten[{
+               Rule[SARAH`L[#], CConversion`ToValidCSymbol[SARAH`L[#]]],
+               Rule[SARAH`B[#], CConversion`ToValidCSymbol[SARAH`B[#]]],
+               Rule[SARAH`T[#], CConversion`ToValidCSymbol[SARAH`T[#]]],
+               Rule[SARAH`Q[#], CConversion`ToValidCSymbol[SARAH`Q[#]]]
+           }& /@ parsWithoutHeads];
+           uniqueExpr = expr /. uniqueRules;
+           uniqueSubs = rules /. uniqueRules;
+           (uniqueExpr /. uniqueSubs) /. (Reverse /@ uniqueRules)
           ];
 
 IsScalar[sym_] :=
@@ -419,7 +721,7 @@ IsPhase[parameter_] := MemberQ[Phases`GetArg /@ allPhases, Phases`GetArg[paramet
 IsModelParameter[parameter_] := MemberQ[allModelParameters, parameter];
 IsModelParameter[Re[parameter_]] := IsModelParameter[parameter];
 IsModelParameter[Im[parameter_]] := IsModelParameter[parameter];
-IsModelParameter[FlexibleSUSY`Temporary[parameter_]] := IsModelParameter[parameter];
+IsModelParameter[FlexibleSUSY`FSTemporary[parameter_]] := IsModelParameter[parameter];
 
 IsModelParameter[parameter_[indices__] /; And @@ (IsIndex /@ {indices})] :=
     IsModelParameter[parameter];
@@ -437,6 +739,12 @@ IsExtraParameter[parameter_] := MemberQ[GetExtraParameters[], parameter];
 IsExtraParameter[parameter_[indices__] /; And @@ (IsIndex /@ {indices})] :=
     IsExtraParameter[parameter];
 
+IsParameter[sym_] :=
+    IsModelParameter[sym] ||
+    IsInputParameter[sym] ||
+    IsExtraParameter[sym] ||
+    IsPhase[sym];
+
 IsRealParameter[Re[sym_]] := True;
 IsRealParameter[Im[sym_]] := True;
 IsRealParameter[FlexibleSUSY`M[_]] := True;
@@ -447,10 +755,18 @@ IsRealParameter[sym_] :=
     (IsExtraParameter[sym] && CConversion`IsRealType[GetType[sym]]) ||
     MemberQ[Utils`ForceJoin[SARAH`realVar, additionalRealParameters, SARAH`RealParameters], sym];
 
+IsRealParameter[sym_[indices__?IsIndex]] := IsRealParameter[sym];
+
 IsComplexParameter[sym_] :=
     !IsRealParameter[sym];
 
-IsRealExpression[parameter_ /; IsModelParameter[parameter]] :=
+IsRealExpression[parameter_?IsModelParameter] :=
+    IsRealParameter[parameter];
+
+IsRealExpression[parameter_?IsInputParameter] :=
+    IsRealParameter[parameter];
+
+IsRealExpression[parameter_?IsExtraParameter] :=
     IsRealParameter[parameter];
 
 IsRealExpression[expr_?NumericQ] :=
@@ -528,7 +844,7 @@ IsRealExpression[sum[index_, start_, stop_, expr_]] :=
 IsRealExpression[otherwise_] := False;
 
 HasPhase[particle_] :=
-    MemberQ[#[[1]]& /@ SARAH`ParticlePhases, particle];
+    MemberQ[First /@ SARAH`ParticlePhases, particle];
 
 GetPhase[particle_ /; HasPhase[particle]] :=
     Cases[SARAH`ParticlePhases, {particle, phase_} :> phase][[1]];
@@ -565,6 +881,24 @@ GetTypeFromDimension[sym_, {dims__} /; Length[{dims}] > 2 && (And @@ (NumberQ /@
        CConversion`TensorType[CConversion`complexScalarCType, dims]
       ];
 
+GetIntegerTypeFromDimension[{}] :=
+    CConversion`ScalarType[CConversion`integerScalarCType];
+
+GetIntegerTypeFromDimension[{0}] :=
+    GetIntegerTypeFromDimension[{}];
+
+GetIntegerTypeFromDimension[{1}] :=
+    GetIntegerTypeFromDimension[{}];
+
+GetIntegerTypeFromDimension[{num_?NumberQ}] :=
+    CConversion`VectorType[CConversion`integerScalarCType, num];
+
+GetIntegerTypeFromDimension[{num1_?NumberQ, num2_?NumberQ}] :=
+    CConversion`MatrixType[CConversion`integerScalarCType, num1, num2];
+
+GetIntegerTypeFromDimension[{dims__} /; Length[{dims}] > 2 && (And @@ (NumberQ /@ {dims}))] :=
+    CConversion`TensorType[CConversion`integerScalarCType, dims];
+
 GetRealTypeFromDimension[{}] :=
     CConversion`ScalarType[CConversion`realScalarCType];
 
@@ -583,6 +917,27 @@ GetRealTypeFromDimension[{num1_?NumberQ, num2_?NumberQ}] :=
 GetRealTypeFromDimension[{dims__} /; Length[{dims}] > 2 && (And @@ (NumberQ /@ {dims}))] :=
     CConversion`TensorType[CConversion`realScalarCType, dims];
 
+GetComplexTypeFromDimension[{}] :=
+    CConversion`ScalarType[CConversion`complexScalarCType];
+
+GetComplexTypeFromDimension[{0}] :=
+    GetComplexTypeFromDimension[{}];
+
+GetComplexTypeFromDimension[{1}] :=
+    GetComplexTypeFromDimension[{}];
+
+GetComplexTypeFromDimension[{num_?NumberQ}] :=
+    CConversion`VectorType[CConversion`complexScalarCType, num];
+
+GetComplexTypeFromDimension[{num1_?NumberQ, num2_?NumberQ}] :=
+    CConversion`MatrixType[CConversion`complexScalarCType, num1, num2];
+
+GetComplexTypeFromDimension[{dims__} /; Length[{dims}] > 2 && (And @@ (NumberQ /@ {dims}))] :=
+    CConversion`TensorType[CConversion`complexScalarCType, dims];
+
+GetType[sym_[indices__] /; And @@ (IsIndex /@ {indices})] :=
+    CConversion`GetScalarElementType[GetType[sym]];
+
 GetType[FlexibleSUSY`SCALE] := GetRealTypeFromDimension[{}];
 
 GetType[FlexibleSUSY`M[sym_]] :=
@@ -592,13 +947,10 @@ GetType[sym_?IsInputParameter] :=
     Cases[GetInputParametersAndTypes[], {sym, _, type_} :> type][[1]];
 
 GetType[sym_?IsExtraParameter] :=
-    Cases[GetExtraParametersAndTypes[], {sym, type_} :> type][[1]];
+    Cases[GetExtraParametersAndTypes[], {sym, _, type_} :> type][[1]];
 
 GetType[sym_] :=
     GetTypeFromDimension[sym, SARAH`getDimParameters[sym]];
-
-GetType[sym_[indices__] /; And @@ (IsIndex /@ {indices})] :=
-    GetType[sym]
 
 GetParameterDimensions[sym_ /; (IsInputParameter[sym] || IsExtraParameter[sym])] :=
     Module[{type},
@@ -912,8 +1264,25 @@ CreateEnumName[par_[idx__]] :=
 CreateEnumName[par_] :=
     CConversion`ToValidCSymbolString[par];
 
+CreateParameterEnumEntries[name_, type_] :=
+    CreateEnumName /@ DecomposeParameter[name, type];
+
 CreateParameterEnums[name_, type_] :=
     Utils`StringJoinWithSeparator[CreateEnumName /@ DecomposeParameter[name, type], ", "];
+
+CreateExtraParameterEnum[extraParameters_List] :=
+    Module[{result},
+           result = Utils`StringJoinWithSeparator[CreateParameterEnums[#, GetType[#]]& /@ extraParameters, ", "];
+           If[Length[extraParameters] > 0, result = result <> ", ";];
+           "enum Extra_parameters : int { " <> result <> "NUMBER_OF_EXTRA_PARAMETERS };\n"
+          ];
+
+CreateExtraParameterNames[extraParameters_List] :=
+    Module[{result},
+           result = Utils`StringJoinWithSeparator[CreateParameterSARAHNames[#,GetType[#]]& /@ extraParameters, ", "];
+           "const std::array<std::string, NUMBER_OF_EXTRA_PARAMETERS> extra_parameter_names = {" <>
+           result <> "};\n"
+          ];
 
 CreateInputParameterEnum[inputParameters_List] :=
     Module[{result},
@@ -943,12 +1312,12 @@ SetInputParameter[parameter_, value_, wrapper_String, castToType_:None] :=
              ]
           ];
 
-SetPhase[phase_, value_, class_String] :=
+SetPhase[phase_, value_, classPrefix_String] :=
     Module[{phaseStr, valueStr},
            If[IsPhase[phase],
               phaseStr = Phases`CreatePhaseName[phase];
               valueStr = CConversion`RValueToCFormString[value];
-              class <> "->set_" <> phaseStr <> "(" <> valueStr <> ");\n",
+              classPrefix <> "set_" <> phaseStr <> "(" <> valueStr <> ");\n",
               ""
              ]
           ];
@@ -964,18 +1333,24 @@ CreateIndices[parameter_] := "";
 AppendIfNotEmpty[str_String, sym_String] := If[str == "", "", str <> sym];
 
 SetParameter[Re[parameter_], value_String, class_String, castToType_:None] :=
-    Module[{parameterStr, newValue},
-           parameterStr = CConversion`RValueToCFormString[parameter];
+    Module[{parameterStr, indicesStr = "", newValue},
+           If[GetIndices[parameter] =!= {},
+              indicesStr = "(" <> ConcatIndices[GetIndices[parameter]] <> ")";
+             ];
+           parameterStr = CConversion`RValueToCFormString[StripIndices[parameter]];
            newValue = CConversion`CreateCType[CConversion`ScalarType[complexScalarCType]] <>
-               "(" <> value <> ",Im(MODELPARAMETER(" <> parameterStr <> ")))";
+               "(" <> value <> ",Im(MODELPARAMETER(" <> parameterStr <> ")" <> indicesStr <> "))";
            SetParameter[parameter, newValue, class, castToType]
           ];
 
 SetParameter[Im[parameter_], value_String, class_String, castToType_:None] :=
-    Module[{parameterStr, newValue},
-           parameterStr = CConversion`RValueToCFormString[parameter];
+    Module[{parameterStr, indicesStr = "", newValue},
+           If[GetIndices[parameter] =!= {},
+              indicesStr = "(" <> ConcatIndices[GetIndices[parameter]] <> ")";
+             ];
+           parameterStr = CConversion`RValueToCFormString[StripIndices[parameter]];
            newValue = CConversion`CreateCType[CConversion`ScalarType[complexScalarCType]] <>
-               "(Re(MODELPARAMETER(" <> parameterStr <> "))," <> value <> ")";
+               "(Re(MODELPARAMETER(" <> parameterStr <> ")" <> indicesStr <> ")," <> value <> ")";
            SetParameter[parameter, newValue, class, castToType]
           ];
 
@@ -1030,12 +1405,45 @@ RemoveProtectedHeads[expr_] :=
               SARAH`Mass  -> FlexibleSUSY`M,
               SARAH`Mass2 -> FlexibleSUSY`M };
 
+CreateRulesForProtectedHead[expr_, protectedHead_Symbol] :=
+    Cases[expr, protectedHead[p__] :> Rule[protectedHead[p],Symbol["x$" <> ToString[Hash[p]]]], {0, Infinity}];
+
+CreateRulesForProtectedHead[expr_, protectedHeads_List] :=
+    Flatten @ Join[CreateRulesForProtectedHead[expr,#]& /@ protectedHeads];
+
+FindMacro[par_] :=
+    Which[IsModelParameter[par] , Global`MODELPARAMETER,
+          IsOutputParameter[par], Global`MODELPARAMETER,
+          IsPhase[par]          , Global`MODELPARAMETER,
+          IsInputParameter[par] , Global`INPUTPARAMETER,
+          IsExtraParameter[par] , Global`EXTRAPARAMETER,
+          True                  , Identity
+         ];
+
+WrapPreprocessorMacroAround[expr_String, ___] := expr;
+
+WrapPreprocessorMacroAround[expr_, protectedHeads_List:{FlexibleSUSY`Pole, SARAH`SM}] :=
+    Module[{allPars, replacements, protectionRules, exprWithoutProtectedSymbols},
+           allPars = Flatten[{FSModelParameters, FSInputParameters,
+                              FSOutputParameters, FSPhysicalOutputParameters,
+                              FSPhases, FSDerivedParameters, FSExtraParameters} /. FindAllParametersClassified[expr]];
+           replacements = Join[
+               RuleDelayed[#     , FindMacro[#][#]   ]& /@ allPars,
+               RuleDelayed[#[i__], FindMacro[#][#][i]]& /@ allPars,
+               {RuleDelayed[FlexibleSUSY`M[p_[i__]], FindMacro[FlexibleSUSY`M[p]][FlexibleSUSY`M[p]][i]]}
+           ];
+           protectionRules = CreateRulesForProtectedHead[expr, protectedHeads];
+           exprWithoutProtectedSymbols = expr /. protectionRules;
+           (* substitute back protected symbols *)
+           exprWithoutProtectedSymbols /. replacements /. (Reverse /@ protectionRules)
+          ];
+
 DefineLocalConstCopy[parameter_, macro_String, prefix_String:""] :=
-    "const auto " <> prefix <> ToValidCSymbolString[parameter] <> " = " <>
-    macro <> "(" <> ToValidCSymbolString[parameter] <> ");\n";
+    "const auto " <> prefix <> CConversion`ToValidCSymbolString[parameter] <> " = " <>
+    macro <> "(" <> CConversion`ToValidCSymbolString[parameter] <> ");\n";
 
 PrivateCallLoopMassFunction[FlexibleSUSY`M[particle_Symbol]] :=
-    "calculate_" <> ToValidCSymbolString[FlexibleSUSY`M[particle]] <> "_pole();\n";
+    "calculate_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[particle]] <> "_pole();\n";
 
 CalculateLocalPoleMasses[parameter_] :=
     "MODEL->" <> PrivateCallLoopMassFunction[parameter];
@@ -1073,7 +1481,7 @@ DefineLocalConstCopyForBeta[{par_, -1}] :=
     DefineLocalConstCopy[par, "BETAPARAMETER", "beta_"];
 
 DefineLocalConstCopyForBeta[{par_, loops_}] :=
-    Module[{lstr = ToString[loops], parStr = ToValidCSymbolString[par]},
+    Module[{lstr = ToString[loops], parStr = CConversion`ToValidCSymbolString[par]},
            "const auto BETA1(" <> lstr <> "," <> parStr <>
            ") = BETAPARAMETER1(" <> lstr <> "," <> parStr <> ");\n"
           ];
@@ -1155,12 +1563,16 @@ DecreaseIndexLiterals[expr_, heads_List] :=
 DecreaseSumIndices[expr_] :=
     expr //. SARAH`sum[idx_, start_, stop_, exp_] :> FlexibleSUSY`SUM[idx, start - 1, stop - 1, exp];
 
+ReplaceThetaStep[expr_] := expr /; FreeQ[expr,ThetaStep];
+
 ReplaceThetaStep[expr_] :=
-    Expand[expr] //. {
-        Times[a__, ThetaStep[i1_, i2_], b__] :> FlexibleSUSY`IF[i1 < i2, a b, 0],
-        Times[a__, ThetaStep[i1_, i2_]] :> FlexibleSUSY`IF[i1 < i2, a, 0],
-        Times[ThetaStep[i1_, i2_], a__] :> FlexibleSUSY`IF[i1 < i2, a, 0]
-    };
+    Factor[
+        Expand[expr] //. {
+            Times[a__, ThetaStep[i1_, i2_], b__] :> FlexibleSUSY`IF[i1 < i2, a b, 0],
+            Times[a__, ThetaStep[i1_, i2_]] :> FlexibleSUSY`IF[i1 < i2, a, 0],
+            Times[ThetaStep[i1_, i2_], a__] :> FlexibleSUSY`IF[i1 < i2, a, 0]
+        }
+    ];
 
 (* Converts an expression to a valid C++ string. *)
 ExpressionToString[expr_] :=
@@ -1195,38 +1607,26 @@ GetEffectiveMASqr[] :=
 
 GetParameterFromDescription[description_String] :=
     Module[{parameter},
-           parameter =Cases[SARAH`ParameterDefinitions,
-                            {parameter_,
-                             {___, SARAH`Description -> description, ___}} :>
-                            parameter];
-           If[Length[parameter] == 0,
-              Print["Error: Parameter with description \"", description,
-                    "\" not found."];
-              Return[Null];
-             ];
-           If[Length[parameter] > 1,
-              Print["Warning: Parameter with description \"", description,
-                    "\" not unique."];
-             ];
-           parameter[[1]]
+           parameter = Cases[SARAH`ParameterDefinitions,
+                             {parameter_, {___, SARAH`Description -> description, ___}} :> parameter];
+           Switch[parameter,
+                  {}, DebugPrint["Note: Parameter with description \"", description, "\" not found."]; Null,
+                  {_}, First[parameter],
+                  {_, __}, Utils`FSFancyWarning["Parameter with description \"", description, "\" not unique: ", parameter]; First[parameter],
+                  _, Print["Error: Cases did not return a list in GetParameterFromDescription[", parameter, "]."]; Quit[1]
+           ]
           ];
 
 GetParticleFromDescription[description_String, eigenstates_:FlexibleSUSY`FSEigenstates] :=
     Module[{particle},
-           particle =Cases[SARAH`ParticleDefinitions[eigenstates],
-                            {particle_,
-                             {___, SARAH`Description -> description, ___}} :>
-                            particle];
-           If[Length[particle] == 0,
-              DebugPrint["Note: Particle with description \"", description,
-                         "\" not found."];
-              Return[Null];
-             ];
-           If[Length[particle] > 1,
-              Print["Warning: Particle with description \"", description,
-                    "\" not unique."];
-             ];
-           particle[[1]]
+           particle = Cases[SARAH`ParticleDefinitions[eigenstates],
+                            {particle_, {___, SARAH`Description -> description, ___}} :> particle];
+           Switch[particle,
+                  {}, DebugPrint["Note: Particle with description \"", description, "\" not found."]; Null,
+                  {_}, First[particle],
+                  {_, __}, Utils`FSFancyWarning["Particle with description \"", description, "\" not unique: ", particle]; First[particle],
+                  _, Print["Error: Cases did not return a list in GetParticleFromDescription[", particle, "]."]; Quit[1]
+           ]
           ];
 
 GetParticleFromDescription[multipletName_String, splitNames_List] :=
@@ -1236,6 +1636,12 @@ GetParticleFromDescription[multipletName_String, splitNames_List] :=
            DeleteCases[GetParticleFromDescription /@ splitNames, Null]
           ];
 
+GetPDGCodesForParticle[SARAH`bar[particle_]] :=
+    -GetPDGCodesForParticle[particle];
+
+GetPDGCodesForParticle[Susyno`LieGroups`conj[particle_]] :=
+    -GetPDGCodesForParticle[particle];
+
 GetPDGCodesForParticle[particle_] :=
     Module[{pdgList},
             pdgList = SARAH`getPDGList[particle];
@@ -1243,6 +1649,51 @@ GetPDGCodesForParticle[particle_] :=
                pdgList = {};
               ];
            pdgList
+          ];
+
+CreatePDGCodeFromParticleCase[particle_] :=
+    Module[{particleName,
+            pdgs = GetPDGCodesForParticle[particle],
+            dim = TreeMasses`GetDimension[particle], value},
+           particleName = CConversion`ToValidCSymbolString[particle];
+           If[dim != Length[pdgs],
+              Print["Error: number of PDG codes does not match ", particle, " multiplet size."];
+              Quit[1];
+             ];
+           If[dim == 1,
+              value = "pdg = " <> ToString[First[pdgs]];,
+              value = "pdg_codes = {" <> Utils`StringJoinWithSeparator[ToString /@ pdgs, ", "] <> "}";
+             ];
+           "case " <> particleName <> ": " <> value <> "; break;\n"
+          ];
+
+CreatePDGCodeFromParticleCases[particles_List] :=
+    StringJoin[CreatePDGCodeFromParticleCase /@ Select[particles, (TreeMasses`GetDimension[#] == 1)&]];
+
+CreatePDGCodeFromParticleIndexedCases[particles_List] :=
+    StringJoin[CreatePDGCodeFromParticleCase /@ Select[particles, (TreeMasses`GetDimension[#] > 1)&]];
+
+CreateParticleMultipletNameAndIndexFromPDGCases[particles_List] :=
+    Module[{i, j, dims, starts, pdgCodes, names, result = ""},
+           dims = TreeMasses`GetDimension /@ particles;
+           dimsWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones /@ particles;
+           starts = TreeMasses`GetDimensionStartSkippingGoldstones /@ particles;
+           pdgCodes = GetPDGCodesForParticle /@ particles;
+           For[i = 1, i <= Length[particles], i++,
+               If[dims[[i]] != Length[pdgCodes[[i]]],
+                  Print["Error: number of PDG codes does not match ", particles[[i]], " multiplet size."];
+                  Quit[1];
+                 ];
+               If[dimsWithoutGoldstones[[i]] > 0,
+                  names = If[dims[[i]] > 1,
+                             Table["\"" <> CConversion`ToValidCSymbolString[particles[[i]]] <> "\", " <> ToString[j], {j, starts[[i]], dims[[i]]}],
+                             {"\"" <> CConversion`ToValidCSymbolString[particles[[i]]] <> "\", {}"}
+                            ];
+                  result = result <> StringJoin[("case " <> ToString[#[[1]]] <> ": name = {" <> #[[2]] <> "}; break;\n")&
+                                                /@ Thread[{#1,#2}& @@ {pdgCodes[[i, starts[[i]] ;;]], names}]];
+                 ];
+              ];
+           result
           ];
 
 NumberOfIndependentEntriesOfSymmetricMatrix[n_] := (n^2 + n) / 2;
@@ -1316,7 +1767,9 @@ StripSARAHIndicesRules[numberOfIndices_] :=
     StripIndicesRules[sarahIndices, numberOfIndices];
 
 ExtractParametersFromSARAHBetaLists[beta_List] :=
-    StripIndices[#[[1]]]& /@ beta;
+    StripIndices[First[#]]& /@ beta;
+
+ExtractParametersFromSARAHBetaLists[_] := {};
 
 GetModelParametersWithMassDimension[dim_?IntegerQ] :=
     Module[{dimPars},
@@ -1333,6 +1786,40 @@ GetModelParametersWithMassDimension[dim_?IntegerQ] :=
            ExtractParametersFromSARAHBetaLists[dimPars]
           ];
 
+GetParametersWithMassDimension[dim_?IntegerQ] :=
+    Module[{dimPars},
+           dimPars = GetModelParametersWithMassDimension[dim];
+           dimPars = Join[dimPars, Flatten[Cases[extraMassDimensions, {dim, pars_} :> pars]]];
+           DeleteDuplicates[dimPars]
+          ];
+
+GetModelParameterMassDimension[par_?IsModelParameter] :=
+    Module[{i, parsList},
+           For[i = 0, i <= 3, i++,
+               parsList = GetModelParametersWithMassDimension[i];
+               If[MemberQ[parsList, StripIndices[par]],
+                  Return[i]
+                 ];
+              ];
+           Print["Error: mass dimension for ", par, " not found!"];
+           Quit[1];
+          ];
+
+GetModelParameterMassDimension[par_] :=
+    Block[{},
+          Print["Error: GetModelParameterMassDimension:", par, " is not a model parameter!"];
+          Quit[1];
+         ];
+
+IsGaugeCoupling[par_] :=
+    MemberQ[ExtractParametersFromSARAHBetaLists[SARAH`BetaGauge], par];
+
+IsYukawaCoupling[par_] :=
+    MemberQ[ExtractParametersFromSARAHBetaLists[SARAH`BetaYijk], par];
+
+IsVEV[par_] :=
+    MemberQ[ExtractParametersFromSARAHBetaLists[SARAH`BetaVEV], par];
+
 AreLinearDependent[{eq1_, eq2_}, parameters_List] :=
     Module[{frac = Simplify[eq1/eq2 /. FlexibleSUSY`tadpole[_] -> 0],
             pars},
@@ -1342,32 +1829,18 @@ AreLinearDependent[{eq1_, eq2_}, parameters_List] :=
            And @@ (FreeQ[frac,#]& /@ pars)
           ];
 
-FilterOutLinearDependentEqs[{}, _List] := {};
-
-FilterOutLinearDependentEqs[{eq_}, _List] := {eq};
-
-FilterOutLinearDependentEqs[{eq_, rest__}, parameters_List] :=
-    If[Or @@ (AreLinearDependent[#,parameters]& /@ ({eq,#}& /@ {rest})),
-       (* leave out eq and check rest *)
-       FilterOutLinearDependentEqs[{rest}, parameters],
-       (* keep eq and check rest *)
-       {eq, Sequence @@ FilterOutLinearDependentEqs[{rest}, parameters]}
-      ];
-
-FilterOutIndependentEqs[eqs_List, pars_List] :=
-    DeleteDuplicates @ Flatten @ Join[FilterOutIndependentEqs[eqs,#]& /@ pars];
-
-FilterOutIndependentEqs[eqs_List, p_] :=
-    Select[eqs, (!FreeQ[#,p])&];
-
 GetThirdGeneration[par_] :=
     Which[IsScalar[par], par,
           IsMatrix[par], par[2,2],
-          True, Print["Warning: GetThirdGeneration[",par,"]: unknown type"]; par
+          True,
+             Utils`FSFancyWarning[
+                "GetThirdGeneration[", par, "]: unknown type"
+             ];
+             par
          ];
 
 GetSARAHParameters[] :=
-    (#[[1]])& /@ SARAH`SARAHparameters;
+    First /@ SARAH`SARAHparameters;
 
 GetAllDependenceSPhenoSymbols[] :=
     DeleteDuplicates @ Flatten @
@@ -1385,7 +1858,7 @@ GetDependenceSPhenoSymbols[] :=
 
 GetDependenceSPhenoRules[] :=
     Module[{sarahPars = GetSARAHParameters[]},
-           Select[GetAllDependenceSPhenoRules[], MemberQ[sarahPars,#[[1]]]&]
+           Select[GetAllDependenceSPhenoRules[], MemberQ[sarahPars,First[#]]&]
           ];
 
 GetAllOutputParameterDependencies[expr_] :=
@@ -1409,6 +1882,40 @@ GetIntermediateOutputParameterDependencies[expr_] :=
         GetAllOutputParameterDependenciesReplaced[expr],
         Join[GetOutputParameters[], GetInputParameters[], GetExponent /@ GetPhases[]]
     ];
+
+CreateExtraParameterArrayGetter[{}] :=
+    "return Eigen::ArrayXd();\n";
+
+CreateExtraParameterArrayGetter[extraParameters_List] :=
+    Module[{get = "", paramCount = 0, name = "", par,
+            type, i, assignment = "", nAssignments = 0},
+           For[i = 1, i <= Length[extraParameters], i++,
+               par  = extraParameters[[i]];
+               type = GetType[extraParameters[[i]]];
+               name = CConversion`ToValidCSymbolString[par];
+               {assignment, nAssignments} = Parameters`CreateDisplayAssignment[name, paramCount, type];
+               get = get <> assignment;
+               paramCount += nAssignments;
+              ];
+           get = "Eigen::ArrayXd pars(" <> ToString[paramCount] <> ");\n\n" <>
+                 get <> "\n" <>
+                 "return pars;";
+           Return[get];
+          ];
+
+CreateExtraParameterArraySetter[extraParameters_List] :=
+    Module[{set = "", paramCount = 0, name = "", par,
+            type, i, assignment = "", nAssignments = 0},
+           For[i = 1, i <= Length[extraParameters], i++,
+               par  = extraParameters[[i]];
+               type = GetType[extraParameters[[i]]];
+               name = CConversion`ToValidCSymbolString[par];
+               {assignment, nAssignments} = Parameters`CreateSetAssignment[name, paramCount, type];
+               set = set <> assignment;
+               paramCount += nAssignments;
+              ];
+           Return[set];
+          ];
 
 CreateInputParameterArrayGetter[{}] :=
     "return Eigen::ArrayXd();\n";
@@ -1444,6 +1951,21 @@ CreateInputParameterArraySetter[inputParameters_List] :=
            Return[set];
           ];
 
+CreateModelParameterGetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par]]
+          ];
+
+CreateDelegateModelParameterGetter[par_, macro_String:"SUPER"] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par], "", macro]
+          ];
+
+CreateModelParameterSetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par], type = GetType[par]},
+           CConversion`CreateInlineSetters[name, type]
+          ];
+
 FindSLHABlock[blockList_List, par_] :=
     Module[{foundBlocks},
            foundBlocks = Cases[blockList, {par, block_, ___} :> block];
@@ -1471,6 +1993,11 @@ SetSMParameter[FlexibleSUSY`MDown2GeVInput     , value_String, struct_String] :=
 SetSMParameter[FlexibleSUSY`MUp2GeVInput       , value_String, struct_String] := struct <> ".setMass(softsusy::mUp, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MStrange2GeVInput  , value_String, struct_String] := struct <> ".setMass(softsusy::mStrange, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MCharmMCharm       , value_String, struct_String] := struct <> ".setMass(softsusy::mCharm, " <> value <> ")";
+
+(*  given a field will return it's indices,
+    e.g. Fd[{a,b}] or bar[Fd[{a,b}] or conj[Sd[{a,b}]] will return {a,b} *)
+GetFieldIndices[field_] :=
+    field /. SARAH`bar | Susyno`LieGroups`conj -> Identity /. _[x_List] :> x;
 
 End[];
 

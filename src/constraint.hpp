@@ -24,6 +24,6 @@ namespace flexiblesusy {
 template <class T>
 class Constraint;
 
-}
+} // namespace flexiblesusy
 
 #endif

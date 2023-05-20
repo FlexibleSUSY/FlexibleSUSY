@@ -37,7 +37,7 @@ public:
    GSL_vector(std::initializer_list<double>);
    ~GSL_vector() noexcept;
 
-   const GSL_vector& operator=(const GSL_vector&);
+   GSL_vector& operator=(const GSL_vector&);
    GSL_vector& operator=(GSL_vector&&) noexcept;
    double& operator[](std::size_t);      ///< element read/write access
    double operator[](std::size_t) const; ///< element read access
@@ -64,6 +64,9 @@ double* end(GSL_vector&);   ///< iterator to end of GSL_vector
 
 const double* cbegin(const GSL_vector&); ///< const iterator to begin of GSL_vector
 const double* cend(const GSL_vector&);   ///< const iterator to end of GSL_vector
+
+/// Returns true if GSL_vector contains only finite elements, false otherwise
+bool is_finite(const GSL_vector&);
 
 std::ostream& operator<<(std::ostream&, const GSL_vector&);
 

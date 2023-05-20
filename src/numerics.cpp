@@ -28,13 +28,12 @@
 // #define USE_LOOPTOOLS
 
 #include "numerics.h"
-#include "rk.hpp"
+#include "numerics2.hpp"
 #ifdef USE_LOOPTOOLS
-#include "clooptools.h"
+#include <clooptools.h>
 #endif
 #include <algorithm>
 #include <cmath>
-#include <Eigen/Dense>
 
 namespace softsusy {
 
@@ -43,433 +42,471 @@ namespace {
 constexpr double EPSTOL = 1.0e-11; ///< underflow accuracy
 constexpr double TOL = 1e-4;
 
+constexpr double dabs(double a) noexcept { return a >= 0. ? a : -a; }
 constexpr double sqr(double a) noexcept { return a*a; }
 constexpr double pow3(double a) noexcept { return a*a*a; }
 constexpr double pow6(double a) noexcept { return a*a*a*a*a*a; }
 
-bool is_close(double m1, double m2, double tol)
+constexpr bool is_zero(double m, double tol) noexcept
 {
-  const double mmax = fabs(std::max(fabs(m1), fabs(m2)));
-  const double mmin = fabs(std::min(fabs(m1), fabs(m2)));
-  const double max_tol = tol * mmax;
-  if (max_tol == 0.0 && mmax != 0.0 && tol != 0.0)
-    return (mmax - mmin <= tol);
+   const double am = dabs(m);
+   const double mtol = tol * am;
 
-  return (mmax - mmin <= max_tol);
+   if (mtol == 0.0 && am != 0.0 && tol != 0.0)
+      return am <= tol;
+
+   return am <= mtol;
 }
 
-double refnfn(double x, double p, double m1, double m2, double q) noexcept
+constexpr bool is_close(double m1, double m2, double tol) noexcept
 {
-  const static std::complex<double> iEpsilon(0.0, TOL * 1.0e-20);
+   const double mmax = std::max(dabs(m1), dabs(m2));
+   const double mmin = std::min(dabs(m1), dabs(m2));
+   const double max_tol = tol * mmax;
 
-  return std::real(x *
-    std::log(((1 - x) * sqr(m1) + x * sqr(m2)
-              - x * (1 - x) * sqr(p) - iEpsilon) / sqr(q)));
+   if (max_tol == 0.0 && mmax != 0.0 && tol != 0.0)
+      return mmax - mmin <= tol;
+
+   return mmax - mmin <= max_tol;
 }
 
-/// returns a/b if a/b is finite, otherwise returns numeric_limits::max()
-template <typename T>
-T divide_finite(T a, T b) {
-   T result = a / b;
-   if (!std::isfinite(result))
-      result = std::numeric_limits<T>::max();
-   return result;
+double sign(double x) noexcept
+{
+   return x >= 0.0 ? 1.0 : -1.0;
 }
 
-double integrandThreshbnr(double x, double p, double m1, double m2, double q) noexcept
+// can be made constexpr in C++20
+double fB(const std::complex<double>& x) noexcept
 {
-  return refnfn(x, p, m1, m2, q);
+   using flexiblesusy::fast_log;
+
+   const double re = std::real(x);
+   const double im = std::imag(x);
+
+   if ((std::abs(re) == 0.0 || std::abs(re) == 1.0) && im == 0.0) {
+      return -1.0;
+   }
+
+   return std::real(-1.0 + fast_log(1.0 - x) - x*fast_log(1.0 - 1.0/x));
 }
 
-Eigen::Array<double,1,1> dd(double x, double p, double m1, double m2, double q) noexcept
+/// fB(xp) + fB(xm)
+double fB(const std::complex<double>& xp, const std::complex<double>& xm) noexcept
 {
-  Eigen::Array<double,1,1> dydx;
-  dydx(0) = -integrandThreshbnr(x, p, m1, m2, q);
-  return dydx;
-}
+   using flexiblesusy::fast_log;
 
-// Returns real part of integral
-double bIntegral(double p, double m1, double m2, double q)
-{
-  using namespace flexiblesusy;
+   const double rep = std::real(xp);
+   const double imp = std::imag(xp);
 
-  const double from = 0.0, to = 1.0, guess = 0.1, hmin = TOL * 1.0e-5;
-  const double eps = TOL * 1.0e-3;
-  Eigen::Array<double,1,1> v;
-  v(0) = 1.0;
+   if ((std::abs(rep) == 0.0 || std::abs(rep) == 1.0) && imp == 0.0) {
+      return -1.0 + fB(xm);
+   }
 
-  runge_kutta::integrateOdes(v, from, to, eps, guess, hmin,
-                             [p, m1, m2, q] (double x, const Eigen::Array<double,1,1>&) {
-                                return dd(x, p, m1, m2, q);
-                             });
+   const double rem = std::real(xm);
+   const double imm = std::imag(xm);
 
-  return v(0) - 1.0;
-}
+   if ((std::abs(rem) == 0.0 || std::abs(rem) == 1.0) && imm == 0.0) {
+      return -1.0 + fB(xp);
+   }
 
-double fB(const std::complex<double>& a) noexcept
-{
-  const double x = a.real();
-
-  if (fabs(x) < EPSTOL)
-     return -1. - x + sqr(x) * 0.5;
-
-  if (is_close(x, 1., EPSTOL))
-     return -1.;
-
-  return std::real(std::log(1. - a) - 1. - a * std::log(1.0 - 1.0 / a));
+   return std::real(-2.0 + fast_log((1.0 - xp)*(1.0 - xm))
+      - xp*fast_log(1.0 - 1.0/xp) - xm*fast_log(1.0 - 1.0/xm));
 }
 
 } // anonymous namespace
 
-double a0(double m, double q) {
-   using std::fabs;
-   using std::log;
-   constexpr double TOL = 1e-4;
-   if (fabs(m) < TOL) return 0.;
-   return sqr(m) * (1.0 - 2. * log(fabs(m / q)));
+/*
+ * Real part of A0 1-loop function.
+ *
+ * @param m mass
+ * @param q renormalization scale, q > 0
+ * @return Re[A0(m, q)]
+ */
+double a0(double m, double q) noexcept
+{
+   return rea0(m*m, q*q);
 }
 
-double ffn(double p, double m1, double m2, double q) {
+/*
+ * Real part of A0 1-loop function.
+ *
+ * Note: Returns correct result even for x < 0.
+ *
+ * @param x squared mass
+ * @param q squared renormalization scale, q > 0
+ * @return Re[A0(x, q)]
+ */
+double rea0(double x, double q) noexcept
+{
+   if (q <= 0) {
+      return std::numeric_limits<double>::quiet_NaN();
+   }
+
+   if (x == 0) {
+      return 0;
+   }
+
+   return x * (1 - std::log(std::abs(x)/q));
+}
+
+double ffn(double p, double m1, double m2, double q) noexcept {
    return a0(m1, q) - 2.0 * a0(m2, q) -
       (2.0 * sqr(p) + 2.0 * sqr(m1) - sqr(m2)) *
       b0(p, m1, m2, q);
 }
 
-double gfn(double p, double m1, double m2, double q) {
+double gfn(double p, double m1, double m2, double q) noexcept {
    return (sqr(p) - sqr(m1) - sqr(m2)) * b0(p, m1, m2, q) - a0(m1, q)
       - a0(m2, q);
 }
 
-double hfn(double p, double m1, double m2, double q) {
+double hfn(double p, double m1, double m2, double q) noexcept {
    return 4.0 * b22(p, m1, m2, q) + gfn(p, m1, m2, q);
 }
 
-double b22bar(double p, double m1, double m2, double q) {
+double b22bar(double p, double m1, double m2, double q) noexcept {
    return b22(p, m1, m2, q) - 0.25 * a0(m1, q) - 0.25 * a0(m2, q);
 }
 
-/*
-  Analytic expressions follow for above integrals: sometimes useful!
-  From hep-ph/9606211
-  Note it returns the REAL PART ONLY.
-*/
-double b0(double p, double m1, double m2, double q)
+/**
+ * Returns Re(B0(p,m1,m2,q)), from hep-ph/9606211
+ */
+double b0(double p, double m1, double m2, double q) noexcept
 {
-  using std::log;
-
 #ifdef USE_LOOPTOOLS
-  setmudim(q*q);
-  double b0l = B0(p*p, m1*m1, m2*m2).real();
-  //  return B0(p*p, m1*m1, m2*m2).real();
+   setmudim(q*q);
+   double b0l = B0(p*p, m1*m1, m2*m2).real();
+   //  return B0(p*p, m1*m1, m2*m2).real();
 #endif
 
-  // protect against infrared divergence
-  if (is_close(p, 0.0, EPSTOL) && is_close(m1, 0.0, EPSTOL)
-      && is_close(m2, 0.0, EPSTOL))
-     return 0.0;
+   m1 = std::abs(m1);
+   m2 = std::abs(m2);
+   p = std::abs(p);
+   q = std::abs(q);
 
-  double ans  = 0.;
-  const double mMin = std::min(fabs(m1), fabs(m2));
-  const double mMax = std::max(fabs(m1), fabs(m2));
+   if (m1 > m2) {
+      std::swap(m1, m2);
+   }
 
-  const double pSq = sqr(p), mMinSq = sqr(mMin), mMaxSq = sqr(mMax);
-  /// Try to increase the accuracy of s
-  const double dmSq = mMaxSq - mMinSq;
-  const double s = pSq + dmSq;
+   // protect against infrared divergence
+   if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL)) {
+      return 0.0;
+   }
 
-  const double pTest = divide_finite(pSq, mMaxSq);
-  /// Decides level at which one switches to p=0 limit of calculations
-  const double pTolerance = 1.0e-10;
+   // p is not 0
+   if (p > 1.0e-5 * m2) {
+      const double m12 = sqr(m1), m22 = sqr(m2), p2 = sqr(p);
+      const double s = p2 - m22 + m12;
+      const std::complex<double> imin(m12, -EPSTOL);
+      const std::complex<double> x = std::sqrt(sqr(s) - 4.0 * p2 * imin);
+      const std::complex<double> xp  = (s + sign(s)*x) / (2*p2);
+      const std::complex<double> xm = imin / (xp*p2);
 
-  /// p is not 0
-  if (pTest > pTolerance) {
-     const std::complex<double> iEpsilon(0.0, EPSTOL * mMaxSq);
-     const std::complex<double> xPlus =
-        (s + sqrt(sqr(s) - 4. * pSq * (mMaxSq - iEpsilon))) / (2. * pSq);
-     const std::complex<double> xMinus = 2. * (mMaxSq - iEpsilon) /
-        (s + sqrt(sqr(s) - 4. * pSq * (mMaxSq - iEpsilon)));
+      return -2.0*std::log(p/q) - fB(xp, xm);
+   }
 
-    ans = -2.0 * log(p / q) - fB(xPlus) - fB(xMinus);
-  } else {
-    if (is_close(m1, m2, EPSTOL)) {
-      ans = - log(sqr(m1 / q));
-    } else {
-      const double Mmax2 = mMaxSq, Mmin2 = mMinSq;
-      if (Mmin2 < 1.e-30) {
-	ans = 1.0 - log(Mmax2 / sqr(q));
-      } else {
-	ans = 1.0 - log(Mmax2 / sqr(q)) + Mmin2 * log(Mmax2 / Mmin2)
-	  / (Mmin2 - Mmax2);
-      }
-    }
-  }
+   if (is_close(m1, m2, EPSTOL)) {
+      return -2.0*std::log(m1/q);
+   }
 
-#ifdef USE_LOOPTOOLS
-  if (!is_close(b0l, ans, 1.0e-3)) {
-    cout << "DEBUG Err: DB0(" << p << ", " << m1 << ", " << m2
-	 << ", "  << q << ")=" << 1.-b0l/ans << endl;
-    cout << "SOFTSUSY  B0=" << ans << endl;
-    cout << "LOOPTOOLS B0=" << b0l << endl;
-  }
-#endif
+   if (m1 < 1.0e-15) {
+      return 1.0 - 2.0*std::log(m2/q);
+   }
 
-  return ans;
+   const double m12 = sqr(m1), m22 = sqr(m2);
+
+   return 1.0 - 2.0 * std::log(m2/q)
+        + 2.0 * m12 * std::log(m2/m1) / (m12 - m22);
 }
 
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!
-double b1(double p, double m1, double m2, double q)
+double b1(double p, double m1, double m2, double q) noexcept
 {
-  using std::log;
-
 #ifdef USE_LOOPTOOLS
-  setmudim(q*q);
-  double b1l = -B1(p*p, m1*m1, m2*m2).real();
-  //    return b1l;
+   setmudim(q*q);
+   double b1l = -B1(p*p, m1*m1, m2*m2).real();
+   //    return b1l;
 #endif
 
-  // protect against infrared divergence
-  if (is_close(p, 0.0, EPSTOL) && is_close(m1, 0.0, EPSTOL)
-      && is_close(m2, 0.0, EPSTOL))
-     return 0.0;
+   // protect against infrared divergence
+   if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL))
+      return 0.0;
 
-  double ans = 0.;
+   const double p2 = sqr(p), m12 = sqr(m1), m22 = sqr(m2), q2 = sqr(q);
 
-  const double p2 = sqr(p), m12 = sqr(m1), m22 = sqr(m2), q2 = sqr(q);
-  const double pTest = divide_finite(p2, std::max(m12, m22));
+   /// Decides level at which one switches to p=0 limit of calculations
+   const double pTolerance = 1.0e-4;
 
-  /// Decides level at which one switches to p=0 limit of calculations
-  const double pTolerance = 1.0e-4;
+   if (p2 > pTolerance * std::max(m12, m22)) {
+      return (a0(m2, q) - a0(m1, q) + (p2 + m12 - m22)
+              * b0(p, m1, m2, q)) / (2.0 * p2);
+   }
 
-  if (pTest > pTolerance) {
-    ans = (a0(m2, q) - a0(m1, q) + (p2 + m12 - m22)
-	   * b0(p, m1, m2, q)) / (2.0 * p2);
-  } else if (fabs(m1) > 1.0e-15 && fabs(m2) > 1.0e-15) { ///< checked
-    const double m14 = sqr(m12), m24 = sqr(m22);
-    const double m16 = m12*m14 , m26 = m22*m24;
-    const double m18 = sqr(m14), m28 = sqr(m24);
-    const double p4 = sqr(p2);
-    if (fabs(m12 - m22) < pTolerance * std::max(m12, m22)) {
-       ans = 0.08333333333333333*p2/m22
-          + 0.008333333333333333*p4/m24
-          + sqr(m12 - m22)*(0.041666666666666664/m24 +
-                            0.016666666666666666*p2/m26 +
-                            0.005357142857142856*p4/m28)
-          + (m12 - m22)*(-0.16666666666666666/m22 -
-                         0.03333333333333333*p2/m24 -
-                         0.007142857142857142*p4/m26)
-          - 0.5*log(m22/q2);
-    } else {
-       ans = (3*m14 - 4*m12*m22 + m24 - 2*m14*log(m12/m22))/(4.*sqr(m12 - m22))
-          + (p2*(4*pow3(m12 - m22)*
-                 (2*m14 + 5*m12*m22 - m24) +
-                 (3*m18 + 44*m16*m22 - 36*m14*m24 - 12*m12*m26 + m28)*p2
-                 - 12*m14*m22*(2*sqr(m12 - m22) + (2*m12 + 3*m22)*p2)*log(m12/m22)))/
-          (24.*pow6(m12 - m22)) - 0.5*log(m22/q2);
-    }
-  } else {
-    ans = bIntegral(p, m1, m2, q);
-  }
+   if (std::abs(m1) > 1.0e-15 && std::abs(m2) > 1.0e-15) {
+      const double m14 = sqr(m12), m24 = sqr(m22);
+      const double m16 = m12*m14 , m26 = m22*m24;
+      const double m18 = sqr(m14), m28 = sqr(m24);
+      const double p4 = sqr(p2);
+      const double diff = m12 - m22;
 
-#ifdef USE_LOOPTOOLS
-  if (!is_close(b1l, ans, 1.0e-3)) {
-    cout << " Test=" << pTest << " ";
-    cout << "DEBUG Err: Db1(" << p << ", " << m1 << ", " << m2
-	 << ", "  << q << ")=" << 1.-b1l/ans << endl;
-    cout << "SOFTSUSY  B1=" << ans << " B0=" << b0(p, m1, m2, q) << endl;
-    cout << "LOOPTOOLS B1=" << b1l << " B0=" << B0(p*p, m1*m1, m2*m2).real()
-	 << endl;
-  }
-#endif
-
-  return ans;
-}
-
-double b22(double p,  double m1, double m2, double q)
-{
-  using std::log;
-
-#ifdef USE_LOOPTOOLS
-  setmudim(q*q);
-  double b22l = B00(p*p, m1*m1, m2*m2).real();
-#endif
-
-  // protect against infrared divergence
-  if (is_close(p, 0.0, EPSTOL) && is_close(m1, 0.0, EPSTOL)
-      && is_close(m2, 0.0, EPSTOL))
-     return 0.0;
-
-  double answer = 0.;
-
-  /// Decides level at which one switches to p=0 limit of calculations
-  const double p2 = sqr(p), m12 = sqr(m1), m22 = sqr(m2);
-  const double pTolerance = 1.0e-10;
-
-  if (p2 < pTolerance * std::max(m12, m22) ) {
-    // m1 == m2 with good accuracy
-    if (is_close(m1, m2, EPSTOL)) {
-      answer = -m12 * log(sqr(m1 / q)) * 0.5 + m12 * 0.5;
-    }
-    else
-      /// This zero p limit is good
-      if (fabs(m1) > EPSTOL && fabs(m2) > EPSTOL) {
-	answer = 0.375 * (m12 + m22) - 0.25 *
-	  (sqr(m22) * log(sqr(m2 / q)) - sqr(m12) *
-	   log(sqr(m1 / q))) / (m22 - m12);
+      if (std::abs(diff) < pTolerance * std::max(m12, m22)) {
+         return
+            - 0.5*std::log(m22/q2)
+            + 1.0/12.0*p2/m22 + 1.0/120.0*p4/m24
+            + diff*(-1.0/6.0/m22 - 1.0/30.0*p2/m24 - 1.0/140.0*p4/m26)
+            + sqr(diff)*(1.0/24.0/m24 + 1.0/60.0*p2/m26 + 3.0/560.0*p4/m28);
       }
-      else
-	if (fabs(m1) < EPSTOL) {
-	  answer = 0.375 * m22 - 0.25 * m22 * log(sqr(m2 / q));
-	}
-	else {
-	  answer = 0.375 * m12 - 0.25 * m12 * log(sqr(m1 / q));
-	}
-  }
-  else {// checked
-    const double b0Save = b0(p, m1, m2, q);
 
-    answer = 1.0 / 6.0 *
-      (0.5 * (a0(m1, q) + a0(m2, q)) + (m12 + m22 - 0.5 * p2)
+      const double l12 = std::log(m12/m22);
+
+      return (3*m14 - 4*m12*m22 + m24 - 2*m14*l12)/(4.*sqr(diff))
+         + (p2*(4*pow3(diff)*
+                (2*m14 + 5*m12*m22 - m24) +
+                (3*m18 + 44*m16*m22 - 36*m14*m24 - 12*m12*m26 + m28)*p2
+                - 12*m14*m22*(2*sqr(diff) + (2*m12 + 3*m22)*p2)*l12))/
+         (24.*pow6(diff)) - 0.5*std::log(m22/q2);
+   }
+
+   return (m12 > m22)
+      ? -0.5*std::log(m12/q2) + 0.75
+      : -0.5*std::log(m22/q2) + 0.25;
+}
+
+double b22(double p,  double m1, double m2, double q) noexcept
+{
+#ifdef USE_LOOPTOOLS
+   setmudim(q*q);
+   double b22l = B00(p*p, m1*m1, m2*m2).real();
+#endif
+
+   p = std::abs(p);
+   m1 = std::abs(m1);
+   m2 = std::abs(m2);
+   q = std::abs(q);
+
+   // protect against infrared divergence
+   if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL))
+      return 0.0;
+
+   /// Decides level at which one switches to p=0 limit of calculations
+   const double p2 = sqr(p), m12 = sqr(m1), m22 = sqr(m2);
+   const double pTolerance = 1.0e-10;
+
+   if (p2 < pTolerance * std::max(m12, m22)) {
+      // m1 == m2 with good accuracy
+      if (is_close(m1, m2, EPSTOL)) {
+         return -m12 * std::log(m1/q) + m12 * 0.5;
+      }
+      // p == 0 limit
+      if (m1 > EPSTOL && m2 > EPSTOL) {
+         return 0.375 * (m12 + m22) - 0.5 *
+            (sqr(m22) * std::log(m2/q) -
+             sqr(m12) * std::log(m1/q)) / (m22 - m12);
+      }
+      return (m1 < EPSTOL)
+         ? 0.375 * m22 - 0.5 * m22 * std::log(m2/q)
+         : 0.375 * m12 - 0.5 * m12 * std::log(m1/q);
+   }
+
+   const double b0Save = b0(p, m1, m2, q);
+   const double a01 = a0(m1, q);
+   const double a02 = a0(m2, q);
+
+   return 1.0 / 6.0 *
+      (0.5 * (a01 + a02) + (m12 + m22 - 0.5 * p2)
        * b0Save + (m22 - m12) / (2.0 * p2) *
-       (a0(m2, q) - a0(m1, q) - (m22 - m12) * b0Save) +
+       (a02 - a01 - (m22 - m12) * b0Save) +
        m12 + m22 - p2 / 3.0);
-  }
+}
 
+double d0(double m1, double m2, double m3, double m4) noexcept
+{
+   const double m1sq = sqr(m1);
+   const double m2sq = sqr(m2);
+
+   if (is_close(m1, m2, EPSTOL)) {
+      const double m3sq = sqr(m3);
+      const double m4sq = sqr(m4);
+
+      if (is_zero(m2, EPSTOL)) {
+         // d0 is undefined for m1 == m2 == 0
+         return 0.;
+      } else if (is_zero(m3, EPSTOL)) {
+         return (-m2sq + m4sq - m2sq * std::log(m4sq/m2sq))/
+            sqr(m2 * m2sq - m2 * m4sq);
+      } else if (is_zero(m4, EPSTOL)) {
+         return (-m2sq + m3sq - m2sq * std::log(m3sq/m2sq))/
+            sqr(m2 * m2sq - m2 * m3sq);
+      } else if (is_close(m2, m3, EPSTOL) && is_close(m2, m4, EPSTOL)) {
+         return 1.0 / (6.0 * sqr(m2sq));
+      } else if (is_close(m2, m3, EPSTOL)) {
+         return (sqr(m2sq) - sqr(m4sq) + 2.0 * m4sq * m2sq * std::log(m4sq / m2sq)) /
+            (2.0 * m2sq * sqr(m2sq - m4sq) * (m2sq - m4sq));
+      } else if (is_close(m2, m4, EPSTOL)) {
+         return (sqr(m2sq) - sqr(m3sq) + 2.0 * m3sq * m2sq * std::log(m3sq / m2sq)) /
+            (2.0 * m2sq * sqr(m2sq - m3sq) * (m2sq - m3sq));
+      } else if (is_close(m3, m4, EPSTOL)) {
+         return -1.0 / sqr(m2sq - m3sq) *
+            ((m2sq + m3sq) / (m2sq - m3sq) * std::log(m3sq / m2sq) + 2.0);
+      }
+
+      return
+         (m4sq / sqr(m2sq - m4sq) * std::log(m4sq / m2sq) +
+          m4sq / (m2sq * (m2sq - m4sq)) -
+          m3sq / sqr(m2sq - m3sq) * std::log(m3sq / m2sq) -
+          m3sq / (m2sq * (m2sq - m3sq))) / (m3sq - m4sq);
+   }
+   return (c0(m1, m3, m4) - c0(m2, m3, m4)) / (m1sq - m2sq);
+}
+
+double d27(double m1, double m2, double m3, double m4) noexcept
+{
+   if (is_close(m1, m2, EPSTOL))
+      m1 += TOL * 0.01;
+
+   const double m12 = sqr(m1), m22 = sqr(m2);
+
+   return (m12 * c0(m1, m3, m4) - m22 * c0(m2, m3, m4))
+      / (4.0 * (m12 - m22));
+}
+
+double c0(double m1, double m2, double m3) noexcept
+{
 #ifdef USE_LOOPTOOLS
-  if (!is_close(b22l, answer, 1.0e-3)) {
-    cout << " DEBUG Err: Db22(" << p << ", " << m1 << ", " << m2
-	 << ", "  << q << ")=" << 1.-b22l/answer << endl;
-    cout << "SOFTSUSY  B22=" << answer << " B0=" << b0(p, m1, m2, q) << endl;
-    cout << "LOOPTOOLS B22=" << b22l << " B0=" << B0(p*p, m1*m1, m2*m2).real()
-	 << endl;
-  }
+   double q = 100.;
+   setmudim(q*q);
+   double psq = 0.;
+   double c0l = C0(psq, psq, psq, m1*m1, m2*m2, m3*m3).real();
 #endif
 
-  return answer;
+   const double m12 = sqr(m1), m22 = sqr(m2), m32 = sqr(m3);
+   const bool m1_is_zero = is_zero(m1, EPSTOL);
+   const bool m2_is_zero = is_zero(m2, EPSTOL);
+   const bool m3_is_zero = is_zero(m3, EPSTOL);
+
+   if ((m1_is_zero && m2_is_zero && m3_is_zero) ||
+       (m2_is_zero && m3_is_zero) ||
+       (m1_is_zero && m3_is_zero) ||
+       (m1_is_zero && m2_is_zero)) {
+      return 0.;
+   }
+
+   if (m1_is_zero) {
+      if (is_close(m2,m3,EPSTOL))
+         return -1./m22;
+      return std::log(m32/m22)/(m22 - m32);
+   }
+
+   if (m2_is_zero) {
+      if (is_close(m1,m3,EPSTOL))
+         return -1./m12;
+      return std::log(m32/m12)/(m12 - m32);
+   }
+
+   if (m3_is_zero) {
+      if (is_close(m1,m2,EPSTOL))
+         return -1./m12;
+      return std::log(m22/m12)/(m12 - m22);
+   }
+
+   if (is_close(m2, m3, EPSTOL)) {
+      if (is_close(m1, m2, EPSTOL))
+         return - 0.5 / m22;
+      return m12 / sqr(m12-m22) * std::log(m22/m12) + 1.0 / (m12 - m22);
+   }
+
+   if (is_close(m1, m2, EPSTOL)) {
+      return - (1.0 + m32 / (m22-m32) * std::log(m32/m22)) / (m22-m32);
+   }
+
+   if (is_close(m1, m3, EPSTOL)) {
+      return - (1.0 + m22 / (m32-m22) * std::log(m22/m32)) / (m32-m22);
+   }
+
+   return (m22 / (m12 - m22) * std::log(m22 / m12) -
+           m32 / (m12 - m32) * std::log(m32 / m12)) / (m22 - m32);
 }
 
-// debugged 23.01.07 - thanks to Shindou Tetsuo
-double d0(double m1, double m2, double m3, double m4)
+/**
+ * Derivative of B0(p^2, m1^2, m2^2, Q^2) w.r.t. p^2.
+ *
+ * @note Implemented only in the p^2 = 0 limit.
+ *
+ * @param p2 squared momentum
+ * @param m2a squared mass
+ * @param m2b squared mass
+ *
+ * @return derivative of B0 w.r.t. p^2
+ */
+double d1_b0(double /* p2 */, double m2a, double m2b) noexcept
 {
-  using std::log;
+   m2a = std::abs(m2a);
+   m2b = std::abs(m2b);
 
-  if (is_close(m1, m2, EPSTOL)) {
-    double m2sq = sqr(m2), m3sq = sqr(m3), m4sq = sqr(m4);
+   if ((m2a < 0.0001) != (m2b < 0.0001)) {
+      return (m2a - m2b) * (m2a + m2b) / (2 * pow3(m2a - m2b));
+   } else if (m2a < 0.0001 && m2b < 0.0001) {
+      return 0.;
+   } else if (std::abs(m2b - m2a) < 0.001) {
+      return 1. / (6 * m2a) + (m2a - m2b) / (12 * sqr(m2a));
+   }
 
-    if (is_close(m2,0.,EPSTOL)) {
-       // d0 is undefined for m1 == m2 == 0
-       return 0.;
-    } else if (is_close(m3,0.,EPSTOL)) {
-       return (-sqr(m2) + sqr(m4) - sqr(m2) * log(sqr(m4/m2)))/
-          sqr(m2 * sqr(m2) - m2 * sqr(m4));
-    } else if (is_close(m4,0.,EPSTOL)) {
-       return (-sqr(m2) + sqr(m3) - sqr(m2) * log(sqr(m3/m2)))/
-          sqr(m2 * sqr(m2) - m2 * sqr(m3));
-    } else if (is_close(m2, m3, EPSTOL) && is_close(m2, m4, EPSTOL)) {
-      return 1.0 / (6.0 * sqr(m2sq));
-    } else if (is_close(m2, m3, EPSTOL)) {
-      return (sqr(m2sq) - sqr(m4sq) + 2.0 * m4sq * m2sq * log(m4sq / m2sq)) /
-	(2.0 * m2sq * sqr(m2sq - m4sq) * (m2sq - m4sq));
-    } else if (is_close(m2, m4, EPSTOL)) {
-      return (sqr(m2sq) - sqr(m3sq) + 2.0 * m3sq * m2sq * log(m3sq / m2sq)) /
-	(2.0 * m2sq * sqr(m2sq - m3sq) * (m2sq - m3sq));
-    } else if (is_close(m3, m4, EPSTOL)) {
-      return -1.0 / sqr(m2sq - m3sq) *
-	((m2sq + m3sq) / (m2sq - m3sq) * log(m3sq / m2sq) + 2.0);
-    }
-
-    return
-      (m4sq / sqr(m2sq - m4sq) * log(m4sq / m2sq) +
-       m4sq / (m2sq * (m2sq - m4sq)) -
-       m3sq / sqr(m2sq - m3sq) * log(m3sq / m2sq) -
-       m3sq / (m2sq * (m2sq - m3sq))) / (m3sq - m4sq);
-  }
-  return (c0(m1, m3, m4) - c0(m2, m3, m4)) / (sqr(m1) - sqr(m2));
+   return ((m2a - m2b) * (m2a + m2b) + 2 * m2a * m2b * std::log(m2b / m2a)) /
+          (2 * pow3(m2a - m2b));
 }
 
-double d27(double m1, double m2, double m3, double m4) {// checked
-
-  if (is_close(m1, m2, EPSTOL)) {
-    const double m1n = m1 + TOL * 0.01;
-    return (sqr(m1n) * c0(m1n, m3, m4) - sqr(m2) * c0(m2, m3, m4))
-      / (4.0 * (sqr(m1n) - sqr(m2)));
-  }
-  return (sqr(m1) * c0(m1, m3, m4) - sqr(m2) * c0(m2, m3, m4))
-    / (4.0 * (sqr(m1) - sqr(m2)));
-}
-
-// Bug-fixed 14.10.02 by T. Watari and collaborators - many thanks!
-double c0(double m1, double m2, double m3)
+double c00(double m1, double m2, double m3, double q) noexcept
 {
-  using std::log;
-
-#ifdef USE_LOOPTOOLS
-  double q = 100.;
-  setmudim(q*q);
-  double psq = 0.;
-  double c0l = C0(psq, psq, psq, m1*m1, m2*m2, m3*m3).real();
-#endif
+  // taken from Package X
+  const double m12 = sqr(m1), m22 = sqr(m2), m32 = sqr(m3), q2 = sqr(q);
 
   double ans = 0.;
 
-  if (is_close(m1,0.,EPSTOL) && is_close(m2,0.,EPSTOL) && is_close(m3,0.,EPSTOL)) {
-     // c0 is undefined for m1 == m2 == m3 == 0
+  if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)
+      && is_close(m3, 0., EPSTOL)) {
+      // IR singularity
      ans = 0.;
-  } else if (is_close(m2,0.,EPSTOL) && is_close(m3,0.,EPSTOL)) {
-     // c0 is undefined for m2 == m3 == 0
-     ans = 0.;
-  } else if (is_close(m1,0.,EPSTOL) && is_close(m3,0.,EPSTOL)) {
-     // c0 is undefined for m1 == m3 == 0
-     ans = 0.;
-  } else if (is_close(m1,0.,EPSTOL) && is_close(m2,0.,EPSTOL)) {
-     // c0 is undefined for m1 == m2 == 0
-     ans= 0.;
-  } else if (is_close(m1,0.,EPSTOL)) {
-     if (is_close(m2,m3,EPSTOL)) {
-        ans = -1./sqr(m2);
+  } else if (is_close(m2, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*std::log(q2/m12);
+  } else if (is_close(m1, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*std::log(q2/m22);
+  } else if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*std::log(q2/m32);
+  } else if (is_close(m1, 0., EPSTOL)) {
+     if (is_close(m2, m3, EPSTOL)) {
+        ans = 1./8 + 1./4*std::log(q2/m22);
      } else {
-        ans = (-log(sqr(m2)) + log(sqr(m3)))/(sqr(m2) - sqr(m3));
+        ans = 3./8 - m22*std::log(m22/m32)/(4*(m22-m32)) + 1./4*std::log(q2/m32);
      }
-  } else if (is_close(m2,0.,EPSTOL)) {
-     if (is_close(m1,m3,EPSTOL)) {
-        ans = -1./sqr(m1);
+  } else if (is_close(m2, 0., EPSTOL)) {
+     if (is_close(m1, m3, EPSTOL)) {
+        ans = 1./8 + 1./4*std::log(q2/m12);
      } else {
-        ans = log(sqr(m3/m1))/(sqr(m1) - sqr(m3));
+        ans = 3./8 - m12*std::log(m12/m32)/(4*(m12-m32)) + 1./4*std::log(q2/m32);
      }
-  } else if (is_close(m3,0.,EPSTOL)) {
-     if (is_close(m1,m2,EPSTOL)) {
-        ans = -1./sqr(m1);
+  } else if (is_close(m3, 0., EPSTOL)) {
+     if (is_close(m1, m2, EPSTOL)) {
+        ans = 1./8 + 1./4*std::log(q2/m12);
      } else {
-        ans = log(sqr(m2/m1))/(sqr(m1) - sqr(m2));
+        ans = 3./8 - m22*std::log(m12/m22)/(4*(m12-m22)) + 1./4*std::log(q2/m12);
      }
   } else if (is_close(m2, m3, EPSTOL)) {
     if (is_close(m1, m2, EPSTOL)) {
-      ans = ( - 0.5 / sqr(m2) ); // checked 14.10.02
+        ans = 1./4*std::log(q2/m12);
     } else {
-      ans = ( sqr(m1) / sqr(sqr(m1)-sqr(m2) ) * log(sqr(m2)/sqr(m1))
-               + 1.0 / (sqr(m1) - sqr(m2)) ) ; // checked 14.10.02
+        ans = (3*m12-m22)/(8*(m12-m22))
+            - 1./4*(sqr(m12)*std::log(m12/m22))/sqr(m12-m22) + 1./4*std::log(q2/m22);
     }
   } else if (is_close(m1, m2, EPSTOL)) {
-     ans = ( - ( 1.0 + sqr(m3) / (sqr(m2)-sqr(m3)) * log(sqr(m3)/sqr(m2)) )
-             / (sqr(m2)-sqr(m3)) ) ; // checked 14.10.02
+     ans = (3*m32-m12)/(8*(m32-m12)) - 1./4*(sqr(m32)*std::log(m32/m12))/sqr(m32-m12)
+         + 1./4*std::log(q2/m12);
   } else if (is_close(m1, m3, EPSTOL)) {
-     ans = ( - (1.0 + sqr(m2) / (sqr(m3)-sqr(m2)) * log(sqr(m2)/sqr(m3)))
-             / (sqr(m3)-sqr(m2)) ); // checked 14.10.02
+     ans = (3*m22-m12)/(8*(m22-m12)) - 1./4*(sqr(m22)*std::log(m22/m12))/sqr(m22-m12)
+         + 1./4*std::log(q2/m12);
   } else {
-     ans = (1.0 / (sqr(m2) - sqr(m3)) *
-            (sqr(m2) / (sqr(m1) - sqr(m2)) *
-             log(sqr(m2) / sqr(m1)) -
-             sqr(m3) / (sqr(m1) - sqr(m3)) *
-             log(sqr(m3) / sqr(m1))) );
+     ans = 3./8 - 1./4*sqr(m12)*std::log(m12/m32)/((m12-m22)*(m12-m32))
+         - 1./4*sqr(m22)*std::log(m22/m32)/((m22-m12)*(m22-m32)) + 1./4*std::log(q2/m32);
   }
-
-#ifdef USE_LOOPTOOLS
-  if (!is_close(c0l, ans, 1.0e-3)) {
-    cout << " DEBUG Err: C0" << m1 << ", " << m2
-	 << ", "  << m3 << ")=" << 1.-c0l/ans << endl;
-    cout << "SOFTSUSY  C0=" << ans << endl;
-    cout << "LOOPTOOLS C0=" << c0l << endl;
-  }
-#endif
 
   return ans;
 }

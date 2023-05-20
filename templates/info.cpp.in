@@ -16,11 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_info.hpp"
 
+#include "error.hpp"
+
 #include <iostream>
+#include <vector>
 
 namespace flexiblesusy {
 
@@ -32,24 +34,82 @@ namespace @ModelName@_info {
 @parameterNames@
 @particleMixingNames@
 @inputParameterNames@
+@extraParameterNames@
    const std::string model_name = "@ModelName@";
+
+int get_pdg_code_for_particle(Particles p)
+{
+   if (particle_multiplicities[p] > 1) {
+      throw OutOfBoundsError(particle_names[p] + " must have a generation index");
+   }
+
+   int pdg = 0;
+   switch (p) {
+
+@getPDGCodeFromParticleEnumNoIndex@
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   return pdg;
+}
+
+int get_pdg_code_for_particle(Particles p, int index)
+{
+   if (particle_multiplicities[p] == 1) {
+      throw OutOfBoundsError(particle_names[p] + " does not carry an index");
+   }
+
+   std::vector<int> pdg_codes;
+   switch (p) {
+
+@getPDGCodeFromParticleEnumIndex@
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   if (index < 0 || std::abs(index) >= pdg_codes.size()) {
+      throw OutOfBoundsError("index " + std::to_string(index) + " out of bounds");
+   }
+
+   return pdg_codes[index];
+}
+
+std::pair<std::string, std::optional<unsigned int>> get_multiplet_and_index_from_pdg(int pdg)
+{
+   std::pair<std::string, std::optional<unsigned int>> name;
+
+   switch (pdg) {
+
+@setParticleMultipletNameAndIndexFromPDG@
+   default: name = {"", {}};
+   }
+
+   return name;
+}
+
+std::string get_particle_name_from_pdg(int pdg)
+{
+   std::pair<std::string, std::optional<unsigned int>> const pair = get_multiplet_and_index_from_pdg(pdg);
+   return pair.first + (pair.second.has_value() ? "(" + std::to_string(pair.second.value()) + ")" : "");
+}
 
 void print(std::ostream& ostr)
 {
    ostr
       << "Model information\n"
       << "=================\n"
-      << "Model name:                " << model_name << '\n'
-      << "Is a low-energy model:     "
+      << "Model name:                  " << model_name << '\n'
+      << "Is a low-energy model:       "
       << (is_low_energy_model ? "yes" : "no") << '\n'
-      << "Is a supersymmetric model: "
+      << "Is a supersymmetric model:   "
       << (is_supersymmetric_model ? "yes" : "no") << '\n'
-      << "Number of multiplets:      " << NUMBER_OF_PARTICLES << '\n'
-      << "Number of parameters:      " << NUMBER_OF_PARAMETERS << '\n'
+      << "Is a FlexibleEFTHiggs model: "
+      << (is_FlexibleEFTHiggs ? "yes" : "no") << '\n'
+      << "Number of multiplets:        " << NUMBER_OF_PARTICLES << '\n'
+      << "Number of parameters:        " << NUMBER_OF_PARAMETERS << '\n'
       ;
 
    ostr << "\n"
-      "Multiplets:                ";
+      "Multiplets:                  ";
    for (int i = 0; i < NUMBER_OF_PARTICLES; i++) {
       ostr << particle_names[i]
            << '[' << particle_multiplicities[i] << ']';
@@ -58,12 +118,21 @@ void print(std::ostream& ostr)
    }
 
    ostr << "\n\n"
-      "Parameters:                ";
+      "Parameters:                  ";
    for (int i = 0; i < NUMBER_OF_PARAMETERS; i++) {
       ostr << parameter_names[i];
       if (i + 1 < NUMBER_OF_PARAMETERS)
          ostr << ", ";
    }
+
+   ostr << "\n\n"
+      "Input parameters:            ";
+   for (int i = 0; i < NUMBER_OF_INPUT_PARAMETERS; i++) {
+      ostr << input_parameter_names[i];
+      if (i + 1 < NUMBER_OF_INPUT_PARAMETERS)
+         ostr << ", ";
+   }
+
    ostr << '\n';
 }
 

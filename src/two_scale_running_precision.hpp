@@ -46,6 +46,6 @@ private:
    double minimum_precision;
 };
 
-}
+} // namespace flexiblesusy
 
 #endif

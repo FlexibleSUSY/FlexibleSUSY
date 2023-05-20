@@ -7,7 +7,7 @@ output="$BASEDIR/test_HSSUSY_SUSYHD.out.dat"
 exe="$BASEDIR/../models/HSSUSY/run_HSSUSY.x"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
 
-rel_error="0.00061"
+rel_error="0.00065"
 
 if test ! -x "$exe"; then
     echo "Error: HSSUSY spectrum generator not found: $exe"
@@ -19,11 +19,13 @@ rm -f "$output"
 # to make seq use point
 LANG=en_US
 
-Xt_values=$(seq -3 0.1 3)
+Xt_values=$(LC_NUMERIC=en_US.UTF-8 seq -3 0.1 3)
 MS=2000
 MS2=$(echo "$MS*$MS" | bc)
 Mu="$MS"
 TB=10
+Xb=0
+Xtau=0
 
 printf "Comparison FlexibleSUSY/HSSUSY and SUSYHD\n"
 printf "MS = ${MS}, Mu = ${Mu}, MSf^2 = ${MS2}, tan(beta) = ${TB}\n\n"
@@ -36,6 +38,14 @@ do
 ${Xt}*${MS} + ${Mu}/${TB}
 EOF
       )
+    Ab=$(cat <<EOF | bc
+${Xb}*${MS} + ${Mu}*${TB}
+EOF
+      )
+    Atau=$(cat <<EOF | bc
+${Xtau}*${MS} + ${Mu}*${TB}
+EOF
+      )
 
     MH=$({ cat <<EOF
 Block FlexibleSUSY
@@ -45,7 +55,7 @@ Block FlexibleSUSY
     3   1                    # calculate SM pole masses
     4   2                    # pole mass loop order
     5   2                    # EWSB loop order
-    6   3                    # beta-functions loop order
+    6   2                    # beta-functions loop order
     7   2                    # threshold corrections loop order
     8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
     9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
@@ -80,8 +90,15 @@ Block EXTPAR                 # Input parameters
     5   ${MS}                # mA(MSUSY)
     6   173.34               # MEWSB
     7   ${At}                # At(MSUSY)
+    8   ${Ab}                # Ab(MSUSY)
+    9   ${Atau}              # Atau(MSUSY)
    25   ${TB}                # TanBeta(MSUSY)
   100   2                    # LambdaLoopOrder
+  101   1                    # 2-loop at*as
+  102   1                    # 2-loop ab*as
+  103   1                    # 2-loop at*ab
+  104   1                    # 2-loop atau*atau
+  105   1                    # 2-loop at*at
 Block MSQ2IN
   1  1     ${MS2}            # mq2(1,1)
   2  2     ${MS2}            # mq2(2,2)
@@ -103,9 +120,11 @@ Block MSD2IN
   2  2     ${MS2}            # md2(2,2)
   3  3     ${MS2}            # md2(3,3)
 EOF
-    } | $exe --slha-input-file=- | \
+    } | $exe --slha-input-file=- 2>/dev/null | \
         awk -f "$print_block" -v block=MASS | \
-        awk '{ if ($1 == 25) print $2 }')
+        awk '{ if ($1 == 25) print $2 - 0.1 }')
+
+    # shift -0.1 GeV due to 2-loop O(at*as + at^2) corrections to mt(MZ)
 
     printf "%8s\t%16s\n" ${Xt} ${MH}
     printf "%8s\t%16s\n" ${Xt} ${MH} >> "$output"

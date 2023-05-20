@@ -16,17 +16,19 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_standard_model_matching.hpp"
 #include "wrappers.hpp"
-#include "two_scale_matching.hpp"
-#include "two_loop_corrections.hpp"
+#include "single_scale_matching.hpp"
+#include "linalg2.hpp"
+#include "loop_corrections.hpp"
 #include "standard_model.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_info.hpp"
 #include "config.h"
+#ifdef ENABLE_THREADS
 #include "global_thread_pool.hpp"
+#endif
 #include <cmath>
 
 using namespace flexiblesusy::standard_model;
@@ -35,8 +37,13 @@ namespace flexiblesusy {
 namespace @ModelName@_standard_model_matching {
 
 #define MODELPARAMETER(p) model.get_##p()
+#define EXTRAPARAMETER(parameter) model.get_##parameter()
 #define SMPARAMETER(p) sm.get_##p()
 #define INPUTPARAMETER(p) model.get_input().p
+#define PHASE(p) model.get_##p()
+#define LowEnergyConstant(p) Electroweak_constants::p
+#define Pole(p) model.get_physical().p
+#define SCALE model.get_scale()
 
 namespace {
 
@@ -119,7 +126,7 @@ double calculate_Mh2_pole(const Standard_model& sm_0l)
  *
  * @return tadpole at loop order
  */
-@ModelName@_mass_eigenstates::EWSB_vector_t calculate_tadpole_over_vevs(
+Eigen::Matrix<double,@numberOfEWSBEquations@,1> calculate_tadpole_over_vevs(
    @ModelName@_mass_eigenstates model, int loop_order)
 {
    if (loop_order == 0) {
@@ -147,7 +154,7 @@ double calculate_Mh2_pole(const Standard_model& sm_0l)
  */
 auto calculate_mh2_tree_level(@ModelName@_mass_eigenstates model) -> decltype(model.get_mass_matrix_@HiggsBoson@())
 {
-   model.solve_ewsb_tree_level();
+   model.solve_ewsb_tree_level_custom();
    return model.get_mass_matrix_@HiggsBoson@();
 }
 
@@ -206,6 +213,8 @@ void match_high_to_low_scale_model_1loop(
    const double Mh2_bsm = calculate_Mh2_pole(model_0l, model_1l, idx);
 
    sm.set_Lambdax((Mh2_bsm - Mh2_sm + mh2_sm)/Sqr(sm.get_v()));
+
+   sm.get_problems().add(sm_0l.get_problems());
 }
 
 double calculate_delta_alpha_em(double alpha_em, const @ModelName@_mass_eigenstates& model)
@@ -581,10 +590,10 @@ double calculate_MZ_DRbar_1loop(
    auto sm = sm_1l;
 
    model.calculate_DRbar_masses();
-   model.solve_ewsb();
+   model.solve_ewsb_one_loop();
 
    sm.calculate_DRbar_masses();
-   sm.solve_ewsb();
+   sm.solve_ewsb_one_loop();
 
    const double alpha_em = Sqr(sm_0l.get_g1() * sm_0l.get_g2() * standard_model_info::normalization_g1 * standard_model_info::normalization_g2)
             /(4. * Pi * (Sqr(sm_0l.get_g1()*standard_model_info::normalization_g1) + Sqr(sm_0l.get_g2()*standard_model_info::normalization_g2)));
@@ -626,6 +635,10 @@ double calculate_MZ_DRbar_1loop(
  * Calculates the gauge and Yukawa couplings and the SM-like VEV in
  * the @ModelName@ at the necessary loop level from the known Standard
  * Model couplings and the SM vev.
+ *
+ * @param model @ModelName@ parameters (to be set)
+ * @param sm SM parameters
+ * @param idx Higgs index (in mass ordered Higgs multiplet)
  */
 void match_low_to_high_scale_model_1loop(
    @ModelName@_mass_eigenstates& model,
@@ -640,6 +653,9 @@ void match_low_to_high_scale_model_1loop(
    const auto model_1l = calculate_@ModelName@_1loop(sm_0l, sm, model_0l, model);
 
 @setBSMParameters@
+
+   model.get_problems().add(model_0l.get_problems());
+   model.get_problems().add(model_1l.get_problems());
 }
 
 } // anonymous namespace
@@ -700,6 +716,17 @@ void match_low_to_high_scale_model_tree_level(
  * Calculates the gauge and Yukawa couplings and the SM-like VEV in
  * the @ModelName@ at the 1-loop level from the known Standard Model
  * couplings and the SM vev.
+ *
+ * @note The \a loop_order argument is interpreted to be the loop
+ * order of the "downwards matching".  The functions responsible for
+ * the upwards matching will use the downwards matching loop order to
+ * determine the @ModelName@ at the right loop order to avoid the
+ * appearence of large logarithms.
+ *
+ * @param model @ModelName@ parameters
+ * @param sm Standard Model
+ * @param loop_order downwards matching loop order
+ * @param idx Higgs index (in mass ordered Higgs multiplet)
  */
 void match_low_to_high_scale_model(
    @ModelName@_mass_eigenstates& model, const Standard_model& sm, int loop_order, int idx)

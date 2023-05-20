@@ -16,11 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_susy_parameters.hpp"
-#include "config.h"
-#include "global_thread_pool.hpp"
 #include "wrappers.hpp"
 #include "functors.hpp"
 
@@ -37,8 +34,7 @@ namespace flexiblesusy {
 const int @ModelName@_susy_parameters::numberOfParameters;
 
 @ModelName@_susy_parameters::@ModelName@_susy_parameters(const @ModelName@_input_parameters& input_)
-   : Beta_function()
-   , input(input_)
+   : input(input_)
 {
    set_number_of_parameters(numberOfParameters);
 }
@@ -91,6 +87,11 @@ Eigen::ArrayXd @ModelName@_susy_parameters::get() const
 @display@
 
    return pars;
+}
+
+void @ModelName@_susy_parameters::print() const
+{
+   this->print(std::cerr);
 }
 
 void @ModelName@_susy_parameters::print(std::ostream& ostr) const

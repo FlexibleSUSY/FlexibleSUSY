@@ -1,0 +1,95 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_semi_analytic_model.hpp
+ * @brief contains class for model with routines needed to solve boundary
+ *        value problem using the semi_analytic solver by solving EWSB
+ *        and determine the pole masses and mixings
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#ifndef @ModelName@_SEMI_ANALYTIC_MODEL_H
+#define @ModelName@_SEMI_ANALYTIC_MODEL_H
+
+#include "@ModelName@_model.hpp"
+#include "@ModelName@_model_slha.hpp"
+#include "@ModelName@_semi_analytic_solutions.hpp"
+
+#include "model.hpp"
+
+namespace flexiblesusy {
+
+class Semi_analytic;
+/**
+ * @class @ModelName@<Semi_analytic>
+ * @brief model class with routines for determining masses and mixings and EWSB
+ */
+template<>
+class @ModelName@<Semi_analytic> : public Model, public @ModelName@_slha {
+public:
+   explicit @ModelName@(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters(), bool do_convert_masses_to_slha = true);
+   explicit @ModelName@(const @ModelName@_slha&, bool do_convert_masses_to_slha = true);
+   @ModelName@(const @ModelName@&) = default;
+   @ModelName@(@ModelName@&&) = default;
+   virtual ~@ModelName@() = default;
+   @ModelName@& operator=(const @ModelName@&) = default;
+   @ModelName@& operator=(@ModelName@&&) = default;
+
+   // interface functions
+   virtual void calculate_spectrum();
+   virtual void clear_problems();
+   virtual std::string name() const;
+   virtual void run_to(double scale, double eps = -1.0);
+   virtual void print(std::ostream&) const;
+   virtual void set_precision(double);
+
+   /**
+    * @brief returns the current values of the semi-analytic coefficients
+    *
+    * @return the current set of semi-analytic solutions
+    */
+   const @ModelName@_semi_analytic_solutions& get_semi_analytic_solutions() const;
+
+   /**
+    * @brief returns the current values of the semi-analytic coefficients
+    *
+    * @return the current set of semi-analytic solutions
+    */
+   @ModelName@_semi_analytic_solutions& get_semi_analytic_solutions();
+
+   /**
+    * @brief calculates the semi-analytic solutions for the soft parameters
+    *
+    * @param[in] input_scale the scale where the boundary conditions hold
+    */
+   void calculate_semi_analytic_solutions(double);
+
+@getSemiAnalyticCoefficients@
+private:
+   /// semi-analytic solutions for the model soft parameters
+   @ModelName@_semi_analytic_solutions solutions{};
+};
+
+std::ostream& operator<<(std::ostream&, const @ModelName@<Semi_analytic>&);
+
+} // namespace flexiblesusy
+
+#endif

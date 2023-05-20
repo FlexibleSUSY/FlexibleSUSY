@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( test_init_default )
 
 BOOST_AUTO_TEST_CASE( test_init_0 )
 {
-   GSL_vector v(0ul);
+   GSL_vector v(static_cast<std::size_t>(0));
    BOOST_CHECK_EQUAL(v.size(), 0);
 }
 
@@ -196,6 +196,20 @@ BOOST_AUTO_TEST_CASE( test_move_assign_chain )
    BOOST_CHECK_EQUAL(v3[0], 1.);
    BOOST_CHECK_EQUAL(v3[1], 2.);
    BOOST_CHECK_EQUAL(v3[2], 3.);
+}
+
+BOOST_AUTO_TEST_CASE( test_self_assign )
+{
+   GSL_vector v(3);
+   v[0] = 1.;
+   v[1] = 2.;
+   v[2] = 3.;
+
+   v = v;
+
+   BOOST_CHECK_EQUAL(v[0], 1.);
+   BOOST_CHECK_EQUAL(v[1], 2.);
+   BOOST_CHECK_EQUAL(v[2], 3.);
 }
 
 BOOST_AUTO_TEST_CASE( test_initializer_list )

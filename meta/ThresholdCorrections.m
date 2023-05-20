@@ -1,17 +1,40 @@
+(* :Copyright:
 
-BeginPackage["ThresholdCorrections`", {"SARAH`", "TextFormatting`", "CConversion`", "TreeMasses`", "Constraint`", "Vertices`", "LoopMasses`", "Utils`"}];
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
+BeginPackage["ThresholdCorrections`", {"SARAH`", "TextFormatting`", "CConversion`", "TreeMasses`", "Constraint`", "Vertices`", "LoopMasses`", "SelfEnergies`", "Utils`"}];
 
 CalculateGaugeCouplings::usage="";
 CalculateDeltaAlphaEm::usage="";
 CalculateDeltaAlphaS::usage="";
 CalculateThetaW::usage="";
-RecalculateMWPole::usage="";
+GetParameter::usage="";
 SetDRbarYukawaCouplingTop::usage="";
 SetDRbarYukawaCouplingBottom::usage="";
 SetDRbarYukawaCouplingElectron::usage="";
 CalculateColorCoupling::usage="";
 CalculateElectromagneticCoupling::usage="";
 SetDRbarYukawaCouplings::usage="";
+GetTwoLoopThresholdHeaders::usage="";
+YukawaToMassPrefactor::usage="";
 
 CalculateGaugeCouplings::MissingRelation = "Warning: Coupling `1` is not\
  releated to `2` via DependenceNum: `1` = `3`"
@@ -40,35 +63,39 @@ CalculateElectromagneticCoupling[scheme_] :=
 CalculateCoupling::UnknownRenormalizationScheme = "Unknown\
  renormalization scheme `1`.";
 
+GetLorentzRepresentationFactor[particle_] :=
+    Which[IsMajoranaFermion[particle], 2/3,
+          IsDiracFermion[   particle], 4/3,
+          IsRealScalar[     particle], 1/6,
+          IsComplexScalar[  particle], 1/3,
+          IsVector[         particle], 1/3,
+          True                       , 1];
+
+GetMultiplicityForUnbrokenGroups[particle_, group_] :=
+    Times @@ Cases[SARAH`getIndizesWI[particle], {Except[SARAH`generation | group], i_} :> i];
+
 (* Calculate threshold correction for a gauge coupling from SM
    (MS-bar) to a given renormalization scheme in the given model. *)
 CalculateCoupling[{coupling_, name_, group_}, scheme_] :=
-    Module[{susyParticles, prefactor, i, result = 0, particle, dynkin,
-            dim, dimStart, nc, casimir, conversion},
+    Module[{susyParticles, prefactor, i, result = 0, particle,
+            conversion},
            susyParticles = TreeMasses`GetSusyParticles[];
            For[i = 1, i <= Length[susyParticles], i++,
                particle = susyParticles[[i]];
-               dim = GetDimension[particle];
-               dimStart = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
-               Which[IsMajoranaFermion[particle], prefactor = 2/3,
-                     IsDiracFermion[   particle], prefactor = 4/3,
-                     IsRealScalar[     particle], prefactor = 1/6,
-                     IsComplexScalar[  particle], prefactor = 1/3,
-                     IsVector[         particle], prefactor = 1/3,
-                     True                       , prefactor = 1];
-               If[coupling === SARAH`electricCharge,
-                  casimir = SA`Casimir[particle, SARAH`color];
-                  nc = If[NumericQ[casimir] && casimir =!= 0, 3, 1];
-                  dynkin = SARAH`getElectricCharge[particle]^2 nc;
-                  ,
-                  dynkin = SA`Dynkin[particle, Position[SARAH`Gauge, name][[1, 1]]];
-                 ];
-               (* some dynkin indices are not defined in SARAH *)
-               If[!NumericQ[dynkin], dynkin = 0];
-               If[dim == 1,
-                  result -= prefactor dynkin Global`FiniteLog[Abs[FlexibleSUSY`M[particle]/Global`currentScale]];,
-                  result -= Sum[prefactor dynkin Global`FiniteLog[Abs[FlexibleSUSY`M[particle][i-1]/Global`currentScale]],
-                                {i,dimStart,dim}];
+               (* Eq.(11) and (13) of arXiv:1406.2319 *)
+               prefactor =
+                  GetLorentzRepresentationFactor[particle] \
+                  GetMultiplicityForUnbrokenGroups[particle,name] \
+                  If[coupling === SARAH`electricCharge,
+                     TreeMasses`GetElectricCharge[particle]^2,
+                     SA`Dynkin[particle, Position[SARAH`Gauge, name][[1, 1]]]
+                    ];
+               If[!NumericQ[prefactor], prefactor = 0];
+               (* sum over generations *)
+               If[GetDimension[particle] == 1,
+                  result -= prefactor Global`FiniteLog[Abs[FlexibleSUSY`M[particle]/Global`currentScale]];,
+                  result -= Sum[prefactor Global`FiniteLog[Abs[FlexibleSUSY`M[particle][i-1]/Global`currentScale]],
+                                {i,TreeMasses`GetDimensionStartSkippingSMGoldstones[particle],GetDimension[particle]}];
                  ];
               ];
            conversion = Switch[scheme,
@@ -76,7 +103,7 @@ CalculateCoupling[{coupling_, name_, group_}, scheme_] :=
                                FlexibleSUSY`MSbar, 0,
                                _, Message[CalculateCoupling::UnknownRenormalizationScheme, scheme]; 0
                               ];
-           Return[result + conversion];
+           result + conversion
           ];
 
 CalculateDeltaAlphaEm[renormalizationScheme_] :=
@@ -85,7 +112,7 @@ CalculateDeltaAlphaEm[renormalizationScheme_] :=
            prefactor = Global`alphaEm / (2 Pi);
            deltaSM = -16/9 Global`FiniteLog[Abs[topQuark/Global`currentScale]];
            deltaSusy = CalculateElectromagneticCoupling[renormalizationScheme];
-           result = Parameters`CreateLocalConstRefs[deltaSusy + deltaSM] <> "\n" <>
+           result = Parameters`CreateLocalConstRefs[{deltaSusy, deltaSM}] <> "\n" <>
                     "const double delta_alpha_em_SM = " <>
                     CConversion`RValueToCFormString[prefactor * deltaSM] <> ";\n\n" <>
                     "const double delta_alpha_em = " <>
@@ -94,19 +121,132 @@ CalculateDeltaAlphaEm[renormalizationScheme_] :=
            Return[result];
           ];
 
+CalculateDeltaAlpha2LSM[] :=
+"if (model->get_thresholds() > 1 && model->get_threshold_corrections().alpha_s > 1) {\n" <>
+IndentText["\
+sm_fourloop_as::Parameters pars;
+pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
+pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
+pars.Q    = model->get_scale();
+
+const auto das_1L = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+const auto das_2L = sm_fourloop_as::delta_alpha_s_2loop_as_as(pars);
+
+delta_alpha_s_2loop = das_2L - Sqr(das_1L);"
+] <> "
+}
+
+";
+
+CalculateDeltaAlpha3LSM[] :=
+"if (model->get_thresholds() > 2 && model->get_threshold_corrections().alpha_s > 2) {\n" <>
+IndentText["\
+sm_fourloop_as::Parameters pars;
+pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
+pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
+pars.Q    = model->get_scale();
+
+const auto das_1L = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+const auto das_2L = sm_fourloop_as::delta_alpha_s_2loop_as_as(pars);
+const auto das_3L = sm_fourloop_as::delta_alpha_s_3loop_as_as_as(pars);
+
+delta_alpha_s_3loop = das_3L + Power3(das_1L) - 2. * das_1L * das_2L;"
+] <> "
+}
+
+";
+
+CalculateDeltaAlpha4LSM[] :=
+"if (model->get_thresholds() > 3 && model->get_threshold_corrections().alpha_s > 3) {\n" <>
+IndentText["\
+sm_fourloop_as::Parameters pars;
+pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
+pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
+pars.Q    = model->get_scale();
+
+const auto das_1L = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+const auto das_2L = sm_fourloop_as::delta_alpha_s_2loop_as_as(pars);
+const auto das_3L = sm_fourloop_as::delta_alpha_s_3loop_as_as_as(pars);
+const auto das_4L = sm_fourloop_as::delta_alpha_s_4loop_as_as_as_as(pars);
+
+delta_alpha_s_4loop = das_4L - 2. * das_1L * das_3L - Power2(das_2L) + 3. * Power2(das_1L) * das_2L - Power4(das_1L);"
+] <> "
+}
+
+";
+
+CalculateDeltaAlpha2LMSSM[] :=
+"if (model->get_thresholds() > 1 && model->get_threshold_corrections().alpha_s > 1) {\n" <>
+IndentText["\
+" <> Parameters`CreateLocalConstRefs[Parameters`GetEffectiveMu[]] <> "
+
+double mst_1, mst_2, theta_t;
+double msb_1, msb_2, theta_b;
+double msd_1, msd_2, theta_d;
+
+model->" <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
+model->" <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`BottomSquark, "msb_1", "msb_2", "theta_b"] <> ";
+model->" <> TreeMasses`CallGenerationHelperFunctionName[2, SARAH`BottomSquark, "msd_1", "msd_2", "theta_d"] <> ";
+
+mssm_twoloop_as::Parameters pars;
+pars.g3   = model->get_" <> CConversion`RValueToCFormString[SARAH`strongCoupling /. Parameters`ApplyGUTNormalization[]] <> "();
+pars.yt   = model->get_" <> CConversion`RValueToCFormString[Parameters`GetThirdGeneration[SARAH`UpYukawa]] <> ";
+pars.yb   = model->get_" <> CConversion`RValueToCFormString[Parameters`GetThirdGeneration[SARAH`DownYukawa]] <> ";
+pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
+pars.mb   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMBottomQuarkMultiplet[],True,True]] <> ";
+pars.mg   = model->get_" <> CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]] <> "();
+pars.mst1 = mst_1;
+pars.mst2 = mst_2;
+pars.msb1 = msb_1;
+pars.msb2 = msb_2;
+pars.msd1 = msd_1;
+pars.msd2 = msd_2;
+pars.xt   = Sin(2*theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt);
+pars.xb   = Sin(2*theta_b) * (Sqr(msb_1) - Sqr(msb_2)) / (2. * pars.mb);
+pars.mw   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`VectorW]] <> "();
+pars.mz   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`VectorZ]] <> "();
+pars.mh   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`HiggsBoson]] <>"(0);
+pars.mH   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`HiggsBoson]] <> "(1);
+pars.mC   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`ChargedHiggs]] <>
+   "(" <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`ChargedHiggs]-1] <> ");
+pars.mA   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`PseudoScalar]] <>
+   "(" <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`PseudoScalar]-1] <> ");
+pars.mu   = " <> CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]] <> ";
+pars.tb   = model->get_" <> CConversion`RValueToCFormString[SARAH`VEVSM2] <>
+   "() / model->get_" <> CConversion`RValueToCFormString[SARAH`VEVSM1] <> "();
+pars.Q    = model->get_scale();
+
+delta_alpha_s_2loop =
+   - Sqr(delta_alpha_s_1loop)/4.
+   - 2.*(
+      + mssm_twoloop_as::delta_alpha_s_2loop_as_as(pars)
+      + mssm_twoloop_as::delta_alpha_s_2loop_at_as(pars)
+      + mssm_twoloop_as::delta_alpha_s_2loop_ab_as(pars)
+     );"] <> "
+}
+
+";
+
 CalculateDeltaAlphaS[renormalizationScheme_] :=
     Module[{result, deltaSusy, deltaSM, prefactor, topQuark},
            topQuark = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            prefactor = Global`alphaS / (2 Pi);
            deltaSM = - 2/3 Global`FiniteLog[Abs[topQuark/Global`currentScale]];
            deltaSusy = CalculateColorCoupling[renormalizationScheme];
-           result = Parameters`CreateLocalConstRefs[deltaSusy + deltaSM] <> "\n" <>
-                    "const double delta_alpha_s_SM = " <>
-                    CConversion`RValueToCFormString[prefactor * deltaSM] <> ";\n\n" <>
-                    "const double delta_alpha_s = " <>
-                    CConversion`RValueToCFormString[prefactor * deltaSusy] <> ";\n\n" <>
-                    "return delta_alpha_s + delta_alpha_s_SM;\n";
-           Return[result];
+           Parameters`CreateLocalConstRefs[{deltaSusy, deltaSM}] <> "\n" <>
+           "const double delta_alpha_s_SM = " <>
+           CConversion`RValueToCFormString[prefactor * deltaSM] <> ";\n\n" <>
+           "const double delta_alpha_s = " <>
+           CConversion`RValueToCFormString[prefactor * deltaSusy] <> ";\n\n" <>
+           "const double delta_alpha_s_1loop = delta_alpha_s + delta_alpha_s_SM;\n" <>
+           "double delta_alpha_s_2loop = 0.;\n" <>
+           "double delta_alpha_s_3loop = 0.;\n" <>
+           "double delta_alpha_s_4loop = 0.;\n\n" <>
+           If[FlexibleSUSY`UseMSSMAlphaS2Loop === True, CalculateDeltaAlpha2LMSSM[], ""] <>
+           If[FlexibleSUSY`UseSMAlphaS3Loop === True, CalculateDeltaAlpha2LSM[], ""] <>
+           If[FlexibleSUSY`UseSMAlphaS3Loop === True, CalculateDeltaAlpha3LSM[], ""] <>
+           If[FlexibleSUSY`UseSMAlphaS4Loop === True, CalculateDeltaAlpha4LSM[], ""] <>
+           "return delta_alpha_s_1loop + delta_alpha_s_2loop + delta_alpha_s_3loop + delta_alpha_s_4loop;\n"
           ];
 
 GetPrefactor[expr_Plus, _] := 1;
@@ -139,7 +279,7 @@ ToMatrixExpression[{}] := Null;
 ToMatrixExpression[expr_ /; Head[expr] =!= List] := expr;
 
 ToMatrixExpression[list_List] :=
-    Module[{dim, symbol, matrix, i, k, diag, expression = Null,
+    Module[{dim, symbol, matrix, diag, expression = Null,
             expandedList, permutations},
            dim = Length[list];
            symbol = ExtractSymbols[list[[1,1]]];
@@ -239,14 +379,27 @@ InvertMassRelation[fermion_, yukawa_] :=
            InvertRelation[matrixExpression, fermion / prefactor, yukawa]
           ];
 
+YukawaToMassPrefactor[fermion_, yukawa_] :=
+    Module[{massMatrix, polynom},
+           If[TreeMasses`IsUnmixed[fermion],
+              massMatrix = TreeMasses`GetMassOfUnmixedParticle[fermion];
+              massMatrix = TreeMasses`ReplaceDependencies[massMatrix];
+              massMatrix = Vertices`StripGroupStructure[massMatrix, {SARAH`ct1, SARAH`ct2}];
+              ,
+              massMatrix = SARAH`MassMatrix[fermion];
+             ];
+           polynom = Factor[massMatrix /. List -> Plus];
+           GetPrefactor[polynom, yukawa]
+          ];
+
 SetDRbarYukawaCouplingTop[settings_] :=
-    SetDRbarYukawaCouplingFermion[SARAH`TopQuark, SARAH`UpYukawa, Global`upQuarksDRbar, settings];
+    SetDRbarYukawaCouplingFermion[TreeMasses`GetSMTopQuarkMultiplet[], SARAH`UpYukawa, Global`upQuarksDRbar, settings];
 
 SetDRbarYukawaCouplingBottom[settings_] :=
-    SetDRbarYukawaCouplingFermion[SARAH`BottomQuark, SARAH`DownYukawa, Global`downQuarksDRbar, settings];
+    SetDRbarYukawaCouplingFermion[TreeMasses`GetSMBottomQuarkMultiplet[], SARAH`DownYukawa, Global`downQuarksDRbar, settings];
 
 SetDRbarYukawaCouplingElectron[settings_] :=
-    SetDRbarYukawaCouplingFermion[SARAH`Electron, SARAH`ElectronYukawa, Global`downLeptonsDRbar, settings];
+    SetDRbarYukawaCouplingFermion[TreeMasses`GetSMTauLeptonMultiplet[], SARAH`ElectronYukawa, Global`downLeptonsDRbar, settings];
 
 SetDRbarYukawaCouplingFermionMatrix[fermion_, yukawa_, mass_, setting_] :=
     Module[{y, f = setting},
@@ -262,7 +415,7 @@ SetDRbarYukawaCouplingFermionMatrix[fermion_, yukawa_, mass_, setting_] :=
 
 SetDRbarYukawaCouplings[] :=
     Module[{y, f, fermion, yukawa, mass, term = {0,0,0}, i},
-           fermion = {SARAH`TopQuark, SARAH`BottomQuark, SARAH`Electron};
+           fermion = {TreeMasses`GetSMTopQuarkMultiplet[], TreeMasses`GetSMBottomQuarkMultiplet[], TreeMasses`GetSMTauLeptonMultiplet[]};
            yukawa  = {SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa};
            mass    = {Global`upQuarksDRbar, Global`downQuarksDRbar, Global`downLeptonsDRbar};
            For[i = 1, i <= 3, i++,
@@ -323,239 +476,53 @@ GetParameter[par_, factor_:1] :=
     "MODEL->get_" <> CConversion`RValueToCFormString[par] <> "()" <>
     MultiplyBy[factor];
 
-CalculateThetaWFromFermiConstantSUSY[options_List] :=
-    Module[{g1Str, g2Str, g3Str, vuStr, vdStr,
-            mTop, mBot, mHiggs,
-            mtStr, mbStr,
-            mnStr, mcStr, znStr, umStr, upStr,
-            mhStr, zhStr,
-            mseExpr, msveExpr, msmExpr, msvmExpr,
-            mseStr, msveStr, msmStr, msvmStr,
-            zStr, wStr, ymStr,
-            gHyp, gLef, gCol,
-            localConstRefs = ""
-           },
-           mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
-           mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
-           mHiggs  = TreeMasses`GetLightestMass[Utils`FSGetOption[options,FlexibleSUSY`FSHiggs]];
-           mtStr   = GetParameter[mTop];
-           mbStr   = GetParameter[mBot];
-           mhStr   = GetParameter[mHiggs];
-           gHyp    = Utils`FSGetOption[options, FlexibleSUSY`FSHyperchargeCoupling];
-           gLef    = Utils`FSGetOption[options, FlexibleSUSY`FSLeftCoupling];
-           gCol    = Utils`FSGetOption[options, FlexibleSUSY`FSStrongCoupling];
-           g1Str   = GetParameter[gHyp, Parameters`GetGUTNormalization[gHyp]];
-           g2Str   = GetParameter[gLef, Parameters`GetGUTNormalization[gLef]];
-           g3Str   = GetParameter[gCol, Parameters`GetGUTNormalization[gCol]];
-           vuStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSVEVSM2]];
-           vdStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSVEVSM1]];
-           mnStr   = GetParameter[FlexibleSUSY`M[Utils`FSGetOption[options,FlexibleSUSY`FSNeutralino]]];
-           mcStr   = GetParameter[FlexibleSUSY`M[Utils`FSGetOption[options,FlexibleSUSY`FSChargino]]];
-           znStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSNeutralinoMM]];
-           umStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSCharginoMinusMM]];
-           upStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSCharginoPlusMM]];
-           zhStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSHiggsMM][0,1]];
-           wStr    = CConversion`RValueToCFormString[Utils`FSGetOption[options,FlexibleSUSY`FSVectorW]];
-           zStr    = CConversion`RValueToCFormString[Utils`FSGetOption[options,FlexibleSUSY`FSVectorZ]];
-           ymStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSElectronYukawa][1,1]];
-           mseExpr  = Utils`FSGetOption[options,FlexibleSUSY`FSSelectronL];
-           msveExpr = Utils`FSGetOption[options,FlexibleSUSY`FSSelectronNeutrinoL];
-           msmExpr  = Utils`FSGetOption[options,FlexibleSUSY`FSSmuonL];
-           msvmExpr = Utils`FSGetOption[options,FlexibleSUSY`FSSmuonNeutrinoL];
-           mseStr  = CConversion`RValueToCFormString[Parameters`DecreaseIndexLiterals[mseExpr]];
-           msveStr = CConversion`RValueToCFormString[Parameters`DecreaseIndexLiterals[msveExpr]];
-           msmStr  = CConversion`RValueToCFormString[Parameters`DecreaseIndexLiterals[msmExpr]];
-           msvmStr = CConversion`RValueToCFormString[Parameters`DecreaseIndexLiterals[msvmExpr]];
-           localConstRefs = Parameters`CreateLocalConstRefs[{mseExpr, msveExpr, msmExpr, msvmExpr}];
+CalculateThetaWFromFermiConstant[] :=
+    Module[{
+        mhStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[TreeMasses`GetHiggsBoson[]]],
+        callStr = If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] > 1, "(higgs_idx)", ""]
+        },
     "\
-using namespace weinberg_angle;
+const auto get_mh_pole = [&] () {
+   double mh_pole = MODEL->get_physical()." <> mhStr <> callStr <> ";
+   if (mh_pole == 0) {
+      mh_pole = Electroweak_constants::MH;
+   }
+   return mh_pole;
+};
 
-" <> localConstRefs <> "
-const double scale         = MODEL->get_scale();
-const double mw_pole       = qedqcd.displayPoleMW();
-const double mz_pole       = qedqcd.displayPoleMZ();
-const double mt_pole       = qedqcd.displayPoleMt();
-const double mt_drbar      = " <> mtStr <> ";
-const double mb_drbar      = " <> mbStr <> ";
-const double mh_drbar      = " <> mhStr <> ";
-const double gY            = " <> g1Str <> ";
-const double g2            = " <> g2Str <> ";
-const double g3            = " <> g3Str <> ";
-const double ymu           = Re(" <> ymStr <> ");
-const double hmix_12       = " <> zhStr <> ";
-const double tanBeta       = " <> vuStr <> " / " <> vdStr <> ";
-const double mselL         = " <> mseStr <> ";
-const double msmuL         = " <> msmStr <> ";
-const double msnue         = " <> msveStr <> ";
-const double msnumu        = " <> msvmStr <> ";
-const double pizztMZ       = Re(MODEL->self_energy_" <> zStr <> "_1loop(mz_pole));
-const double piwwt0        = Re(MODEL->self_energy_" <> wStr <> "_1loop(0.));
-self_energy_w_at_mw        = Re(MODEL->self_energy_" <> wStr <> "_1loop(mw_pole));
+" <> FlexibleSUSY`FSModelName <> "_weinberg_angle::Sm_parameters sm_pars;
+sm_pars.fermi_constant = qedqcd.displayFermiConstant();
+sm_pars.mw_pole = qedqcd.displayPoleMW();
+sm_pars.mz_pole = qedqcd.displayPoleMZ();
+sm_pars.mt_pole = qedqcd.displayPoleMt();
+sm_pars.mh_pole = get_mh_pole();
+sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
+sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+sm_pars.higgs_index = higgs_idx;
 
-Weinberg_angle::Self_energy_data se_data;
-se_data.scale    = scale;
-se_data.mt_pole  = mt_pole;
-se_data.mt_drbar = mt_drbar;
-se_data.mb_drbar = mb_drbar;
-se_data.gY       = gY;
-se_data.g2       = g2;
+const int number_of_iterations =
+    std::max(20, static_cast<int>(std::abs(-log10(MODEL->get_precision()) * 10)));
 
-double pizztMZ_corrected = pizztMZ;
-double piwwtMW_corrected = self_energy_w_at_mw;
-double piwwt0_corrected  = piwwt0;
+" <> FlexibleSUSY`FSModelName <> "_weinberg_angle weinberg(MODEL, sm_pars);
+weinberg.set_number_of_loops(MODEL->get_threshold_corrections().sin_theta_w);
+weinberg.set_number_of_iterations(number_of_iterations);
 
-if (model->get_thresholds() > 1) {
-   pizztMZ_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_z(pizztMZ, mz_pole, se_data);
-   piwwtMW_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_w(self_energy_w_at_mw, mw_pole, se_data);
-   piwwt0_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_w(piwwt0, 0., se_data);
-}
+try {
+   const auto result = weinberg.calculate();
+   THETAW = ArcSin(result.first);
 
-Weinberg_angle::Data data;
-data.scale               = scale;
-data.alpha_em_drbar      = ALPHA_EM_DRBAR;
-data.fermi_contant       = qedqcd.displayFermiConstant();
-data.self_energy_z_at_mz = pizztMZ_corrected;
-data.self_energy_w_at_mw = piwwtMW_corrected;
-data.self_energy_w_at_0  = piwwt0_corrected;
-data.mw_pole             = mw_pole;
-data.mz_pole             = mz_pole;
-data.mt_pole             = mt_pole;
-data.mh_drbar            = mh_drbar;
-data.hmix_12             = hmix_12;
-data.msel_drbar          = mselL;
-data.msmul_drbar         = msmuL;
-data.msve_drbar          = msnue;
-data.msvm_drbar          = msnumu;
-data.mn_drbar            = " <> mnStr <> ";
-data.mc_drbar            = " <> mcStr <> ";
-data.zn                  = " <> znStr <> ";
-data.um                  = " <> umStr <> ";
-data.up                  = " <> upStr <> ";
-data.gY                  = gY;
-data.g2                  = g2;
-data.g3                  = g3;
-data.tan_beta            = tanBeta;
-data.ymu                 = ymu;
+   if (MODEL->get_thresholds() && MODEL->get_threshold_corrections().sin_theta_w > 0)
+      qedqcd.setPoleMW(result.second);
 
-Weinberg_angle weinberg;
-weinberg.enable_susy_contributions();
-weinberg.set_number_of_loops(MODEL->get_thresholds());
-weinberg.set_data(data);
-
-const int error = weinberg.calculate();
-
-THETAW = ArcSin(weinberg.get_sin_theta());
-
-if (error)
-   MODEL->get_problems().flag_no_rho_convergence();
-else
-   MODEL->get_problems().unflag_no_rho_convergence();"
+   MODEL->get_problems().unflag_no_sinThetaW_convergence();
+} catch (const Error& e) {
+   VERBOSE_MSG(e.what_detailed());
+   MODEL->get_problems().flag_no_sinThetaW_convergence();
+}"
           ];
 
-CalculateThetaWFromFermiConstantNonSUSY[options_List] :=
-    Module[{g1Str, g2Str, g3Str,
-            mTop, mBot, mHiggs,
-            mtStr, mbStr,
-            mhStr, zhStr,
-            zStr, wStr, ymStr,
-            gHyp, gLef, gCol
-           },
-           mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
-           mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
-           mHiggs  = TreeMasses`GetLightestMass[Utils`FSGetOption[options,FlexibleSUSY`FSHiggs]];
-           gHyp    = Utils`FSGetOption[options, FlexibleSUSY`FSHyperchargeCoupling];
-           gLef    = Utils`FSGetOption[options, FlexibleSUSY`FSLeftCoupling];
-           gCol    = Utils`FSGetOption[options, FlexibleSUSY`FSStrongCoupling];
-           mtStr   = GetParameter[mTop];
-           mbStr   = GetParameter[mBot];
-           g1Str   = GetParameter[gHyp, Parameters`GetGUTNormalization[gHyp]];
-           g2Str   = GetParameter[gLef, Parameters`GetGUTNormalization[gLef]];
-           g3Str   = GetParameter[gCol, Parameters`GetGUTNormalization[gCol]];
-           mhStr   = GetParameter[mHiggs];
-           zhStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSHiggsMM][0,1]];
-           wStr    = CConversion`RValueToCFormString[Utils`FSGetOption[options,FlexibleSUSY`FSVectorW]];
-           zStr    = CConversion`RValueToCFormString[Utils`FSGetOption[options,FlexibleSUSY`FSVectorZ]];
-           ymStr   = GetParameter[Utils`FSGetOption[options,FlexibleSUSY`FSElectronYukawa][1,1]];
-    "\
-using namespace weinberg_angle;
-
-const double scale         = MODEL->get_scale();
-const double mw_pole       = qedqcd.displayPoleMW();
-const double mz_pole       = qedqcd.displayPoleMZ();
-const double mt_pole       = qedqcd.displayPoleMt();
-const double mt_drbar      = " <> mtStr <> ";
-const double mb_drbar      = " <> mbStr <> ";
-const double mh_drbar      = " <> mhStr <> ";
-const double gY            = " <> g1Str <> ";
-const double g2            = " <> g2Str <> ";
-const double g3            = " <> g3Str <> ";
-const double ymu           = Re(" <> ymStr <> ");
-const double pizztMZ       = Re(MODEL->self_energy_" <> zStr <> "_1loop(mz_pole));
-const double piwwt0        = Re(MODEL->self_energy_" <> wStr <> "_1loop(0.));
-self_energy_w_at_mw        = Re(MODEL->self_energy_" <> wStr <> "_1loop(mw_pole));
-
-Weinberg_angle::Self_energy_data se_data;
-se_data.scale    = scale;
-se_data.mt_pole  = mt_pole;
-se_data.mt_drbar = mt_drbar;
-se_data.mb_drbar = mb_drbar;
-se_data.gY       = gY;
-se_data.g2       = g2;
-
-double pizztMZ_corrected = pizztMZ;
-double piwwtMW_corrected = self_energy_w_at_mw;
-double piwwt0_corrected  = piwwt0;
-
-if (model->get_thresholds() > 1) {
-   pizztMZ_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_z(pizztMZ, mz_pole, se_data);
-   piwwtMW_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_w(self_energy_w_at_mw, mw_pole, se_data);
-   piwwt0_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_w(piwwt0, 0., se_data);
-}
-
-Weinberg_angle::Data data;
-data.scale               = scale;
-data.alpha_em_drbar      = ALPHA_EM_DRBAR;
-data.fermi_contant       = qedqcd.displayFermiConstant();
-data.self_energy_z_at_mz = pizztMZ_corrected;
-data.self_energy_w_at_mw = piwwtMW_corrected;
-data.self_energy_w_at_0  = piwwt0_corrected;
-data.mw_pole             = mw_pole;
-data.mz_pole             = mz_pole;
-data.mt_pole             = mt_pole;
-data.mh_drbar            = mh_drbar;
-data.gY                  = gY;
-data.g2                  = g2;
-data.g3                  = g3;
-data.ymu                 = ymu;
-
-Weinberg_angle weinberg;
-weinberg.disable_susy_contributions();
-weinberg.set_number_of_loops(MODEL->get_thresholds());
-weinberg.set_data(data);
-
-const int error = weinberg.calculate();
-
-THETAW = ArcSin(weinberg.get_sin_theta());
-
-if (error)
-   MODEL->get_problems().flag_no_rho_convergence();
-else
-   MODEL->get_problems().unflag_no_rho_convergence();"
-          ];
-
-CalculateThetaWFromFermiConstant[options_List,isSUSYModel_] :=
-    If[isSUSYModel,
-       CalculateThetaWFromFermiConstantSUSY[options],
-       CalculateThetaWFromFermiConstantNonSUSY[options]
-      ];
-
-CalculateThetaWFromMW[] :=
+CalculateThetaWFromMW[expr_] :=
     Module[{subst, weinbergAngle, result},
            subst = { SARAH`Mass[SARAH`VectorW] -> FlexibleSUSY`MWDRbar,
                      SARAH`Mass[SARAH`VectorZ] -> FlexibleSUSY`MZDRbar,
@@ -563,10 +530,9 @@ CalculateThetaWFromMW[] :=
            (* read weinberg angle from DependenceNum *)
            weinbergAngle = Parameters`FindSymbolDef[SARAH`Weinberg] /. subst;
            If[weinbergAngle === None || weinbergAngle === Null,
-              (* read weinberg angle from FSWeakMixingAngleExpr *)
-              weinbergAngle = Utils`FSGetOption[FlexibleSUSY`FSWeakMixingAngleOptions, FlexibleSUSY`FSWeakMixingAngleExpr] /. subst;
+              weinbergAngle = expr /. subst;
               If[weinbergAngle === None || weinbergAngle === Null,
-                 Print["Warning: No expression for the Weinberg angle defined, setting it to 0."];
+                 Utils`FSFancyWarning["No expression for the Weinberg angle defined, setting it to 0."];
                  weinbergAngle = 0;
                 ];
              ];
@@ -576,44 +542,33 @@ CalculateThetaWFromMW[] :=
            Return[result];
           ];
 
-CalculateThetaW[options_List,isSUSYModel_] :=
-    Switch[Utils`FSGetOption[options, FlexibleSUSY`FSWeakMixingAngleInput],
-           FlexibleSUSY`FSFermiConstant, CalculateThetaWFromFermiConstant[options,isSUSYModel],
-           FlexibleSUSY`FSMassW, CalculateThetaWFromMW[],
+CalculateThetaW[input_] :=
+    Switch[input,
+           FlexibleSUSY`FSFermiConstant, CalculateThetaWFromFermiConstant[],
+           FlexibleSUSY`FSMassW, CalculateThetaWFromMW[FlexibleSUSY`FSWeakMixingAngleExpr],
            _,
            Print["Error: CalculateThetaW[", input, "]: unknown input ", input];
            Print["   Using default input: ", FlexibleSUSY`FSMassW];
-           CalculateThetaWFromMW[]
+           CalculateThetaWFromMW[FlexibleSUSY`FSWeakMixingAngleExpr]
           ];
-
-RecalculateMWPole[options_List] :=
-    RecalculateMWPole[Utils`FSGetOption[options, FlexibleSUSY`FSWeakMixingAngleInput],
-                      Utils`FSGetOption[options,FlexibleSUSY`FSVectorW]];
-
-RecalculateMWPole[input_ /; input === FlexibleSUSY`FSFermiConstant, w_] :=
-    Module[{mwStr, wStr},
-           wStr = CConversion`RValueToCFormString[w];
-           mwStr = CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
-           "\
-MODEL->calculate_" <> mwStr <> "();
-
-const double mw_drbar    = MODEL->get_" <> mwStr <> "();
-const double mw_pole_sqr = Sqr(mw_drbar) - self_energy_w_at_mw;
-
-if (mw_pole_sqr < 0.)
-   " <> TreeMasses`FlagPoleTachyon[wStr, "MODEL->get_problems()."] <> "
-return AbsSqrt(mw_pole_sqr);"
-          ];
-
-RecalculateMWPole[_,_] := "return mw_pole;";
 
 WarnIfFreeQ[coupling_, expr_, sym_] :=
     If[FreeQ[expr, sym],
        Message[CalculateGaugeCouplings::MissingRelation, coupling, sym, expr];
       ];
 
+CheckPerturbativityOf[coup_, name_String] :=
+"
+if (IsFinite(new_" <> name <> ")) {
+   model->get_problems().unflag_non_perturbative_parameter(" <> FlexibleSUSY`FSModelName <> "_info::" <> CConversion`ToValidCSymbolString[coup] <> ");
+} else {
+   model->get_problems().flag_non_perturbative_parameter(
+      " <> FlexibleSUSY`FSModelName <> "_info::" <> CConversion`ToValidCSymbolString[coup] <> ", new_" <> name <> ", get_scale());
+   new_" <> name <> " = Electroweak_constants::" <> name <> ";
+}";
+
 CalculateGaugeCouplings[] :=
-    Module[{subst, g1Def, g2Def, g3Def, result},
+    Module[{subst, g1Def, g2Def, g3Def},
            subst = { SARAH`Mass[SARAH`VectorW] -> FlexibleSUSY`MWDRbar,
                      SARAH`Mass[SARAH`VectorZ] -> FlexibleSUSY`MZDRbar,
                      SARAH`electricCharge      -> FlexibleSUSY`EDRbar,
@@ -632,11 +587,32 @@ CalculateGaugeCouplings[] :=
            g1Def = g1Def /. subst;
            g2Def = g2Def /. subst;
            g3Def = g3Def /. subst;
-           result = Parameters`CreateLocalConstRefs[{g1Def, g2Def, g3Def}] <>
-                    "new_g1 = " <> CConversion`RValueToCFormString[g1Def] <> ";\n" <>
-                    "new_g2 = " <> CConversion`RValueToCFormString[g2Def] <> ";\n" <>
-                    "new_g3 = " <> CConversion`RValueToCFormString[g3Def] <> ";\n";
-           Return[result];
+           Parameters`CreateLocalConstRefs[{g1Def, g2Def, g3Def}] <>
+           "new_g1 = " <> CConversion`RValueToCFormString[g1Def] <> ";\n" <>
+           "new_g2 = " <> CConversion`RValueToCFormString[g2Def] <> ";\n" <>
+           "new_g3 = " <> CConversion`RValueToCFormString[g3Def] <> ";\n" <>
+           If[ValueQ[SARAH`hyperchargeCoupling], CheckPerturbativityOf[SARAH`hyperchargeCoupling, "g1"], ""] <> "\n" <>
+           If[ValueQ[SARAH`leftCoupling]       , CheckPerturbativityOf[SARAH`leftCoupling, "g2"], ""]
+          ];
+
+GetTwoLoopThresholdHeaders[] :=
+    Module[{result = ""},
+           If[FlexibleSUSY`UseSMYukawa2Loop === True,
+              result = result <> "#include \"sm_twoloop_mt.hpp\"\n";
+             ];
+           If[FlexibleSUSY`UseMSSMYukawa2Loop === True,
+              result = "#include \"mssm_twoloop_mb.hpp\"\n" <>
+                       "#include \"mssm_twoloop_mt.hpp\"\n" <>
+                       "#include \"mssm_twoloop_mtau.hpp\"\n";
+             ];
+           If[FlexibleSUSY`UseSMAlphaS3Loop === True ||
+              FlexibleSUSY`UseSMAlphaS4Loop === True,
+              result = result <> "#include \"sm_fourloop_as.hpp\"\n";
+             ];
+           If[FlexibleSUSY`UseMSSMAlphaS2Loop === True,
+              result = result <> "#include \"mssm_twoloop_as.hpp\"\n";
+             ];
+           result
           ];
 
 End[];

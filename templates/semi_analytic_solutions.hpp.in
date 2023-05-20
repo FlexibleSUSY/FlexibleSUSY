@@ -1,0 +1,150 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_semi_analytic_solutions.hpp
+ * @brief contains class for computing the semi-analytic solutions
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#ifndef @ModelName@_SEMI_ANALYTIC_SOLUTIONS_H
+#define @ModelName@_SEMI_ANALYTIC_SOLUTIONS_H
+
+#include "@ModelName@_mass_eigenstates.hpp"
+
+#include <Eigen/Core>
+#include <Eigen/SVD>
+
+#include <map>
+#include <vector>
+
+namespace flexiblesusy {
+
+/**
+ * @class @ModelName@_semi_analytic_solutions
+ * @brief class with routines for computing the semi-analytic solutions
+ */
+class @ModelName@_semi_analytic_solutions {
+public:
+   @ModelName@_semi_analytic_solutions();
+   @ModelName@_semi_analytic_solutions(
+      const @ModelName@_semi_analytic_solutions&) = default;
+   @ModelName@_semi_analytic_solutions(
+      @ModelName@_semi_analytic_solutions&&) = default;
+   ~@ModelName@_semi_analytic_solutions() = default;
+   @ModelName@_semi_analytic_solutions& operator=(
+      const @ModelName@_semi_analytic_solutions&) = default;
+   @ModelName@_semi_analytic_solutions& operator=(
+      @ModelName@_semi_analytic_solutions&&) = default;
+
+   /**
+    * @brief returns the scale where the boundary conditions are imposed
+    *
+    * @return the boundary condition scale
+    */
+   double get_input_scale() const { return input_scale; }
+
+   /**
+    * @brief returns the scale at which the coefficients are calculated
+    *
+    * @return the scale where the coefficients apply
+    */
+   double get_output_scale() const { return output_scale; }
+
+   /**
+    * @brief sets the scale where the boundary conditions are imposed
+    *
+    * @param[in] s the value of the boundary condition scale
+    */
+   void set_input_scale(double s) { input_scale = s; }
+
+   /**
+    * @brief sets the scale at which the coefficients are calculated
+    * @param[in] s the scale to calculate the coefficients at
+    */
+   void set_output_scale(double s) { output_scale = s; }
+
+@coefficientGetters@
+   /**
+    * @brief calculates semi-analytic coefficients for a model
+    *
+    * @param[in] model model to calculate semi-analytic coefficients for
+    */
+   void calculate_coefficients(const @ModelName@_mass_eigenstates&);
+
+   /**
+    * @brief applies the semi-analytic solutions to the model
+    *
+    * @param[out] model model to apply semi-analytic solutions to
+    */
+   void evaluate_solutions(@ModelName@_mass_eigenstates&) const;
+
+private:
+   struct Boundary_values {
+@boundaryValueStructDefs@
+   };
+
+   struct Model_data {
+      Boundary_values boundary_values{};
+      @ModelName@_mass_eigenstates model{};
+      std::vector<int> basis_sets{};
+   };
+
+   using Data_vector_t = std::vector<const Model_data*>;
+
+   double input_scale{0.};  ///< scale at which boundary conditions hold
+   double output_scale{0.}; ///< scale at which coefficients are calculated
+   std::array<Model_data,@numberOfTrialPoints@> trial_data{};
+
+   // semi-analytic solution coefficients
+@semiAnalyticSolutionsDefs@
+
+   void initialize_trial_values();
+   void calculate_trial_data(const @ModelName@_mass_eigenstates&);
+   void set_to_boundary_values(@ModelName@_mass_eigenstates&,
+                               const Boundary_values&) const;
+   @ModelName@_mass_eigenstates run_to_output_scale(
+      const @ModelName@_mass_eigenstates&, const Boundary_values&) const;
+   std::map<int,Data_vector_t> create_datasets() const;
+
+   template <class MatrixType, int BasisSize, class BasisEvaluator>
+   Eigen::JacobiSVD<MatrixType> create_solver(
+      const Data_vector_t&, const BasisEvaluator&) const;
+
+@calculateCoefficientsPrototypes@
+};
+
+template <class MatrixType, int BasisSize, class BasisEvaluator>
+Eigen::JacobiSVD<MatrixType> @ModelName@_semi_analytic_solutions::create_solver(
+   const @ModelName@_semi_analytic_solutions::Data_vector_t& data,
+   const BasisEvaluator& ev) const
+{
+   const std::size_t n = data.size();
+   MatrixType lhs(n, BasisSize);
+   for (std::size_t i = 0; i < n; ++i) {
+      lhs.row(i) = ev(data[i]->boundary_values);
+   }
+   return Eigen::JacobiSVD<MatrixType>(
+      lhs, Eigen::ComputeThinU | Eigen::ComputeThinV);
+}
+
+} // namespace flexiblesusy
+
+#endif

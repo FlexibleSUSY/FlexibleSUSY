@@ -98,11 +98,8 @@ int main(int argc, char* argv[])
    if (!problems.have_problem())
       slha_io.set_spectrum(model);
 
-   if (slha_output_file.empty()) {
-      slha_io.write_to_stream(std::cout);
-   } else {
-      slha_io.write_to_file(slha_output_file);
-   }
+   if (!slha_output_file.empty())
+      slha_io.write_to(slha_output_file);
 
    if (!spectrum_file.empty())
       spectrum_generator.write_spectrum(spectrum_file);

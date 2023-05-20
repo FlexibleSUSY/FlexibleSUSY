@@ -16,8 +16,6 @@ MINPAR = {
 
 EXTPAR = {};
 
-FSExtraInputParameters = {};
-
 EWSBOutputParameters = {MuP, mu2};
 
 SUSYScale = LowScale;
@@ -63,10 +61,11 @@ InitialGuessAtLowScale = {
 PotentialLSPParticles = {};
 
 ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy,
+               {{21, FlexibleSUSYObservable`AMM[Fe[2]]} } },
    {FlexibleSUSYOutput,
            {{1, Hold[SUSYScale]},
-            {2, Hold[LowScale]} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
+            {2, Hold[LowScale]} } }
 };
+
+FSCalculateDecays = True;

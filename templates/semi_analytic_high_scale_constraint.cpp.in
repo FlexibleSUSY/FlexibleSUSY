@@ -1,0 +1,131 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+#include "@ModelName@_semi_analytic_high_scale_constraint.hpp"
+#include "@ModelName@_semi_analytic_model.hpp"
+#include "@ModelName@_info.hpp"
+#include "wrappers.hpp"
+#include "logger.hpp"
+#include "ew_input.hpp"
+#include "minimizer.hpp"
+#include "root_finder.hpp"
+#include "threshold_loop_functions.hpp"
+#include "numerics2.hpp"
+
+#include <cmath>
+#include <cerrno>
+#include <cstring>
+
+namespace flexiblesusy {
+
+#define DERIVEDPARAMETER(p) model->p()
+#define EXTRAPARAMETER(p) model->get_##p()
+#define INPUTPARAMETER(p) model->get_input().p
+#define MODELPARAMETER(p) model->get_##p()
+#define PHASE(p) model->get_##p()
+#define BETAPARAMETER(p) beta_functions.get_##p()
+#define BETAPARAMETER1(l,p) beta_functions_##l##L.get_##p()
+#define BETA(p) beta_##p
+#define BETA1(l,p) beta_##l##L_##p
+#define LowEnergyConstant(p) Electroweak_constants::p
+#define MZPole Electroweak_constants::MZ
+#define STANDARDDEVIATION(p) Electroweak_constants::Error_##p
+#define Pole(p) model->get_physical().p
+#define SCALE model->get_scale()
+#define THRESHOLD static_cast<int>(model->get_thresholds())
+#define MODEL model
+#define MODELCLASSNAME @ModelName@<Semi_analytic>
+
+@ModelName@_high_scale_constraint<Semi_analytic>::@ModelName@_high_scale_constraint(
+   @ModelName@<Semi_analytic>* model_)
+   : model(model_)
+{
+   initialize();
+}
+
+double @ModelName@_high_scale_constraint<Semi_analytic>::get_scale() const
+{
+@getConstraintScale@
+}
+
+void @ModelName@_high_scale_constraint<Semi_analytic>::apply()
+{
+   check_model_ptr();
+
+@initialSetting@
+
+   update_scale();
+
+@applyConstraint@
+@saveBoundaryValueParameters@
+   check_non_perturbative();
+
+@temporaryResetting@
+}
+
+bool @ModelName@_high_scale_constraint<Semi_analytic>::check_non_perturbative()
+{
+   bool problem = false;
+
+@checkPerturbativityForDimensionlessParameters@
+
+   return problem;
+}
+
+const @ModelName@_input_parameters& @ModelName@_high_scale_constraint<Semi_analytic>::get_input_parameters() const
+{
+   return model->get_input();
+}
+
+void @ModelName@_high_scale_constraint<Semi_analytic>::set_model(Model* model_)
+{
+   model = cast_model<@ModelName@<Semi_analytic>*>(model_);
+}
+
+void @ModelName@_high_scale_constraint<Semi_analytic>::clear()
+{
+   scale = 0.;
+   initial_scale_guess = 0.;
+   model = nullptr;
+}
+
+void @ModelName@_high_scale_constraint<Semi_analytic>::initialize()
+{
+   check_model_ptr();
+
+@scaleGuess@
+   scale = initial_scale_guess;
+}
+
+void @ModelName@_high_scale_constraint<Semi_analytic>::update_scale()
+{
+   check_model_ptr();
+
+@calculateScale@
+@restrictScale@
+}
+
+void @ModelName@_high_scale_constraint<Semi_analytic>::check_model_ptr() const
+{
+   if (!model)
+      throw SetupError("@ModelName@_high_scale_constraint<Semi_analytic>: "
+                       "model pointer is zero!");
+}
+
+} // namespace flexiblesusy

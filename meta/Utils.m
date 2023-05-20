@@ -1,5 +1,29 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
 
 BeginPackage["Utils`"];
+
+AppendOrReplaceInList::usage="Replaces existing element in list,
+or appends it if not already present.";
 
 ApplyAndConcatenate::usage = "Applies a function to a list and
 concatenates the resulting list.";
@@ -23,6 +47,9 @@ Out[]= 2
 ";
 
 StringJoinWithSeparator::usage = "Joins a list of strings with a given separator string";
+
+StringJoinWithReplacement::usage =
+"Joins a list of strings with a given separator string, making string replacement afterwards";
 
 Zip::usage = "Combines two lists to a list of touples.
 Example:
@@ -108,7 +135,55 @@ FSFancyPrint::usage = "Print text in fancy headline style";
 
 FSFancyLine::usage = "Print separator line in command line mode";
 
+FSFancyWarning::usage = "Print a warning with a style."
+
+PrintHeadline::usage = "Print fancy head line";
+
+PrintAndReturn::usage = "Print result and return it";
+
+AssertWithMessage::usage = "AssertWithMessage[assertion_, message_String]:
+If assertion does not evaluate to True, print message and Quit[1].";
+
+AssertOrQuit::usage = "
+@brief If assertion === True, True is returned.
+       If assertion =!= True, an error message is printed and kernel is killed.
+@param assertion Any expression.
+@param sym::tag A message string.
+@param insertions Expressions inserted into the message via StringTemplate.";
+
+MakeUnknownInputDefinition::usage = "
+@brief After the definition of any function use it like:
+
+          Utils`MakeUnknownInputDefinition[function];
+
+       It creates a new definition function[args___], which prints an error and
+       kills the kernel if used in the code.
+@param sym A name of a function.
+@note UpValues for symbol[args___] are not cleared.";
+
+ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
+Read the entire contents of the file given by fileName and return it
+as a list of Strings representing the lines in the file.
+Warning: This function may ignore empty lines.";
+
+MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
+FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
+
+DecomposeVersionString::usage = "Return a list for string containing a version number";
+VersionOrderGtEqThan::usage = "Checks if version is >= than a given one";
+
 Begin["`Private`"];
+
+AppendOrReplaceInList[values_List, elem_, test_:SameQ] :=
+    Module[{matches, result},
+           matches = test[elem, #]& /@ values;
+           matches = (If[# =!= True && # =!= False, False, #])& /@ matches;
+           If[!Or @@ matches,
+              result = Append[values, elem];,
+              result = ReplacePart[values, Position[matches, True] -> elem];
+             ];
+           result
+          ];
 
 ApplyAndConcatenate[Func_, l_List] :=
     Module[{result = ""},
@@ -121,7 +196,7 @@ ApplyAndConcatenate[Func_, l_] := Evaluate[Func[l]];
 SetAttributes[ApplyAndConcatenate, HoldFirst];
 
 StringJoinWithSeparator[list_List, separator_String, transformer_:ToString] :=
-    StringJoin[Riffle[transformer /@ list, separator]];
+    StringRiffle[transformer /@ list, separator];
 
 Zip[list1_List, list2_List] :=
     MapThread[List, {list1, list2}];
@@ -151,7 +226,7 @@ FSGetOption[opts_List, opt_] :=
                   0, Print["Error: option ", opt, " not found"];
                      Null,
                   1, values[[1]],
-                  _, Print["Warning: option ", opt, " not unique"];
+                  _, FSFancyWarning["Option ", opt, " is not unique"];
                      values[[1]]
                  ]
           ];
@@ -225,6 +300,164 @@ FSFancyPrint[text_, level_:1] :=
 
 FSFancyLine[type_:"-", style__:Bold] :=
     If[!$Notebooks, Print[Style[StringJoin[Array[type&, 70]], style]]];
+
+PrintHeadline[text__] :=
+    Block[{},
+          Print[""];
+          FSFancyLine[];
+          FSFancyPrint[text];
+          FSFancyLine[];
+         ];
+
+PrintAndReturn[e___] := (Print[e]; e)
+
+AssertWithMessage[assertion_, message_String] :=
+	If[assertion =!= True, Print[message]; Quit[1]];
+
+AssertOrQuit[assertion_,
+             HoldPattern@MessageName[sym_, tag_],
+             insertions___] :=
+Module[{RedString, WriteOut},
+   If[TrueQ@assertion, Return@True];
+   RedString[str_] := If[$Notebooks,
+      Style[str, Red],
+      If[TrueQ@FlexibleSUSY`FSEnableColors,
+         "\033[1;31m"<>str<>"\033[1;0m",
+         str
+      ]
+   ];
+   WriteOut[str__] := If[$Notebooks,
+      Print[str],
+      WriteString[$Output, StringJoin[str]<>"\n"]
+   ];
+   WriteOut[Context@sym, SymbolName@sym, ": ", RedString@tag, ":"];
+   WriteOut@StringTemplate[MessageName[sym, tag]][insertions];
+   WriteOut["Wolfram Language kernel session ", RedString@"terminated", "."];
+   Quit[1];
+];
+
+AssertOrQuit[x___] := AssertOrQuit[False, AssertOrQuit::errInput, {x}];
+AssertOrQuit ~ SetAttributes ~ {HoldAll, Protected};
+AssertOrQuit::errInput = "Input '`1`' is not supported.";
+
+Options[FSFancyWarning] = {
+   PageWidth-> 70
+};
+
+FSFancyWarning[input__, OptionsPattern[]] :=
+Module[{warning, chopped, string},
+   string = StringReplace[StringJoin[ToString/@ {input}], "\n"-> " "];
+   warning = If[!$Notebooks,
+      If[TrueQ@FlexibleSUSY`FSEnableColors,
+         "\033[1;36mWarning:\033[1;0m ",
+         "Warning: "
+      ],
+      Style["Warning: ", Cyan]
+   ];
+   chopped = InsertLinebreaks[string, OptionValue[PageWidth]-9];
+   chopped = StringReplace[chopped, "\n"-> "\n         "];
+   If[!$Notebooks,
+      WriteString[$Output, warning <> chopped <> "\n"];,
+      Print[warning, chopped];
+   ];
+];
+
+MakeUnknownInputDefinition[sym_Symbol] :=
+Module[{up, down, all, usageString, infoString, simplify},
+   Off[Unset::norep];
+      sym[args___] =.;
+   On[Unset::norep];
+
+   If[MatchQ[sym::usage, _String],
+      usageString = StringJoin["Usage:\n", sym::usage, "\n\n"];,
+      usageString = "";
+   ];
+
+   simplify[expr_] := StringReplace[ToString@expr,
+      StartOfString ~~ "HoldPattern[" ~~ x___ ~~ "]" ~~ EndOfString :> x];
+
+   up = simplify/@ First/@ UpValues@ sym;
+   down = simplify/@ First/@ DownValues@ sym;
+   all = Join[up, down];
+
+   If[all === {},
+      infoString = "",
+      infoString = Array[(ToString[#]<>") "<>all[[#]])&, Length@all];
+      infoString = StringRiffle[infoString, "\n"];
+      infoString = "The behavior for case(s):\n"<>infoString<>
+         "\nis defined only.\n\n";
+   ];
+
+   With[{name = ToString@sym},
+      sym::errUnknownInput = "`1``2`Call\n`3`[`4`]\nis not supported.";
+      sym[args___] := AssertOrQuit[False,
+         sym::errUnknownInput,
+         usageString,
+         infoString,
+         name,
+         StringJoinWithSeparator[{args},", "]
+      ];
+   ];
+];
+MakeUnknownInputDefinition@MakeUnknownInputDefinition;
+SetAttributes[MakeUnknownInputDefinition,{Locked,Protected}];
+
+StringJoinWithReplacement[
+   list_List,
+   separator:_String:", ",
+   replacement:Rule[_String,_String]:Rule["`","`.`"],
+   transformer_:ToString
+] :=
+StringReplace[StringJoinWithSeparator[list,separator,transformer],replacement];
+StringJoinWithReplacement // MakeUnknownInputDefinition;
+StringJoinWithReplacement ~ SetAttributes ~ {Locked,Protected};
+
+ReadLinesInFile[fileName_String] :=
+	Module[{fileHandle, lines = {}, line},
+		fileHandle = OpenRead[fileName, BinaryFormat -> True];
+
+		While[(line = Read[fileHandle, String]) =!= EndOfFile,
+			AssertWithMessage[line =!= $Failed,
+				"Utils`ReadLinesInFile[]: Unable to read line from file '" <>
+				fileName <> "'"];
+			AppendTo[lines, line];
+			];
+
+    Close[fileHandle];
+    lines
+	]
+
+(* MathIndexToCPP *)
+
+MathIndexToCPP[i_Integer /; i>0] := i-1;
+
+MathIndexToCPP::wrongInt =
+"Cannot convert index of value \"`1`\". Index value cannot be smaller than \"1\".";
+MathIndexToCPP[i_Integer] := AssertOrQuit[False, MathIndexToCPP::wrongInt, StringJoin@@Riffle[ToString/@{i},", "]];
+
+MathIndexToCPP::nonIntInput =
+"Cannot convert a non integer index \"`1`\".";
+MathIndexToCPP[i___] := AssertOrQuit[False, MathIndexToCPP::nonIntInput, StringJoin@@Riffle[ToString/@{i},", "]];
+
+(* FSPermutationSign *)
+
+(* from https://reference.wolfram.com/language/tutorial/Permutations.html *)
+FSPermutationSign[perm_?PermutationCyclesQ] :=
+    Apply[Times, (-1)^(Length /@ First[perm] - 1)];
+FSPermutationSign[perm___] :=
+    (Print[perm, " is not a permutation in disjoint cyclic form."];Quit[1]);
+
+DecomposeVersionString[version_String] :=
+    ToExpression /@ StringSplit[version, "."];
+
+VersionOrderGtEqThan[version_List, minimRequired_List] /;
+   Length[version] ===3 && Length[minimRequired] ===3 && And@@(IntegerQ /@ Join[version, minimRequired]) :=
+      !(version[[1]] < minimRequired[[1]] ||
+           (version[[1]] == minimRequired[[1]] &&
+            version[[2]] < minimRequired[[2]]) ||
+              (version[[1]] == minimRequired[[1]] &&
+               version[[2]] == minimRequired[[2]] &&
+               version[[3]] < minimRequired[[3]]));
 
 End[];
 

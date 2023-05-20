@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 Needs["TestSuite`", "TestSuite.m"];
 Needs["Parameters`", "Parameters.m"];
 
@@ -21,7 +43,7 @@ Print["testing GuessExtraParameterType[] ..."];
 extraPars = {t, u, FlexibleSUSY`Phase[v]};
 
 TestEquality[Parameters`GuessExtraParameterType[t],
-             CConversion`ScalarType[CConversion`complexScalarCType]];
+             CConversion`ScalarType[CConversion`realScalarCType]];
 TestEquality[Parameters`GuessExtraParameterType[FlexibleSUSY`Phase[v]],
              CConversion`ScalarType[CConversion`complexScalarCType]];
 
@@ -52,7 +74,7 @@ TestEquality[Parameters`IsRealParameter[Sign[o]], True];
 TestEquality[Parameters`IsRealParameter[FlexibleSUSY`Phase[p]], False];
 TestEquality[Parameters`IsRealParameter[q], True];
 TestEquality[Parameters`IsRealParameter[t], True];
-TestEquality[Parameters`IsRealParameter[u], False];
+TestEquality[Parameters`IsRealParameter[u], True];
 TestEquality[Parameters`IsRealParameter[FlexibleSUSY`Phase[v]], False];
 TestEquality[Parameters`IsRealParameter[w], True];
 
@@ -66,6 +88,7 @@ TestEquality[Parameters`IsComplexParameter[FlexibleSUSY`Phase[p]], True];
 Print["testing IsRealExpression[] ..."];
 
 TestEquality[Parameters`IsRealExpression[a], True];
+TestEquality[Parameters`IsRealExpression[a[1]], True];
 TestEquality[Parameters`IsRealExpression[x], False];
 
 TestEquality[Parameters`IsRealExpression[a^2], True];
@@ -140,6 +163,23 @@ expr = 2 * Mu SARAH`B[Mu] + WOp SARAH`Q[WOp] + a;
 TestEquality[Sort[Parameters`FindAllParameters[expr]],
              Sort[modelParameters]
             ];
+
+expr = 2 * Mu Re[SARAH`B[Mu]] + Im[WOp] SARAH`Q[WOp] + a;
+
+TestEquality[Sort[Parameters`FindAllParameters[expr]],
+             Sort[modelParameters]
+            ];
+
+expr = 2 * SARAH`B[Mu] + SARAH`Q[WOp];
+
+TestEquality[Sort[Parameters`FindAllParameters[expr]],
+             Sort[{SARAH`B[Mu], SARAH`Q[WOp]}]
+            ];
+
+expr = Which[WOp > 1, Sqrt[B[Mu]]];
+
+TestEquality[Sort[Parameters`FindAllParameters[expr]],
+             Sort[{B[Mu], WOp}]];
 
 Print["testing GetType[] ..."];
 

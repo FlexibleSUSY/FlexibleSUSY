@@ -19,7 +19,9 @@
 #ifndef MSSMCBS_SPECTRUM_GENERATOR_H
 #define MSSMCBS_SPECTRUM_GENERATOR_H
 
+#include "CMSSM_info.hpp"
 #include "MSSMcbs_two_scale_model.hpp"
+#include "CMSSM_two_scale_ewsb_solver.hpp"
 #include "CMSSM_two_scale_high_scale_constraint.hpp"
 #include "CMSSM_two_scale_susy_scale_constraint.hpp"
 #include "MSSMcbs_two_scale_low_scale_constraint.hpp"
@@ -58,9 +60,7 @@ public:
    double get_susy_scale() const { return susy_scale; }
    double get_low_scale()  const { return low_scale;  }
    const MSSMcbs<T>& get_model() const { return model; }
-   const Problems<CMSSM_info::NUMBER_OF_PARTICLES, CMSSM_info::NUMBER_OF_PARAMETERS>& get_problems() const {
-      return model.get_problems();
-   }
+   const Problems& get_problems() const { return model.get_problems(); }
    int get_exit_code() const { return get_problems().have_problem(); };
    void set_parameter_output_scale(double s) { parameter_output_scale = s; }
    void set_precision_goal(double precision_goal_) { precision_goal = precision_goal_; }
@@ -111,6 +111,10 @@ void MSSMcbs_spectrum_generator<T>::run(const softsusy::QedQcd& qedqcd,
    model.set_loops(beta_loop_order);
    model.set_thresholds(threshold_corrections_loop_order);
 
+   CMSSM_ewsb_solver<T> ewsb_solver;
+   model.set_ewsb_solver(
+      std::make_shared<CMSSM_ewsb_solver<T> >(ewsb_solver));
+
    high_scale_constraint.clear();
    susy_scale_constraint.clear();
    low_scale_constraint .clear();
@@ -158,7 +162,7 @@ void MSSMcbs_spectrum_generator<T>::run(const softsusy::QedQcd& qedqcd,
          model.run_to(parameter_output_scale);
       }
    } catch (const NoConvergenceError&) {
-      model.get_problems().flag_no_convergence();
+      model.get_problems().flag_thrown("no convergence");
    } catch (const NonPerturbativeRunningError&) {
       model.get_problems().flag_no_perturbative();
    } catch (const Error& error) {
@@ -184,10 +188,17 @@ void MSSMcbs_spectrum_generator<T>::write_running_couplings(const std::string& f
    MSSMcbs<T> tmp_model(model);
    tmp_model.run_to(low_scale);
 
-   CMSSM_parameter_getter parameter_getter;
-   Coupling_monitor<MSSMcbs<T>, CMSSM_parameter_getter>
-      coupling_monitor(tmp_model, parameter_getter);
+   // returns parameters at given scale
+   auto data_getter = [&tmp_model](double scale) {
+      tmp_model.run_to(scale);
+      return CMSSM_parameter_getter::get_parameters(tmp_model);
+   };
 
+   std::vector<std::string> parameter_names(
+      std::cbegin(CMSSM_info::parameter_names),
+      std::cend(CMSSM_info::parameter_names));
+
+   Coupling_monitor coupling_monitor(data_getter, parameter_names);
    coupling_monitor.run(low_scale, high_scale, 100, true);
    coupling_monitor.write_to_file(filename);
 }

@@ -75,3 +75,5 @@ InitialGuessAtHighScale = {
 
 UseHiggs2LoopMSSM = True;
 EffectiveMu = \[Mu];
+
+FSCalculateDecays = True;

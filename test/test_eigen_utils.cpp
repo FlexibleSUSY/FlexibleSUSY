@@ -21,8 +21,66 @@
 
 #include <boost/test/unit_test.hpp>
 #include "eigen_utils.hpp"
+#include <complex>
+#include <typeinfo>
 
 using namespace flexiblesusy;
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_array_same)
+{
+   Eigen::Array<double,3,1> v1, v2;
+   v1 << 1.0, 2.0, 3.0;
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_array_zero)
+{
+   Eigen::Array<double,3,1> v1, v2;
+   v1.setZero();
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_array_small)
+{
+   Eigen::Array<double,3,1> v1, v2;
+   v1 << 0.0, 100.0, 1000.0;
+   v2 << 0.0, 101.0, 1001.0;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-2));
+   BOOST_CHECK(!is_equal_rel(v1, v2, 9e-3));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_matrix_same)
+{
+   Eigen::Matrix<double,3,1> v1, v2;
+   v1 << 1.0, 2.0, 3.0;
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_matrix_zero)
+{
+   Eigen::Matrix<double,3,1> v1, v2;
+   v1.setZero();
+   v2 = v1;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(test_is_equal_rel_matrix_small)
+{
+   Eigen::Matrix<double,3,1> v1, v2;
+   v1 << 0.0, 100.0, 1000.0;
+   v2 << 0.0, 101.0, 1001.0;
+
+   BOOST_CHECK(is_equal_rel(v1, v2, 1e-2));
+   BOOST_CHECK(!is_equal_rel(v1, v2, 9e-3));
+}
 
 BOOST_AUTO_TEST_CASE(test_div_safe_zero)
 {
@@ -41,6 +99,18 @@ BOOST_AUTO_TEST_CASE(test_div_safe_zero)
 BOOST_AUTO_TEST_CASE(test_div_safe)
 {
    Eigen::Array<double,3,1> v1, v2, result;
+   v1 << 1, 2, 3;
+   v2 << 0, 1, 2;
+   result = div_safe(v1, v2);
+
+   BOOST_CHECK_EQUAL(result(0), 0.);
+   BOOST_CHECK_EQUAL(result(1), 2.);
+   BOOST_CHECK_EQUAL(result(2), 3./2.);
+}
+
+BOOST_AUTO_TEST_CASE(test_div_safe_dynamic)
+{
+   Eigen::ArrayXd v1(3,1), v2(3,1), result(3,1);
    v1 << 1, 2, 3;
    v2 << 0, 1, 2;
    result = div_safe(v1, v2);
@@ -93,6 +163,40 @@ BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix)
    BOOST_CHECK_EQUAL(vec1(2), 2);
 }
 
+BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix_abs)
+{
+   Eigen::Array<double,3,1> vec1;
+   vec1 << 1, 2, 3;
+
+   Eigen::Matrix<double,3,3> matrix;
+   matrix << 3, 0, 0,
+             0, 1, 0,
+             0, 0, -2; // uses abs() of diagonal values
+
+   reorder_vector(vec1, matrix);
+
+   BOOST_CHECK_EQUAL(vec1(0), 3);
+   BOOST_CHECK_EQUAL(vec1(1), 1);
+   BOOST_CHECK_EQUAL(vec1(2), 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix_complex)
+{
+   Eigen::Array<double,3,1> vec1;
+   vec1 << 1, 2, 3;
+
+   Eigen::Matrix<std::complex<double>,3,3> matrix;
+   matrix << 3, 0, 0,
+             0, 1, 0,
+             0, 0, 2;
+
+   reorder_vector(vec1, matrix);
+
+   BOOST_CHECK_EQUAL(vec1(0), 3);
+   BOOST_CHECK_EQUAL(vec1(1), 1);
+   BOOST_CHECK_EQUAL(vec1(2), 2);
+}
+
 BOOST_AUTO_TEST_CASE(test_remove_if_equal)
 {
    Eigen::Array<double,5,1> src;
@@ -121,4 +225,48 @@ BOOST_AUTO_TEST_CASE(test_remove_if_equal_double_indices)
    BOOST_CHECK_EQUAL(dst(0), 1);
    BOOST_CHECK_EQUAL(dst(1), 4);
    BOOST_CHECK_EQUAL(dst(2), 5);
+}
+
+BOOST_AUTO_TEST_CASE(test_normalize_to_interval_real)
+{
+   Eigen::Matrix<double,2,2> m;
+   m << -2., -1., 0., 2;
+
+   normalize_to_interval(m, -1., 1.);
+
+   BOOST_CHECK_EQUAL(m(0,0), -1.);
+   BOOST_CHECK_EQUAL(m(0,1), -1.);
+   BOOST_CHECK_EQUAL(m(1,0),  0.);
+   BOOST_CHECK_EQUAL(m(1,1),  1.);
+}
+
+BOOST_AUTO_TEST_CASE(test_normalize_to_interval_complex)
+{
+   Eigen::Matrix<std::complex<double>,2,2> m;
+   m << -2., -1., 0., 2.;
+
+   normalize_to_interval(m, 1.);
+
+   BOOST_CHECK_CLOSE(std::real(m(0,0)), -1., 1e-15);
+   BOOST_CHECK_CLOSE(std::real(m(0,1)), -1., 1e-15);
+   BOOST_CHECK_SMALL(std::real(m(1,0)), 1e-15);
+   BOOST_CHECK_CLOSE(std::real(m(1,1)),  1., 1e-15);
+   BOOST_CHECK_SMALL(std::imag(m(0,0)), 1e-15);
+   BOOST_CHECK_SMALL(std::imag(m(0,1)), 1e-15);
+   BOOST_CHECK_SMALL(std::imag(m(1,0)), 1e-15);
+   BOOST_CHECK_SMALL(std::imag(m(1,1)), 1e-15);
+
+   m << std::polar(2.,1.), std::polar(1.,1.),
+        std::polar(0.5,1.), std::polar(2.,-1.);
+
+   normalize_to_interval(m, 1.);
+
+   BOOST_CHECK_CLOSE(std::abs(m(0,0)),  1., 1e-15);
+   BOOST_CHECK_CLOSE(std::abs(m(0,1)),  1., 1e-15);
+   BOOST_CHECK_CLOSE(std::abs(m(1,0)), 0.5, 1e-15);
+   BOOST_CHECK_CLOSE(std::abs(m(1,1)),  1., 1e-15);
+   BOOST_CHECK_CLOSE(std::arg(m(0,0)),  1., 1e-15);
+   BOOST_CHECK_CLOSE(std::arg(m(0,1)),  1., 1e-15);
+   BOOST_CHECK_CLOSE(std::arg(m(1,0)),  1., 1e-15);
+   BOOST_CHECK_CLOSE(std::arg(m(1,1)), -1., 1e-15);
 }

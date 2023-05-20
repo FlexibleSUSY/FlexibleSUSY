@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef linalg2_hpp
-#define linalg2_hpp
+#ifndef LINALG2_H
+#define LINALG2_H
 
 #include <cstdint>
 #include <limits>
@@ -28,7 +28,7 @@
 #include <Eigen/Core>
 #include <Eigen/SVD>
 #include <Eigen/Eigenvalues>
-#include "config.h"
+#include <unsupported/Eigen/MatrixFunctions>
 
 namespace flexiblesusy {
 
@@ -45,8 +45,8 @@ void svd_eigen
     Eigen::JacobiSVD<Eigen::Matrix<Scalar, M, N> >
 	svd(m, (u ? Eigen::ComputeFullU : 0) | (vh ? Eigen::ComputeFullV : 0));
     s = svd.singularValues();
-    if (u)  *u  = svd.matrixU();
-    if (vh) *vh = svd.matrixV().adjoint();
+    if (u)  { *u  = svd.matrixU(); }
+    if (vh) { *vh = svd.matrixV().adjoint(); }
 }
 
 template<class Real, class Scalar, int N>
@@ -58,112 +58,8 @@ void hermitian_eigen
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar,N,N> >
 	es(m, z ? Eigen::ComputeEigenvectors : Eigen::EigenvaluesOnly);
     w = es.eigenvalues();
-    if (z) *z = es.eigenvectors();
+    if (z) { *z = es.eigenvectors(); }
 }
-
-#ifdef ENABLE_LAPACK
-
-#   ifdef ENABLE_ILP64MKL_WORKAROUND
-using lapack_int = int64_t;
-#   else
-using lapack_int = int;
-#   endif
-
-extern "C" void zgesvd_
-(const char& JOBU, const char& JOBVT, const lapack_int& M, const lapack_int& N,
- std::complex<double> *A, const lapack_int& LDA, double *S,
- std::complex<double> *U, const lapack_int& LDU,
- std::complex<double> *VT, const lapack_int& LDVT,
- std::complex<double> *WORK, const lapack_int& LWORK, double *RWORK,
- lapack_int& INFO);
-
-extern "C" void dgesvd_
-(const char& JOBU, const char& JOBVT, const lapack_int& M, const lapack_int& N,
- double *A, const lapack_int& LDA, double *S,
- double *U, const lapack_int& LDU,
- double *VT, const lapack_int& LDVT,
- double *WORK, const lapack_int& LWORK,
- lapack_int& INFO);
-
-extern "C" void zheev_
-(const char& JOBZ, const char& UPLO, const lapack_int& N,
- std::complex<double> *A, const lapack_int& LDA, double *W,
- std::complex<double> *WORK, const lapack_int& LWORK, double *RWORK,
- lapack_int& INFO);
-
-extern "C" void dsyev_
-(const char& JOBZ, const char& UPLO, const lapack_int& N,
- double *A, const lapack_int& LDA, double *W,
- double *WORK, const lapack_int& LWORK,
- lapack_int& INFO);
-
-#define def_svd_lapack(t, f, ...)					\
-template<int M, int N>							\
-void svd_lapack								\
-(const Eigen::Matrix<t, M, N>& m,					\
- Eigen::Array<double, MIN_(M, N), 1>& s,				\
- Eigen::Matrix<t, M, M> *u  = 0,					\
- Eigen::Matrix<t, N, N> *vh = 0)					\
-{									\
-    const     char JOBU  = u  ? 'A' : 'N';				\
-    const     char JOBVT = vh ? 'A' : 'N';				\
-    Eigen::Matrix<t, M, N> A = m;					\
-    const     lapack_int LDA   = M;					\
-              t   *U    = u ? u->data() : 0;				\
-    const     lapack_int LDU   = M;					\
-              t   *VT   = vh ? vh->data() : 0;				\
-    const     lapack_int LDVT  = N;					\
-    const     lapack_int LWORK = get_lwork(__VA_ARGS__,);		\
-    Eigen::Array<t, LWORK, 1> WORK;					\
-    decl_rwork(__VA_ARGS__);						\
-    lapack_int INFO;							\
-    f(JOBU, JOBVT, M, N, A.data(), LDA, s.data(), U, LDU, VT, LDVT,	\
-      WORK.data(), LWORK, put_rwork(__VA_ARGS__) INFO);			\
-}
-
-#define def_hermitian_lapack(s, f, ...)					\
-template<int N>								\
-void hermitian_lapack							\
-(const Eigen::Matrix<s, N, N>& m,					\
- Eigen::Array<double, N, 1>& w,						\
- Eigen::Matrix<s, N, N> *z = 0)						\
-{									\
-    const     char JOBZ = z ? 'V' : 'N';				\
-    const     char UPLO = 'L';						\
-    Eigen::Matrix<s, N, N> A = m;					\
-    const     lapack_int LDA   = N;					\
-    const     lapack_int LWORK = get_lwork(__VA_ARGS__,);		\
-    Eigen::Array<s, LWORK, 1> WORK;					\
-    decl_rwork(__VA_ARGS__);						\
-    lapack_int INFO;							\
-    f(JOBZ, UPLO, N, A.data(), LDA, w.data(), WORK.data(), LWORK,	\
-      put_rwork(__VA_ARGS__) INFO);					\
-    if (z) *z = A;							\
-}
-
-#define get_lwork(lwork, ...) (lwork)
-
-#define get_rwork_macro(_1, _2, name, ...) name
-
-#define nop_(_1)
-
-#define do_decl_rwork(_1, lrwork) Eigen::Array<double, (lrwork), 1> RWORK
-
-#define decl_rwork(...) \
-    get_rwork_macro(__VA_ARGS__, do_decl_rwork, nop_,)(__VA_ARGS__)
-
-#define do_put_rwork(_1, _2) RWORK.data(),
-
-#define put_rwork(...) \
-    get_rwork_macro(__VA_ARGS__, do_put_rwork, nop_,)(__VA_ARGS__)
-
-def_svd_lapack(std::complex<double>, zgesvd_, 3*MAX_(M,N), 5*MIN_(M,N))
-def_svd_lapack(double, dgesvd_, MAX_(3*MIN_(M,N)+MAX_(M,N),5*MIN_(M,N)))
-
-def_hermitian_lapack(std::complex<double>, zheev_, 2*N-1, 3*N-2)
-def_hermitian_lapack(double, dsyev_, 3*N-1)
-
-#endif // ENABLE_LAPACK
 
 /**
  * Template version of DDISNA from LAPACK.
@@ -193,33 +89,39 @@ void disna(const char& JOB, const Eigen::Array<Real, MIN_(M, N), 1>& D,
       LEFT  = std::toupper(JOB) == 'L';
       RIGHT = std::toupper(JOB) == 'R';
       SINGUL = LEFT || RIGHT;
-      if (EIGEN)
+      if (EIGEN) {
 	 K = M;
-      else if (SINGUL)
+      } else if (SINGUL) {
          K = MIN_(M, N);
-      if (!EIGEN && !SINGUL)
+      }
+      if (!EIGEN && !SINGUL) {
          INFO = -1;
-      else if (M < 0)
+      } else if (M < 0) {
          INFO = -2;
-      else if (K < 0)
+      } else if (K < 0) {
          INFO = -3;
-      else {
+      } else {
          INCR = true;
          DECR = true;
          for (I = 0; I < K - 1; I++) {
-            if (INCR)
+            if (INCR) {
                INCR = INCR && D(I) <= D(I+1);
-            if (DECR)
+            }
+            if (DECR) {
 	       DECR = DECR && D(I) >= D(I+1);
+            }
 	 }
          if (SINGUL && K > 0) {
-            if (INCR)
+            if (INCR) {
                INCR = INCR && ZERO <= D(0);
-            if (DECR)
+            }
+            if (DECR) {
                DECR = DECR && D(K-1) >= ZERO;
+            }
          }
-         if (!(INCR || DECR))
+         if (!(INCR || DECR)) {
             INFO = -4;
+         }
       }
       if (INFO != 0) {
          // CALL XERBLA( 'DDISNA', -INFO )
@@ -228,14 +130,15 @@ void disna(const char& JOB, const Eigen::Array<Real, MIN_(M, N), 1>& D,
 //
 //     Quick return if possible
 //
-      if (K == 0)
+      if (K == 0) {
          return;
+      }
 //
 //     Compute reciprocal condition numbers
 //
-      if (K == 1)
+      if (K == 1) {
          SEP(0) = std::numeric_limits<Real>::max();
-      else {
+      } else {
          OLDGAP = std::fabs(D(1) - D(0));
          SEP(0) = OLDGAP;
          for (I = 1; I < K - 1; I++) {
@@ -245,13 +148,16 @@ void disna(const char& JOB, const Eigen::Array<Real, MIN_(M, N), 1>& D,
 	 }
          SEP(K-1) = OLDGAP;
       }
-      if (SINGUL)
+      if (SINGUL) {
          if ((LEFT && M > N) || (RIGHT && M < N)) {
-            if (INCR)
+            if (INCR) {
                SEP( 0 ) = std::min(SEP( 0 ), D( 0 ));
-            if (DECR)
+            }
+            if (DECR) {
                SEP(K-1) = std::min(SEP(K-1), D(K-1));
+            }
          }
+      }
 //
 //     Ensure that reciprocal condition numbers are not less than
 //     threshold, in order to limit the size of the error bound
@@ -262,12 +168,14 @@ void disna(const char& JOB, const Eigen::Array<Real, MIN_(M, N), 1>& D,
       EPS = std::numeric_limits<Real>::epsilon();
       SAFMIN = std::numeric_limits<Real>::min();
       ANORM = std::max(std::fabs(D(0)), std::fabs(D(K-1)));
-      if (ANORM == ZERO)
+      if (ANORM == ZERO) {
          THRESH = EPS;
-      else
+      } else {
          THRESH = std::max(EPS*ANORM, SAFMIN);
-      for (I = 0; I < K; I++)
+      }
+      for (I = 0; I < K; I++) {
 	 SEP(I) = std::max(SEP(I), THRESH);
+      }
 }
 
 
@@ -280,52 +188,6 @@ void svd_internal
 {
     svd_eigen(m, s, u, vh);
 }
-
-#ifdef ENABLE_LAPACK
-
-// ZGESVD of ATLAS seems to be faster than Eigen::JacobiSVD for M, N >= 4
-
-template<class Scalar, int M, int N>
-void svd_internal
-(const Eigen::Matrix<Scalar, M, N>& m,
- Eigen::Array<double, MIN_(M, N), 1>& s,
- Eigen::Matrix<Scalar, M, M> *u,
- Eigen::Matrix<Scalar, N, N> *vh)
-{
-    svd_lapack(m, s, u, vh);
-}
-
-template<class Scalar>
-void svd_internal
-(const Eigen::Matrix<Scalar, 3, 3>& m,
- Eigen::Array<double, 3, 1>& s,
- Eigen::Matrix<Scalar, 3, 3> *u,
- Eigen::Matrix<Scalar, 3, 3> *vh)
-{
-    svd_eigen(m, s, u, vh);
-}
-
-template<class Scalar>
-void svd_internal
-(const Eigen::Matrix<Scalar, 2, 2>& m,
- Eigen::Array<double, 2, 1>& s,
- Eigen::Matrix<Scalar, 2, 2> *u,
- Eigen::Matrix<Scalar, 2, 2> *vh)
-{
-    svd_eigen(m, s, u, vh);
-}
-
-template<class Scalar>
-void svd_internal
-(const Eigen::Matrix<Scalar, 1, 1>& m,
- Eigen::Array<double, 1, 1>& s,
- Eigen::Matrix<Scalar, 1, 1> *u,
- Eigen::Matrix<Scalar, 1, 1> *vh)
-{
-    svd_eigen(m, s, u, vh);
-}
-
-#endif // ENABLE_LAPACK
 
 template<class Real, class Scalar, int M, int N>
 void svd_errbd
@@ -340,7 +202,7 @@ void svd_errbd
     svd_internal(m, s, u, vh);
 
     // see http://www.netlib.org/lapack/lug/node96.html
-    if (!s_errbd) return;
+    if (!s_errbd) { return; }
     const Real EPSMCH = std::numeric_limits<Real>::epsilon();
     *s_errbd = EPSMCH * s[0];
 
@@ -496,12 +358,12 @@ void diagonalize_hermitian_errbd
     diagonalize_hermitian_internal(m, w, z);
 
     // see http://www.netlib.org/lapack/lug/node89.html
-    if (!w_errbd) return;
+    if (!w_errbd) { return; }
     const Real EPSMCH = std::numeric_limits<Real>::epsilon();
     Real mnorm = std::max(std::abs(w[0]), std::abs(w[N-1]));
     *w_errbd = EPSMCH * mnorm;
 
-    if (!z_errbd) return;
+    if (!z_errbd) { return; }
     Eigen::Array<Real, N, 1> RCONDZ;
     int INFO;
     disna<N, N>('E', w, RCONDZ, INFO);
@@ -613,12 +475,6 @@ void diagonalize_hermitian
     diagonalize_hermitian_errbd(m, w, 0, &w_errbd);
 }
 
-template<class Real>
-struct RephaseOp {
-    std::complex<Real> operator() (const std::complex<Real>& z) const
-	{ return std::polar(Real(1), std::arg(z)/2); }
-};
-
 template<class Real, int N>
 void diagonalize_symmetric_errbd
 (const Eigen::Matrix<std::complex<Real>, N, N>& m,
@@ -627,12 +483,31 @@ void diagonalize_symmetric_errbd
  Real *s_errbd = 0,
  Eigen::Array<Real, N, 1> *u_errbd = 0)
 {
-    svd_errbd(m, s, u, (Eigen::Matrix<std::complex<Real>, N, N> *)0,
-	      s_errbd, u_errbd);
-    if (!u) return;
-    Eigen::Array<std::complex<Real>, N, 1> diag =
-	(u->adjoint() * m * u->conjugate()).diagonal();
-    *u *= diag.unaryExpr(RephaseOp<Real>()).matrix().asDiagonal();
+   if (!u) {
+      svd_errbd(m, s, u, u, s_errbd, u_errbd);
+      return;
+   }
+   Eigen::Matrix<std::complex<Real>, N, N> vh;
+   svd_errbd(m, s, u, &vh, s_errbd, u_errbd);
+   // see Eq. (5) of https://doi.org/10.1016/j.amc.2014.01.170
+   Eigen::Matrix<std::complex<Real>, N, N> const Z = u->adjoint() * vh.transpose();
+   Eigen::Matrix<std::complex<Real>, N, N> Zsqrt = Z.sqrt().eval();
+   if (!Zsqrt.isUnitary()) {
+      // The formula assumes that sqrt of a unitary matrix is also unitary.
+      // This is not always true when using Eigen's build in sqrt function
+      // so we use a more generic matrixFunction in those cases.
+      // n-th derivative of sqrt(x)
+      const auto sqrtfn =
+         [](std::complex<Real> x, int n) {
+            static constexpr Real Pi = 3.141592653589793238462643383279503L;
+            return std::sqrt(Pi*x)/(2*std::tgamma(static_cast<Real>(1.5)-n)*std::pow(x, n));
+         };
+      Zsqrt = Z.matrixFunction(sqrtfn).eval();
+      if (!Zsqrt.isUnitary()) {
+         std::runtime_error("Zsqrt matrix must be unitary");
+      }
+   }
+   *u *= Zsqrt;
 }
 
 /**
@@ -756,8 +631,12 @@ void diagonalize_symmetric_errbd
     Eigen::Matrix<Real, N, N> z;
     diagonalize_hermitian_errbd(m, s, u ? &z : 0, s_errbd, u_errbd);
     // see http://forum.kde.org/viewtopic.php?f=74&t=62606
-    if (u) *u = z * s.template cast<std::complex<Real> >().
-		unaryExpr(FlipSignOp<Real>()).matrix().asDiagonal();
+    if (u) {
+        *u = z * s.template cast<std::complex<Real>>()
+                    .unaryExpr(FlipSignOp<Real>())
+                    .matrix()
+                    .asDiagonal();
+    }
     s = s.abs();
 }
 
@@ -892,8 +771,8 @@ void reorder_svd_errbd
 	p.indices().template segment<MIN_(M, N)>(0).reverseInPlace();
 	vh->transpose() *= p;
     }
-    if (u_errbd) u_errbd->reverseInPlace();
-    if (v_errbd) v_errbd->reverseInPlace();
+    if (u_errbd) { u_errbd->reverseInPlace(); }
+    if (v_errbd) { v_errbd->reverseInPlace(); }
 }
 
 /**
@@ -1024,8 +903,8 @@ void reorder_diagonalize_symmetric_errbd
 {
     diagonalize_symmetric_errbd(m, s, u, s_errbd, u_errbd);
     s.reverseInPlace();
-    if (u) *u = u->rowwise().reverse().eval();
-    if (u_errbd) u_errbd->reverseInPlace();
+    if (u) { *u = u->rowwise().reverse().eval(); }
+    if (u_errbd) { u_errbd->reverseInPlace(); }
 }
 
 template<class Real, int N>
@@ -1043,14 +922,14 @@ void reorder_diagonalize_symmetric_errbd
               [&s] (int i, int j) { return s[i] < s[j]; });
 #if EIGEN_VERSION_AT_LEAST(3,1,4)
     s.matrix().transpose() *= p;
-    if (u_errbd) u_errbd->matrix().transpose() *= p;
+    if (u_errbd) { u_errbd->matrix().transpose() *= p; }
 #else
     Eigen::Map<Eigen::Matrix<Real, N, 1> >(s.data()).transpose() *= p;
-    if (u_errbd)
-	Eigen::Map<Eigen::Matrix<Real, N, 1> >(u_errbd->data()).transpose()
-	    *= p;
+    if (u_errbd) {
+        Eigen::Map<Eigen::Matrix<Real, N, 1>>(u_errbd->data()).transpose() *= p;
+    }
 #endif
-    if (u) *u *= p;
+    if (u) { *u *= p; }
 }
 
 /**
@@ -1168,7 +1047,7 @@ void fs_svd_errbd
  Eigen::Array<Real, MIN_(M, N), 1> *v_errbd = 0)
 {
     reorder_svd_errbd(m, s, u, v, s_errbd, u_errbd, v_errbd);
-    if (u) u->transposeInPlace();
+    if (u) { u->transposeInPlace(); }
 }
 
 /**
@@ -1382,7 +1261,7 @@ void fs_diagonalize_symmetric_errbd
  Eigen::Array<Real, N, 1> *u_errbd = 0)
 {
     reorder_diagonalize_symmetric_errbd(m, s, u, s_errbd, u_errbd);
-    if (u) u->transposeInPlace();
+    if (u) { u->transposeInPlace(); }
 }
 
 /**
@@ -1505,14 +1384,14 @@ void fs_diagonalize_hermitian_errbd
               [&w] (int i, int j) { return std::abs(w[i]) < std::abs(w[j]); });
 #if EIGEN_VERSION_AT_LEAST(3,1,4)
     w.matrix().transpose() *= p;
-    if (z_errbd) z_errbd->matrix().transpose() *= p;
+    if (z_errbd) { z_errbd->matrix().transpose() *= p; }
 #else
     Eigen::Map<Eigen::Matrix<Real, N, 1> >(w.data()).transpose() *= p;
-    if (z_errbd)
-	Eigen::Map<Eigen::Matrix<Real, N, 1> >(z_errbd->data()).transpose()
-	    *= p;
+    if (z_errbd) {
+        Eigen::Map<Eigen::Matrix<Real, N, 1>>(z_errbd->data()).transpose() *= p;
+    }
 #endif
-    if (z) *z = (*z * p).adjoint().eval();
+    if (z) { *z = (*z * p).adjoint().eval(); }
 }
 
 /**
@@ -1619,6 +1498,59 @@ void fs_diagonalize_hermitian
     fs_diagonalize_hermitian_errbd(m, w, 0, &w_errbd);
 }
 
+/**
+ * Calculates the mass of a singlet from a (possibly complex)
+ * numerical value by taking the magnitude of the value.
+ *
+ * @param value numerical value
+ * @return mass
+ */
+template <typename T>
+double calculate_singlet_mass(T value) noexcept
+{
+   return std::abs(value);
+}
+
+/**
+ * Calculates the mass of a Majoran fermion singlet from a (possibly
+ * complex) numerical value by taking the magnitude of the value.
+ *
+ * The phase is set to exp(i theta/2), where theta is the phase angle
+ * of the complex value.  If the value is pure real, then the phase
+ * will be set to 1.  If the value is purely imaginary, then the phase
+ * will be set to \f$e^{i \pi/2}\f$.
+ *
+ * @param value numerical value
+ * @param[out] phase phase
+ * @return mass
+ */
+template <typename T>
+double calculate_majorana_singlet_mass(T value, std::complex<double>& phase)
+{
+   phase = std::polar(1., 0.5 * std::arg(std::complex<double>(value)));
+   return std::abs(value);
+}
+
+/**
+ * Calculates the mass of a Dirac fermion singlet from a (possibly
+ * complex) numerical value by taking the magnitude of the value.
+ *
+ * The phase is set to exp(i theta), where theta is the phase angle of
+ * the complex value.  If the value is pure real, then the phase will
+ * be set to 1.  If the value is purely imaginary, then the phase will
+ * be set to \f$e^{i \pi}\f$.
+ *
+ * @param value numerical value
+ * @param[out] phase phase
+ * @return mass
+ */
+template <typename T>
+double calculate_dirac_singlet_mass(T value, std::complex<double>& phase)
+{
+   phase = std::polar(1., std::arg(std::complex<double>(value)));
+   return std::abs(value);
+}
+
 } // namespace flexiblesusy
 
-#endif // linalg2_hpp
+#endif // LINALG2_H

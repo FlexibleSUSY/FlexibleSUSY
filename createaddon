@@ -3,9 +3,6 @@
 # addon creation script for FlexibleSUSY
 # Author: Alexander Voigt
 
-# directory of this script
-BASEDIR=$(dirname $0)
-
 overwrite="no"
 name=""
 
@@ -13,7 +10,6 @@ name=""
 exit_ok="0"
 exit_syntax_error="1"
 exit_addon_dir_exists="2"
-exit_no_default_addon="3"
 
 #_____________________________________________________________________
 help() {

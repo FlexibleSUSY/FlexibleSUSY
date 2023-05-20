@@ -37,4 +37,4 @@ CM33 standard_VCKM(Real gamma)
     return standard_VCKM(gamma, modVub_cent);
 }
 
-}
+} // namespace flexiblesusy

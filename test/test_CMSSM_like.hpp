@@ -2,7 +2,7 @@
 #ifndef TEST_CMSSM_LIKE_H
 #define TEST_CMSSM_LIKE_H
 
-#include "test.h"
+#include "test_legacy.hpp"
 #include "softsusy.h"
 #include "wrappers.hpp"
 #include "ew_input.hpp"

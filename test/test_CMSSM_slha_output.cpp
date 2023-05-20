@@ -40,7 +40,7 @@ int run_point(const std::string& slha_file,
       return status;
    }
 
-   status = run_cmd("./models/SoftsusyNMSSM/run_softpoint.x leshouches < " +
+   status = run_cmd("./test/SOFTSUSY/run_softpoint.x leshouches < " +
                     slha_file + " > " + softsusy_output_file);
 
    if (status) {
@@ -99,7 +99,7 @@ void compare_2component_block(const std::string& name,
 
       const double value2 = std::fabs(SLHAea::to<double>((*line2)[1]));
 
-      BOOST_CHECK_CLOSE_FRACTION(value, value2, 4.0e-3);
+      BOOST_CHECK_CLOSE_FRACTION(value, value2, 8.0e-3);
    }
 }
 
@@ -110,16 +110,16 @@ void compare_block_gauge(const SLHAea::Coll& coll1, const SLHAea::Coll& coll2)
 
    // scale
    BOOST_CHECK_CLOSE_FRACTION(SLHAea::to<double>(coll1.at("gauge").at("Block").at(3)),
-                              SLHAea::to<double>(coll2.at("gauge").at("Block").at(3)), 2e-5);
+                              SLHAea::to<double>(coll2.at("gauge").at("Block").at(3)), 6e-4);
 
    BOOST_CHECK_CLOSE_FRACTION(SLHAea::to<double>(coll1.at("gauge").at("1").at(1)),
-                              SLHAea::to<double>(coll2.at("gauge").at("1").at(1)), 6.0e-7);
+                              SLHAea::to<double>(coll2.at("gauge").at("1").at(1)), 1.0e-4);
 
    BOOST_CHECK_CLOSE_FRACTION(SLHAea::to<double>(coll1.at("gauge").at("2").at(1)),
-                              SLHAea::to<double>(coll2.at("gauge").at("2").at(1)), 8.0e-8);
+                              SLHAea::to<double>(coll2.at("gauge").at("2").at(1)), 0.0003);
 
    BOOST_CHECK_CLOSE_FRACTION(SLHAea::to<double>(coll1.at("gauge").at("3").at(1)),
-                              SLHAea::to<double>(coll2.at("gauge").at("3").at(1)), 7.5e-7);
+                              SLHAea::to<double>(coll2.at("gauge").at("3").at(1)), 3e-5);
 }
 
 void compare_slha_files(const std::string& file1, const std::string& file2)

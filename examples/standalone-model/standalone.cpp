@@ -132,12 +132,12 @@ void self_energy_example()
    double p = Electroweak_constants::MZ;
    double self_energy_VZ = Re(mssm.self_energy_VZ_1loop(p));
 
-   double vertex_barFe_VZ_Fe_PR = mssm.CpbarFeVZFePR(0, 0);
-   double vertex_barFe_VZ_Fe_PL = mssm.CpbarFeVZFePL(0, 0);
+   double vertex_barFe_Fe_VZ_PR = mssm.CpbarFeFeVZPR(0, 0);
+   double vertex_barFe_Fe_VZ_PL = mssm.CpbarFeFeVZPL(0, 0);
 
    INFO("Sigma_VZ(MZ) = " << self_energy_VZ);
-   INFO("Vertex(bar(Fe),VZ,Fe)_PR = " << vertex_barFe_VZ_Fe_PR);
-   INFO("Vertex(bar(Fe),VZ,Fe)_PL = " << vertex_barFe_VZ_Fe_PL);
+   INFO("Vertex(bar(Fe),Fe,VZ)_PR = " << vertex_barFe_Fe_VZ_PR);
+   INFO("Vertex(bar(Fe),Fe,VZ)_PL = " << vertex_barFe_Fe_VZ_PL);
 }
 
 int main()

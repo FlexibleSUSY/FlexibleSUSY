@@ -1,0 +1,191 @@
+FSModelName = "@CLASSNAME@";
+FSDefaultSARAHModel = MSSMNoFV;
+
+MINPAR = {
+    {3, TanBeta}
+};
+
+EXTPAR = { {0, Qin},
+           {1, M1},
+           {2, M2},
+           {3, M3},
+           {11, AtIN},
+           {12, AbIN},
+           {13, AtauIN},
+           {14, AcIN},
+           {15, AsIN},
+           {16, AmuonIN},
+           {17, AuIN},
+           {18, AdIN},
+           {19, AeIN},
+           {23, MuIN},
+           {24, mA2IN},
+           {31, ml11IN},
+           {32, ml22IN},
+           {33, ml33IN},
+           {34, me11IN},
+           {35, me22IN},
+           {36, me33IN},
+           {41, mq11IN},
+           {42, mq22IN},
+           {43, mq33IN},
+           {44, mu11IN},
+           {45, mu22IN},
+           {46, mu33IN},
+           {47, md11IN},
+           {48, md22IN},
+           {49, md33IN},
+           {100, Mlow}
+};
+
+EWSBOutputParameters = { mHd2, mHu2 };
+
+SUSYScale = Sqrt[M[St[1]] M[St[2]]];
+
+SUSYScaleFirstGuess = LowEnergyConstant[MZ];
+
+SUSYScaleInput = {};
+
+Qstop = With[
+    { mt = Yu[3,3] vu / Sqrt[2],
+      mQ2 = mq33IN^2,
+      mU2 = mu33IN^2,
+      Xt = AtIN - MuIN/TanBeta
+    },
+    Simplify @
+    Sqrt[Sqrt[Times @@ Eigenvalues[{{mt^2 + mQ2, mt Xt}, {mt Xt, mt^2 + mU2}}]]]
+];
+
+QstopGuess = With[
+    { mt = 160,
+      mQ2 = mq33IN^2,
+      mU2 = mu33IN^2,
+      Xt = AtIN - MuIN/TanBeta
+    },
+    Simplify @
+    Sqrt[Sqrt[Times @@ Eigenvalues[{{mt^2 + mQ2, mt Xt}, {mt Xt, mt^2 + mU2}}]]]
+];
+
+EvalIf[expr_] := Block[{If}, expr];
+
+HighScale = EvalIf @ If[Qin != 0, Qin, Qstop];
+
+HighScaleFirstGuess = EvalIf @ If[Qin != 0, Qin, QstopGuess];
+
+HighScaleInput = {
+   {T[Ye][1,1], AeIN*Ye[1,1]},
+   {T[Ye][2,2], AmuonIN*Ye[2,2]},
+   {T[Ye][3,3], AtauIN*Ye[3,3]},
+   {T[Yd][1,1], AdIN*Yd[1,1]},
+   {T[Yd][2,2], AsIN*Yd[2,2]},
+   {T[Yd][3,3], AbIN*Yd[3,3]},
+   {T[Yu][1,1], AuIN*Yu[1,1]},
+   {T[Yu][2,2], AcIN*Yu[2,2]},
+   {T[Yu][3,3], AtIN*Yu[3,3]},
+   {\[Mu], MuIN},
+   {B[\[Mu]], mA2IN/(vu/vd + vd/vu)},
+   {mq2[1,1],mq11IN^2},
+   {mq2[2,2],mq22IN^2},
+   {mq2[3,3],mq33IN^2},
+   {ml2[1,1],ml11IN^2},
+   {ml2[2,2],ml22IN^2},
+   {ml2[3,3],ml33IN^2},
+   {md2[1,1],md11IN^2},
+   {md2[2,2],md22IN^2},
+   {md2[3,3],md33IN^2},
+   {mu2[1,1],mu11IN^2},
+   {mu2[2,2],mu22IN^2},
+   {mu2[3,3],mu33IN^2},
+   {me2[1,1],me11IN^2},
+   {me2[2,2],me22IN^2},
+   {me2[3,3],me33IN^2},
+   {MassB, M1},
+   {MassWB,M2},
+   {MassG,M3}
+};
+
+LowScale = If[Mlow != 0, Mlow, LowEnergyConstant[MZ]];
+
+LowScaleFirstGuess = If[Mlow != 0, Mlow, LowEnergyConstant[MZ]];
+
+LowScaleInput = {
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic},
+   {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+   {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
+};
+
+InitialGuessAtLowScale = {
+   {vd, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+   {vu, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtHighScale = {
+   {\[Mu]   , 1.0},
+   {B[\[Mu]], 0.0}
+};
+
+UseHiggs2LoopMSSM = True;
+EffectiveMu = \[Mu];
+UseMSSM3LoopRGEs = True;
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYOutput,
+           {{0, Hold[HighScale]},
+            {1, Hold[SUSYScale]},
+            {2, Hold[LowScale]} } },
+   {FlexibleSUSYLowEnergy, NoScale,
+           {{0, FlexibleSUSYObservable`AMM[Fm]},
+            {1, FlexibleSUSYObservable`AMMUncertainty[Fm]},
+            {2, FlexibleSUSYObservable`aMuonGM2Calc},
+            {3, FlexibleSUSYObservable`aMuonGM2CalcUncertainty} } },
+   {ALPHA, {{ArcSin[Pole[ZH[2,2]]]}}},
+   {HMIX , {{1, \[Mu]},
+            {2, vu / vd},
+            {3, Sqrt[vu^2 + vd^2]},
+            {4, M[Ah[2]]^2},
+            {101, B[\[Mu]]},
+            {102, vd},
+            {103, vu} } },
+   {Au,    {{1, 1, T[Yu][1,1] / Yu[1,1]},
+            {2, 2, T[Yu][2,2] / Yu[2,2]},
+            {3, 3, T[Yu][3,3] / Yu[3,3]} } },
+   {Ad,    {{1, 1, T[Yd][1,1] / Yd[1,1]},
+            {2, 2, T[Yd][2,2] / Yd[2,2]},
+            {3, 3, T[Yd][3,3] / Yd[3,3]} } },
+   {Ae,    {{1, 1, T[Ye][1,1] / Ye[1,1]},
+            {2, 2, T[Ye][2,2] / Ye[2,2]},
+            {3, 3, T[Ye][3,3] / Ye[3,3]} } },
+   {MSOFT, {{1, MassB},
+            {2, MassWB},
+            {3, MassG},
+            {21, mHd2},
+            {22, mHu2},
+            {31, SignedAbsSqrt[ml2[1,1]]},
+            {32, SignedAbsSqrt[ml2[2,2]]},
+            {33, SignedAbsSqrt[ml2[3,3]]},
+            {34, SignedAbsSqrt[me2[1,1]]},
+            {35, SignedAbsSqrt[me2[2,2]]},
+            {36, SignedAbsSqrt[me2[3,3]]},
+            {41, SignedAbsSqrt[mq2[1,1]]},
+            {42, SignedAbsSqrt[mq2[2,2]]},
+            {43, SignedAbsSqrt[mq2[3,3]]},
+            {44, SignedAbsSqrt[mu2[1,1]]},
+            {45, SignedAbsSqrt[mu2[2,2]]},
+            {46, SignedAbsSqrt[mu2[3,3]]},
+            {47, SignedAbsSqrt[md2[1,1]]},
+            {48, SignedAbsSqrt[md2[2,2]]},
+            {49, SignedAbsSqrt[md2[3,3]]} } }
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+FSCalculateDecays = False;
+

@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 BeginPackage["TwoLoopMSSM`"];
 EndPackage[];
 
@@ -80,6 +102,8 @@ GetDeltaMPoleOverMRunningMSSMSQCDDRbar::usage = "Returns the general
  Delta M_f/m_f in the MSSM in DR-bar scheme.  Taken from the files
  mt.res and mb.res from hep-ph/0210258.  (mst[i] = i'th running stop
  mass, mg = gluino DR-bar mass, Q = ren. scale).
+
+Note: The 2-loop QCD contribution is not included in this expression!
 
 Parameters:
 
@@ -558,11 +582,13 @@ GetDeltaMPoleOverMRunningMSSMSQCDDRbar2LUniversalMSUSY[] :=
          )
         ];
 
-resmt = Get[FileNameJoin[{"meta", "MSSM", "mt.m"}]];
+resmt = Get[FileNameJoin[{"meta", "MSSM", "tquark_2loop_strong.m"}]];
 
 GetDeltaMPoleOverMRunningMSSMSQCDDRbar2L[] :=
     With[{as = g3^2/(4 Pi)},
          (as/(4 Pi))^2 resmt //. {
+             GS -> 1, colorCF -> 4/3, colorCA -> 3, Tf -> 1/2,
+             log2 -> Log[2], MGl -> mgl, MT -> mt,
              zt2 -> Zeta[2], zt3 -> Zeta[3],
              mmt -> mt^2, mmb -> mb^2,
              mgl -> mg, mmgl -> mgl^2,

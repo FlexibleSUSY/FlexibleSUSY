@@ -52,11 +52,4 @@ HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
-FSWeakMixingAngleOptions = FSSetOption[
-    FSWeakMixingAngleOptions,
-    FSWeakMixingAngleInput -> FSMassW
-];
-FSWeakMixingAngleOptions = FSSetOption[
-    FSWeakMixingAngleOptions,
-    FSWeakMixingAngleExpr  -> ArcSin[Sqrt[1 - (Mass[VWm]^2 - g2^2*vT^2)/Mass[VZ]^2]]
-];
+FSCalculateDecays = True;

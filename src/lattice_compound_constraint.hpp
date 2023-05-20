@@ -59,6 +59,6 @@ protected:
     std::vector<Matching<Lattice>*> components;
 };
 
-}
+} // namespace flexiblesusy
 
 #endif // lattice_compound_constraint_hpp

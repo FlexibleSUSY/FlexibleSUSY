@@ -20,10 +20,10 @@
 #define EIGEN_UTILS_H
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <cassert>
-#include <iomanip>
-#include <sstream>
-#include <string>
+#include <cmath>
+#include <complex>
 #include <limits>
 
 namespace flexiblesusy {
@@ -76,6 +76,36 @@ Derived div_safe(
 }
 
 /**
+ * Returns true when two objects are element-wise equal up to a
+ * relative precision \a eps.
+ *
+ * @param a first object
+ * @param b second object
+ * @param eps maximum relative difference
+ *
+ * @return true when both objects are equal, false otherwise
+ */
+template <class Derived>
+bool is_equal_rel(const Eigen::PlainObjectBase<Derived>& a,
+                  const Eigen::PlainObjectBase<Derived>& b, double eps)
+{
+   if (a.rows() != b.rows() || a.cols() != b.cols()) {
+      return false;
+   }
+
+   for (decltype(a.size()) i = 0; i < a.size(); i++) {
+      const auto ai = a.data()[i];
+      const auto bi = b.data()[i];
+      const auto max = std::max(std::abs(ai), std::abs(bi));
+      if (std::abs(ai - bi) >= eps*(1 + max)) {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+/**
  * The element of v, which is closest to mass, is moved to the
  * position idx.
  *
@@ -101,6 +131,50 @@ void move_goldstone_to(int idx, double mass, Eigen::ArrayBase<DerivedArray>& v,
       v.row(new_pos).swap(v.row(pos));
       z.row(new_pos).swap(z.row(pos));
       pos = new_pos;
+   }
+}
+
+/**
+ * Normalize each element of the given real matrix to be within the
+ * interval [min, max].  Values < min are set to min.  Values > max
+ * are set to max.
+ *
+ * @param m matrix
+ * @param min minimum
+ * @param max maximum
+ */
+template <int M, int N>
+void normalize_to_interval(Eigen::Matrix<double,M,N>& m, double min = -1., double max = 1.)
+{
+   auto data = m.data();
+   const auto size = m.size();
+
+   for (int i = 0; i < size; i++) {
+      if (data[i] < min)
+         data[i] = min;
+      else if (data[i] > max)
+         data[i] = max;
+   }
+}
+
+/**
+ * Normalize each element of the given complex matrix to have a
+ * magnitude within the interval [0, max].  If the magnitude of a
+ * matrix element is > max, then the magnitude is set to max.  The
+ * phase angles are not modified.
+ *
+ * @param m matrix
+ * @param max_mag maximum magnitude
+ */
+template <int M, int N>
+void normalize_to_interval(Eigen::Matrix<std::complex<double>,M,N>& m, double max_mag = 1.)
+{
+   auto data = m.data();
+   const auto size = m.size();
+
+   for (int i = 0; i < size; i++) {
+      if (std::abs(data[i]) > max_mag)
+         data[i] = std::polar(max_mag, std::arg(data[i]));
    }
 }
 
@@ -162,7 +236,9 @@ void reorder_vector(
 }
 
 /**
- * @brief reorders vector v according to ordering of diagonal elements in mass_matrix
+ * @brief reorders vector v according to ordering of the magitude of
+ * the diagonal elements in matrix
+ *
  * @param v vector with elementes to be reordered
  * @param matrix matrix with diagonal elements with reference ordering
  */
@@ -171,24 +247,15 @@ void reorder_vector(
    Eigen::Array<double,Eigen::MatrixBase<Derived>::RowsAtCompileTime,1>& v,
    const Eigen::MatrixBase<Derived>& matrix)
 {
-   reorder_vector(v, matrix.diagonal().array().eval());
+   reorder_vector(v, matrix.diagonal().array().cwiseAbs().eval());
 }
 
-template<class Derived>
-std::string print_scientific(const Eigen::DenseBase<Derived>& v,
-                             int number_of_digits = std::numeric_limits<typename Derived::Scalar>::digits10 + 1)
+/// sorts an Eigen array
+template<int N>
+void sort(Eigen::Array<double, N, 1>& v)
 {
-   std::ostringstream sstr;
-
-   for (int k = 0; k < v.cols(); k++) {
-      for (int i = 0; i < v.rows(); i++) {
-         sstr << std::setprecision(number_of_digits)
-              << std::scientific << v(i,k) << ' ';
-      }
-      sstr << '\n';
-   }
-
-   return sstr.str();
+   std::sort(v.data(), v.data() + v.size(),
+             [] (double a, double b) { return std::abs(a) < std::abs(b); });
 }
 
 } // namespace flexiblesusy

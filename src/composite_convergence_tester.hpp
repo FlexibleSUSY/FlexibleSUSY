@@ -19,11 +19,33 @@
 #ifndef COMPOSITE_CONVERGENCE_TESTER_H
 #define COMPOSITE_CONVERGENCE_TESTER_H
 
+#include "convergence_tester.hpp"
+#include <vector>
+
 namespace flexiblesusy {
 
-template <class T>
-class Composite_convergence_tester;
+/**
+ * @class Composite_convergence_tester
+ * @brief A composite convergence tester
+ *
+ * This class collects convergence testers that will be checked when
+ * Composite_convergence_tester::accuracy_goal_reached() is called.
+ */
 
-}
+class Composite_convergence_tester : public Convergence_tester {
+public:
+   Composite_convergence_tester() = default;
+   virtual ~Composite_convergence_tester() = default;
+
+   virtual bool accuracy_goal_reached() override;
+   virtual int max_iterations() const override;
+   virtual void restart() override;
+   void add_convergence_tester(Convergence_tester*);
+
+private:
+   std::vector<Convergence_tester*> testers{};
+};
+
+} // namespace flexiblesusy
 
 #endif

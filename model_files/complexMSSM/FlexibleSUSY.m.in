@@ -20,13 +20,31 @@ EXTPAR = {
     {300, ImMassGIN}
 };
 
-FSExtraInputParameters = {
-    {Aeij, AEIN, {3,3}},     (* 3x3 matrix *)
-    {Adij, ADIN, {3,3}},     (* 3x3 matrix *)
-    {Auij, AUIN, {3,3}},     (* 3x3 matrix *)
-    {ImAeij, IMAEIN, {3,3}}, (* 3x3 matrix *)
-    {ImAdij, IMADIN, {3,3}}, (* 3x3 matrix *)
-    {ImAuij, IMAUIN, {3,3}}  (* 3x3 matrix *)
+FSAuxiliaryParameterInfo = {
+    {Aeij,   { LesHouches -> AEIN,
+               ParameterDimensions -> {3,3}, (* 3x3 matrix *)
+               InputParameter -> True
+             } },
+    {Adij,   { LesHouches -> ADIN,
+               ParameterDimensions -> {3,3}, (* 3x3 matrix *)
+               InputParameter -> True
+             } },
+    {Auij,   { LesHouches -> AUIN,
+               ParameterDimensions -> {3,3}, (* 3x3 matrix *)
+               InputParameter -> True
+             } },
+    {ImAeij, { LesHouches -> IMAEIN,
+               ParameterDimensions -> {3,3}, (* 3x3 matrix *)
+               InputParameter -> True
+             } },
+    {ImAdij, { LesHouches -> IMADIN,
+               ParameterDimensions -> {3,3}, (* 3x3 matrix *)
+               InputParameter -> True
+             } },
+    {ImAuij, { LesHouches -> IMAUIN,
+               ParameterDimensions -> {3,3}, (* 3x3 matrix *)
+               InputParameter -> True
+             } }
 };
 
 RealParameters = { B[\[Mu]] };
@@ -46,9 +64,9 @@ HighScale = Qin;
 HighScaleFirstGuess = Qin;
 
 HighScaleInput = {
-   {T[Ye], Aeij*Ye + I ImAeij},
-   {T[Yd], Adij*Ye + I ImAdij},
-   {T[Yu], Auij*Ye + I ImAuij},
+   {T[Ye], Aeij*Ye + I ImAeij*Ye},
+   {T[Yd], Adij*Yd + I ImAdij*Yd},
+   {T[Yu], Auij*Yu + I ImAuij*Yu},
    {mHd2, mHd2IN},
    {mHu2, mHu2IN},
    {mq2, LHInput[mq2]},
@@ -170,3 +188,5 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[Im[md2[2,2]]]},
             {49, SignedAbsSqrt[Im[md2[3,3]]]} } }
 };
+
+FSCalculateDecays = True;

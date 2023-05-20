@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_two_scale_initial_guesser.hpp"
 #include "@ModelName@_two_scale_model.hpp"
@@ -43,8 +42,7 @@ namespace flexiblesusy {
    const @ModelName@_susy_scale_constraint<Two_scale>& susy_constraint_,
    const @ModelName@_high_scale_constraint<Two_scale>& high_constraint_
 )
-   : Initial_guesser<Two_scale>()
-   , model(model_)
+   : model(model_)
    , qedqcd(qedqcd_)
    , low_constraint(low_constraint_)
    , susy_constraint(susy_constraint_)
@@ -78,32 +76,29 @@ void @ModelName@_initial_guesser<Two_scale>::guess()
  */
 void @ModelName@_initial_guesser<Two_scale>::guess_susy_parameters()
 {
-   using namespace softsusy;
-
    softsusy::QedQcd leAtMt(qedqcd);
-   const double MZ = Electroweak_constants::MZ;
-   const double MW = Electroweak_constants::MW;
-   const double sinThetaW2 = 1.0 - Sqr(MW / MZ);
    const double mtpole = leAtMt.displayPoleMt();
 
-   mu_guess = leAtMt.displayMass(mUp);
-   mc_guess = leAtMt.displayMass(mCharm);
-   mt_guess = model->get_thresholds() > 0 ?
-      leAtMt.displayMass(mTop) - 30.0 :
+   mu_guess = leAtMt.displayMass(softsusy::mUp);
+   mc_guess = leAtMt.displayMass(softsusy::mCharm);
+   mt_guess = model->get_thresholds() > 0 && model->get_threshold_corrections().mt > 0 ?
+      leAtMt.displayMass(softsusy::mTop) - 30.0 :
       leAtMt.displayPoleMt();
-   md_guess = leAtMt.displayMass(mDown);
-   ms_guess = leAtMt.displayMass(mStrange);
-   mb_guess = leAtMt.displayMass(mBottom);
+   md_guess = leAtMt.displayMass(softsusy::mDown);
+   ms_guess = leAtMt.displayMass(softsusy::mStrange);
+   mb_guess = leAtMt.displayMass(softsusy::mBottom);
    me_guess = model->get_thresholds() > 0 ?
-      leAtMt.displayMass(mElectron) :
+      leAtMt.displayMass(softsusy::mElectron) :
       leAtMt.displayPoleMel();
    mm_guess = model->get_thresholds() > 0 ?
-      leAtMt.displayMass(mMuon) :
+      leAtMt.displayMass(softsusy::mMuon) :
       leAtMt.displayPoleMmuon();
-   mtau_guess = leAtMt.displayMass(mTau);
+   mtau_guess = leAtMt.displayMass(softsusy::mTau);
+
+   calculate_running_SM_masses();
 
    // guess gauge couplings at mt
-   const auto alpha_sm(leAtMt.getGaugeMu(mtpole, sinThetaW2));
+   const auto alpha_sm(leAtMt.guess_alpha_SM5(mtpole));
 
 @initialGuessAtLowScaleGaugeCouplings@
 
@@ -115,9 +110,28 @@ void @ModelName@_initial_guesser<Two_scale>::guess_susy_parameters()
 
 void @ModelName@_initial_guesser<Two_scale>::calculate_DRbar_yukawa_couplings()
 {
+   calculate_running_SM_masses();
    calculate_@UpYukawa@_DRbar();
    calculate_@DownYukawa@_DRbar();
    calculate_@ElectronYukawa@_DRbar();
+}
+
+void @ModelName@_initial_guesser<Two_scale>::calculate_running_SM_masses()
+{
+   upQuarksDRbar.setZero();
+   upQuarksDRbar(0,0) = mu_guess;
+   upQuarksDRbar(1,1) = mc_guess;
+   upQuarksDRbar(2,2) = mt_guess;
+
+   downQuarksDRbar.setZero();
+   downQuarksDRbar(0,0) = md_guess;
+   downQuarksDRbar(1,1) = ms_guess;
+   downQuarksDRbar(2,2) = mb_guess;
+
+   downLeptonsDRbar.setZero();
+   downLeptonsDRbar(0,0) = me_guess;
+   downLeptonsDRbar(1,1) = mm_guess;
+   downLeptonsDRbar(2,2) = mtau_guess;
 }
 
 /**
@@ -127,11 +141,6 @@ void @ModelName@_initial_guesser<Two_scale>::calculate_DRbar_yukawa_couplings()
  */
 void @ModelName@_initial_guesser<Two_scale>::calculate_@UpYukawa@_DRbar()
 {
-   Eigen::Matrix<std::complex<double>,3,3> upQuarksDRbar(ZEROMATRIXCOMPLEX(3,3));
-   upQuarksDRbar(0,0) = mu_guess;
-   upQuarksDRbar(1,1) = mc_guess;
-   upQuarksDRbar(2,2) = mt_guess;
-
 @setDRbarUpQuarkYukawaCouplings@
 }
 
@@ -142,11 +151,6 @@ void @ModelName@_initial_guesser<Two_scale>::calculate_@UpYukawa@_DRbar()
  */
 void @ModelName@_initial_guesser<Two_scale>::calculate_@DownYukawa@_DRbar()
 {
-   Eigen::Matrix<std::complex<double>,3,3> downQuarksDRbar(ZEROMATRIXCOMPLEX(3,3));
-   downQuarksDRbar(0,0) = md_guess;
-   downQuarksDRbar(1,1) = ms_guess;
-   downQuarksDRbar(2,2) = mb_guess;
-
 @setDRbarDownQuarkYukawaCouplings@
 }
 
@@ -157,11 +161,6 @@ void @ModelName@_initial_guesser<Two_scale>::calculate_@DownYukawa@_DRbar()
  */
 void @ModelName@_initial_guesser<Two_scale>::calculate_@ElectronYukawa@_DRbar()
 {
-   Eigen::Matrix<std::complex<double>,3,3> downLeptonsDRbar(ZEROMATRIXCOMPLEX(3,3));
-   downLeptonsDRbar(0,0) = me_guess;
-   downLeptonsDRbar(1,1) = mm_guess;
-   downLeptonsDRbar(2,2) = mtau_guess;
-
 @setDRbarElectronYukawaCouplings@
 }
 

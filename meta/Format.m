@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 (* :Name: Format` *)
 
 (* :Title: Extensions to the built-in Format rules and more... *)
@@ -390,7 +412,7 @@ denom::usage="The symbol denom is used to format Denominator in MapleAssign.";
 dexp::usage="The symbol dexp is used in the test for ANSI compatible
 functions in FortranAssign.";
 diff::usage="The symbol diff is used to format D in MapleAssign.";
-dilog::usage="The symbol dilog is used to format PolyLog in MapleAssign.";
+Li2::usage="The symbol Li2 is used to format PolyLog in MapleAssign.";
 dim::usage="The symbol dim is used in the test for ANSI compatible functions in
 FortranAssign.";
 dint::usage="The symbol dint is used in the test for ANSI compatible
@@ -560,7 +582,7 @@ Unprotect[d,e,abs,acos,acosh,Ai,aimag,aint,alog,alog10,amax0,amax1,amin0,amin1,
 amod,and,anint,arccos,arccosh,arccot,arccoth,arccsc,arccsch,arcsec,arcsech,arcsin,
 arcsinh,arctan,arctanh,asin,asinh,atan,atan2,atanh,bernoulli,Bi,binomial,cabs,
 ccos,ceil,cexp,char,Ci,clog,cmplx,collect,conjg,cos,cosh,cot,coth,csc,csch,csin,
-csqrt,dabs,dacos,dasin,datan,datan2,dble,dcos,dcosh,ddim,denom,dexp,dilog,dim,
+csqrt,dabs,dacos,dasin,datan,datan2,dble,dcos,dcosh,ddim,denom,dexp,Li2,dim,
 dint,dlog,dlog10,dmax1,dmin1,dmod,dnint,dprod,dsign,dsin,dsinh,dsqrt,dtan,dtanh,
 Ei,erf,erfc,euler,evalf,exp,expand,factor,factorial,false,float,fsolve,GAMMA,iabs,
 ichar,idim,idint,idnint,ifix,index,infinity,int,isign,len,lge,lgt,lle,llt,log,log10,lnGAMMA,
@@ -1246,7 +1268,7 @@ Literal[MRH[expr_]]:= MD[expr];
     MD[Length]=nops; MD[Log]=log; MD[LogGamma]=lnGAMMA; MD[Map]=map; MD[Max]=max;
     MD[Min]=min; MD[Mod]=mod; MD[N]=evalf; MD[NIntegrate]=int; MD[NSolve]=fsolve; MD[Not]=not;
     MD[Null]=NULL; MD[Numerator]=num; MD[Or]=or; MD[Part]=op; MD[PolyGamma]=Psi;
-    MD[PolyLog]=dilog; MD[Product]=product; MD[Replace]=subs; MD[ReplaceAll]=subs;
+    MD[PolyLog]=Li2; MD[Product]=product; MD[Replace]=subs; MD[ReplaceAll]=subs;
     MD[Roots]=RootOf; MD[Round]=round; MD[Sec]=sec; MD[Sech]=sech;
     MD[Series]=series; MD[Sign]=sign; MD[Simplify]=simplify; MD[Sin]=sin;
     MD[Sinh]=sinh; MD[SinIntegral]=Si; MD[Solve]=solve; MD[Sqrt]=sqrt; MD[Sum]=sum;
@@ -1776,7 +1798,7 @@ Protect[d,e,abs,acos,acosh,Ai,aimag,aint,alog,alog10,amax0,amax1,amin0,amin1,
 amod,and,anint,arccos,arccosh,arccot,arccoth,arccsc,arccsch,arcsec,arcsech,arcsin,
 arcsinh,arctan,arctanh,asin,asinh,atan,atan2,atanh,bernoulli,Bi,binomial,cabs,
 ccos,ceil,cexp,char,Ci,clog,cmplx,collect,conjg,cos,cosh,cot,coth,csc,csch,csin,
-csqrt,dabs,dacos,dasin,datan,datan2,dble,dcos,dcosh,ddim,denom,dexp,dilog,dim,
+csqrt,dabs,dacos,dasin,datan,datan2,dble,dcos,dcosh,ddim,denom,dexp,Li2,dim,
 dint,dlog,dlog10,dmax1,dmin1,dmod,dnint,dprod,dsign,dsin,dsinh,dsqrt,dtan,dtanh,
 Ei,erf,erfc,euler,evalf,exp,expand,factor,factorial,false,float,fsolve,GAMMA,iabs,
 ichar,idim,idint,idnint,ifix,index,infinity,int,isign,len,lge,lgt,lle,llt,log,log10,lnGAMMA,

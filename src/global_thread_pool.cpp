@@ -17,9 +17,6 @@
 // ====================================================================
 
 #include "global_thread_pool.hpp"
-
-#ifdef ENABLE_THREADS
-
 #include "thread_pool.hpp"
 #include "logger.hpp"
 
@@ -41,5 +38,3 @@ Thread_pool& global_thread_pool()
 }
 
 } // namespace flexiblesusy
-
-#endif

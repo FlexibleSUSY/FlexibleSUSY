@@ -6,6 +6,7 @@ ABSBASEDIR      := @ABSBASEDIR@
 # Switches
 ENABLE_FFLITE    := @ENABLE_FFLITE@
 ENABLE_LOOPTOOLS := @ENABLE_LOOPTOOLS@
+ENABLE_COLLIER   := @ENABLE_COLLIER@
 ENABLE_THREADS   := @ENABLE_THREADS@
 
 MODULE_LIBEXT   := @MODULE_LIBEXT@
@@ -17,6 +18,8 @@ CONFIGDIR       := $(ABSBASEDIR)/config
 FLEXIDIR        := $(ABSBASEDIR)/src
 FFLITEDIR       := $(ABSBASEDIR)/fflite
 SLHAEADIR       := $(ABSBASEDIR)/slhaea
+MSSMHODIR       := $(ABSBASEDIR)/model_specific/MSSM_higgs
+SMHODIR         := $(ABSBASEDIR)/model_specific/SM
 
 INCMODEL        := -I$(MODELDIR)
 INCCONFIG       := -I$(CONFIGDIR)
@@ -26,26 +29,25 @@ INCSLHAEA       := -I$(SLHAEADIR)
 LIBMODEL        := $(MODELDIR)/lib$(MODEL)$(MODULE_LIBEXT)
 LIBFLEXI        := $(FLEXIDIR)/libflexisusy$(MODULE_LIBEXT)
 LIBFFLITE       := $(FFLITEDIR)/libfflite$(MODULE_LIBEXT)
+LIBMSSMHO       := $(MSSMHODIR)/libmodel_specific_MSSM_higgs$(MODULE_LIBEXT)
+LIBSMHO         := $(SMHODIR)/libmodel_specific_SM$(MODULE_LIBEXT)
 
 # Variables for compilation
 CXX             := @CXX@
 CPPFLAGS        := @CPPFLAGS@ -I. $(INCCONFIG) $(INCFLEXI) \
-                   $(INCSLHAEA) $(INCMODEL)
+                   $(INCSLHAEA) -I$(SMHODIR) -I$(MSSMHODIR) $(INCMODEL)
 CXXFLAGS        := @CXXFLAGS@
 CXX_DEP_GEN     := $(CXX)
 CXXFLAGS_DEP_GEN:= $(CXXFLAGS)
 FC              := @FC@
 FFLAGS          := @FFLAGS@
 FLIBS           := @FLIBS@
+FUTILIBS        := @FUTILIBS@
 FOR_DEP_GEN     := $(FC)
-BLASLIBS        := @BLASLIBS@
-BOOSTTESTLIBS   := @BOOSTTESTLIBS@
-BOOSTTHREADLIBS := @BOOSTTHREADLIBS@
 BOOSTFLAGS      := @BOOSTFLAGS@
 EIGENFLAGS      := @EIGENFLAGS@
 GSLLIBS         := @GSLLIBS@
 GSLFLAGS        := @GSLFLAGS@
-LAPACKLIBS      := @LAPACKLIBS@
 LOOPFUNCFLAGS   := @LOOPFUNCFLAGS@
 LOOPFUNCLIBS    := @LOOPFUNCLIBS@
 SQLITEFLAGS     := @SQLITEFLAGS@
@@ -67,6 +69,12 @@ CUSTOMBETAS_DEP := \
 
 CUSTOMBETAS_EXE := \
 		custombetas.x
+
+# set default shell
+SHELL = /bin/sh
+
+# disable built-in rules to improve speed
+MAKEFLAGS += -rR --include-dir=$(CURDIR)
 
 # returns file name with absolute path, taking whitespace in directory
 # names into account
@@ -91,12 +99,12 @@ distclean: clean
 
 $(CUSTOMBETAS_DEP) $(CUSTOMBETAS_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS)
 
-ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
+ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)$(ENABLE_COLLIER)))
 $(CUSTOMBETAS_DEP) $(CUSTOMBETAS_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
 endif
 
-$(CUSTOMBETAS_EXE): $(CUSTOMBETAS_OBJ) $(LIBMODEL) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS)
+$(CUSTOMBETAS_EXE): $(CUSTOMBETAS_OBJ) $(LIBMODEL) $(LIBMSSMHO) $(LIBSMHO) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(THREADLIBS) $(FLIBS) $(FUTILIBS) $(SQLITELIBS)
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean-dep)
@@ -116,6 +124,9 @@ endif
 %.d: %.f
 	$(FOR_DEP_GEN) $(CPPFLAGS) -cpp -MM -MP -MG $^ -MT '$*.o' | \
 	sed 's|.*\.o:|$*.o:|' > $@
+
+%.o: %.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 showbuild:
 	@echo "# package information"
@@ -140,14 +151,10 @@ showbuild:
 	@echo "FFLAGS             = $(FFLAGS)"
 	@echo "FLIBS              = $(FLIBS)"
 	@echo "FOR_DEP_GEN        = $(FOR_DEP_GEN)"
-	@echo "BLASLIBS           = $(BLASLIBS)"
-	@echo "BOOSTTESTLIBS      = $(BOOSTTESTLIBS)"
-	@echo "BOOSTTHREADLIBS    = $(BOOSTTHREADLIBS)"
 	@echo "BOOSTFLAGS         = $(BOOSTFLAGS)"
 	@echo "EIGENFLAGS         = $(EIGENFLAGS)"
 	@echo "GSLLIBS            = $(GSLLIBS)"
 	@echo "GSLFLAGS           = $(GSLFLAGS)"
-	@echo "LAPACKLIBS         = $(LAPACKLIBS)"
 	@echo "LOOPFUNCFLAGS      = $(LOOPFUNCFLAGS)"
 	@echo "LOOPFUNCLIBS       = $(LOOPFUNCLIBS)"
 	@echo "MODULE_LIBEXT      = $(MODULE_LIBEXT)"
@@ -157,4 +164,5 @@ showbuild:
 	@echo ""
 	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
 	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
+	@echo "ENABLE_COLLIER     = $(ENABLE_COLLIER)"
 	@echo "ENABLE_THREADS     = $(ENABLE_THREADS)"

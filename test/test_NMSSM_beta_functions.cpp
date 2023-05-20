@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "test.h"
+#include "test_legacy.hpp"
 #include "test_NMSSM.hpp"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
@@ -123,7 +123,7 @@ void test_beta_function_equality(const SoftParsNmssm& a, const NMSSM_soft_parame
    TEST_EQUALITY(beta_a.displayMh1Squared(), beta_b.get_mHd2());
    TEST_CLOSE(beta_a.displayMh2Squared(), beta_b.get_mHu2(), 2.0e-12);
    TEST_EQUALITY(beta_a.displayMsSquared(), beta_b.get_ms2());
-   TEST_EQUALITY(beta_a.displaySoftMassSquared(mQl), beta_b.get_mq2());
+   TEST_CLOSE(beta_a.displaySoftMassSquared(mQl), beta_b.get_mq2(), 2.0e-12);
    TEST_CLOSE(beta_a.displaySoftMassSquared(mUr), beta_b.get_mu2(), 2.0e-12);
    TEST_EQUALITY(beta_a.displaySoftMassSquared(mDr), beta_b.get_md2());
    TEST_EQUALITY(beta_a.displaySoftMassSquared(mLl), beta_b.get_ml2());
@@ -163,6 +163,9 @@ BOOST_AUTO_TEST_CASE( test_NMSSM_beta_functions )
    NMSSM<Two_scale> m;
    NmssmSoftsusy s;
    setup_NMSSM(m, s, input);
+
+   m.set_loops(2);
+   s.setLoops(2);
 
    test_parameter_equality(s, m);
    BOOST_REQUIRE(gErrors == 0);

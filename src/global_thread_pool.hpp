@@ -19,10 +19,6 @@
 #ifndef GLOBAL_THREAD_POOL
 #define GLOBAL_THREAD_POOL
 
-#include "config.h"
-
-#ifdef ENABLE_THREADS
-
 #include "thread_pool.hpp"
 
 namespace flexiblesusy {
@@ -31,7 +27,5 @@ namespace flexiblesusy {
 Thread_pool& global_thread_pool();
 
 } // namespace flexiblesusy
-
-#endif
 
 #endif

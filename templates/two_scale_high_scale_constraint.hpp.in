@@ -16,14 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 #define @ModelName@_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 
 #include "@ModelName@_high_scale_constraint.hpp"
 #include "@ModelName@_input_parameters.hpp"
-#include "two_scale_constraint.hpp"
+#include "single_scale_constraint.hpp"
 
 namespace flexiblesusy {
 
@@ -33,15 +32,16 @@ class @ModelName@;
 class Two_scale;
 
 template<>
-class @ModelName@_high_scale_constraint<Two_scale> : public Constraint<Two_scale> {
+class @ModelName@_high_scale_constraint<Two_scale> : public Single_scale_constraint {
 public:
    @ModelName@_high_scale_constraint() = default;
    @ModelName@_high_scale_constraint(@ModelName@<Two_scale>*);
    virtual ~@ModelName@_high_scale_constraint() = default;
+
    virtual void apply() override;
    virtual double get_scale() const override;
    virtual std::string name() const override { return "@ModelName@ high-scale constraint"; }
-   virtual void set_model(Two_scale_model*) override;
+   virtual void set_model(Model*) override;
 
    void clear();
    double get_initial_scale_guess() const;

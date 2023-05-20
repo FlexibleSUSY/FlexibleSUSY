@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_STANDARD_MODEL_TWO_SCALE_INITIAL_GUESSER_H
 #define @ModelName@_STANDARD_MODEL_TWO_SCALE_INITIAL_GUESSER_H
@@ -25,10 +24,11 @@
 #include "@ModelName@_two_scale_susy_scale_constraint.hpp"
 #include "@ModelName@_two_scale_high_scale_constraint.hpp"
 #include "standard_model_two_scale_low_scale_constraint.hpp"
-#include "two_scale_initial_guesser.hpp"
+#include "initial_guesser.hpp"
 #include "lowe.h"
 
 #include <sstream>
+#include <Eigen/Core>
 
 namespace flexiblesusy {
 
@@ -49,7 +49,7 @@ class @ModelName@_standard_model_initial_guesser;
  */
 
 template<>
-class @ModelName@_standard_model_initial_guesser<Two_scale> : public Initial_guesser<Two_scale> {
+class @ModelName@_standard_model_initial_guesser<Two_scale> : public Initial_guesser {
 public:
    @ModelName@_standard_model_initial_guesser(@ModelName@<Two_scale>*,
                                standard_model::StandardModel<Two_scale>*,
@@ -79,6 +79,9 @@ private:
    standard_model::Standard_model_low_scale_constraint<Two_scale> low_constraint{};
    @ModelName@_susy_scale_constraint<Two_scale> susy_constraint{};
    @ModelName@_high_scale_constraint<Two_scale> high_constraint{};
+   Eigen::Matrix<std::complex<double>,3,3> upQuarksDRbar{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> downQuarksDRbar{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> downLeptonsDRbar{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
 
    void guess_eft_parameters();
    void guess_model_parameters();
@@ -86,6 +89,7 @@ private:
    void calculate_@UpYukawa@_DRbar();
    void calculate_@DownYukawa@_DRbar();
    void calculate_@ElectronYukawa@_DRbar();
+   void calculate_running_SM_masses();
 };
 
 } // namespace flexiblesusy

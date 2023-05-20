@@ -23,7 +23,6 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 
 /**
  * @file two_scale_solver.hpp
@@ -32,12 +31,13 @@
 
 namespace flexiblesusy {
 
-template <class T> class Constraint;
-template <class T> class Matching;
-template <class T> class Convergence_tester;
-template <class T> class Initial_guesser;
+class Convergence_tester;
+class Initial_guesser;
+class Model;
+class Single_scale_constraint;
+class Single_scale_matching;
+
 class Two_scale;
-class Two_scale_model;
 class Two_scale_running_precision;
 
 /**
@@ -46,7 +46,7 @@ class Two_scale_running_precision;
  *
  * This boundary condition solver uses the two-scale algorithm to
  * solve the boundary value problem: It uses RG running to iteratively
- * run the models to the boundary condtion (constraint) scales and
+ * run the models to the boundary condition (constraint) scales and
  * imposes the constraints.
  *
  * To add constraints use the add() function.  Matching conditions are
@@ -63,13 +63,16 @@ public:
    RGFlow() = default;
    RGFlow(const RGFlow&) = delete;
    RGFlow(RGFlow&&) = delete;
+   ~RGFlow() = default;
+   RGFlow& operator=(const RGFlow&) = delete;
+   RGFlow& operator=(RGFlow&&) = delete;
 
    /// add constraint
-   void add(Constraint<Two_scale>*, Two_scale_model*);
+   void add(Single_scale_constraint*, Model*);
    /// add matching condition
-   void add(Matching<Two_scale>*, Two_scale_model*, Two_scale_model*);
+   void add(Single_scale_matching*, Model*, Model*);
    /// get model at current scale
-   Two_scale_model* get_model() const;
+   Model* get_model() const;
    /// get number of used iterations
    int number_of_iterations_done() const;
    /// clear all internal data
@@ -77,20 +80,20 @@ public:
    /// run model at given scale to given scale
    void run_to(double);
    /// set convergence tester
-   void set_convergence_tester(Convergence_tester<Two_scale>*);
+   void set_convergence_tester(Convergence_tester*);
    /// set running precision calculator
    void set_running_precision(Two_scale_running_precision*);
    /// set initial guesser
-   void set_initial_guesser(Initial_guesser<Two_scale>*);
+   void set_initial_guesser(Initial_guesser*);
    /// solves the boundary value problem
    void solve();
 
 private:
    struct Slider {
    public:
-      virtual ~Slider() = default;
+      virtual ~Slider() {}
       virtual void clear_problems() {}
-      virtual Two_scale_model* get_model() = 0;
+      virtual Model* get_model() = 0;
       virtual double get_scale() = 0;
       virtual void slide() {}
       virtual void set_precision(double) {}
@@ -98,47 +101,47 @@ private:
 
    struct Constraint_slider : public Slider {
    public:
-      Constraint_slider(Two_scale_model* m, Constraint<Two_scale>* c)
+      Constraint_slider(Model* m, Single_scale_constraint* c)
          : model(m), constraint(c) {}
-      virtual ~Constraint_slider() = default;
+      virtual ~Constraint_slider() {}
       virtual void clear_problems() override;
-      virtual Two_scale_model* get_model() override;
+      virtual Model* get_model() override;
       virtual double get_scale() override;
       virtual void slide() override;
       virtual void set_precision(double) override;
    private:
-      Two_scale_model* model;
-      Constraint<Two_scale>* constraint;
+      Model* model;
+      Single_scale_constraint* constraint;
    };
 
    struct Matching_slider : public Slider {
    public:
-      Matching_slider(Two_scale_model* m1_, Two_scale_model* m2_, Matching<Two_scale>* mc)
+      Matching_slider(Model* m1_, Model* m2_, Single_scale_matching* mc)
          : m1(m1_), m2(m2_), matching(mc) {}
-      virtual ~Matching_slider() = default;
+      virtual ~Matching_slider() {}
       virtual void clear_problems() override;
-      virtual Two_scale_model* get_model() override;
+      virtual Model* get_model() override;
       virtual double get_scale() override;
       virtual void slide() override;
       virtual void set_precision(double) override;
    private:
-      Two_scale_model *m1, *m2;
-      Matching<Two_scale>* matching;
+      Model *m1, *m2;
+      Single_scale_matching* matching;
    };
 
    std::vector<std::shared_ptr<Slider> > sliders{}; ///< sliders to be run up and down
-   int iteration{0};                                ///< iteration number (starting at 0)
-   Convergence_tester<Two_scale>* convergence_tester{nullptr}; ///< the convergence tester
-   Initial_guesser<Two_scale>* initial_guesser{nullptr};       ///< does initial guess
+   int iteration{0};             ///< iteration number (starting at 0)
+   Convergence_tester* convergence_tester{nullptr}; ///< the convergence tester
+   Initial_guesser* initial_guesser{nullptr};       ///< does initial guess
    Two_scale_running_precision* running_precision_calculator{nullptr}; ///< RG running precision calculator
-   double running_precision{1.0e-3};                ///< RG running precision
-   double scale{0.};                                ///< current scale
+   double running_precision{1.0e-3};           ///< RG running precision
+   double scale{0.};                           ///< current scale
 
    bool accuracy_goal_reached() const; ///< check if accuracy goal is reached
    void check_setup() const;           ///< check the setup
    void clear_problems();              ///< clear model problems
-   int get_max_iterations() const;     ///< returns max. number of iterations
-   Two_scale_model* get_model(double) const; ///< returns model at given scale
+   int get_max_iterations() const; ///< returns max. number of iterations
+   Model* get_model(double) const;     ///< returns model at given scale
    double get_precision();             ///< returns running precision
    void initial_guess();               ///< initial guess
    void run_sliders();                 ///< run all sliders
@@ -146,6 +149,6 @@ private:
    void update_running_precision();    ///< update the RG running precision
 };
 
-}
+} // namespace flexiblesusy
 
 #endif

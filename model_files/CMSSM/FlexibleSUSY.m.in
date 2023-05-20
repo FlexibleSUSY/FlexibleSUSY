@@ -70,11 +70,6 @@ UseHiggs2LoopMSSM = True;
 EffectiveMu = \[Mu];
 UseMSSM3LoopRGEs = True;
 
-(* low-energy input to determine weak mixing angle
- * Possible values: FSFermiConstant (default), FSMassW
- *)
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSWeakMixingAngleInput -> FSFermiConstant];
-
 PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
 
 DefaultPoleMassPrecision = MediumPrecision;
@@ -88,12 +83,9 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } },
+           {{20, FlexibleSUSYObservable`AMM[Fe[1]]},
+            {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+            {22, FlexibleSUSYObservable`AMM[Fe[3]]} } },
    {ALPHA, NoScale,
            {{ArcSin[Pole[ZH[2,2]]]}}},
    {HMIX , {{1, \[Mu]},
@@ -133,3 +125,6 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[md2[2,2]]},
             {49, SignedAbsSqrt[md2[3,3]]} } }
 };
+
+FSCalculateDecays = True;
+

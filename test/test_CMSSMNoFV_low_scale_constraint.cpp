@@ -13,11 +13,9 @@
 #include "CMSSMNoFV_two_scale_low_scale_constraint.hpp"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
+#include "lowe.h"
 
-template <class T>
-double calculate_delta_alpha_em(T& model)
-{
-}
+using namespace softsusy;
 
 BOOST_AUTO_TEST_CASE( test_delta_alpha )
 {

@@ -1,6 +1,29 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 BeginPackage["ThreeLoopSM`", {"SARAH`", "Parameters`"}];
 
-BetaSM::usage = "beta functions of the SM from SUSYHD v1.0.2";
+BetaSM::usage = "3-loop beta functions of the SM from SUSYHD v1.0.2
+ and 4-loop beta functions from [arxiv:1508.00912]";
 
 Begin["`Private`"];
 
@@ -29,10 +52,11 @@ BetaSM[gc_] :=
                     Get[FileNameJoin[{subDir, "beta_lambda.m"}]],
                     True, Print["Error: unknown coupling: ", gc]; {0,0,0}
                     ]
-          ] /. ThreeLoopSM`Private`ToSARAHNamingConvention[];
+          ] /. ThreeLoopSM`Private`ToSARAHNamingConvention[] /. Zeta[n_] :> N[Zeta[n]];
 
 (* Note:
-   g1, g2, g3, gb are global variables in SARAH
+   g1, g2, g3, gb are global variables in SARAH.
+   Since version 4.14.0 the symbol m2 is defined in Susyno`LieGroups`.
  *)
 ToSARAHNamingConvention[] := {
     g1 -> SARAH`hyperchargeCoupling G1GUTNormalization[],
@@ -42,7 +66,8 @@ ToSARAHNamingConvention[] := {
     gb -> SARAH`DownYukawa[3,3],
     Global`g\[Tau] -> SARAH`ElectronYukawa[3,3],
     \[Lambda] -> Parameters`GetParameterFromDescription["SM Higgs Selfcouplings"],
-    m2        -> Parameters`GetParameterFromDescription["SM Mu Parameter"]
+    m2        -> Parameters`GetParameterFromDescription["SM Mu Parameter"],
+    Susyno`LieGroups`m2 -> Parameters`GetParameterFromDescription["SM Mu Parameter"]
 };
 
 End[];

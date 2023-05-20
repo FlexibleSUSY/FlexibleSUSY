@@ -40,7 +40,7 @@ MSSMcbs_initial_guesser<Two_scale>::MSSMcbs_initial_guesser(
    const CMSSM_susy_scale_constraint<Two_scale>& susy_constraint_,
    const CMSSM_high_scale_constraint<Two_scale>& high_constraint_
 )
-   : Initial_guesser<Two_scale>()
+   : Initial_guesser()
    , model(model_)
    , qedqcd(qedqcd_)
    , mu_guess(0.)
@@ -76,9 +76,6 @@ void MSSMcbs_initial_guesser<Two_scale>::guess_susy_parameters()
    using namespace softsusy;
 
    softsusy::QedQcd leAtMt(qedqcd);
-   const double MZ = Electroweak_constants::MZ;
-   const double MW = Electroweak_constants::MW;
-   const double sinThetaW2 = 1.0 - Sqr(MW / MZ);
    const double mtpole = leAtMt.displayPoleMt();
 
    mu_guess = leAtMt.displayMass(mUp);
@@ -92,7 +89,7 @@ void MSSMcbs_initial_guesser<Two_scale>::guess_susy_parameters()
    mtau_guess = leAtMt.displayMass(mTau);
 
    // guess gauge couplings at mt
-   const auto alpha_sm(leAtMt.getGaugeMu(mtpole, sinThetaW2));
+   const auto alpha_sm(leAtMt.guess_alpha_SM5(mtpole));
 
    model->set_g1(sqrt(4.0 * M_PI * alpha_sm(0)));
    model->set_g2(sqrt(4.0 * M_PI * alpha_sm(1)));

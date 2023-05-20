@@ -2,7 +2,7 @@
 
 # directory of this script
 BASEDIR=$(dirname $0)
-HOMEDIR=$(readlink -f "${BASEDIR}/../")
+HOMEDIR="${BASEDIR}/.."
 FSCONFIG="${HOMEDIR}/flexiblesusy-config"
 
 DEFAULT_CMSSM_INPUT="${HOMEDIR}/model_files/CMSSM/LesHouches.in.CMSSM"
@@ -11,7 +11,8 @@ DEFAULT_SM_INPUT="${HOMEDIR}/model_files/SM/LesHouches.in.SM"
 
 SGS="\
 CMSSM,${DEFAULT_CMSSM_INPUT},0
-CMSSMtower,_DEFAULT_,0
+CMSSMEFTHiggs,_DEFAULT_,0
+CMSSMEFTHiggs,${BASEDIR}/test_CMSSMEFTHiggs_no_ewsb.spc,1
 CMSSMConvergenceTester,${DEFAULT_CMSSM_INPUT},0
 CMSSMFPIAbsolute,${DEFAULT_CMSSM_INPUT},0
 CMSSMFPIRelative,${DEFAULT_CMSSM_INPUT},0
@@ -27,15 +28,18 @@ CMSSMNoFV,_DEFAULT_,0
 CMSSMCKM,_DEFAULT_,0
 CMSSMCPV,_DEFAULT_,0
 CMSSMCPV,${BASEDIR}/test_CMSSMCPV_wrong_higgs_state.in.spc,0
+CMSSMYt2L,${DEFAULT_CMSSM_INPUT},0
 MSSMMuBMu,_DEFAULT_,0
 NUHMSSMalt,_DEFAULT_,0
-NUHMSSMalttower,_DEFAULT_,0
+NUHMSSMaltEFTHiggs,_DEFAULT_,0
 cCMSSM,_DEFAULT_,0
 E6SSM,_DEFAULT_,0
 E6SSM,${BASEDIR}/test_E6SSM_nan.in.spc,1
-E6SSMtower,_DEFAULT_,0
+CE6SSM,_DEFAULT_,0
+E6SSMEFTHiggs,_DEFAULT_,0
 InertMSSM,${DEFAULT_CMSSM_INPUT},0
 LHInputMSSM,_DEFAULT_,0
+LRLR,_DEFAULT_,0
 lowMSSM,_DEFAULT_,0
 lowNMSSM,_DEFAULT_,0
 lowNMSSM,${BASEDIR}/test_lowNMSSM_goldstone_tachyon.in.spc,0
@@ -57,25 +61,28 @@ MDM,_DEFAULT_,0
 minMSSM,${DEFAULT_CMSSM_INPUT},1
 MRSSM,_DEFAULT_,0
 MRSSM2,_DEFAULT_,0
-MRSSMtower,_DEFAULT_,0
+MRSSMEFTHiggs,_DEFAULT_,0
 MSSM,_DEFAULT_,0
 MSSMCPV,_DEFAULT_,0
 MSSMatMGUT,_DEFAULT_,0
 MSSMNoFV,_DEFAULT_,0
+MSSMNoFVHimalaya,_DEFAULT_,0
 MSSMNoFVatMGUT,_DEFAULT_,0
-MSSMNoFVtower,_DEFAULT_,0
-MSSMtower,_DEFAULT_,0
+MSSMNoFVatMGUTHimalaya,_DEFAULT_,0
 complexMSSM,_DEFAULT_,0
 complexMSSM,${DEFAULT_MSSM_INPUT},0
 munuSSM,_DEFAULT_,0
 NMSSM,_DEFAULT_,0
+CNMSSM,_DEFAULT_,0
 NMSSMCPV,_DEFAULT_,0
-NMSSMtower,_DEFAULT_,0
-NMSSMtower,${HOMEDIR}/model_files/NMSSMtower/LesHouches.in.NMSSMtower_1507.05093_TP3,0
+NMSSMEFTHiggs,_DEFAULT_,0
+NMSSMEFTHiggs,${HOMEDIR}/model_files/NMSSMEFTHiggs/LesHouches.in.NMSSMEFTHiggs_1507.05093_TP3,0
 NoInputParameters,${DEFAULT_SM_INPUT},0
 NoYukawaMSSM,${DEFAULT_CMSSM_INPUT},1
 NSM,_DEFAULT_,0
 NUHMSSM,_DEFAULT_,0
+NUHMSSMNoFV,_DEFAULT_,0
+NUHMSSMNoFVHimalaya,_DEFAULT_,0
 NUTNMSSM,_DEFAULT_,0
 NUTNMSSM,${HOMEDIR}/model_files/NUTNMSSM/LesHouches.in.NUTNMSSM_GTP1,0
 NUTNMSSM,${HOMEDIR}/model_files/NUTNMSSM/LesHouches.in.NUTNMSSM_GTP2,0
@@ -89,10 +96,14 @@ SM,${BASEDIR}/test_SM_0L_RGEs.in.spc,0
 cSM,${DEFAULT_SM_INPUT},0
 SMEWSBAtMZ,${DEFAULT_SM_INPUT},0
 SMHighPrecision,${DEFAULT_SM_INPUT},0
-SMtower,_DEFAULT_,0
+SMEFTHiggs,_DEFAULT_,0
 SMSSM,_DEFAULT_,0
 SplitMSSM,_DEFAULT_,0
+SMRules,${DEFAULT_SM_INPUT},0
 SSM,_DEFAULT_,0
+SSMMhInput,_DEFAULT_,0
+SMThrow,${DEFAULT_SM_INPUT},0
+SMThrow,${HOMEDIR}/model_files/SMThrow/LesHouches.in.SMThrow_large_lambda,1
 HSSUSY,_DEFAULT_,0
 HSSUSY,${BASEDIR}/test_HSSUSY_SUSYHD_msq_msu_m3_msusy_degenerate.in.spc,0
 HSSUSY,${BASEDIR}/test_HSSUSY_SUSYHD_msq_msu_m3_degenerate.in.spc,0
@@ -129,7 +140,7 @@ do
 
     echo "== $model ===================================="
 
-    if [ $("$FSCONFIG" --with-${model}) = no ] ; then
+    if [ "$("$FSCONFIG" --with-${model})" = no ] ; then
         echo "> skipping, because the model is not configured"
         continue
     fi

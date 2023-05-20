@@ -1,0 +1,50 @@
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = SMnoGUT;
+
+(* SM input parameters *)
+
+MINPAR = { {1, LambdaIN} };
+
+EWSBOutputParameters = { mu2 };
+
+SUSYScale = v;
+
+SUSYScaleFirstGuess = 1000;
+
+SUSYScaleInput = {
+    {\[Lambda], LambdaIN}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[gY]^2 gY^2 + g2^2]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtLowScale = {
+   {v, LowEnergyConstant[vev]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+OnlyLowEnergyFlexibleSUSY = True;
+UseSM3LoopRGEs = True;
+UseHiggs2LoopSM = True;
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+SARAH`ParameterDefinitions = Append[
+    Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
+    {SARAH`\[Lambda], { Description -> "SM Higgs Selfcouplings" } }
+];

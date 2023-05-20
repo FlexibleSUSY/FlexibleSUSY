@@ -25,7 +25,7 @@
 #include "MSSMD5O_two_scale_susy_scale_constraint.hpp"
 #include "MSSMRHN_two_scale_high_scale_constraint.hpp"
 #include "MSSMD5O_MSSMRHN_two_scale_matching.hpp"
-#include "two_scale_initial_guesser.hpp"
+#include "initial_guesser.hpp"
 
 #include <sstream>
 
@@ -40,7 +40,7 @@ class MSSMRHN;
 class Two_scale;
 
 template<>
-class MSSMD5O_MSSMRHN_initial_guesser<Two_scale> : public Initial_guesser<Two_scale> {
+class MSSMD5O_MSSMRHN_initial_guesser<Two_scale> : public Initial_guesser {
 public:
    MSSMD5O_MSSMRHN_initial_guesser(MSSMD5O<Two_scale>*, MSSMRHN<Two_scale>*,
 				const MSSMD5O_input_parameters&,

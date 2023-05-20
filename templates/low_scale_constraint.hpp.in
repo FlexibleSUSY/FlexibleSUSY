@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_LOW_SCALE_CONSTRAINT_H
 #define @ModelName@_LOW_SCALE_CONSTRAINT_H

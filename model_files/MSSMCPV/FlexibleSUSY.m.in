@@ -25,18 +25,51 @@ IMEXTPAR = {
     {23, ImMuInput}
 };
 
-FSExtraInputParameters = {
-    {mq2Input, MSQ2IN, {3,3}},
-    {mu2Input, MSU2IN, {3,3}},
-    {md2Input, MSD2IN, {3,3}},
-    {ml2Input, MSL2IN, {3,3}},
-    {me2Input, MSE2IN, {3,3}},
-    {ReAuInput, AUIN, {3,3}},
-    {ReAdInput, ADIN, {3,3}},
-    {ReAeInput, AEIN, {3,3}},
-    {ImAuInput, IMAUIN, {3,3}},
-    {ImAdInput, IMADIN, {3,3}},
-    {ImAeInput, IMAEIN, {3,3}}
+FSAuxiliaryParameterInfo = {
+    {mq2Input,  { LesHouches -> MSQ2IN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {mu2Input,  { LesHouches -> MSU2IN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {md2Input,  { LesHouches -> MSD2IN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ml2Input,  { LesHouches -> MSL2IN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {me2Input,  { LesHouches -> MSE2IN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ReAuInput, { LesHouches -> AUIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ReAdInput, { LesHouches -> ADIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ReAeInput, { LesHouches -> AEIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ImAuInput, { LesHouches -> IMAUIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ImAdInput, { LesHouches -> IMADIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ImAeInput, { LesHouches -> IMAEIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } }
 };
 
 RealParameters = {};
@@ -49,9 +82,9 @@ SUSYScale = MSUSY;
 SUSYScaleFirstGuess = MSUSY;
 
 SUSYScaleInput = {
-    {T[Ye], (ReAeInput + I ImAeInput) Ye},
-    {T[Yd], (ReAdInput + I ImAdInput) Yd},
-    {T[Yu], (ReAuInput + I ImAuInput) Yu},
+    {T[Ye], ReAeInput Ye + I ImAeInput Ye},
+    {T[Yd], ReAdInput Yd + I ImAdInput Yd},
+    {T[Yu], ReAuInput Yu + I ImAuInput Yu},
     {mq2, mq2Input},
     {ml2, ml2Input},
     {md2, md2Input},
@@ -61,7 +94,7 @@ SUSYScaleInput = {
     {MassWB, ReM2Input + I ImM2Input},
     {MassG, ReM3Input + I ImM3Input},
     {\[Mu], ReMuInput + I ImMuInput},
-    {B[\[Mu]], mA2Input/(TanBeta + 1/TanBeta) + I Im[B[\[Mu]]]},
+    {B[\[Mu]], mA2Input/(vu/vd + vd/vu) + I Im[B[\[Mu]]]},
     {eta, etaInput}
 };
 
@@ -93,12 +126,13 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } },
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]},
+            {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+            {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+            {25, FlexibleSUSYObservable`EDM[Fe[3]]},
+            {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+           }
+   },
    {ALPHA, NoScale,
            {{ArcSin[Pole[ZH[2,2]]]}}},
    {HMIX , {{1, Re[\[Mu]]},
@@ -167,3 +201,6 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[Im[md2[2,2]]]},
             {49, SignedAbsSqrt[Im[md2[3,3]]]} } }
 };
+
+FSCalculateDecays = True;
+

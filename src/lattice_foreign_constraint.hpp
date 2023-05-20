@@ -63,6 +63,6 @@ private:
     size_t nr;
 };
 
-}
+} // namespace flexiblesusy
 
 #endif // LATTICE_FOREIGN_CONSTRAINT_H

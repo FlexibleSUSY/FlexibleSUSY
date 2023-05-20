@@ -32,10 +32,10 @@ class RAII_save {
 public:
    RAII_save(T& var_) noexcept : var(var_), value(var_) {}
    RAII_save(const RAII_save&) = delete;
-   RAII_save(RAII_save&&) = default;
+   RAII_save(RAII_save&&) noexcept = default;
    ~RAII_save() { var = value; }
    RAII_save& operator=(const RAII_save&) = delete;
-   RAII_save& operator=(RAII_save&& other) = default;
+   RAII_save& operator=(RAII_save&& other) noexcept = default;
 
 private:
    T& var;
@@ -57,13 +57,10 @@ class RAII_guard {
 public:
    RAII_guard(F f_) : clean_up(std::move(f_)) {}
    RAII_guard(const RAII_guard&) = delete;
-   RAII_guard(RAII_guard&& other) : clean_up(std::move(other.clean_up)) {}
+   RAII_guard(RAII_guard&&) noexcept = default;
    ~RAII_guard() { clean_up(); }
    RAII_guard& operator=(const RAII_guard&) = delete;
-   RAII_guard& operator=(RAII_guard&& other) {
-      clean_up = std::move(other.clean_up);
-      return *this;
-   }
+   RAII_guard& operator=(RAII_guard&&) noexcept = default;
 private:
    F clean_up;
 };

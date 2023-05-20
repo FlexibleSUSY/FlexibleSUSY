@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 (* Script for converting MSSM 2L Higgs corrections from Fortran to
    Mathematica form and derivation of the limits s2t -> 0 and mst1 ->
    mst2.
@@ -144,22 +166,57 @@ tadpoles = {S1, S2};
 selfEnergy = {S11, S12, S22} /. s2t -> 0 /. c2t -> 1;
 
 (* Limits *)
-(* s2t -> 0 *)
 
+(* s2t -> 0 *)
 tadpolesS2t0 =
     Simplify[Limit[tadpoles, s2t -> 0] /. c2t -> 1 /. Xt -> 0];
 
 (* s2t -> 0 and mst1 -> mst2 *)
 tadpolesS2t0T1eqT2 =
-    Simplify[Normal /@
-             Series[tadpolesS2t0 /. phi -> phiExpr /. T1 -> T2 + eps,
-                    {eps, 0, 0}] /. T2 -> T];
+    Simplify[Normal[
+             Series[tadpolesS2t0 /. T1 -> T2 + eps,
+                    {eps, 0, 0}]] /. T2 -> T];
 
 (* s2t -> 0 and mst1 -> mst2 *)
 selfEnergyS2t0T1eqT2 = 
-    Simplify[Normal /@
-             Series[selfEnergy /. T1 -> T2 + eps, {eps, 0, 0}] /. T2 -> T];
+    Simplify[Normal[
+             Series[selfEnergy /. T1 -> T2 + eps,
+                    {eps, 0, 0}]] /. T2 -> T];
 
-Print[CForm /@ FullSimplify[tadpolesS2t0]];
-Print[CForm /@ Simplify[tadpolesS2t0T1eqT2]];
-Print[CForm /@ Simplify[selfEnergyS2t0T1eqT2]];
+gs /: gs^2 = gs2;
+ht /: ht^2 = ht2;
+mt /: mt^2 = mt2;
+g  /: g^2  = g2;
+t  /: t^2  = t2;
+t  /: t^3  = t3;
+T  /: T^2  = Tsqr;
+T  /: T^3  = Tcub;
+
+simp1 = {
+    Log[t/g] -> ltg,
+    Log[T/g] -> lTg,
+    Log[T/q] -> lTq,
+    Log[T1/q]-> lT1q,
+    Log[T2/q]-> lT2q,
+    Log[t/q] -> ltq,
+    Log[g/q] -> lgq,
+    Log[Tsqr/t2] -> lT2t2,
+    Log[g t/q^2] -> lgtq2
+};
+
+simp2 = {
+    a_^2 :> sqr[a],
+    a_^-2 :> 1/sqr[a]
+};
+
+(* simplify CP-even tadpole s2t = 0 *)
+pref = mt^2 gs^2 / (4 Pi)^4;
+Print[CForm /@ FullSimplify[1/pref tadpolesS2t0 //. simp1] //. simp1 //. simp2];
+
+(* simplify CP-even tadpole s2t = 0 and T1 = T2 *)
+pref = mt^2 gs^2 / (4 Pi)^4;
+Print[CForm /@ Simplify[1/pref tadpolesS2t0T1eqT2 //. simp1] //. simp1 //. simp2];
+
+(* simplify CP-even self-energy *)
+pref = ht^2 mt^2 gs^2 / (4 Pi)^4;
+Print[CForm /@ Simplify[1/pref selfEnergyS2t0T1eqT2 //. simp1] //. simp1 //. simp2];

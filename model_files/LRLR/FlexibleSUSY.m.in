@@ -1,0 +1,201 @@
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = LRmodels/LRLR;
+FSRGELoopOrder = 0;
+
+(* left-right symmetric model of arXiv:1512.07541 *)
+
+MINPAR = {
+   {1, vHRInput},
+   {2, vtLInput},
+   {3, vtRInput},
+   {4, vSUInput},
+   {5, vSDInput},
+   {6, vSEInput},
+   {10, rho1RInput},
+   {11, rho2RInput},
+   {12, rho1LInput},
+   {13, rho2LInput},
+   {14, rho3Input},
+   {15, lamDDInput},
+   {16, lamUUInput},
+   {17, lamEEInput},
+   {18, lamDUInput},
+   {19, lamDEInput},
+   {20, lamUEInput},
+   {21, lam2LInput},
+   {22, lam2RInput},
+   {23, lamLRInput},
+   {24, lamULInput},
+   {25, lamDLInput},
+   {26, lamELInput},
+   {27, lamURInput},
+   {28, lamDRInput},
+   {29, lamERInput},
+   {30, lamUdLInput},
+   {31, lamDdLInput},
+   {32, lamEdLInput},
+   {33, lamUdRInput},
+   {34, lamDdRInput},
+   {35, lamEdRInput},
+   {36, etaLLInput},
+   {37, etaRLInput},
+   {38, etaLRInput},
+   {39, etaRRInput},
+   {40, eRR1Input},
+   {41, eRR2Input},
+   {42, eLL1Input},
+   {43, eLL2Input},
+   {50, rhoLInput},
+   {51, rhoRInput},
+   {52, lamInput},
+   {53, xiSInput},
+   {54, etaInput},
+   {55, kapInput}
+};
+
+EXTPAR = {};
+
+EWSBOutputParameters = {muL2, muR2, mudL2, mudR2, muU, muD, muE};
+
+SUSYScale = LowScale;
+
+SUSYScaleFirstGuess = LowScaleFirstGuess;
+
+SUSYScaleInput = {};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {g3, LowEnergyConstant[g3SM]},
+   {g2, LowEnergyConstant[g2SM]},
+   {g1L1R, 0},
+   {g1R1L, 0},
+   {gR, LowEnergyConstant[g2SM]},
+   {g1L, (LowEnergyConstant[g1SM]*LowEnergyConstant[g2SM])/Sqrt[2*(-LowEnergyConstant[g1SM]^2 + LowEnergyConstant[g2SM]^2)]},
+   {g1R, (LowEnergyConstant[g1SM]*LowEnergyConstant[g2SM])/Sqrt[2*(-LowEnergyConstant[g1SM]^2 + LowEnergyConstant[g2SM]^2)]},
+   {vHR, vHRInput},
+   {vSE, vSEInput},
+   {vSD, vSDInput},
+   {vSU, vSUInput},
+   {vtL, vtLInput},
+   {vtR, vtRInput},
+   {vHL, Sqrt[LowEnergyConstant[vSM]^2 - 2*vtLInput^2]},
+   {rho1R, rho1RInput},
+   {rho2R, rho2RInput},
+   {rho1L, rho1LInput},
+   {rho2L, rho2LInput},
+   {rho3, rho3Input},
+   {lamDD, lamDDInput},
+   {lamUU, lamUUInput},
+   {lamEE, lamEEInput},
+   {lamDU, lamDUInput},
+   {lamDE, lamDEInput},
+   {lamUE, lamUEInput},
+   {lam2L, lam2LInput},
+   {lam2R, lam2RInput},
+   {lamLR, lamLRInput},
+   {lamUL, lamULInput},
+   {lamDL, lamDLInput},
+   {lamEL, lamELInput},
+   {lamUR, lamURInput},
+   {lamDR, lamDRInput},
+   {lamER, lamERInput},
+   {lamUdL, lamUdLInput},
+   {lamDdL, lamDdLInput},
+   {lamEdL, lamEdLInput},
+   {lamUdR, lamUdRInput},
+   {lamDdR, lamDdRInput},
+   {lamEdR, lamEdRInput},
+   {etaLL, etaLLInput},
+   {etaRL, etaRLInput},
+   {etaLR, etaLRInput},
+   {etaRR, etaRRInput},
+   {eRR1, eRR1Input},
+   {eRR2, eRR2Input},
+   {eLL1, eLL1Input},
+   {eLL2, eLL2Input},
+   {rhoL, rhoLInput},
+   {rhoR, rhoRInput},
+   {lam, lamInput},
+   {xiS, xiSInput},
+   {eta, etaInput},
+   {kap, kapInput}
+};
+
+InitialGuessAtLowScale = {
+   {g3, LowEnergyConstant[g3SM]},
+   {g2, LowEnergyConstant[g2SM]},
+   {g1L1R, 0},
+   {g1R1L, 0},
+   {gR, LowEnergyConstant[g2SM]},
+   {g1L, (LowEnergyConstant[g1SM]*LowEnergyConstant[g2SM])/Sqrt[2*(-LowEnergyConstant[g1SM]^2 + LowEnergyConstant[g2SM]^2)]},
+   {g1R, (LowEnergyConstant[g1SM]*LowEnergyConstant[g2SM])/Sqrt[2*(-LowEnergyConstant[g1SM]^2 + LowEnergyConstant[g2SM]^2)]},
+   {vHR, vHRInput},
+   {vSE, vSEInput},
+   {vSD, vSDInput},
+   {vSU, vSUInput},
+   {vtL, vtLInput},
+   {vtR, vtRInput},
+   {vHL, Sqrt[LowEnergyConstant[vSM]^2 - 2*vtLInput^2]},
+   {rho1R, rho1RInput},
+   {rho2R, rho2RInput},
+   {rho1L, rho1LInput},
+   {rho2L, rho2LInput},
+   {rho3, rho3Input},
+   {lamDD, lamDDInput},
+   {lamUU, lamUUInput},
+   {lamEE, lamEEInput},
+   {lamDU, lamDUInput},
+   {lamDE, lamDEInput},
+   {lamUE, lamUEInput},
+   {lam2L, lam2LInput},
+   {lam2R, lam2RInput},
+   {lamLR, lamLRInput},
+   {lamUL, lamULInput},
+   {lamDL, lamDLInput},
+   {lamEL, lamELInput},
+   {lamUR, lamURInput},
+   {lamDR, lamDRInput},
+   {lamER, lamERInput},
+   {lamUdL, lamUdLInput},
+   {lamDdL, lamDdLInput},
+   {lamEdL, lamEdLInput},
+   {lamUdR, lamUdRInput},
+   {lamDdR, lamDdRInput},
+   {lamEdR, lamEdRInput},
+   {etaLL, etaLLInput},
+   {etaRL, etaRLInput},
+   {etaLR, etaLRInput},
+   {etaRR, etaRRInput},
+   {eRR1, eRR1Input},
+   {eRR2, eRR2Input},
+   {eLL1, eLL1Input},
+   {eLL2, eLL2Input},
+   {rhoL, rhoLInput},
+   {rhoR, rhoRInput},
+   {lam, lamInput},
+   {xiS, xiSInput},
+   {eta, etaInput},
+   {kap, kapInput}
+};
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh, Ah};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+PotentialLSPParticles = {};
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYOutput,
+           {{1, Hold[SUSYScale]},
+            {2, Hold[LowScale]} } }
+};
+
+FSCalculateDecays = True;

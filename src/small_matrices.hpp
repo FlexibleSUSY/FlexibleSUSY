@@ -23,6 +23,6 @@ using RVe3 = Eigen::Matrix<Real, 3, 1>;
 using RVe4 = Eigen::Matrix<Real, 4, 1>;
 using RVe6 = Eigen::Matrix<Real, 6, 1>;
 
-}
+} // namespace flexiblesusy
 
 #endif // small_matrices_hpp

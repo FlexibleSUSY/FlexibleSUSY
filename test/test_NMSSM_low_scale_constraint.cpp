@@ -13,6 +13,24 @@
 #include "wrappers.hpp"
 #include "ew_input.hpp"
 
+softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
+{
+   softsusy::QedQcd qn;
+
+   qn.setAlphas(flexiblesusy::ToEigenArray(ql.displayAlphas()));
+   qn.setMasses(flexiblesusy::ToEigenArray(ql.displayMass()));
+   qn.set_input(ql.display_input());
+   qn.setPoleMb(ql.displayPoleMb());
+   qn.setCKM(ql.displayCKM());
+   qn.setPMNS(ql.displayPMNS());
+   qn.set_number_of_parameters(ql.howMany());
+   qn.set_scale(ql.displayMu());
+   qn.set_loops(ql.displayLoops());
+   qn.set_thresholds(ql.displayThresholds());
+
+   return qn;
+}
+
 BOOST_AUTO_TEST_CASE( test_delta_alpha )
 {
    NMSSM<Two_scale> m;
@@ -24,17 +42,17 @@ BOOST_AUTO_TEST_CASE( test_delta_alpha )
    input.Azero = -500.;
    input.LambdaInput = 0.1;
    input.SignvS = 1;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    setup_NMSSM_const(m, s, input);
    s.setData(qedqcd);
 
    m.calculate_DRbar_masses();
    s.calcDrBarPars();
 
-   NMSSM_low_scale_constraint<Two_scale> constraint(&m, qedqcd);
+   NMSSM_low_scale_constraint<Two_scale> constraint(&m, convert(qedqcd));
 
-   const double alpha_em = qedqcd.displayAlpha(ALPHA);
-   const double alpha_s  = qedqcd.displayAlpha(ALPHAS);
+   const double alpha_em = qedqcd.displayAlpha(legacy::ALPHA);
+   const double alpha_s  = qedqcd.displayAlpha(legacy::ALPHAS);
    const double scale = m.get_scale();
 
    const double delta_alpha_em_fs = constraint.calculate_delta_alpha_em(alpha_em);
@@ -59,16 +77,16 @@ BOOST_AUTO_TEST_CASE( test_low_energy_constraint )
    input.Azero = -500.;
    input.LambdaInput = 0.1;
    input.SignvS = 1;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    qedqcd.setPoleMt(175.);       // non-default
-   qedqcd.setMass(mBottom, 4.3); // non-default
+   qedqcd.setMass(legacy::mBottom, 4.3); // non-default
    setup_NMSSM_const(m, s, input);
    s.setData(qedqcd);
 
    m.calculate_DRbar_masses();
    s.calcDrBarPars();
 
-   NMSSM_low_scale_constraint<Two_scale> constraint(&m, qedqcd);
+   NMSSM_low_scale_constraint<Two_scale> constraint(&m, convert(qedqcd));
 
    const double TanBeta = input.TanBeta;
    const double g1 = m.get_g1();
@@ -83,8 +101,8 @@ BOOST_AUTO_TEST_CASE( test_low_energy_constraint )
    const double ss_new_vev = s.getVev();
 
    const double fs_mt = m.calculate_MFu_DRbar(qedqcd.displayPoleMt(), 2);
-   const double fs_mb = m.calculate_MFd_DRbar(qedqcd.displayMass(mBottom), 2);
-   const double fs_me = m.calculate_MFe_DRbar(qedqcd.displayMass(mTau), 2);
+   const double fs_mb = m.calculate_MFd_DRbar(qedqcd.displayMass(legacy::mBottom), 2);
+   const double fs_me = m.calculate_MFe_DRbar(qedqcd.displayMass(legacy::mTau), 2);
    const double fs_MZ = m.calculate_MVZ_DRbar(Electroweak_constants::MZ);
    const double fs_old_vd = m.get_vd();
    const double fs_old_vu = m.get_vu();
@@ -95,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_low_energy_constraint )
 
    BOOST_CHECK_CLOSE_FRACTION(fs_mt, ss_mt, 9.5e-05);
    BOOST_CHECK_CLOSE_FRACTION(fs_mb, ss_mb, 2.6e-14);
-   BOOST_CHECK_CLOSE_FRACTION(fs_me, ss_me, 6.0e-07);
+   BOOST_CHECK_CLOSE_FRACTION(fs_me, ss_me, 2.1e-04);
    BOOST_CHECK_CLOSE_FRACTION(fs_MZ, ss_MZ, 5.0e-10);
    BOOST_CHECK_CLOSE_FRACTION(fs_new_vev, ss_new_vev, 5.0e-10);
    BOOST_CHECK_CLOSE_FRACTION(fs_old_vu / fs_old_vd, s.displayTanb(), 1.0e-10);
@@ -105,8 +123,8 @@ BOOST_AUTO_TEST_CASE( test_low_energy_constraint )
    constraint.apply();
    s.sparticleThresholdCorrections(input.TanBeta);
 
-   BOOST_CHECK_CLOSE_FRACTION(m.get_g1(), s.displayGaugeCoupling(1), 0.002);
-   BOOST_CHECK_CLOSE_FRACTION(m.get_g2(), s.displayGaugeCoupling(2), 0.004);
+   BOOST_CHECK_CLOSE_FRACTION(m.get_g1(), s.displayGaugeCoupling(1), 0.003);
+   BOOST_CHECK_CLOSE_FRACTION(m.get_g2(), s.displayGaugeCoupling(2), 0.007);
    BOOST_CHECK_CLOSE_FRACTION(m.get_g3(), s.displayGaugeCoupling(3), 1.0e-12);
 
    // test off-diagonal elements

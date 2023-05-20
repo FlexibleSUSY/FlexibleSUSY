@@ -32,6 +32,6 @@ public:
    virtual int max_iterations() { return 0; }
 };
 
-}
+} // namespace flexiblesusy
 
 #endif

@@ -16,11 +16,11 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_SPECTRUM_GENERATOR_INTERFACE_H
 #define @ModelName@_SPECTRUM_GENERATOR_INTERFACE_H
 
+#include "@ModelName@_info.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_model.hpp"
 #include "@ModelName@_model_slha.hpp"
@@ -30,10 +30,13 @@
 #include "coupling_monitor.hpp"
 #include "logger.hpp"
 #include "lowe.h"
+#include "spectrum_generator_problems.hpp"
 #include "spectrum_generator_settings.hpp"
-#include "two_loop_corrections.hpp"
+
+#include "loop_libraries/loop_library.hpp"
 
 #include <string>
+#include <tuple>
 
 namespace flexiblesusy {
 
@@ -42,61 +45,25 @@ struct @ModelName@_input_parameters;
 template <class T>
 class @ModelName@_spectrum_generator_interface {
 public:
-   @ModelName@_spectrum_generator_interface()
-      : model()
-      , settings()
-      , parameter_output_scale(0.)
-      , reached_precision(std::numeric_limits<double>::infinity())
-   {}
    virtual ~@ModelName@_spectrum_generator_interface() = default;
 
-   const @ModelName@<T>& get_model() const { return model; }
-   @ModelName@<T>& get_model() { return model; }
-   @ModelName@_slha<@ModelName@<T> > get_model_slha() const { return @ModelName@_slha<@ModelName@<T> >(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.); }
+   std::tuple<@ModelName@<T>> get_models() const
+   { return std::make_tuple(model); }
+   std::tuple<@ModelName@<T>> get_models_slha() const
+   { return std::make_tuple(@ModelName@<T>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.)); }
 
-   const Problems<@ModelName@_info::NUMBER_OF_PARTICLES, @ModelName@_info::NUMBER_OF_PARAMETERS>& get_problems() const {
-      return model.get_problems();
-   }
-   int get_exit_code() const { return get_problems().have_problem(); }
+   const @ModelName@<T>& get_model() const
+   { return model; }
+   @ModelName@<T>& get_model()
+   { return model; }
+   @ModelName@<T> get_model_slha() const
+   { return @ModelName@<T>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.); }
+
+   Spectrum_generator_problems get_problems() const { return problems; }
+   int get_exit_code() const { return problems.have_problem(); }
    double get_reached_precision() const { return reached_precision; }
    const Spectrum_generator_settings& get_settings() const { return settings; }
    void set_parameter_output_scale(double s) { parameter_output_scale = s; }
-   void set_precision_goal(double precision_goal_) {
-      settings.set(Spectrum_generator_settings::precision, precision_goal_);
-   }
-   void set_pole_mass_loop_order(int l) {
-      settings.set(Spectrum_generator_settings::pole_mass_loop_order, l);
-      model.set_pole_mass_loop_order(l);
-   }
-   void set_pole_scale(double q) {
-      settings.set(Spectrum_generator_settings::pole_mass_scale, q);
-   }
-   void set_ewsb_loop_order(int l) {
-      settings.set(Spectrum_generator_settings::ewsb_loop_order, l);
-      model.set_ewsb_loop_order(l);
-   }
-   void set_beta_loop_order(int l) {
-      settings.set(Spectrum_generator_settings::beta_loop_order, l);
-   }
-   void set_beta_zero_threshold(double t) {
-      settings.set(Spectrum_generator_settings::beta_zero_threshold, t);
-   }
-   void set_max_iterations(int n) {
-      settings.set(Spectrum_generator_settings::max_iterations, n);
-   }
-   void set_calculate_sm_masses(bool flag) {
-      settings.set(Spectrum_generator_settings::calculate_sm_masses, flag);
-   }
-   void set_force_output(bool flag) {
-      settings.set(Spectrum_generator_settings::force_output, flag);
-   }
-   void set_threshold_corrections_loop_order(int t) {
-      settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, t);
-   }
-   void set_two_loop_corrections(const Two_loop_corrections& c) {
-      settings.set_two_loop_corrections(c);
-      model.set_two_loop_corrections(c);
-   }
    void set_settings(const Spectrum_generator_settings&);
 
    void run(const softsusy::QedQcd&, const @ModelName@_input_parameters&);
@@ -105,9 +72,10 @@ public:
 
 protected:
    @ModelName@<T> model;
+   Spectrum_generator_problems problems;
    Spectrum_generator_settings settings;
-   double parameter_output_scale; ///< output scale for running parameters
-   double reached_precision; ///< the precision that was reached
+   double parameter_output_scale{0.}; ///< output scale for running parameters
+   double reached_precision{std::numeric_limits<double>::infinity()}; ///< the precision that was reached
 
    void translate_exception_to_problem(@ModelName@<T>& model);
    virtual void run_except(const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
@@ -123,9 +91,12 @@ void @ModelName@_spectrum_generator_interface<T>::set_settings(
    const Spectrum_generator_settings& settings_)
 {
    settings = settings_;
+   Loop_library::set(settings.get(Spectrum_generator_settings::loop_library));
+
    model.set_pole_mass_loop_order(settings.get(Spectrum_generator_settings::pole_mass_loop_order));
    model.set_ewsb_loop_order(settings.get(Spectrum_generator_settings::ewsb_loop_order));
-   model.set_two_loop_corrections(settings.get_two_loop_corrections());
+   model.set_loop_corrections(settings.get_loop_corrections());
+   model.set_threshold_corrections(settings.get_threshold_corrections());
 }
 
 /**
@@ -141,6 +112,7 @@ template <class T>
 void @ModelName@_spectrum_generator_interface<T>::run(
    const softsusy::QedQcd& qedqcd_, const @ModelName@_input_parameters& input)
 {
+
    softsusy::QedQcd qedqcd = qedqcd_;
 
    try {
@@ -149,6 +121,8 @@ void @ModelName@_spectrum_generator_interface<T>::run(
    } catch (...) {
       this->translate_exception_to_problem(model);
    }
+
+   problems.set_model_problems({ model.get_problems() });
 }
 
 /**
@@ -169,14 +143,21 @@ void @ModelName@_spectrum_generator_interface<T>::write_running_couplings(
       tmp_model.run_to(start);
    } catch (const Error& error) {
       ERROR("write_running_couplings: running to scale "
-            << start << " failed: " << error.what());
+            << start << " failed: " << error.what_detailed());
       return;
    }
 
-   @ModelName@_parameter_getter parameter_getter;
-   Coupling_monitor<@ModelName@_mass_eigenstates, @ModelName@_parameter_getter>
-      coupling_monitor(tmp_model, parameter_getter);
+   // returns parameters at given scale
+   auto data_getter = [&tmp_model](double scale) {
+      tmp_model.run_to(scale);
+      return @ModelName@_parameter_getter::get_parameters(tmp_model);
+   };
 
+   std::vector<std::string> parameter_names(
+      std::cbegin(@ModelName@_info::parameter_names),
+      std::cend(@ModelName@_info::parameter_names));
+
+   Coupling_monitor coupling_monitor(data_getter, parameter_names);
    coupling_monitor.run(start, stop, 100, true);
    coupling_monitor.write_to_file(filename);
 }
@@ -190,8 +171,7 @@ template <class T>
 void @ModelName@_spectrum_generator_interface<T>::write_spectrum(
    const std::string& filename) const
 {
-   @ModelName@_spectrum_plotter plotter;
-   plotter.extract_spectrum(model);
+   @ModelName@_spectrum_plotter plotter(model);
    plotter.write_to_file(filename);
 }
 
@@ -209,7 +189,7 @@ void @ModelName@_spectrum_generator_interface<T>::translate_exception_to_problem
    try {
       throw;
    } catch (const NoConvergenceError&) {
-      model.get_problems().flag_no_convergence();
+      problems.flag_no_convergence();
    } catch (const NonPerturbativeRunningError& error) {
       model.get_problems().flag_no_perturbative();
       model.get_problems().flag_non_perturbative_parameter(
@@ -217,11 +197,11 @@ void @ModelName@_spectrum_generator_interface<T>::translate_exception_to_problem
          error.get_scale());
    } catch (const NonPerturbativeRunningQedQcdError& error) {
       model.get_problems().flag_no_perturbative();
-      model.get_problems().flag_thrown(error.what());
-   } catch (const NoRhoConvergenceError&) {
-      model.get_problems().flag_no_rho_convergence();
+      model.get_problems().flag_thrown(error.what_detailed());
+   } catch (const NoSinThetaWConvergenceError&) {
+      model.get_problems().flag_no_sinThetaW_convergence();
    } catch (const Error& error) {
-      model.get_problems().flag_thrown(error.what());
+      model.get_problems().flag_thrown(error.what_detailed());
    } catch (const std::exception& error) {
       model.get_problems().flag_thrown(error.what());
    }

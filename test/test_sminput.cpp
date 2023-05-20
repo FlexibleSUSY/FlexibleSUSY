@@ -3,14 +3,31 @@
 #define BOOST_TEST_MODULE test_sminput
 
 #include <boost/test/unit_test.hpp>
-
-#include <fstream>
 #include "slhaea.h"
+
+const std::string input_str =
+"# Example input in SLHA2 format\n"
+"Block SMINPUTS                 # Standard Model inputs\n"
+"    1   1.279340000e+02        # alpha^(-1) SM MSbar(MZ)\n"
+"    2   1.166370000e-05        # G_Fermi\n"
+"    3   1.176000000e-01        # alpha_s(MZ) SM MSbar\n"
+"    4   9.118760000e+01        # MZ(pole)\n"
+"    5   4.200000000e+00        # mb(mb) SM MSbar\n"
+"    6   1.733000000e+02        # mtop(pole)\n"
+"    7   1.777000000e+00        # mtau(pole)\n"
+"    8   0.000000000e+00        # mnu3(pole)\n"
+"   11   5.109989020e-04        # melectron(pole)\n"
+"   12   0.000000000e+00        # mnu1(pole)\n"
+"   13   1.056583570e-01        # mmuon(pole)\n"
+"   14   0.000000000e+00        # mnu2(pole)\n"
+"   21   4.750000000e-03        # md(2 GeV)\n"
+"   22   2.400000000e-03        # mu(2 GeV)\n"
+"   23   1.040000000e-01        # ms(2 GeV)\n"
+"   24   1.270000000e+00        # mc(2 GeV)\n";
 
 BOOST_AUTO_TEST_CASE( test_reading_sminput )
 {
-   std::ifstream ifs("test/test_sminput.in.spc");
-   const SLHAea::Coll input(ifs);
+   const auto input = SLHAea::Coll::from_str(input_str);
 
    BOOST_REQUIRE(!input.empty());
 
@@ -51,8 +68,7 @@ BOOST_AUTO_TEST_CASE( test_reading_sminput )
 
 BOOST_AUTO_TEST_CASE( test_iteration_sminput )
 {
-   std::ifstream ifs("test/test_sminput.in.spc");
-   const SLHAea::Coll input(ifs);
+   const auto input = SLHAea::Coll::from_str(input_str);
 
    BOOST_REQUIRE(!input.empty());
 

@@ -2,12 +2,11 @@
 #ifndef TEST_CMSSMNOFV_H
 #define TEST_CMSSMNOFV_H
 
-#include "test.h"
+#include "test.hpp"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
 
 using namespace flexiblesusy;
-using namespace softsusy;
 
 template <class T>
 void ensure_tree_level_ewsb(T& m)

@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 BeginPackage["TwoLoopQCD`", {"SARAH`"}];
 
 GetDeltaMPoleOverMRunningQCDOneLoop::usage="Returns one-loop QCD
@@ -43,7 +65,7 @@ GetDeltaMPoleOverMRunningQCDTwoLoop[quark_, renScale_, renScheme_] :=
               Quit[1];
           ];
 
-GetDeltaMPoleOverMRunningQCDTwoLoopDRbar[quark_ /; quark === SARAH`TopQuark, renScale_] :=
+GetDeltaMPoleOverMRunningQCDTwoLoopDRbar[quark_ /; quark === TreeMasses`GetSMTopQuarkMultiplet[], renScale_] :=
     Module[{CF, CA, colorPosition, alphaStrong, mf, log, result},
            colorPosition = Position[SARAH`Gauge, SARAH`color][[1,1]];
            CF = SA`Casimir[quark, colorPosition];
@@ -60,14 +82,14 @@ GetDeltaMPoleOverMRunningQCDTwoLoopDRbar[quark_ /; quark === SARAH`TopQuark, ren
            result
           ];
 
-GetDeltaMPoleOverMRunningQCDTwoLoopDRbar[quark_ /; quark === SARAH`BottomQuark, renScale_] :=
+GetDeltaMPoleOverMRunningQCDTwoLoopDRbar[quark_ /; quark === TreeMasses`GetSMBottomQuarkMultiplet[], renScale_] :=
     Module[{CF, CA, colorPosition, alphaStrong, mf, mt, log, logMt, result},
            colorPosition = Position[SARAH`Gauge, SARAH`color][[1,1]];
            CF = SA`Casimir[quark, colorPosition];
            CA = SA`Casimir[SARAH`VectorG, colorPosition];
            alphaStrong = SARAH`strongCoupling^2 / (4 Pi);
            mf = FlexibleSUSY`M[quark];
-           mt = FlexibleSUSY`M[SARAH`TopQuark];
+           mt = FlexibleSUSY`M[TreeMasses`GetSMTopQuarkMultiplet[]];
            log = Log[(mf / renScale)^2];
            logMt = Log[(mf / mt)^2];
            result = CF (alphaStrong / (4 Pi))^2 (

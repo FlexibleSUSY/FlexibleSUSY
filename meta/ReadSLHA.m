@@ -1,13 +1,69 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 BeginPackage["ReadSLHA`"];
 
-ReadSLHAFile::usage="reads SLHA file and returns list of input and
- output parameters";
+ReadSLHAFile::usage="Reads SLHA file and returns list of input and
+ output parameters.
 
-ReadSLHAStream::usage="reads stream with SLHA input and returns list
- of input and output parameters";
+ Usage:  ReadSLHAFile[fileName, parameters]
 
-ReadSLHAString::usage="reads string with SLHA input and returns list
- of input and output parameters";
+ - fileName - name of SLHA file to be read
+ - parameters - list of 3-component lists specifying how
+   to interpret the SLHA file content:
+   #1 is the parameter name (a symbol)
+   #2 is the parameter dimension (a list of positive integers)
+   #3 is the {block, entry, ...} in the SLHA input
+
+ Example:
+
+ parameters = {
+    {Qin  , {0}   , {EXTPAR, 0}},
+    {m0   , {0}   , {MINPAR, 1}},
+    {CpHPP, {0}   , {EFFHIGGSCOUPLINGS, 25, 22, 22}},
+    {k    , {3}   , KappaIn},
+    {Yu   , {3, 3}, YuIN}
+ };
+
+ ReadSLHAFile[\"file.slha\", parameters]
+";
+
+ReadSLHAStream::usage="Reads stream with SLHA input and returns list
+ of input and output parameters.
+
+ Usage:  ReadSLHAStream[streamName, parameters]
+
+ - streamName - name of the stream
+ - parameters - see documentation of ReadSLHAFile[].
+";
+
+ReadSLHAString::usage="Reads string with SLHA input and returns list
+ of input and output parameters.
+
+ Usage:  ReadSLHAString[str, parameters]
+
+ - str - string in SLHA format (set of blocks)
+ - parameters - see documentation of ReadSLHAFile[].
+";
 
 Begin["`Private`"];
 
@@ -15,17 +71,17 @@ IsDataLine[str_String] :=
     !StringMatchQ[str, StartOfString ~~ "#" ~~ ___];
 
 BlockStarts[str_String, blockName_String] :=
-    StringMatchQ[str, StartOfString ~~ "BLOCK" ~~ Whitespace ~~ blockName ~~ ___,
+    StringMatchQ[str, StartOfString ~~ "BLOCK" ~~ Whitespace ~~ blockName ~~ WordBoundary ~~ ___,
                  IgnoreCase -> True];
 
 BlockStarts[str_String] :=
-    StringMatchQ[str, StartOfString ~~ "BLOCK" ~~ Whitespace ~~ ___,
+    StringMatchQ[str, StartOfString ~~ "BLOCK" ~~ WordBoundary ~~ ___,
                  IgnoreCase -> True];
 
 floatRegex = "[+\-]?(?:[0-9]*)(?:\\.[0-9]*)?(?:[eE][+\-]?[0-9]+)?";
 
 ReadBlock[stream_, blockName_String] :=
-    Module[{line = "", block = "", inBlock = True},
+    Module[{line = "", block = "", inBlock = False},
            SetStreamPosition[stream, 0];
            While[(line = Read[stream, String]) =!= EndOfFile,
                  If[BlockStarts[line, blockName],
@@ -99,20 +155,6 @@ ReadParameter[stream_, par_, {dims__}, block_] :=
 ReadParameter[stream_, {par_, type_, block_}] :=
     par -> ReadParameter[stream, par, type, block];
 
-(*
- The elements of the parameters list are 3-component lists, where
- #1 is the parameter name
- #2 is the parameter type
- #3 is the block / entry in the SLHA input
-
- parameters = {
-    {Qin  , {0}   , {EXTPAR, 0}},
-    {m0   , {0}   , {MINPAR, 1}},
-    {CpHPP, {0}   , {EFFHIGGSCOUPLINGS, 25, 22, 22}},
-    {k    , {3}   , KappaIn},
-    {Yu   , {3, 3}, YuIN}
- };
- *)
 ReadSLHAStream[stream_, parameters_List] :=
     ReadParameter[stream, #]& /@ parameters;
 

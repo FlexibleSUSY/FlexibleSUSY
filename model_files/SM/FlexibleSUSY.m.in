@@ -46,16 +46,16 @@ InitialGuessAtLowScale = {
    {Ye, Automatic}
 };
 
-SMParticles = {
-    Electron, TopQuark, BottomQuark,
-    VectorP, VectorZ, VectorG, VectorW, Neutrino,
-    gP, gG, gZ, gWm, gWmC,
-    Hp, Ah, (* goldstones *)
-    hh (* Higgs *)
-};
-
 UseSM3LoopRGEs = True;
+UseSM4LoopRGEs = True;
+UseSM5LoopRGEs = True;
 UseHiggs2LoopSM = True;
+UseHiggs3LoopSM = True;
+UseHiggs4LoopSM = True;
+UseYukawa3LoopQCD = True;
+UseYukawa4LoopQCD = True;
+UseSMAlphaS3Loop = True;
+UseSMAlphaS4Loop = True;
 
 DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh};
@@ -64,11 +64,12 @@ LowPoleMassPrecision     = {};
 
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
+           {{20, FlexibleSUSYObservable`AMM[Fe[1]]},
+            {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+            {22, FlexibleSUSYObservable`AMM[Fe[3]]} } }
 };
+
+FSCalculateDecays = True;
 
 SARAH`ParameterDefinitions = Append[
     Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],

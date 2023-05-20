@@ -34,7 +34,6 @@ double calculate_delta_vb_sm_1loop(
   const double outcos  = Sqrt(1.0 - sinThetaW2);
   const double q       = data.scale;
   const double alphaDRbar = data.alpha_em_drbar;
-  const double hmu     = data.ymu;
 
   const double deltaVbSm =
      rho * alphaDRbar / (4.0 * Pi * sinThetaW2) *
@@ -235,7 +234,6 @@ BOOST_AUTO_TEST_CASE( test_delta_vb )
    data.gY = fs_gY;
    data.g2 = fs_g2;
    data.g3 = fs_g3;
-   data.ymu = fs_hmu;
 
    const double ss_delta_vb =
       ::calculate_delta_vb_sm_1loop(outrho, outsin, data);
@@ -309,7 +307,6 @@ BOOST_AUTO_TEST_CASE( test_delta_r )
    data.gY = fs_gY;
    data.g2 = fs_g2;
    data.g3 = fs_g3;
-   data.ymu = fs_hmu;
 
    const double ss_delta_r_1l =
       ::calculate_delta_r_sm_1loop(outrho, outsin, data);
@@ -394,7 +391,6 @@ BOOST_AUTO_TEST_CASE( test_delta_rho )
    data.gY = fs_gY;
    data.g2 = fs_g2;
    data.g3 = fs_g3;
-   data.ymu = fs_hmu;
 
    const double ss_delta_r_1l =
       ::calculate_delta_rho_sm_1loop(outrho, outsin, data);
@@ -479,7 +475,6 @@ BOOST_AUTO_TEST_CASE( test_rho_sinTheta )
    data.gY = fs_gY;
    data.g2 = fs_g2;
    data.g3 = fs_g3;
-   data.ymu = fs_hmu;
 
    const double sin_theta_tree = ::calculate_sin_theta_tree(data);
 

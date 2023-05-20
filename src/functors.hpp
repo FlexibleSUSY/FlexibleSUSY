@@ -19,7 +19,7 @@
 #ifndef FUNCTORS_H
 #define FUNCTORS_H
 
-#include "wrappers.hpp"
+#include <cmath>
 #include <limits>
 
 namespace flexiblesusy {
@@ -32,12 +32,12 @@ namespace flexiblesusy {
  */
 template <typename RealScalar>
 struct Chop {
-   Chop() : threshold(std::numeric_limits<RealScalar>::epsilon()) {}
-   Chop(RealScalar threshold_) : threshold(Abs(threshold_)) {}
+   Chop() = default;
+   Chop(RealScalar threshold_) : threshold(std::abs(threshold_)) {}
    const RealScalar operator()(const RealScalar& x) const noexcept {
-      return Abs(x) < threshold ? RealScalar{} : x;
+      return std::abs(x) < threshold ? RealScalar{} : x;
    }
-   RealScalar threshold;
+   RealScalar threshold{std::numeric_limits<RealScalar>::epsilon()};
 };
 
 } // namespace flexiblesusy

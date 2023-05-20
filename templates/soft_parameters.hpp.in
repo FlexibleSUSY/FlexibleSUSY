@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_soft_parameters_H
 #define @ModelName@_soft_parameters_H
@@ -58,7 +57,7 @@ protected:
 @parameterDef@
 
 private:
-   static const int numberOfParameters = @numberOfParameters@;
+   static constexpr int numberOfParameters = @numberOfParameters@;
 
    struct Soft_traces {
 @traceDefs@

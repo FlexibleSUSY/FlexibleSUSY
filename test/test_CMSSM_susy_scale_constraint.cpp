@@ -5,6 +5,8 @@
 #include <boost/test/unit_test.hpp>
 #include "test_CMSSM.hpp"
 
+#include <cmath>
+
 #define private public
 
 #include "CMSSM_two_scale_model.hpp"
@@ -12,7 +14,6 @@
 #include "softsusy.h"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
-#include <cmath>
 
 BOOST_AUTO_TEST_CASE( test_susy_scale_constraint )
 {

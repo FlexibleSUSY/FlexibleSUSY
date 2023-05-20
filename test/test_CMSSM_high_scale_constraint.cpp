@@ -3,7 +3,7 @@
 #define BOOST_TEST_MODULE test_CMSSM_high_scale_constraint
 
 #include <boost/test/unit_test.hpp>
-#include "test.h"
+#include "test.hpp"
 #include <functional>
 #include <Eigen/Dense>
 
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( test_mx_calculation )
    CMSSM_high_scale_constraint<Two_scale> CMSSM_sugra_constraint(&m);
    SoftsusyMSSM_sugra_constraint mssm_sugra_constraint(pp);
 
-   mssm_sugra_constraint.set_model((Two_scale_model*)&s);
+   mssm_sugra_constraint.set_model((Model*)&s);
 
    CMSSM_sugra_constraint.update_scale();
    mssm_sugra_constraint.update_scale();

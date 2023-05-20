@@ -9,32 +9,37 @@ FLEXIBLESUSY_PKG   := $(PKGNAME)-$(FLEXIBLESUSY_VERSION)
 FLEXIBLESUSY_TAG   := v$(FLEXIBLESUSY_VERSION)
 ABSBASEDIR         := @ABSBASEDIR@
 INSTALL_DIR        := @INSTALL_DIR@
+OPERATING_SYSTEM   := @OPERATING_SYSTEM@
 
 # Makefile switches
 ENABLE_COMPILE     := @ENABLE_COMPILE@
 ENABLE_FFLITE      := @ENABLE_FFLITE@
-ENABLE_LAPACK      := @ENABLE_LAPACK@
+ENABLE_GM2CALC     := @ENABLE_GM2CALC@
+ENABLE_HIGGSTOOLS  := @ENABLE_HIGGSTOOLS@
+ENABLE_HIMALAYA    := @ENABLE_HIMALAYA@
 ENABLE_LIBRARYLINK := @ENABLE_LIBRARYLINK@
 ENABLE_LOOPTOOLS   := @ENABLE_LOOPTOOLS@
+ENABLE_COLLIER     := @ENABLE_COLLIER@
 ENABLE_META        := @ENABLE_META@
 ENABLE_SHARED_LIBS := @ENABLE_SHARED_LIBS@
 ENABLE_SQLITE      := @ENABLE_SQLITE@
 ENABLE_STATIC      := @ENABLE_STATIC@
 ENABLE_THREADS     := @ENABLE_THREADS@
 ENABLE_TSIL        := @ENABLE_TSIL@
+ENABLE_FEYNARTS    := @ENABLE_FEYNARTS@
+ENABLE_FORMCALC    := @ENABLE_FORMCALC@
 
 # C/C++ preprocessor defines
-ENABLE_COLOR_PRINTOUT := @ENABLE_COLOR_PRINTOUT@
+ENABLE_COLORS         := @ENABLE_COLORS@
 ENABLE_DEBUG          := @ENABLE_DEBUG@
 ENABLE_CHECK_EIGENVALUE_ERROR := @ENABLE_CHECK_EIGENVALUE_ERROR@
-ENABLE_ILP64MKL_WORKAROUND := @ENABLE_ILP64MKL_WORKAROUND@
 ENABLE_SILENT         := @ENABLE_SILENT@
 ENABLE_VERBOSE        := @ENABLE_VERBOSE@
 
 # Makefile modules
 MODELS             := @MODELS@
 ADDONS             := @ADDONS@
-MODULES            := config src fflite slhaea doc
+MODULES            := config src fflite slhaea doc nlohmann
 # BEGIN: NOT EXPORTED ##########################################
 MODULES            += meta templates
 # END:   NOT EXPORTED ##########################################
@@ -45,38 +50,53 @@ MODULES            += @OPTIONAL_MODULES@
 
 # Variables for Mathematica meta code
 MATH               := @MATH@
-ALGORITHMS         := @ALGORITHMS@
+SOLVERS            := @SOLVERS@
 
 # Variables for compilation
 CXX                := @CXX@
 CPPFLAGS           := @CPPFLAGS@ $(patsubst %,-I%,$(MODULES)) -I.
 CXXFLAGS           := @CXXFLAGS@
-CC                 := @CC@
-CFLAGS             := @CFLAGS@ $(patsubst %,-I%,$(MODULES)) -I.
 FC                 := @FC@
 FFLAGS             := @FFLAGS@
 FLIBS              := @FLIBS@
+FMOD               := @FMOD@
+FSTD               := @FSTD@
+FUTILIBS           := @FUTILIBS@
 MODULE_LIBEXT      := @MODULE_LIBEXT@
 MODULE_MAKE_LIB_CMD:= @MODULE_MAKE_LIB_CMD@
 LDFLAGS            := @LDFLAGS@
 LDLIBS             := @LDLIBS@
 LIBLNK_LIBEXT      := @LIBLNK_LIBEXT@
 LIBLNK_MAKE_LIB_CMD:= @LIBLNK_MAKE_LIB_CMD@
-BLASLIBS           := @BLASLIBS@
+LLFLAGS            := @LLFLAGS@
+LLLIBS             := @LLLIBS@
 BOOSTTESTLIBS      := @BOOSTTESTLIBS@
 BOOSTTHREADLIBS    := @BOOSTTHREADLIBS@
 BOOSTFLAGS         := @BOOSTFLAGS@
 EIGENFLAGS         := @EIGENFLAGS@
 GSLLIBS            := @GSLLIBS@
 GSLFLAGS           := @GSLFLAGS@
-LAPACKLIBS         := @LAPACKLIBS@
 LOOPFUNCFLAGS      := @LOOPFUNCFLAGS@
 LOOPFUNCLIBS       := @LOOPFUNCLIBS@
+COLLIERFLAGS       := @COLLIERFLAGS@
+COLLIERLIBS        := @COLLIERLIBS@
+GM2CALCFLAGS       := @GM2CALCFLAGS@
+GM2CALCLIBS        := @GM2CALCLIBS@
+HIGGSTOOLSFLAGS    := @HIGGSTOOLSFLAGS@
+HIGGSTOOLSLIBS     := @HIGGSTOOLSLIBS@
+HIMALAYAFLAGS      := @HIMALAYAFLAGS@
+HIMALAYALIBS       := @HIMALAYALIBS@
 SQLITEFLAGS        := @SQLITEFLAGS@
 SQLITELIBS         := @SQLITELIBS@
 THREADLIBS         := @THREADLIBS@
 TSILFLAGS          := @TSILFLAGS@
 TSILLIBS           := @TSILLIBS@
+
+ifeq ($(VERBOSE),1)
+  Q :=
+else
+  Q := @
+endif
 
 # the modules add their dependency files to this variable
 ALLDEP   :=
@@ -92,6 +112,17 @@ ALLLL    :=
 ALLTST   :=
 # the addons add libraries to this variable to be linked against executables
 ADDONLIBS:=
+# the modules add dependent modules to this variable to be included in the makefile
+ALLMODDEP:=
+
+# set default shell
+SHELL = /bin/sh
+
+# disable built-in rules to improve speed
+MAKEFLAGS += -rR --include-dir=$(CURDIR)
+
+# message printed for each target
+MSG = echo "Building $@"
 
 # flexiblesusy-config script
 FSCONFIG := @FSCONFIG@
@@ -104,6 +135,7 @@ DEPGEN = $(DEPGEN_EXE)
 
 # script which lists the SARAH model files
 SARAH_DEP_GEN := @SARAH_DEP_GEN@
+SARAH_MODEL_DIR := @SARAH_MODEL_DIR@
 
 # script which installs a file without export markers
 INSTALL_STRIPPED := config/install_stripped.sh
@@ -116,10 +148,10 @@ CONVERT_DOS_PATHS := config/convert_dos_paths.sh
 MATH_INC_PATHS := config/mathematica_include_paths.sh
 
 # package information files
-README_FILE    := README
+README_FILE    := README.rst
 AUTHORS_FILE   := AUTHORS
 COPYING_FILE   := COPYING
-ChangeLog_FILE := ChangeLog
+ChangeLog_FILE := CHANGES.rst
 
 .PHONY:  all allsrc allexec alllib allll alltest clean clean-dep \
 	 clean-executables clean-generated clean-lib clean-obj \
@@ -142,12 +174,12 @@ install-src::
 	$(error Installation directory is not set!  To set in please run: ./configure --with-install-dir=/path/to/install/dir)
 else
 install-src::
-	install -d $(INSTALL_DIR)
-	$(INSTALL_STRIPPED) $(CONFIGURE_SCRIPT) $(INSTALL_DIR) -m u=rwx,g=r,o=r
-	$(INSTALL_STRIPPED) $(README_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(AUTHORS_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(COPYING_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(ChangeLog_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)install -d $(INSTALL_DIR)
+	$(Q)$(INSTALL_STRIPPED) $(CONFIGURE_SCRIPT) $(INSTALL_DIR) -m u=rwx,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(README_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(AUTHORS_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(COPYING_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(ChangeLog_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
 
 ifeq ($(ENABLE_META),yes)
 install-src:: allsrc
@@ -156,6 +188,7 @@ endif
 
 include config/abspathx.mk
 include $(patsubst %, %/module.mk, $(MODULES))
+include $(patsubst %, %/module.mk, $(sort $(ALLMODDEP)))
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
@@ -194,40 +227,52 @@ allll:    $(ALLLL)
 alltest:  $(ALLTST)
 
 clean-dep:
-	-rm -f $(ALLDEP)
+	$(Q)-rm -f $(ALLDEP)
 
 clean-executables:
-	-rm -f $(ALLEXE)
+	$(Q)-rm -f $(ALLEXE)
 
 clean-lib:
-	-rm -f $(ALLLIB) $(ALLLL)
+	$(Q)-rm -f $(ALLLIB) $(ALLLL)
 
 depend:  clean-dep
 depend:  $(ALLDEP)
 
 %.d: %.cpp | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.c | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.f | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.f90 | $(DEPGEN)
 	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
 
 %.d: %.F | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+
+%.o: %.cpp
+	@$(MSG)
+	$(Q)$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+%.o: %.f
+	@$(MSG)
+	$(Q)$(FC) $(FFLAGS) -c $< -o $@
+
+%.o: %.F
+	@$(MSG)
+	$(Q)$(FC) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 
 %.o: %.f90
 	$(FC) $(FFLAGS) -c -o $@ $^
 
 distclean::
-	-rm -f Makefile
-	-rm -f $(FSCONFIG)
-	-rm -f $(SARAH_DEP_GEN)
-	-rm -f config.boost config.log config.math config.sarah config.status
+	$(Q)-rm -f Makefile
+	$(Q)-rm -f $(FSCONFIG)
+	$(Q)-rm -f $(SARAH_DEP_GEN)
+	$(Q)-rm -f config.boost config.log config.math config.sarah config.status
 
 librarylink: allll
 	@true
@@ -237,11 +282,12 @@ showbuild:
 	@echo "VERSION            = $(FLEXIBLESUSY_VERSION)"
 	@echo "ABSBASEDIR         = $(ABSBASEDIR)"
 	@echo "INSTALL_DIR        = $(INSTALL_DIR)"
+	@echo "OPERATING_SYSTEM   = $(OPERATING_SYSTEM)"
 	@echo ""
 	@echo "MATH               = $(MATH)"
 	@echo "MODELS             = $(MODELS)"
 	@echo "ADDONS             = $(ADDONS)"
-	@echo "ALGORITHMS         = $(ALGORITHMS)"
+	@echo "SOLVERS            = $(SOLVERS)"
 	@echo ""
 	@echo "CXX                = $(CXX)"
 	@echo "CPPFLAGS           = $(CPPFLAGS)"
@@ -251,14 +297,20 @@ showbuild:
 	@echo "FLIBS              = $(FLIBS)"
 	@echo "LDFLAGS            = $(LDFLAGS)"
 	@echo "LDLIBS             = $(LDLIBS)"
-	@echo "BLASLIBS           = $(BLASLIBS)"
+	@echo "LLFLAGS            = $(LLFLAGS)"
+	@echo "LLLIBS             = $(LLLIBS)"
 	@echo "BOOSTTESTLIBS      = $(BOOSTTESTLIBS)"
 	@echo "BOOSTTHREADLIBS    = $(BOOSTTHREADLIBS)"
 	@echo "BOOSTFLAGS         = $(BOOSTFLAGS)"
 	@echo "EIGENFLAGS         = $(EIGENFLAGS)"
+	@echo "GM2CALCFLAGS       = $(GM2CALCFLAGS)"
+	@echo "GM2CALCLIBS        = $(GM2CALCLIBS)"
 	@echo "GSLLIBS            = $(GSLLIBS)"
 	@echo "GSLFLAGS           = $(GSLFLAGS)"
-	@echo "LAPACKLIBS         = $(LAPACKLIBS)"
+	@echo "HIGGSTOOLSFLAGS    = $(HIGGSTOOLSFLAGS)"
+	@echo "HIGGSTOOLSLIBS     = $(HIGGSTOOLSLIBS)"
+	@echo "HIMALAYAFLAGS      = $(HIMALAYAFLAGS)"
+	@echo "HIMALAYALIBS       = $(HIMALAYALIBS)"
 	@echo "LIBLNK_MAKE_LIB_CMD= $(LIBLNK_MAKE_LIB_CMD)"
 	@echo "LIBLNK_LIBEXT      = $(LIBLNK_LIBEXT)"
 	@echo "LOOPFUNCFLAGS      = $(LOOPFUNCFLAGS)"
@@ -271,14 +323,17 @@ showbuild:
 	@echo "TSILLIBS           = $(TSILLIBS)"
 	@echo "TSILFLAGS          = $(TSILFLAGS)"
 	@echo ""
-	@echo "ENABLE_COLOR_PRINTOUT = $(ENABLE_COLOR_PRINTOUT)"
+	@echo "ENABLE_COLORS      = $(ENABLE_COLORS)"
 	@echo "ENABLE_COMPILE     = $(ENABLE_COMPILE)"
 	@echo "ENABLE_DEBUG       = $(ENABLE_DEBUG)"
 	@echo "ENABLE_CHECK_EIGENVALUE_ERROR = $(ENABLE_CHECK_EIGENVALUE_ERROR)"
 	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
-	@echo "ENABLE_LAPACK      = $(ENABLE_LAPACK)"
+	@echo "ENABLE_GM2CALC     = $(ENABLE_GM2CALC)"
+	@echo "ENABLE_HIGGSTOOLS  = $(ENABLE_HIGGSTOOLS)"
+	@echo "ENABLE_HIMALAYA    = $(ENABLE_HIMALAYA)"
 	@echo "ENABLE_LIBRARYLINK = $(ENABLE_LIBRARYLINK)"
-	@echo "ENABLE_ILP64MKL_WORKAROUND = $(ENABLE_ILP64MKL_WORKAROUND)"
+	@echo "ENABLE_FEYNARTS    = $(ENABLE_FEYNARTS)"
+	@echo "ENABLE_FORMCALC    = $(ENABLE_FORMCALC)"
 	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
 	@echo "ENABLE_META        = $(ENABLE_META)"
 	@echo "ENABLE_SHARED_LIBS = $(ENABLE_SHARED_LIBS)"

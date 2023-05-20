@@ -1,0 +1,85 @@
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = SSM;
+
+FSBVPSolvers = { SemiAnalyticSolver };
+
+(* SSM input parameters *)
+
+MINPAR = {};
+
+EXTPAR = {
+    {0, Qin},
+    {1, QEWSB},
+    {2, Lambdainput},
+    {3, LambdaSinput},
+    {4, Kappainput},
+    {5, K1input},
+    {6, K2input},
+    {7, vSInput}
+};
+
+EWSBOutputParameters = { mu20, MS0 };
+
+FSAuxiliaryParameterInfo = {
+    {mu20,         { ParameterDimensions -> {1},
+                     MassDimension -> 2 } },
+    {MS0,          { ParameterDimensions -> {1},
+                     MassDimension -> 2} },
+    {Lambdainput,  { MassDimension -> 0 } },
+    {LambdaSinput, { MassDimension -> 0 } },
+    {Kappainput,   { MassDimension -> 1 } },
+    {K1input,      { MassDimension -> 1 } },
+    {K2input,      { MassDimension -> 0 } },
+    {vSInput,      { MassDimension -> 1 } }
+};
+
+HighScale = Qin;
+
+HighScaleFirstGuess = Qin;
+
+HighScaleInput = {
+    {\[Lambda], Lambdainput},
+    {LambdaS, LambdaSinput},
+    {K1, K1input},
+    {K2, K2input},
+    {\[Kappa], Kappainput},
+    {mu2, mu20},
+    {MS, MS0}
+};
+
+SUSYScale = QEWSB;
+
+SUSYScaleFirstGuess = QEWSB;
+
+SUSYScaleInput = {
+    {vS, vSInput}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtLowScale = {
+   {v, LowEnergyConstant[vev]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+OnlyLowEnergyFlexibleSUSY = False;
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+FSCalculateDecays = True;

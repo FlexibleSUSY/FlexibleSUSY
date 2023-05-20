@@ -15,7 +15,6 @@ MINPAR = {
 EXTPAR = {
     {61, LambdaInput},
     {62, KappaInput},
-    {63, ALambdaInput},
     {65, vRInput},
     {200, vL1Input},
     {201, vL2Input},
@@ -68,8 +67,7 @@ LowScaleFirstGuess = LowEnergyConstant[MZ];
 LowScaleInput = {
    {Yu, Automatic},
    {Yd, Automatic},
-   {Ye, Tp[Sqrt[2] electronDRbar / vd]},
-   {Yv, ZEROMATRIX[3,1]},
+   {Ye, Tp[Sqrt[2] downLeptonsDRbar / vd]},
    {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
    {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
 };
@@ -82,7 +80,7 @@ InitialGuessAtLowScale = {
    {\[Kappa], 0.1},
    {Yu, Automatic},
    {Yd, Automatic},
-   {Ye, Tp[Sqrt[2] electronDRbar / vd]}
+   {Ye, Tp[Sqrt[2] downLeptonsDRbar / vd]}
 };
 
 InitialGuessAtHighScale = {};
@@ -96,3 +94,12 @@ DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`AMM[Cha[2]]}
+      }
+   }
+};
+
+FSCalculateDecays = True;

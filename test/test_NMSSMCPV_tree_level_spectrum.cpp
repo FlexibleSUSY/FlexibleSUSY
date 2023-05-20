@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "test.h"
+#include "test.hpp"
 #include "test_NMSSMCPV.hpp"
 #include "NMSSM_two_scale_model.hpp"
 #include "NMSSMCPV_two_scale_model.hpp"
@@ -96,6 +96,7 @@ BOOST_AUTO_TEST_CASE( test_NMSSMCPV_tree_level_spectrum )
    NMSSM<Two_scale> m2;
 
    setup_NMSSMCPV(m1, input);
+
    m1.solve_ewsb_tree_level();
    copy_parameters(m1, m2);
    m1.calculate_DRbar_masses();

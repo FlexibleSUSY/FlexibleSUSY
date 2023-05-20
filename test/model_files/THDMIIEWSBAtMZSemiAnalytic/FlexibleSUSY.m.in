@@ -1,0 +1,91 @@
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = "THDM-II";
+
+FSBVPSolvers = { SemiAnalyticSolver };
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+(* input parameters *)
+
+MINPAR = {
+    {1, Lambda1IN},
+    {2, Lambda2IN},
+    {3, Lambda3IN},
+    {4, Lambda4IN},
+    {5, Lambda5IN},
+    {6, Lambda6IN},
+    {7, Lambda7IN},
+    {8, M122IN},
+    {10, TanBeta}
+};
+
+EXTPAR = {
+    {0, Qin}
+};
+
+FSAuxiliaryParameterInfo = {
+    {M112IN,    { ParameterDimensions -> {1},
+                  MassDimension -> 2 } },
+    {M222IN,    { ParameterDimensions -> {1},
+                  MassDimension -> 2 } },
+    {M122IN,    { MassDimension -> 2 } },
+    {Lambda1IN, { MassDimension -> 0 } },
+    {Lambda2IN, { MassDimension -> 0 } },
+    {Lambda3IN, { MassDimension -> 0 } },
+    {Lambda4IN, { MassDimension -> 0 } },
+    {Lambda5IN, { MassDimension -> 0 } },
+    {Lambda6IN, { MassDimension -> 0 } },
+    {Lambda7IN, { MassDimension -> 0 } }
+};
+
+EWSBOutputParameters = { M112IN, M222IN };
+
+SUSYScale = Qin;
+
+SUSYScaleFirstGuess = Qin;
+
+SUSYScaleInput = {
+    {Lambda1, Lambda1IN},
+    {Lambda2, Lambda2IN},
+    {Lambda3, Lambda3IN},
+    {Lambda4, Lambda4IN},
+    {Lambda5, Lambda5IN},
+    {Lambda6, Lambda6IN},
+    {Lambda7, Lambda7IN},
+    {M122   , M122IN},
+    {M112   , M112IN},
+    {M222   , M222IN}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v1, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+   {v2, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic},
+   FSSolveEWSBFor[EWSBOutputParameters]
+};
+
+InitialGuessAtLowScale = {
+   {v1, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+   {v2, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh, Ah, Hpm};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+ExtraSLHAOutputBlocks = {
+};
+
+FSCalculateDecays = True;

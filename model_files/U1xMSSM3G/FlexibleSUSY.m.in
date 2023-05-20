@@ -36,8 +36,6 @@ EXTPAR = {
     {54, MVEinput}
 };
 
-FSExtraInputParameters = {};
-
 EWSBOutputParameters = {mHd2, mHu2, mC12, lw, mS2};
 
 HighScale = mSUSY;
@@ -63,11 +61,11 @@ HighScaleInput = {
     {T[Yep], Azero*Yep},
     {T[lambdaE], Azero*lambdaE},
     {T[lambdaU], Azero*lambdaU},
-    {μ, MuInput},
+    {\[Mu], MuInput},
     {MVU, (MVUinput - (lUinput*vSInput)/Sqrt[2])*UNITMATRIX[3]},
     {MVE, (MVEinput - (lEinput*vSInput)/Sqrt[2])*UNITMATRIX[3]},
     {MS, MSInput},
-    {B[μ], BMuInput},
+    {B[\[Mu]], BMuInput},
     {B[MS], BMSInput},
     {B[MVU], -(lambdaU*(lw + Sqrt[2]*MS*xS))},
     {B[MVE], -(lambdaE*(lw + Sqrt[2]*MS*xS))},
@@ -107,10 +105,10 @@ gXT  = Sqrt[gX^2 + gX1^2];
 g1XT = (g1X*gX + g1*gX1)/Sqrt[gX^2 + gX1^2];
 
 SUSYScaleInput = {
-    {Temporary[g1], g1T},
-    {Temporary[gX], gXT},
-    {Temporary[g1X], g1XT},
-    {Temporary[gX1], 0},
+    {FSTemporary[g1], g1T},
+    {FSTemporary[gX], gXT},
+    {FSTemporary[g1X], g1XT},
+    {FSTemporary[gX1], 0},
     {xS, vSInput},
     {x2, Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)]/(2*gX*Sqrt[1 + TanBetaX^2])},
     {x1, (TanBetaX*Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)])/(2*gX*Sqrt[1 + TanBetaX^2])},
@@ -132,10 +130,10 @@ vDRbar  = AbsSqrt[
 
 LowScaleInput = {
     (* do not rotate g1, because it is set to gY *)
-    (* {Temporary[g1], g1T}, *)
-    {Temporary[gX], gXT},
-    {Temporary[g1X], g1XT},
-    {Temporary[gX1], 0},
+    (* {FSTemporary[g1], g1T}, *)
+    {FSTemporary[gX], gXT},
+    {FSTemporary[g1X], g1XT},
+    {FSTemporary[gX1], 0},
     {vd, vDRbar Cos[ArcTan[TanBeta]]},
     {vu, vDRbar Sin[ArcTan[TanBeta]]},
     {Yu[1,1], Sqrt[2] upQuarksDRbar[1,1] / vu},
@@ -179,10 +177,7 @@ PotentialLSPParticles = {};
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYOutput, NoScale,
            {{1, Hold[SUSYScale]},
-            {2, Hold[LowScale]} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+            {2, Hold[LowScale]} } }
 };
+
+FSCalculateDecays = True;

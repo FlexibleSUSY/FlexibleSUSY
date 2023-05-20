@@ -5,21 +5,19 @@
 #
 # Examples:
 #
-#   ./list_sarah_model_files.sh MSSM
-#   ./list_sarah_model_files.sh MSSM/CKM
+#   ./list_sarah_model_files.sh ~/SARAH/Models MSSM
+#   ./list_sarah_model_files.sh ~/SARAH/Models MSSM/CKM
 
-if test $# -ne 1; then
-    echo "Error: 1 argument required"
-    echo "Usage: $0 <sarah-model-name>[/<sub-model>]"
+if test $# -ne 2; then
+    echo "Error: 2 arguments required"
+    echo "Usage: $0 <sarah-model-dir> <sarah-model-name>[/<sub-model>]"
     echo ""
     echo "Examples:"
     echo ""
-    echo "   $0 MSSM"
-    echo "   $0 MSSM/CKM"
+    echo "   $0 ~/SARAH/Models MSSM"
+    echo "   $0 ~/SARAH/Models MSSM/CKM"
     exit 1
 fi
-
-OPERATING_SYSTEM="@OPERATING_SYSTEM@"
 
 convert_dos_paths() {
     case "$OPERATING_SYSTEM" in
@@ -28,59 +26,55 @@ convert_dos_paths() {
     esac
 }
 
+check_exist() {
+    dir=$1
+    shift
+
+    local f=
+    deps=
+    while test ! "x$1" = "x" ; do
+        f="$(echo "$dir/$1" | sed -e 's#//*#/#g')"
+        [ -e "$f" ] || {
+            deps=
+            return 1
+        }
+        deps="$deps $f"
+        shift
+    done
+
+    return 0
+}
+
+sarah_model_dir="$1"
+model="$2"
+OPERATING_SYSTEM="@OPERATING_SYSTEM@"
 # directory of this script
 BASEDIR=$(dirname $0)
+fs_sarah_model_dir="${BASEDIR}/../sarah"
 
-FLEXIBLESUSY_SARAH_DIR="${BASEDIR}/../sarah"
+base_model=$(echo "$model" | awk -F '/' '{ print $1 }')
+sub_model=$(echo "$model" | awk -F '/' '{ print $2 }')
 
-model="$1"
+# SARAH model file
+model_files=
+if [ -z "$sub_model" ] ; then
+    model_files="${base_model}.m"
+else
+    model_files="${base_model}-${sub_model}.m"
+fi
+model_files="$model_files parameters.m"
+model_files="$model_files particles.m"
 
-cat <<EOF | ("@MATH@" 2> /dev/stdout 1> /dev/null) | convert_dos_paths
-FindModelFiles[dir_String, modelName_String, submodeldir_] :=
-    Module[{files, modelFile, modelDir},
-           If[submodeldir =!= False,
-              modelDir  = FileNameJoin[{dir, modelName, submodeldir}];
-              modelFile = FileNameJoin[{modelDir, modelName <> "-" <> submodeldir <> ".m"}];
-              ,
-              modelDir  = FileNameJoin[{dir, modelName}];
-              modelFile = FileNameJoin[{modelDir, modelName <> ".m"}];
-             ];
-           files = Join[{modelFile},
-                        FileNameJoin[{modelDir, #}]& /@ {"parameters.m", "particles.m"}
-                       ];
-           Select[files, FileExistsQ]
-          ];
+if [ -z "$sub_model" ] ; then
+    sarah_model_dir="${sarah_model_dir}/${base_model}/"
+    fs_sarah_model_dir="${fs_sarah_model_dir}/${base_model}/"
+else
+    sarah_model_dir="${sarah_model_dir}/${base_model}/${sub_model}/"
+    fs_sarah_model_dir="${fs_sarah_model_dir}/${base_model}/${sub_model}/"
+fi
 
-sarahLoaded = Needs["SARAH\`"];
+check_exist "$sarah_model_dir" ${model_files} || \
+check_exist "$fs_sarah_model_dir" ${model_files}
 
-If[sarahLoaded === \$Failed || !ValueQ[\$sarahModelDir],
-   Quit[1];
-  ];
-
-If[!StringFreeQ["${model}","/"],
-   splitted = StringSplit["${model}","/"];
-   modelName = splitted[[1]];
-   submodeldir = splitted[[2]];
-   ,
-   modelName = "${model}";
-   submodeldir = False;
-];
-
-(* search in SARAH/Models/ directory *)
-files = FindModelFiles[\$sarahModelDir, modelName, submodeldir];
-
-(* search in FlexibleSUSY/sarah/ directory *)
-If[files === {},
-   files = FindModelFiles["${FLEXIBLESUSY_SARAH_DIR}", modelName, submodeldir];
-  ];
-
-strList = "";
-For[i = 1, i <= Length[files], i++,
-    If[i > 1, strList = strList <> " ";];
-    strList = strList <> files[[i]];
-   ];
-
-WriteString["stderr", strList];
-
-Quit[];
-EOF
+echo "$deps" | convert_dos_paths
+exit 0

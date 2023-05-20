@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 (* This test compares the implementation of arxiv:0901.2065 with the
    implementation of arxiv:hep-ph/9307201 and arxiv:1508.00576 *)
 
@@ -68,7 +90,7 @@ result = Simplify[Plus @@ Select[List @@ Expand[#],
 
 Print["testing THDM threshold corrections[] ..."];
 
-Get["model_files/THDMIIMSSMBC/FlexibleSUSY.m.in"];
+Get["test/model_files/THDMIIMSSMBC/FlexibleSUSY.m.in"];
 
 renameRules = {
     AtauInput -> Atau,
@@ -103,5 +125,26 @@ deltaLambdaFull = deltaLambdaTh + deltaLambdaPhi;
 lamThDiff  = Simplify[result - deltaLambdaFull];
 
 TestEquality[lamThDiff, Table[0, {i,1,7}]];
+
+Print["testing MS-DR conversion ..."];
+
+(* tag MS-DR conversion terms and filter them out *)
+conv = Coefficient[
+    GetTHDMThresholds1L[loopOrder -> {0, k (4 Pi)^2},
+                        flags -> Join[{flagMSDRg2 -> tag, flagMSDRlam -> tag},
+                                      GetTHDMThresholds1LFlags[]]],
+    tag
+] /. gRules;
+
+(* [1805.00867] Eqs.(104) *)
+lit = {
+    -1/12 k (7 g2^4 + 6 g2^2 gY^2 + 3 gY^4),
+    -1/12 k (7 g2^4 + 6 g2^2 gY^2 + 3 gY^4),
+    -1/12 k (7 g2^4 - 6 g2^2 gY^2 + 3 gY^4),
+    -1/3  k g2^2 (g2^2 + 3 gY^2),
+    0, 0, 0
+};
+
+TestEquality[conv - lit // Simplify, Table[0, {i,1,7}]];
 
 PrintTestSummary[];

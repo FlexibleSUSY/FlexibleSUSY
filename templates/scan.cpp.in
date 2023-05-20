@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "config.h"
 
@@ -26,12 +25,14 @@
 
 @solverIncludes@
 #include "command_line_options.hpp"
+#include "array_view.hpp"
 #include "scan.hpp"
 #include "lowe.h"
 #include "logger.hpp"
 
 #include <iostream>
-#include <cstring>
+#include <iomanip>
+#include <string>
 
 #define INPUTPARAMETER(p) input.p
 
@@ -43,24 +44,32 @@ void print_usage()
       "Usage: scan_@ModelName@.x [options]\n"
       "Options:\n"
 @printCommandLineOptions@
-      "  --solver-type=<value>             select solver type\n"
+      "  --solver-type=<value>             an integer corresponding\n"
+      "                                    to the solver type to use\n"
+      "  --loop-library=<value>            an integer corresponding to the used\n"
+      "                                    realization of loop library\n"
       "  --help,-h                         print this help message"
              << std::endl;
 }
 
 void set_command_line_parameters(const Dynamic_array_view<char*>& args,
                                  @ModelName@_input_parameters& input,
-                                 int& solver_type)
+                                 int& solver_type,
+                                 int& loop_library)
 {
    for (int i = 1; i < args.size(); ++i) {
-      const auto option = args[i];
+      const std::string option = args[i];
 
 @parseCmdLineOptions@
       if (Command_line_options::get_parameter_value(
              option, "--solver-type=", solver_type))
          continue;
 
-      if (strcmp(option,"--help") == 0 || strcmp(option,"-h") == 0) {
+      if (Command_line_options::get_parameter_value(
+             option, "--loop-library=", loop_library))
+         continue;
+
+      if (option == "--help" || option == "-h") {
          print_usage();
          exit(EXIT_SUCCESS);
       }
@@ -70,48 +79,60 @@ void set_command_line_parameters(const Dynamic_array_view<char*>& args,
    }
 }
 
+struct @ModelName@_scan_result {
+   Spectrum_generator_problems problems;
+   double higgs{0.};
+};
+
 template <class solver_type>
-void run_scan(
-   @ModelName@_input_parameters& input, const std::vector<double>& range)
+@ModelName@_scan_result run_parameter_point(int loop_library, const softsusy::QedQcd& qedqcd,
+   @ModelName@_input_parameters& input)
+{
+   Spectrum_generator_settings settings;
+   settings.set(Spectrum_generator_settings::precision, 1.0e-4);
+   settings.set(Spectrum_generator_settings::loop_library, loop_library);
+
+   @ModelName@_spectrum_generator<solver_type> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   const auto model = std::get<0>(spectrum_generator.get_models_slha());
+   const auto& pole_masses = model.get_physical_slha();
+
+   @ModelName@_scan_result result;
+   result.problems = spectrum_generator.get_problems();
+   result.higgs = pole_masses.M@HiggsBoson_0@;
+
+   return result;
+}
+
+void scan(int solver_type, int loop_library, @ModelName@_input_parameters& input,
+          const std::vector<double>& range)
 {
    softsusy::QedQcd qedqcd;
 
-   @ModelName@_spectrum_generator<solver_type> spectrum_generator;
-   spectrum_generator.set_precision_goal(1.0e-4);
-   spectrum_generator.set_max_iterations(0);         // 0 == automatic
-   spectrum_generator.set_calculate_sm_masses(0);    // 0 == no
-   spectrum_generator.set_parameter_output_scale(0); // 0 == susy scale
-
    for (const auto p: range) {
 @setInputParameterTo[1,p]@
+      @ModelName@_scan_result result;
+      switch (solver_type) {
+      case 0:
+@scanEnabledSolvers@
+      default:
+         if (solver_type != 0) {
+            ERROR("unknown solver type: " << solver_type);
+            exit(EXIT_FAILURE);
+         }
+      }
 
-      spectrum_generator.run(qedqcd, input);
-
-      const auto model = spectrum_generator.get_model_slha();
-      const auto& pole_masses = model.get_physical_slha();
-      const auto& problems = spectrum_generator.get_problems();
-      const double higgs = pole_masses.M@HiggsBoson_0@;
-      const bool error = problems.have_problem();
-
+      const int error = result.problems.have_problem();
       std::cout << "  "
                 << std::setw(12) << std::left << p << ' '
-                << std::setw(12) << std::left << higgs << ' '
+                << std::setw(12) << std::left << result.higgs << ' '
                 << std::setw(12) << std::left << error;
       if (error) {
-         std::cout << "\t# " << problems;
+         std::cout << "\t# " << result.problems;
       }
       std::cout << '\n';
-   }
-}
-
-void scan(int solver_type, @ModelName@_input_parameters& input,
-          const std::vector<double>& range)
-{
-   switch (solver_type) {
-@scanEnabledSolvers@
-   default:
-      ERROR("unknown solver type: " << solver_type);
-      exit(EXIT_FAILURE);
    }
 }
 
@@ -124,8 +145,9 @@ int main(int argc, char* argv[])
 
    @ModelName@_input_parameters input;
    int solver_type = @defaultSolverType@;
+   int loop_library = 0;
    set_command_line_parameters(make_dynamic_array_view(&argv[0], argc), input,
-                               solver_type);
+                               solver_type, loop_library);
 
    std::cout << "# "
              << std::setw(12) << std::left << "@InputParameter_1@" << ' '
@@ -135,7 +157,7 @@ int main(int argc, char* argv[])
 
    const std::vector<double> range(float_range(0., 100., 10));
 
-   scan(solver_type, input, range);
+   scan(solver_type, loop_library, input, range);
 
    return 0;
 }

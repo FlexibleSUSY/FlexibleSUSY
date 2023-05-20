@@ -89,47 +89,36 @@ public:
 
     class MemoryError : public Error {
     public:
-	MemoryError(const std::string& message_) : message(message_) {}
-	virtual ~MemoryError() {}
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
+	MemoryError(const std::string& message_) : Error(message_) {}
+	virtual ~MemoryError() = default;
     };
 
     class SetupError : public Error {
     public:
-	SetupError(const std::string& message_) : message(message_) {}
-	virtual ~SetupError() {}
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
+	SetupError(const std::string& message_) : Error(message_) {}
+	virtual ~SetupError() = default;
     };
 
     class NonInvertibleMatrixError : public Error {
     public:
 	NonInvertibleMatrixError(const std::string& message_) :
-	    message(message_) {}
-	virtual ~NonInvertibleMatrixError() {}
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
+	    Error(message_) {}
+	virtual ~NonInvertibleMatrixError() = default;
     };
 
     class DivergenceError : public Error {
     public:
-	DivergenceError(const std::string& message_) : message(message_) {}
-	virtual ~DivergenceError() {}
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
+	DivergenceError(const std::string& message_) : Error(message_) {}
+	virtual ~DivergenceError() = default;
     };
 
     class NoConvergenceError : public Error {
     public:
 	NoConvergenceError(size_t number_of_iterations_)
-	    : number_of_iterations(number_of_iterations_) {}
-	virtual ~NoConvergenceError() {}
-	virtual std::string what() const {
+	    : Error("RGFlow<Lattice>: no convergence")
+            , number_of_iterations(number_of_iterations_) {}
+	virtual ~NoConvergenceError() = default;
+	std::string what_detailed() const override {
 	    std::stringstream message;
 	    message << "RGFlow<Lattice>::NoConvergenceError: no convergence"
 		    << " after " << number_of_iterations << " iterations";
@@ -142,11 +131,12 @@ public:
     class NonPerturbativeRunningError : public Error {
     public:
 	NonPerturbativeRunningError(Lattice_model* model_, double scale_)
-	    : model(model_)
+	    : Error("non-perturbative RG running")
+            , model(model_)
 	    , scale(scale_)
 	    {}
-	virtual ~NonPerturbativeRunningError() {}
-	virtual std::string what() const;
+	virtual ~NonPerturbativeRunningError() = default;
+	std::string what_detailed() const override;
     private:
 	Lattice_model* model;
 	double scale;
@@ -287,6 +277,6 @@ public:
     void sort_rows();
 };
 
-}
+} // namespace flexiblesusy
 
 #endif // lattice_solver_hpp

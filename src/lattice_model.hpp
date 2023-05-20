@@ -31,7 +31,7 @@ template<class Method> class RGFlow;
 
 struct Wilson {
     Wilson(size_t nvars) : width(nvars) {}
-    virtual ~Wilson() {}
+    virtual ~Wilson() = default;
     size_t width;		// 1 + number of Wilson coefficients
     // derivative wrt t == x[0]
     virtual Real  dx(const Real *x, size_t i) const = 0;
@@ -41,7 +41,7 @@ struct Wilson {
 
 struct ParWilson {
     ParWilson(size_t width_) : width(width_) {}
-    virtual ~ParWilson() {}
+    virtual ~ParWilson() = default;
     size_t width;		// 1 + number of Wilson coefficients
     // derivative wrt t == x[0]
     virtual Real  dx(const Real a, const Real *x, size_t i) const = 0;
@@ -52,7 +52,7 @@ struct ParWilson {
 class Lattice_model: public ParWilson {
 public:
     Lattice_model(size_t width) : ParWilson(width) {}
-    virtual ~Lattice_model() {}
+    virtual ~Lattice_model() = default;
     virtual void init(RGFlow<Lattice> *flow, size_t theory)
     { f = flow; T = theory; }
     virtual void calculate_spectrum() = 0;
@@ -95,6 +95,6 @@ private:
     size_t m;
 };
 
-}
+} // namespace flexiblesusy
 
 #endif

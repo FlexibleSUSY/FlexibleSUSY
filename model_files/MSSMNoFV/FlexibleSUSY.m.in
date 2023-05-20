@@ -114,22 +114,14 @@ UseHiggs2LoopMSSM = True;
 EffectiveMu = \[Mu];
 UseMSSM3LoopRGEs = True;
 
-(* low-energy input to determine weak mixing angle
- * Possible values: FSFermiConstant (default), FSMassW
- *)
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSWeakMixingAngleInput -> FSFermiConstant];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSelectronL -> Sum[conj[ZE[i,1]] ZE[i,1] M[Se[i]], {i,1,2}]];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSmuonL     -> Sum[conj[ZM[i,1]] ZM[i,1] M[Sm[i]], {i,1,2}]];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSelectronNeutrinoL -> M[SveL]];
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSSmuonNeutrinoL     -> M[SvmL]];
-
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYOutput, NoScale,
            {{0, Hold[HighScale]},
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy, NoScale,
-           {{0, FlexibleSUSYObservable`aMuon},
+           {{3, FlexibleSUSYObservable`AMM[Fe]},
+            {0, FlexibleSUSYObservable`AMM[Fm]},
             {1, FlexibleSUSYObservable`aMuonGM2Calc},
             {2, FlexibleSUSYObservable`aMuonGM2CalcUncertainty} } },
    {ALPHA, NoScale,
@@ -215,12 +207,5 @@ ExtraSLHAOutputBlocks = {
             {     15, Pole[M[Ftau]]   } } }
 };
 
-TopQuark    = Ft;
-BottomQuark = Fb;
-Neutrino    = Fvt;
-Electron    = Ftau;
+FSCalculateDecays = False;
 
-SMParticles = {
-    VectorP, VectorZ, VectorG, VectorW,
-    Fu, Fd, Fc, Fs, Ft, Fb, Fe, Fm, Ftau, Fve, Fvm, Fvt
-};

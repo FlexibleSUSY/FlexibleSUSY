@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file @ModelName@_mass_eigenstates.cpp
@@ -26,30 +25,33 @@
  * which solve EWSB and calculate pole masses and mixings from @RenScheme@
  * parameters.
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_ewsb_solver_interface.hpp"
+#include "config.h"
 #include "eigen_utils.hpp"
+#include "ewsb_solver.hpp"
 #include "wrappers.hpp"
 #include "linalg2.hpp"
-#include "numerics2.hpp"
 #include "logger.hpp"
 #include "error.hpp"
-#include "root_finder.hpp"
-#include "fixed_point_iterator.hpp"
-#include "config.h"
-#include "pv.hpp"
+#include "loop_libraries/loop_library.hpp"
 #include "raii.hpp"
-#include "thread_pool.hpp"
 #include "two_loop_functions.hpp"
 #include "functors.hpp"
 
+#ifdef ENABLE_THREADS
+#include "thread_pool.hpp"
+#endif
+
+@ewsbSolverHeaders@
 @twoLoopHiggsHeaders@
 @threeLoopHiggsHeaders@
+@fourLoopHiggsHeaders@
+@twoLoopThresholdHeaders@
 
-#include <array>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -58,6 +60,8 @@
 
 namespace flexiblesusy {
 
+#define STRINGIFY(s) XSTRINGIFY(s)
+#define XSTRINGIFY(s) #s
 #define CLASSNAME @ModelName@_mass_eigenstates
 
 #define PHYSICAL(parameter) physical.parameter
@@ -66,26 +70,27 @@ namespace flexiblesusy {
 #define MODELPARAMETER(parameter) model.get_##parameter()
 #define EXTRAPARAMETER(parameter) model.get_##parameter()
 
-#define HIGGS_2LOOP_CORRECTION_AT_AS     two_loop_corrections.higgs_at_as
-#define HIGGS_2LOOP_CORRECTION_AB_AS     two_loop_corrections.higgs_ab_as
-#define HIGGS_2LOOP_CORRECTION_AT_AT     two_loop_corrections.higgs_at_at
-#define HIGGS_2LOOP_CORRECTION_ATAU_ATAU two_loop_corrections.higgs_atau_atau
-#define TOP_POLE_QCD_CORRECTION          two_loop_corrections.top_qcd
-#define HIGGS_3LOOP_CORRECTION_AT_AS_AS  1
+#define HIGGS_2LOOP_CORRECTION_AT_AS       loop_corrections.higgs_at_as
+#define HIGGS_2LOOP_CORRECTION_AB_AS       loop_corrections.higgs_ab_as
+#define HIGGS_2LOOP_CORRECTION_AT_AT       loop_corrections.higgs_at_at
+#define HIGGS_2LOOP_CORRECTION_ATAU_ATAU   loop_corrections.higgs_atau_atau
+#define TOP_POLE_QCD_CORRECTION            loop_corrections.top_qcd
+#define HIGGS_3LOOP_CORRECTION_AT_AS_AS    loop_corrections.higgs_at_as_as
+#define HIGGS_3LOOP_CORRECTION_AB_AS_AS    loop_corrections.higgs_ab_as_as
+#define HIGGS_3LOOP_SCHEME                 loop_corrections.higgs_3L_scheme
+#define HIGGS_3LOOP_CORRECTION_AT_AT_AS    loop_corrections.higgs_at_at_as
+#define HIGGS_3LOOP_CORRECTION_AT_AT_AT    loop_corrections.higgs_at_at_at
+#define HIGGS_4LOOP_CORRECTION_AT_AS_AS_AS loop_corrections.higgs_at_as_as_as
 
-CLASSNAME::@ModelName@_mass_eigenstates(const @ModelName@_input_parameters& input_)
+CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
    : @ModelName@_soft_parameters(input_)
-   , ewsb_loop_order(2)
-   , pole_mass_loop_order(2)
-   , calculate_sm_pole_masses(false)
-   , calculate_bsm_pole_masses(true)
-   , force_output(false)
-   , precision(1.0e-3)
-   , ewsb_iteration_precision(1.0e-5)
-   , physical()
-   , problems(@ModelName@_info::particle_names, @ModelName@_info::parameter_names)
-   , two_loop_corrections()
+@defaultEWSBSolverCctor@
 {
+}
+
+std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
+{
+   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
 }
 
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
@@ -121,16 +126,29 @@ bool CLASSNAME::do_force_output() const
 void CLASSNAME::set_ewsb_loop_order(int loop_order)
 {
    ewsb_loop_order = loop_order;
+   if (ewsb_solver) {
+      ewsb_solver->set_loop_order(ewsb_loop_order);
+   }
 }
 
-void CLASSNAME::set_two_loop_corrections(const Two_loop_corrections& two_loop_corrections_)
+void CLASSNAME::set_loop_corrections(const Loop_corrections& loop_corrections_)
 {
-   two_loop_corrections = two_loop_corrections_;
+   loop_corrections = loop_corrections_;
 }
 
-const Two_loop_corrections& CLASSNAME::get_two_loop_corrections() const
+const Loop_corrections& CLASSNAME::get_loop_corrections() const
 {
-   return two_loop_corrections;
+   return loop_corrections;
+}
+
+void CLASSNAME::set_threshold_corrections(const Threshold_corrections& tc)
+{
+   threshold_corrections = tc;
+}
+
+const Threshold_corrections& CLASSNAME::get_threshold_corrections() const
+{
+   return threshold_corrections;
 }
 
 int CLASSNAME::get_number_of_ewsb_iterations() const
@@ -147,6 +165,9 @@ void CLASSNAME::set_precision(double precision_)
 {
    precision = precision_;
    ewsb_iteration_precision = precision_;
+   if (ewsb_solver) {
+      ewsb_solver->set_precision(precision_);
+   }
 }
 
 void CLASSNAME::set_pole_mass_loop_order(int loop_order)
@@ -162,6 +183,9 @@ int CLASSNAME::get_pole_mass_loop_order() const
 void CLASSNAME::set_ewsb_iteration_precision(double precision)
 {
    ewsb_iteration_precision = precision;
+   if (ewsb_solver) {
+      ewsb_solver->set_precision(precision);
+   }
 }
 
 double CLASSNAME::get_ewsb_iteration_precision() const
@@ -194,34 +218,19 @@ void CLASSNAME::set_physical(const @ModelName@_physical& physical_)
    physical = physical_;
 }
 
-const Problems<@ModelName@_info::NUMBER_OF_PARTICLES, @ModelName@_info::NUMBER_OF_PARAMETERS>& CLASSNAME::get_problems() const
+const Problems& CLASSNAME::get_problems() const
 {
    return problems;
 }
 
-Problems<@ModelName@_info::NUMBER_OF_PARTICLES, @ModelName@_info::NUMBER_OF_PARAMETERS>& CLASSNAME::get_problems()
+Problems& CLASSNAME::get_problems()
 {
    return problems;
 }
 
-/**
- * Method which calculates the tadpoles at the current loop order.
- *
- * @return array of tadpoles
- */
-CLASSNAME::EWSB_vector_t CLASSNAME::tadpole_equations() const
+void CLASSNAME::set_ewsb_solver(const std::shared_ptr<@ModelName@_ewsb_solver_interface>& solver)
 {
-   EWSB_vector_t tadpole(EWSB_vector_t::Zero());
-
-@calculateTreeLevelTadpoles@
-   if (ewsb_loop_order > 0) {
-@calculateOneLoopTadpoles@
-      if (ewsb_loop_order > 1) {
-@calculateTwoLoopTadpoles@
-      }
-   }
-
-   return tadpole;
+   ewsb_solver = solver;
 }
 
 /**
@@ -236,13 +245,34 @@ void CLASSNAME::tadpole_equations(double tadpole[number_of_ewsb_equations]) cons
 }
 
 /**
+ * Method which calculates the tadpoles at the current loop order.
+ *
+ * @return array of tadpoles
+ */
+Eigen::Matrix<double,CLASSNAME::number_of_ewsb_equations,1> CLASSNAME::tadpole_equations() const
+{
+   Eigen::Matrix<double,number_of_ewsb_equations,1> tadpole(
+      Eigen::Matrix<double,number_of_ewsb_equations,1>::Zero());
+
+@calculateTreeLevelTadpoles@
+   if (ewsb_loop_order > 0) {
+@calculateOneLoopTadpoles@
+      if (ewsb_loop_order > 1) {
+@calculateTwoLoopTadpoles@
+      }
+   }
+
+   return tadpole;
+}
+
+/**
  * This function returns the vector of tadpoles, each divided by the
  * corresponding VEV.  Thus, the returned tadpoles have the dimension
  * GeV^2 each.
  *
  * @return vector of tadpoles
  */
-CLASSNAME::EWSB_vector_t CLASSNAME::tadpole_equations_over_vevs() const
+Eigen::Matrix<double,CLASSNAME::number_of_ewsb_equations,1> CLASSNAME::tadpole_equations_over_vevs() const
 {
    auto tadpole = tadpole_equations();
 
@@ -251,211 +281,111 @@ CLASSNAME::EWSB_vector_t CLASSNAME::tadpole_equations_over_vevs() const
    return tadpole;
 }
 
-/**
- * This method solves the EWSB conditions iteratively, trying several
- * root finding methods until a solution is found.
- */
-int CLASSNAME::solve_ewsb_iteratively()
-{
-   auto model = *this;
-
-   auto ewsb_stepper = [model](const EWSB_vector_t& ewsb_pars) mutable -> EWSB_vector_t {
-@getEWSBParametersFromVector@
-@setEWSBParametersFromLocalCopies@
-@applyEWSBSubstitutions@
-      if (model.get_ewsb_loop_order() > 0)
-         model.calculate_DRbar_masses();
-
-      return model.ewsb_step();
-   };
-
-   auto tadpole_stepper = [model](const EWSB_vector_t& ewsb_pars) mutable -> EWSB_vector_t {
-@getEWSBParametersFromVector@
-@setEWSBParametersFromLocalCopies@
-@applyEWSBSubstitutions@
-      if (model.get_ewsb_loop_order() > 0)
-         model.calculate_DRbar_masses();
-
-      return model.tadpole_equations();
-   };
-
-   std::unique_ptr<EWSB_solver> solvers[] = {
-@EWSBSolvers@
-   };
-
-   const auto x_init(ewsb_initial_guess());
-
-   VERBOSE_MSG("\t\tSolving EWSB equations ...");
-   VERBOSE_MSG("\t\tInitial guess: x_init = " << x_init.transpose());
-
-   int status;
-   for (auto& solver: solvers) {
-      VERBOSE_MSG("\t\t\tStarting EWSB iteration using " << solver->name());
-      status = solve_ewsb_iteratively_with(solver.get(), x_init);
-      if (status == EWSB_solver::SUCCESS) {
-         VERBOSE_MSG("\t\t\t" << solver->name() << " finished successfully!");
-         break;
-      }
-#ifdef ENABLE_VERBOSE
-      else {
-         WARNING("\t\t\t" << solver->name() << " could not find a solution!"
-                 " (requested precision: " << ewsb_iteration_precision << ")");
-      }
-#endif
-   }
-
-   if (status == EWSB_solver::SUCCESS) {
-      problems.unflag_no_ewsb();
-   } else {
-      set_best_ewsb_solution(std::begin(solvers), std::end(solvers));
-      problems.flag_no_ewsb();
-#ifdef ENABLE_VERBOSE
-      WARNING("\t\tCould not find a solution to the EWSB equations!"
-              " (requested precision: " << ewsb_iteration_precision << ")");
-#endif
-   }
-
-   return status;
-}
-
-/**
- * Solves EWSB equations with given EWSB solver
- *
- * @param solver EWSB solver
- * @param x_init initial values
- *
- * @return status of the EWSB solver
- */
-int CLASSNAME::solve_ewsb_iteratively_with(
-   EWSB_solver* solver, const EWSB_vector_t& x_init)
-{
-   const int status = solver->solve(x_init);
-
-   if (status == EWSB_solver::SUCCESS)
-      set_ewsb_solution(solver);
-
-   return status;
-}
-
-/**
- * Sets EWSB output parameters from given solver.
- *
- * @param solver solver
- */
-void CLASSNAME::set_ewsb_solution(const EWSB_solver* solver)
-{
-   const auto solution = solver->get_solution();
-
-@setEWSBSolution@
-@setModelParametersFromEWSB@
-   calculate_DRbar_masses();
-}
-
-/**
- * Sets EWSB output parameters from the solver from the range [first,
- * last), which minimizes the tadpole equations at most.
- *
- * @param first iterator to first solver
- * @param last iterator to last solver
- */
-template <typename It>
-void CLASSNAME::set_best_ewsb_solution(It first, It last)
-{
-   auto ma(*this), mb(*this);
-
-   const auto best_solver =
-      std::min_element(first, last,
-                       [this, &ma, &mb](const std::unique_ptr<EWSB_solver>& a, const std::unique_ptr<EWSB_solver>& b) {
-                          ma.set_ewsb_solution(a.get());
-                          mb.set_ewsb_solution(b.get());
-                          return Total(Abs(Re(ma.tadpole_equations()))) < Total(Abs(Re(mb.tadpole_equations())));
-                       });
-
-   VERBOSE_MSG("\t\tUsing best solution from " << (*best_solver)->name());
-
-   set_ewsb_solution(best_solver->get());
-}
-
-int CLASSNAME::solve_ewsb_iteratively(int loop_order)
-{
-   // temporarily set `ewsb_loop_order' to `loop_order' and do
-   // iteration
-   const auto save_loop_order_raii = make_raii_save(ewsb_loop_order);
-   ewsb_loop_order = loop_order;
-   return solve_ewsb_iteratively();
-}
-
-
-int CLASSNAME::solve_ewsb_tree_level()
-{
-   int error = 0;
-
-@solveEwsbTreeLevel@
-
-   return error;
-}
-
 int CLASSNAME::solve_ewsb_tree_level_custom()
 {
-   int error = 0;
+   int error = EWSB_solver::SUCCESS;
 
 @solveTreeLevelEWSBviaSoftHiggsMasses@
 
    return error;
 }
 
+int CLASSNAME::solve_ewsb_tree_level()
+{
+   if (!ewsb_solver) {
+      throw SetupError(STRINGIFY(CLASSNAME) "::solve_ewsb_tree_level: "
+                       "no EWSB solver set");
+   }
+
+   const int old_loop_order = ewsb_solver->get_loop_order();
+   const auto save_loop_order = make_raii_guard(
+      [this, old_loop_order] () {
+         this->ewsb_solver->set_loop_order(old_loop_order);
+      });
+
+   const int old_iterations = ewsb_solver->get_number_of_iterations();
+   const auto save_iterations = make_raii_guard(
+      [this, old_iterations] () {
+         this->ewsb_solver->set_number_of_iterations(old_iterations);
+      });
+
+   const double old_precision = ewsb_solver->get_precision();
+   const auto save_precision = make_raii_guard(
+      [this, old_precision] () {
+         this->ewsb_solver->set_precision(old_precision);
+      });
+
+   ewsb_solver->set_loop_order(0);
+   ewsb_solver->set_number_of_iterations(get_number_of_ewsb_iterations());
+   ewsb_solver->set_precision(ewsb_iteration_precision);
+
+   return ewsb_solver->solve(*this);
+}
+
 int CLASSNAME::solve_ewsb_one_loop()
 {
-   return solve_ewsb_iteratively(1);
+   if (!ewsb_solver) {
+      throw SetupError(STRINGIFY(CLASSNAME) "::solve_ewsb_one_loop: "
+                       "no EWSB solver set");
+   }
+
+   const int old_loop_order = ewsb_solver->get_loop_order();
+   const auto save_loop_order = make_raii_guard(
+      [this, old_loop_order] () {
+         this->ewsb_solver->set_loop_order(old_loop_order);
+      });
+
+   const int old_iterations = ewsb_solver->get_number_of_iterations();
+   const auto save_iterations = make_raii_guard(
+      [this, old_iterations] () {
+         this->ewsb_solver->set_number_of_iterations(old_iterations);
+      });
+
+   const double old_precision = ewsb_solver->get_precision();
+   const auto save_precision = make_raii_guard(
+      [this, old_precision] () {
+         this->ewsb_solver->set_precision(old_precision);
+      });
+
+   ewsb_solver->set_loop_order(1);
+   ewsb_solver->set_number_of_iterations(get_number_of_ewsb_iterations());
+   ewsb_solver->set_precision(ewsb_iteration_precision);
+
+   return ewsb_solver->solve(*this);
 }
 
 int CLASSNAME::solve_ewsb()
 {
-   VERBOSE_MSG("\t\tSolving @ModelName@ EWSB at " << ewsb_loop_order << "-loop order");
-
-   if (ewsb_loop_order == 0)
-      return solve_ewsb_tree_level();
-
-   return solve_ewsb_iteratively(ewsb_loop_order);
-}
-
-CLASSNAME::EWSB_vector_t CLASSNAME::ewsb_initial_guess()
-{
-   EWSB_vector_t x_init(EWSB_vector_t::Zero());
-
-@ewsbInitialGuess@
-
-   return x_init;
-}
-
-/**
- * Calculates EWSB output parameters including loop-corrections.
- *
- * Throws exception of type EEWSBStepFailed if new EWSB parameters are
- * inf or nan.
- *
- * @return new set of EWSB output parameters
- */
-CLASSNAME::EWSB_vector_t CLASSNAME::ewsb_step() const
-{
-   std::array<double, number_of_ewsb_equations> tadpole{};
-   EWSB_vector_t ewsb_parameters(EWSB_vector_t::Zero());
-
-   if (ewsb_loop_order > 0) {
-@calculateOneLoopTadpolesNoStruct@
-      if (ewsb_loop_order > 1) {
-@calculateTwoLoopTadpolesNoStruct@
-      }
+   if (!ewsb_solver) {
+      throw SetupError(STRINGIFY(CLASSNAME) "::solve_ewsb: "
+                       "no EWSB solver set");
    }
 
-@solveEwsbWithTadpoles@
+   VERBOSE_MSG("\t\tSolving @ModelName@ EWSB at " << ewsb_loop_order << "-loop order");
 
-   if (!is_finite)
-      throw EEWSBStepFailed();
+   const int old_loop_order = ewsb_solver->get_loop_order();
+   const auto save_loop_order = make_raii_guard(
+      [this, old_loop_order] () {
+         this->ewsb_solver->set_loop_order(old_loop_order);
+      });
 
-@fillArrayWithEWSBParameters@
+   const int old_iterations = ewsb_solver->get_number_of_iterations();
+   const auto save_iterations = make_raii_guard(
+      [this, old_iterations] () {
+         this->ewsb_solver->set_number_of_iterations(old_iterations);
+      });
 
-   return ewsb_parameters;
+   const double old_precision = ewsb_solver->get_precision();
+   const auto save_precision = make_raii_guard(
+      [this, old_precision] () {
+         this->ewsb_solver->set_precision(old_precision);
+      });
+
+   ewsb_solver->set_loop_order(ewsb_loop_order);
+   ewsb_solver->set_number_of_iterations(get_number_of_ewsb_iterations());
+   ewsb_solver->set_precision(ewsb_iteration_precision);
+
+   return ewsb_solver->solve(*this);
 }
 
 void CLASSNAME::print(std::ostream& ostr) const
@@ -477,46 +407,60 @@ void CLASSNAME::print(std::ostream& ostr) const
 
 /**
  * wrapper routines for passarino Veltman functions
+ * @note: They take squared arguments!
  */
 
-double CLASSNAME::A0(double m) const
+double CLASSNAME::A0(double m) const noexcept
 {
-   return passarino_veltman::ReA0(m*m, Sqr(get_scale()));
+   return Loop_library::get().A0(m, Sqr(get_scale())).real();
 }
 
-double CLASSNAME::B0(double p, double m1, double m2) const
+double CLASSNAME::B0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB0(p*p, m1*m1, m2*m2, Sqr(get_scale()));
+   return Loop_library::get().B0(p, m1, m2, Sqr(get_scale())).real();
 }
 
-double CLASSNAME::B1(double p, double m1, double m2) const
+double CLASSNAME::B1(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB1(p*p, m1*m1, m2*m2, Sqr(get_scale()));
+   return Loop_library::get().B1(p, m1, m2, Sqr(get_scale())).real();
 }
 
-double CLASSNAME::B00(double p, double m1, double m2) const
+double CLASSNAME::B00(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB00(p*p, m1*m1, m2*m2, Sqr(get_scale()));
+   return Loop_library::get().B00(p, m1, m2, Sqr(get_scale())).real();
 }
 
-double CLASSNAME::B22(double p, double m1, double m2) const
+double CLASSNAME::B22(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB22(p*p, m1*m1, m2*m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return (
+      Loop_library::get().B00(p, m1, m2, scl2) - Loop_library::get().A0(m1, scl2)/4.0 -
+      Loop_library::get().A0(m2, scl2)/4.0
+   ).real();
 }
 
-double CLASSNAME::H0(double p, double m1, double m2) const
+double CLASSNAME::H0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReH0(p*p, m1*m1, m2*m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return 4.0*Loop_library::get().B00(p, m1, m2, scl2).real() + CLASSNAME::G0(p, m1, m2);
 }
 
-double CLASSNAME::F0(double p, double m1, double m2) const
+double CLASSNAME::F0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReF0(p*p, m1*m1, m2*m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return (
+      Loop_library::get().A0(m1, scl2) - 2.0*Loop_library::get().A0(m2, scl2)
+      - (2.0*p + 2.0*m1 - m2) * Loop_library::get().B0(p, m1, m2, scl2)
+   ).real();
 }
 
-double CLASSNAME::G0(double p, double m1, double m2) const
+double CLASSNAME::G0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReG0(p*p, m1*m1, m2*m2, Sqr(get_scale()));
+   const double scl2 = Sqr(get_scale());
+   return (
+      (p - m1 - m2) * Loop_library::get().B0(p, m1, m2, scl2)
+      - Loop_library::get().A0(m1, scl2) - Loop_library::get().A0(m2, scl2)
+   ).real();
 }
 
 double CLASSNAME::TfSS(double x, double y, double z) const { return two_loop_functions::TfSS(x, y, z, Sqr(get_scale())); }
@@ -652,7 +596,7 @@ void CLASSNAME::clear_DRbar_parameters()
 
 void CLASSNAME::clear_problems()
 {
-   problems.unflag_all_tachyons();
+   problems.clear();
 }
 
 void CLASSNAME::clear()
@@ -673,6 +617,32 @@ Eigen::ArrayXd CLASSNAME::get_DRbar_masses() const
 @getMasses@
 }
 
+void CLASSNAME::set_DRbar_masses_and_mixings(const Eigen::ArrayXd& pars)
+{
+   set_DRbar_masses(pars);
+
+@setMixings@
+}
+
+Eigen::ArrayXd CLASSNAME::get_DRbar_masses_and_mixings() const
+{
+   Eigen::ArrayXd pars(get_DRbar_masses());
+
+@getMixings@
+
+   return pars;
+}
+
+void CLASSNAME::set_extra_parameters(const Eigen::ArrayXd& pars)
+{
+@setExtraParameters@
+}
+
+Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
+{
+@getExtraParameters@
+}
+
 std::string CLASSNAME::name() const
 {
    return "@ModelName@";
@@ -685,6 +655,61 @@ void CLASSNAME::run_to(double scale, double eps)
    @ModelName@_soft_parameters::run_to(scale, eps);
 }
 
+void CLASSNAME::calculate_tree_level_mass_spectrum()
+{
+   calculate_DRbar_masses();
+}
+
+void CLASSNAME::calculate_pole_mass_spectrum()
+{
+   calculate_pole_masses();
+}
+
+void CLASSNAME::calculate_mass_spectrum()
+{
+   calculate_spectrum();
+}
+
+int CLASSNAME::solve_ewsb_equations_tree_level()
+{
+   return solve_ewsb_tree_level();
+}
+
+int CLASSNAME::solve_ewsb_equations()
+{
+   return solve_ewsb();
+}
+
+const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
+{
+   return get_input();
+}
+
+@ModelName@_input_parameters& CLASSNAME::get_input_parameters()
+{
+   return get_input();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses() const
+{
+   return get_DRbar_masses();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses_and_mixings() const
+{
+   return get_DRbar_masses_and_mixings();
+}
+
+void CLASSNAME::set_tree_level_masses(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses(m);
+}
+
+void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses_and_mixings(m);
+}
+
 @higgsMassGetters@
 
 @lspFunctions@
@@ -695,6 +720,7 @@ void CLASSNAME::run_to(double scale, double eps)
 
 @selfEnergyFunctions@
 
+@secondGenerationHelperFunctions@
 @thirdGenerationHelperFunctions@
 
 @twoLoopSelfEnergyFunctions@
@@ -703,13 +729,15 @@ void CLASSNAME::run_to(double scale, double eps)
 
 @threeLoopSelfEnergyFunctions@
 
+@fourLoopSelfEnergyFunctions@
+
 @loopMassesFunctions@
 
 @runningDRbarMassesFunctions@
 
 @dependenceFunctions@
 
-std::ostream& operator<<(std::ostream& ostr, const @ModelName@_mass_eigenstates& model)
+std::ostream& operator<<(std::ostream& ostr, const CLASSNAME& model)
 {
    model.print(ostr);
    return ostr;

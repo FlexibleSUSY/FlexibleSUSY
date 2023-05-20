@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( test_delta_vb )
    BOOST_REQUIRE(mz_pole > 0.);
 
    double outrho = 1.0, outsin = 0.48;
-   const double alphaMsbar = ss.displayDataSet().displayAlpha(ALPHA);
+   const double alphaMsbar = ss.displayDataSet().displayAlpha(legacy::ALPHA);
    const double alphaDrbar = ss.qedSusythresh(alphaMsbar, scale);
 
    const double ss_delta_vb =
@@ -128,7 +128,6 @@ BOOST_AUTO_TEST_CASE( test_delta_vb )
    data.up = v;
    data.gY = gY;
    data.g2 = g2;
-   data.ymu = hmu;
 
    // test with SoftSusy parameters
    double fs_delta_vb =
@@ -153,7 +152,6 @@ BOOST_AUTO_TEST_CASE( test_delta_vb )
    data.up = fs_v;
    data.gY = fs_gY;
    data.g2 = fs_g2;
-   data.ymu = fs_hmu;
 
    fs_delta_vb =
       Weinberg_angle::calculate_delta_vb(outrho, outsin, data);
@@ -183,7 +181,7 @@ BOOST_AUTO_TEST_CASE( test_delta_r )
    BOOST_CHECK_EQUAL(scale, mz_pole);
 
    double outrho = 1.0, outsin = 0.48;
-   const double alphaMsbar = ss.displayDataSet().displayAlpha(ALPHA);
+   const double alphaMsbar = ss.displayDataSet().displayAlpha(legacy::ALPHA);
    const double alphaDrbar = ss.qedSusythresh(alphaMsbar, scale);
    const double pizztMZ    = ss.piZZT(mz_pole, scale, true);
    const double piwwt0     = ss.piWWT(0., scale, true);
@@ -279,7 +277,6 @@ BOOST_AUTO_TEST_CASE( test_delta_r )
    data.g2 = g2;
    data.g3 = g3;
    data.tan_beta = tanBeta;
-   data.ymu = hmu;
 
    // test with SoftSusy parameters
    double fs_delta_r =
@@ -311,7 +308,6 @@ BOOST_AUTO_TEST_CASE( test_delta_r )
    data.gY = fs_gY;
    data.g2 = fs_g2;
    data.g3 = fs_g3;
-   data.ymu = fs_hmu;
    data.tan_beta = fs_tanBeta;
 
    fs_delta_r =
@@ -342,7 +338,7 @@ BOOST_AUTO_TEST_CASE( test_delta_rho )
    BOOST_CHECK_EQUAL(scale, mz_pole);
 
    double outrho = 1.0, outsin = 0.48;
-   const double alphaMsbar = ss.displayDataSet().displayAlpha(ALPHA);
+   const double alphaMsbar = ss.displayDataSet().displayAlpha(legacy::ALPHA);
    const double alphaDrbar = ss.qedSusythresh(alphaMsbar, scale);
    const double pizztMZ    = ss.piZZT(mz_pole, scale, true);
    const double piwwtMW    = ss.piWWT(mw_pole, scale, true);
@@ -431,7 +427,7 @@ void setup_data(const CMSSM_input_parameters& input,
    const double pizztMZ = ss.piZZT(mz_pole, scale, true);
    const double piwwt0  = ss.piWWT(0., scale, true);
    const double piwwtMW = ss.piWWT(mw_pole, scale, true);
-   const double alphaMsbar = ss.displayDataSet().displayAlpha(ALPHA);
+   const double alphaMsbar = ss.displayDataSet().displayAlpha(legacy::ALPHA);
    const double alphaDrbar = ss.qedSusythresh(alphaMsbar, scale);
    const double gY         = fs.get_g1() * sqrt(0.6);
    const double g2         = fs.get_g2();
@@ -504,7 +500,6 @@ void setup_data(const CMSSM_input_parameters& input,
    data.g2 = g2;
    data.g3 = g3;
    data.tan_beta = tanBeta;
-   data.ymu = hmu;
 }
 
 BOOST_AUTO_TEST_CASE( test_rho_sinTheta )

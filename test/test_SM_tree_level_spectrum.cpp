@@ -7,10 +7,11 @@
 #include "test_SM.hpp"
 #include "wrappers.hpp"
 #include "SM_two_scale_model.hpp"
+#include "standard_model.hpp"
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_SM_tree_level_masses )
+BOOST_AUTO_TEST_CASE( test_SM_tree_level_Higgs_masses )
 {
    SM_input_parameters input;
    input.LambdaIN = 0.25;
@@ -36,4 +37,45 @@ BOOST_AUTO_TEST_CASE( test_SM_tree_level_masses )
    // check Goldstone boson masses
    BOOST_CHECK_EQUAL(m.get_MHp(), m.get_MVWp());
    BOOST_CHECK_EQUAL(m.get_MAh(), m.get_MVZ());
+}
+
+#define CHECK_CLOSE_1(mass,eps)                                         \
+   do {                                                                 \
+      BOOST_CHECK_CLOSE(m.get_##mass(), sm.get_##mass(), (eps));        \
+      BOOST_TEST_MESSAGE(#mass " = " << m.get_##mass() << " = " << sm.get_##mass()); \
+   } while (false);
+
+#define CHECK_CLOSE_N(mass,eps,N)                                       \
+   do {                                                                 \
+      for (int i = 0; i < N; i++) {                                     \
+         BOOST_CHECK_CLOSE(m.get_##mass(i), sm.get_##mass(i), (eps));   \
+         BOOST_TEST_MESSAGE(#mass "(" << i << ") = " << m.get_##mass(i) << " = " << sm.get_##mass(i)); \
+      }                                                                 \
+   } while (false);
+
+BOOST_AUTO_TEST_CASE( test_SM_tree_level_masses )
+{
+   SM_input_parameters input;
+   input.LambdaIN = 0.25;
+   SM<Two_scale> m;
+   standard_model::Standard_model sm;
+   setup_SM_const(m, input);
+   setup_SM_const(sm, input);
+
+   m.calculate_DRbar_masses();
+   sm.calculate_DRbar_masses();
+
+   static constexpr double eps = 1e-15;
+
+   CHECK_CLOSE_1(MVP, eps);
+   CHECK_CLOSE_1(MVG, eps);
+   CHECK_CLOSE_1(MVZ, eps);
+   CHECK_CLOSE_1(MVWp, eps);
+   CHECK_CLOSE_1(MAh, eps);
+   CHECK_CLOSE_1(MHp, eps);
+   CHECK_CLOSE_1(Mhh, eps);
+   CHECK_CLOSE_N(MFv, eps, 3);
+   CHECK_CLOSE_N(MFu, eps, 3);
+   CHECK_CLOSE_N(MFd, eps, 3);
+   CHECK_CLOSE_N(MFe, eps, 3);
 }

@@ -6,6 +6,15 @@
 #include <iostream>
 
 #include "logger.hpp"
+#include "error.hpp"
+#include "config.h"
+
+BOOST_AUTO_TEST_CASE( test_streaming_operator )
+{
+   INFO("streamed info" << " message");
+}
+
+#ifndef ENABLE_SILENT
 
 BOOST_AUTO_TEST_CASE( test_all_messages )
 {
@@ -14,12 +23,7 @@ BOOST_AUTO_TEST_CASE( test_all_messages )
    INFO("info message");
    WARNING("warning message");
    ERROR("error message");
-   // FATAL("fatal message");
-}
-
-BOOST_AUTO_TEST_CASE( test_streaming_operator )
-{
-   INFO("streamed info" << " message");
+   BOOST_CHECK_THROW(FATAL("fatal message"), flexiblesusy::FatalError);
 }
 
 #pragma GCC diagnostic ignored "-Wempty-body"
@@ -53,3 +57,5 @@ BOOST_AUTO_TEST_CASE( test_statement_executed_once )
    INFO(++i);
    BOOST_CHECK_EQUAL(i, 2);
 }
+
+#endif

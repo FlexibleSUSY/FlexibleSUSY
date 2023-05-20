@@ -12,6 +12,11 @@ MINPAR = {
     {5, Azero}
 };
 
+IMMINPAR = {
+    {2, Imm12},
+    {5, ImAzero}
+};
+
 EXTPAR = {
     {61, LambdaInput},
     {62, KappaInput},
@@ -41,9 +46,9 @@ HighScale = g1 == g2;
 HighScaleFirstGuess = 2.0 10^16;
 
 HighScaleInput={
-   {T[Ye], Azero*Ye},
-   {T[Yd], Azero*Yd},
-   {T[Yu], Azero*Yu},
+   {T[Ye], (Azero + I ImAzero) Ye},
+   {T[Yd], (Azero + I ImAzero) Yd},
+   {T[Yu], (Azero + I ImAzero) Yu},
    {T[\[Kappa]] , AKappaInput  KappaInput  + I Im[T[\[Kappa]]]},
    {T[\[Lambda]], ALambdaInput LambdaInput + I Im[T[\[Lambda]]]},
    {mq2, UNITMATRIX[3] m0^2},
@@ -53,9 +58,9 @@ HighScaleInput={
    {me2, UNITMATRIX[3] m0^2},
    {\[Lambda], LambdaInput},
    {\[Kappa], KappaInput},
-   {MassB, m12},
-   {MassWB,m12},
-   {MassG,m12}
+   {MassB, m12 + I Imm12},
+   {MassWB,m12 + I Imm12},
+   {MassG, m12 + I Imm12}
 };
 
 LowScale = LowEnergyConstant[MZ];
@@ -89,7 +94,7 @@ InitialGuessAtHighScale = {};
 PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
 
 DefaultPoleMassPrecision = MediumPrecision;
-HighPoleMassPrecision    = {hh, Ah, Hpm};
+HighPoleMassPrecision    = {hh, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
@@ -98,6 +103,11 @@ ExtraSLHAOutputBlocks = {
            {{0, Hold[HighScale]},
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
+   {FlexibleSUSYLowEnergy,
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]},
+            {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+            {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+            {25, FlexibleSUSYObservable`EDM[Fe[3]]} } },
    {NMSSMRUN,
            {{1  , Re[\[Lambda]]   },
             {2  , Re[\[Kappa]]    },
@@ -110,3 +120,5 @@ ExtraSLHAOutputBlocks = {
             {13 , Im[T[\[Lambda]] / \[Lambda]]},
             {14 , Im[T[\[Kappa]] / \[Kappa]] } } }
 };
+
+FSCalculateDecays = True;

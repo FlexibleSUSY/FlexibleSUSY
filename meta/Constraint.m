@@ -1,3 +1,24 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
 
 BeginPackage["Constraint`", {"CConversion`", "BetaFunction`", "Parameters`", "TextFormatting`", "TreeMasses`", "Utils`"}];
 
@@ -22,7 +43,7 @@ CheckPerturbativityForParameters::usage="";
 
 GetSMMatchingScale::usage="returns SM matching scale from low-energy data set";
 
-SetTemporarily::usage="set temporary variables";
+InitialApplyConstraint::usage="apply constaints before calculating the mass spectrum";
 
 Begin["`Private`"];
 
@@ -30,15 +51,15 @@ allBetaFunctions = {};
 
 SetBetaFunctions[pars_List] := allBetaFunctions = pars;
 
-ApplyConstraint[{parameter_, value_}, modelName_String] :=
+ApplyConstraint[{parameter_, value_}, modelPrefix_String] :=
     Which[Parameters`IsModelParameter[parameter],
-          Parameters`SetParameter[parameter, value, modelName <> "->"],
+          Parameters`SetParameter[parameter, value, modelPrefix],
           Parameters`IsInputParameter[parameter],
           Parameters`SetInputParameter[parameter, value, "INPUTPARAMETER"],
           Parameters`IsPhase[parameter],
-          Parameters`SetPhase[parameter, value, modelName],
+          Parameters`SetPhase[parameter, value, modelPrefix],
           Parameters`IsExtraParameter[parameter],
-          Parameters`SetParameter[parameter, value, modelName <> "->"],
+          Parameters`SetParameter[parameter, value, modelPrefix],
           True,
           Print["Error: ", parameter, " cannot be set in the constraint,",
                 " because it is neither a model nor an input parameter!"];
@@ -48,25 +69,24 @@ ApplyConstraint[{parameter_, value_}, modelName_String] :=
 
 ApplyConstraint[{parameter_ | parameter_[__] /; parameter === SARAH`UpYukawa,
                  value_ /; (!FreeQ[value, Global`upQuarksDRbar] || value === Automatic)},
-                modelName_String] :=
+                modelPrefix_String] :=
     "calculate_" <> CConversion`ToValidCSymbolString[parameter] <> "_DRbar();\n";
 
 ApplyConstraint[{parameter_ | parameter_[__] /; parameter === SARAH`DownYukawa,
                  value_ /; (!FreeQ[value, Global`downQuarksDRbar] || value === Automatic)},
-                modelName_String] :=
+                modelPrefix_String] :=
     "calculate_" <> CConversion`ToValidCSymbolString[parameter] <> "_DRbar();\n";
 
 ApplyConstraint[{parameter_ | parameter_[__] /; parameter === SARAH`ElectronYukawa,
                  value_ /; (!FreeQ[value, Global`downLeptonsDRbar] || value === Automatic)},
-                modelName_String] :=
+                modelPrefix_String] :=
     "calculate_" <> CConversion`ToValidCSymbolString[parameter] <> "_DRbar();\n";
 
 ApplyConstraint[{parameter_,
-                 value_ /; !FreeQ[value, Global`neutrinoDRbar]}, modelName_String] :=
-    "calculate_MNeutrino_DRbar();\n" <>
-    Parameters`SetParameter[parameter, value, modelName <> "->"];
+                 value_ /; !FreeQ[value, Global`neutrinoDRbar]}, modelPrefix_String] :=
+    Parameters`SetParameter[parameter, value, modelPrefix];
 
-ApplyConstraint[{parameter_ /; !MemberQ[{SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa}, parameter], value_ /; value === Automatic}, modelName_String] :=
+ApplyConstraint[{parameter_ /; !MemberQ[{SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa}, parameter], value_ /; value === Automatic}, modelPrefix_String] :=
     Block[{},
           Print["Error: cannot determine ", parameter, " automatically!"];
           Quit[1];
@@ -77,11 +97,12 @@ CreateStartPoint[parameters_List, name_String] :=
            dim = Length[parameters];
            dimStr = ToString[dim];
            For[i = 1, i <= dim, i++,
-               startPoint = startPoint <> If[i==1," ",", "] <> "MODELPARAMETER(" <>
-                            CConversion`ToValidCSymbolString[parameters[[i]]] <> ")";
+               startPoint = startPoint <> If[i==1,"",", "] <>
+                            CConversion`RValueToCFormString[parameters[[i]]];
               ];
+           Parameters`CreateLocalConstRefs[parameters] <> "\n" <>
            "Eigen::VectorXd " <> name <> "(" <> dimStr <> ");\n" <>
-           name <> " << " <> startPoint <> " ;\n"
+           name <> " << " <> startPoint <> ";\n"
           ];
 
 SetModelParametersFromVector[model_String, vector_String, parameters_List] :=
@@ -103,13 +124,15 @@ SetVectorFromExpressions[vector_String, expressions_List] :=
            Return[result];
           ];
 
-CreateMinimizationFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_] :=
+CreateMinimizationFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_, modelPrefix_String] :=
     Module[{type, stype},
            type  = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
            stype = CConversion`CreateCType[CConversion`ScalarType[CConversion`realScalarCType]];
-"auto " <> functionName <> " = [this](const "<> type <> "& x) -> " <> stype <> " {
-" <> TextFormatting`IndentText[SetModelParametersFromVector["MODEL->","x",parameters]] <> "
-   MODEL->calculate_DRbar_masses();
+"auto " <> functionName <> " = [&](const "<> type <> "& x) {
+" <> TextFormatting`IndentText[CreateTemporaryForceOutputRAII[modelPrefix]] <> "
+
+" <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
+   " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "
    return " <> CConversion`RValueToCFormString[function] <> ";
 };
@@ -120,27 +143,47 @@ localFunctionWrapper = 0;
 
 CreateSolverName[] := "solver_" <> ToString[localFunctionWrapper++];
 
-ApplyConstraint[FlexibleSUSY`FSMinimize[parameters_List, function_], modelName_String] :=
+ApplyConstraint[FlexibleSUSY`FSMinimize[parameters_List, function_], modelPrefix_String] :=
     Module[{callMinimizer, dim, dimStr, startPoint, functionWrapper, functionName},
            dim = Length[parameters];
            dimStr = ToString[dim];
            startPoint = CreateStartPoint[parameters, "start_point"];
            functionName = CreateSolverName[];
-           functionWrapper = CreateMinimizationFunctionWrapper[functionName,dim,parameters,function];
-           callMinimizer = functionWrapper <> "\n" <> startPoint <>
-                           "Minimizer<" <> dimStr <>
-                           "> minimizer(" <> functionName <> ", 100, 1.0e-2);\n" <>
-                           "const int status = minimizer.minimize(start_point);\n" <>
-                           "VERBOSE_MSG(\"\\tminimizer status: \" << gsl_strerror(status));\n";
-           Return[callMinimizer];
+           functionWrapper = CreateMinimizationFunctionWrapper[functionName,dim,parameters,
+                                                               Parameters`DecreaseIndexLiterals[function],
+                                                               modelPrefix];
+           callMinimizer = functionWrapper <> "
+const char* par_str = \"" <> ToString[CConversion`ToValidCSymbol /@ parameters] <> "\";
+MODEL->get_problems().unflag_no_minimum(par_str);
+
+" <> startPoint <>
+"Minimizer<" <> dimStr <> "> minimizer(" <> functionName <> ", 100, " <> modelPrefix <> "get_precision());
+
+const int status = minimizer.minimize(start_point);
+
+VERBOSE_MSG(\"\\tminimizer status: \" << gsl_strerror(status));
+
+if (status != GSL_SUCCESS) {
+    MODEL->get_problems().flag_no_minimum(par_str, status);
+}
+";
+           "\n{\n" <> TextFormatting`IndentText[callMinimizer] <> "}\n\n"
           ];
 
-CreateRootFinderFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_List] :=
+CreateTemporaryForceOutputRAII[modelPrefix_String] := "\
+// temporarily enforce calculation of pole masses
+const bool force_output = " <> modelPrefix <> "do_force_output();
+const auto tmp_force_output = make_raii_guard([&] { " <> modelPrefix <> "do_force_output(force_output); });
+" <> modelPrefix <> "do_force_output(true);";
+
+CreateRootFinderFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_List, modelPrefix_String] :=
     Module[{type},
            type = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
-"auto " <> functionName <> " = [this](const "<> type <> "& x) -> " <> type <> " {
-" <> TextFormatting`IndentText[SetModelParametersFromVector["MODEL->","x",parameters]] <> "
-   MODEL->calculate_DRbar_masses();
+"auto " <> functionName <> " = [&](const "<> type <> "& x) {
+" <> TextFormatting`IndentText[CreateTemporaryForceOutputRAII[modelPrefix]] <> "
+
+" <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
+   " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "
    "<> type <> " f;
 " <> TextFormatting`IndentText[SetVectorFromExpressions["f",function]] <> "
@@ -149,23 +192,54 @@ CreateRootFinderFunctionWrapper[functionName_String, dim_Integer, parameters_Lis
 "
           ];
 
-ApplyConstraint[FlexibleSUSY`FSFindRoot[parameters_List, function_List], modelName_String] :=
+ApplyConstraint[FlexibleSUSY`FSFindRoot[parameters_List, function_List], modelPrefix_String] :=
     Module[{callRootFinder, dim, dimStr, startPoint, functionWrapper, functionName},
            dim = Length[parameters];
            dimStr = ToString[dim];
            startPoint = CreateStartPoint[parameters, "start_point"];
            functionName = CreateSolverName[];
-           functionWrapper = CreateRootFinderFunctionWrapper[functionName,dim,parameters,function];
-           callRootFinder = functionWrapper <> "\n" <> startPoint <>
-                           "Root_finder<" <> dimStr <>
-                           "> root_finder(" <> functionName <> ", 100, 1.0e-2);\n" <>
-                           "const int status = root_finder.find_root(start_point);\n" <>
-                           "VERBOSE_MSG(\"\\troot finder status: \" << gsl_strerror(status));\n";
-           Return[callRootFinder];
+           functionWrapper = CreateRootFinderFunctionWrapper[functionName,dim,parameters,
+                                                             Parameters`DecreaseIndexLiterals[function],
+                                                             modelPrefix];
+           callRootFinder = functionWrapper <> "
+const char* par_str = \"" <> ToString[CConversion`ToValidCSymbol /@ parameters] <> "\";
+MODEL->get_problems().unflag_no_root(par_str);
+
+" <> startPoint <>
+"Root_finder<" <> dimStr <> "> root_finder(" <> functionName <> ", 100, " <> modelPrefix <> "get_precision());
+const int status = root_finder.find_root(start_point);
+
+VERBOSE_MSG(\"\\troot finder status: \" << gsl_strerror(status));
+
+if (status != GSL_SUCCESS) {
+    MODEL->get_problems().flag_no_root(par_str, status);
+}
+";
+           "\n{\n" <> TextFormatting`IndentText[callRootFinder] <> "}\n\n"
           ];
 
-ApplyConstraint[FlexibleSUSY`FSSolveEWSBFor[___], modelName_String] :=
-    modelName <> "->solve_ewsb();\n";
+ApplyConstraint[FlexibleSUSY`FSSolveEWSBFor[___], modelPrefix_String] :=
+    modelPrefix <> "solve_ewsb();\n";
+
+ExpandRestrictParameter[FlexibleSUSY`FSRestrictParameter[p_, interval_, FlexibleSUSY`FSNoProblem, expr___]] :=
+    ExpandRestrictParameter[FlexibleSUSY`FSRestrictParameter[p, interval, 0, expr]];
+
+ExpandRestrictParameter[FlexibleSUSY`FSRestrictParameter[p_, interval_, problem_]] :=
+    ExpandRestrictParameter[FlexibleSUSY`FSRestrictParameter[p, interval, problem, p]];
+
+ExpandRestrictParameter[FlexibleSUSY`FSRestrictParameter[p_, {istart_, iend_}, problem_, expr_]] :=
+    {p,
+     FlexibleSUSY`WHICH[
+         p < istart, expr + problem,
+         p > iend  , expr + problem,
+         True      , p
+     ]
+    };
+
+ExpandRestrictParameter[FlexibleSUSY`FSInitialSetting[p_, expr_]] := {p, expr};
+
+ApplyConstraint[patt:(FlexibleSUSY`FSRestrictParameter | FlexibleSUSY`FSInitialSetting)[__], modelPrefix_String] :=
+    ApplyConstraint[ExpandRestrictParameter[patt], modelPrefix];
 
 ApplyConstraint[Null, _] :=
     Block[{},
@@ -180,23 +254,27 @@ ApplyConstraint[p_, _] :=
           Quit[1];
          ];
 
-ApplyConstraints[settings_List] :=
+ApplyConstraints[settings_List, modelPrefix_String:"MODEL->"] :=
     Module[{result, noMacros, noTemp},
            noMacros = DeleteCases[
                settings,
                FlexibleSUSY`FSMinimize[__] | \
                FlexibleSUSY`FSFindRoot[__] | \
                FlexibleSUSY`FSSolveEWSBFor[__] | \
-               {FlexibleSUSY`Temporary[_], _}
+               {FlexibleSUSY`FSTemporary[_], _} | \
+               FlexibleSUSY`FSRestrictParameter[__] | \
+               FlexibleSUSY`FSInitialSetting[__]
            ];
            noTemp = DeleteCases[
                settings,
-               {FlexibleSUSY`Temporary[_], _}
+               {FlexibleSUSY`FSTemporary[_], _} | \
+               FlexibleSUSY`FSRestrictParameter[__] | \
+               FlexibleSUSY`FSInitialSetting[__]
            ];
            result = Parameters`CreateLocalConstRefs[(#[[2]])& /@ noMacros];
-           result = result <> AddBetas[noMacros];
+           result = result <> AddBetas[noMacros, modelPrefix];
            result = result <> "\n";
-           (result = result <> ApplyConstraint[#, "MODEL"])& /@ noTemp;
+           (result = result <> ApplyConstraint[#, modelPrefix])& /@ noTemp;
            Return[result];
           ];
 
@@ -207,34 +285,34 @@ MaxBetaLoopOrder[expr_] :=
     Sort @ Cases[expr /. FlexibleSUSY`BETA[p_] :> FlexibleSUSY`BETA[-1,p],
                  FlexibleSUSY`BETA[l_, _] | FlexibleSUSY`BETA[l_, _][___] :> l, {0, Infinity}];
 
-CallCalcBeta[-1] :=
-    "const " <> FlexibleSUSY`FSModelName <> "_soft_parameters beta_functions(MODEL->calc_beta());\n";
+CallCalcBeta[-1, modelPrefix_String] :=
+    "const " <> FlexibleSUSY`FSModelName <> "_soft_parameters beta_functions(" <> modelPrefix <> "calc_beta());\n";
 
-CallCalcBeta[l_?IntegerQ] :=
+CallCalcBeta[l_?IntegerQ, modelPrefix_String] :=
     Module[{lstr = ToString[l]},
            "const " <> FlexibleSUSY`FSModelName <>
            "_soft_parameters beta_functions_" <> lstr <>
-           "L(MODEL->calc_beta(" <> lstr <> "));\n"
+           "L(" <> modelPrefix <> "calc_beta(" <> lstr <> "));\n"
           ];
 
-AddBetas[expr_?ContainsBetas] :=
-    StringJoin[CallCalcBeta /@ MaxBetaLoopOrder[expr]] <>
+AddBetas[expr_?ContainsBetas, modelPrefix_String] :=
+    StringJoin[CallCalcBeta[#, modelPrefix]& /@ MaxBetaLoopOrder[expr]] <>
     Parameters`CreateLocalConstRefsForBetas[expr];
 
-AddBetas[_] := "";
+AddBetas[_, modelPrefix_String] := "";
 
 FindFixedParametersFromSetting[{parameter_, value_}] := Parameters`StripIndices[parameter];
 FindFixedParametersFromSetting[FlexibleSUSY`FSMinimize[parameters_List, value_]] := parameters;
 FindFixedParametersFromSetting[FlexibleSUSY`FSFindRoot[parameters_List, value_]] := parameters;
 FindFixedParametersFromSetting[FlexibleSUSY`FSSolveEWSBFor[parameters_List]] := parameters;
+FindFixedParametersFromSetting[_] := {};
 
 FindFixedParametersFromConstraint[settings_List] :=
     DeleteDuplicates[Flatten[FindFixedParametersFromSetting /@ settings]];
 
 CheckSetting[patt:(FlexibleSUSY`FSMinimize|FlexibleSUSY`FSFindRoot)[parameters_, value_],
-             constraintName_String] :=
-    Module[{modelParameters, unknownParameters},
-           modelParameters = Join[Parameters`GetModelParameters[], Parameters`GetExtraParameters[]];
+             constraintName_String, __] :=
+    Module[{unknownParameters},
            If[Head[parameters] =!= List,
               Print["Error: In constraint ", constraintName, ": ", InputForm[patt]];
               Print["   First parameter must be a list!"];
@@ -263,7 +341,8 @@ CheckSetting[patt:(FlexibleSUSY`FSMinimize|FlexibleSUSY`FSFindRoot)[parameters_,
               Print["   Correct syntax: FSMinimize[{a,b}, f[a,b]]"];
               Return[False];
              ];
-           unknownParameters = Complement[parameters, modelParameters];
+           unknownParameters = Select[parameters, (!Parameters`IsModelParameter[#] &&
+                                                   !Parameters`IsExtraParameter[#])&];
            If[unknownParameters =!= {},
               Print["Error: In constraint ", constraintName, ": ", InputForm[patt]];
               Print["   Unknown parameters: ", unknownParameters];
@@ -273,9 +352,9 @@ CheckSetting[patt:(FlexibleSUSY`FSMinimize|FlexibleSUSY`FSFindRoot)[parameters_,
           ];
 
 CheckSetting[patt:FlexibleSUSY`FSSolveEWSBFor[parameters_List],
-             constraintName_String] :=
-    Module[{unknownParameters = Complement[parameters, Join[Parameters`GetModelParameters[],
-                                                            Parameters`GetExtraParameters[]]]},
+             constraintName_String, __] :=
+    Module[{unknownParameters = Select[parameters, (!Parameters`IsModelParameter[#] &&
+                                                    !Parameters`IsExtraParameter[#])&]},
            If[unknownParameters =!= {},
               Print["Error: In constraint ", constraintName, ": ", InputForm[patt],
                     "   Unknown parameters: ", unknownParameters];
@@ -284,7 +363,7 @@ CheckSetting[patt:FlexibleSUSY`FSSolveEWSBFor[parameters_List],
            True
           ];
 
-CheckSetting[patt:{parameter_[idx_Integer], value_}, constraintName_String] :=
+CheckSetting[patt:{parameter_[idx_Integer], value_}, constraintName_String, __] :=
     Module[{modelParameters, dim},
            modelParameters = Parameters`GetModelParameters[];
            If[!CheckSetting[{parameter, value}],
@@ -307,7 +386,7 @@ CheckSetting[patt:{parameter_[idx_Integer], value_}, constraintName_String] :=
            True
           ];
 
-CheckSetting[patt:{parameter_[idx1_Integer, idx2_Integer], value_}, constraintName_String] :=
+CheckSetting[patt:{parameter_[idx1_Integer, idx2_Integer], value_}, constraintName_String, __] :=
     Module[{modelParameters, dim},
            modelParameters = Parameters`GetModelParameters[];
            If[!CheckSetting[{parameter, value}],
@@ -335,18 +414,40 @@ CheckSetting[patt:{parameter_[idx1_Integer, idx2_Integer], value_}, constraintNa
            True
           ];
 
-CheckSetting[patt:{parameter_, value_}, constraintName_String] :=
-    Module[{outputParameters},
+CheckSetting[patt:{parameter_, value_}, constraintName_String, isInitial_] :=
+    Module[{outputParameters, modelPars},
            outputParameters = Parameters`GetOutputParameters[];
            If[MemberQ[outputParameters, parameter],
               Print["Error: In constraint ", constraintName, ": ", InputForm[patt]];
               Print["   ", parameter, " is a output parameter!"];
               Return[False];
              ];
+           If[isInitial,
+              modelPars = Parameters`FSModelParameters /. Parameters`FindAllParametersClassified[value];
+              If[Intersection[modelPars, Parameters`GetModelParameters[]] =!= {},
+                 Utils`FSFancyWarning[
+                    "In constraint ", constraintName, ": ", InputForm[patt],
+                    " ", ToString@modelPars,
+                    " on the r.h.s. are model parameters, which may initially be zero!"
+                 ];
+              ];
+           ];
            True
           ];
 
-CheckSetting[patt_, constraintName_String] :=
+CheckSetting[patt:( FlexibleSUSY`FSRestrictParameter[p_,__] | FlexibleSUSY`FSInitialSetting[p_,__] ),
+             constraintName_String, __] :=
+    Module[{outputParameters},
+           outputParameters = Parameters`GetOutputParameters[];
+           If[MemberQ[outputParameters, p],
+              Print["Error: In constraint ", constraintName, ": ", InputForm[patt]];
+              Print["   ", p, " is a output parameter!"];
+              Return[False];
+             ];
+           True
+          ];
+
+CheckSetting[patt_, constraintName_String, __] :=
     Module[{},
            Print["Error: In constraint ", constraintName, ": ", InputForm[patt]];
            Print["   This is not a valid constraint setting!"];
@@ -356,8 +457,8 @@ CheckSetting[patt_, constraintName_String] :=
            False
           ];
 
-CheckConstraint[settings_List, constraintName_String] :=
-    CheckSetting[#,constraintName]& /@ settings;
+CheckConstraint[settings_List, constraintName_String, isInitial_:False] :=
+    CheckSetting[#,constraintName,isInitial]& /@ settings;
 
 SanityCheck[settings_List, constraintName_String:""] :=
     Module[{setParameters, y,
@@ -367,21 +468,21 @@ SanityCheck[settings_List, constraintName_String:""] :=
            For[y = 1, y <= Length[yukawas], y++,
                If[(ValueQ /@ yukawas)[[y]] &&
                   FreeQ[setParameters, yukawas[[y]]],
-                  Print["Warning: Yukawa coupling ", yukawas[[y]],
-                        " not set",
-                        If[constraintName != "", " in the " <> constraintName, ""],
-                        "."];
-                 ];
-              ];
+                  Utils`FSFancyWarning[
+                     "Yukawa coupling ", yukawas[[y]],
+                     " not set"<> If[constraintName != ""," in the " <> constraintName, ""]
+                  ];
+               ];
+           ];
           ];
 
 CalculateScale[Null, _] := "";
 
 CalculateScale[False, _] :=
-    "ERROR(\"scale condition is allways false!\");\n";
+    "ERROR(\"scale condition is always false!\");\n";
 
 CalculateScale[True, _] :=
-    "WARNING(\"scale condition is allways true!\");\n";
+    "WARNING(\"scale condition is always true!\");\n";
 
 GetSMMatchingScale[FlexibleSUSY`LowEnergyConstant[FlexibleSUSY`MT], qedqcd_String] :=
     qedqcd <> ".displayPoleMt()";
@@ -407,11 +508,22 @@ CreateBetasForParsIn[expr_] :=
           ];
 
 CalculateScale[expr_Equal, scaleName_String] :=
-    Module[{result},
-           result = Parameters`CreateLocalConstRefs[expr];
+    Module[{scaleReset, result},
+           result = "const double currentScale = model->get_scale();\n"
+                    <> "const auto beta_functions(model->calc_beta());\n\n";
+           result = result <> Parameters`CreateLocalConstRefs[expr];
            result = result <> Parameters`CreateLocalConstRefsForBetas[CreateBetasForParsIn[expr]];
            result = result <> "\n";
            result = result <> CalculateScaleFromExpr[expr, scaleName];
+           scaleReset = "ERROR(\"Overflow error during calculation of scale: \"\n"
+                        <> "      << strerror(errno) << '\\n'\n"
+                        <> "      << \"   current scale = \" << currentScale << '\\n'\n"
+                        <> "      << \"   new scale = \" << scale << '\\n'\n"
+                        <> "      << \"   resetting scale to \" << get_initial_scale_guess());\n";
+           scaleReset = "#ifdef ENABLE_VERBOSE\n" <> IndentText[scaleReset] <> "#endif\n";
+           scaleReset = scaleReset <> IndentText["scale = get_initial_scale_guess();\n"]
+                        <> IndentText["errno = 0;\n"];
+           result = result <> "if (errno == ERANGE) {\n" <> scaleReset <> "}\n";
            Return[result];
           ];
 
@@ -464,7 +576,7 @@ CalculateScaleFromExpr[Equal[expr1_, expr2_], scaleName_String] :=
               result = "ERROR(\"no solution found for the equation " <>
                         ToString[expr1] <> " == " <> ToString[expr2] <> "\");\n";
               ,
-              result = scaleName <> " = " <> RValueToCFormString[solution] <> ";\n";
+              result = scaleName <> " = " <> CConversion`RValueToCFormString[solution] <> ";\n";
              ];
            Return[result];
           ];
@@ -514,6 +626,9 @@ IsFixedIn[par_, FlexibleSUSY`FSFindRoot[parameters_List, _]] :=
 
 IsFixedIn[par_, FlexibleSUSY`FSSolveEWSBFor[parameters___]] :=
     MemberQ[Parameters`StripIndices /@ Flatten[{parameters}], Parameters`StripIndices[par]];
+
+IsFixedIn[par_, (FlexibleSUSY`FSRestrictParameter | FlexibleSUSY`FSInitialSetting)[p_, ___]] :=
+    MemberQ[Parameters`StripIndices[p], Parameters`StripIndices[par]];
 
 IsFixedIn[par_, p___] :=
     Block[{},
@@ -597,7 +712,7 @@ SaveValue[par_] :=
           ];
 
 SetTemporarily[settings_List] :=
-    Module[{tempSettings = Cases[settings, {FlexibleSUSY`Temporary[p_], v_} :> {p,v}],
+    Module[{tempSettings = Cases[settings, {FlexibleSUSY`FSTemporary[p_], v_} :> {p,v}],
             set, savedVals},
            If[tempSettings === {}, Return[""];];
            set = ApplyConstraints[tempSettings];
@@ -606,12 +721,18 @@ SetTemporarily[settings_List] :=
            savedVals <> "\n{\n" <> IndentText[set] <> "}"
           ];
 
-ResetTemporarily[settings_List] :=
-    Module[{tempSettings = Cases[settings, {FlexibleSUSY`Temporary[p_], v_} :> {p,v}]},
-           If[tempSettings === {}, Return[""];];
-           "// reset temporary parameter re-definitons\n" <>
-           StringJoin[RestoreValue[#[[1]], "old_"]& /@ tempSettings]
+SetRestrictions[settings_List] :=
+    Module[{initSettings = Cases[settings, (FlexibleSUSY`FSRestrictParameter | FlexibleSUSY`FSInitialSetting)[__]]},
+           If[initSettings === {},
+              "",
+              "// initial settings / parameter restrictions\n{\n" <> IndentText[
+                  ApplyConstraints[ExpandRestrictParameter /@ initSettings]
+              ] <> "\n}"
+             ]
           ];
+
+InitialApplyConstraint[settings_List] :=
+    SetTemporarily[settings] <> "\n" <> SetRestrictions[settings];
 
 End[];
 

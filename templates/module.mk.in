@@ -2,8 +2,17 @@ DIR          := @DIR@
 MODNAME      := @CLASSNAME@
 SARAH_MODEL  := @MODEL@
 WITH_$(MODNAME) := yes
+MOD@CLASSNAME@_MOD := @MODEL_SPECIFIC_MODULES@
+MOD@CLASSNAME@_DEP := $(patsubst %,model_specific/%,$(MOD@CLASSNAME@_MOD))
+MOD@CLASSNAME@_INC := $(patsubst %,-Imodel_specific/%,$(MOD@CLASSNAME@_MOD))
+MOD@CLASSNAME@_LIB := $(foreach M,$(MOD@CLASSNAME@_MOD),model_specific/$M/libmodel_specific_$M$(MODULE_LIBEXT))
+
+MOD@CLASSNAME@_SUBMOD  := $(DIR)/cxx_qft
+MOD@CLASSNAME@_SUBMOD_INC := $(patsubst %,-I%,$(MOD@CLASSNAME@_SUBMOD))
 
 @CLASSNAME@_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
+@CLASSNAME@_INSTALL_CXXQFT_DIR := \
+		$(@CLASSNAME@_INSTALL_DIR)/cxx_qft
 
 @CLASSNAME@_MK     := \
 		$(DIR)/module.mk
@@ -14,6 +23,18 @@ WITH_$(MODNAME) := yes
 @CLASSNAME@_SOFT_BETAS_MK := \
 		$(DIR)/soft_betas.mk
 
+@CLASSNAME@_CXXQFT_VERTICES_MK := \
+		$(DIR)/cxx_qft/vertices.mk
+
+-include $(@CLASSNAME@_CXXQFT_VERTICES_MK)
+LIB@CLASSNAME@_CXXQFT_VERTICES_SRC ?= ''
+
+@CLASSNAME@_FlexibleEFTHiggs_MK := \
+		$(DIR)/FlexibleEFTHiggs.mk
+
+@CLASSNAME@_FlexibleDecay_MK := \
+		$(DIR)/decays/FlexibleDecay.mk
+
 @CLASSNAME@_INCLUDE_MK := \
 		$(@CLASSNAME@_SUSY_BETAS_MK) \
 		$(@CLASSNAME@_SOFT_BETAS_MK)
@@ -21,6 +42,9 @@ WITH_$(MODNAME) := yes
 @CLASSNAME@_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.@CLASSNAME@_generated \
 @SLHA_INPUT@
+
+@CLASSNAME@_REFERENCES := \
+		$(DIR)/@CLASSNAME@_references.tex
 
 @CLASSNAME@_GNUPLOT := \
 		$(DIR)/@CLASSNAME@_plot_rgflow.gnuplot \
@@ -30,18 +54,27 @@ WITH_$(MODNAME) := yes
 		$(MODNAME).tar.gz
 
 LIB@CLASSNAME@_SRC := \
-		$(DIR)/@CLASSNAME@_a_muon.cpp \
-		$(DIR)/@CLASSNAME@_effective_couplings.cpp \
+		$(DIR)/@CLASSNAME@_amm.cpp \
+		$(DIR)/@CLASSNAME@_edm.cpp \
+		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp \
+		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
+		$(DIR)/@CLASSNAME@_b_to_s_gamma.cpp \
 		$(DIR)/@CLASSNAME@_info.cpp \
 		$(DIR)/@CLASSNAME@_input_parameters.cpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates.cpp \
+		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.cpp \
+		$(DIR)/@CLASSNAME@_model_slha.cpp \
+		$(DIR)/@CLASSNAME@_lepton_amm_wrapper.cpp \
 		$(DIR)/@CLASSNAME@_observables.cpp \
 		$(DIR)/@CLASSNAME@_physical.cpp \
 		$(DIR)/@CLASSNAME@_slha_io.cpp \
 		$(DIR)/@CLASSNAME@_soft_parameters.cpp \
-		$(DIR)/@CLASSNAME@_standard_model_matching.cpp \
 		$(DIR)/@CLASSNAME@_susy_parameters.cpp \
-		$(DIR)/@CLASSNAME@_utilities.cpp
+		$(DIR)/@CLASSNAME@_utilities.cpp \
+		$(DIR)/@CLASSNAME@_weinberg_angle.cpp
+
+LIB@CLASSNAME@_SRC += $(LIB@CLASSNAME@_CXXQFT_VERTICES_SRC)
 
 EXE@CLASSNAME@_SRC := \
 		$(DIR)/run_@CLASSNAME@.cpp \
@@ -57,28 +90,53 @@ LL@CLASSNAME@_MMA  := \
 		$(DIR)/run_@CLASSNAME@.m
 
 LIB@CLASSNAME@_HDR := \
-		$(DIR)/@CLASSNAME@_a_muon.hpp \
-		$(DIR)/@CLASSNAME@_effective_couplings.hpp \
+		$(DIR)/@CLASSNAME@_amm.hpp \
+		$(DIR)/@CLASSNAME@_convergence_tester.hpp \
+		$(DIR)/@CLASSNAME@_edm.hpp \
+		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.hpp \
+		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
+		$(DIR)/@CLASSNAME@_b_to_s_gamma.hpp \
+		$(DIR)/@CLASSNAME@_ewsb_solver.hpp \
+		$(DIR)/@CLASSNAME@_ewsb_solver_interface.hpp \
+		$(DIR)/@CLASSNAME@_high_scale_constraint.hpp \
 		$(DIR)/@CLASSNAME@_info.hpp \
+		$(DIR)/@CLASSNAME@_initial_guesser.hpp \
 		$(DIR)/@CLASSNAME@_input_parameters.hpp \
+		$(DIR)/@CLASSNAME@_low_scale_constraint.hpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates.hpp \
+		$(DIR)/@CLASSNAME@_mass_eigenstates_interface.hpp \
+		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.hpp \
 		$(DIR)/@CLASSNAME@_model.hpp \
 		$(DIR)/@CLASSNAME@_model_slha.hpp \
+		$(DIR)/@CLASSNAME@_lepton_amm_wrapper.hpp \
 		$(DIR)/@CLASSNAME@_observables.hpp \
 		$(DIR)/@CLASSNAME@_physical.hpp \
 		$(DIR)/@CLASSNAME@_slha_io.hpp \
 		$(DIR)/@CLASSNAME@_spectrum_generator.hpp \
 		$(DIR)/@CLASSNAME@_spectrum_generator_interface.hpp \
 		$(DIR)/@CLASSNAME@_soft_parameters.hpp \
-		$(DIR)/@CLASSNAME@_standard_model_matching.hpp \
 		$(DIR)/@CLASSNAME@_susy_parameters.hpp \
-		$(DIR)/@CLASSNAME@_utilities.hpp
+		$(DIR)/@CLASSNAME@_susy_scale_constraint.hpp \
+		$(DIR)/@CLASSNAME@_utilities.hpp \
+		$(DIR)/@CLASSNAME@_weinberg_angle.hpp
 
-ifneq ($(findstring two_scale,$(ALGORITHMS)),)
+LIB@CLASSNAME@_CXXQFT_HDR := \
+		$(DIR)/cxx_qft/@CLASSNAME@_qft.hpp \
+		$(DIR)/cxx_qft/@CLASSNAME@_fields.hpp \
+		$(DIR)/cxx_qft/@CLASSNAME@_particle_aliases.hpp \
+		$(DIR)/cxx_qft/@CLASSNAME@_vertices.hpp \
+		$(DIR)/cxx_qft/@CLASSNAME@_context_base.hpp \
+		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions_wilsoncoeffs.hpp
+
+ifneq ($(findstring two_scale,$(SOLVERS)),)
 -include $(DIR)/two_scale.mk
 endif
-ifneq ($(findstring lattice,$(ALGORITHMS)),)
+ifneq ($(findstring lattice,$(SOLVERS)),)
 -include $(DIR)/lattice.mk
+endif
+ifneq ($(findstring semi_analytic,$(SOLVERS)),)
+-include $(DIR)/semi_analytic.mk
 endif
 
 ifneq ($(MAKECMDGOALS),showbuild)
@@ -87,6 +145,9 @@ ifneq ($(MAKECMDGOALS),release)
 ifneq ($(MAKECMDGOALS),doc)
 -include $(@CLASSNAME@_SUSY_BETAS_MK)
 -include $(@CLASSNAME@_SOFT_BETAS_MK)
+-include $(@CLASSNAME@_FlexibleDecay_MK)
+-include $(@CLASSNAME@_CXXQFT_VERTICES_MK)
+-include $(@CLASSNAME@_FlexibleEFTHiggs_MK)
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
 ifneq ($(MAKECMDGOALS),pack-$(MODNAME)-src)
@@ -97,6 +158,12 @@ $(@CLASSNAME@_SUSY_BETAS_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
 $(@CLASSNAME@_SOFT_BETAS_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
+
+$(@CLASSNAME@_FlexibleDecay_MK): run-metacode-$(MODNAME)
+$(@CLASSNAME@_CXXQFT_VERTICES_MK): run-metacode-$(MODNAME)
+		@$(CONVERT_DOS_PATHS) $@
+$(@CLASSNAME@_FlexibleEFTHiggs_MK): run-metacode-$(MODNAME)
+		@$(CONVERT_DOS_PATHS) $@
 endif
 endif
 endif
@@ -108,7 +175,7 @@ endif
 endif
 endif
 
-# remove duplicates in case all algorithms are used
+# remove duplicates in case all solvers are used
 LIB@CLASSNAME@_SRC := $(sort $(LIB@CLASSNAME@_SRC))
 EXE@CLASSNAME@_SRC := $(sort $(EXE@CLASSNAME@_SRC))
 
@@ -142,7 +209,7 @@ METACODE_STAMP_@CLASSNAME@ := $(DIR)/00_DELETE_ME_TO_RERUN_METACODE
 
 ifeq ($(ENABLE_META),yes)
 SARAH_MODEL_FILES_@CLASSNAME@ := \
-		$(shell $(SARAH_DEP_GEN) $(SARAH_MODEL))
+		$(shell $(SARAH_DEP_GEN) $(SARAH_MODEL_DIR) $(SARAH_MODEL))
 endif
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) clean-$(MODNAME)-src \
@@ -155,51 +222,60 @@ all-$(MODNAME): $(LIB@CLASSNAME@) $(EXE@CLASSNAME@_EXE)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_HDR) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(EXE@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LL@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LL@CLASSNAME@_MMA) $(@CLASSNAME@_INSTALL_DIR)
-		$(INSTALL_STRIPPED) $(@CLASSNAME@_MK) $(@CLASSNAME@_INSTALL_DIR) -m u=rw,g=r,o=r
-		install -m u=rw,g=r,o=r $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -d $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -d $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_VERTICES_SRC) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_HDR) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_HDR) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(EXE@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LL@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LL@CLASSNAME@_MMA) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)$(INSTALL_STRIPPED) $(@CLASSNAME@_MK) $(@CLASSNAME@_INSTALL_DIR) -m u=rw,g=r,o=r
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_CXXQFT_VERTICES_MK) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
+
 ifneq ($(@CLASSNAME@_SLHA_INPUT),)
-		install -m u=rw,g=r,o=r $(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_INSTALL_DIR)
 endif
-		install -m u=rw,g=r,o=r $(@CLASSNAME@_GNUPLOT) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_REFERENCES) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_GNUPLOT) $(@CLASSNAME@_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIB@CLASSNAME@_DEP)
-		-rm -f $(EXE@CLASSNAME@_DEP)
-		-rm -f $(LL@CLASSNAME@_DEP)
+		$(Q)-rm -f $(LIB@CLASSNAME@_DEP)
+		$(Q)-rm -f $(EXE@CLASSNAME@_DEP)
+		$(Q)-rm -f $(LL@CLASSNAME@_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIB@CLASSNAME@)
-		-rm -f $(LL@CLASSNAME@_LIB)
+		$(Q)-rm -f $(LIB@CLASSNAME@)
+		$(Q)-rm -f $(LL@CLASSNAME@_LIB)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIB@CLASSNAME@_OBJ)
-		-rm -f $(EXE@CLASSNAME@_OBJ)
-		-rm -f $(LL@CLASSNAME@_OBJ)
+		$(Q)-rm -f $(LIB@CLASSNAME@_OBJ)
+		$(Q)-rm -f $(EXE@CLASSNAME@_OBJ)
+		$(Q)-rm -f $(LL@CLASSNAME@_OBJ)
 
 # BEGIN: NOT EXPORTED ##########################################
 clean-$(MODNAME)-src:
-		-rm -f $(LIB@CLASSNAME@_SRC)
-		-rm -f $(LIB@CLASSNAME@_HDR)
-		-rm -f $(EXE@CLASSNAME@_SRC)
-		-rm -f $(LL@CLASSNAME@_SRC)
-		-rm -f $(LL@CLASSNAME@_MMA)
-		-rm -f $(METACODE_STAMP_@CLASSNAME@)
-		-rm -f $(@CLASSNAME@_INCLUDE_MK)
-		-rm -f $(@CLASSNAME@_SLHA_INPUT)
-		-rm -f $(@CLASSNAME@_GNUPLOT)
+		$(Q)-rm -f $(LIB@CLASSNAME@_SRC)
+		$(Q)-rm -f $(LIB@CLASSNAME@_HDR)
+		$(Q)-rm -f $(LIB@CLASSNAME@_CXXQFT_HDR)
+		$(Q)-rm -f $(EXE@CLASSNAME@_SRC)
+		$(Q)-rm -f $(LL@CLASSNAME@_SRC)
+		$(Q)-rm -f $(LL@CLASSNAME@_MMA)
+		$(Q)-rm -f $(METACODE_STAMP_@CLASSNAME@)
+		$(Q)-rm -f $(@CLASSNAME@_INCLUDE_MK)
+		$(Q)-rm -f $(@CLASSNAME@_CXXQFT_VERTICES_MK)
+		$(Q)-rm -f $(@CLASSNAME@_SLHA_INPUT)
+		$(Q)-rm -f $(@CLASSNAME@_REFERENCES)
+		$(Q)-rm -f $(@CLASSNAME@_GNUPLOT)
 
 distclean-$(MODNAME): clean-$(MODNAME)-src
 # END:   NOT EXPORTED ##########################################
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
-		-rm -f $(EXE@CLASSNAME@_EXE)
+		$(Q)-rm -f $(EXE@CLASSNAME@_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 		@true
@@ -213,14 +289,16 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 pack-$(MODNAME)-src:
-		tar -czf $(@CLASSNAME@_TARBALL) \
-		$(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) \
+		$(Q)tar -czf $(@CLASSNAME@_TARBALL) \
+		$(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) \
 		$(EXE@CLASSNAME@_SRC) \
 		$(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
-		$(@CLASSNAME@_MK) $(@CLASSNAME@_INCLUDE_MK) \
-		$(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_GNUPLOT)
+		$(@CLASSNAME@_MK) $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_CXXQFT_VERTICES_MK) \
+		$(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_REFERENCES) \
+		$(@CLASSNAME@_GNUPLOT) \
+		$(@CLASSNAME@_FlexibleDecay_MK)
 
-$(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(EXE@CLASSNAME@_SRC) $(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
+$(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) $(EXE@CLASSNAME@_SRC) $(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
 : run-metacode-$(MODNAME)
 		@true
 
@@ -229,7 +307,8 @@ run-metacode-$(MODNAME): $(METACODE_STAMP_@CLASSNAME@)
 
 ifeq ($(ENABLE_META),yes)
 $(METACODE_STAMP_@CLASSNAME@): $(DIR)/start.m $(DIR)/FlexibleSUSY.m $(META_SRC) $(TEMPLATES) $(SARAH_MODEL_FILES_@CLASSNAME@)
-		"$(MATH)" -run "Get[\"$<\"]; Quit[]"
+		@$(MSG)
+		$(Q)printf "%s" "Get[\"$<\"]; Quit[]" | "$(MATH)" || (echo "Error: The code generation failed!"; exit 1)
 		@touch "$(METACODE_STAMP_@CLASSNAME@)"
 		@echo "Note: to regenerate @CLASSNAME@ source files," \
 		      "please remove the file "
@@ -241,7 +320,7 @@ $(METACODE_STAMP_@CLASSNAME@):
 endif
 
 $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP) $(LL@CLASSNAME@_DEP) $(LIB@CLASSNAME@_OBJ) $(EXE@CLASSNAME@_OBJ) $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
-	CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(TSILFLAGS)
+	CPPFLAGS += $(MOD@CLASSNAME@_SUBMOD_INC) $(MOD@CLASSNAME@_INC) $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(GM2CALCFLAGS) $(HIGGSTOOLSFLAGS) $(HIMALAYAFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP) $(LL@CLASSNAME@_DEP) $(LIB@CLASSNAME@_OBJ) $(EXE@CLASSNAME@_OBJ) $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
@@ -249,21 +328,25 @@ $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP) $(LL@CLASSNAME@_DEP) $(LIB@CLASSNAME
 endif
 
 $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
-	CPPFLAGS += $(shell $(MATH_INC_PATHS) --math-cmd="$(MATH)" -I --librarylink --mathlink)
+	CPPFLAGS += $(LLFLAGS)
 
 $(LIB@CLASSNAME@): $(LIB@CLASSNAME@_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
-$(DIR)/%.x: $(DIR)/%.o $(LIB@CLASSNAME@) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$^ $(ADDONLIBS)) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS)
+$(DIR)/%.x: $(DIR)/%.o $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+		@$(MSG)
+		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^) $(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIGGSTOOLSLIBS) $(HIMALAYALIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(THREADLIBS) $(LDLIBS) $(FUTILIBS)
 
-$(LL@CLASSNAME@_LIB): $(LL@CLASSNAME@_OBJ) $(LIB@CLASSNAME@) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$^) $(ADDONLIBS) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS)
+$(LL@CLASSNAME@_LIB): $(LL@CLASSNAME@_OBJ) $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+		@$(MSG)
+		$(Q)$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$(ADDONLIBS) $^) $(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIGGSTOOLSLIBS) $(HIMALAYALIBS) $(TSILLIBS) $(GSLLIBS) $(THREADLIBS) $(LDLIBS) $(LLLIBS) $(FUTILIBS) $(FLIBS)
 
 ALLDEP += $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP)
 ALLSRC += $(LIB@CLASSNAME@_SRC) $(EXE@CLASSNAME@_SRC)
 ALLLIB += $(LIB@CLASSNAME@)
 ALLEXE += $(EXE@CLASSNAME@_EXE)
+ALLMODDEP += $(MOD@CLASSNAME@_DEP)
 
 ifeq ($(ENABLE_LIBRARYLINK),yes)
 ALLDEP += $(LL@CLASSNAME@_DEP)

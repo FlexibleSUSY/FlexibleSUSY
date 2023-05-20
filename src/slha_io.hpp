@@ -19,64 +19,32 @@
 #ifndef SLHA_IO_H
 #define SLHA_IO_H
 
-#include <string>
-#include <sstream>
+#include "slha_format.hpp"
+
+#include <complex>
+#include <functional>
 #include <iosfwd>
+#include <memory>
+#include <string>
 #include <vector>
+
 #include <Eigen/Core>
-#include <boost/format.hpp>
-#include <boost/function.hpp>
-#include "slhaea.h"
-#include "config.h"
-#include "logger.hpp"
-#include "error.hpp"
-#include "wrappers.hpp"
-#include "numerics2.hpp"
-#include "pmns.hpp"
-#include "standard_model_two_scale_model.hpp"
 
 namespace softsusy {
    class QedQcd;
-}
+} // namespace softsusy
+
+namespace SLHAea {
+   class Coll;
+   class Line;
+} // namespace SLHAea
 
 namespace flexiblesusy {
 
    class Spectrum_generator_settings;
+   class FlexibleDecay_settings;
    class Physical_input;
-
-   namespace {
-      /// SLHA line formatter for the MASS block entries
-      const boost::format mass_formatter(" %9d   %16.8E   # %s\n");
-      /// SLHA line formatter for the mixing matrix entries (NMIX, UMIX, VMIX, ...)
-      const boost::format mixing_matrix_formatter(" %2d %2d   %16.8E   # %s\n");
-      /// SLHA line formatter for vector entries
-      const boost::format vector_formatter(" %5d   %16.8E   # %s\n");
-      /// SLHA number formatter
-      const boost::format number_formatter("         %16.8E   # %s\n");
-      /// SLHA line formatter for entries with three indices
-      const boost::format tensor_formatter(" %8d %8d %8d   %16.8E   # %s\n");
-      /// SLHA scale formatter
-      const boost::format scale_formatter("%9.8E");
-      /// SLHA line formatter for the one-element entries (HMIX, GAUGE, MSOFT, ...)
-      const boost::format single_element_formatter(" %5d   %16.8E   # %s\n");
-      /// SLHA line formatter for the SPINFO block entries
-      const boost::format spinfo_formatter(" %5d   %s\n");
-   }
-
-#define FORMAT_MASS(pdg,mass,name)                                      \
-   boost::format(mass_formatter) % (pdg) % (mass) % (name)
-#define FORMAT_MIXING_MATRIX(i,k,entry,name)                            \
-   boost::format(mixing_matrix_formatter) % (i) % (k) % (entry) % (name)
-#define FORMAT_ELEMENT(pdg,value,name)                                  \
-   boost::format(single_element_formatter) % (pdg) % (value) % (name)
-#define FORMAT_SCALE(n)                                                 \
-   boost::format(scale_formatter) % (n)
-#define FORMAT_NUMBER(n,str)                                            \
-   boost::format(number_formatter) % (n) % (str)
-#define FORMAT_SPINFO(n,str)                                            \
-   boost::format(spinfo_formatter) % (n) % (str)
-#define FORMAT_RANK_THREE_TENSOR(i,j,k,entry,name)                      \
-   boost::format(tensor_formatter) % (i) % (j) % (k) % (entry) % (name)
+   struct PMNS_parameters;
 
 /**
  * @class SLHA_io
@@ -138,39 +106,40 @@ public:
       void clear() { *this = CKM_wolfenstein(); }
    };
 
+   SLHA_io();
+   SLHA_io(const SLHA_io&);
+   SLHA_io(SLHA_io&&) noexcept;
+   ~SLHA_io();
+
+   SLHA_io& operator=(const SLHA_io&);
+   SLHA_io& operator=(SLHA_io&&) noexcept;
+
    void clear();
 
    // reading functions
    bool block_exists(const std::string&) const;
    void fill(softsusy::QedQcd&) const;
+   void fill(FlexibleDecay_settings&) const;
    void fill(Spectrum_generator_settings&) const;
    void fill(Physical_input&) const;
    const Modsel& get_modsel() const { return modsel; }
-   const SLHAea::Coll& get_data() const { return data; }
+   const SLHAea::Coll& get_data() const;
    void read_from_file(const std::string&);
    void read_from_source(const std::string&);
    void read_from_stream(std::istream&);
    double read_block(const std::string&, const Tuple_processor&) const;
    template <class Derived>
-   double read_block(const std::string&, Eigen::MatrixBase<Derived>&) const;
+   double read_block(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    double read_block(const std::string&, double&) const;
    double read_entry(const std::string&, int) const;
    double read_scale(const std::string&) const;
 
    // writing functions
-   void set_data(const SLHAea::Coll& data_) { data = data_; }
+   void set_data(const SLHAea::Coll&);
    void set_block(const std::ostringstream&, Position position = back);
    void set_block(const std::string&, Position position = back);
    void set_blocks(const std::vector<std::string>&, Position position = back);
    void set_block(const std::string&, double, const std::string&, double scale = 0.);
-   template<class Scalar, int M, int N>
-   void set_block(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, N>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M>
-   void set_block(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, 1>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M, int N>
-   void set_block_imag(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, N>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M>
-   void set_block_imag(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, 1>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    template <class Derived>
@@ -178,173 +147,35 @@ public:
    void set_modsel(const Modsel&);
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);
+   void set_FlexibleDecay_settings(const FlexibleDecay_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    void write_to_file(const std::string&) const;
-   void write_to_stream(std::ostream& = std::cout) const;
-
-   // Standard_model class interface
-   void set_mass(const standard_model::Standard_model_physical&);
-   void set_mixing_matrices(const standard_model::Standard_model_physical&);
-   void set_model_parameters(const standard_model::Standard_model&);
-   void set_spectrum(const standard_model::Standard_model&);
-
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>&,
-                                                         Eigen::Matrix<double, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_slha(double&,
-                                                         Eigen::Matrix<double, 1, 1>&);
-
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>&,
-                                                         Eigen::Matrix<std::complex<double>, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_slha(double&,
-                                                         Eigen::Matrix<std::complex<double>, 1, 1>&);
-
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>&,
-                                                       Eigen::Matrix<double, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_hk(double&,
-                                                       Eigen::Matrix<double, 1, 1>&);
-
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>&,
-                                                       Eigen::Matrix<std::complex<double>, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_hk(double&,
-                                                       Eigen::Matrix<std::complex<double>, 1, 1>&);
+   void write_to_stream() const;
+   void write_to_stream(std::ostream&) const;
 
 private:
-   SLHAea::Coll data{};        ///< SHLA data
+   std::unique_ptr<SLHAea::Coll> data; ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
-   template <class Scalar>
-   static Scalar convert_to(const std::string&); ///< convert string
-   static std::string to_lower(const std::string&); ///< string to lower case
-   static void process_sminputs_tuple(softsusy::QedQcd&, int, double);
-   static void process_modsel_tuple(Modsel&, int, double);
-   static void process_vckmin_tuple(CKM_wolfenstein&, int, double);
-   static void process_upmnsin_tuple(PMNS_parameters&, int, double);
-   static void process_flexiblesusy_tuple(Spectrum_generator_settings&, int, double);
-   static void process_flexiblesusyinput_tuple(Physical_input&, int, double);
+
+   static std::string block_head(const std::string& name, double scale);
+   static bool read_scale(const SLHAea::Line& line, double& scale);
+
    void read_modsel();
-   template <class Derived>
-   double read_matrix(const std::string&, Eigen::MatrixBase<Derived>&) const;
-   template <class Derived>
-   double read_vector(const std::string&, Eigen::MatrixBase<Derived>&) const;
+   double read_matrix(const std::string&, double*, int, int) const;
+   double read_matrix(const std::string&, std::complex<double>*, int, int) const;
+   double read_vector(const std::string&, double*, int) const;
+   double read_vector(const std::string&, std::complex<double>*, int) const;
+
+   void set_vector(const std::string&, const double*, const std::string&, double, int);
+   void set_vector(const std::string&, const std::complex<double>*, const std::string&, double, int);
+   void set_matrix(const std::string&, const double*, const std::string&, double, int, int);
+   void set_matrix(const std::string&, const std::complex<double>*, const std::string&, double, int, int);
+
+   void set_vector_imag(const std::string&, const double*, const std::string&, double, int);
+   void set_vector_imag(const std::string&, const std::complex<double>*, const std::string&, double, int);
+   void set_matrix_imag(const std::string&, const double*, const std::string&, double, int, int);
+   void set_matrix_imag(const std::string&, const std::complex<double>*, const std::string&, double, int, int);
 };
-
-template<class S>
-struct Set_spectrum {
-   S* slha_io;
-   Set_spectrum(S* slha_io_) : slha_io(slha_io_) {}
-   template<typename T>
-   void operator()(const T& model) const { slha_io->set_spectrum(model); }
-};
-
-template <class Scalar>
-Scalar SLHA_io::convert_to(const std::string& str)
-{
-   Scalar value;
-   try {
-      value = SLHAea::to<Scalar>(str);
-   }  catch (const boost::bad_lexical_cast& error) {
-      const std::string msg("cannot convert string \"" + str + "\" to "
-                            + typeid(Scalar).name());
-      throw ReadError(msg);
-   }
-   return value;
-}
-
-/**
- * Fills a matrix from a SLHA block
- *
- * @param block_name block name
- * @param matrix matrix to be filled
- *
- * @return scale (or 0 if no scale is defined)
- */
-template <class Derived>
-double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Derived>& matrix) const
-{
-   if (matrix.cols() <= 1) throw SetupError("Matrix has less than 2 columns");
-
-   auto block = data.find(data.cbegin(), data.cend(), block_name);
-
-   const int cols = matrix.cols(), rows = matrix.rows();
-   double scale = 0.;
-
-   while (block != data.cend()) {
-      for (const auto& line: *block) {
-         if (!line.is_data_line()) {
-            // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
-               scale = convert_to<double>(line[3]);
-            continue;
-         }
-
-         if (line.size() >= 3) {
-            const int i = convert_to<int>(line[0]) - 1;
-            const int k = convert_to<int>(line[1]) - 1;
-            if (0 <= i && i < rows && 0 <= k && k < cols) {
-               const double value = convert_to<double>(line[2]);
-               matrix(i,k) = value;
-            }
-         }
-      }
-
-      ++block;
-      block = data.find(block, data.cend(), block_name);
-   }
-
-   return scale;
-}
-
-/**
- * Fills a vector from a SLHA block
- *
- * @param block_name block name
- * @param vector vector to be filled
- *
- * @return scale (or 0 if no scale is defined)
- */
-template <class Derived>
-double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Derived>& vector) const
-{
-   if (vector.cols() != 1) throw SetupError("Vector has more than 1 column");
-
-   auto block = data.find(data.cbegin(), data.cend(), block_name);
-
-   const int rows = vector.rows();
-   double scale = 0.;
-
-   while (block != data.cend()) {
-      for (const auto& line: *block) {
-         if (!line.is_data_line()) {
-            // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
-               scale = convert_to<double>(line[3]);
-            continue;
-         }
-
-         if (line.size() >= 2) {
-            const int i = convert_to<int>(line[0]) - 1;
-            if (0 <= i && i < rows) {
-               const double value = convert_to<double>(line[1]);
-               vector(i,0) = value;
-            }
-         }
-      }
-
-      ++block;
-      block = data.find(block, data.cend(), block_name);
-   }
-
-   return scale;
-}
 
 /**
  * Fills a matrix or vector from a SLHA block
@@ -355,217 +186,47 @@ double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Der
  * @return scale (or 0 if no scale is defined)
  */
 template <class Derived>
-double SLHA_io::read_block(const std::string& block_name, Eigen::MatrixBase<Derived>& dense) const
+double SLHA_io::read_block(const std::string& block_name, Eigen::PlainObjectBase<Derived>& dense) const
 {
    return dense.cols() == 1
-      ? read_vector(block_name, dense)
-      : read_matrix(block_name, dense);
-}
-
-template<class Scalar, int NRows>
-void SLHA_io::set_block(const std::string& name,
-                        const Eigen::Matrix<std::complex<Scalar>, NRows, 1>& matrix,
-                        const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
-
-   for (int i = 1; i <= NRows; ++i) {
-      ss << boost::format(vector_formatter) % i % Re(matrix(i-1,0))
-         % ("Re(" + symbol + "(" + ToString(i) + "))");
-   }
-
-   set_block(ss);
-}
-
-template<class Scalar, int NRows, int NCols>
-void SLHA_io::set_block(const std::string& name,
-                        const Eigen::Matrix<std::complex<Scalar>, NRows, NCols>& matrix,
-                        const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
-
-   for (int i = 1; i <= NRows; ++i) {
-      for (int k = 1; k <= NCols; ++k) {
-         ss << boost::format(mixing_matrix_formatter) % i % k
-            % Re(matrix(i-1,k-1))
-            % ("Re(" + symbol + "(" + ToString(i) + ","
-               + ToString(k) + "))");
-      }
-   }
-
-   set_block(ss);
-}
-
-template<class Scalar, int NRows>
-void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::Matrix<std::complex<Scalar>, NRows, 1>& matrix,
-                             const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
-
-   for (int i = 1; i <= NRows; ++i) {
-      ss << boost::format(vector_formatter) % i % Im(matrix(i-1,0))
-         % ("Im(" + symbol + "(" + ToString(i) + "))");
-   }
-
-   set_block(ss);
-}
-
-template<class Scalar, int NRows, int NCols>
-void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::Matrix<std::complex<Scalar>, NRows, NCols>& matrix,
-                             const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
-
-   for (int i = 1; i <= NRows; ++i) {
-      for (int k = 1; k <= NCols; ++k) {
-         ss << boost::format(mixing_matrix_formatter) % i % k
-            % Im(matrix(i-1,k-1))
-            % ("Im(" + symbol + "(" + ToString(i) + ","
-               + ToString(k) + "))");
-      }
-   }
-
-   set_block(ss);
-}
-
-template <class Derived>
-void SLHA_io::set_block(const std::string& name,
-                        const Eigen::MatrixBase<Derived>& matrix,
-                        const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
-
-   const int rows = matrix.rows();
-   const int cols = matrix.cols();
-   for (int i = 1; i <= rows; ++i) {
-      if (cols == 1) {
-         ss << boost::format(vector_formatter) % i % matrix(i-1,0)
-            % (symbol + "(" + ToString(i) + ")");
-      } else {
-         for (int k = 1; k <= cols; ++k) {
-            ss << boost::format(mixing_matrix_formatter) % i % k % matrix(i-1,k-1)
-               % (symbol + "(" + ToString(i) + "," + ToString(k) + ")");
-         }
-      }
-   }
-
-   set_block(ss);
-}
-
-template <class Derived>
-void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::MatrixBase<Derived>& matrix,
-                             const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
-
-   const int rows = matrix.rows();
-   const int cols = matrix.cols();
-   for (int i = 1; i <= rows; ++i) {
-      if (cols == 1) {
-         ss << boost::format(vector_formatter) % i % Im(matrix(i-1,0))
-            % ("Im(" + symbol + "(" + ToString(i) + "))");
-      } else {
-         for (int k = 1; k <= cols; ++k) {
-            ss << boost::format(mixing_matrix_formatter) % i % k % Im(matrix(i-1,k-1))
-               % ("Im(" + symbol + "(" + ToString(i) + "," + ToString(k) + "))");
-         }
-      }
-   }
-
-   set_block(ss);
-}
-
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>&,
-                                                        Eigen::Matrix<double, N, N>&)
-{
+      ? read_vector(block_name, dense.data(), dense.rows())
+      : read_matrix(block_name, dense.data(), dense.rows(), dense.cols());
 }
 
 /**
- * Converts the given vector of masses and the corresponding (complex)
- * mixing matrix to SLHA convention: Matrix rows with non-zero
- * imaginary parts are multiplied by i and the corresponding mass
- * eigenvalue is multiplied by -1.  As a result the mixing matrix will
- * be real and the mass eigenvalues might be positive or negative.  It
- * is assumed that these mixings result from diagonalizing a symmetric
- * fermion mass matrix in the convention of Haber and Kane,
- * Phys. Rept. 117 (1985) 75-263.  This conversion makes sense only if
- * the original symmetric mass matrix is real-valued.
+ * Writes real part of a matrix or vector to SLHA object
  *
- * @param m vector of masses
- * @param z mixing matrix
+ * @param name bloch name
+ * @param dense matrix ox vector
+ * @param symbol symbol name
+ * @param scale renormalization scale
  */
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>& m,
-                                                        Eigen::Matrix<std::complex<double>, N, N>& z)
+template<class Derived>
+void SLHA_io::set_block(const std::string& name,
+                        const Eigen::MatrixBase<Derived>& dense,
+                        const std::string& symbol, double scale)
 {
-   for (int i = 0; i < N; i++) {
-      // check if i'th row contains non-zero imaginary parts
-      if (!is_zero(z.row(i).imag().cwiseAbs().maxCoeff())) {
-         z.row(i) *= std::complex<double>(0.0,1.0);
-         m(i) *= -1;
-#ifdef ENABLE_DEBUG
-         if (!is_zero(z.row(i).imag().cwiseAbs().maxCoeff())) {
-            WARNING("Row " << i << " of the following fermion mixing matrix"
-                    " contains entries which have non-zero real and imaginary"
-                    " parts:\nZ = " << z);
-         }
-#endif
-      }
-   }
-}
-
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>&,
-                                                      Eigen::Matrix<double, N, N>&)
-{
+   dense.cols() == 1
+      ? set_vector(name, dense.eval().data(), symbol, scale, dense.rows())
+      : set_matrix(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
 }
 
 /**
- * Converts the given vector of masses and the corresponding (real)
- * mixing matrix to Haber-Kane convention (Phys. Rept. 117 (1985)
- * 75-263): Masses are positive and mixing matrices can be complex.
+ * Writes imaginary part of a matrix or vector to SLHA object
  *
- * @param m vector of masses
- * @param z mixing matrix
+ * @param name bloch name
+ * @param dense matrix ox vector
+ * @param symbol symbol name
+ * @param scale renormalization scale
  */
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>& m,
-                                                      Eigen::Matrix<std::complex<double>, N, N>& z)
+template<class Derived>
+void SLHA_io::set_block_imag(const std::string& name,
+                             const Eigen::MatrixBase<Derived>& dense,
+                             const std::string& symbol, double scale)
 {
-   for (int i = 0; i < N; i++) {
-      if (m(i) < 0.) {
-         z.row(i) *= std::complex<double>(0.0,1.0);
-         m(i) *= -1;
-      }
-   }
+   dense.cols() == 1
+      ? set_vector_imag(name, dense.eval().data(), symbol, scale, dense.rows())
+      : set_matrix_imag(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
 }
 
 } // namespace flexiblesusy

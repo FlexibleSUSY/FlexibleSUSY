@@ -19,9 +19,6 @@
 #ifndef SFERMIONS_H
 #define SFERMIONS_H
 
-#include <array>
-#include <Eigen/Core>
-
 namespace flexiblesusy {
 namespace sfermions {
 
@@ -33,28 +30,28 @@ enum Sparticles {
    NUMBER_OF_MSSM_SPARTICLES
 };
 
-extern const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Isospin;
-extern const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Hypercharge_left;
-extern const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Hypercharge_right;
+extern const double Isospin[NUMBER_OF_MSSM_SPARTICLES];
+extern const double Hypercharge_left[NUMBER_OF_MSSM_SPARTICLES];
+extern const double Hypercharge_right[NUMBER_OF_MSSM_SPARTICLES];
 
 /**
  * parameters needed to fill 2 x 2 sfermion mass matrix
  */
 struct Mass_data {
-   double ml2;    ///< soft mass of left-handed sfermion
-   double mr2;    ///< soft mass of right-handed sfermion
-   double yf;     ///< Yukawa coupling
-   double vd, vu; ///< Higgs VEVs
-   double gY, g2; ///< gauge couplings (not GUT normalized)
-   double Tyf;    ///< trilinear coupling
-   double mu;     ///< Superpotential parameter
-   double T3;     ///< weak isospin
-   double Yl;     ///< Hypercharge of left-handed sfermion
-   double Yr;     ///< Hypercharge of right-handed sfermion
+   double ml2{};      ///< soft mass of left-handed sfermion
+   double mr2{};      ///< soft mass of right-handed sfermion
+   double yf{};       ///< Yukawa coupling
+   double vd{}, vu{}; ///< Higgs VEVs
+   double gY{}, g2{}; ///< gauge couplings (not GUT normalized)
+   double Tyf{};      ///< trilinear coupling
+   double mu{};       ///< Superpotential parameter
+   double T3{};       ///< weak isospin
+   double Yl{};       ///< Hypercharge of left-handed sfermion
+   double Yr{};       ///< Hypercharge of right-handed sfermion
 };
 
-double diagonalize_sfermions_2x2(const Mass_data&,
-                                 Eigen::Array<double,2,1>&);
+/// returns mixing angle and sets (squared) mass eigenvalues
+double diagonalize_sfermions_2x2(const Mass_data&, double&, double&);
 
 } // namespace sfermions
 } // namespace flexiblesusy

@@ -19,136 +19,91 @@
 #ifndef PROBLEMS_H
 #define PROBLEMS_H
 
-#include "logger.hpp"
-#include "config.h"
-
-#include <algorithm>
-#include <array>
-#include <iostream>
+#include <iosfwd>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace flexiblesusy {
+
+class Names;
 
 /**
  * @class Problems
  * @brief stores problem flags for the spectrum generator
  */
-template <int Number_of_particles, int Number_of_parameters>
 class Problems {
 public:
-   enum : int {
-      NUMBER_OF_PARTICLES = Number_of_particles,
-      NUMBER_OF_PARAMETERS = Number_of_parameters
-   };
+   Problems(const std::string& model_name_, const Names* particle_names_, const Names* parameter_names_);
 
-   Problems(const std::array<std::string, Number_of_particles>&,
-            const std::array<std::string, Number_of_parameters>&);
+   void flag_bad_mass(int particle, bool flag = true);
+   void flag_running_tachyon(int particle, bool flag = true);
+   void flag_pole_tachyon(int particle, bool flag = true);
+   void flag_thrown(const std::string& msg = "unknown");
+   void flag_no_ewsb();
+   void flag_no_ewsb_tree_level();
+   void flag_no_perturbative();
+   void flag_no_pole_mass_convergence(int particle);
+   void flag_non_perturbative_parameter(int parameter, double value, double scale, double threshold = 0.);
+   void flag_no_sinThetaW_convergence();
+   void flag_no_minimum(const std::string& msg, int status);
+   void flag_no_root(const std::string& msg, int status);
 
-   void flag_bad_mass(int particle, bool flag = true)
-      { bad_masses.at(particle) = flag; }
-   void flag_running_tachyon(int particle, bool flag = true) {
-      running_tachyons.at(particle) = flag;
-#if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
-      if (flag) WARNING("running " << particle_names[particle] << " tachyon");
-#endif
-   }
-   void flag_pole_tachyon(int particle, bool flag = true) {
-      pole_tachyons.at(particle) = flag;
-#if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
-      if (flag) WARNING("pole " << particle_names[particle] << " tachyon");
-#endif
-   }
-   void flag_thrown(const std::string& msg = "") {
-      thrown = true;
-      exception_msg = msg;
-   }
-   void flag_no_ewsb()
-      { failed_ewsb = true; }
-   void flag_no_convergence()
-      { failed_convergence = true; }
-   void flag_no_perturbative()
-      { non_perturbative = true; }
-   void flag_no_pole_mass_convergence(int particle)
-      { failed_pole_mass_convergence.at(particle) = true; }
-   void flag_non_perturbative_parameter(int parameter, double value, double scale, double threshold = 0.) {
-      if (parameter < -1 || parameter >= static_cast<int>(Number_of_parameters))
-         ERROR("Parameter index " << parameter << " out of range ["
-               << -1 <<  ", " << (Number_of_parameters - 1) << "]");
-      non_pert_pars[parameter] = NonPerturbativeValue(value, scale, threshold);
-   }
-   void flag_no_rho_convergence()
-      { failed_rho_convergence = true; }
+   void unflag_bad_mass(int particle);
+   void unflag_all_bad_masses();
+   void unflag_running_tachyon(int particle);
+   void unflag_pole_tachyon(int particle);
+   void unflag_all_tachyons();
+   void unflag_thrown();
+   void unflag_no_ewsb();
+   void unflag_no_ewsb_tree_level();
+   void unflag_no_perturbative();
+   void unflag_no_pole_mass_convergence(int particle);
+   void unflag_non_perturbative_parameter(int parameter);
+   void unflag_all_non_perturbative_parameters();
+   void unflag_no_sinThetaW_convergence();
+   void unflag_no_minimum(const std::string& msg);
+   void unflag_no_root(const std::string& msg);
 
-   void unflag_bad_mass(int particle)
-      { bad_masses.at(particle) = false; }
-   void unflag_running_tachyon(int particle)
-      { running_tachyons.at(particle) = false; }
-   void unflag_pole_tachyon(int particle)
-      { pole_tachyons.at(particle) = false; }
-   void unflag_all_tachyons() {
-      running_tachyons = std::array<bool, Number_of_particles>{};
-      pole_tachyons    = std::array<bool, Number_of_particles>{};
-   }
-   void unflag_thrown()
-      { thrown = false; exception_msg = ""; }
-   void unflag_no_ewsb()
-      { failed_ewsb = false; }
-   void unflag_no_convergence()
-      { failed_convergence = false; }
-   void unflag_no_perturbative()
-      { non_perturbative = false; }
-   void unflag_no_pole_mass_convergence(int particle)
-      { failed_pole_mass_convergence.at(particle) = false; }
-   void unflag_non_perturbative_parameter(int parameter)
-      { non_pert_pars.erase(parameter); }
-   void unflag_no_rho_convergence() { failed_rho_convergence = false; }
+   bool is_bad_mass(int particle) const;
+   bool is_running_tachyon(int particle) const;
+   bool is_pole_tachyon(int particle) const;
+   bool have_bad_mass() const;
+   bool have_running_tachyon() const;
+   bool have_pole_tachyon() const;
+   bool have_tachyon() const;
+   bool have_thrown() const;
+   bool have_non_perturbative_parameter() const;
+   bool have_failed_pole_mass_convergence() const;
+   bool no_ewsb() const;
+   bool no_ewsb_tree_level() const;
+   bool no_perturbative() const;
+   bool no_sinThetaW_convergence() const;
+   bool no_minimum() const;
+   bool no_root() const;
 
-   bool is_bad_mass(int particle) const
-      { return bad_masses.at(particle); }
-   bool is_running_tachyon(int particle) const
-      { return running_tachyons.at(particle); }
-   bool is_pole_tachyon(int particle) const
-      { return pole_tachyons.at(particle); }
-   bool have_bad_mass() const
-      { return std::any_of(bad_masses.cbegin(), bad_masses.cend(), [](bool x){ return x; }); }
-   bool have_running_tachyon() const {
-      return std::any_of(running_tachyons.cbegin(), running_tachyons.cend(), [](bool x){ return x; });
-   }
-   bool have_pole_tachyon() const {
-      return std::any_of(pole_tachyons.cbegin(), pole_tachyons.cend(), [](bool x){ return x; });
-   }
-   bool have_tachyon() const
-      { return have_running_tachyon() || have_pole_tachyon(); }
-   bool have_thrown() const
-      { return thrown; }
-   bool have_non_perturbative_parameter() const
-      { return !non_pert_pars.empty(); }
-   bool have_failed_pole_mass_convergence() const
-      { return std::any_of(failed_pole_mass_convergence.cbegin(), failed_pole_mass_convergence.cend(), [](bool x){ return x; }); }
-   bool no_ewsb() const            { return failed_ewsb; }
-   bool no_convergence() const     { return failed_convergence; }
-   bool no_perturbative() const    { return non_perturbative; }
-   bool no_rho_convergence() const { return failed_rho_convergence; }
-
+   void add(const Problems&);         ///< add problems from other class
    void clear();                      ///< clear all problems
    bool have_problem() const;         ///< problems which yield invalid spectrum
    bool have_warning() const;         ///< warnings
+   unsigned number_of_problems() const; ///< returns number of problems
+   unsigned number_of_warnings() const; ///< returns number of warnings
    std::vector<std::string> get_problem_strings() const;
    std::vector<std::string> get_warning_strings() const;
-   std::string get_problem_string() const { return concat(get_problem_strings(), '\n'); }
-   std::string get_warning_string() const { return concat(get_warning_strings(), '\n'); }
-   void print_problems(std::ostream& = std::cout) const;
-   void print_warnings(std::ostream& = std::cout) const;
+   std::string get_problem_string(const std::string& sep = "\n") const;
+   std::string get_warning_string(const std::string& sep = "\n") const;
+   std::string get_particle_name(int) const;  ///< returns particle name
+   std::string get_parameter_name(int) const; ///< returns parameter name
+   void print_problems() const;
+   void print_problems(std::ostream&) const;
+   void print_warnings() const;
+   void print_warnings(std::ostream&) const;
+   const std::string& get_model_name() const;
 
-   std::array<bool, Number_of_particles> get_bad_masses() const
-      { return bad_masses; }
-   std::array<bool, Number_of_particles> get_running_tachyons() const
-      { return running_tachyons; }
-   std::array<bool, Number_of_particles> get_pole_tachyons() const
-      { return pole_tachyons; }
-   std::array<bool, Number_of_particles> get_failed_pole_mass_convergence() const
-      { return failed_pole_mass_convergence; }
+   std::vector<int> get_bad_masses() const;
+   std::vector<int> get_running_tachyons() const;
+   std::vector<int> get_pole_tachyons() const;
+   std::vector<int> get_failed_pole_mass_convergence() const;
 
 private:
    struct NonPerturbativeValue {
@@ -158,182 +113,24 @@ private:
       double value{0.}, scale{0.}, threshold{0.};
    };
 
-   std::array<bool, Number_of_particles> bad_masses; ///< imprecise mass eigenvalues
-   std::array<bool, Number_of_particles> running_tachyons; ///< tachyonic particles (running mass)
-   std::array<bool, Number_of_particles> pole_tachyons; ///< tachyonic particles (pole mass)
-   std::array<bool, Number_of_particles> failed_pole_mass_convergence; ///< no convergence during pole mass calculation
+   std::string model_name;             ///< model name
+   const Names* particle_names;        ///< access to particle names
+   const Names* parameter_names;       ///< access to parameter names
+   std::vector<int> bad_masses;        ///< imprecise mass eigenvalues
+   std::vector<int> running_tachyons;  ///< tachyonic particles (running mass)
+   std::vector<int> pole_tachyons;     ///< tachyonic particles (pole mass)
+   std::vector<int> failed_pole_mass_convergence; ///< no convergence during pole mass calculation
    std::map<int, NonPerturbativeValue> non_pert_pars; ///< non-perturbative parmeters
+   std::map<std::string, int> failed_minimum; ///< no minimum found (message, status code)
+   std::map<std::string, int> failed_root; ///< no root found (message, status code)
    std::string exception_msg;          ///< exception message
-   std::array<std::string, Number_of_particles> particle_names; ///< particle names
-   std::array<std::string, Number_of_parameters> parameter_names; ///< parameter names
-   bool thrown;                        ///< excepton thrown
-   bool failed_ewsb;                   ///< no EWSB
-   bool failed_convergence;            ///< no convergence
-   bool non_perturbative;              ///< non-perturbative running
-   bool failed_rho_convergence;        ///< rho-parameter not converged
-
-   std::string get_parameter_name(int) const; ///< returns parameter name
-   static std::string concat(const std::vector<std::string>&, char); ///< concatenate strings
+   bool failed_ewsb{false};            ///< no EWSB
+   bool failed_ewsb_tree_level{false}; ///< no tree-level EWSB
+   bool non_perturbative{false};       ///< non-perturbative running
+   bool failed_sinThetaW_convergence{false}; ///< sinThetaW-parameter not converged
 };
 
-template <int Number_of_particles, int Number_of_parameters>
-Problems<Number_of_particles, Number_of_parameters>::Problems(
-   const std::array<std::string, Number_of_particles>& particle_names_,
-   const std::array<std::string, Number_of_parameters>& parameter_names_)
-   : bad_masses() // intializes all elements to zero (= false)
-   , running_tachyons()
-   , pole_tachyons()
-   , failed_pole_mass_convergence()
-   , non_pert_pars()
-   , exception_msg("")
-   , particle_names(particle_names_)
-   , parameter_names(parameter_names_)
-   , thrown(false)
-   , failed_ewsb(false)
-   , failed_convergence(false)
-   , non_perturbative(false)
-   , failed_rho_convergence(false)
-{
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-void Problems<Number_of_particles, Number_of_parameters>::clear()
-{
-   bad_masses = std::array<bool, Number_of_particles>{};
-   running_tachyons = std::array<bool, Number_of_particles>{};
-   pole_tachyons = std::array<bool, Number_of_particles>{};
-   failed_pole_mass_convergence = std::array<bool, Number_of_particles>{};
-   non_pert_pars.clear();
-   exception_msg = "";
-   failed_ewsb = false;
-   failed_convergence = false;
-   non_perturbative = false;
-   failed_rho_convergence = false;
-   thrown = false;
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-bool Problems<Number_of_particles, Number_of_parameters>::have_problem() const
-{
-   return have_tachyon() || failed_ewsb || failed_convergence
-      || non_perturbative || failed_rho_convergence || thrown
-      || have_failed_pole_mass_convergence()
-      || have_non_perturbative_parameter();
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-bool Problems<Number_of_particles, Number_of_parameters>::have_warning() const
-{
-   return have_bad_mass();
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-std::string Problems<Number_of_particles, Number_of_parameters>::get_parameter_name(int idx) const
-{
-   if (idx == -1)
-      return "Q";
-
-   return parameter_names.at(idx);
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-std::vector<std::string> Problems<Number_of_particles, Number_of_parameters>::get_problem_strings() const
-{
-   std::vector<std::string> strings;
-
-   for (int i = 0; i < Number_of_particles; ++i) {
-      if (running_tachyons[i])
-         strings.push_back("running tachyon " + particle_names[i]);
-   }
-   for (int i = 0; i < Number_of_particles; ++i) {
-      if (pole_tachyons[i])
-         strings.push_back("pole tachyon " + particle_names[i]);
-   }
-   if (failed_ewsb)
-      strings.push_back("no ewsb");
-   if (failed_convergence)
-      strings.push_back("no convergence");
-   if (non_perturbative)
-      strings.push_back("non-perturbative");
-   if (failed_rho_convergence)
-      strings.push_back("no rho convergence");
-   if (thrown)
-      strings.push_back("exception thrown(" + exception_msg + ")");
-   for (int i = 0; i < Number_of_particles; ++i) {
-      if (failed_pole_mass_convergence[i])
-         strings.push_back("no M" + particle_names[i] + " pole convergence");
-   }
-
-   for (const auto& par: non_pert_pars) {
-      const std::string par_name = get_parameter_name(par.first);
-      std::string str("non-perturbative " + par_name);
-      if (par.second.threshold > 0) {
-         str += " [|" + par_name + "|(" +
-                std::to_string(par.second.scale) + ") = " +
-                std::to_string(par.second.value) +
-                " > " + std::to_string(par.second.threshold) + "]";
-      } else {
-         str += " [" + par_name + "(" +
-                std::to_string(par.second.scale) +
-                ") = " + std::to_string(par.second.value) + "]";
-      }
-      strings.push_back(str);
-   }
-
-   return strings;
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-std::vector<std::string> Problems<Number_of_particles, Number_of_parameters>::get_warning_strings() const
-{
-   std::vector<std::string> strings;
-
-   for (int i = 0; i < Number_of_particles; ++i) {
-      if (bad_masses[i])
-         strings.push_back("Warning: imprecise M" + particle_names[i]);
-   }
-
-   return strings;
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-void Problems<Number_of_particles, Number_of_parameters>::print_problems(std::ostream& ostr) const
-{
-   if (!have_problem())
-      return;
-
-   ostr << get_problem_string();
-}
-
-
-template <int Number_of_particles, int Number_of_parameters>
-void Problems<Number_of_particles, Number_of_parameters>::print_warnings(std::ostream& ostr) const
-{
-   if (!have_warning())
-      return;
-
-   ostr << get_warning_string();
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-std::string Problems<Number_of_particles, Number_of_parameters>::concat(
-   const std::vector<std::string>& strings, char separator)
-{
-   std::string result;
-
-   for (const auto& s: strings)
-      result += s + separator;
-
-   return result;
-}
-
-template <int Number_of_particles, int Number_of_parameters>
-std::ostream& operator<<(std::ostream& ostr, const Problems<Number_of_particles, Number_of_parameters>& problems)
-{
-   problems.print_problems(ostr);
-   problems.print_warnings(ostr);
-   return ostr;
-}
+std::ostream& operator<<(std::ostream&, const Problems&);
 
 } // namespace flexiblesusy
 

@@ -69,7 +69,7 @@ void RGFlow<Lattice>::add_model
 (Lattice_model *model, InterTheoryConstraint *matching,
  const vector<SingleSiteConstraint*>& constraints)
 {
-    efts.push_back(EFTspec(model, constraints, matching, this));
+    efts.emplace_back(model, constraints, matching, this);
 }
 
 void RGFlow<Lattice>::add_model
@@ -92,12 +92,12 @@ void RGFlow<Lattice>::add_model
     reverse_copy(ds.begin(), ds.end(), rs.begin());
 
     vector<SingleSiteConstraint*> combined;
-    ci_t pu = us.begin();
+    auto pu = us.begin();
     ci_t pr = rs.begin();
 
     while (pu != us.cend() || pr != rs.cend()) {
-	ci_t pun = find(pu, us.cend(), pr != rs.cend() ? *pr : nullptr);
-	ci_t prn = find(pr, rs.cend(), pu != us.cend() ? *pu : nullptr);
+	auto pun = find(pu, us.cend(), pr != rs.cend() ? *pr : nullptr);
+	auto prn = find(pr, rs.cend(), pu != us.cend() ? *pu : nullptr);
 
 	if (pun == pu && prn == pr) {
 	    assert(*pu == *pr);
@@ -195,12 +195,12 @@ void RGFlow<Lattice>::init_lattice()
     for (size_t T = 0; T < efts.size(); T++) {
 	for (size_t m = 0; m < efts[T].height-1; m++) {
 	    teqidx.push_back(constraints.size());
-	    Uniform_dt *teq = new Uniform_dt;
+	    auto *teq = new Uniform_dt;
 	    teq->init(this, T, m, 2);
 	    constraints.push_back(teq);
 
 	    rgeidx.push_back(constraints.size());
-	    Lattice_RGE *rge = new Lattice_RGE;
+	    auto *rge = new Lattice_RGE;
 	    rge->init(this, T, m, 2);
 	    constraints.push_back(rge);
 	}
@@ -399,7 +399,7 @@ void RGFlow<Lattice>::enable_Runge_Kutta()
 	    constraints[rgeidx[i]]->free_rows();
 	    constraints[rgeidx[i]]->deactivate();
 	    delete constraints[rgeidx[i]];
-	    Lattice_RKRGE *rkrge = new Lattice_RKRGE;
+	    auto *rkrge = new Lattice_RKRGE;
 	    rkrge->init(this, T, m, 2);
 	    constraints[rgeidx[i]] = rkrge;
 	}
@@ -419,7 +419,7 @@ void RGFlow<Lattice>::disable_Runge_Kutta()
 	    constraints[rgeidx[i]]->free_rows();
 	    constraints[rgeidx[i]]->deactivate();
 	    delete constraints[rgeidx[i]];
-	    Lattice_RGE *rge = new Lattice_RGE;
+	    auto *rge = new Lattice_RGE;
 	    rge->init(this, T, m, 2);
 	    constraints[rgeidx[i]] = rge;
 	}
@@ -580,8 +580,8 @@ Real RGFlow<Lattice>::maxdiff(const RVec& y0, const RVec& y1)
 {
     assert(y0.size() == y1.size());
     Real max = 0;
-    RVec::const_iterator p = y0.begin();
-    RVec::const_iterator q = y1.begin();
+    auto p = y0.begin();
+    auto q = y1.begin();
     while (p < y0.end()) {
 	Real diff = fabs(*p++ - *q++);
 	if (diff > max) max = diff;
@@ -691,4 +691,4 @@ RGFlow<Lattice>::Inner_status RGFlow<Lattice>::iterate()
 	return ENDLESS;
 }
 
-}
+} // namespace flexiblesusy

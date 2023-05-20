@@ -30,16 +30,16 @@ HighScale = g1 == g2;
 HighScaleFirstGuess = 2.0 10^16;
 
 HighScaleInput = {
-   {T[Ye], MatMul[Tp[ZER], Tp[LHInput[T[Ye]]], ZEL]},
-   {T[Yd], MatMul[Tp[ZDR], Tp[LHInput[T[Yd]]], ZDL]},
-   {T[Yu], MatMul[Tp[ZUR], Tp[LHInput[T[Yu]]], ZUL]},
+   {T[Ye], MatMul[Tp[ZER], LHInput[T[Ye]], ZEL]},
+   {T[Yd], MatMul[Tp[ZDR], LHInput[T[Yd]], ZDL]},
+   {T[Yu], MatMul[Tp[ZUR], LHInput[T[Yu]], ZUL]},
    {mHd2, mHd2IN},
    {mHu2, mHu2IN},
-   {mq2, MatMul[Tp[ZDR], LHInput[mq2], ZDR]},
-   {ml2, MatMul[Tp[ZER], LHInput[ml2], ZER]},
-   {md2, MatMul[Tp[ZDL], Tp[LHInput[md2]], ZDL]},
-   {mu2, MatMul[Tp[ZUL], Tp[LHInput[mu2]], ZUL]},
-   {me2, MatMul[Tp[ZEL], Tp[LHInput[me2]], ZEL]},
+   {mq2, MatMul[Adj[ZDL], LHInput[mq2], ZDL]},
+   {ml2, MatMul[Adj[ZEL], LHInput[ml2], ZEL]},
+   {md2, MatMul[Tp[ZDR], LHInput[md2], Conj[ZDR]]},
+   {mu2, MatMul[Tp[ZUR], LHInput[mu2], Conj[ZUR]]},
+   {me2, MatMul[Tp[ZER], LHInput[me2], Conj[ZER]]},
    {MassB, LHInput[MassB]},
    {MassWB,LHInput[MassWB]},
    {MassG, LHInput[MassG]}
@@ -50,7 +50,7 @@ LowScale = LowEnergyConstant[MZ];
 LowScaleFirstGuess = LowEnergyConstant[MZ];
 
 LowScaleInput = {
-   {Yu, Sqrt[2] MatMul[Tp[CKM], upQuarksDRbar] / vu},
+   {Yu, Sqrt[2] MatMul[upQuarksDRbar, CKM] / vu},
    {Yd, Sqrt[2] downQuarksDRbar / vd},
    {Ye, Sqrt[2] downLeptonsDRbar / vd},
    {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
@@ -89,5 +89,16 @@ ExtraSLHAOutputBlocks = {
             {4, M[Ah[2]]^2},
             {101, B[\[Mu]]},
             {102, vd},
-            {103, vu} } }
+            {103, vu} } },
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+         {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+         {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+         {25, FlexibleSUSYObservable`EDM[Fe[3]]},
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
+         {27, FlexibleSUSYObservable`bsgamma}
+      }
+   }
 };
+
+FSCalculateDecays = True;

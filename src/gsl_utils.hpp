@@ -19,43 +19,48 @@
 #ifndef GSL_UTILS_H
 #define GSL_UTILS_H
 
+#include "error.hpp"
+#include "gsl_vector.hpp"
+
 #include <gsl/gsl_vector.h>
 #include <Eigen/Core>
-#include <cassert>
 
 namespace flexiblesusy {
 
-class GSL_vector;
-
-/// Returns true if GSL_vector contains only finite elements, false otherwise
-bool is_finite(const GSL_vector&);
 /// Returns true if GSL vector contains only finite elements, false otherwise
 bool is_finite(const gsl_vector*);
-Eigen::ArrayXd to_eigen_array(const gsl_vector*);
-Eigen::ArrayXd to_eigen_array(const GSL_vector&);
-Eigen::VectorXd to_eigen_vector(const gsl_vector*);
-Eigen::VectorXd to_eigen_vector(const GSL_vector&);
-GSL_vector to_GSL_vector(const Eigen::VectorXd&);
-GSL_vector to_GSL_vector(const gsl_vector*);
 
-/**
- * Copies values from an Eigen array/matrix to a GSL vector.
- *
- * @param src Eigen array/matrix
- * @param dst GSL vector
- */
 template <typename Derived>
-void copy(const Eigen::DenseBase<Derived>& src, gsl_vector* dst)
+GSL_vector to_GSL_vector(const Eigen::DenseBase<Derived>& v)
 {
-   const std::size_t dim = src.rows();
+   using Index_t = typename Derived::Index;
+   GSL_vector v2(v.rows());
 
-   assert(dst);
-   assert(dim == dst->size);
+   for (Index_t i = 0; i < v.rows(); i++) {
+      v2[i] = v(i);
+   }
 
-   for (std::size_t i = 0; i < dim; i++)
-      gsl_vector_set(dst, i, src(i));
+   return v2;
 }
 
+template <int Size>
+Eigen::Matrix<double,Size,1> to_eigen_vector(const gsl_vector* v)
+{
+   if (Size != v->size) {
+      throw OutOfBoundsError("Size of GSL_vector does not match size of Eigen vector.");
+   }
+
+   using Result_t = Eigen::Matrix<double,Size,1>;
+   using Index_t = typename Result_t::Index;
+   Result_t result;
+
+   for (Index_t i = 0; i < Size; i++) {
+      result(i) = gsl_vector_get(v, i);
+   }
+
+   return result;
 }
+
+} // namespace flexiblesusy
 
 #endif

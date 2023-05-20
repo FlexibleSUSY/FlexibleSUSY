@@ -2,7 +2,7 @@
 #ifndef TEST_NMSSMCPV_H
 #define TEST_NMSSMCPV_H
 
-#include "test.h"
+#include "test.hpp"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
 #include "NMSSMCPV_two_scale_model.hpp"

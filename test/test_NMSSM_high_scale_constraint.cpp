@@ -7,7 +7,7 @@
 #define private public
 #define protected public
 
-#include "test.h"
+#include "test_legacy.hpp"
 #include "test_NMSSM.hpp"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( test_mx_calculation )
    NMSSM_high_scale_constraint<Two_scale> NMSSM_sugra_constraint(&m);
    SoftsusyNMSSM_sugra_constraint snmssm_sugra_constraint(pp);
 
-   snmssm_sugra_constraint.set_model((Two_scale_model*)&s);
+   snmssm_sugra_constraint.set_model((Model*)&s);
 
    NMSSM_sugra_constraint.update_scale();
    snmssm_sugra_constraint.update_scale();

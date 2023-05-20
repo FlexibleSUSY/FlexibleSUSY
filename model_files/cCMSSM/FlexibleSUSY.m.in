@@ -1,3 +1,6 @@
+(* ************* TESTING MODEL ************* *)
+(* Warning: Do not use for physical studies! *)
+(* ***************************************** *)
 
 FSModelName = "@CLASSNAME@";
 FSEigenstates = SARAH`EWSB;
@@ -76,11 +79,6 @@ InitialGuessAtHighScale = {
 
 UseHiggs2LoopMSSM = True;
 EffectiveMu = \[Mu];
-
-(* low-energy input to determine weak mixing angle
- * Possible values: FSFermiConstant (default), FSMassW
- *)
-FSWeakMixingAngleOptions = FSSetOption[FSWeakMixingAngleOptions, FSWeakMixingAngleInput -> FSFermiConstant];
 
 PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
 
@@ -161,5 +159,10 @@ ExtraSLHAOutputBlocks = {
             {46, SignedAbsSqrt[Im[mu2[3,3]]]},
             {47, SignedAbsSqrt[Im[md2[1,1]]]},
             {48, SignedAbsSqrt[Im[md2[2,2]]]},
-            {49, SignedAbsSqrt[Im[md2[3,3]]]} } }
+            {49, SignedAbsSqrt[Im[md2[3,3]]]} } },
+   {FlexibleSUSYLowEnergy,
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]}}
+   }
 };
+
+FSCalculateDecays = False;

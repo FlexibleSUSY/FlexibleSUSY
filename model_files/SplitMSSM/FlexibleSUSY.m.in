@@ -19,12 +19,27 @@ EXTPAR = {
     {100, LambdaLoopOrder}
 };
 
-FSExtraInputParameters = {
-    {msq2, MSQ2IN, {3,3}}, (* 3x3 matrix *)
-    {msu2, MSU2IN, {3,3}}, (* 3x3 matrix *)
-    {msd2, MSD2IN, {3,3}}, (* 3x3 matrix *)
-    {msl2, MSL2IN, {3,3}}, (* 3x3 matrix *)
-    {mse2, MSE2IN, {3,3}}  (* 3x3 matrix *)
+FSAuxiliaryParameterInfo = {
+    {msq2, { LesHouches -> MSQ2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msu2, { LesHouches -> MSU2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msd2, { LesHouches -> MSD2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msl2, { LesHouches -> MSL2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {mse2, { LesHouches -> MSE2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } }
 };
 
 EWSBOutputParameters = { mu2 };
@@ -84,14 +99,6 @@ DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
-
-SMParticles = {
-    Electron, TopQuark, BottomQuark,
-    VectorP, VectorZ, VectorG, VectorW, Neutrino,
-    gP, gG, gZ, gWm, gWmC,
-    Hp, Ah, (* goldstones *)
-    hh (* Higgs *)
-};
 
 OnlyLowEnergyFlexibleSUSY = False;
 UseHiggs2LoopSM = True;
@@ -264,3 +271,5 @@ g2d1L = 1/(4 Pi)^2 g2 Cos[ArcTan[TanBeta]] (
      + (g2^2/6) Log[msl2[2,2]/SCALE^2]
      + (g2^2/6) Log[msl2[3,3]/SCALE^2]
 );
+
+FSCalculateDecays = True;

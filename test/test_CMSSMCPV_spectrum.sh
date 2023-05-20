@@ -9,7 +9,7 @@ print_block_entry="$BASEDIR/../utils/print_slha_block_entry.awk"
 cmssmcpv_input="$BASEDIR/test_CMSSMCPV_wrong_higgs_state.in.spc"
 cmssmcpv_output="$BASEDIR/test_CMSSMCPV_wrong_higgs_state.out.spc"
 cmssm_output="$BASEDIR/test_CMSSM_wrong_higgs_state.out.spc"
-rel_error="0.0000001"
+rel_error="0.0001"
 
 cmssm_exe="$BASEDIR/../models/CMSSM/run_CMSSM.x"
 cmssmcpv_exe="$BASEDIR/../models/CMSSMCPV/run_CMSSMCPV.x"

@@ -30,17 +30,23 @@
 
 namespace softsusy {
 
-double a0(double m, double q);
-double b0(double p, double m1, double m2, double q);
-double b1(double p, double m1, double m2, double q);
-double b22(double p,  double m1, double m2, double q);
-double c0(double m1, double m2, double m3);
-double d27(double m1, double m2, double m3, double m4);
-double d0(double m1, double m2, double m3, double m4);
-double ffn(double p, double m1, double m2, double q);
-double gfn(double p, double m1, double m2, double q);
-double hfn(double p, double m1, double m2, double q);
-double b22bar(double p, double m1, double m2, double q);
+double a0(double m, double q) noexcept;
+double b0(double p, double m1, double m2, double q) noexcept;
+double b1(double p, double m1, double m2, double q) noexcept;
+double b22(double p,  double m1, double m2, double q) noexcept;
+double c0(double m1, double m2, double m3) noexcept;
+double c00(double m1, double m2, double m3, double q) noexcept;
+double d27(double m1, double m2, double m3, double m4) noexcept;
+double d0(double m1, double m2, double m3, double m4) noexcept;
+double ffn(double p, double m1, double m2, double q) noexcept;
+double gfn(double p, double m1, double m2, double q) noexcept;
+double hfn(double p, double m1, double m2, double q) noexcept;
+double b22bar(double p, double m1, double m2, double q) noexcept;
+
+double d1_b0(double p2, double m2a, double m2b) noexcept;
+
+// Re[A0(x, q)] with squared arguments
+double rea0(double x, double q) noexcept;
 
 } // namespace softsusy
 

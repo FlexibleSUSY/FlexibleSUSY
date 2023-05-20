@@ -1,2 +1,0 @@
-\newcommand{\FlexibleSUSYVersion}{@FLEXIBLESUSY_VERSION@\xspace}
-\newcommand{\FlexibleSUSY}{@PKGNAME@\xspace}

@@ -1,3 +1,25 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
 Needs["TestSuite`", "TestSuite.m"];
 Needs["EWSB`", "EWSB.m"];
 Needs["Parameters`", "Parameters.m"];
@@ -256,7 +278,7 @@ TestEquality[Sort[solution],
 Print["testing MSSM/CPV EWSB for mHu2, mHd2"];
 
 solution = EWSB`Private`TimeConstrainedSolve[
-    Parameters`FilterOutIndependentEqs[
+    EWSB`FilterOutIndependentEqs[
         {mHd2*vd + x - (E^(I*eta)*vu*B[Mu])/2 - (vu*Susyno`LieGroups`conj[B[Mu]])/(2*E^(I*eta)) == 0,
          mHu2*vu - y - (E^(I*eta)*vd*B[Mu])/2 - (vd*Susyno`LieGroups`conj[B[Mu]])/(2*E^(I*eta)) == 0,
          -I/2*E^(I*eta)*vd*B[Mu] + (I/2*vd*Susyno`LieGroups`conj[B[Mu]])/E^(I*eta) == 0},
@@ -332,7 +354,7 @@ nmssmcpvEWSBOutputParameters = { mHd2, mHu2, ms2, Im[T[\[Kappa]]], Im[T[\[Lambda
 
 Parameters`AddRealParameter[{mHd2, mHu2, ms2}];
 
-nmssmcpvEWSBEqs = Parameters`FilterOutLinearDependentEqs[nmssmcpvEWSBEqs, nmssmcpvEWSBOutputParameters];
+nmssmcpvEWSBEqs = EWSB`FilterOutLinearDependentEqs[nmssmcpvEWSBEqs, nmssmcpvEWSBOutputParameters];
 solution = EWSB`Private`FindSolution[nmssmcpvEWSBEqs, nmssmcpvEWSBOutputParameters];
 
 TestNonEquality[solution, {}];
@@ -342,20 +364,22 @@ TestEquality[Length[solution[[1]]], 5];
 
 Print["testing EWSB substitutions ..."];
 
+Parameters`SetModelParameters[{\[Mu], B[\[Mu]], mHd2, mHu2}];
+
 subEwsbEqs = {
     \[Mu]^2 + x^2 + x y + z + 5,
-    B[\[Mu]]  - x^2 + x y + z + 5
+    B[\[Mu]] - x^2 + x y + z + 5
 };
 
 ewsbSubs = {
-   {\[Mu], Sign[\[Mu]] Sqrt[MuSqr]}
+   Rule[\[Mu], Sign[\[Mu]] Sqrt[MuSqr]]
 };
 
 subEwsbOutputParameters = { MuSqr, B[\[Mu]] };
 
 Parameters`SetRealParameters[subEwsbOutputParameters];
 
-{subSolution, subFreePhases} = EWSB`FindSolutionAndFreePhases[subEwsbEqs, subEwsbOutputParameters, ewsbSubs];
+{subSolution, subFreePhases} = EWSB`FindSolutionAndFreePhases[subEwsbEqs, subEwsbOutputParameters, "", ewsbSubs];
 
 TestEquality[subFreePhases, {}];
 TestEquality[Sort[Rule[#[[1]],Expand[#[[2]]]]& /@ subSolution],
@@ -363,13 +387,13 @@ TestEquality[Sort[Rule[#[[1]],Expand[#[[2]]]]& /@ subSolution],
                                                    B[\[Mu]] -> x^2 - x y - z - 5}]];
 
 ewsbSubs = {
-   {\[Mu], Sign[\[Mu]] Sqrt[MuSqr]},
-   {B[\[Mu]], BMu0}
+   Rule[\[Mu], Sign[\[Mu]] Sqrt[MuSqr]],
+   Rule[B[\[Mu]], BMu0]
 };
 
 subEwsbOutputParameters = { MuSqr, BMu0 };
 
-{subSolution, subFreePhases} = EWSB`FindSolutionAndFreePhases[subEwsbEqs, subEwsbOutputParameters, ewsbSubs];
+{subSolution, subFreePhases} = EWSB`FindSolutionAndFreePhases[subEwsbEqs, subEwsbOutputParameters, "", ewsbSubs];
 
 TestEquality[subFreePhases, {}];
 TestEquality[Sort[Rule[#[[1]],Expand[#[[2]]]]& /@ subSolution],
@@ -384,15 +408,15 @@ subEwsbEqs = {
 };
 
 ewsbSubs = {
-   {mHd2, m0^2 + m12^2},
-   {mHu2, m0^2 + AzeroSqr}
+   Rule[mHd2, m0^2 + m12^2],
+   Rule[mHu2, m0^2 + AzeroSqr]
 };
 
 subEwsbOutputParameters = {m12, AzeroSqr};
 
 Parameters`SetRealParameters[subEwsbOutputParameters];
 
-{subSolution, subFreePhases} = EWSB`FindSolutionAndFreePhases[subEwsbEqs, subEwsbOutputParameters, ewsbSubs];
+{subSolution, subFreePhases} = EWSB`FindSolutionAndFreePhases[subEwsbEqs, subEwsbOutputParameters, "", ewsbSubs];
 
 TestEquality[subFreePhases, {Sign[m12]}];
 TestEquality[Sort[Rule[#[[1]],Expand[#[[2]]]]& /@ subSolution],

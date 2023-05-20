@@ -1,0 +1,222 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = SM;
+
+(* input parameters *)
+
+MINPAR = {};
+
+EXTPAR = {
+    {0, MSUSY},
+    {1, M1Input},
+    {2, M2Input},
+    {3, M3Input},
+    {4, MuInput},
+    {5, mAInput},
+    {6, MEWSB},
+    {7, AtInput},
+    {8, AbInput},
+    {9, AtauInput},
+    {25, TanBeta},
+    {100, LambdaLoopOrder},
+    {101, TwoLoopAtAs},
+    {102, TwoLoopAbAs},
+    {103, TwoLoopAtAb},
+    {104, TwoLoopAtauAtau},
+    {105, TwoLoopAtAt},
+    {200, DeltaEFT},
+    {201, DeltaYt},
+    {202, DeltaOS},
+    {203, Qmatch}
+};
+
+FSAuxiliaryParameterInfo = {
+    {msq2, { LesHouches -> MSQ2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msu2, { LesHouches -> MSU2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msd2, { LesHouches -> MSD2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msl2, { LesHouches -> MSL2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {mse2, { LesHouches -> MSE2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } }
+};
+
+EWSBOutputParameters = { mu2 };
+
+Qmat = With[
+    { mt = Yu[3,3] v Sin[ArcTan[TanBeta]] / Sqrt[2],
+      mQ2 = msq2[3,3],
+      mU2 = msu2[3,3],
+      Xt = AtInput - MuInput/TanBeta
+    },
+    Simplify @
+    Sqrt[Sqrt[Times @@ Eigenvalues[{{mt^2 + mQ2, mt Xt}, {mt Xt, mt^2 + mU2}}]]]
+];
+
+QmatGuess = With[
+    { mt = 160,
+      mQ2 = msq2[3,3],
+      mU2 = msu2[3,3],
+      Xt = AtInput - MuInput/TanBeta
+    },
+    Simplify @
+    Sqrt[Sqrt[Times @@ Eigenvalues[{{mt^2 + mQ2, mt Xt}, {mt Xt, mt^2 + mU2}}]]]
+];
+
+EvalIf[expr_] := Block[{If}, expr];
+
+(* The high scale where we match to the MSSM *)
+HighScale = EvalIf @ If[MSUSY != 0, MSUSY, Qmat];
+
+HighScaleFirstGuess = EvalIf @ If[MSUSY != 0, MSUSY, QmatGuess];
+
+HighScaleInput = {
+    {\[Lambda], lambdaTree
+                + UnitStep[LambdaLoopOrder-1] (
+                    + lambda1LReg + lambda1LPhi
+                    + lambda1LChi1 + lambda1LChi2
+                    + lambda1Lbottom + lambda1Ltau)
+                + UnitStep[LambdaLoopOrder-2] (
+                    If[TwoLoopAtAs >= 1, (
+                        Which[IsCloseRel[SCALE^2,msq2[3,3],0.01] &&
+                              IsCloseRel[SCALE^2,msu2[3,3],0.01] &&
+                              IsCloseRel[SCALE,M3Input,0.01],
+                              lambda2LPhiHSSAlphaTAlphaSDegenerate,
+                              IsCloseRel[M3Input^2,msq2[3,3],0.01] &&
+                              IsCloseRel[M3Input^2,msu2[3,3],0.01],
+                              lambda2LPhiHSSAlphaTAlphaSMQMUM3Degenerate,
+                              IsCloseRel[M3Input^2,msq2[3,3],0.01],
+                              lambda2LPhiHSSAlphaTAlphaSMQM3Degenerate,
+                              IsCloseRel[M3Input^2,msu2[3,3],0.01],
+                              lambda2LPhiHSSAlphaTAlphaSMUM3Degenerate,
+                              Not[IsClose[M3Input^2, 0]] &&
+                              IsCloseRel[msu2[3,3]/M3Input^2,msq2[3,3]/M3Input^2,0.01],
+                              lambda2LPhiHSSAlphaTAlphaSX1X2Degenerate,
+                              True,
+                              lambda2LPhiHSSAlphaTAlphaSFull
+                             ]
+                      ), 0]
+                    + If[TwoLoopAtAt >= 1, (
+                        Which[IsCloseRel[msu2[3,3],msq2[3,3],0.01] &&
+                              IsCloseRel[mAInput^2,msu2[3,3],0.01],
+                              lambda2LHSSAlphaT2,
+                              True,
+                              lambda2LHSSAlphaT2Generic
+                             ]
+                      ), 0]
+                    + If[TwoLoopAbAs >= 1, (
+                        Which[IsCloseRel[msu2[3,3],msq2[3,3],0.01] &&
+                              IsCloseRel[Sqrt[msu2[3,3]],M3Input,0.01],
+                              lambda2LPhiHSSAlphaBAlphaSDegenerate,
+                              IsCloseRel[msq2[3,3],msu2[3,3],0.01],
+                              lambda2LPhiHSSAlphaBAlphaSDegenerateSquark,
+                              True,
+                              lambda2LPhiHSSAlphaBAlphaSFull
+                             ]
+                      ), 0]
+                    + If[TwoLoopAtAb >= 1, (
+                        Which[IsCloseRel[SCALE^2,msq2[3,3],0.01] &&
+                              IsCloseRel[SCALE^2,msu2[3,3],0.01] &&
+                              IsCloseRel[SCALE^2,msd2[3,3],0.01] &&
+                              IsCloseRel[SCALE,mAInput,0.01] &&
+                              IsCloseRel[SCALE,Abs[MuInput],0.01],
+                              lambda2LHSSAlphaTAlphaBAllDegenerate,
+                              True,
+                              lambda2LHSSAlphaTAlphaBGeneric
+                             ]
+                      ), 0]
+                    + If[TwoLoopAtauAtau >= 1, lambda2LHSSTau, 0]
+                    + If[DeltaOS >= 1,
+                         If[TwoLoopAtAs >= 1, lambda2LDRtoOSAtAs, 0] +
+                         If[TwoLoopAtAt >= 1, lambda2LDRtoOSAtAt, 0],
+                         0]
+                )
+                (* contributions for uncertainty estimation *)
+                + If[Abs[Qmatch] > 1,
+                     Which[LambdaLoopOrder < 1, deltaLambdaQmatch1L,
+                           LambdaLoopOrder < 2, deltaLambdaQmatch2L,
+                           LambdaLoopOrder < 3, deltaLambdaQmatch3L,
+                           True, 0
+                          ],
+                     0
+                    ]
+                + If[LambdaLoopOrder < 2 && DeltaYt >= 1,
+                     (* 2L counter term when expressing lambda^{1L}(yt^MSSM) *)
+                     lambda2LAtAsYtShift + lambda2LAtAtYtShift,
+                     0]
+                + If[LambdaLoopOrder < 3 && DeltaYt >= 1,
+                     (* 3L counter term when expressing lambda^{1L+2L}(yt^MSSM, g3^MSSM) *)
+                     Which[IsCloseRel[SCALE^2,msq2[3,3],0.01] &&
+                           IsCloseRel[SCALE^2,msu2[3,3],0.01] &&
+                           IsCloseRel[SCALE,Abs[M3Input],0.01],
+                           lambda3LAtAsAsYtShiftDeg,
+                           True,
+                           lambda3LAtAsAsYtShift
+                          ],
+                     0]
+    }
+};
+
+(* The scale where we impose the EWSB conditions
+   and calculate the spectrum *)
+SUSYScale = MEWSB;
+
+SUSYScaleFirstGuess = MEWSB;
+
+SUSYScaleInput = {};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtLowScale = {
+   {v, LowEnergyConstant[vev]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+OnlyLowEnergyFlexibleSUSY = False;
+UseHiggs2LoopSM = True;
+UseHiggs3LoopSM = True;
+UseHiggs4LoopSM = True;
+UseSM3LoopRGEs = True;
+UseSM4LoopRGEs = True;
+UseSM5LoopRGEs = True;
+UseYukawa3LoopQCD = True;
+UseSMAlphaS3Loop = True;
+
+ExtraSLHAOutputBlocks = {
+};
+
+SARAH`ParameterDefinitions = Append[
+    Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
+    {SARAH`\[Lambda], { Description -> "SM Higgs Selfcouplings" } }
+];
+
+Get[FileNameJoin[{Directory[], "meta", "SM", "HSSUSY_corrections.m"}]];
+Get[FileNameJoin[{Directory[], "meta", "SM", "HSSUSY_scale_variation.m"}]];

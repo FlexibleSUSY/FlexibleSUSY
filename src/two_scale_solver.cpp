@@ -17,22 +17,17 @@
 // ====================================================================
 
 #include "two_scale_solver.hpp"
-#include "two_scale_constraint.hpp"
-#include "two_scale_convergence_tester.hpp"
-#include "two_scale_initial_guesser.hpp"
-#include "two_scale_matching.hpp"
-#include "two_scale_model.hpp"
-#include "two_scale_running_precision.hpp"
-#include "logger.hpp"
-#include "error.hpp"
-#include "functors.hpp"
 
-#include <cmath>
+#include "convergence_tester.hpp"
+#include "error.hpp"
+#include "initial_guesser.hpp"
+#include "logger.hpp"
+#include "model.hpp"
+#include "single_scale_constraint.hpp"
+#include "single_scale_matching.hpp"
+#include "two_scale_running_precision.hpp"
+
 #include <algorithm>
-#include <iterator>
-#include <limits>
-#include <cassert>
-#include <sstream>
 
 /**
  * @file two_scale_solver.cpp
@@ -47,7 +42,7 @@ namespace flexiblesusy {
  * @param c constraint
  * @param m model
  */
-void RGFlow<Two_scale>::add(Constraint<Two_scale>* c, Two_scale_model* m)
+void RGFlow<Two_scale>::add(Single_scale_constraint* c, Model* m)
 {
    if (!c) throw SetupError("constraint pointer is NULL");
    if (!m) throw SetupError("model pointer is NULL");
@@ -63,7 +58,7 @@ void RGFlow<Two_scale>::add(Constraint<Two_scale>* c, Two_scale_model* m)
  * @param m1 model 1
  * @param m2 model 2
  */
-void RGFlow<Two_scale>::add(Matching<Two_scale>* mc, Two_scale_model* m1, Two_scale_model* m2)
+void RGFlow<Two_scale>::add(Single_scale_matching* mc, Model* m1, Model* m2)
 {
    if (!mc) throw SetupError("matching condition pointer is NULL");
    if (!m1) throw SetupError("model pointer 1 is NULL");
@@ -109,7 +104,7 @@ void RGFlow<Two_scale>::solve()
 }
 
 /**
- * Sanity checks the models and boundary condtitions.
+ * Sanity checks the models and boundary conditions.
  */
 void RGFlow<Two_scale>::check_setup() const
 {
@@ -183,12 +178,12 @@ bool RGFlow<Two_scale>::accuracy_goal_reached() const
  *
  * @param convergence_tester_ the convergence tester to be used
  */
-void RGFlow<Two_scale>::set_convergence_tester(Convergence_tester<Two_scale>* convergence_tester_)
+void RGFlow<Two_scale>::set_convergence_tester(Convergence_tester* convergence_tester_)
 {
    convergence_tester = convergence_tester_;
 }
 
-void RGFlow<Two_scale>::set_initial_guesser(Initial_guesser<Two_scale>* ig)
+void RGFlow<Two_scale>::set_initial_guesser(Initial_guesser* ig)
 {
    initial_guesser = ig;
 }
@@ -227,9 +222,9 @@ int RGFlow<Two_scale>::get_max_iterations() const
  * @param scale scale for which corresponding model to return
  * @return model at scale
  */
-Two_scale_model* RGFlow<Two_scale>::get_model(double scale) const
+Model* RGFlow<Two_scale>::get_model(double scale) const
 {
-   const std::vector<std::shared_ptr<Slider> > sorted_sliders(sort_sliders());
+   const auto sorted_sliders = sort_sliders();
 
    auto it = std::lower_bound(sorted_sliders.begin(), sorted_sliders.end(),
                               scale,
@@ -246,7 +241,7 @@ Two_scale_model* RGFlow<Two_scale>::get_model(double scale) const
  * Returns the pointer to the model at the current scale.
  * @return model at current scale
  */
-Two_scale_model* RGFlow<Two_scale>::get_model() const
+Model* RGFlow<Two_scale>::get_model() const
 {
    return get_model(scale);
 }
@@ -256,7 +251,7 @@ Two_scale_model* RGFlow<Two_scale>::get_model() const
  *
  * The pointers to the models, matching conditions, convergence
  * tester, initial guesser, and running precision calculator are set
- * to zero.  The runnin precision is set to the default value 0.001.
+ * to zero.  The running precision is set to the default value 0.001.
  */
 void RGFlow<Two_scale>::reset()
 {
@@ -295,7 +290,7 @@ void RGFlow<Two_scale>::run_to(double scale_)
 {
    scale = scale_;
 
-   Two_scale_model* model = get_model(scale_);
+   Model* model = get_model(scale_);
 
    if (model)
       model->run_to(scale_);
@@ -307,7 +302,7 @@ void RGFlow<Two_scale>::Constraint_slider::clear_problems() {
    model->clear_problems();
 }
 
-Two_scale_model* RGFlow<Two_scale>::Constraint_slider::get_model() {
+Model* RGFlow<Two_scale>::Constraint_slider::get_model() {
    return model;
 }
 
@@ -331,7 +326,7 @@ void RGFlow<Two_scale>::Matching_slider::clear_problems() {
    m2->clear_problems();
 }
 
-Two_scale_model* RGFlow<Two_scale>::Matching_slider::get_model() {
+Model* RGFlow<Two_scale>::Matching_slider::get_model() {
    return m1;
 }
 

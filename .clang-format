@@ -1,0 +1,32 @@
+Standard: Cpp11
+TabWidth: 8
+Cpp11BracedListStyle: true
+BreakBeforeBraces: Linux
+
+UseTab: Never
+IndentWidth: 3
+ContinuationIndentWidth: 3
+ConstructorInitializerIndentWidth: 3
+AccessModifierOffset: -3
+PointerAlignment: Left
+AlwaysBreakTemplateDeclarations: true
+AlignTrailingComments: true
+AllowShortIfStatementsOnASingleLine: false
+# AllowShortFunctionsOnASingleLine: SFS_Inline
+# BreakStringLiterals: true
+# BreakConstructorInitializers: BeforeComma
+ObjCSpaceAfterProperty: false
+
+IncludeCategories:
+  - Regex:           '^("|<)boost/'
+    Priority:        4
+  - Regex:           '^("|<)gsl/'
+    Priority:        3
+  - Regex:           '^("|<)Eigen/'
+    Priority:        2
+  - Regex:           '^"'
+    Priority:        1
+  - Regex:           '^<'
+    Priority:        5
+  - Regex:           '.*'
+    Priority:        0

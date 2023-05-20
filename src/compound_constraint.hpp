@@ -27,6 +27,6 @@ class CompoundConstraint;
 template<class Method>
 class CompoundMatching;
 
-}
+} // namespace flexiblesusy
 
 #endif

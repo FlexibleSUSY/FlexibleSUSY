@@ -2,9 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <boost/lexical_cast.hpp>
 
-#include "test.h"
+#include "test.hpp"
 #include "run_cmd.hpp"
 #include "slhaea.h"
 #include "stopwatch.hpp"
@@ -66,7 +65,7 @@ void run_point(const std::string& slha_file, Data& fs_data, Data& ss_data)
    }
 
    stopwatch.start();
-   status = run_cmd("./models/SoftsusyNMSSM/run_softpoint.x leshouches < " +
+   status = run_cmd("./test/SOFTSUSY/run_softpoint.x leshouches < " +
                     slha_file + " > " + slha_output_file);
    stopwatch.stop();
 
@@ -92,7 +91,7 @@ SLHAea::Coll create_point(double tanBeta)
       "Block MINPAR\n"
       "   1   2.000000000e+02   # m0\n"
       "   2   5.000000000e+02   # m12\n"
-      "   3   " + boost::lexical_cast<std::string>(tanBeta) + "   # TanBeta\n"
+      "   3   " + std::to_string(tanBeta) + "   # TanBeta\n"
       "   5  -5.000000000e+02   # A0\n");
 
    const std::string extpar_str(
@@ -117,9 +116,10 @@ void test_tanbeta_scan()
 
    Data fs_data, ss_data;
 
-   printf("%10s %30s %30s \n", "tan(beta)",
+   printf("%10s %30s %30s %20s\n", "tan(beta)",
           "Softsusy / s (status)",
-          "FlexibleSUSY / s (status)");
+          "FlexibleSUSY / s (status)",
+          "FlexibleSUSY speed");
 
    for (int i = 0; i < num_points; i++) {
       const double tanBeta = tanBeta_start + i * tanBeta_step;
@@ -132,9 +132,10 @@ void test_tanbeta_scan()
 
       run_point(input_file, fs_data, ss_data);
 
-      printf("%10g %24g (%3d) %24g (%3d)\n", tanBeta,
+      printf("%10g %22g (%5d) %24g (%3d) %19.1f%%\n", tanBeta,
              ss_data.time, ss_data.error,
-             fs_data.time, fs_data.error);
+             fs_data.time, fs_data.error,
+             100.*(fs_data.time - ss_data.time)/ss_data.time);
    }
 
    const double fs_average_time = fs_data.sum_of_times / fs_data.number_of_valid_points;
@@ -144,7 +145,8 @@ void test_tanbeta_scan()
         "  FlexibleSUSY: " << fs_average_time <<
         " (" << fs_data.number_of_valid_points << "/" << num_points << " points)\n" <<
         "  Softsusy    : " << ss_average_time <<
-        " (" << ss_data.number_of_valid_points << "/" << num_points << " points)");
+        " (" << ss_data.number_of_valid_points << "/" << num_points << " points)\n" <<
+        "  FlexibleSUSY speed: " << (100.*(fs_average_time - ss_average_time)/ss_average_time) << "%");
 
    TEST_GREATER(ss_average_time, fs_average_time);
 }

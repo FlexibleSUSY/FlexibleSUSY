@@ -1,0 +1,127 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_semi_analytic_solutions.cpp
+ * @brief contains implementation of class for computing the semi-analytic solutions
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_semi_analytic_solutions.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+
+#include "wrappers.hpp"
+
+namespace flexiblesusy {
+
+#define INPUTPARAMETER(parameter) model.get_input().parameter
+#define MODELPARAMETER(parameter) model.get_##parameter()
+#define EXTRAPARAMETER(parameter) model.get_##parameter()
+#define DERIVEDPARAMETER(parameter) model.parameter()
+#define PHASE(p) MODELPARAMETER(p)
+#define BOUNDARYVALUE(p) boundary_values.p
+
+@ModelName@_semi_analytic_solutions::@ModelName@_semi_analytic_solutions()
+{
+   initialize_trial_values();
+}
+
+void @ModelName@_semi_analytic_solutions::initialize_trial_values()
+{
+@initializeTrialBoundaryValues@
+}
+
+void @ModelName@_semi_analytic_solutions::calculate_trial_data(const @ModelName@_mass_eigenstates& model)
+{
+   for (auto& point: trial_data) {
+      point.model = run_to_output_scale(model, point.boundary_values);
+   }
+}
+
+@ModelName@_mass_eigenstates @ModelName@_semi_analytic_solutions::run_to_output_scale(
+   const @ModelName@_mass_eigenstates& model, const Boundary_values& values) const
+{
+   @ModelName@_mass_eigenstates result(model);
+   set_to_boundary_values(result, values);
+
+   result.run_to(output_scale);
+
+   return result;
+}
+
+std::map<int,@ModelName@_semi_analytic_solutions::Data_vector_t> @ModelName@_semi_analytic_solutions::create_datasets() const
+{
+   std::map<int,Data_vector_t> datasets;
+   for (const auto& point: trial_data) {
+      for (auto idx: point.basis_sets) {
+         datasets[idx].push_back(&point);
+      }
+   }
+
+   for (auto& d: datasets)
+      d.second.shrink_to_fit();
+
+   return datasets;
+}
+
+/**
+ * Calculates the coefficients in the semi-analytic solutions
+ * by varying the boundary value parameters and running to the
+ * output scale.  For each term in the semi-analytic solutions,
+ * the boundary value parameters are chosen to make that term
+ * non-zero.  The boundary conditions are applied at the
+ * defined input scale, and the parameters run to the output scale.
+ * The estimates for the soft parameters obtained in this way for
+ * each term defines a linear system, which is solved for the
+ * coefficients.
+ */
+void @ModelName@_semi_analytic_solutions::calculate_coefficients(const @ModelName@_mass_eigenstates& model_)
+{
+   @ModelName@_mass_eigenstates model(model_);
+   model.run_to(input_scale);
+
+   calculate_trial_data(model);
+   std::map<int,Data_vector_t> datasets(create_datasets());
+
+@createBasisEvaluators@
+@createLinearSystemSolvers@
+@calculateCoefficients@
+}
+
+void @ModelName@_semi_analytic_solutions::set_to_boundary_values(
+   @ModelName@_mass_eigenstates& model, const Boundary_values& boundary_values) const
+{
+@applyBoundaryConditions@
+}
+
+/**
+ * Sets the soft parameters in the given model to the values
+ * obtained by evaluating the semi-analytic solutions with the
+ * current values of the coefficients and the basis parameters
+ * appearing in the boundary conditions.
+ */
+void @ModelName@_semi_analytic_solutions::evaluate_solutions(
+   @ModelName@_mass_eigenstates& model) const
+{
+@evaluateSemiAnalyticSolns@
+}
+
+@calculateCoefficientsFunctions@
+} // namespace flexiblesusy

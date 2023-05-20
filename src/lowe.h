@@ -38,10 +38,10 @@
 namespace softsusy {
 
 /// used to give order of quark masses stored
-enum mass {mUp=1, mCharm, mTop, mDown, mStrange, mBottom, mElectron,
+enum EMass {mUp=1, mCharm, mTop, mDown, mStrange, mBottom, mElectron,
            mMuon, mTau};
 /// order of gauge couplings stored in QedQcd
-enum leGauge {ALPHA=1, ALPHAS};
+enum EGauge {ALPHA=1, ALPHAS};
 
 enum QedQcd_input_parmeters : int {
    alpha_em_MSbar_at_MZ,
@@ -49,9 +49,9 @@ enum QedQcd_input_parmeters : int {
    GFermi,
    MZ_pole, MW_pole,
    Mv1_pole, Mv2_pole, Mv3_pole,
-   MElectron_pole, MMuon_pole, MTau_pole,
-   MU_2GeV, MS_2GeV, MT_pole,
-   MD_2GeV, mc_mc, mb_mb,
+   Me_pole, Mm_pole, Mtau_pole,
+   mu_2GeV, ms_2GeV, Mt_pole,
+   md_2GeV, mc_mc, mb_mb,
    CKM_theta_12, CKM_theta_13, CKM_theta_23, CKM_delta,
    PMNS_theta_12, PMNS_theta_13, PMNS_theta_23, PMNS_delta, PMNS_alpha_1, PMNS_alpha_2,
    NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS
@@ -62,21 +62,19 @@ extern const std::array<std::string, NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS> QedQ
 /// Quark and lepton masses and gauge couplings in QEDxQCD effective theory
 class QedQcd: public flexiblesusy::Beta_function
 {
+public:
+  using Input_t = Eigen::Array<double,NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS,1>;
+
 private:
-  Eigen::ArrayXd a; ///< gauge couplings
-  Eigen::ArrayXd mf; ///< fermion running masses
-  Eigen::ArrayXd input; ///< SLHA input parmeters
+  Eigen::Array<double,2,1> a{Eigen::Array<double,2,1>::Zero()};  ///< gauge couplings
+  Eigen::Array<double,9,1> mf{Eigen::Array<double,9,1>::Zero()}; ///< fermion running masses
+  Input_t input{Input_t::Zero()}; ///< SLHA input parmeters
   double mbPole;    ///< pole masses of third family quarks
 
   double qedBeta() const;   ///< QED beta function
   double qcdBeta() const;   ///< QCD beta function
-  Eigen::ArrayXd massBeta() const; ///< beta functions of masses
-  Eigen::ArrayXd gaugeDerivs(double, const Eigen::ArrayXd&);
-  Eigen::ArrayXd smGaugeDerivs(double, const Eigen::ArrayXd&);
-  /// Does not run the masses, just gauge couplings from start to end
-  void runGauge(double start, double end);
-  Eigen::ArrayXd runSMGauge(double, const Eigen::ArrayXd&);
-  void runto_safe(double, double); ///< throws if non-perturbative error occurs
+  Eigen::Array<double,9,1> massBeta() const; ///< beta functions of masses
+  void runto_safe(double, double eps = -1.0); ///< throws if non-perturbative error occurs
 
   int flavours(double) const;  /// returns number of active flavours
 
@@ -89,31 +87,35 @@ public:
   QedQcd(QedQcd&&) = default;
   QedQcd& operator=(const QedQcd&) = default;
   QedQcd& operator=(QedQcd&&) = default;
-  virtual ~QedQcd() {}
+  virtual ~QedQcd() = default;
 
   // Beta_function interface
   virtual Eigen::ArrayXd get() const override;
   virtual void set(const Eigen::ArrayXd&) override;
   virtual Eigen::ArrayXd beta() const override;
 
-  void setPoleMt(double mt) { input(MT_pole) = mt; }; ///< set pole top mass
-  void setPoleMb(double mb) { mbPole = mb; }; ///< set pole bottom mass
-  void setPoleMtau(double mtau) { input(MTau_pole) = mtau; }; ///< set pole tau mass
-  void setPoleMmuon(double m) { input(MMuon_pole) = m; } ///< set pole muon mass
-  void setPoleMel(double m) { input(MElectron_pole) = m; } ///< set pole electron mass
-  void setMbMb(double mb)   { input(mb_mb) = mb;   }; ///< set mb(mb)
-  void setMcMc(double mc)   { input(mc_mc) = mc;   }  ///< set mc(mc)
-  void setMu2GeV(double mu) { input(MU_2GeV) = mu; } ///< set mu(2 GeV)
-  void setMd2GeV(double md) { input(MD_2GeV) = md; } ///< set md(2 GeV)
-  void setMs2GeV(double ms) { input(MS_2GeV) = ms; } ///< set ms(2 GeV)
+  void setPoleMt(double mt) { input(Mt_pole) = mt; } ///< set pole top mass
+  void setPoleMb(double mb) { mbPole = mb; } ///< set pole bottom mass
+  void setPoleMtau(double mtau) { input(Mtau_pole) = mtau; } ///< set pole tau mass
+  void setPoleMmuon(double m) { input(Mm_pole) = m; } ///< set pole muon mass
+  void setPoleMel(double m) { input(Me_pole) = m;  } ///< set pole electron mass
+  void setMbMb(double mb)   { input(mb_mb) = mb;   } ///< set mb(mb)
+  void setMcMc(double mc)   { input(mc_mc) = mc;   } ///< set mc(mc)
+  void setMu2GeV(double mu) { input(mu_2GeV) = mu; } ///< set mu(2 GeV)
+  void setMd2GeV(double md) { input(md_2GeV) = md; } ///< set md(2 GeV)
+  void setMs2GeV(double ms) { input(ms_2GeV) = ms; } ///< set ms(2 GeV)
   void setPoleMW(double mw) { input(MW_pole) = mw; } ///< set W boson pole mass
   void setPoleMZ(double mz) { input(MZ_pole) = mz; } ///< set Z boson pole mass
+  /// sets running quark masses
+  void setMasses(const Eigen::Array<double,9,1>& m) { mf = m; }
   /// sets a running quark mass
-  void setMass(mass mno, double m) { mf(mno - 1) = m; }
+  void setMass(EMass mno, double m) { mf(mno - 1) = m; }
   /// sets a neutrino pole mass
   void setNeutrinoPoleMass(int i, double m) { input(Mv1_pole + i - 1) = m; }
+  /// sets QED and QCD structure constants
+  void setAlphas(const Eigen::Array<double,2,1>& o) { a = o; }
   /// sets QED or QCD structure constant
-  void setAlpha(leGauge ai, double ap) { a(ai - 1) = ap; }
+  void setAlpha(EGauge ai, double ap) { a(ai - 1) = ap; }
   /// set input value of alpha_em(MZ)
   void setAlphaEmInput(double a) { input(alpha_em_MSbar_at_MZ) = a; }
   /// set input value of alpha_s(MZ)
@@ -125,43 +127,50 @@ public:
   /// sets Fermi constant
   void setFermiConstant(double gf) { input(GFermi) = gf; }
   /// sets all input parameters
-  void set_input(const Eigen::ArrayXd&);
+  void set_input(const Input_t& i) { input = i; }
 
   /// Displays input parameters
-  Eigen::ArrayXd displayInput() const { return input; }
+  Input_t displayInput() const { return input; }
   /// Display pole top mass
-  double displayPoleMt() const { return input(MT_pole); };
+  double displayPoleMt() const { return input(Mt_pole); }
   /// Display pole tau mass
-  double displayPoleMtau() const { return input(MTau_pole); };
+  double displayPoleMtau() const { return input(Mtau_pole); }
   /// Display pole muon mass
-  double displayPoleMmuon() const { return input(MMuon_pole); };
+  double displayPoleMmuon() const { return input(Mm_pole); }
   /// Display pole electron mass
-  double displayPoleMel() const { return input(MElectron_pole); };
+  double displayPoleMel() const { return input(Me_pole); }
   /// Returns bottom "pole" mass
-  double displayPoleMb() const { return mbPole; };
+  double displayPoleMb() const { return mbPole; }
   /// Returns W boson pole mass
   double displayPoleMW() const { return input(MW_pole); }
   /// Returns Z boson pole mass
   double displayPoleMZ() const { return input(MZ_pole); }
   /// Returns a vector of running fermion masses
-  const Eigen::ArrayXd& displayMass() const { return mf; }
+  auto displayMass() const -> decltype(mf) { return mf; }
   /// Returns a single running mass
-  double displayMass(mass mno) const { return mf(mno - 1); }
+  double displayMass(EMass mno) const { return mf(mno - 1); }
+  /// Returns a single up-quark running MS-bar mass, given a zero-based generation index i
+  double displayUpQuarkRunningMass(int) const;
+  /// Returns a single down-quark running MS-bar mass, given a zero-based generation index i
+  double displayDownQuarkRunningMass(int) const;
   /// Returns a single neutrino pole mass
   double displayNeutrinoPoleMass(int i) const { return input(Mv1_pole + i - 1); }
+  /// Returns a single charged lepton pole mass, given a zero-based generation index i
+  double displayLeptonPoleMass(int) const;
+  /// Returns a single charged lepton running mass, given a zero-based generation index i
+  double displayLeptonRunningMass(int) const;
   /// Returns a single gauge structure constant
-  double displayAlpha(leGauge ai) const { return a(ai - 1); };
+  double displayAlpha(EGauge ai) const { return a(ai - 1); }
   /// Returns gauge structure constants
-  Eigen::ArrayXd displayAlphas() const { return a; }
+  auto displayAlphas() const -> decltype(a) { return a; }
   /// Returns input value alpha_em(MZ)
   double displayAlphaEmInput() const { return input(alpha_em_MSbar_at_MZ); }
   /// Returns input value alpha_s(MZ)
   double displayAlphaSInput() const { return input(alpha_s_MSbar_at_MZ); }
   /// Returns Fermi constant
   double displayFermiConstant() const { return input(GFermi); }
-  /// Obgligatory: returns vector of all running parameters
   /// returns vector of all input parameters
-  Eigen::ArrayXd display_input() const;
+  Input_t display_input() const { return input; }
   /// returns vector of all parameter names
   static std::array<std::string, NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS> display_input_parameter_names();
   /// Returns mb(mb) MSbar
@@ -169,11 +178,11 @@ public:
   /// Returns mc(mc) MSbar
   double displayMcMc() const { return input(mc_mc); }
   /// Returns mu(2 GeV)
-  double displayMu2GeV() const { return input(MU_2GeV); }
+  double displayMu2GeV() const { return input(mu_2GeV); }
   /// Returns md(2 GeV)
-  double displayMd2GeV() const { return input(MD_2GeV); }
+  double displayMd2GeV() const { return input(md_2GeV); }
   /// Returns ms(2 GeV)
-  double displayMs2GeV() const { return input(MS_2GeV); }
+  double displayMs2GeV() const { return input(ms_2GeV); }
   /// returns CKM parameters
   flexiblesusy::CKM_parameters displayCKM() const;
   /// Returns real CKM matrix
@@ -189,15 +198,10 @@ public:
 
   /// Evolves object to MZ
   void toMz();
-  /// Evolves object to given scale.  This implementation can be called multiple times
-  void to(double, double tol = 1e-5, int max_iterations = 20);
-  /// This will calculate the three gauge couplings of the Standard Model at
-  /// the scale m2.
-  /// It's a simple one-loop calculation only and no
-  /// thresholds are assumed. Range of validity is electroweak to top scale.
-  // alpha1 is in the GUT normalisation. sinth = sin^2 thetaW(Q) in MSbar
-  // scheme
-  Eigen::ArrayXd getGaugeMu(double m2, double sinth) const;
+  /// Evolves object to given scale.
+  void to(double scale, double precision_goal = 1e-5, int max_iterations = 20);
+  /// guess coupling constants {alpha_1, alpha_2, alpha_3} in SM(5)
+  Eigen::Array<double,3,1> guess_alpha_SM5(double scale) const;
 };
 
 /// Formatted output from QedQcd object

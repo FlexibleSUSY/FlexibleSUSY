@@ -158,4 +158,4 @@ int Lattice_RKRGE::evolve_to(Real to, Adapter& a, Real eps)
     return 0;
 }
 
-}
+} // namespace flexiblesusy

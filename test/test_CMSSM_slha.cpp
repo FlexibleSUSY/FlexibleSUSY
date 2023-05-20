@@ -8,11 +8,8 @@
 #include "CMSSM_model_slha.hpp"
 #include "wrappers.hpp"
 #include "ckm.hpp"
-#include "utils.h"
-#include "linalg.h"
 
 using namespace flexiblesusy;
-using namespace softsusy;
 
 BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_cctor )
 {
@@ -28,28 +25,21 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_cctor )
    const double sinthWsq = 0.23122;
    const double alpha1 = 5 * ALPHAMZ / (3 * (1 - sinthWsq));
    const double alpha2 = ALPHAMZ / sinthWsq;
-   const double g1 = sqrt(4 * PI * alpha1);
-   const double g2 = sqrt(4 * PI * alpha2);
-   const double g3 = sqrt(4 * PI * ALPHASMZ);
+   const double g1 = Sqrt(4 * Pi * alpha1);
+   const double g2 = Sqrt(4 * Pi * alpha2);
+   const double g3 = Sqrt(4 * Pi * ALPHASMZ);
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
    const double cosBeta = cos(atan(tanBeta));
    const double M12 = 100.0;
    const double m0 = 250.0;
    const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
+   const double root2 = Sqrt(2.0);
    const double vev = 246.0;
    const double vu = vev * sinBeta;
    const double vd = vev * cosBeta;
    const double susyMu = 120.0;
-   const double BMu = sqr(2.0 * susyMu);
-   DoubleMatrix Yu_SS(3,3), Yd_SS(3,3), Ye_SS(3,3);
-   Yu_SS(3,3) = 165.0   * root2 / (vev * sinBeta);
-   Yd_SS(3,3) = 2.9     * root2 / (vev * cosBeta);
-   Ye_SS(3,3) = 1.77699 * root2 / (vev * cosBeta);
-   DoubleMatrix ID(3, 3), mm0_SS(3, 3);
-   for (int i=1; i<=3; i++) ID(i, i) = 1.0;
-   mm0_SS = ID * sqr(m0);
+   const double BMu = Sqr(2.0 * susyMu);
 
    Eigen::Matrix<double,3,3> Yu(Eigen::Matrix<double,3,3>::Zero()),
       Yd(Eigen::Matrix<double,3,3>::Zero()),
@@ -58,7 +48,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_cctor )
    Yu(2,2) = 165.0   * root2 / (vev * sinBeta);
    Yd(2,2) = 2.9     * root2 / (vev * cosBeta);
    Ye(2,2) = 1.77699 * root2 / (vev * cosBeta);
-   mm0 = sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
+   mm0 = Sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
 
    CMSSM<Two_scale> model(input);
    model.set_scale(91);
@@ -77,8 +67,8 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_cctor )
    model.set_md2(mm0);
    model.set_mu2(mm0);
    model.set_me2(mm0);
-   model.set_mHd2(sqr(m0));
-   model.set_mHu2(sqr(m0));
+   model.set_mHd2(Sqr(m0));
+   model.set_mHu2(Sqr(m0));
    model.set_TYu(a0 * Yu);
    model.set_TYd(a0 * Yd);
    model.set_TYe(a0 * Ye);
@@ -98,7 +88,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_cctor )
 
    // fill SLHA wrapper class
    // automatic conversion to SLHA happens here
-   CMSSM_slha<CMSSM<Two_scale> > slha_model(model);
+   CMSSM_slha slha_model(model);
 
    // check that model wrapper is in SLHA convention
    BOOST_CHECK_GT(slha_model.get_physical_slha().MChi.maxCoeff(), 0.);
@@ -106,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_cctor )
    BOOST_CHECK_EQUAL(slha_model.get_physical_slha().ZN.imag().maxCoeff(), 0.);
 
    // no automatic conversion
-   CMSSM_slha<CMSSM<Two_scale> > slha_model_not_converted(model, false);
+   CMSSM_slha slha_model_not_converted(model, false);
 
    // check that model is in non-SLHA convention
    BOOST_CHECK_GT(slha_model_not_converted.get_physical().MChi.maxCoeff(), 0.);
@@ -128,28 +118,21 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_calculate_spectrum )
    const double sinthWsq = 0.23122;
    const double alpha1 = 5 * ALPHAMZ / (3 * (1 - sinthWsq));
    const double alpha2 = ALPHAMZ / sinthWsq;
-   const double g1 = sqrt(4 * PI * alpha1);
-   const double g2 = sqrt(4 * PI * alpha2);
-   const double g3 = sqrt(4 * PI * ALPHASMZ);
+   const double g1 = Sqrt(4 * Pi * alpha1);
+   const double g2 = Sqrt(4 * Pi * alpha2);
+   const double g3 = Sqrt(4 * Pi * ALPHASMZ);
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
    const double cosBeta = cos(atan(tanBeta));
    const double M12 = 100.0;
    const double m0 = 250.0;
    const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
+   const double root2 = Sqrt(2.0);
    const double vev = 246.0;
    const double vu = vev * sinBeta;
    const double vd = vev * cosBeta;
    const double susyMu = 120.0;
-   const double BMu = sqr(2.0 * susyMu);
-   DoubleMatrix Yu_SS(3,3), Yd_SS(3,3), Ye_SS(3,3);
-   Yu_SS(3,3) = 165.0   * root2 / (vev * sinBeta);
-   Yd_SS(3,3) = 2.9     * root2 / (vev * cosBeta);
-   Ye_SS(3,3) = 1.77699 * root2 / (vev * cosBeta);
-   DoubleMatrix ID(3, 3), mm0_SS(3, 3);
-   for (int i=1; i<=3; i++) ID(i, i) = 1.0;
-   mm0_SS = ID * sqr(m0);
+   const double BMu = Sqr(2.0 * susyMu);
 
    Eigen::Matrix<double,3,3> Yu(Eigen::Matrix<double,3,3>::Zero()),
       Yd(Eigen::Matrix<double,3,3>::Zero()),
@@ -158,9 +141,9 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_calculate_spectrum )
    Yu(2,2) = 165.0   * root2 / (vev * sinBeta);
    Yd(2,2) = 2.9     * root2 / (vev * cosBeta);
    Ye(2,2) = 1.77699 * root2 / (vev * cosBeta);
-   mm0 = sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
+   mm0 = Sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
 
-   CMSSM_slha<CMSSM<Two_scale> > model(input);
+   CMSSM_slha model(input);
    model.set_scale(91);
    model.set_loops(1);
    model.set_g1(g1);
@@ -177,8 +160,8 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_calculate_spectrum )
    model.set_md2(mm0);
    model.set_mu2(mm0);
    model.set_me2(mm0);
-   model.set_mHd2(sqr(m0));
-   model.set_mHu2(sqr(m0));
+   model.set_mHd2(Sqr(m0));
+   model.set_mHu2(Sqr(m0));
    model.set_TYu(a0 * Yu);
    model.set_TYd(a0 * Yd);
    model.set_TYe(a0 * Ye);
@@ -216,21 +199,21 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_diagonal_yukawas )
    const double sinthWsq = 0.23122;
    const double alpha1 = 5 * ALPHAMZ / (3 * (1 - sinthWsq));
    const double alpha2 = ALPHAMZ / sinthWsq;
-   const double g1 = sqrt(4 * PI * alpha1);
-   const double g2 = sqrt(4 * PI * alpha2);
-   const double g3 = sqrt(4 * PI * ALPHASMZ);
+   const double g1 = Sqrt(4 * Pi * alpha1);
+   const double g2 = Sqrt(4 * Pi * alpha2);
+   const double g3 = Sqrt(4 * Pi * ALPHASMZ);
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
    const double cosBeta = cos(atan(tanBeta));
    const double M12 = 100.0;
    const double m0 = 250.0;
    const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
+   const double root2 = Sqrt(2.0);
    const double vev = 246.0;
    const double vu = vev * sinBeta;
    const double vd = vev * cosBeta;
    const double susyMu = 120.0;
-   const double BMu = sqr(2.0 * susyMu);
+   const double BMu = Sqr(2.0 * susyMu);
 
    Eigen::Matrix<double,3,3> Yu(Eigen::Matrix<double,3,3>::Zero()),
       Yd(Eigen::Matrix<double,3,3>::Zero()),
@@ -252,9 +235,9 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_diagonal_yukawas )
    Ye <<  0.1, 0.2, 0.3,
          -0.2, 0.4, 0.6,
           0.3, 0.6, 1.77699 * root2 / (vev * sinBeta);
-   mm0 = sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
+   mm0 = Sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
 
-   CMSSM_slha<CMSSM<Two_scale> > model(input);
+   CMSSM_slha model(input);
    model.set_scale(91);
    model.set_loops(1);
    model.set_g1(g1);
@@ -271,8 +254,8 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_two_scale_slha_diagonal_yukawas )
    model.set_md2(mm0 * Yd);
    model.set_mu2(mm0 * Yu);
    model.set_me2(mm0 * Ye);
-   model.set_mHd2(sqr(m0));
-   model.set_mHu2(sqr(m0));
+   model.set_mHd2(Sqr(m0));
+   model.set_mHu2(Sqr(m0));
    model.set_TYu(a0 * Yu);
    model.set_TYd(a0 * Yd);
    model.set_TYe(a0 * Ye);

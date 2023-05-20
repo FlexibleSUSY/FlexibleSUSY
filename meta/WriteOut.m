@@ -1,11 +1,33 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
 
 BeginPackage["WriteOut`", {"SARAH`", "TextFormatting`", "CConversion`",
                            "Parameters`", "TreeMasses`",
-                           "Utils`", "Observables`"}];
+                           "Utils`"}];
 
 ReplaceInFiles::usage="Replaces tokens in files.";
 PrintParameters::usage="Creates parameter printout statements";
 PrintInputParameters::usage="Creates input parameter printout statements";
+PrintExtraParameters::usage="Creates extra parameter printout statements";
 WriteSLHAExtparBlock::usage="";
 WriteSLHAImMinparBlock::usage="";
 WriteSLHAImExtparBlock::usage="";
@@ -28,6 +50,13 @@ ParseCmdLineOptions::usage="";
 PrintCmdLineOptions::usage="";
 GetGaugeCouplingNormalizationsDecls::usage="";
 GetGaugeCouplingNormalizationsDefs::usage="";
+
+CreateSetDecaysInfoBlockPrototypes::usage="";
+CreateSetDecaysInfoBlockFunctions::usage="";
+CreateSetDecaysPrototypes::usage="";
+CreateSetDecaysFunctions::usage="";
+CreateFillDecaysDataPrototypes::usage="";
+CreateFillDecaysDataFunctions::usage="";
 
 CreateSLHAYukawaDefinition::usage="";
 CreateSLHAYukawaGetters::usage="";
@@ -96,6 +125,20 @@ TransposeIfVector[p:FlexibleSUSY`Phase[parameter_], _] :=
 
 TransposeIfVector[parameter_, _] := parameter;
 
+TransposeIfVector[parameter_, CConversion`ArrayType[__], macro_] :=
+    SARAH`Tp[macro[parameter]];
+
+TransposeIfVector[parameter_, CConversion`VectorType[__], macro_] :=
+    SARAH`Tp[macro[parameter]];
+
+TransposeIfVector[p:Sign[parameter_], type_, macro_] :=
+    CConversion`ToValidCSymbolString[macro[p]];
+
+TransposeIfVector[p:FlexibleSUSY`Phase[parameter_], type_, macro_] :=
+    CConversion`ToValidCSymbolString[macro[p]];
+
+TransposeIfVector[parameter_, type_, macro_] := macro[parameter];
+
 PrintParameter[Null, streamName_String] := "";
 
 PrintParameter[parameter_, streamName_String] :=
@@ -125,6 +168,22 @@ PrintInputParameter[{parameter_, type_}, streamName_String] :=
 PrintInputParameters[parameters_List, streamName_String] :=
     Module[{result = ""},
            (result = result <> PrintInputParameter[#,streamName])& /@ parameters;
+           Return[result];
+          ];
+
+PrintExtraParameter[{parameter_, type_}, streamName_String, macro_:Global`EXTRAPARAMETER] :=
+    Module[{parameterName, parameterNameWithoutIndices, expr},
+           parameterNameWithoutIndices = parameter /.
+                                         a_[Susyno`LieGroups`i1,SARAH`i2] :> a;
+           parameterName = CConversion`ToValidCSymbolString[parameterNameWithoutIndices];
+           expr = TransposeIfVector[parameterNameWithoutIndices, type, macro];
+           Return[streamName <> " << \"" <> parameterName <> " = \" << " <>
+                  CConversion`RValueToCFormString[expr] <> " << '\\n';\n"];
+          ];
+
+PrintExtraParameters[parameters_List, streamName_String, macro_:Global`EXTRAPARAMETER] :=
+    Module[{result = ""},
+           (result = result <> PrintExtraParameter[#,streamName,macro])& /@ parameters;
            Return[result];
           ];
 
@@ -252,23 +311,23 @@ WriteSLHAInputParameterBlocks[pars_List] :=
            StringJoin[WriteSLHABlock[#, ""]& /@ blocks]
           ];
 
-GetSLHAMixinMatrices[] :=
-    DeleteCases[Select[FlexibleSUSY`FSLesHouchesList,
+GetSLHAMixingMatrices[lesHouchesParameters_List] :=
+    DeleteCases[Select[lesHouchesParameters,
                        MemberQ[Parameters`GetOutputParameters[],#[[1]]]&],
                 {_,None}];
 
-GetSLHAModelParameters[] :=
-    DeleteCases[Select[FlexibleSUSY`FSLesHouchesList,
+GetSLHAModelParameters[lesHouchesParameters_List] :=
+    DeleteCases[Select[lesHouchesParameters,
                        MemberQ[Parameters`GetModelParameters[],#[[1]]]&],
                 {_,None}];
 
-GetSLHAInputParameters[] :=
-    DeleteCases[Select[FlexibleSUSY`FSLesHouchesList,
+GetSLHAInputParameters[lesHouchesParameters_List] :=
+    DeleteCases[Select[lesHouchesParameters,
                        MemberQ[Parameters`GetInputParameters[],#[[1]]]&],
                 {_,None}];
 
-GetSLHAPhases[] :=
-    DeleteCases[Select[FlexibleSUSY`FSLesHouchesList,
+GetSLHAPhases[lesHouchesParameters_List] :=
+    DeleteCases[Select[lesHouchesParameters,
                        MemberQ[Parameters`GetPhases[],#[[1]]]&],
                 {_,None}];
 
@@ -276,10 +335,12 @@ WriteSLHAMatrix[{mixingMatrix_, lesHouchesName_}, head_String, scale_String, set
     Module[{str, strSLHA, lhs, wrapper},
            If[SARAH`getDimParameters[mixingMatrix] === {} ||
               SARAH`getDimParameters[mixingMatrix] === {1},
-              Print["Warning: You are trying to create a SLHA matrix block for"];
-              Print["   ", mixingMatrix, ", which is not a matrix!"];
-              Print["   Please specify a Les Houches index in the SARAH model file."];
-             ];
+              Utils`FSFancyWarning[
+                 "You are trying to create a SLHA matrix block for ",
+                 mixingMatrix, ", which is not a matrix! Please specify ",
+                 "a Les Houches index in the SARAH model file."
+              ];
+           ];
            str = CConversion`ToValidCSymbolString[mixingMatrix];
            (* use SLHA compliant yukawas, trilinears, soft-squared masses *)
            strSLHA = If[mixingMatrix === SARAH`UpYukawa ||
@@ -309,10 +370,10 @@ WriteSLHAMatrix[{mixingMatrix_, lesHouchesName_}, head_String, scale_String, set
            "\"" <> If[scale != "", ", " <> scale, ""] <> ");\n"
           ];
 
-WriteSLHAMixingMatricesBlocks[] :=
+WriteSLHAMixingMatricesBlocks[lesHouchesParameters_List] :=
     Module[{result, mixingMatrices, smMix, susyMix, majoranaMix,
             smMixStr = "", susyMixStr = "", majoranaMixStr = ""},
-           mixingMatrices = GetSLHAMixinMatrices[];
+           mixingMatrices = GetSLHAMixingMatrices[lesHouchesParameters];
            smMix = Flatten[TreeMasses`FindMixingMatrixSymbolFor /@ SARAH`SMParticles];
            smMix = Select[mixingMatrices, MemberQ[smMix,#[[1]]]&];
            majoranaMix = Flatten[TreeMasses`FindMixingMatrixSymbolFor /@
@@ -373,42 +434,9 @@ SortBlocks[modelParameters_List] :=
            Flatten[SplitRealAndImagPartBlocks /@ collected, 1]
           ];
 
-CreateRulesForProtectedHead[expr_, protectedHead_Symbol] :=
-    Cases[expr, protectedHead[p__] :> Rule[protectedHead[p],Symbol["x$" <> ToString[Hash[p]]]], {0, Infinity}];
-
-CreateRulesForProtectedHead[expr_, protectedHeads_List] :=
-    Flatten @ Join[CreateRulesForProtectedHead[expr,#]& /@ protectedHeads];
-
-FindMacro[par_] :=
-    Which[IsModelParameter[par] , Global`MODELPARAMETER,
-          IsOutputParameter[par], Global`MODELPARAMETER,
-          IsPhase[par]          , Global`MODELPARAMETER,
-          IsInputParameter[par] , Global`INPUTPARAMETER,
-          IsExtraParameter[par] , Global`EXTRAPARAMETER,
-          True                  , Identity
-         ];
-
-WrapPreprocessorMacroAround[expr_String, ___] := expr;
-
-WrapPreprocessorMacroAround[expr_, protectedHeads_List:{FlexibleSUSY`Pole, SARAH`SM}] :=
-    Module[{allPars, replacements, protectionRules, exprWithoutProtectedSymbols},
-           allPars = Flatten[{FSModelParameters, FSInputParameters,
-                              FSOutputParameters, FSPhysicalOutputParameters,
-                              FSPhases, FSDerivedParameters, FSExtraParameters} /. FindAllParametersClassified[expr]];
-           replacements = Join[
-               RuleDelayed[#     , FindMacro[#][#]   ]& /@ allPars,
-               RuleDelayed[#[i__], FindMacro[#][#][i]]& /@ allPars,
-               {RuleDelayed[FlexibleSUSY`M[p_[i__]], FindMacro[FlexibleSUSY`M[p]][FlexibleSUSY`M[p]][i]]}
-           ];
-           protectionRules = CreateRulesForProtectedHead[expr, protectedHeads];
-           exprWithoutProtectedSymbols = expr /. protectionRules;
-           (* substitute back protected symbols *)
-           exprWithoutProtectedSymbols /. replacements /. (Reverse /@ protectionRules)
-          ];
-
 SetAttributes[WriteSLHABlockEntry, HoldFirst];
 
-WriteSLHABlockEntry[{Hold[par_], idx___}, comment_String:""] :=
+WriteSLHABlockEntry[blockName_, {Hold[par_], idx___}, comment_String:""] :=
     Module[{parStr, commentStr},
            parStr = ToString[Unevaluated[par]];
            commentStr = If[comment == "", parStr, comment];
@@ -417,90 +445,46 @@ WriteSLHABlockEntry[{Hold[par_], idx___}, comment_String:""] :=
                                    RegularExpression["\\bHighScale\\b"] -> "SCALES(HighScale)",
                                    RegularExpression["\\bLowScale\\b"]  -> "SCALES(LowScale)"}
                                  ];
-           WriteSLHABlockEntry[{parStr, idx}, commentStr]
+           WriteSLHABlockEntry[blockName, {parStr, idx}, commentStr]
           ];
 
 ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 
-WriteEffectiveCouplingsSLHABlockEntry[particle_, vectorBoson_] :=
-    Module[{i, dim, dimWithoutGoldstones, start, particlePDG, vectorPDG,
-            struct, comment, value, result = ""},
-           vectorPDG = Parameters`GetPDGCodesForParticle[vectorBoson][[1]];
-           particlePDG = Parameters`GetPDGCodesForParticle[particle];
-           dim = TreeMasses`GetDimension[particle];
-           dimWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones[particle];
-           If[Length[particlePDG] != dim,
-              Print["Warning: length of PDG number list != dimension of particle ", particle];
-              Print["       PDG number list = ", particlePDG];
-              Print["       dimension of particle ", particle, " = ", dim];
-             ];
-           If[Length[particlePDG] < dim,
-              Return[""];
-             ];
-           start = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
-           Which[particle === SARAH`HiggsBoson && vectorBoson === SARAH`VectorP,
-                 struct = "OBSERVABLES.eff_cp_higgs_photon_photon";
-                 comment = "Abs(effective H-Photon-Photon coupling)";,
-                 particle === SARAH`HiggsBoson && vectorBoson === SARAH`VectorG,
-                 struct = "OBSERVABLES.eff_cp_higgs_gluon_gluon";
-                 comment = "Abs(effective H-Gluon-Gluon coupling)";,
-                 particle === SARAH`PseudoScalar && vectorBoson === SARAH`VectorP,
-                 struct = "OBSERVABLES.eff_cp_pseudoscalar_photon_photon";
-                 comment = "Abs(effective A-Photon-Photon coupling)";,
-                 particle === SARAH`PseudoScalar && vectorBoson === SARAH`VectorG,
-                 struct = "OBSERVABLES.eff_cp_pseudoscalar_gluon_gluon";
-                 comment = "Abs(effective A-Gluon-Gluon coupling)";,
-                 True,
-                 Print["Error: unsupported effective coupling ",
-                       particle, "-", vectorBoson, "-", vectorBoson,
-                       "requested!"];
-                 Quit[1]
-                ];
-           If[dimWithoutGoldstones == 1 || start == dim,
-              value = "Abs(" <> struct <> ")";
-              result = result
-                        <> WriteSLHABlockEntry[{value, particlePDG[[start]], vectorPDG, vectorPDG},
-                                                comment];,
-              For[i = start, i <= Length[particlePDG], i++,
-                  value = "Abs(" <> struct <> "(" <> ToString[i-start] <> "))";
-                  result = result
-                           <> WriteSLHABlockEntry[{value, particlePDG[[i]], vectorPDG, vectorPDG},
-                                                  comment];
-                 ];
-             ];
-           result
-          ];
-
-WriteSLHABlockEntry[{par_?IsObservable, idx___}, comment_String:""] :=
-    Module[{i, dim, scalarPDG, vectorPDG, result = ""},
+WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
+    Module[{result = ""},
            Switch[par,
-                  FlexibleSUSYObservable`aMuon,
-                      result = WriteSLHABlockEntry[{"OBSERVABLES.a_muon", idx}, "Delta(g-2)_muon/2 FlexibleSUSY 1L"],
+                  FlexibleSUSYObservable`AMM[_],
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES." <> Observables`GetObservableName[par], idx}, Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`AMMUncertainty[_],
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES." <> Observables`GetObservableName[par], idx}, Observables`GetObservableDescription[par]],
                   FlexibleSUSYObservable`aMuonGM2Calc,
-                      result = WriteSLHABlockEntry[{"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],
                   FlexibleSUSYObservable`aMuonGM2CalcUncertainty,
-                      result = WriteSLHABlockEntry[{"OBSERVABLES.a_muon_gm2calc_uncertainty", idx}, "Delta(g-2)_muon/2 GM2Calc uncertainty"],
-                  FlexibleSUSYObservable`CpHiggsPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[SARAH`HiggsBoson, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpHiggsGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[SARAH`HiggsBoson, SARAH`VectorG],
-                  FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[SARAH`PseudoScalar, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpPseudoScalarGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[SARAH`PseudoScalar, SARAH`VectorG],
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc_uncertainty", idx}, "Delta(g-2)_muon/2 GM2Calc uncertainty"],
                   FlexibleSUSYObservable`EDM[_],
-                      result = WriteSLHABlockEntry[{"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                      result = WriteSLHABlockEntry[blockName,
+                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
                                                    Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`BrLToLGamma[__],
+                      result = WriteSLHABlockEntry[blockName,
+                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                                   Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`FToFConversionInNucleus[__],
+                      result = WriteSLHABlockEntry[blockName,
+                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                                   Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`bsgamma,
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
                   _,
-                     result = WriteSLHABlockEntry[{"", idx}, ""]
+                     result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
                  ];
            result
           ];
 
-WriteSLHABlockEntry[{par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment_String:""] :=
+WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment_String:""] :=
     Module[{parStr, parVal, idx1Str, idx2Str, idx3Str, commentStr},
            parStr = CConversion`RValueToCFormString[Parameters`IncreaseIndexLiterals[par]];
-           parVal = CConversion`RValueToCFormString[WrapPreprocessorMacroAround[par]];
+           parVal = CConversion`RValueToCFormString[Parameters`WrapPreprocessorMacroAround[par]];
            idx1Str = ToString[idx1];
            idx2Str = ToString[idx2];
            idx3Str = ToString[idx3];
@@ -510,10 +494,10 @@ WriteSLHABlockEntry[{par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment
            <> idx3Str <> ", (" <> parVal <> "), \"" <> commentStr <> "\")" <> "\n"
           ];
 
-WriteSLHABlockEntry[{par_, idx1_?NumberQ, idx2_?NumberQ}, comment_String:""] :=
+WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ}, comment_String:""] :=
     Module[{parStr, parVal, idx1Str, idx2Str, commentStr},
            parStr = CConversion`RValueToCFormString[Parameters`IncreaseIndexLiterals[par]];
-           parVal = CConversion`RValueToCFormString[WrapPreprocessorMacroAround[par]];
+           parVal = CConversion`RValueToCFormString[Parameters`WrapPreprocessorMacroAround[par]];
            idx1Str = ToString[idx1];
            idx2Str = ToString[idx2];
            commentStr = If[comment == "", parStr, comment];
@@ -522,16 +506,20 @@ WriteSLHABlockEntry[{par_, idx1_?NumberQ, idx2_?NumberQ}, comment_String:""] :=
            ", (" <> parVal <> "), \"" <> commentStr <> "\")" <> "\n"
           ];
 
-WriteSLHABlockEntry[{par_, pdg_?NumberQ}, comment_String:""] :=
+WriteSLHABlockEntry[blockName_, {par_, pdg_?NumberQ}, comment_String:""] :=
     Module[{parStr, parVal, pdgStr, commentStr},
            parStr = CConversion`RValueToCFormString[Parameters`IncreaseIndexLiterals[par]];
-           parVal = CConversion`RValueToCFormString[WrapPreprocessorMacroAround[par]];
-           (* print unnormalized hypercharge gauge coupling *)
-           If[par === SARAH`hyperchargeCoupling,
+           parVal = CConversion`RValueToCFormString[Parameters`WrapPreprocessorMacroAround[par]];
+           (* print unnormalized gauge couplings *)
+           If[ToUpperCase[blockName] == "GAUGE" &&
+              Parameters`IsGaugeCoupling[par] &&
+              Parameters`GetGUTNormalization[par] =!= 1,
               parVal = parVal <> " * " <>
-                           CConversion`RValueToCFormString[
-                               Parameters`GetGUTNormalization[par]];
-              parStr = "gY";
+                       CConversion`RValueToCFormString[
+                           Parameters`GetGUTNormalization[par]];
+              parStr = CConversion`RValueToCFormString[par] <> " * " <>
+                       CConversion`RValueToCFormString[
+                           Parameters`GetGUTNormalization[par]];
              ];
            pdgStr = ToString[pdg];
            commentStr = If[comment == "", parStr, comment];
@@ -540,10 +528,10 @@ WriteSLHABlockEntry[{par_, pdg_?NumberQ}, comment_String:""] :=
            "), \"" <> commentStr <> "\")" <> "\n"
           ];
 
-WriteSLHABlockEntry[{par_}, comment_String:""] :=
+WriteSLHABlockEntry[_, {par_}, comment_String:""] :=
     Module[{parStr, parVal, commentStr},
            parStr = CConversion`RValueToCFormString[Parameters`IncreaseIndexLiterals[par]];
-           parVal = CConversion`RValueToCFormString[WrapPreprocessorMacroAround[par]];
+           parVal = CConversion`RValueToCFormString[Parameters`WrapPreprocessorMacroAround[par]];
            commentStr = If[comment == "", parStr, comment];
            (* result *)
            "      << FORMAT_NUMBER((" <> parVal <> "), \"" <> commentStr <> "\")\n"
@@ -567,7 +555,7 @@ WriteSLHABlock[{blockName_, tuples_List}, scale_String:"model.get_scale()"] :=
                   "\""
                  ] <>
                " << '\\n'\n" <>
-               StringJoin[WriteSLHABlockEntry /@ tuples] <> ";\n" <>
+               StringJoin[WriteSLHABlockEntry[blockNameStr, #]& /@ tuples] <> ";\n" <>
                "slha_io.set_block(block);\n"
            ] <>
            "}\n"
@@ -577,24 +565,24 @@ WriteSLHABlock[{blockName_, Re[parameter_]}, scale_String:"model.get_scale()"] :
     WriteSLHABlock[{blockName, parameter}, scale];
 
 WriteSLHABlock[{blockName_, Im[parameter_]}, scale_String:"model.get_scale()"] :=
-    WriteSLHAMatrix[{parameter, blockName}, ToString[FindMacro[parameter]], scale, "set_block_imag"];
+    WriteSLHAMatrix[{parameter, blockName}, ToString[Parameters`FindMacro[parameter]], scale, "set_block_imag"];
 
 WriteSLHABlock[{blockName_, parameter_}, scale_String:"model.get_scale()"] :=
-    WriteSLHAMatrix[{parameter, blockName}, ToString[FindMacro[parameter]], scale];
+    WriteSLHAMatrix[{parameter, blockName}, ToString[Parameters`FindMacro[parameter]], scale];
 
 WriteSLHABlock[{blockName_, {parameter_ /; Head[parameter] =!= List}}, scale_String:"model.get_scale()"] :=
     WriteSLHABlock[{blockName, parameter}, scale];
 
-WriteSLHAModelParametersBlocks[] :=
+WriteSLHAModelParametersBlocks[lesHouchesParameters_List] :=
     Module[{modelParameters, blocks},
-           modelParameters = GetSLHAModelParameters[];
+           modelParameters = GetSLHAModelParameters[lesHouchesParameters];
            blocks = SortBlocks[modelParameters];
            StringJoin[WriteSLHABlock /@ blocks]
           ];
 
-WriteSLHAPhasesBlocks[] :=
+WriteSLHAPhasesBlocks[lesHouchesParameters_List] :=
     Module[{phases, blocks},
-           phases = GetSLHAPhases[];
+           phases = GetSLHAPhases[lesHouchesParameters];
            blocks = SortBlocks[phases];
            StringJoin[WriteSLHABlock /@ blocks]
           ];
@@ -608,7 +596,7 @@ GetExtraSLHAOutputBlockScale[scale_?NumericQ] := ToString[scale];
 GetExtraSLHAOutputBlockScale[scale_] :=
     Module[{result},
            scaleStr = CConversion`RValueToCFormString[
-               WrapPreprocessorMacroAround[Parameters`DecreaseIndexLiterals[scale]]];
+               Parameters`WrapPreprocessorMacroAround[Parameters`DecreaseIndexLiterals[scale]]];
            StringReplace[scaleStr, "CurrentScale" -> "model.get_scale()"]
           ];
 
@@ -621,8 +609,16 @@ WriteExtraSLHAOutputBlock[outputBlocks_List] :=
            ReformeBlocks[{idx_, expr_}]         := {expr, idx};
            ReformeBlocks[{idx1_, idx2_, expr_}] := {expr, idx1, idx2};
            reformed = ReformeBlocks /@ outputBlocks;
-           (result = result <> WriteSLHABlock[#[[1]], #[[2]]])& /@ reformed;
-           Return[result];
+           (
+              result = result
+                 <> If[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                       "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {\n"
+                       <> TextFormatting`IndentText[WriteSLHABlock[#[[1]], #[[2]]]]
+                       <> "}\n",
+                       WriteSLHABlock[#[[1]], #[[2]]]
+                    ]
+           )& /@ reformed;
+           result
           ];
 
 ReadSLHAInputBlock[{parameter_, {blockName_, pdg_?NumberQ}}] :=
@@ -663,7 +659,9 @@ ReadSLHAOutputBlock[{parameter_, {blockName_String, pdg_?NumberQ}}] :=
     Module[{result, parmStr, pdgStr, gutNorm = ""},
            parmStr = CConversion`ToValidCSymbolString[parameter];
            pdgStr = ToString[pdg];
-           If[parameter === SARAH`hyperchargeCoupling,
+           If[ToUpperCase[blockName] == "GAUGE" &&
+              Parameters`IsGaugeCoupling[parameter] &&
+              Parameters`GetGUTNormalization[parameter] =!= 1,
               gutNorm = " * " <> CConversion`RValueToCFormString[
                   1/Parameters`GetGUTNormalization[parameter]];
              ];
@@ -678,8 +676,10 @@ ReadSLHAOutputBlock[{parameter_, {blockName_Symbol, pdg_?NumberQ}}] :=
 
 ReadSLHAOutputBlock[{parameter_, {blockName_, pdg_?NumberQ}}] :=
     Block[{},
-          Print["Warning: SLHA block name is not a symbol: ", blockName];
-          Print["   I'm using: ", CConversion`RValueToCFormString[blockName]];
+          Utils`FSFancyWarning[
+             "SLHA block name is not a symbol: ", blockName,
+             " I'm using: ", CConversion`RValueToCFormString[blockName]
+          ];
           ReadSLHAOutputBlock[{parameter, {CConversion`RValueToCFormString[blockName], pdg}}]
          ];
 
@@ -745,35 +745,35 @@ ReadSLHAPhysicalMassBlock[struct_String:"PHYSICAL"] :=
            Return[result];
           ];
 
-ReadLesHouchesOutputParameters[] :=
+ReadLesHouchesOutputParameters[lesHouchesParameters_List] :=
     Module[{result = "", modelParameters},
-           modelParameters = GetSLHAModelParameters[];
+           modelParameters = GetSLHAModelParameters[lesHouchesParameters];
            (result = result <> ReadSLHAOutputBlock[#])& /@ modelParameters;
            Return[result];
           ];
 
-ReadLesHouchesPhysicalParameters[struct_String:"PHYSICAL", defMacro_String:"DEFINE_PHYSICAL_PARAMETER"] :=
+ReadLesHouchesPhysicalParameters[lesHouchesParameters_List, struct_String:"PHYSICAL", defMacro_String:"DEFINE_PHYSICAL_PARAMETER"] :=
     Module[{result = "", physicalParameters},
-           physicalParameters = GetSLHAMixinMatrices[];
+           physicalParameters = GetSLHAMixingMatrices[lesHouchesParameters];
            (result = result <> ReadSLHAPhysicalMixingMatrixBlock[#,struct,defMacro])& /@ physicalParameters;
            result = result <> "\n" <> ReadSLHAPhysicalMassBlock[struct];
            Return[result];
           ];
 
-GetDRbarBlocks[] :=
+GetDRbarBlocks[lesHouchesParameters_List] :=
     Module[{modelParameters},
-           modelParameters = GetSLHAModelParameters[];
+           modelParameters = GetSLHAModelParameters[lesHouchesParameters];
            DeleteDuplicates[Cases[modelParameters, {_, blockName_Symbol} | {_, {blockName_Symbol, _?NumberQ}} :> blockName]]
           ];
 
-GetDRbarBlockNames[] :=
+GetDRbarBlockNames[lesHouchesParameters_List] :=
     Module[{blocks, transformer},
-           blocks = GetDRbarBlocks[];
+           blocks = GetDRbarBlocks[lesHouchesParameters];
            transformer = ("\"" <> ToString[#] <> "\"")&;
            "{ " <> Utils`StringJoinWithSeparator[blocks, ", ", transformer] <> " }"
           ];
 
-GetNumberOfDRbarBlocks[] := Length[GetDRbarBlocks[]];
+GetNumberOfDRbarBlocks[lesHouchesParameters_List] := Length[GetDRbarBlocks[lesHouchesParameters]];
 
 ConvertMixingsToSLHAConvention[massMatrices_List] :=
     ConvertMixingsToConvention[massMatrices, "slha"];
@@ -792,7 +792,7 @@ ConvertMixingsToConvention[massMatrices_List, convention_String] :=
                   eigenstateNameStr  = CConversion`ToValidCSymbolString[FlexibleSUSY`M[eigenstateName]];
                   mixingMatrixSymStr = CConversion`ToValidCSymbolString[mixingMatrixSym];
                   result = result <>
-                           "SLHA_io::convert_symmetric_fermion_mixings_to_" <> convention <> "(LOCALPHYSICAL(" <>
+                           "convert_symmetric_fermion_mixings_to_" <> convention <> "(LOCALPHYSICAL(" <>
                            eigenstateNameStr <> "), LOCALPHYSICAL(" <>
                            mixingMatrixSymStr <> "));\n";
                  ];
@@ -890,13 +890,13 @@ CreateSLHATrilinearCouplingName[c_] :=
     CConversion`ToValidCSymbolString[c] <> "_slha";
 
 GetSLHATrilinearCouplingType[c_] :=
-    CConversion`ToRealType[Parameters`GetType[c]];
+    Parameters`GetType[c];
 
 CreateSLHASoftSquaredMassName[c_] :=
     CConversion`ToValidCSymbolString[c] <> "_slha";
 
 GetSLHASoftSquaredMassType[c_] :=
-    CConversion`ToRealType[Parameters`GetType[c]];
+    Parameters`GetType[c];
 
 CreateSLHAYukawaDefinition[] :=
     StringJoin[Parameters`CreateParameterDefinitionAndDefaultInitialize[
@@ -908,11 +908,8 @@ CreateSLHAYukawaGetters[] :=
            yuks = GetYukawas[];
            Block[{},
               result = result <>
-                       CConversion`CreateInlineGetter[
-                           CreateSLHAYukawaName[#], GetSLHAYukawaType[#]
-                       ] <>
-                       CConversion`CreateInlineElementGetter[
-                           CreateSLHAYukawaName[#], GetSLHAYukawaType[#]
+                       CConversion`CreateInlineGetters[
+                           CreateSLHAYukawaName[#], CreateSLHAYukawaName[#], GetSLHAYukawaType[#]
                        ];
            ]& /@ yuks;
            result
@@ -935,9 +932,11 @@ ConvertYukawaCouplingsToSLHA[] :=
                                       CreateSLHAFermionMixingMatrixName[vR] <> ", " <>
                                       CreateSLHAFermionMixingMatrixName[vL] <> ");\n";
                      ,
-                     Print["Warning: Cannot convert Yukawa coupling ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert Yukawa coupling ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
                               CreateSLHAYukawaName[#] <> " = MODELPARAMETER(" <>
                               CConversion`ToValidCSymbolString[#] <> ").diagonal().real();\n";
@@ -963,11 +962,8 @@ CreateSLHATrilinearCouplingGetters[] :=
            tril = GetTrilinearCouplings[];
            Block[{},
               result = result <>
-                       CConversion`CreateInlineGetter[
-                           CreateSLHATrilinearCouplingName[#], GetSLHATrilinearCouplingType[#]
-                       ] <>
-                       CConversion`CreateInlineElementGetter[
-                           CreateSLHATrilinearCouplingName[#], GetSLHATrilinearCouplingType[#]
+                       CConversion`CreateInlineGetters[
+                           CreateSLHATrilinearCouplingName[#], CreateSLHATrilinearCouplingName[#], GetSLHATrilinearCouplingType[#]
                        ];
            ]& /@ tril;
            result
@@ -981,19 +977,26 @@ ConvertTrilinearCouplingsToSLHA[] :=
                   If[Parameters`IsOutputParameter[{vL, vR}] &&
                      ParametersHaveSameDimension[{vL, vR, #}],
                      result = result <>
-                              CreateSLHATrilinearCouplingName[#] <> " = (" <>
-                              CreateSLHAFermionMixingMatrixName[vR] <> ".conjugate() * " <>
-                              "MODELPARAMETER(" <>
-                              CConversion`ToValidCSymbolString[#] <> ") * " <>
-                              CreateSLHAFermionMixingMatrixName[vL] <> ".adjoint()" <>
-                              ").real();\n";
+                              CreateSLHATrilinearCouplingName[#] <> " = " <>
+                              CConversion`CastTo[
+                                  CreateSLHAFermionMixingMatrixName[vR] <> ".conjugate() * " <>
+                                  "MODELPARAMETER(" <>
+                                  CConversion`ToValidCSymbolString[#] <> ") * " <>
+                                  CreateSLHAFermionMixingMatrixName[vL] <> ".adjoint()",
+                                  GetSLHATrilinearCouplingType[#]
+                              ] <> ";\n";
                      ,
-                     Print["Warning: Cannot convert Trilinear coupling ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert Trilinear coupling ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
-                              CreateSLHATrilinearCouplingName[#] <> " = MODELPARAMETER(" <>
-                              CConversion`ToValidCSymbolString[#] <> ").real();\n";
+                              CreateSLHATrilinearCouplingName[#] <> " = " <>
+                              CConversion`CastTo[
+                                  "MODELPARAMETER(" <> CConversion`ToValidCSymbolString[#] <> ")",
+                                  GetSLHATrilinearCouplingType[#]
+                              ] <> ";\n";
                     ];
            ]& /@ tril;
            result
@@ -1004,11 +1007,8 @@ CreateSLHAFermionMixingMatricesGetters[] :=
            mix = GetFermionMixingMatrices[];
            Block[{},
               result = result <>
-                       CConversion`CreateInlineGetter[
-                           CreateSLHAFermionMixingMatrixName[#], GetSLHAFermionMixingMatrixType[#]
-                       ] <>
-                       CConversion`CreateInlineElementGetter[
-                           CreateSLHAFermionMixingMatrixName[#], GetSLHAFermionMixingMatrixType[#]
+                       CConversion`CreateInlineGetters[
+                           CreateSLHAFermionMixingMatrixName[#], CreateSLHAFermionMixingMatrixName[#], GetSLHAFermionMixingMatrixType[#]
                        ];
            ]& /@ mix;
            result
@@ -1024,11 +1024,8 @@ CreateSLHASoftSquaredMassesGetters[] :=
            massSq = GetSoftSquaredMasses[];
            Block[{},
               result = result <>
-                       CConversion`CreateInlineGetter[
-                           CreateSLHASoftSquaredMassName[#], GetSLHASoftSquaredMassType[#]
-                       ] <>
-                       CConversion`CreateInlineElementGetter[
-                           CreateSLHASoftSquaredMassName[#], GetSLHASoftSquaredMassType[#]
+                       CConversion`CreateInlineGetters[
+                           CreateSLHASoftSquaredMassName[#], CreateSLHASoftSquaredMassName[#], GetSLHASoftSquaredMassType[#]
                        ];
            ]& /@ massSq;
            result
@@ -1043,28 +1040,37 @@ ConvertSoftSquaredMassesToSLHA[] :=
                      ParametersHaveSameDimension[{vL, vR, #}],
                      If[IsLeftHanded[#],
                         result = result <>
-                                 CreateSLHASoftSquaredMassName[#] <> " = (" <>
-                                 CreateSLHAFermionMixingMatrixName[vL] <> " * " <>
-                                 "MODELPARAMETER(" <>
-                                 CConversion`ToValidCSymbolString[#] <> ") * " <>
-                                 CreateSLHAFermionMixingMatrixName[vL] <> ".adjoint()" <>
-                                 ").real();\n";
+                                 CreateSLHASoftSquaredMassName[#] <> " = " <>
+                                 CConversion`CastTo[
+                                     CreateSLHAFermionMixingMatrixName[vL] <> " * " <>
+                                     "MODELPARAMETER(" <>
+                                     CConversion`ToValidCSymbolString[#] <> ") * " <>
+                                     CreateSLHAFermionMixingMatrixName[vL] <> ".adjoint()",
+                                     GetSLHASoftSquaredMassType[#]
+                                 ] <> ";\n";
                         ,
                         result = result <>
-                                 CreateSLHASoftSquaredMassName[#] <> " = (" <>
-                                 CreateSLHAFermionMixingMatrixName[vR] <> ".conjugate() * " <>
-                                 "MODELPARAMETER(" <>
-                                 CConversion`ToValidCSymbolString[#] <> ") * " <>
-                                 CreateSLHAFermionMixingMatrixName[vR] <> ".transpose()" <>
-                                 ").real();\n";
+                                 CreateSLHASoftSquaredMassName[#] <> " = " <>
+                                 CConversion`CastTo[
+                                     CreateSLHAFermionMixingMatrixName[vR] <> ".conjugate() * " <>
+                                     "MODELPARAMETER(" <>
+                                     CConversion`ToValidCSymbolString[#] <> ") * " <>
+                                     CreateSLHAFermionMixingMatrixName[vR] <> ".transpose()",
+                                     GetSLHASoftSquaredMassType[#]
+                                 ] <> ";\n";
                        ];
                      ,
-                     Print["Warning: Cannot convert soft squared mass ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert soft squared mass ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
-                              CreateSLHASoftSquaredMassName[#] <> " = MODELPARAMETER(" <>
-                              CConversion`ToValidCSymbolString[#] <> ").real();\n";
+                              CreateSLHASoftSquaredMassName[#] <> " = " <>
+                              CConversion`CastTo[
+                                  "MODELPARAMETER(" <> CConversion`ToValidCSymbolString[#] <> ")",
+                                  GetSLHASoftSquaredMassType[#]
+                              ] <> ";\n";
                     ];
            ]& /@ massSq;
            result
@@ -1110,6 +1116,18 @@ CalculatePMNSMatrix[] :=
               result = "pmns = " <>
               CreateSLHAFermionMixingMatrixName[SARAH`ElectronMatrixL] <> " * " <>
               CreateSLHAFermionMixingMatrixName[SARAH`NeutrinoMM] <> ".adjoint();\n";
+              (* convert PMNS matrix to PDG convention *)
+              If[MemberQ[Parameters`GetOutputParameters[], SARAH`ElectronMatrixL] &&
+                 MemberQ[Parameters`GetOutputParameters[], SARAH`ElectronMatrixR] &&
+                 MemberQ[Parameters`GetOutputParameters[], SARAH`NeutrinoMM] &&
+                 SARAH`getDimParameters[SARAH`ElectronMatrixL] === {3,3} &&
+                 SARAH`getDimParameters[SARAH`ElectronMatrixR] === {3,3} &&
+                 SARAH`getDimParameters[SARAH`ElectronMatrixL] === SARAH`getDimParameters[SARAH`NeutrinoMM],
+                 result = result <> "PMNS_parameters::to_pdg_convention(pmns, " <>
+                 CreateSLHAFermionMixingMatrixName[SARAH`NeutrinoMM] <> ", " <>
+                 CreateSLHAFermionMixingMatrixName[SARAH`ElectronMatrixL] <> ", " <>
+                 CreateSLHAFermionMixingMatrixName[SARAH`ElectronMatrixR] <> ");\n";
+                ];
               ,
               result = "pmns << 1, 0, 0, 0, 1, 0, 0, 0, 1;\n";
              ];
@@ -1195,6 +1213,38 @@ CreateFormattedSLHABlocks[inputPars_List] :=
            sortForBlocks = {#, FindParametersInBlock[inputPars, #]}& /@ blocks;
            StringJoin[CreateFormattedSLHABlock /@ sortForBlocks]
           ];
+
+CreateSetDecaysPrototypes[modelName_String] := "\
+void set_decays(const " <> modelName <> "_decay_table&, FlexibleDecay_settings const&);";
+
+CreateSetDecaysFunctions[modelName_String] := "\
+/**
+ * Stores the particle decay branching ratios in the SLHA object.
+ *
+ * @param decays struct containing decays data
+ */
+void " <> modelName <> "_slha_io::set_decays(const " <> modelName <> "_decay_table& decay_table, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   for (const auto& particle : decay_table) {
+      set_decay_block(particle, flexibledecay_settings);
+   }
+}";
+
+CreateFillDecaysDataPrototypes[modelName_String] := "\
+void fill_decays_data(const " <> modelName <> "_decays&, FlexibleDecay_settings const&);";
+
+CreateFillDecaysDataFunctions[modelName_String] := "\
+void " <> modelName <> "_slha_io::fill_decays_data(const " <> modelName <> "_decays& decays, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   const auto& decays_problems = decays.get_problems();
+   const bool decays_error = decays_problems.have_problem();
+
+   set_dcinfo(decays_problems);
+
+   if (!decays_error) {
+      set_decays(decays.get_decay_table(), flexibledecay_settings);
+   }
+}";
 
 End[];
 

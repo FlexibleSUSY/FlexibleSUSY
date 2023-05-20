@@ -7,14 +7,13 @@
 #include "CMSSM_model_slha.hpp"
 #include "CMSSM_slha_io.hpp"
 #include "CMSSM_two_scale_model.hpp"
-#include "def.h"
-#include "utils.h"
+#include "wrappers.hpp"
 
 using namespace flexiblesusy;
 
 BOOST_AUTO_TEST_CASE( test_CMSSM_slha_reading )
 {
-   CMSSM_slha<CMSSM<Two_scale> > model;
+   CMSSM_slha model;
    model.do_calculate_sm_pole_masses(true);
 
    const double scale = 91.0;
@@ -23,21 +22,21 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_slha_reading )
    const double sinthWsq = 0.23122;
    const double alpha1 = 5 * ALPHAMZ / (3 * (1 - sinthWsq));
    const double alpha2 = ALPHAMZ / sinthWsq;
-   const double g1 = sqrt(4 * softsusy::PI * alpha1);
-   const double g2 = sqrt(4 * softsusy::PI * alpha2);
-   const double g3 = sqrt(4 * softsusy::PI * ALPHASMZ);
+   const double g1 = Sqrt(4 * Pi * alpha1);
+   const double g2 = Sqrt(4 * Pi * alpha2);
+   const double g3 = Sqrt(4 * Pi * ALPHASMZ);
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
    const double cosBeta = cos(atan(tanBeta));
    const double M12 = 100.0;
    const double m0 = 250.0;
    const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
+   const double root2 = Sqrt(2.0);
    const double vev = 246.0;
    const double vu = vev * sinBeta;
    const double vd = vev * cosBeta;
    const double susyMu = 120.0;
-   const double BMu = sqr(2.0 * susyMu);
+   const double BMu = Sqr(2.0 * susyMu);
 
    Eigen::Matrix<double,3,3> Yu(Eigen::Matrix<double,3,3>::Zero()),
       Yd(Eigen::Matrix<double,3,3>::Zero()),
@@ -78,8 +77,8 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_slha_reading )
    model.set_md2(mm0);
    model.set_mu2(mm0);
    model.set_me2(mm0);
-   model.set_mHd2(sqr(m0));
-   model.set_mHu2(sqr(m0));
+   model.set_mHd2(Sqr(m0));
+   model.set_mHu2(Sqr(m0));
    model.set_TYu(a0 * Yu);
    model.set_TYd(a0 * Yd);
    model.set_TYe(a0 * Ye);

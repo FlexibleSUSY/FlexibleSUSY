@@ -1,0 +1,184 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = MSSMNoFV;
+
+(* CMSSM input parameters *)
+
+MINPAR = {
+    {1, m0},
+    {2, m12},
+    {3, TanBeta},
+    {4, Sign[\[Mu]]},
+    {5, Azero}
+};
+
+EXTPAR = {
+    {100, Mlow}
+};
+
+EWSBOutputParameters = { B[\[Mu]], \[Mu] };
+
+SUSYScale = Sqrt[M[St[1]] M[St[2]]];
+
+SUSYScaleFirstGuess = Sqrt[m0^2 + 4 m12^2];
+
+SUSYScaleInput = {};
+
+HighScale = g1 == g2;
+
+HighScaleFirstGuess = 2.0 10^16;
+
+HighScaleInput = {
+   {T[Ye], Azero*Ye},
+   {T[Yd], Azero*Yd},
+   {T[Yu], Azero*Yu},
+   {mHd2, m0^2},
+   {mHu2, m0^2},
+   {mq2, UNITMATRIX[3] m0^2},
+   {ml2, UNITMATRIX[3] m0^2},
+   {md2, UNITMATRIX[3] m0^2},
+   {mu2, UNITMATRIX[3] m0^2},
+   {me2, UNITMATRIX[3] m0^2},
+   {MassB, m12},
+   {MassWB,m12},
+   {MassG,m12}
+};
+
+LowScale = If[Mlow != 0, Mlow, LowEnergyConstant[MZ]];
+
+LowScaleFirstGuess = If[Mlow != 0, Mlow, LowEnergyConstant[MZ]];
+
+LowScaleInput = {
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic},
+   {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+   {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
+};
+
+InitialGuessAtLowScale = {
+   {vd, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+   {vu, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtHighScale = {
+   {\[Mu]   , 1.0},
+   {B[\[Mu]], 0.0}
+};
+
+UseHiggs2LoopMSSM = True;
+EffectiveMu = \[Mu];
+UseMSSM3LoopRGEs = True;
+UseHiggs3LoopMSSM = True;
+UseMSSMYukawa2Loop = True;
+UseMSSMAlphaS2Loop = True;
+
+PotentialLSPParticles = {
+    Chi, SveL, SvmL, SvtL, Su, Sd, Sc, Ss, St, Sb,
+    Se, Sm, Stau, Cha, Glu
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh, Ah, Hpm};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYOutput,
+           {{0, Hold[HighScale]},
+            {1, Hold[SUSYScale]},
+            {2, Hold[LowScale]} } },
+   {FlexibleSUSYLowEnergy,
+           {{0, FlexibleSUSYObservable`AMM[Fm]},
+            {1, FlexibleSUSYObservable`AMMUncertainty[Fm]},
+            {2, FlexibleSUSYObservable`aMuonGM2Calc},
+            {3, FlexibleSUSYObservable`aMuonGM2CalcUncertainty} } },
+   {ALPHA, {{ArcSin[Pole[ZH[2,2]]]}}},
+   {HMIX , {{1, \[Mu]},
+            {2, vu / vd},
+            {3, Sqrt[vu^2 + vd^2]},
+            {4, M[Ah[2]]^2},
+            {101, B[\[Mu]]},
+            {102, vd},
+            {103, vu} } },
+   {Au,    {{1, 1, T[Yu][1,1] / Yu[1,1]},
+            {2, 2, T[Yu][2,2] / Yu[2,2]},
+            {3, 3, T[Yu][3,3] / Yu[3,3]} } },
+   {Ad,    {{1, 1, T[Yd][1,1] / Yd[1,1]},
+            {2, 2, T[Yd][2,2] / Yd[2,2]},
+            {3, 3, T[Yd][3,3] / Yd[3,3]} } },
+   {Ae,    {{1, 1, T[Ye][1,1] / Ye[1,1]},
+            {2, 2, T[Ye][2,2] / Ye[2,2]},
+            {3, 3, T[Ye][3,3] / Ye[3,3]} } },
+   {MSOFT, {{1, MassB},
+            {2, MassWB},
+            {3, MassG},
+            {21, mHd2},
+            {22, mHu2},
+            {31, SignedAbsSqrt[ml2[1,1]]},
+            {32, SignedAbsSqrt[ml2[2,2]]},
+            {33, SignedAbsSqrt[ml2[3,3]]},
+            {34, SignedAbsSqrt[me2[1,1]]},
+            {35, SignedAbsSqrt[me2[2,2]]},
+            {36, SignedAbsSqrt[me2[3,3]]},
+            {41, SignedAbsSqrt[mq2[1,1]]},
+            {42, SignedAbsSqrt[mq2[2,2]]},
+            {43, SignedAbsSqrt[mq2[3,3]]},
+            {44, SignedAbsSqrt[mu2[1,1]]},
+            {45, SignedAbsSqrt[mu2[2,2]]},
+            {46, SignedAbsSqrt[mu2[3,3]]},
+            {47, SignedAbsSqrt[md2[1,1]]},
+            {48, SignedAbsSqrt[md2[2,2]]},
+            {49, SignedAbsSqrt[md2[3,3]]} } },
+   {MASS,  {{      6, Pole[M[Ft]]     },
+            {     24, Pole[M[VWm]]    },
+            {1000021, Pole[M[Glu]]    },
+            {1000012, Pole[M[SveL]]   },
+            {1000014, Pole[M[SvmL]]   },
+            {1000016, Pole[M[SvtL]]   },
+            {1000024, Pole[M[Cha[1]]] },
+            {1000037, Pole[M[Cha[2]]] },
+            {     25, Pole[M[hh[1]]]  },
+            {     35, Pole[M[hh[2]]]  },
+            {     37, Pole[M[Hpm[2]]] },
+            {     36, Pole[M[Ah[2]]]  },
+            {1000001, Sum[conj[Pole[ZD[i,1]]] Pole[ZD[i,1]] Pole[M[Sd[i]]], {i,1,2}] }, (* ~d_L *)
+            {2000001, Sum[conj[Pole[ZD[i,2]]] Pole[ZD[i,2]] Pole[M[Sd[i]]], {i,1,2}] }, (* ~d_R *)
+            {1000003, Sum[conj[Pole[ZS[i,1]]] Pole[ZS[i,1]] Pole[M[Ss[i]]], {i,1,2}] }, (* ~s_L *)
+            {2000003, Sum[conj[Pole[ZS[i,2]]] Pole[ZS[i,2]] Pole[M[Ss[i]]], {i,1,2}] }, (* ~s_R *)
+            {1000005, Pole[M[Sb[1]]]  },
+            {2000005, Pole[M[Sb[2]]]  },
+            {1000011, Sum[conj[Pole[ZE[i,1]]] Pole[ZE[i,1]] Pole[M[Se[i]]], {i,1,2}] }, (* ~e_L *)
+            {2000011, Sum[conj[Pole[ZE[i,2]]] Pole[ZE[i,2]] Pole[M[Se[i]]], {i,1,2}] }, (* ~e_R *)
+            {1000013, Sum[conj[Pole[ZM[i,1]]] Pole[ZM[i,1]] Pole[M[Sm[i]]], {i,1,2}] }, (* ~m_L *)
+            {2000013, Sum[conj[Pole[ZM[i,2]]] Pole[ZM[i,2]] Pole[M[Sm[i]]], {i,1,2}] }, (* ~m_R *)
+            {1000015, Pole[M[Stau[1]]]},
+            {2000015, Pole[M[Stau[2]]]},
+            {1000002, Sum[conj[Pole[ZU[i,1]]] Pole[ZU[i,1]] Pole[M[Su[i]]], {i,1,2}] }, (* ~u_L *)
+            {2000002, Sum[conj[Pole[ZU[i,2]]] Pole[ZU[i,2]] Pole[M[Su[i]]], {i,1,2}] }, (* ~u_R *)
+            {1000004, Sum[conj[Pole[ZC[i,1]]] Pole[ZC[i,1]] Pole[M[Sc[i]]], {i,1,2}] }, (* ~c_L *)
+            {2000004, Sum[conj[Pole[ZC[i,2]]] Pole[ZC[i,2]] Pole[M[Sc[i]]], {i,1,2}] }, (* ~c_R *)
+            {1000006, Pole[M[St[1]]]  },
+            {2000006, Pole[M[St[2]]]  },
+            {1000022, Pole[M[Chi[1]]] },
+            {1000023, Pole[M[Chi[2]]] },
+            {1000025, Pole[M[Chi[3]]] },
+            {1000035, Pole[M[Chi[4]]] },
+            {     24, Pole[M[VWm]]    },
+            {     23, Pole[M[VZ]]     },
+            {      1, Pole[M[Fd]]     },
+            {      2, Pole[M[Fu]]     },
+            {      3, Pole[M[Fs]]     },
+            {      4, Pole[M[Fc]]     },
+            {      5, Pole[M[Fb]]     },
+            {      6, Pole[M[Ft]]     },
+            {     11, Pole[M[Fe]]     },
+            {     13, Pole[M[Fm]]     },
+            {     15, Pole[M[Ftau]]   } } }
+};
+
+FSCalculateDecays = False;
+

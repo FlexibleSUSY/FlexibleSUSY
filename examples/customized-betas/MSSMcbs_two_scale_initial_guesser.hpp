@@ -23,7 +23,7 @@
 #include "MSSMcbs_two_scale_low_scale_constraint.hpp"
 #include "CMSSM_two_scale_susy_scale_constraint.hpp"
 #include "CMSSM_two_scale_high_scale_constraint.hpp"
-#include "two_scale_initial_guesser.hpp"
+#include "initial_guesser.hpp"
 
 #include <sstream>
 
@@ -35,7 +35,7 @@ class MSSMcbs;
 class Two_scale;
 
 template<>
-class MSSMcbs_initial_guesser<Two_scale> : public Initial_guesser<Two_scale> {
+class MSSMcbs_initial_guesser<Two_scale> : public Initial_guesser {
 public:
    MSSMcbs_initial_guesser(MSSMcbs<Two_scale>*,
                                const softsusy::QedQcd&,

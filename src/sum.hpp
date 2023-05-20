@@ -19,7 +19,9 @@
 #ifndef SUM_H
 #define SUM_H
 
+#include <type_traits>
 #include <cstddef>
+#include <Eigen/Core>
 
 namespace flexiblesusy {
 
@@ -30,42 +32,69 @@ namespace flexiblesusy {
 #define get_sum_macro(_1, _2, _3, _4, _5, name, ...) name
 
 #define sum_ptrdiff_t(idx, ini, fin, expr)      \
-    sum<std::ptrdiff_t, (ini), (fin)>([&](std::ptrdiff_t (idx)) { return (expr); })
+    sum<std::ptrdiff_t>((ini), (fin), [&](std::ptrdiff_t (idx)) { return (expr); })
 
 #define sum_user_t(type, idx, ini, fin, expr)	\
-    sum<type, (ini), (fin)>([&](type (idx)) { return (expr); })
+    sum<type>((ini), (fin), [&](type (idx)) { return (expr); })
 
-template<bool valid, class Function, class Idx, Idx ini, Idx fin>
-struct unroll_sum;
-
-template<class Function, class Idx, Idx ini, Idx fin>
-struct unroll_sum<false, Function, Idx, ini, fin> {
-    static auto eval(Function f) -> decltype(f(ini)) {
-	return decltype(f(ini))();
-    }
-};
-
-template<class Function, class Idx, Idx idx>
-struct unroll_sum<true, Function, Idx, idx, idx> {
-    static auto eval(Function f) -> decltype(f(idx)) {
-	return f(idx);
-    }
-};
-
-template<class Function, class Idx, Idx ini, Idx fin>
-struct unroll_sum<true, Function, Idx, ini, fin> {
-    static constexpr Idx mid = (ini+fin)/2;
-    static auto eval(Function f) -> decltype(f(mid)) {
-	return unroll_sum<(mid > ini), Function, Idx, ini, mid-1>::eval(f) +
-	       f(mid) +
-	       unroll_sum<(fin > mid), Function, Idx, mid+1, fin>::eval(f);
-    }
-};
-
-template<class Idx, Idx ini, Idx fin, class Function>
-auto sum(Function f) -> decltype(f(ini))
+template<typename T>
+struct is_eigen_type
 {
-    return unroll_sum<(fin >= ini), Function, Idx, ini, fin>::eval(f);
+    static constexpr auto value =
+	std::is_base_of<Eigen::EigenBase<T>, T>::value;
+};
+
+template<typename Idx, typename Function, bool isEigenType>
+struct EvalEigenXprImpl {
+    static auto eval(Idx i, Function f) -> decltype(f(i)) {
+	return f(i);
+    }
+};
+
+template<typename Idx, typename Function>
+struct EvalEigenXprImpl<Idx, Function, true> {
+    static auto eval(Idx i, Function f) ->
+	typename std::remove_reference<decltype(f(i).eval())>::type
+    {
+	return f(i).eval();
+    }
+};
+
+template<typename Idx, typename Function>
+auto EvalEigenXpr(Idx i, Function f) ->
+    decltype(
+	EvalEigenXprImpl<Idx, Function, is_eigen_type<decltype(f(i))>::value>::
+	eval(i, f))
+{
+    return
+	EvalEigenXprImpl<Idx, Function, is_eigen_type<decltype(f(i))>::value>::
+	eval(i, f);
+}
+
+template<typename T, bool isEigenType>
+struct create_zero {
+    static const T zero() {
+	return T();
+    }
+};
+
+template<typename T>
+struct create_zero<T, true> {
+    static const T zero() {
+	T z;
+	z.setZero();
+	return z;
+    }
+};
+
+template<class Idx, class Function>
+auto sum(Idx ini, Idx fin, Function f) -> decltype(EvalEigenXpr<Idx>(ini, f))
+{
+    using Evaled = decltype(EvalEigenXpr<Idx>(ini, f));
+    using Acc = typename std::remove_cv<Evaled>::type;
+    Acc s = create_zero<Acc, is_eigen_type<Acc>::value>::zero();
+    for (Idx i = ini; i <= fin; i++) s += f(i);
+    return s;
 }
 
 } // namespace flexiblesusy

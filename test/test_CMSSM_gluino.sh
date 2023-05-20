@@ -5,7 +5,7 @@ print_block="$BASEDIR/../utils/print_slha_block.awk"
 print_block_entry="$BASEDIR/../utils/print_slha_block_entry.awk"
 
 mssm_exe="$BASEDIR/../models/CMSSM/run_CMSSM.x"
-softsusy_exe="$BASEDIR/../models/SoftsusyNMSSM/run_softpoint.x"
+softsusy_exe="$BASEDIR/../test/SOFTSUSY/run_softpoint.x"
 
 input="$BASEDIR/test_CMSSM_gluino.spc.in"
 output="$BASEDIR/test_CMSSM_gluino.spc.out"

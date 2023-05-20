@@ -5,7 +5,7 @@ LIBFMSSMN_SRC  :=
 LIBFMSSMN_GENERATED_SRC :=
 LIBFMSSMN_INC  :=
 
-ifneq ($(findstring lattice,$(ALGORITHMS)),)
+ifneq ($(findstring lattice,$(SOLVERS)),)
 LIBFMSSMN_GENERATED_SRC += \
 		$(DIR)/fmssmn_lattice_rge.f \
 		$(DIR)/fmssmn_lattice_constraints.f \
@@ -77,7 +77,7 @@ $(DIR)/%.f : $(DIR)/%.f.m
 $(DIR)/%.inc : $(DIR)/%.inc.m
 	$(MATH) -run 'filename="$@"; << $<; Quit[]'
 
-ifneq ($(findstring lattice,$(ALGORITHMS)),)
+ifneq ($(findstring lattice,$(SOLVERS)),)
 $(LIBFMSSMN_DEP) $(LIBFMSSMN_OBJ): CPPFLAGS += $(EIGENFLAGS) $(GSLFLAGS) $(BOOSTFLAGS)
 endif
 

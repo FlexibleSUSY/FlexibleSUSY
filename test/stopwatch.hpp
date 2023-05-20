@@ -16,6 +16,9 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+#ifndef STOPWATCH_H
+#define STOPWATCH_H
+
 #include <chrono>
 
 namespace flexiblesusy {
@@ -34,3 +37,5 @@ private:
 };
 
 } // namespace flexiblesusy
+
+#endif

@@ -19,13 +19,13 @@
 #ifndef @ModelName@_TWO_SCALE_MATCHING_H
 #define @ModelName@_TWO_SCALE_MATCHING_H
 
-#include "two_scale_matching.hpp"
+#include "single_scale_matching.hpp"
 #include <functional>
 
 namespace flexiblesusy {
 
+class Model;
 class Two_scale;
-class Two_scale_model;
 
 template <class T> class @ModelName@;
 template <class T> class @ModelName@_standard_model_matching_up;
@@ -36,7 +36,7 @@ template <class T> class StandardModel;
 }
 
 template<>
-class @ModelName@_standard_model_matching_up<Two_scale> : public Matching<Two_scale>
+class @ModelName@_standard_model_matching_up<Two_scale> : public Single_scale_matching
 {
 public:
    using Scale_getter = std::function<double()>;
@@ -51,7 +51,7 @@ public:
    virtual ~@ModelName@_standard_model_matching_up() = default;
 
    virtual double get_scale() const override;
-   virtual void set_models(Two_scale_model*, Two_scale_model*) override;
+   virtual void set_models(Model*, Model*) override;
    virtual void match() override;
 
    int get_higgs_index() const;
@@ -73,7 +73,7 @@ private:
 };
 
 template<>
-class @ModelName@_standard_model_matching_down<Two_scale> : public Matching<Two_scale>
+class @ModelName@_standard_model_matching_down<Two_scale> : public Single_scale_matching
 {
 public:
    using Scale_getter = std::function<double()>;
@@ -88,7 +88,7 @@ public:
    virtual ~@ModelName@_standard_model_matching_down() = default;
 
    virtual double get_scale() const override;
-   virtual void set_models(Two_scale_model*, Two_scale_model*) override;
+   virtual void set_models(Model*, Model*) override;
    virtual void match() override;
 
    int get_higgs_index() const;

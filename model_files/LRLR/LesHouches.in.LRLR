@@ -1,0 +1,153 @@
+Block MODSEL                 # Select model
+#   12    1000                # DRbar parameter output scale (GeV
+Block FlexibleSUSY
+    0   1.000000000e-04      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
+    3   0                    # calculate SM pole masses
+    4   0                    # pole mass loop order
+    5   0                    # EWSB loop order
+    6   1                    # beta-functions loop order
+    7   0                    # threshold corrections loop order
+    8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
+   12   0                    # force output
+   13   1                    # Top quark 2-loop corrections QCD
+   14   1.000000000e-11      # beta-function zero threshold
+   15   0                    # calculate observables (a_muon, ...)
+Block SMINPUTS               # Standard Model inputs
+    1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
+    3   1.176000000e-01      # alpha_s(MZ) SM MSbar
+    4   9.118760000e+01      # MZ(pole)
+    5   4.200000000e+00      # mb(mb) SM MSbar
+    6   1.733000000e+02      # mtop(pole)
+    7   1.777000000e+00      # mtau(pole)
+    8   0.000000000e+00      # mnu3(pole)
+   11   5.109989020e-04      # melectron(pole)
+   12   0.000000000e+00      # mnu1(pole)
+   13   1.056583570e-01      # mmuon(pole)
+   14   0.000000000e+00      # mnu2(pole)
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
+Block MINPAR                 # Input parameters
+    1   1.000000000e+03      # vHRInput
+    2   1.000000000e-02      # vtLInput
+    3   1.000000000e+03      # vtRInput
+    4   2.000000000e+03      # vSUInput
+    5   1.000000000e+03      # vSDInput
+    6   1.000000000e+03      # vSEInput
+   10   1.000000000e-01      # rho1RInput
+   11   0.000000000e+00      # rho2RInput
+   12   1.000000000e+00      # rho1LInput
+   13   0.000000000e+00      # rho2LInput
+   14   0.000000000e+00      # rho3Input
+   15   1.000000000e-01      # lamDDInput
+   16   1.000000000e-01      # lamUUInput
+   17   1.000000000e-01      # lamEEInput
+   18   0.000000000e+00      # lamDUInput
+   19   0.000000000e+00      # lamDEInput
+   20   0.000000000e+00      # lamUEInput
+   21   3.000000000e-01      # lam2LInput
+   22   1.000000000e+00      # lam2RInput
+   23   0.000000000e+00      # lamLRInput
+   24   0.000000000e+00      # lamULInput
+   25   0.000000000e+00      # lamDLInput
+   26   0.000000000e+00      # lamELInput
+   27   0.000000000e+00      # lamURInput
+   28   0.000000000e+00      # lamDRInput
+   29   0.000000000e+00      # lamERInput
+   30   0.000000000e+00      # lamUdLInput
+   31   0.000000000e+00      # lamDdLInput
+   32   0.000000000e+00      # lamEdLInput
+   33   0.000000000e+00      # lamUdRInput
+   34   0.000000000e+00      # lamDdRInput
+   35   0.000000000e+00      # lamEdRInput
+   36   0.000000000e+00      # etaLLInput
+   37   0.000000000e+00      # etaRLInput
+   38   0.000000000e+00      # etaLRInput
+   39   1.000000000e-01      # etaRRInput
+   40  -1.000000000e-01      # eRR1Input
+   41   0.000000000e+00      # eRR2Input
+   42   0.000000000e+00      # eLL1Input
+   43   0.000000000e+00      # eLL2Input
+   50  -1.000000000e-01      # rhoLInput
+   51  -1.000000000e-04      # rhoRInput
+   52  -1.000000000e-03      # lamInput
+   53   0.000000000e+00      # xiSInput
+   54   0.000000000e+00      # etaInput
+   55  -1.000000000e-01      # kapInput
+Block FDIN
+  1  1  0.100000000e+00      # fd(1,1)
+  1  2  0.000000000e+00      # fd(1,2)
+  1  3  0.000000000e+00      # fd(1,3)
+  2  1  0.000000000e+00      # fd(2,1)
+  2  2  1.000000000e+00      # fd(2,2)
+  2  3  0.000000000e+00      # fd(2,3)
+  3  1  0.000000000e+00      # fd(3,1)
+  3  2  0.000000000e+00      # fd(3,2)
+  3  3  4.000000000e+00      # fd(3,3)
+Block FEIN
+  1  1  0.010000000e+00      # fe(1,1)
+  1  2  0.000000000e+00      # fe(1,2)
+  1  3  0.000000000e+00      # fe(1,3)
+  2  1  0.000000000e+00      # fe(2,1)
+  2  2  0.100000000e+00      # fe(2,2)
+  2  3  0.000000000e+00      # fe(2,3)
+  3  1  0.000000000e+00      # fe(3,1)
+  3  2  0.000000000e+00      # fe(3,2)
+  3  3  1.000000000e+00      # fe(3,3)
+Block FUIN
+  1  1  0.100000000e+00      # fu(1,1)
+  1  2  0.000000000e+00      # fu(1,2)
+  1  3  0.000000000e+00      # fu(1,3)
+  2  1  0.000000000e+00      # fu(2,1)
+  2  2  1.000000000e+00      # fu(2,2)
+  2  3  0.000000000e+00      # fu(2,3)
+  3  1  0.000000000e+00      # fu(3,1)
+  3  2  0.000000000e+00      # fu(3,2)
+  3  3  1.750000000e+02      # fu(3,3)
+Block YLIN
+  1  1  0.100000000e+00      # yl(1,1)
+  1  2  0.000000000e+00      # yl(1,2)
+  1  3  0.000000000e+00      # yl(1,3)
+  2  1  0.000000000e+00      # yl(2,1)
+  2  2  0.200000000e+00      # yl(2,2)
+  2  3  0.000000000e+00      # yl(2,3)
+  3  1  0.000000000e+00      # yl(3,1)
+  3  2  0.000000000e+00      # yl(3,2)
+  3  3  0.300000000e+00      # yl(3,3)
+Block YVDIN
+  1  1  0.100000000e+00      # YVD(1,1)
+  1  2  0.000000000e+00      # YVD(1,2)
+  1  3  0.000000000e+00      # YVD(1,3)
+  2  1  0.000000000e+00      # YVD(2,1)
+  2  2  0.200000000e+00      # YVD(2,2)
+  2  3  0.000000000e+00      # YVD(2,3)
+  3  1  0.000000000e+00      # YVD(3,1)
+  3  2  0.000000000e+00      # YVD(3,2)
+  3  3  0.300000000e+00      # YVD(3,3)
+Block YVEIN
+  1  1  0.100000000e+00      # YVE(1,1)
+  1  2  0.000000000e+00      # YVE(1,2)
+  1  3  0.000000000e+00      # YVE(1,3)
+  2  1  0.000000000e+00      # YVE(2,1)
+  2  2  0.200000000e+00      # YVE(2,2)
+  2  3  0.000000000e+00      # YVE(2,3)
+  3  1  0.000000000e+00      # YVE(3,1)
+  3  2  0.000000000e+00      # YVE(3,2)
+  3  3  0.300000000e+00      # YVE(3,3)
+Block YVUIN
+  1  1  0.100000000e+00      # YVU(1,1)
+  1  2  0.000000000e+00      # YVU(1,2)
+  1  3  0.000000000e+00      # YVU(1,3)
+  2  1  0.000000000e+00      # YVU(2,1)
+  2  2  0.200000000e+00      # YVU(2,2)
+  2  3  0.000000000e+00      # YVU(2,3)
+  3  1  0.000000000e+00      # YVU(3,1)
+  3  2  0.000000000e+00      # YVU(3,2)
+  3  3  0.300000000e+00      # YVU(3,3)

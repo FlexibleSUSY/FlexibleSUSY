@@ -19,17 +19,6 @@ using namespace softsusy;
 void setup(CMSSMCKM_input_parameters& input, DoubleVector& input2)
 {
    const double M12 = 100.0;
-   const double m0 = 250.0;
-   const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
-   const double vev = 246.0;
-   const double tanBeta = 10;
-   const double sinBeta = sin(atan(tanBeta));
-   const double cosBeta = cos(atan(tanBeta));
-   const double vu = vev * sinBeta;
-   const double vd = vev * cosBeta;
-   const double susyMu = 120.0;
-   const double BMu = Sqr(2.0 * susyMu);
 
    Eigen::Matrix<double,3,3> mm0;
    mm0 << Sqr(330), 200     , 100,
@@ -115,7 +104,6 @@ void setup(CMSSMCKM_mass_eigenstates& m, FlavourMssmSoftsusy& s)
    const double g1 = sqrt(4 * Pi * alpha1);
    const double g2 = sqrt(4 * Pi * alpha2);
    const double g3 = sqrt(4 * Pi * ALPHASMZ);
-   const double root2 = sqrt(2.0);
    const double vev = 246.0;
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
@@ -196,6 +184,20 @@ void setup(CMSSMCKM_mass_eigenstates& m, FlavourMssmSoftsusy& s)
    s.setMw(s.displayMwRun());
 }
 
+DoubleMatrix get_CKM(const FlavourMssmSoftsusy& s)
+{
+   DoubleMatrix Ud(3, 3), Vd(3, 3), Uu(3, 3), Vu(3, 3);
+   DoubleVector yu(3), yd(3);
+
+   s.displayYukawaMatrix(YU).diagonalise(Vu, Uu, yu);
+   s.displayYukawaMatrix(YD).diagonalise(Vd, Ud, yd);
+   ckmNormalise(Vu, Vd, Uu, Ud);
+
+   DoubleMatrix CKM(Vu.transpose() * Vd);
+
+   return CKM;
+}
+
 BOOST_AUTO_TEST_CASE( test_CMSSMCKM_tree_level_masses )
 {
    // This test compares the DR-bar spectrum of Softsusy (in the
@@ -203,14 +205,14 @@ BOOST_AUTO_TEST_CASE( test_CMSSMCKM_tree_level_masses )
 
    softsusy::PRINTOUT = 2;
    FlavourMssmSoftsusy s;
-   CMSSMCKM<Two_scale> m0;
+   CMSSMCKM_mass_eigenstates m0;
    m0.do_force_output(true);
    setup(m0, s);
 
    m0.calculate_DRbar_masses();
    s.calcDrBarPars();
 
-   CMSSMCKM_slha<CMSSMCKM<Two_scale> > m(m0); // converts to SLHA-2
+   CMSSMCKM_slha m(m0); // converts to SLHA-2
 
    // re-set model parameters to super-CKM basis
    m.set_Yu(m.get_Yu_slha().matrix().cast<std::complex<double> >().asDiagonal());
@@ -331,10 +333,25 @@ BOOST_AUTO_TEST_CASE( test_CMSSMCKM_tree_level_masses )
    const DoubleVector MFd(ToDoubleVector(m.get_MFd()));
    BOOST_CHECK_CLOSE(MFd(3), s.displayDrBarPars().mb, 1.0e-12);
 
+   // compare CKM matrices
+
+   const auto VCKM = m.get_ckm_matrix();
+   const auto VCKM_SS = get_CKM(s);
+
+   BOOST_TEST_MESSAGE("CKM(FS): " << VCKM);
+   BOOST_TEST_MESSAGE("CKM(SS): " << VCKM_SS);
+
+   for (int i = 0; i < 3; i++) {
+      for (int k = 0; k < 3; k++) {
+         BOOST_CHECK_CLOSE(std::real(VCKM(i,k)), std::real(VCKM_SS(i+1,k+1)), 1e-10);
+         BOOST_CHECK_SMALL(std::imag(VCKM(i,k)), 1e-7);
+         BOOST_CHECK_SMALL(std::imag(VCKM_SS(i+1,k+1)), 1e-10);
+      }
+   }
+
    // Now set CMSSMCKM up-type sfermion masses to super-CKM basis, as
    // in Eq. (11) of SLHA-2.
 
-   const auto VCKM = m.get_ckm_matrix();
    const auto mq2_super_CKM = m.get_mq2();
    const auto mq2_up = VCKM * mq2_super_CKM * VCKM.adjoint();
 

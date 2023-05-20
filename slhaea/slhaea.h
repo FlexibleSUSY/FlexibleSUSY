@@ -28,6 +28,12 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 
+#if __cplusplus <= 199711L
+#define MEM_FN std::mem_fun_ref
+#else
+#define MEM_FN std::mem_fn
+#endif
+
 namespace SLHAea {
 
 // auxiliary functions
@@ -832,7 +838,7 @@ public:
       {
         if (++def_count > 1)
         {
-          is.seekg(-line_str.length()-1, std::ios_base::cur);
+          is.seekg(-static_cast<std::ptrdiff_t>(line_str.length() + 1), std::ios_base::cur);
           break;
         }
         if (nameless)
@@ -1274,7 +1280,7 @@ public:
   find_block_def()
   {
     return std::find_if(begin(), end(),
-      std::mem_fun_ref(&value_type::is_block_def));
+      MEM_FN(&value_type::is_block_def));
   }
 
   /**
@@ -1286,7 +1292,7 @@ public:
   find_block_def() const
   {
     return std::find_if(begin(), end(),
-      std::mem_fun_ref(&value_type::is_block_def));
+      MEM_FN(&value_type::is_block_def));
   }
 
   // introspection
@@ -1310,7 +1316,7 @@ public:
   data_size() const
   {
     return std::count_if(begin(), end(),
-      std::mem_fun_ref(&value_type::is_data_line));
+      MEM_FN(&value_type::is_data_line));
   }
 
   /** Returns the size() of the largest possible %Block. */
@@ -1500,7 +1506,7 @@ public:
    */
   void
   reformat()
-  { std::for_each(begin(), end(), std::mem_fun_ref(&value_type::reformat)); }
+  { std::for_each(begin(), end(), MEM_FN(&value_type::reformat)); }
 
   /**
    * \brief Comments all Lines in the %Block.
@@ -1508,7 +1514,7 @@ public:
    */
   void
   comment()
-  { std::for_each(begin(), end(), std::mem_fun_ref(&value_type::comment)); }
+  { std::for_each(begin(), end(), MEM_FN(&value_type::comment)); }
 
   /**
    * \brief Uncomments all Lines in the %Block.
@@ -1516,10 +1522,10 @@ public:
    */
   void
   uncomment()
-  { std::for_each(begin(), end(), std::mem_fun_ref(&value_type::uncomment)); }
+  { std::for_each(begin(), end(), MEM_FN(&value_type::uncomment)); }
 
   /** Unary predicate that checks if a provided key matches a Line. */
-  struct key_matches : public std::unary_function<value_type, bool>
+  struct key_matches
   {
     explicit
     key_matches(const key_type& key) : key_(key) {}
@@ -1564,11 +1570,11 @@ private:
   {
     key_type key;
     key.reserve(5);
-    if (s0.empty()) return key; key.push_back(s0);
-    if (s1.empty()) return key; key.push_back(s1);
-    if (s2.empty()) return key; key.push_back(s2);
-    if (s3.empty()) return key; key.push_back(s3);
-    if (s4.empty()) return key; key.push_back(s4);
+    if (s0.empty()) { return key; } key.push_back(s0);
+    if (s1.empty()) { return key; } key.push_back(s1);
+    if (s2.empty()) { return key; } key.push_back(s2);
+    if (s3.empty()) { return key; } key.push_back(s3);
+    if (s4.empty()) { return key; } key.push_back(s4);
     return key;
   }
 
@@ -1577,11 +1583,11 @@ private:
   {
     key_type key;
     key.reserve(5);
-    if (i0 == no_index_) return key; key.push_back(to_string(i0));
-    if (i1 == no_index_) return key; key.push_back(to_string(i1));
-    if (i2 == no_index_) return key; key.push_back(to_string(i2));
-    if (i3 == no_index_) return key; key.push_back(to_string(i3));
-    if (i4 == no_index_) return key; key.push_back(to_string(i4));
+    if (i0 == no_index_) { return key; } key.push_back(to_string(i0));
+    if (i1 == no_index_) { return key; } key.push_back(to_string(i1));
+    if (i2 == no_index_) { return key; } key.push_back(to_string(i2));
+    if (i3 == no_index_) { return key; } key.push_back(to_string(i3));
+    if (i4 == no_index_) { return key; } key.push_back(to_string(i4));
     return key;
   }
 
@@ -2323,7 +2329,7 @@ public:
    */
   void
   reformat()
-  { std::for_each(begin(), end(), std::mem_fun_ref(&value_type::reformat)); }
+  { std::for_each(begin(), end(), MEM_FN(&value_type::reformat)); }
 
   /**
    * \brief Comments all Blocks in the %Coll.
@@ -2331,7 +2337,7 @@ public:
    */
   void
   comment()
-  { std::for_each(begin(), end(), std::mem_fun_ref(&value_type::comment)); }
+  { std::for_each(begin(), end(), MEM_FN(&value_type::comment)); }
 
   /**
    * \brief Uncomments all Blocks in the %Coll.
@@ -2339,13 +2345,13 @@ public:
    */
   void
   uncomment()
-  { std::for_each(begin(), end(), std::mem_fun_ref(&value_type::uncomment)); }
+  { std::for_each(begin(), end(), MEM_FN(&value_type::uncomment)); }
 
   /**
    * Unary predicate that checks if a provided name matches the name
    * of a Block.
    */
-  struct key_matches : public std::unary_function<value_type, bool>
+  struct key_matches
   {
     explicit
     key_matches(const key_type& blockName) : name_(blockName) {}
@@ -2366,7 +2372,7 @@ public:
    * Unary predicate that checks if a provided key matches the block
    * definition of a Block.
    */
-  struct key_matches_block_def : public std::unary_function<value_type, bool>
+  struct key_matches_block_def
   {
     explicit
     key_matches_block_def(const value_type::key_type& key)
@@ -2658,5 +2664,7 @@ operator>=(const Coll& a, const Coll& b)
 { return !(a < b); }
 
 } // namespace SLHAea
+
+#undef MEM_FN
 
 #endif // SLHAEA_H

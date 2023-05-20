@@ -1,8 +1,8 @@
 Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
-    2   0                    # algorithm (0 = two_scale, 1 = lattice)
-    3   0                    # calculate SM pole masses
+    2   1                    # algorithm (1 = two_scale, 2 = semi-analytic)
+    3   1                    # calculate SM pole masses
     4   2                    # pole mass loop order
     5   2                    # EWSB loop order
     6   3                    # beta-functions loop order
@@ -23,6 +23,15 @@ Block FlexibleSUSY
    21   1                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   1                    # calculate BSM pole masses
+   24   123111321            # individual threshold correction loop orders
+   25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
+   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   1                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+   31   -1                   # loop library (0 = softsusy)
+   32   2                    # loop level to calculate AMM
 Block SMINPUTS               # Standard Model inputs
     1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
     2   1.166370000e-05      # G_Fermi

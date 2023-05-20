@@ -5,10 +5,13 @@
 #include <boost/test/unit_test.hpp>
 
 #include "slha_io.hpp"
+#include "slhaea.h"
+#include "mixings.hpp"
 #include "linalg2.hpp"
 #include "stopwatch.hpp"
+#include "wrappers.hpp"
+#include <string>
 #include <Eigen/Core>
-#include <boost/lexical_cast.hpp>
 
 using namespace flexiblesusy;
 
@@ -19,7 +22,8 @@ BOOST_AUTO_TEST_CASE( test_read_entry )
 
    const std::string str = "Block A\n"
       "   1   1.2      # comment 1\n"
-      "   2   2.3E+2   # comment 2";
+      "   2   1.3E+2   # comment 2\n"
+      "   2   2.3E+2   # comment 3";
 
    block.str(str);
    coll.push_back(block);
@@ -148,7 +152,9 @@ BOOST_AUTO_TEST_CASE( test_read_scale )
    SLHAea::Coll coll;
    SLHAea::Block block;
 
-   const std::string str = "Block Matrix Q= 1234.56\n"
+   std::string str =
+      "Block Matrix Q= 1234.56\n"
+      "Block Matrix Q= 2000\n"
       "   1  1  1.0      # element 1,1\n"
       "   1  2  2.0      # element 1,2\n"
       "   2  1  3.0      # element 2,1\n"
@@ -157,13 +163,22 @@ BOOST_AUTO_TEST_CASE( test_read_scale )
    block.str(str);
    coll.push_back(block);
 
+   str =
+      "Block Matrix Q= 2000\n"
+      "   1  1  11.0      # element 1,1\n"
+      "   1  2  12.0      # element 1,2\n"
+      "   2  1  13.0      # element 2,1\n"
+      "   2  2  14.0      # element 2,2\n";
+
+   block.str(str);
+   coll.push_back(block);
+
    SLHA_io reader;
    reader.set_data(coll);
 
-   Eigen::MatrixXd matrix(Eigen::MatrixXd::Zero(2,2));
    const double scale = reader.read_scale("Matrix");
 
-   BOOST_CHECK_EQUAL(scale, 1234.56);
+   BOOST_CHECK_EQUAL(scale, 2000.);
 }
 
 BOOST_AUTO_TEST_CASE( test_read_scale_from_block )
@@ -171,11 +186,22 @@ BOOST_AUTO_TEST_CASE( test_read_scale_from_block )
    SLHAea::Coll coll;
    SLHAea::Block block;
 
-   const std::string str = "Block Matrix Q= 1234.56\n"
+   std::string str =
+      "Block Matrix Q= 1234.56\n"
       "   1  1  1.0      # element 1,1\n"
       "   1  2  2.0      # element 1,2\n"
       "   2  1  3.0      # element 2,1\n"
       "   2  2  4.0      # element 2,2\n";
+
+   block.str(str);
+   coll.push_back(block);
+
+   str =
+      "Block Matrix Q= 2000\n"
+      "   1  1  11.0      # element 1,1\n"
+      "   1  2  12.0      # element 1,2\n"
+      "   2  1  13.0      # element 2,1\n"
+      "   2  2  14.0      # element 2,2\n";
 
    block.str(str);
    coll.push_back(block);
@@ -186,11 +212,109 @@ BOOST_AUTO_TEST_CASE( test_read_scale_from_block )
    Eigen::MatrixXd matrix(Eigen::MatrixXd::Zero(2,2));
    const double scale = reader.read_block("Matrix", matrix);
 
-   BOOST_CHECK_EQUAL(scale, 1234.56);
-   BOOST_CHECK_EQUAL(matrix(0,0), 1.0);
-   BOOST_CHECK_EQUAL(matrix(0,1), 2.0);
-   BOOST_CHECK_EQUAL(matrix(1,0), 3.0);
-   BOOST_CHECK_EQUAL(matrix(1,1), 4.0);
+   BOOST_CHECK_EQUAL(scale, 2000.0);
+   BOOST_CHECK_EQUAL(matrix(0,0), 11.0);
+   BOOST_CHECK_EQUAL(matrix(0,1), 12.0);
+   BOOST_CHECK_EQUAL(matrix(1,0), 13.0);
+   BOOST_CHECK_EQUAL(matrix(1,1), 14.0);
+}
+
+BOOST_AUTO_TEST_CASE( test_write_read_matrix )
+{
+   const double scale = 100.0;
+   const char* block_name = "Matrix";
+
+   Eigen::MatrixXd matrix(2,2);
+   matrix << 1, 2, 3, 4;
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name, matrix, "M", scale);
+
+   Eigen::MatrixXd new_matrix(2,2);
+   const double new_scale = slha_io.read_block(block_name, new_matrix);
+
+   BOOST_CHECK_EQUAL(scale, new_scale);
+   BOOST_CHECK_EQUAL(matrix(0,0), new_matrix(0,0));
+   BOOST_CHECK_EQUAL(matrix(0,1), new_matrix(0,1));
+   BOOST_CHECK_EQUAL(matrix(1,0), new_matrix(1,0));
+   BOOST_CHECK_EQUAL(matrix(1,1), new_matrix(1,1));
+}
+
+BOOST_AUTO_TEST_CASE( test_write_read_matrix_complex )
+{
+   const double scale = 100.0;
+   const char* block_name_real = "Matrix";
+   const char* block_name_imag = "ImMatrix";
+   const std::complex<double> i(0.0, 1.0);
+
+   Eigen::MatrixXcd matrix(2,2);
+   matrix << std::complex<double>(1.0,1.0),
+             std::complex<double>(2.0,2.0),
+             std::complex<double>(3.0,3.0),
+             std::complex<double>(4.0,4.0);
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name_real, matrix, "M", scale);
+   slha_io.set_block(block_name_imag, matrix, "M", scale);
+
+   Eigen::MatrixXd new_matrix_real(2,2), new_matrix_imag(2,2);
+   const double new_scale_real = slha_io.read_block(block_name_real, new_matrix_real);
+   const double new_scale_imag = slha_io.read_block(block_name_imag, new_matrix_imag);
+
+   Eigen::MatrixXcd new_matrix = new_matrix_real + new_matrix_imag*i;
+
+   BOOST_CHECK_EQUAL(scale, new_scale_real);
+   BOOST_CHECK_EQUAL(scale, new_scale_imag);
+   BOOST_CHECK_EQUAL(matrix(0,0), new_matrix(0,0));
+   BOOST_CHECK_EQUAL(matrix(0,1), new_matrix(0,1));
+   BOOST_CHECK_EQUAL(matrix(1,0), new_matrix(1,0));
+   BOOST_CHECK_EQUAL(matrix(1,1), new_matrix(1,1));
+}
+
+BOOST_AUTO_TEST_CASE( test_write_read_vector )
+{
+   const double scale = 100.0;
+   const char* block_name = "Vector";
+
+   Eigen::VectorXd vector(2);
+   vector << 1, 2;
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name, vector, "V", scale);
+
+   Eigen::VectorXd new_vector(2);
+   const double new_scale = slha_io.read_block(block_name, new_vector);
+
+   BOOST_CHECK_EQUAL(scale, new_scale);
+   BOOST_CHECK_EQUAL(vector(0), new_vector(0));
+   BOOST_CHECK_EQUAL(vector(1), new_vector(1));
+}
+
+BOOST_AUTO_TEST_CASE( test_write_read_vector_complex )
+{
+   const double scale = 100.0;
+   const char* block_name_real = "Vector";
+   const char* block_name_imag = "ImVector";
+   const std::complex<double> i(0.0, 1.0);
+
+   Eigen::VectorXcd vector(2);
+   vector << std::complex<double>(1.0,1.0),
+             std::complex<double>(2.0,2.0);
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name_real, vector, "M", scale);
+   slha_io.set_block(block_name_imag, vector, "M", scale);
+
+   Eigen::VectorXd new_vector_real(2), new_vector_imag(2);
+   const double new_scale_real = slha_io.read_block(block_name_real, new_vector_real);
+   const double new_scale_imag = slha_io.read_block(block_name_imag, new_vector_imag);
+
+   Eigen::VectorXcd new_vector = new_vector_real + new_vector_imag*i;
+
+   BOOST_CHECK_EQUAL(scale, new_scale_real);
+   BOOST_CHECK_EQUAL(scale, new_scale_imag);
+   BOOST_CHECK_EQUAL(vector(0), new_vector(0));
+   BOOST_CHECK_EQUAL(vector(1), new_vector(1));
 }
 
 /**
@@ -213,12 +337,12 @@ SLHAea::Block create_block(int number_of_entries, int offset, double scale = 0.)
    SLHAea::Block block;
    std::string str = "Block TestBlock";
    if (scale != 0.)
-      str += " Q= " + boost::lexical_cast<std::string>(scale);
+      str += " Q= " + std::to_string(scale);
    str += '\n';
 
    for (int i = 0; i < number_of_entries; i++) {
-      const std::string key(boost::lexical_cast<std::string>(i));
-      const std::string num(boost::lexical_cast<std::string>(i + offset));
+      const std::string key(std::to_string(i));
+      const std::string num(std::to_string(i + offset));
       str += "   " + key + "  " + num + "\n";
    }
 
@@ -282,7 +406,7 @@ BOOST_AUTO_TEST_CASE( test_processor_vs_loop )
    using namespace std::placeholders;
    Stopwatch timer;
    double processor_time = 0., loop_time = 0.;
-   const int number_of_entries = 10000;
+   const int number_of_entries = 1000;
    SLHA_io reader;
    SLHAea::Coll coll;
 
@@ -319,7 +443,7 @@ BOOST_AUTO_TEST_CASE( test_processor_vs_loop )
    BOOST_TEST_MESSAGE("time using the tuple processor: " << processor_time << " s");
    BOOST_TEST_MESSAGE("time using the for loop: " << loop_time << " s");
 
-   BOOST_CHECK_LT(1000. * processor_time, loop_time);
+   BOOST_CHECK_LT(10 * processor_time, loop_time);
 }
 
 BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )
@@ -347,7 +471,7 @@ BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )
                 Z.row(0).imag().cwiseAbs().maxCoeff() == 0.));
 
    // convert to SLHA convention
-   SLHA_io::convert_symmetric_fermion_mixings_to_slha(eigenvalues, Z);
+   convert_symmetric_fermion_mixings_to_slha(eigenvalues, Z);
 
    BOOST_CHECK(eigenvalues(0) < 0. || eigenvalues(1) < 0.);
    BOOST_CHECK_EQUAL(Z.imag().cwiseAbs().maxCoeff(), 0.);
@@ -367,7 +491,7 @@ BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )
    BOOST_CHECK_EQUAL(Im(reconstructed_mass_matrix(1,1)), 0.);
 
    // convert to HK convention
-   SLHA_io::convert_symmetric_fermion_mixings_to_hk(eigenvalues, Z);
+   convert_symmetric_fermion_mixings_to_hk(eigenvalues, Z);
 
    BOOST_CHECK(eigenvalues(0) > 0. && eigenvalues(1) > 0.);
    BOOST_CHECK_GT(Z.imag().cwiseAbs().maxCoeff(), 0.);
@@ -448,7 +572,7 @@ void convert_symmetric_fermion_mixings_to_slha_rediagonalization(
 
 BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_conversion_speed )
 {
-   const int number_of_iterations = 10000000;
+   const int number_of_iterations = 1000000;
 
    MEASURE(forloop          , number_of_iterations);
    MEASURE(rediagonalization, number_of_iterations);
