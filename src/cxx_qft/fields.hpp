@@ -201,6 +201,7 @@ namespace cxx_diagrams {
       static constexpr auto particle_type = Field::particle_type;
       static constexpr auto color_rep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
+      static constexpr auto pdgids = Field::pdgids;
    };
 
    template<class Field>
@@ -216,6 +217,7 @@ namespace cxx_diagrams {
       static constexpr auto particle_type = Field::particle_type;
       static constexpr auto color_rep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
+      static constexpr auto pdgids = Field::pdgids;
    };
 
    // Double Lorentz conjugation
