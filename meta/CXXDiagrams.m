@@ -231,9 +231,8 @@ ParticleTypeAsString[part_] := Module[
 ];
 
 (** \brief Creates c++ code that makes all fields and their properties
- * available as c++ types. Also creates two using declarations for
- * the following fields:
- * - Photon
+ * available as c++ types. Also creates one using declaration for
+ * the following field:
  * - Electron
  * Furthermore create the necessary boilerplate code to conjugate any
  * given c++ field as well as convenience `boost::mpl::vector<>`
@@ -297,7 +296,6 @@ CreateFields[] :=
               "};" &) /@ fields, "\n\n"] <> "\n\n" <>
 
        "// Named fields\n" <>
-       "using Photon = " <> CXXNameOfField[SARAH`Photon] <> ";\n" <>
        "using Electron = " <> CXXNameOfField[AtomHead @ TreeMasses`GetSMElectronLepton[]] <> ";\n\n" <>
 
        "using scalars = boost::mpl::vector<" <>
