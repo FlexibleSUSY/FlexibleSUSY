@@ -36,6 +36,25 @@ namespace flexiblesusy {
 namespace standard_model_cxx_diagrams {
 namespace detail {
 
+cxx_diagrams::ChiralVertex unit_charge(const context_base& context)
+{
+   std::array<int, 1> electron_indices = { 0 };
+   std::array<int, 0> photon_indices = {};
+   std::array<int, 2> indices = concatenate(photon_indices, electron_indices, electron_indices);
+
+   const int gt1 = indices[0];
+   const int gt2 = indices[1];
+   const auto g1 = MODELPARAMETER(g1);
+   const auto g2 = MODELPARAMETER(g2);
+   const auto ThetaW = DERIVEDPARAMETER(ThetaW);
+
+   const std::complex<double> left = 0.5*KroneckerDelta(gt1,gt2)*(0.7745966692414834*g1*Cos(ThetaW) + g2*Sin(ThetaW));
+
+   const std::complex<double> right = 0.7745966692414834*g1*Cos(ThetaW)*KroneckerDelta(gt1,gt2);
+
+   return {left, right};
+}
+
 cxx_diagrams::ScalarVertex VertexImpl<standard_model_cxx_diagrams::fields::Ah, standard_model_cxx_diagrams::fields::Ah, standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::hh>::evaluate(
    const std::array<int, 0>& indices, const context_base& context)
 {
