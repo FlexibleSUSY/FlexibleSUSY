@@ -18,5 +18,4 @@
 
 
 LIB_model_specific_SM_CXXQFT_VERTICES_SRC := \
-	model_specific/SM/cxx_qft/standard_model_vertices_1.cpp \
-	model_specific/SM/cxx_qft/standard_model_vertices_2.cpp
+	model_specific/SM/cxx_qft/standard_model_vertices.cpp
