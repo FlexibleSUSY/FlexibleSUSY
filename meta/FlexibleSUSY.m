@@ -2070,8 +2070,10 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                           FileByteCount::fdnfnd warning. This is harmless because at this point in
                           the code we know that the model does exist at least somewhere. *)
                        Off[FileByteCount::fdnfnd];
+                       Off[Superpotential::ViolationGlobal];
                        Start@modelName;
                        On[FileByteCount::fdnfnd];
+                       On[Superpotential::ViolationGlobal];
                     ];,
                     DistributedContexts -> None
                  ];
