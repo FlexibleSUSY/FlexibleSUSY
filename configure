@@ -1775,6 +1775,9 @@ check_cxxflags() {
             CXXFLAGS="${CXXFLAGS} -Wall -pedantic -Wextra\
  -Wcast-align -Woverloaded-virtual -Wnon-virtual-dtor\
  -Wno-unused-local-typedefs"
+        elif test "x${cxx_compiler_type}" = "xclang"; then
+            CXXFLAGS="${CXXFLAGS} -Wall -pedantic -Wextra\
+ -Wcast-align -Woverloaded-virtual -Wnon-virtual-dtor"
         elif test "x${cxx_compiler_type}" = "xintel"; then
             CXXFLAGS="${CXXFLAGS} -w3 -Wnon-virtual-dtor"
         fi
