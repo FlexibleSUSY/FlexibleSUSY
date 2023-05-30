@@ -914,8 +914,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
                  "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
                  TextFormatting`IndentText[
-                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
-                    "model.solve_ewsb();\n"
+                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
                  ] <> "}\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
@@ -956,6 +955,8 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "}\n" <>
                  "case 2: {\n" <>
                  TextFormatting`IndentText[
+                    "model.solve_ewsb_tree_level();\n" <>
+                    "model.calculate_DRbar_masses();\n" <>
                     "// decoupling scheme automatically reorders Goldstones to first\n" <>
                     "// positions in tree-level mass and mixing matrices. The\n" <>
                     "// non-decoupled model does not.\n" <>
