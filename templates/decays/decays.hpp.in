@@ -78,6 +78,13 @@ public:
 @decaysGetters@
 @decaysCalculationPrototypes@
 
+   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+   double get_partial_width(
+      const @ModelName@_cxx_diagrams::context_base&,
+      typename cxx_diagrams::field_indices<FieldIn>::type const&,
+      typename cxx_diagrams::field_indices<FieldOut1>::type const&,
+      typename cxx_diagrams::field_indices<FieldOut2>::type const&) const;
+
 @partialWidthCalculationPrototypes@
 
 private:
@@ -85,7 +92,7 @@ private:
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};
-   bool run_to_decay_particle_scale {true};
+   static constexpr bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    FlexibleDecay_problems problems{};
 #ifdef ENABLE_HIGGSTOOLS

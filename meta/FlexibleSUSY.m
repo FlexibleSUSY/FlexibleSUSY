@@ -2156,7 +2156,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@decaysGetters@" -> IndentText[WrapLines[decaysGetters]],
                             "@decaysCalculationPrototypes@" -> IndentText[decaysCalculationPrototypes],
                             "@decaysCalculationFunctions@" -> WrapLines[decaysCalculationFunctions],
-                            "@partialWidthCalculationPrototypes@" -> partialWidthCalculationPrototypes,
+                            "@partialWidthCalculationPrototypes@" -> TextFormatting`IndentText[partialWidthCalculationPrototypes],
                             "@partialWidthCalculationFunctions@" -> partialWidthCalculationFunctions,
                             "@calcAmplitudeSpecializationDecls@" -> calcAmplitudeSpecializationDecls,
                             "@calcAmplitudeSpecializationDefs@" -> calcAmplitudeSpecializationDefs,
