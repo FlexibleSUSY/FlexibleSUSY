@@ -5785,6 +5785,7 @@ void CLASSNAME::calculate_hh_decays()
             std::cout << e.what() << '\n';
             std::cout << "λ(μ=" << decay_mass << " GeV) = " << model.get_Lambdax() << '\n';
          }
+         model.solve_ewsb_tree_level();
          model.calculate_DRbar_masses();
       }
    }
