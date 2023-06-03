@@ -33,6 +33,10 @@
 #include <boost/fusion/adapted/boost_array.hpp>
 #include <boost/fusion/adapted/mpl.hpp>
 
+#include <boost/hana/config.hpp>
+#include <boost/hana/equal.hpp>
+#include <boost/hana/fwd/transform.hpp>
+
 #if BOOST_VERSION >= 105800
 #include <boost/fusion/include/move.hpp>
 #else
@@ -188,6 +192,8 @@ namespace cxx_diagrams {
       return Field::color_rep;
    }
 
+   auto negate = [](auto x) { return -x; };
+
    template<class Field>
    struct bar {
       using index_bounds = typename Field::index_bounds;
@@ -201,7 +207,7 @@ namespace cxx_diagrams {
       static constexpr auto particle_type = Field::particle_type;
       static constexpr auto color_rep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
-      static constexpr auto pdgids = Field::pdgids;
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, negate);
    };
 
    template<class Field>
@@ -217,7 +223,7 @@ namespace cxx_diagrams {
       static constexpr auto particle_type = Field::particle_type;
       static constexpr auto color_rep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
-      static constexpr auto pdgids = Field::pdgids;
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, negate);
    };
 
    // Double Lorentz conjugation

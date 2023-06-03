@@ -26,6 +26,8 @@
 #ifndef @ModelName@_CXXQFT_FIELDS_H
 #define @ModelName@_CXXQFT_FIELDS_H
 
+#include <boost/hana/tuple.hpp>
+
 #include "cxx_qft/fields.hpp"
 
 namespace flexiblesusy {

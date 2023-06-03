@@ -291,9 +291,9 @@ CreateFields[] :=
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
               "static constexpr double electric_charge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
-              "static constexpr std::array<int, numberOfGenerations> pdgids = " <>
+              "static constexpr auto pdgids = boost::hana::make_tuple(" <>
                    (* in SARAH particles.m PDG is sometimes a list of integers, and sometimes just an integer *)
-                   ToString@If[IntegerQ[SARAH`getPDGList[#]], {SARAH`getPDGList[#]}, SARAH`getPDGList[#]] <> ";\n" <>
+                   ToString@If[IntegerQ[SARAH`getPDGList[#]], SARAH`getPDGList[#], StringRiffle[SARAH`getPDGList[#], ","]] <> ");\n" <>
               "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
               "};")& /@ fields, "\n\n"] <> "\n\n" <>

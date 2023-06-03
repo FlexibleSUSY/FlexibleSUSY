@@ -26,7 +26,7 @@
 #ifndef STANDARDMODEL_CXXQFT_FIELDS_H
 #define STANDARDMODEL_CXXQFT_FIELDS_H
 
-#include <array>
+#include <boost/hana/tuple.hpp>
 
 #include "cxx_qft/fields.hpp"
 
@@ -51,7 +51,7 @@ struct VG {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {21};
+   static constexpr auto pdgids = boost::hana::make_tuple(21);
    using lorentz_conjugate = VG;
 };
 
@@ -67,7 +67,7 @@ struct gG {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {0};
+   static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gG>::type;
 };
 
@@ -83,7 +83,7 @@ struct Hp {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 1;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {0};
+   static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename conj<Hp>::type;
 };
 
@@ -99,7 +99,7 @@ struct Fv {
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {12, 14, 16};
+   static constexpr auto pdgids = boost::hana::make_tuple(12,14,16);
    using lorentz_conjugate = typename bar<Fv>::type;
 };
 
@@ -115,7 +115,7 @@ struct Ah {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {0};
+   static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = Ah;
 };
 
@@ -131,7 +131,7 @@ struct hh {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {25};
+   static constexpr auto pdgids = boost::hana::make_tuple(25);
    using lorentz_conjugate = hh;
 };
 
@@ -147,7 +147,7 @@ struct VP {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {22};
+   static constexpr auto pdgids = boost::hana::make_tuple(22);
    using lorentz_conjugate = VP;
 };
 
@@ -163,7 +163,7 @@ struct VZ {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {23};
+   static constexpr auto pdgids = boost::hana::make_tuple(23);
    using lorentz_conjugate = VZ;
 };
 
@@ -179,7 +179,7 @@ struct gP {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {0};
+   static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gP>::type;
 };
 
@@ -195,7 +195,7 @@ struct gZ {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 0;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {0};
+   static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gZ>::type;
 };
 
@@ -211,7 +211,7 @@ struct gWp {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 1;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {0};
+   static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gWp>::type;
 };
 
@@ -227,7 +227,7 @@ struct gWpC {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = -1;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {0};
+   static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gWpC>::type;
 };
 
@@ -243,7 +243,7 @@ struct Fd {
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
    static constexpr double electric_charge = -0.3333333333333333;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {1, 3, 5};
+   static constexpr auto pdgids = boost::hana::make_tuple(1,3,5);
    using lorentz_conjugate = typename bar<Fd>::type;
 };
 
@@ -259,7 +259,7 @@ struct Fu {
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
    static constexpr double electric_charge = 0.6666666666666666;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {2, 4, 6};
+   static constexpr auto pdgids = boost::hana::make_tuple(2,4,6);
    using lorentz_conjugate = typename bar<Fu>::type;
 };
 
@@ -275,7 +275,7 @@ struct Fe {
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
    static constexpr double electric_charge = -1;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {11, 13, 15};
+   static constexpr auto pdgids = boost::hana::make_tuple(11,13,15);
    using lorentz_conjugate = typename bar<Fe>::type;
 };
 
@@ -291,7 +291,7 @@ struct VWp {
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
    static constexpr double electric_charge = 1;
-   static constexpr std::array<int, numberOfGenerations> pdgids = {24};
+   static constexpr auto pdgids = boost::hana::make_tuple(24);
    using lorentz_conjugate = typename conj<VWp>::type;
 };
 
