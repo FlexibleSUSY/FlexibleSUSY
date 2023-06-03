@@ -168,7 +168,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
       higgstools_input.add_coupling(field_as_string<Higgs>(indexIn),
-         {bar<UpTypeQuark>::pdgids.at(indexOut1.at(0)), UpTypeQuark::pdgids.at(indexOut2.at(0))}, std::sqrt(result_S) + std::sqrt(result_P)*1i);
+         {
+            boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
+            boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
+         }, std::sqrt(result_S) + std::sqrt(result_P)*1i);
    }
 #endif
 

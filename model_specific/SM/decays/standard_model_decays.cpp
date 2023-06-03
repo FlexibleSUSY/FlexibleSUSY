@@ -109,6 +109,11 @@ double CLASSNAME::get_alpha(standard_model_cxx_diagrams::context_base const& con
    return Sqr(unit_charge(context))/(4.*Pi);
 }
 
+template <int N>
+constexpr auto _to_array = [](auto&& ...x) {
+   return std::array<int, N>{std::forward<decltype(x)>(x)...};
+};
+
 /* 1-loop BSM amplitudes
  *
  * Notes:
@@ -5718,17 +5723,6 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fu>::type, F
 }
 
 // -------- specializations for decays needing higher order SM corrections --------
-
-using H = fields::hh;
-using Ah = fields::Ah;
-using Wm = typename fields::conj<fields::VWp>;
-using Wp = fields::VWp;
-using Z = fields::VZ;
-using g = fields::VG;
-using A = fields::VP;
-using l = fields::Fe;
-using u = fields::Fu;
-using d = fields::Fd;
 
 // List of potential Z boson decay products excluding pure SM decays
 typedef boost::mpl::list<
