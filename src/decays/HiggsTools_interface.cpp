@@ -99,7 +99,7 @@ std::pair<int, double> call_HiggsTools(
 
       double m = 0.1;
 
-      // hack to pass lambda to GSL
+      // hack to pass lambda-function to GSL
       std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
       gsl_function F = {
          [](double d, void* vf) -> double {
