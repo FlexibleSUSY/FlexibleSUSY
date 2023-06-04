@@ -228,6 +228,9 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
       else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
          effC.mutau += c;
       }
+      else {
+         WARNING("HiggsTools interface warning: trying to add an unknown decay channel {" + std::to_string(fs[0]) + ", " + std::to_string(fs[1]) + "}");
+      }
       effective_coupling_list.push_back(std::move(effC));
    }
    else {
@@ -266,6 +269,9 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
       }
       else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
          found->mutau += c;
+      }
+      else {
+         WARNING("HiggsTools interface warning: trying to add an unknown decay channel {" + std::to_string(fs[0]) + ", " + std::to_string(fs[1]) + "}");
       }
    }
 }
