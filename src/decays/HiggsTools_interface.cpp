@@ -69,6 +69,7 @@ std::pair<int, double> call_HiggsTools(
 
       auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
       s.setMass(mass);
+      s.setMassUnc(0.03*mass); // set mass uncertainty to 3%
 
       // create a SM equivalent to the BSM model, with mhSM == mass
       standard_model::Standard_model sm {};
