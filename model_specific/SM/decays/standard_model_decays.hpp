@@ -72,7 +72,7 @@ public:
    void clear_problems();
    void calculate_decays();
 #ifdef ENABLE_HIGGSTOOLS
-   EffectiveCoupling_list get_higgstools_input() const {return higgstools_input;};
+   EffectiveCoupling_list const& get_higgstools_input() const {return higgstools_input;};
 #endif
 
    const Decays_list& get_hh_decays() const { return decay_table.get_hh_decays();
