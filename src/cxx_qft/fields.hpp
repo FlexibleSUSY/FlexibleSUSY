@@ -43,8 +43,7 @@
 #include <boost/fusion/include/copy.hpp>
 #endif
 
-namespace flexiblesusy {
-namespace cxx_diagrams {
+namespace flexiblesusy::cxx_diagrams {
    /** @brief Declare a type that can hold the field indices for any given field.
     * @todo Field should have nested numberOfFieldIndices.
     * @returns `::type` evaluates to `std::array<int,int N>`.
@@ -292,8 +291,6 @@ namespace cxx_diagrams {
    using fields::conj;
    using fields::remove_lorentz_conjugation;
 
-} // namespace cxx_diagrams
-
-} // namespace flexiblesusy
+} // namespace flexiblesusy::cxx_diagrams
 
 #endif

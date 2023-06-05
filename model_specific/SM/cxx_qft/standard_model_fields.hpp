@@ -31,8 +31,7 @@
 #include "cxx_qft/fields.hpp"
 
 namespace flexiblesusy {
-namespace standard_model_cxx_diagrams {
-namespace fields {
+namespace standard_model_cxx_diagrams::fields {
 
 using cxx_diagrams::fields::ParticleType;
 using cxx_diagrams::fields::ParticleColorRep;
@@ -303,12 +302,9 @@ using fermions = boost::mpl::vector<Fv, Fd, Fu, Fe>;
 using vectors = boost::mpl::vector<VG, VP, VZ, VWp>;
 using ghosts = boost::mpl::vector<gG, gP, gZ, gWp, gWpC>;
 
-} // namespace fields
+} // namespace standard_model_cxx_diagrams::fields
 
-} // namespace standard_model_cxx_diagrams
-
-namespace cxx_diagrams {
-namespace fields{
+namespace cxx_diagrams::fields{
 
 // Fields that are their own Lorentz conjugates.
 template<> struct conj<standard_model_cxx_diagrams::fields::VG> { using type = standard_model_cxx_diagrams::fields::VG; };
@@ -316,8 +312,6 @@ template<> struct conj<standard_model_cxx_diagrams::fields::Ah> { using type = s
 template<> struct conj<standard_model_cxx_diagrams::fields::hh> { using type = standard_model_cxx_diagrams::fields::hh; };
 template<> struct conj<standard_model_cxx_diagrams::fields::VP> { using type = standard_model_cxx_diagrams::fields::VP; };
 template<> struct conj<standard_model_cxx_diagrams::fields::VZ> { using type = standard_model_cxx_diagrams::fields::VZ; };
-
-
 
 template<>
 struct is_vector<flexiblesusy::standard_model_cxx_diagrams::fields::VG > : public std::true_type {};
@@ -353,8 +347,7 @@ template<>
 struct is_vector<flexiblesusy::standard_model_cxx_diagrams::fields::VWp > : public std::true_type {};
 
 
-} // namespace fields
-} // namespace cxx_diagrams
+} // namespace cxx_diagrams::fields
 
 } // namespace flexiblesusy
 
