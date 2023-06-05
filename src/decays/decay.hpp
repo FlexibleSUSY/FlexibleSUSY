@@ -266,23 +266,19 @@ constexpr double squared_color_generator() noexcept {
 }
 
 template <typename Field1, typename Field2>
-constexpr std::enable_if_t<!std::is_same<Field1, Field2>::value, double>
-final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type const& idx1,
+double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
-   return 1.;
-}
-
-template <typename Field1, typename Field2>
-std::enable_if_t<std::is_same<Field1, Field2>::value, double>
-final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type const& idx1,
-                            typename cxx_diagrams::field_indices<Field2>::type const& idx2)
-{
-   if (boost::range::equal(idx1, idx2)) {
-      return 0.5;
+   if constexpr (!std::is_same_v<Field1, Field2>) {
+      return 1.;
    }
    else {
-      return 1.;
+      if (boost::range::equal(idx1, idx2)) {
+         return 0.5;
+      }
+      else {
+         return 1.;
+      }
    }
 }
 
