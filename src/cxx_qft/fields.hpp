@@ -192,8 +192,6 @@ namespace cxx_diagrams {
       return Field::color_rep;
    }
 
-   auto negate = [](auto x) { return -x; };
-
    template<class Field>
    struct bar {
       using index_bounds = typename Field::index_bounds;
@@ -207,7 +205,7 @@ namespace cxx_diagrams {
       static constexpr auto particle_type = Field::particle_type;
       static constexpr auto color_rep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
-      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, negate);
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };
 
    template<class Field>
@@ -223,7 +221,7 @@ namespace cxx_diagrams {
       static constexpr auto particle_type = Field::particle_type;
       static constexpr auto color_rep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
-      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, negate);
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };
 
    // Double Lorentz conjugation
