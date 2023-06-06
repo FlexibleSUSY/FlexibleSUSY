@@ -5863,11 +5863,6 @@ void CLASSNAME::calculate_hh_decays()
 
    for (int gO1 = 0; gO1 < 3; ++gO1) {
       for (int gO2 = 0; gO2 < 3; ++gO2) {
-         if (context.physical_mass<hh>(std::array<int, 0>{}) < context.
-            physical_mass<typename bar<Fu>::type>(std::array<int, 1> {gO1}) +
-            context.physical_mass<Fu>(std::array<int, 1> {gO2})) {
-            continue;
-         }
          decays.set_decay(partial_width_hh_to_barFuFu(model, gO1, gO2
             ), {-standard_model_info::get_pdg_code_for_particle(standard_model_info::Fu, gO1), standard_model_info
             ::get_pdg_code_for_particle(standard_model_info::Fu, gO2)},

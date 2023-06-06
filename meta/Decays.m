@@ -817,8 +817,8 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
 
            CheckOffShellDecay[x_, y_] := (
            initialState === x && (
-                 finalState === {y, SARAH`AntiField[y]} ||
-                     finalState === {SARAH`AntiField[y], y}
+                 finalState === {y, TreeMasses`FSAntiField[y]} ||
+                     finalState === {TreeMasses`FSAntiField[y], y}
 
                ));
            (* skip decays of a particle into itself *)
@@ -830,7 +830,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                     ]]&, finalState
               ] <>
               If[
-                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]], "",
+                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]], "",
 
               "if (context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
                StringRiffle[
@@ -866,7 +866,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
            If[loopIndices =!= {},
               body = LoopOverIndexCollection[skip <> body, loopIndices],
              body = If[
-               CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]],
+               CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]],
                "",
 
 
@@ -882,7 +882,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                        finalState
                     ], " + "
                  ] <> ") {\n"] <> TextFormatting`IndentText[body] <>
-                 If[CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]],
+                 If[CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]],
                    "",
 
                  "}\n"
