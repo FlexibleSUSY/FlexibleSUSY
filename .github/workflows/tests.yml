@@ -213,7 +213,8 @@ jobs:
             --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
-            --enable-librarylink
+            --enable-librarylink \
+            --enable-debug
           make showbuild
 
       - name: Make
