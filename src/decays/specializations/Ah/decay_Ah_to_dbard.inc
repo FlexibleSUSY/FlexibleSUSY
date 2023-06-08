@@ -19,7 +19,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
    const double mAOS = context.physical_mass<PseudoscalarHiggs>(indexIn);
    const double flux = 1./(2.*mAOS);
 
-   static constexpr double color_factor = squared_color_generator<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>();
+   static constexpr double color_factor = noexcept(squared_color_generator<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>());
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
@@ -84,7 +84,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
 
          // 1L QED correction - eq. 17 in FD paper
          const double alpha_red = get_alpha(context)/Pi;
-         const double deltaqq_QED_DR = 17./4.*Sqr(DownTypeQuark::electric_charge)*alpha_red;
+         const double deltaqq_QED_DR = 17./4.*Sqr(DownTypeQuark::electricCharge)*alpha_red;
 
          deltaqq_QCD_DR_P +=
             2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
@@ -94,7 +94,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
                4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
          const double deltaqq_QED_OS_P =
-               alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
+               alpha_red * Sqr(DownTypeQuark::electricCharge) * calc_DeltaAh(betaOS);
 
          const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<DownTypeQuark>(indexOut1);
          double deltaPhi2_P = 0.;
@@ -102,7 +102,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
 
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
             deltaqq_QCDxQED_DR =
-               deltaqq_QCDxQED*Sqr(DownTypeQuark::electric_charge)*alpha_red*alpha_s_red;
+               deltaqq_QCDxQED*Sqr(DownTypeQuark::electricCharge)*alpha_red*alpha_s_red;
             if (!is_zero(gbHoVEV_P)) {
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAOS/mtpole));

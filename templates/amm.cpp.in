@@ -326,7 +326,7 @@ template <typename Lepton>
 double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
 {
    const double MSUSY = Abs(get_MSUSY(context.model));
-   const double alpha_em = Sqr(Lepton::electric_charge * unit_charge(context))/(4*Pi);
+   const double alpha_em = Sqr(Lepton::electricCharge * unit_charge(context))/(4*Pi);
    const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
 
    return qed_2L;
@@ -384,7 +384,7 @@ Lepton, Fermion, Scalar
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
 
          static constexpr double fermionChargeCount =
-            Fermion::electric_charge / Lepton::electric_charge;
+            Fermion::electricCharge / Lepton::electricCharge;
 
          const std::complex<double> zrm = leptonVertex.right();
          const std::complex<double> zlm = leptonVertex.left();
@@ -488,7 +488,7 @@ Lepton, Fermion, Scalar
                const auto zMass = context.mass<ZBoson>({ });
 
                static constexpr double fermionChargeCount =
-                  Fermion::electric_charge / Lepton::electric_charge;
+                  Fermion::electricCharge / Lepton::electricCharge;
 
                const std::complex<double> zrm = leptonVertex.right();
                const std::complex<double> zlm = leptonVertex.left();
@@ -574,7 +574,7 @@ Lepton, ChargedScalar, NeutralScalar
          const auto neutralScalarMass = context.mass<NeutralScalar>(neutralScalarIndices);
 
          static constexpr double scalarChargeCount =
-            ChargedScalar::electric_charge / Lepton::electric_charge;
+            ChargedScalar::electricCharge / Lepton::electricCharge;
 
          const std::complex<double> zrm = leptonVertex.right();
          const std::complex<double> zlm = leptonVertex.left();
@@ -646,7 +646,7 @@ Lepton, Vector, Scalar
          const auto scalarMass = context.mass<Scalar>(scalarIndices);
 
          static constexpr double vectorChargeCount =
-            Vector::electric_charge / Lepton::electric_charge;
+            Vector::electricCharge / Lepton::electricCharge;
 
          const std::complex<double> zrm = leptonVertex.right();
          const std::complex<double> zlm = leptonVertex.left();

@@ -267,8 +267,8 @@ CreateFields[] :=
        StringRiffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
-              "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
-              "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
+              "static constexpr auto particleType = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
+              "static constexpr auto colorRep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
               "static constexpr auto massless = " <> CConversion`CreateCBoolValue @ TreeMasses`IsMassless[#] <> ";\n" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
@@ -289,7 +289,7 @@ CreateFields[] :=
                    ] <> ">;\n" <>
               "static constexpr int numberOfFieldIndices = " <>
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
-              "static constexpr double electric_charge = " <>
+              "static constexpr double electricCharge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
               "static constexpr auto pdgids = boost::hana::make_tuple(" <>
                    (* in SARAH particles.m PDG is sometimes a list of integers, and sometimes just an integer *)

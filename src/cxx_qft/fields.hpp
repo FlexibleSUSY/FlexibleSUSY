@@ -142,14 +142,14 @@ namespace flexiblesusy::cxx_diagrams {
    template<typename Field>
    struct is_singlet {
       static constexpr bool value =
-         Field::color_rep == ParticleColorRep::singlet;
+         Field::colorRep == ParticleColorRep::singlet;
    };
    template<typename Field>
    constexpr bool is_singlet_v = is_singlet<Field>::value;
 
    template<typename Field>
    struct is_triplet {
-      static constexpr bool value = Field::color_rep == ParticleColorRep::triplet;
+      static constexpr bool value = Field::colorRep == ParticleColorRep::triplet;
    };
    template<typename Field>
    constexpr bool is_triplet_v = is_triplet<Field>::value;
@@ -157,14 +157,14 @@ namespace flexiblesusy::cxx_diagrams {
    template<typename Field>
    struct is_anti_triplet {
       static constexpr bool value =
-         Field::color_rep == ParticleColorRep::anti_triplet;
+         Field::colorRep == ParticleColorRep::anti_triplet;
    };
    template<typename Field>
    constexpr bool is_anti_triplet_v = is_anti_triplet<Field>::value;
 
    template<typename Field>
    struct is_octet {
-      static constexpr bool value = Field::color_rep == ParticleColorRep::octet;
+      static constexpr bool value = Field::colorRep == ParticleColorRep::octet;
    };
    template<typename Field>
    constexpr bool is_octet_v = is_octet<Field>::value;
@@ -188,7 +188,7 @@ namespace flexiblesusy::cxx_diagrams {
       !is_triplet<Field>::value && !is_anti_triplet<Field>::value, ParticleColorRep
       >
    color_conj() {
-      return Field::color_rep;
+      return Field::colorRep;
    }
 
    template<class Field>
@@ -200,9 +200,9 @@ namespace flexiblesusy::cxx_diagrams {
 
       static constexpr int numberOfGenerations = Field::numberOfGenerations;
       static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      static constexpr auto particle_type = Field::particle_type;
-      static constexpr auto color_rep = color_conj<Field>();
+      static constexpr double electricCharge = -Field::electricCharge;
+      static constexpr auto particleType = Field::particleType;
+      static constexpr auto colorRep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
       static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };
@@ -216,9 +216,9 @@ namespace flexiblesusy::cxx_diagrams {
 
       static constexpr int numberOfGenerations = Field::numberOfGenerations;
       static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      static constexpr auto particle_type = Field::particle_type;
-      static constexpr auto color_rep = color_conj<Field>();
+      static constexpr double electricCharge = -Field::electricCharge;
+      static constexpr auto particleType = Field::particleType;
+      static constexpr auto colorRep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
       static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };

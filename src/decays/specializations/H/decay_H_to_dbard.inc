@@ -88,7 +88,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
 
          // 1L QED correction - eq. 17 in FD paper
          const double alpha_red = get_alpha(context)/Pi;
-         const double deltaqq_QED_DR = 17./4.*Sqr(DownTypeQuark::electric_charge)*alpha_red;
+         const double deltaqq_QED_DR = 17./4.*Sqr(DownTypeQuark::electricCharge)*alpha_red;
 
          deltaqq_QCD_DR_S +=
             2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
@@ -98,7 +98,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
             4./3. * alpha_s_red * calc_DeltaH(betaOS);
 
          const double deltaqq_QED_OS_S =
-            alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaH(betaOS);
+            alpha_red * Sqr(DownTypeQuark::electricCharge) * calc_DeltaH(betaOS);
 
          double deltaPhi2_S = 0.;
          double deltaqq_QCD_OS_P = 0.;
@@ -108,7 +108,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
 
             deltaqq_QCDxQED_DR =
-               deltaqq_QCDxQED*Sqr(DownTypeQuark::electric_charge)*alpha_red*alpha_s_red;
+               deltaqq_QCDxQED*Sqr(DownTypeQuark::electricCharge)*alpha_red*alpha_s_red;
 
             const double mtpole = qedqcd.displayPoleMt();
             const double lt = std::log(Sqr(mHOS/mtpole));
@@ -134,7 +134,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
                   4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
                deltaqq_QED_OS_P =
-                  alpha_red * Sqr(DownTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
+                  alpha_red * Sqr(DownTypeQuark::electricCharge) * calc_DeltaAh(betaOS);
 
                const auto gbHoVEV_P = HBBbarVertexDR_P/mdqDR;
                if (!is_zero(gbHoVEV_P)) {

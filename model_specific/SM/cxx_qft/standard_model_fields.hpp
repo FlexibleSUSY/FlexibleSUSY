@@ -39,8 +39,8 @@ using cxx_diagrams::fields::conj;
 using cxx_diagrams::fields::bar;
 
 struct VG {
-   static constexpr auto particle_type = ParticleType::vector;
-   static constexpr auto color_rep = ParticleColorRep::octet;
+   static constexpr auto particleType = ParticleType::vector;
+   static constexpr auto colorRep = ParticleColorRep::octet;
    static constexpr auto massless = true;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -49,14 +49,14 @@ struct VG {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(21);
    using lorentz_conjugate = VG;
 };
 
 struct gG {
-   static constexpr auto particle_type = ParticleType::ghost;
-   static constexpr auto color_rep = ParticleColorRep::octet;
+   static constexpr auto particleType = ParticleType::ghost;
+   static constexpr auto colorRep = ParticleColorRep::octet;
    static constexpr auto massless = true;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -65,14 +65,14 @@ struct gG {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gG>::type;
 };
 
 struct Hp {
-   static constexpr auto particle_type = ParticleType::scalar;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::scalar;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -81,14 +81,14 @@ struct Hp {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 1;
+   static constexpr double electricCharge = 1;
    static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename conj<Hp>::type;
 };
 
 struct Fv {
-   static constexpr auto particle_type = ParticleType::fermion;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::fermion;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = true;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int, 0>,
@@ -97,14 +97,14 @@ struct Fv {
    static constexpr int numberOfGenerations = 3;
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(12,14,16);
    using lorentz_conjugate = typename bar<Fv>::type;
 };
 
 struct Ah {
-   static constexpr auto particle_type = ParticleType::scalar;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::scalar;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -113,14 +113,14 @@ struct Ah {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = Ah;
 };
 
 struct hh {
-   static constexpr auto particle_type = ParticleType::scalar;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::scalar;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -129,14 +129,14 @@ struct hh {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(25);
    using lorentz_conjugate = hh;
 };
 
 struct VP {
-   static constexpr auto particle_type = ParticleType::vector;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::vector;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = true;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -145,14 +145,14 @@ struct VP {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(22);
    using lorentz_conjugate = VP;
 };
 
 struct VZ {
-   static constexpr auto particle_type = ParticleType::vector;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::vector;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -161,14 +161,14 @@ struct VZ {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(23);
    using lorentz_conjugate = VZ;
 };
 
 struct gP {
-   static constexpr auto particle_type = ParticleType::ghost;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::ghost;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = true;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -177,14 +177,14 @@ struct gP {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gP>::type;
 };
 
 struct gZ {
-   static constexpr auto particle_type = ParticleType::ghost;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::ghost;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -193,14 +193,14 @@ struct gZ {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 0;
+   static constexpr double electricCharge = 0;
    static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gZ>::type;
 };
 
 struct gWp {
-   static constexpr auto particle_type = ParticleType::ghost;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::ghost;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -209,14 +209,14 @@ struct gWp {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 1;
+   static constexpr double electricCharge = 1;
    static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gWp>::type;
 };
 
 struct gWpC {
-   static constexpr auto particle_type = ParticleType::ghost;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::ghost;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -225,14 +225,14 @@ struct gWpC {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = -1;
+   static constexpr double electricCharge = -1;
    static constexpr auto pdgids = boost::hana::make_tuple(0);
    using lorentz_conjugate = typename bar<gWpC>::type;
 };
 
 struct Fd {
-   static constexpr auto particle_type = ParticleType::fermion;
-   static constexpr auto color_rep = ParticleColorRep::triplet;
+   static constexpr auto particleType = ParticleType::fermion;
+   static constexpr auto colorRep = ParticleColorRep::triplet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int, 0>,
@@ -241,14 +241,14 @@ struct Fd {
    static constexpr int numberOfGenerations = 3;
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
-   static constexpr double electric_charge = -0.3333333333333333;
+   static constexpr double electricCharge = -0.3333333333333333;
    static constexpr auto pdgids = boost::hana::make_tuple(1,3,5);
    using lorentz_conjugate = typename bar<Fd>::type;
 };
 
 struct Fu {
-   static constexpr auto particle_type = ParticleType::fermion;
-   static constexpr auto color_rep = ParticleColorRep::triplet;
+   static constexpr auto particleType = ParticleType::fermion;
+   static constexpr auto colorRep = ParticleColorRep::triplet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int, 0>,
@@ -257,14 +257,14 @@ struct Fu {
    static constexpr int numberOfGenerations = 3;
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
-   static constexpr double electric_charge = 0.6666666666666666;
+   static constexpr double electricCharge = 0.6666666666666666;
    static constexpr auto pdgids = boost::hana::make_tuple(2,4,6);
    using lorentz_conjugate = typename bar<Fu>::type;
 };
 
 struct Fe {
-   static constexpr auto particle_type = ParticleType::fermion;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::fermion;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int, 0>,
@@ -273,14 +273,14 @@ struct Fe {
    static constexpr int numberOfGenerations = 3;
    using sm_flags = boost::mpl::vector_c<bool, true, true, true>;
    static constexpr int numberOfFieldIndices = 1;
-   static constexpr double electric_charge = -1;
+   static constexpr double electricCharge = -1;
    static constexpr auto pdgids = boost::hana::make_tuple(11,13,15);
    using lorentz_conjugate = typename bar<Fe>::type;
 };
 
 struct VWp {
-   static constexpr auto particle_type = ParticleType::vector;
-   static constexpr auto color_rep = ParticleColorRep::singlet;
+   static constexpr auto particleType = ParticleType::vector;
+   static constexpr auto colorRep = ParticleColorRep::singlet;
    static constexpr auto massless = false;
    using index_bounds = boost::mpl::pair<
      boost::mpl::vector_c<int>,
@@ -289,7 +289,7 @@ struct VWp {
    static constexpr int numberOfGenerations = 1;
    using sm_flags = boost::mpl::vector_c<bool, true>;
    static constexpr int numberOfFieldIndices = 0;
-   static constexpr double electric_charge = 1;
+   static constexpr double electricCharge = 1;
    static constexpr auto pdgids = boost::hana::make_tuple(24);
    using lorentz_conjugate = typename conj<VWp>::type;
 };

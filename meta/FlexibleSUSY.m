@@ -2787,7 +2787,7 @@ if (spectrum_generator.get_exit_code() == 0 && loop_library_for_decays) {
 CreateHiggsToolsChargedInput[] := If[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] > TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], "", "\
 std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates const& m, " <> FlexibleSUSY`FSModelName <> "_decays const& decays) {
    std::vector<SingleChargedHiggsInput> v {};
-   static constexpr int chargeSign = " <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> "::electric_charge > 0 ? 1 : -1;
+   static constexpr int chargeSign = " <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> "::electricCharge > 0 ? 1 : -1;
    context_base context {m};
    for (int i = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]-1] <> "; i<" <> ToString@TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] <> "; i++) {
       SingleChargedHiggsInput input;

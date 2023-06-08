@@ -55,7 +55,7 @@ double lepton_total_decay_width(
    const auto leptonOutMass = context.mass<FOut>(indices2);
    const auto r = Power2(leptonOutMass/leptonInMass);
    const auto GF2 = Power2(qedqcd.displayFermiConstant());
-   const double Alpha = Power2(FIn::electric_charge * unit_charge(context))/(4*Pi);
+   const double Alpha = Power2(FIn::electricCharge * unit_charge(context))/(4*Pi);
 
    // eq. 10.6 of http://pdg.lbl.gov/2018/reviews/rpp2018-rev-standard-model.pdf
    return
