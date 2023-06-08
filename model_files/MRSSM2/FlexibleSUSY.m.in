@@ -98,11 +98,18 @@ ExtraSLHAOutputBlocks = {
          {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
          {27, FlexibleSUSYObservable`AMMUncertainty[Fe[2]]}
       }
-   }
+   },
+   {HMIX , {
+         {5, (vd ZH[1,1] + vu ZH[1,2])/Sqrt[vu^2 + vd^2]},
+         {6, (vd Pole[ZH[1,1]] + vu Pole[ZH[1,2]])/Sqrt[vu^2 + vd^2]}
+      }
+   },
+   {runningZH, Flatten[Table[{i, j, ZH[i,j]}, {i,1,4}, {j,1,4}],1]},
+   {runningZA, Flatten[Table[{i, j, ZA[i,j]}, {i,1,4}, {j,1,4}],1]}
 };
 
 FSCalculateDecays = True;
-FSDecayParticles = {hh, Ah, Hpm, sigmaO, phiO, Fu};
+FSDecayParticles = {hh, Ah, Hpm};
 
 DefaultPoleMassPrecision = HighPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};

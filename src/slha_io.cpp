@@ -30,8 +30,6 @@
 #include "string_conversion.hpp"
 #include "string_format.hpp"
 
-#include <boost/math/distributions/chi_squared.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -984,9 +982,6 @@ void SLHA_io::set_higgssignals(int ndof, double chi2)
    ss << block_head("HIGGSSIGNALS", 0.0);
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
-
-   boost::math::chi_squared dist(static_cast<int>(ndof)-1);
-   ss << FORMAT_ELEMENT(3, 1-boost::math::cdf(dist, chi2), "p-value");
 
    set_block(ss);
 }

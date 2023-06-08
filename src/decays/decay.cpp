@@ -133,6 +133,31 @@ double hVV_4body(double *q2, size_t /* dim */, void *params)
      * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
 }
 
+double Httbar_3body(double *q2, size_t /* dim */, void *params)
+{
+  struct Phittbar_3body_params * fp = static_cast<struct Phittbar_3body_params*>(params);
+  const double kappaW = fp->kappaW;
+  const double kappat = fp->kappat;
+  const double gammat = fp->gammat;
+  const double y1 = 1 - q2[0];
+  const double y2 = 1 - q2[1];
+  const double GammatH = Sqr(y1)*(1-y1-y2+kappaW - 5*kappat) + 2*kappaW*(y1*y2*-kappaW-2*kappat*y1+4*kappat*kappaW)
+  - kappat*y1*y2 + kappat*(1-4*kappat)*(2*y1 + kappaW + kappat);
+  return GammatH/(Sqr(y1) + gammat*kappat);
+}
+
+double Attbar_3body(double *q2, size_t /* dim */, void *params)
+{
+  struct Phittbar_3body_params * fp = static_cast<struct Phittbar_3body_params*>(params);
+  const double kappaW = fp->kappaW;
+  const double kappat = fp->kappat;
+  const double gammat = fp->gammat;
+  const double y1 = 1 - q2[0];
+  const double y2 = 1 - q2[1];
+  const double GammatA = Sqr(y1)*(1-y1-y2+kappaW-kappat) + 2*kappaW*(y1*y2-kappaW) - kappat*(y1*y2-2*y1-kappaW-kappat);
+  return GammatA/(Sqr(y1) + gammat*kappat);
+}
+
 void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, double c) {
       auto found = std::find_if(
          std::begin(effective_coupling_list), std::end(effective_coupling_list),

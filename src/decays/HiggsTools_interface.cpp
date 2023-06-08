@@ -66,6 +66,7 @@ std::pair<int, double> call_HiggsTools(
       // for mh > 700 GeV this gives λ > 4
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
       if (mass > 700) continue;
+      if (mass < 120) continue;
 
       auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
       s.setMass(mass);
@@ -228,14 +229,6 @@ std::pair<int, double> call_HiggsTools(
    }
    auto bounds = Higgs::Bounds {higgsbounds_dataset};
    auto hbResult = bounds(pred);
-   std::ofstream hb_output("HiggsBounds.out");
-   hb_output << hbResult;
-   hb_output.close();
-   // mimics the behavious of << operator
-   //for (const auto &[p, lim] : hbResult.selectedLimits) {
-   //   std::cout << p << ' ' << lim.obsRatio() << ' ' << lim.expRatio() << " # " << lim.limit()->to_string() << std::endl;
-   //}
-
 
    // HiggsSignals
    if (higgssignals_dataset.empty()) {
