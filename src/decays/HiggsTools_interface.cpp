@@ -182,11 +182,11 @@ std::pair<int, double> call_HiggsTools(
          effc.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
          effc.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
          // gauge bosons
-         effc.WW = std::abs(sm_input[0].WW) > 0 ? el.WW/sm_input[0].WW : 0.;
-         effc.ZZ = std::abs(sm_input[0].ZZ) > 0 ? el.ZZ/sm_input[0].ZZ : 0.;
+         effc.WW = std::abs(sm_input[0].WW) > 0         ? el.WW/sm_input[0].WW         : 0.;
+         effc.ZZ = std::abs(sm_input[0].ZZ) > 0         ? el.ZZ/sm_input[0].ZZ         : 0.;
          effc.gamgam = std::abs(sm_input[0].gamgam) > 0 ? el.gamgam/sm_input[0].gamgam : 0.;
-         effc.Zgam = std::abs(sm_input[0].Zgam) > 0 ? el.Zgam/sm_input[0].Zgam : 0.;
-         effc.gg = std::abs(sm_input[0].gg) > 0 ? el.gg/sm_input[0].gg : 0.;
+         effc.Zgam = std::abs(sm_input[0].Zgam) > 0     ? el.Zgam/sm_input[0].Zgam     : 0.;
+         effc.gg = std::abs(sm_input[0].gg) > 0         ? el.gg/sm_input[0].gg         : 0.;
 
          effectiveCouplingInput(
             s, effc,
@@ -235,8 +235,6 @@ std::pair<int, double> call_HiggsTools(
       double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, el.brtHpb);
       Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
    }
-
-
 
    // HiggsBounds
    if (higgsbounds_dataset.empty()) {

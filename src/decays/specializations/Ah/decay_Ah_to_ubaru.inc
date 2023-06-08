@@ -41,7 +41,6 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
    const auto xOS = Sqr(muqOS/mAhOS);
    const auto xDR = Sqr(muqDR/mAhOS);
 
-   // TODO: add off-shell decays?
    if (4.*std::max(xDR, xOS) > 1.) {
       return 0.;
    }

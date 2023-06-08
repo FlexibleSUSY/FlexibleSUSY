@@ -46,7 +46,7 @@ namespace @ModelName@_l_to_lgamma {
 
 template <typename FIn, typename FOut, typename T1, typename T2>
 double lepton_total_decay_width(
-      T1 const& indices1, T2 const& indices2, 
+      T1 const& indices1, T2 const& indices2,
       const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
