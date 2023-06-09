@@ -421,14 +421,15 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    const double delta_alpha_s  = eft.calculate_delta_alpha_s(alpha_s_SM5);
    const double alpha_em_SM5_p = alpha_em_msbar/(1 + delta_alpha_em);
    const double alpha_s_SM5_p  = alpha_s_msbar*(1 - delta_alpha_s);
+   const double mb_p           = eft.calculate_MFd_DRbar(mb_qedqcd, 2);
 
    diff(0) = (alpha_em_SM5 - alpha_em_SM5_p)/alpha_em_SM5;
    diff(1) = (alpha_s_SM5 - alpha_s_SM5_p)/alpha_s_SM5;
    diff(2) = (qedqcd.displayFermiConstant() -  g_fermi)/qedqcd.displayFermiConstant();
    diff(3) = (Mtop -  eft.get_physical().MFu(2))/Mtop;
    diff(4) = (qedqcd.displayPoleMZ() - eft.get_physical().MVZ)/qedqcd.displayPoleMZ();
-   diff(5) = (eft.calculate_MFd_DRbar(mb_qedqcd, 2) - eft.get_MFd(2))/eft.calculate_MFd_DRbar(mb_qedqcd, 2) ;
-   diff(6) = (qedqcd.displayPoleMtau() - eft.get_physical().MFe(2))/(qedqcd.displayPoleMtau());
+   diff(5) = (mb_p - eft.get_MFd(2))/mb_p;
+   diff(6) = (qedqcd.displayPoleMtau() - eft.get_physical().MFe(2))/qedqcd.displayPoleMtau();
 
    VERBOSE_MSG("\t[4] relative deviation from input observables: " <<  diff.transpose());
 
