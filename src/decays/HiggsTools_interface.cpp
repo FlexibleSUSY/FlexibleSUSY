@@ -66,7 +66,6 @@ std::pair<int, double> call_HiggsTools(
       // for mh > 700 GeV this gives λ > 4
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
       if (mass > 700) continue;
-      if (mass < 120) continue;
 
       auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
       s.setMass(mass);
