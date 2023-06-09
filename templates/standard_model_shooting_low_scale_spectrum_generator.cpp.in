@@ -31,6 +31,7 @@
 #include "numerics2.hpp"
 #include "rkf_integrator.hpp"
 #include "shooting_solver.hpp"
+#include "wrappers.hpp"
 
 #include <limits>
 #include <tuple>
@@ -400,13 +401,12 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
 
    Vec_t diff(Vec_t::Zero());
 
-   const double Pi             = 3.141592653589793;
    const double gY             = eft.get_g1() * standard_model_info::normalization_g1;
    const double g2             = eft.get_g2() * standard_model_info::normalization_g2;
    const double g3             = eft.get_g3() * standard_model_info::normalization_g3;
-   const double e              = gY*g2 / Sqrt(Sqr(gY) + Sqr(g2));
-   const double alpha_em_msbar = Sqr(e) / (4*Pi);
-   const double alpha_s_msbar  = Sqr(g3) / (4*Pi);
+   const double e              = gY*g2/Sqrt(Sqr(gY) + Sqr(g2));
+   const double alpha_em_msbar = Sqr(e)*oneOver4Pi;
+   const double alpha_s_msbar  = Sqr(g3)*oneOver4Pi;
 
    auto qedqcd_GF = qedqcd;
    qedqcd_GF.setPoleMt(eft.get_physical().MFu(2));
@@ -424,8 +424,8 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    const double alpha_s_SM5    = qedqcd.displayAlpha(softsusy::ALPHAS);
    const double delta_alpha_em = eft.calculate_delta_alpha_em(alpha_em_msbar);
    const double delta_alpha_s  = eft.calculate_delta_alpha_s(alpha_s_SM5);
-   const double alpha_em_SM5_p = alpha_em_msbar / (1 + delta_alpha_em);
-   const double alpha_s_SM5_p  = alpha_s_msbar * (1 - delta_alpha_s);
+   const double alpha_em_SM5_p = alpha_em_msbar/(1 + delta_alpha_em);
+   const double alpha_s_SM5_p  = alpha_s_msbar*(1 - delta_alpha_s);
 
    diff(0) = (alpha_em_SM5 - alpha_em_SM5_p)/alpha_em_SM5;
    diff(1) = (alpha_s_SM5 - alpha_s_SM5_p)/alpha_s_SM5;
