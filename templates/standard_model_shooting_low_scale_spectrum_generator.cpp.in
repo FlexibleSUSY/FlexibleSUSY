@@ -167,8 +167,9 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd
 
    const int max_it = settings.get(Spectrum_generator_settings::max_iterations);
 
-   if (!is_zero(max_it))
+   if (!is_zero(max_it)) {
       solver.set_max_iterations(max_it);
+   }
 
    solver.set_precision(settings.get(Spectrum_generator_settings::precision));
    solver.add(&susy_scale_constraint, &model);
@@ -412,12 +413,8 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    qedqcd_GF.setPoleMZ(eft.get_physical().MVZ);
 
    const double g_fermi        = eft.calculate_G_fermi(qedqcd_GF);
-
-   auto qedqcd_Q_low = qedqcd; // TODO: why necessary for mb?
-   qedqcd_Q_low.to(Q_low);
-
    const double Mtop           = qedqcd.displayPoleMt();
-   const double mb_qedqcd      = qedqcd_Q_low.displayMass(softsusy::mBottom);
+   const double mb_qedqcd      = qedqcd.displayMass(softsusy::mBottom);
    const double alpha_em_SM5   = qedqcd.displayAlpha(softsusy::ALPHA);
    const double alpha_s_SM5    = qedqcd.displayAlpha(softsusy::ALPHAS);
    const double delta_alpha_em = eft.calculate_delta_alpha_em(alpha_em_msbar);
