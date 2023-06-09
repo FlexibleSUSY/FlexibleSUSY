@@ -126,8 +126,6 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd
 {
    VERBOSE_MSG("Solving BVP using shooting solver");
 
-   std::cerr.precision(std::numeric_limits<long double>::digits10 + 1);
-
    problems.set_bvp_solver_problems({ BVP_solver_problems("ShootingSolver") });
 
    model.clear();
