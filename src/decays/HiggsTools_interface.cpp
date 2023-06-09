@@ -128,7 +128,7 @@ std::pair<int, double> call_HiggsTools(
 
           // determine mh with a relative error < 0.1%
           status
-             = gsl_min_test_interval (a, b, 0.0, 8e-4);
+             = gsl_min_test_interval (a, b, 0.0, 1e-4);
       }
       while (status == GSL_CONTINUE && iter < max_iter);
 
@@ -139,7 +139,7 @@ std::pair<int, double> call_HiggsTools(
       if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > 1e-3) {
          throw Error("Higgstools interface: cannot find a SM equivalent of " + el.particle +
                      " with a mass " + std::to_string(mass) + " GeV (got " +
-                     std::to_string(sm.get_physical().Mhh) + " - " + std::to_string(diff) + "% difference). ");
+                     std::to_string(sm.get_physical().Mhh) + " - " + std::to_string(100*diff) + "% difference). ");
       }
 
       if (sm.get_physical().Mhh > 0) {
