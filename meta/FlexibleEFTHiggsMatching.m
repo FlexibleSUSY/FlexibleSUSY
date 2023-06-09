@@ -24,7 +24,7 @@ BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopM
 
 CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
 Create3LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 3-loop level.";
-CallMatch2LoopTopMass::usage = "";
+CallMatch2LoopTopMass::usage = "Sets SM top Yukawa coupling to 2-loop value, determined from BSM model";
 CreateSMMt2LoopFunction::usage = "Creates a function that calculates the running MS-bar top quark mass in the SM from the BSM parameters";
 CalculateRunningUpQuarkMasses::usage = "";
 CalculateRunningDownQuarkMasses::usage = "";
@@ -32,14 +32,14 @@ CalculateRunningDownLeptonMasses::usage = "";
 CalculateMUpQuarkPole1L::usage = "";
 CalculateMDownQuarkPole1L::usage = "";
 CalculateMDownLeptonPole1L::usage = "";
-FillSMFermionPoleMasses::usage = "";
+FillSMFermionPoleMasses::usage = "Set SM fermion pole masses from BSM fermion pole masses";
 GetFixedBSMParameters::usage="Returns a list of the BSM parameters fixed by matching SM -> BSM.";
 SetBSMParameters::usage = "";
 SetGaugeLessLimit::usage = "applies gauge-less limit to given model";
 
 Begin["`Private`"];
 
-CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] /; (GetDimension[particle] == 1) :=
+CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] /; (TreeMasses`GetDimension[particle] == 1) :=
     outVar <> " = mh2_tree - self_energy - tadpole(0);"
 
 CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] :=
@@ -139,8 +139,8 @@ const double lambda_3l = lambda_2l + delta_lambda_3l;
 " <> outputModel <> ".calculate_DRbar_masses();";
 
 
-CallMatch2LoopTopMass[] :=
-"sm.set_Yu(2, 2, calculate_yt_sm_2l(sm_0l, sm_1l, model));"
+CallMatch2LoopTopMass[smStr_:"sm."] :=
+smStr <> "set_Yu(2, 2, calculate_yt_sm_2l(sm_0l, sm_1l, model));"
 
 CreateSMMt2LoopFunction[] :=
 Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]], 
@@ -337,8 +337,7 @@ CalculateMFermionPole1L[name_String, GetList_, GetEntry_] :=
                   mq = CConversion`RValueToCFormString[GetEntry[i + 1, True]];
                   iStr = ToString[i];
                   result = result <>
-"\
-if (i == " <> iStr <> ") {
+"if (i == " <> iStr <> ") {
    const double p = model_0l.get_M" <> mq <> "();
    const auto self_energy_1  = Re(model_0l.self_energy_" <> mq <> "_1loop_1(p));
    const auto self_energy_PL = Re(model_0l.self_energy_" <> mq <> "_1loop_PL(p));
@@ -353,8 +352,7 @@ if (i == " <> iStr <> ") {
               ,
               mq = CConversion`RValueToCFormString[GetParticleFromDescription[name]];
               result =
-"\
-const double p = model_0l.get_M" <> mq <> "(i);
+"const double p = model_0l.get_M" <> mq <> "(i);
 const auto self_energy_1  = Re(model_0l.self_energy_" <> mq <> "_1loop_1(p));
 const auto self_energy_PL = Re(model_0l.self_energy_" <> mq <> "_1loop_PL(p));
 const auto self_energy_PR = Re(model_0l.self_energy_" <> mq <> "_1loop_PR(p));
@@ -380,25 +378,25 @@ CalculateMDownLeptonPole1L[] := CalculateMFermionPole1L["Leptons",
                                                         TreeMasses`GetSMChargedLeptons,
                                                         TreeMasses`GetDownLepton];
 
-FillSMFermionPoleMasses[] :=
+FillSMFermionPoleMasses[eftStr_:"eft.", bsmStr_:"this->model."] :=
     Module[{result = "", i, mq},
            For[i = 0, i < 3, i++,
                mq = CConversion`RValueToCFormString[TreeMasses`GetUpQuark[i + 1, True]];
                result = result <>
-                        "this->model.get_physical().M" <> mq <> " = " <>
-                        "eft.get_physical().MFu(" <> ToString[i] <> ");\n";
+                        bsmStr <> "get_physical().M" <> mq <> " = " <>
+                        eftStr <> "get_physical().MFu(" <> ToString[i] <> ");\n";
               ];
            For[i = 0, i < 3, i++,
                mq = CConversion`RValueToCFormString[TreeMasses`GetDownQuark[i + 1, True]];
                result = result <>
-                        "this->model.get_physical().M" <> mq <> " = " <>
-                        "eft.get_physical().MFd(" <> ToString[i] <> ");\n";
+                        bsmStr <> "get_physical().M" <> mq <> " = " <>
+                        eftStr <> "get_physical().MFd(" <> ToString[i] <> ");\n";
               ];
            For[i = 0, i < 3, i++,
                mq = CConversion`RValueToCFormString[TreeMasses`GetDownLepton[i + 1, True]];
                result = result <>
-                        "this->model.get_physical().M" <> mq <> " = " <>
-                        "eft.get_physical().MFe(" <> ToString[i] <> ");\n";
+                        bsmStr <> "get_physical().M" <> mq <> " = " <>
+                        eftStr <> "get_physical().MFe(" <> ToString[i] <> ");\n";
               ];
            result
           ];
