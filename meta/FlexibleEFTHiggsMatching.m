@@ -444,17 +444,21 @@ SetBSMParameters[susyScaleMatching_List, higgsMassMatrix_, struct_String:""] :=
            StringJoin[SetBSMParameterAtLoopOrder[#[[1]], #[[2]], struct]& /@ Utils`Zip[pars, loopOrder]]
           ];
 
-(* solve given relation between the effective mu parameter muEff
-   and the singlet VEV for the singlet VEV *)
-GetSingletVEVInTermsOf[muEff_] :=
-  Module[{vs = Parameters`GetParameterFromDescription["Singlet-VEV"]},
-         If[vs === Null,
-            vs,
-            First[vs /. Solve[muEff == FlexibleSUSY`EffectiveMu, vs]]
-           ]
+(* extract expression for parameter `par' in terms of model parameters
+   from susyScaleInput *)
+GetExprFrom[par_, susyScaleInput_] :=
+  Module[{repl, expr},
+	 (* reversed replacement rules from susyScaleInput *)
+	 repl = Cases[susyScaleInput, l:{Except[par], _} :> Reverse[Rule @@ l]];
+	 (* expression for par from susyScaleInput *)
+	 expr = Cases[susyScaleInput, {par, expr_} :> expr] //. repl;
+	 If[MatchQ[expr, {__}],
+	    Last[expr],
+	    Null
+	 ]
   ]; 
 
-(* @TODO: generalize gaugeless limit for any model 
+(* @todo: generalize gaugeless limit for any model 
    Set all dimensionless parameter to zero except (yt, yb, ytau, g3) in the MSSM.  
    In other models, need to check which 2-loop contributions to Mh are available.
  *)
@@ -465,7 +469,7 @@ SetGaugeLessLimit[struct_String] :=
             lambda = Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"],
             kappa = Parameters`GetParameterFromDescription["Singlet Self-Interaction"],
             vs = Parameters`GetParameterFromDescription["Singlet-VEV"],
-            vSexpr = GetSingletVEVInTermsOf[FlexibleSUSY`MuInput]},
+            vSexpr, tlambdaExpr},
            (* set g1 = 0 *)
            If[ValueQ[SARAH`hyperchargeCoupling],
               result = result <> Parameters`SetParameter[SARAH`hyperchargeCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g1str, struct <> "."];
@@ -475,11 +479,15 @@ SetGaugeLessLimit[struct_String] :=
               result = result <> Parameters`SetParameter[SARAH`leftCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g2str, struct <> "."];
              ];
            (* set lambda = 0 *)
-           If[lambda =!= Null && vs =!= Null && vSexpr =!= Null,
-              result = result <> Parameters`SetParameter[lambda, "gauge_less", struct <> "."];
-              result = result <> Parameters`SetParameter[SARAH`T[lambda], "INPUTPARAMETER(ALambdaInput)*gauge_less", struct <> "."];
-              result = result <> Parameters`CreateLocalConstRefs[vSexpr];
-              result = result <> Parameters`SetParameter[vs, vSexpr, struct <> "."];
+           If[lambda =!= Null && vs =!= Null,
+	      vSexpr = GetExprFrom[vs, FlexibleSUSY`SUSYScaleInput];
+	      tlambdaExpr = GetExprFrom[SARAH`T[lambda], FlexibleSUSY`SUSYScaleInput];
+	      If[vSexpr =!= Null,
+		 result = result <> Parameters`SetParameter[lambda, "gauge_less", struct <> "."];
+		 result = result <> Parameters`CreateLocalConstRefs[{vSexpr, tlambdaExpr}];
+		 result = result <> Parameters`SetParameter[vs, vSexpr, struct <> "."];
+		 result = result <> Parameters`SetParameter[SARAH`T[lambda], tlambdaExpr, struct <> "."];
+	      ];
            ];
            (* set kappa = 0 *)
            If[kappa =!= Null,
