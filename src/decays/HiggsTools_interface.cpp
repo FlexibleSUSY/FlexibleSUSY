@@ -117,17 +117,6 @@ std::pair<int, double> call_HiggsTools(
       sGSL = gsl_min_fminimizer_alloc (T);
       gsl_min_fminimizer_set (sGSL, &F, m, a, b);
 
-      printf ("using %s method\n",
-         gsl_min_fminimizer_name (sGSL));
-
-      printf ("%5s [%9s, %9s] %9s %10s %9s\n",
-         "iter", "lower", "upper", "min",
-         "err", "err(est)");
-
-      printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
-         iter, a, b,
-         m, b - a);
-
       do
       {
            iter++;
@@ -139,15 +128,7 @@ std::pair<int, double> call_HiggsTools(
 
           // determine mh with a relative error < 0.1%
           status
-             = gsl_min_test_interval (a, b, 0.0, 1e-3);
-
-          if (status == GSL_SUCCESS)
-             printf ("Converged:\n");
-
-             printf ("%5d [%.7f, %.7f] "
-                "%.7f %.7f\n",
-                iter, a, b,
-                m, b - a);
+             = gsl_min_test_interval (a, b, 0.0, 8e-4);
       }
       while (status == GSL_CONTINUE && iter < max_iter);
 
@@ -155,8 +136,10 @@ std::pair<int, double> call_HiggsTools(
 
       sm.calculate_pole_masses();
 
-      if (std::abs(1. - sm.get_physical().Mhh/mass) > 1e-3) {
-         throw Error("Higgstools interface: cannot find a SM equivalent of " + el.particle + " with a mass " + std::to_string(mass) + " GeV (got " + std::to_string(sm.get_physical().Mhh) + ").");
+      if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > 1e-3) {
+         throw Error("Higgstools interface: cannot find a SM equivalent of " + el.particle +
+                     " with a mass " + std::to_string(mass) + " GeV (got " +
+                     std::to_string(sm.get_physical().Mhh) + " - " + std::to_string(diff) + "% difference). ");
       }
 
       if (sm.get_physical().Mhh > 0) {
@@ -248,7 +231,6 @@ std::pair<int, double> call_HiggsTools(
    std::ofstream hb_output("HiggsBounds.out");
    hb_output << hbResult;
    hb_output.close();
-   std::cout << hbResult;
    // mimics the behavious of << operator
    //for (const auto &[p, lim] : hbResult.selectedLimits) {
    //   std::cout << p << ' ' << lim.obsRatio() << ' ' << lim.expRatio() << " # " << lim.limit()->to_string() << std::endl;
