@@ -95,8 +95,8 @@ std::pair<int, double> call_HiggsTools(
       int iter = 0, max_iter = 100;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
-      // find λ in range [0, 4]
-      double a = 0.001, b = 4;
+      // find λ in range [0, 5]
+      double a = 0.001, b = 5;
 
       double m = 0.1;
 
@@ -140,7 +140,8 @@ std::pair<int, double> call_HiggsTools(
          throw Error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
                      " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations."
                      "Mass difference: " + std::to_string(mass) + " GeV (BSM) vs " +
-                     std::to_string(sm.get_physical().Mhh) + " GeV (SM). Difference: " + std::to_string(100*diff) + "%. ");
+                     std::to_string(sm.get_physical().Mhh) + " GeV (SM) for λSM = " + std::to_string(m) +
+                     ". Difference: " + std::to_string(100*diff) + "%. ");
       }
 
       if (sm.get_physical().Mhh > 0) {
