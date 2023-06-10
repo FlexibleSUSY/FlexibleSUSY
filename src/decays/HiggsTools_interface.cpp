@@ -126,7 +126,7 @@ std::pair<int, double> call_HiggsTools(
            a = gsl_min_fminimizer_x_lower (sGSL);
            b = gsl_min_fminimizer_x_upper (sGSL);
 
-          // determine mh with a relative error < 0.1%
+          // this seems to give a relative error < 0.1%
           status
              = gsl_min_test_interval (a, b, 0.0, 1e-4);
       }
@@ -137,9 +137,10 @@ std::pair<int, double> call_HiggsTools(
       sm.calculate_pole_masses();
 
       if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > 1e-3) {
-         throw Error("Higgstools interface: cannot find a SM equivalent of " + el.particle +
-                     " with a mass " + std::to_string(mass) + " GeV (got " +
-                     std::to_string(sm.get_physical().Mhh) + " - " + std::to_string(100*diff) + "% difference). ");
+         throw Error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
+                     " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations."
+                     "Mass difference: " + std::to_string(mass) + " GeV (BSM) vs " +
+                     std::to_string(sm.get_physical().Mhh) + " GeV (SM). Difference: " + std::to_string(100*diff) + "%. ");
       }
 
       if (sm.get_physical().Mhh > 0) {
