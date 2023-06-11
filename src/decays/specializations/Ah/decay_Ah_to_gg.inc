@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       const context_base& context,
       const typename field_indices<PseudoscalarHiggs>::type& in_idx,
       const typename field_indices<Gluon>::type& out1_idx,
-      const typename field_indices<Gluon>::type& out2_idx) const
+      const typename field_indices<Gluon>::type& out2_idx)
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");

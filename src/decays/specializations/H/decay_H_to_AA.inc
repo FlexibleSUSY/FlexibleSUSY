@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<Higgs, Photon, Photon>(
       const context_base& context,
       const typename field_indices<Higgs>::type& in_idx,
       const typename field_indices<Photon>::type& out1_idx,
-      const typename field_indices<Photon>::type& out2_idx) const
+      const typename field_indices<Photon>::type& out2_idx)
 {
    const auto amp = calculate_amplitude<Higgs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<Higgs>(in_idx);

@@ -2,7 +2,7 @@ template <>
 double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
    const context_base& context, typename field_indices<Higgs>::type const& indexIn,
    typename field_indices<WpBoson>::type const& indexOut1,
-   typename field_indices<WmBoson>::type const& indexOut2) const
+   typename field_indices<WmBoson>::type const& indexOut2)
 {
 
    const double mHOS = context.physical_mass<Higgs>(indexIn);
