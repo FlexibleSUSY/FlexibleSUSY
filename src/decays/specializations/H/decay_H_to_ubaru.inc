@@ -32,7 +32,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    const double muqDR = context.mass<UpTypeQuark>(indexOut1);
    const double muqOS = context.physical_mass<UpTypeQuark>(indexOut1);
    if(is_zero(muqDR) || is_zero(muqOS)) {
-      throw std::runtime_error("Error in H->uubar: down quarks cannot be massless");
+      throw std::runtime_error(create_process_string<Higgs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2) + ": Up-type quark cannot be massless. Aborting.");
    }
    const auto xOS = Sqr(muqOS/mHOS);
    const auto xDR = Sqr(muqDR/mHOS);
@@ -66,8 +66,12 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                     2*std::norm(HQQbarVertexDR_P) * Sqr(muqOS / muqDR);
       }
 
-      if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0)  {
-            const int Nf = number_of_active_flavours(qedqcd, mHOS);
+      const int Nf = number_of_active_flavours(qedqcd, mHOS);
+      if (Nf < 5) {
+         problems.add_error(create_process_string<Higgs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2) + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections.");
+      }
+
+      if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5)  {
             double alpha_s_red;
             double Y_conversion = 1.;
             switch (Nf) {
@@ -81,8 +85,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                case 6:
                   alpha_s_red = get_alphas(context)/Pi;
                   break;
-               default:
-                  throw std::runtime_error ("Error in H->uubar: Cannot determine the number of active flavours");
             }
             double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf, flexibledecay_settings);
             double deltaqq_QCD_DR_P = deltaqq_QCD_DR_S;

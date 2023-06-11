@@ -235,17 +235,17 @@ std::string create_process_string(
          return std::string();
       }
       else {
-         return "(" + std::to_string(v[0]) + ")";
+         // in the output we count particles from 1 (not 0)
+         return "(" + std::to_string(v[0]+1) + ")";
       }
    };
 
    using boost::core::demangle;
    std::string process_string =
          strip_field_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
-         + "->{" +
-         strip_field_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + "," +
-         strip_field_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2) +
-         "}";
+         + " -> " +
+         strip_field_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + " " +
+         strip_field_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2);
 
    return process_string;
 }
