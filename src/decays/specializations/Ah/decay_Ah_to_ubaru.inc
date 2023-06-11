@@ -65,7 +65,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
 
       const int Nf = number_of_active_flavours(qedqcd, mAhOS);
       if (Nf < 5) {
-         problems.add_error(create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2) + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections.");
+         problems.add_warning(create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2) + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections.");
       }
 
       if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5) {
