@@ -128,7 +128,7 @@ std::pair<int, double> call_HiggsTools(
 
           // this seems to give a relative error < 0.1%
           status
-             = gsl_min_test_interval (a, b, 0.0, 1e-4);
+             = gsl_min_test_interval (a, b, 0.0, 9e-5);
       }
       while (status == GSL_CONTINUE && iter < max_iter);
 
