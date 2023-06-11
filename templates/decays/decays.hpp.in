@@ -83,7 +83,7 @@ public:
       const @ModelName@_cxx_diagrams::context_base&,
       typename cxx_diagrams::field_indices<FieldIn>::type const&,
       typename cxx_diagrams::field_indices<FieldOut1>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut2>::type const&) const;
+      typename cxx_diagrams::field_indices<FieldOut2>::type const&);
 
 @partialWidthCalculationPrototypes@
 
@@ -113,12 +113,6 @@ private:
                   typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
                   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const;
 
-   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-   double get_partial_width(
-      const @ModelName@_cxx_diagrams::context_base&,
-      typename cxx_diagrams::field_indices<FieldIn>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut1>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut2>::type const&);
    double get_alphas(@ModelName@_cxx_diagrams::context_base const&) const;
    double get_alpha(@ModelName@_cxx_diagrams::context_base const&) const;
 };
@@ -144,8 +138,7 @@ double @ModelName@_decays::get_partial_width(
    const @ModelName@_cxx_diagrams::context_base& context,
    typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
    typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
-   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2
-   )
+   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2)
 {
 
    // on-shell masses
@@ -155,7 +148,10 @@ double @ModelName@_decays::get_partial_width(
 
    // is decay kinematically allowed?
    if(mIn < mOut1 + mOut2) {
-      WARNING("Called kinematically forbidden decay");
+      problems.add_warning(
+         create_process_string<FieldIn,FieldOut1,FieldOut2>(indexIn, indexOut1, indexOut2)
+            + ": Called kinematically forbidden decay."
+      );
       return 0.;
    }
 

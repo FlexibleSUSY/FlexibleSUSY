@@ -3,8 +3,7 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,
    typename field_indices<ZBoson>::type const& indexOut1,
-   typename field_indices<ZBoson>::type const& indexOut2
-   )
+   typename field_indices<ZBoson>::type const& indexOut2)
 {
 
    const double mHOS = context.physical_mass<Higgs>(indexIn);

@@ -3,8 +3,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,
    typename field_indices<DownTypeQuark>::type const& indexOut1,
-   typename field_indices<DownTypeQuark>::type const& indexOut2
-   )
+   typename field_indices<DownTypeQuark>::type const& indexOut2)
 {
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need this vertex
@@ -32,7 +31,10 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    const double mdqDR = context.mass<DownTypeQuark>(indexOut1);
    const double mdqOS = context.physical_mass<DownTypeQuark>(indexOut1);
    if(is_zero(mdqDR) || is_zero(mdqOS)) {
-      throw std::runtime_error(create_process_string<Higgs,bar<DownTypeQuark>::type, DownTypeQuark>(indexIn, indexOut1, indexOut2) + ": Down-type quark cannot be massless. Aborting.");
+      throw std::runtime_error(
+         create_process_string<Higgs,bar<DownTypeQuark>::type, DownTypeQuark>(indexIn, indexOut1, indexOut2)
+            + ": Down-type quark cannot be massless. Aborting."
+      );
    }
    const auto xOS = Sqr(mdqOS/mHOS);
    const auto xDR = Sqr(mdqDR/mHOS);
@@ -67,7 +69,10 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
 
    const int Nf = number_of_active_flavours(qedqcd, mHOS);
    if (Nf < 5) {
-      problems.add_warning(create_process_string<Higgs,bar<DownTypeQuark>::type, DownTypeQuark>(indexIn, indexOut1, indexOut2) + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections.");
+      problems.add_warning(
+         create_process_string<Higgs,bar<DownTypeQuark>::type, DownTypeQuark>(indexIn, indexOut1, indexOut2)
+            + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections."
+      );
    }
 
    if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5) {
@@ -84,6 +89,11 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
             case 6:
                alpha_s_red = get_alphas(context)/Pi;
                break;
+            default:
+               throw std::runtime_error(
+                  create_process_string<Higgs,bar<DownTypeQuark>::type, DownTypeQuark>(indexIn, indexOut1, indexOut2)
+                     + ": Cannot determine the number of active quark flavours."
+               );
          }
          double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf, flexibledecay_settings);
          double deltaqq_QCD_DR_P = deltaqq_QCD_DR_S;

@@ -3,8 +3,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
    const context_base& context,
    typename field_indices<PseudoscalarHiggs>::type const& indexIn,
    typename field_indices<UpTypeQuark>::type const& indexOut1,
-   typename field_indices<UpTypeQuark>::type const& indexOut2
-   )
+   typename field_indices<UpTypeQuark>::type const& indexOut2)
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
@@ -37,7 +36,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
    const double muqDR = context.mass<UpTypeQuark>(indexOut1);
    const double muqOS = context.physical_mass<UpTypeQuark>(indexOut1);
    if(is_zero(muqDR) || is_zero(muqOS)) {
-      throw std::runtime_error(create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2) + ": Up-type quark cannot be massless. Aborting.");
+      throw std::runtime_error(
+         create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2)
+            + ": Up-type quark cannot be massless. Aborting."
+      );
    }
    const auto xOS = Sqr(muqOS/mAhOS);
    const auto xDR = Sqr(muqDR/mAhOS);
@@ -65,7 +67,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
 
       const int Nf = number_of_active_flavours(qedqcd, mAhOS);
       if (Nf < 5) {
-         problems.add_warning(create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2) + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections.");
+         problems.add_warning(
+            create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2)
+               + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections."
+         );
       }
 
       if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5) {
@@ -82,6 +87,11 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
                case 6:
                   alpha_s_red = get_alphas(context)/Pi;
                   break;
+               default:
+                  throw std::runtime_error(
+                     create_process_string<PseudoscalarHiggs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2)
+                        + ": Cannot determine the number of active quark flavours."
+                  );
             }
             double deltaqq_QCD_DR_P =
                   calc_Deltaqq(alpha_s_red, Nf, flexibledecay_settings)
