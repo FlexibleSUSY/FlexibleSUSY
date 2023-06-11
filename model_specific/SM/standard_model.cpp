@@ -50,6 +50,7 @@
 #include <iostream>
 #include <memory>
 #include <algorithm>
+#include <optional>
 
 namespace flexiblesusy {
 
