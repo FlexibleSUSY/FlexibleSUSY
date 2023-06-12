@@ -98,7 +98,7 @@ std::pair<int, double> call_HiggsTools(
       // find λ in range [0, 5]
       double a = 0.001, b = 5;
 
-      double m = 0.1;
+      double m = 0.05;
 
       // hack to pass lambda-function to GSL
       std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
@@ -112,8 +112,8 @@ std::pair<int, double> call_HiggsTools(
 
       // checked on a single point in the MRSSM2:
       //    brent seems faster and more accurate than quad_golden
-      T = gsl_min_fminimizer_brent;
-      //T = gsl_min_fminimizer_quad_golden;
+      //T = gsl_min_fminimizer_brent;
+      T = gsl_min_fminimizer_quad_golden;
       sGSL = gsl_min_fminimizer_alloc (T);
       gsl_min_fminimizer_set (sGSL, &F, m, a, b);
 
@@ -128,7 +128,7 @@ std::pair<int, double> call_HiggsTools(
 
           // this seems to give a relative error < 0.1%
           status
-             = gsl_min_test_interval (a, b, 0.0, 9e-5);
+             = gsl_min_test_interval (a, b, 0.0, 6e-5);
       }
       while (status == GSL_CONTINUE && iter < max_iter);
 
