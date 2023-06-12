@@ -91,8 +91,8 @@ std::pair<int, double> call_HiggsTools(
          return std::abs(sm.get_physical().Mhh - mass);
       };
 
-      int status;
-      int iter = 0, max_iter = 100;
+      int status, iter = 0;
+      static constexpr int max_iter = 100;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
@@ -125,24 +125,20 @@ std::pair<int, double> call_HiggsTools(
            m = gsl_min_fminimizer_x_minimum (sGSL);
            a = gsl_min_fminimizer_x_lower (sGSL);
            b = gsl_min_fminimizer_x_upper (sGSL);
-
-          // this seems to give a relative error < 0.1%
-          status
-             = gsl_min_test_interval (a, b, 0.0, 6e-5);
       }
-      while (status == GSL_CONTINUE && iter < max_iter);
+      while (std::abs(1. - sm.get_physical().Mhh/mass) > 1e-3 && iter < max_iter);
 
       gsl_min_fminimizer_free (sGSL);
 
-      sm.calculate_pole_masses();
-
       if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > 1e-3) {
-         throw Error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
-                     " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations."
+         throw std::runtime_error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
+                     " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations. "
                      "Mass difference: " + std::to_string(mass) + " GeV (BSM) vs " +
                      std::to_string(sm.get_physical().Mhh) + " GeV (SM) for λSM = " + std::to_string(m) +
                      ". Difference: " + std::to_string(100*diff) + "%. ");
       }
+
+      sm.calculate_pole_masses();
 
       if (sm.get_physical().Mhh > 0) {
          // calculate decays in the SM equivalent
@@ -154,7 +150,6 @@ std::pair<int, double> call_HiggsTools(
 
          // fermion channels are given as complex numbers
          // we normalize to real part of SM coupling
-
          // quarks
          effc.dd = std::abs(sm_input[0].dd) > 0 ? el.dd/sm_input[0].dd.real() : 0.;
          effc.uu = std::abs(sm_input[0].uu) > 0 ? el.uu/sm_input[0].uu.real() : 0.;
@@ -166,6 +161,7 @@ std::pair<int, double> call_HiggsTools(
          effc.ee = std::abs(sm_input[0].ee)         > 0 ? el.ee/sm_input[0].ee.real()         : 0.;
          effc.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
          effc.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
+
          // gauge bosons
          effc.WW = std::abs(sm_input[0].WW) > 0         ? el.WW/sm_input[0].WW         : 0.;
          effc.ZZ = std::abs(sm_input[0].ZZ) > 0         ? el.ZZ/sm_input[0].ZZ         : 0.;
