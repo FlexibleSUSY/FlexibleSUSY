@@ -96,7 +96,7 @@ std::pair<int, double> call_HiggsTools(
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
-      double a = 0.001, b = 5;
+      double a = 0.0001, b = 5;
 
       double m = 0.05;
 
@@ -112,8 +112,8 @@ std::pair<int, double> call_HiggsTools(
 
       // checked on a single point in the MRSSM2:
       //    brent seems faster and more accurate than quad_golden
-      //T = gsl_min_fminimizer_brent;
-      T = gsl_min_fminimizer_quad_golden;
+      T = gsl_min_fminimizer_brent;
+      //T = gsl_min_fminimizer_quad_golden;
       sGSL = gsl_min_fminimizer_alloc (T);
       gsl_min_fminimizer_set (sGSL, &F, m, a, b);
 
@@ -125,6 +125,14 @@ std::pair<int, double> call_HiggsTools(
            m = gsl_min_fminimizer_x_minimum (sGSL);
            a = gsl_min_fminimizer_x_lower (sGSL);
            b = gsl_min_fminimizer_x_upper (sGSL);
+
+          if (status == GSL_SUCCESS)
+             printf ("Converged:\n");
+
+             printf ("%5d [%.7f, %.7f] "
+                "%.7f %.7f %.7f %.7f %.7f\n",
+                iter, a, b,
+                m, b - a, mass, sm.get_physical().Mhh, 1. - sm.get_physical().Mhh/mass);
       }
       while (std::abs(1. - sm.get_physical().Mhh/mass) > 1e-3 && iter < max_iter);
 
@@ -169,6 +177,16 @@ std::pair<int, double> call_HiggsTools(
          effc.Zgam = std::abs(sm_input[0].Zgam) > 0     ? el.Zgam/sm_input[0].Zgam     : 0.;
          effc.gg = std::abs(sm_input[0].gg) > 0         ? el.gg/sm_input[0].gg         : 0.;
 
+         std::cout << "Ania gg " << sm.get_physical().Mhh << ' ' << mass << ' ' << el.gg/sm_input[0].gg << std::endl;
+         std::cout << "Ania WW " << sm.get_physical().Mhh << ' ' << mass << ' ' << el.WW/sm_input[0].WW << std::endl;
+         std::cout << "Ania ZZ " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.ZZ/sm_input[0].ZZ << std::endl;
+         std::cout << "Ania gamgam " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.gamgam/sm_input[0].gamgam << std::endl;
+         std::cout << "Ania Zgam " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.Zgam/sm_input[0].Zgam << std::endl;
+         std::cout << "Ania bb " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.bb/sm_input[0].bb.real() << std::endl;
+         std::cout << "Ania tautau " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.tautau/sm_input[0].tautau.real() << std::endl;
+         std::cout << "Ania tt " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.tt/sm_input[0].tt.real() << std::endl;
+         std::cout << "Ania mm " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.mumu/sm_input[0].mumu.real() << std::endl;
+
          effectiveCouplingInput(
             s, effc,
             // choosing reference model
@@ -194,6 +212,7 @@ std::pair<int, double> call_HiggsTools(
       }
    }
 
+   /*
    for (auto const& el : bsm_input2) {
       auto& Hpm = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::single));
       // set mass
@@ -216,6 +235,7 @@ std::pair<int, double> call_HiggsTools(
       double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, el.brtHpb);
       Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
    }
+   */
 
    // HiggsBounds
    if (higgsbounds_dataset.empty()) {
@@ -226,6 +246,14 @@ std::pair<int, double> call_HiggsTools(
    }
    auto bounds = Higgs::Bounds {higgsbounds_dataset};
    auto hbResult = bounds(pred);
+   //std::ofstream hb_output("HiggsBounds.out");
+   //hb_output << hbResult;
+   //hb_output.close();
+   // mimics the behavious of << operator
+   //for (const auto &[p, lim] : hbResult.selectedLimits) {
+   //   std::cout << p << ' ' << lim.obsRatio() << ' ' << lim.expRatio() << " # " << lim.limit()->to_string() << std::endl;
+   //}
+
 
    // HiggsSignals
    if (higgssignals_dataset.empty()) {
@@ -235,6 +263,9 @@ std::pair<int, double> call_HiggsTools(
       throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
    }
    const auto signals = Higgs::Signals {higgssignals_dataset};
+   //for (const auto &m : signals.measurements()) {
+   //   std::cout << m.reference() << " " << m(pred) << std::endl;
+   //}
    const double hs_chisq = signals(pred);
 
    return {signals.observableCount(), hs_chisq};

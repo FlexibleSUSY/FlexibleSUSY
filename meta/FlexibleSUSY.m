@@ -2742,11 +2742,13 @@ IndentText[
    ] <> ";\n" <>
    "try {\n" <>
    IndentText[
-      "auto [higgssignals_ndof, higgssignals_chi2] = call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
+      "// structured bindings creates new variables - need to use std::tie
+std::tie(higgssignals_ndof, higgssignals_chi2) =
+   call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
    ] <>
    "}\n" <>
-   "catch (const Error& error) {\n" <>
-      "WARNING(error.what_detailed());\n" <>
+   "catch (const std::exception& error) {\n" <>
+      IndentText["ERROR(error.what());\n"] <>
    "}\n"
 ] <>
 "}\n"
