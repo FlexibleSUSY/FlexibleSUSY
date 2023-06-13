@@ -2215,7 +2215,7 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
                     Flatten[Last /@ particleDecays, 1]
                  ]
            ];
-           Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
+           Print["The creation of C++ code for decays took", FSRound[First@specializations, 1], "s"];
            specializations = Last@specializations;
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
