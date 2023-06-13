@@ -179,16 +179,6 @@ std::pair<int, double> call_HiggsTools(
          effc.Zgam = std::abs(sm_input[0].Zgam) > 0     ? el.Zgam/sm_input[0].Zgam     : 0.;
          effc.gg = std::abs(sm_input[0].gg) > 0         ? el.gg/sm_input[0].gg         : 0.;
 
-         std::cout << "Ania gg " << sm.get_physical().Mhh << ' ' << mass << ' ' << el.gg/sm_input[0].gg << std::endl;
-         std::cout << "Ania WW " << sm.get_physical().Mhh << ' ' << mass << ' ' << el.WW/sm_input[0].WW << std::endl;
-         std::cout << "Ania ZZ " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.ZZ/sm_input[0].ZZ << std::endl;
-         std::cout << "Ania gamgam " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.gamgam/sm_input[0].gamgam << std::endl;
-         std::cout << "Ania Zgam " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.Zgam/sm_input[0].Zgam << std::endl;
-         std::cout << "Ania bb " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.bb/sm_input[0].bb.real() << std::endl;
-         std::cout << "Ania tautau " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.tautau/sm_input[0].tautau.real() << std::endl;
-         std::cout << "Ania tt " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.tt/sm_input[0].tt.real() << std::endl;
-         std::cout << "Ania mm " << sm.get_physical().Mhh << ' ' << mass  << ' ' << el.mumu/sm_input[0].mumu.real() << std::endl;
-
          effectiveCouplingInput(
             s, effc,
             // choosing reference model
