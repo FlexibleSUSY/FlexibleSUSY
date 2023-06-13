@@ -127,14 +127,6 @@ std::pair<int, double> call_HiggsTools(
            m = gsl_min_fminimizer_x_minimum (sGSL);
            a = gsl_min_fminimizer_x_lower (sGSL);
            b = gsl_min_fminimizer_x_upper (sGSL);
-
-          if (status == GSL_SUCCESS)
-             printf ("Converged:\n");
-
-             printf ("%5d [%.7f, %.7f] "
-                "%.7f %.7f %.7f %.7f %.7f\n",
-                iter, a, b,
-                m, b - a, mass, sm.get_physical().Mhh, 1. - sm.get_physical().Mhh/mass);
       }
       while (std::abs(1. - sm.get_physical().Mhh/mass) > mass_precision && iter < max_iter);
 
