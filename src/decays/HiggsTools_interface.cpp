@@ -117,6 +117,8 @@ std::pair<int, double> call_HiggsTools(
       sGSL = gsl_min_fminimizer_alloc (T);
       gsl_min_fminimizer_set (sGSL, &F, m, a, b);
 
+      static constexpr double mass_precision = 1e-5;
+
       do
       {
            iter++;
@@ -134,11 +136,11 @@ std::pair<int, double> call_HiggsTools(
                 iter, a, b,
                 m, b - a, mass, sm.get_physical().Mhh, 1. - sm.get_physical().Mhh/mass);
       }
-      while (std::abs(1. - sm.get_physical().Mhh/mass) > 1e-3 && iter < max_iter);
+      while (std::abs(1. - sm.get_physical().Mhh/mass) > mass_precision && iter < max_iter);
 
       gsl_min_fminimizer_free (sGSL);
 
-      if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > 1e-3) {
+      if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > mass_precision) {
          throw std::runtime_error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
                      " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations. "
                      "Mass difference: " + std::to_string(mass) + " GeV (BSM) vs " +
