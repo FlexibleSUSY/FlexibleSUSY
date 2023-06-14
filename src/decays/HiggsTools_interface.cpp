@@ -35,6 +35,7 @@
 #include <fstream>
 #include <iostream>
 #include <functional>
+#include <random>
 
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
@@ -98,7 +99,7 @@ std::pair<int, double> call_HiggsTools(
       // find λ in range [0, 5]
       double a = 0.0001, b = 5;
 
-      double m = 0.05;
+      double m = 0.1;
 
       // hack to pass lambda-function to GSL
       std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
@@ -115,7 +116,23 @@ std::pair<int, double> call_HiggsTools(
       T = gsl_min_fminimizer_brent;
       //T = gsl_min_fminimizer_quad_golden;
       sGSL = gsl_min_fminimizer_alloc (T);
-      gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+
+      // gsl_min_fminimizer_set expects f(m) < f(a) && f(m) < f(b),
+      // otherwise it returns GSL_EINVAL status.
+      // In this case we randomly try different m from [a, b]
+      // until status != GSL_EINVAL
+      gsl_error_handler_t * _error_handler = gsl_set_error_handler_off();
+      status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+      if (status == GSL_EINVAL) {
+         std::random_device rd;
+         std::mt19937 gen(rd());
+         std::uniform_real_distribution<> dis(a, b);
+         do {
+            m = dis(gen);
+            status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+         } while (status == GSL_EINVAL);
+      }
+      gsl_set_error_handler (_error_handler);
 
       static constexpr double mass_precision = 1e-5;
 
