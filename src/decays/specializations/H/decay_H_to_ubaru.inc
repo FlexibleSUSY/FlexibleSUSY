@@ -17,9 +17,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    static constexpr double color_factor = squared_color_generator<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
-      if (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right())) {
-         const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
-         const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
+      const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      if (mHOS > muqOS1 + muqOS2 && (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right()))) {
          const auto xOS1 = Sqr(muqOS1/mHOS);
          const auto xOS2 = Sqr(muqOS2/mHOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
