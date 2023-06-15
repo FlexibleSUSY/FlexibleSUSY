@@ -2102,7 +2102,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
               ]
            ];
            Print[""];
-           Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
+           Print["Creation of decay amplitudes took", FSRound[First@decaysLists, 1], "s"];
            decaysLists = Last@decaysLists;
 
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
