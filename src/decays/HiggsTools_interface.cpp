@@ -93,7 +93,7 @@ std::pair<int, double> call_HiggsTools(
       };
 
       int status, iter = 0;
-      static constexpr int max_iter = 150;
+      static constexpr int max_iter = 200;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
