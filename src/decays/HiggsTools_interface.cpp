@@ -68,7 +68,7 @@ std::pair<int, double> call_HiggsTools(
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
       if (mass > 700) continue;
 
-      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
+      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
       s.setMass(mass);
       s.setMassUnc(0.03*mass); // set mass uncertainty to 3%
 

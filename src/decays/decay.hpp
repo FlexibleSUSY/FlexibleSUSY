@@ -73,6 +73,7 @@ struct NeutralHiggsEffectiveCouplings {
    std::string particle = "";
    double mass = 0.;
    double width = 0.;
+   int CP = 0;
    std::complex<double> dd = 0.;
    std::complex<double> uu = 0.;
    std::complex<double> ss = 0.;

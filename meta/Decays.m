@@ -984,7 +984,8 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   "auto found = std::find_if(std::begin(higgstools_input), std::end(higgstools_input), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
                   "found->width = decays.get_total_width();\n" <>
-                  "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n"] <>
+                  "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n" <>
+                  "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, -1], 1] <> ";\n"] <>
                   "}\n"] <>
                   "\r#endif",
                   ""
