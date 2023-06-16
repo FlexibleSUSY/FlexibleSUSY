@@ -461,7 +461,7 @@ VersionOrderGtEqThan[version_List, minimRequired_List] /;
                version[[3]] < minimRequired[[3]]));
 
 FSRound[num_, prec_] :=
- PaddedForm[num, {IntegerPart[Log[10, Abs[num]]] + prec, prec}];
+   PaddedForm[num, {IntegerPart[Log[10, Abs[num]]] + prec + 1, prec}];
 
 End[];
 
