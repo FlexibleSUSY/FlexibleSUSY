@@ -93,13 +93,13 @@ std::pair<int, double> call_HiggsTools(
       };
 
       int status, iter = 0;
-      static constexpr int max_iter = 200;
+      static constexpr int max_iter = 50;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
       double a = 0.0001, b = 5;
-
-      double m = 0.1;
+      // initial guess for the location of minimum: λ=(mass/v)^2/2
+      double m = 0.5*Sqr(mass/247);
 
       // hack to pass lambda-function to GSL
       std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
@@ -114,19 +114,18 @@ std::pair<int, double> call_HiggsTools(
       // checked on a single point in the MRSSM2:
       //    brent seems faster and more accurate than quad_golden
       T = gsl_min_fminimizer_brent;
-      //T = gsl_min_fminimizer_quad_golden;
       sGSL = gsl_min_fminimizer_alloc (T);
 
       // gsl_min_fminimizer_set expects f(m) < f(a) && f(m) < f(b),
       // otherwise it returns GSL_EINVAL status.
-      // In this case we randomly try different m from [a, b]
+      // In this case we randomly try different m from [max(a, 0.01m), min(b, 100m)]
       // until status != GSL_EINVAL
       gsl_error_handler_t * _error_handler = gsl_set_error_handler_off();
       status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
       if (status == GSL_EINVAL) {
          std::random_device rd;
          std::mt19937 gen(rd());
-         std::uniform_real_distribution<> dis(a, b);
+         std::uniform_real_distribution<> dis(std::max(a,1e-2*m), std::min(b,1e+2*m));
          do {
             m = dis(gen);
             status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
@@ -134,7 +133,7 @@ std::pair<int, double> call_HiggsTools(
       }
       gsl_set_error_handler (_error_handler);
 
-      static constexpr double mass_precision = 1e-5;
+      static constexpr double mass_precision = 1e-4;
 
       do
       {
