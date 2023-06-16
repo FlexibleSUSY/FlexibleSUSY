@@ -498,6 +498,8 @@ endif # ifeq ($(ENABLE_LOOPTOOLS),yes)
 ifeq ($(WITH_BLSMlightZp),yes)
 TEST_SH += \
 		$(DIR)/test_BLSMlightZp_ZZp_mixing.sh
+TEST_SRC += \
+		$(DIR)/test_BLSMlightZp_amm.cpp
 endif
 
 ifeq ($(WITH_MSSM),yes)
@@ -1263,6 +1265,8 @@ $(DIR)/test_lowNUHMSSMSemiAnalytic_semi_analytic_solutions.x: $(LIBlowNUHMSSMSem
 $(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.x: $(LIBlowNUHMSSMSemiAnalytic) $(LIBlowNUHMSSM)
 
 $(DIR)/test_munuSSM_amm.x: $(LIBmunuSSM)
+
+$(DIR)/test_BLSMlightZp_amm.x: $(LIBBLSMlightZp)
 
 $(DIR)/test_munuSSMSemiAnalytic_ewsb.x: $(LIBmunuSSMSemiAnalytic)
 
