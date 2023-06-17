@@ -245,9 +245,9 @@ std::tuple<int, double, std::vector<std::tuple<int, double, double, std::string>
    //hb_output.close();
    // mimics the behavious of << operator
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
-   for (const auto &[p, lim] : hbResult.selectedLimits) {
-      auto found = std::find_if(std::begin(bsm_input), std::end(bsm_input), [&p](auto const& el) { return el.particle==p; });
-      hb_return.push_back({found->pdgid, lim.obsRatio(), lim.expRatio(), lim.limit()->to_string()});
+   for (auto const& _hb: hbResult.selectedLimits) {
+      auto found = std::find_if(std::begin(bsm_input), std::end(bsm_input), [&_hb](auto const& el) { return el.particle==_hb.first; });
+      hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
    }
 
 
