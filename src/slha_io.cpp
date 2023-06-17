@@ -991,8 +991,8 @@ void SLHA_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::s
    std::ostringstream ss;
 
    ss << block_head("HIGGSBOUNDS", 0.0);
-   for (const auto &[pdgid, obsRatio, expRatio, desription] : v) {
-      ss << FORMAT_ELEMENT(pdgid, obsRatio, desription);
+   for (auto const& el : v) {
+      ss << FORMAT_ELEMENT(std::get<0>(el), std::get<1>(el), std::get<3>(el));
    }
 
    set_block(ss);
