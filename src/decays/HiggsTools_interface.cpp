@@ -51,6 +51,22 @@ std::tuple<int, double, std::vector<std::tuple<int, double, double, std::string>
    FlexibleDecay_settings const& flexibledecay_settings,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
 
+   // check location of databases
+   // HiggsBounds
+   if (higgsbounds_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsBounds database");
+   }
+   else if (!std::filesystem::exists(higgsbounds_dataset)) {
+      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
+   }
+   // HiggsSignals
+   if (higgssignals_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsSignals database");
+   }
+   else if (!std::filesystem::exists(higgssignals_dataset)) {
+      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
+   }
+
    auto pred = Higgs::Predictions();
    namespace HP = Higgs::predictions;
    // whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
@@ -230,34 +246,17 @@ std::tuple<int, double, std::vector<std::tuple<int, double, double, std::string>
       Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
    }
    */
-
-   // HiggsBounds
-   if (higgsbounds_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsBounds database");
-   }
-   else if (!std::filesystem::exists(higgsbounds_dataset)) {
-      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
-   }
    auto bounds = Higgs::Bounds {higgsbounds_dataset};
    auto hbResult = bounds(pred);
-   //std::ofstream hb_output("HiggsBounds.out");
-   //hb_output << hbResult;
-   //hb_output.close();
-   // mimics the behavious of << operator
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
    for (auto const& _hb: hbResult.selectedLimits) {
-      auto found = std::find_if(std::begin(bsm_input), std::end(bsm_input), [&_hb](auto const& el) { return el.particle==_hb.first; });
+      auto found = std::find_if(
+         std::begin(bsm_input), std::end(bsm_input),
+         [&_hb](auto const& el) { return el.particle==_hb.first; }
+      );
       hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
    }
 
-
-   // HiggsSignals
-   if (higgssignals_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsSignals database");
-   }
-   else if (!std::filesystem::exists(higgssignals_dataset)) {
-      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
-   }
    const auto signals = Higgs::Signals {higgssignals_dataset};
    //for (const auto &m : signals.measurements()) {
    //   std::cout << m.reference() << " " << m(pred) << std::endl;
