@@ -2745,7 +2745,7 @@ IndentText[
    "try {\n" <>
    IndentText[
       "// structured bindings creates new variables - need to use std::tie
-std::tie(higgssignals_ndof, higgssignals_chi2) =
+std::tie(higgssignals_ndof, higgssignals_chi2, higgsbounds_v) =
    call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
    ] <>
    "}\n" <>
@@ -2774,6 +2774,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) && higgssignals_ndof > 0) {
       slha_io.set_higgssignals(higgssignals_ndof, higgssignals_chi2);
+      slha_io.set_higgsbounds(higgsbounds_v);
    }
 #endif
 }";

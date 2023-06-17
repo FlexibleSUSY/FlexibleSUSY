@@ -99,6 +99,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
 #ifdef ENABLE_HIGGSTOOLS
    int higgssignals_ndof = -1;
    double higgssignals_chi2 = NAN;
+   std::vector<std::tuple<int, double, double, std::string>> higgsbounds_v = {};
 #endif
 @calculateDecaysForModel@
 

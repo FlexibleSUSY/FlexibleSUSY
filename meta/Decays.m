@@ -985,7 +985,8 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
                   "found->width = decays.get_total_width();\n" <>
                   "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n" <>
-                  "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, -1], 1] <> ";\n"] <>
+                  "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, -1], 1] <> ";\n" <>
+                  "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n"] <>
                   "}\n"] <>
                   "\r#endif",
                   ""

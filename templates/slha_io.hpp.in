@@ -83,6 +83,7 @@ public:
 @setDecaysPrototypes@
    void set_extra(const @ModelName@_slha&, const @ModelName@_scales&, const @ModelName@_observables&, const flexiblesusy::Spectrum_generator_settings&);
    void set_higgssignals(int /* n.d.o.f. */, double /* chi2 */);
+   void set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const&);
    void set_input(const @ModelName@_input_parameters&);
    void set_modsel(const SLHA_io::Modsel&);
    void set_physical_input(const Physical_input&);

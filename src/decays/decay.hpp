@@ -71,6 +71,7 @@ private:
 
 struct NeutralHiggsEffectiveCouplings {
    std::string particle = "";
+   int pdgid = 0;
    double mass = 0.;
    double width = 0.;
    int CP = 0;

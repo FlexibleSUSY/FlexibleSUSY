@@ -42,7 +42,7 @@
 
 namespace flexiblesusy {
 
-std::pair<int, double> call_HiggsTools(
+std::tuple<int, double, std::vector<std::tuple<int, double, double, std::string>>> call_HiggsTools(
    EffectiveCoupling_list const& bsm_input,
    std::vector<SingleChargedHiggsInput> const& bsm_input2,
    Physical_input const& physical_input,
@@ -250,9 +250,11 @@ std::pair<int, double> call_HiggsTools(
    //hb_output << hbResult;
    //hb_output.close();
    // mimics the behavious of << operator
-   //for (const auto &[p, lim] : hbResult.selectedLimits) {
-   //   std::cout << p << ' ' << lim.obsRatio() << ' ' << lim.expRatio() << " # " << lim.limit()->to_string() << std::endl;
-   //}
+   std::vector<std::tuple<int, double, double, std::string>> hb_return {};
+   for (const auto &[p, lim] : hbResult.selectedLimits) {
+      auto found = std::find_if(std::begin(bsm_input), std::end(bsm_input), [&p](auto const& el) { return el.particle==p; });
+      hb_return.push_back({found->pdgid, lim.obsRatio(), lim.expRatio(), lim.limit()->to_string()});
+   }
 
 
    // HiggsSignals
@@ -268,7 +270,7 @@ std::pair<int, double> call_HiggsTools(
    //}
    const double hs_chisq = signals(pred);
 
-   return {signals.observableCount(), hs_chisq};
+   return {signals.observableCount(), hs_chisq, hb_return};
 }
 
 } // flexiblesusy
