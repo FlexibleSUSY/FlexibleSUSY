@@ -5,11 +5,11 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    typename field_indices<DownTypeQuark>::type const& indexOut1,
    typename field_indices<DownTypeQuark>::type const& indexOut2)
 {
-   // get HBBbar vertex
+   // get HQQbar vertex
    // we don't use amplitude_squared here because we need this vertex
    // both with running and pole masses
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto HBBbarVertexDR = Vertex<bar<DownTypeQuark>::type, DownTypeQuark, Higgs>::evaluate(indices, context);
+   const auto HQQbarVertexDR = Vertex<bar<DownTypeQuark>::type, DownTypeQuark, Higgs>::evaluate(indices, context);
 
    const double mHOS = context.physical_mass<Higgs>(indexIn);
    const double flux = 1./(2.*mHOS);
@@ -17,7 +17,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    static constexpr double color_factor = squared_color_generator<Higgs,bar<DownTypeQuark>::type,DownTypeQuark>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
-      if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
+      if (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right())) {
          const double mdqOS1 = context.physical_mass<DownTypeQuark>(indexOut1);
          const double mdqOS2 = context.physical_mass<DownTypeQuark>(indexOut2);
          const auto xOS1 = Sqr(mdqOS1/mHOS);
@@ -50,21 +50,21 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
    const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
-   const auto HBBbarVertexDR_S = 0.5*(HBBbarVertexDR.left() + HBBbarVertexDR.right());
-   const auto HBBbarVertexDR_P = 0.5*(HBBbarVertexDR.right() - HBBbarVertexDR.left());
+   const auto HQQbarVertexDR_S = 0.5*(HQQbarVertexDR.left() + HQQbarVertexDR.right());
+   const auto HQQbarVertexDR_P = 0.5*(HQQbarVertexDR.right() - HQQbarVertexDR.left());
 
    double amp2DR_S = Sqr(mHOS) * Sqr(betaDR) *
-                     2*std::norm(HBBbarVertexDR_S);
+                     2*std::norm(HQQbarVertexDR_S);
    double amp2OS_S = Sqr(mHOS) * Sqr(betaOS) *
-                     2*std::norm(HBBbarVertexDR_S) * Sqr(mdqOS / mdqDR);
+                     2*std::norm(HQQbarVertexDR_S) * Sqr(mdqOS / mdqDR);
 
    double amp2DR_P = 0;
    double amp2OS_P = 0;
    if (info::is_CP_violating_Higgs_sector) {
       amp2DR_P = Sqr(mHOS) *
-                 2*std::norm(HBBbarVertexDR_P);
+                 2*std::norm(HQQbarVertexDR_P);
       amp2OS_P = Sqr(mHOS) *
-                 2*std::norm(HBBbarVertexDR_P) * Sqr(mdqOS / mdqDR);
+                 2*std::norm(HQQbarVertexDR_P) * Sqr(mdqOS / mdqDR);
    }
 
    const int Nf = number_of_active_flavours(qedqcd, mHOS);
@@ -127,7 +127,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
             const double lq = std::log(xDR);
             const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
             const auto Httbar = Vertex<bar<UpTypeQuark>::type, UpTypeQuark, Higgs>::evaluate(Httindices, context);
-            const auto gbHoVEV = HBBbarVertexDR_S/mdqDR;
+            const auto gbHoVEV = HQQbarVertexDR_S/mdqDR;
             if (!is_zero(gbHoVEV)) {
                // eq. 28 of hep-ph/9505358
                const auto Httbar_S = 0.5*(Httbar.left() + Httbar.right());
@@ -148,7 +148,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
                deltaqq_QED_OS_P =
                   alpha_red * Sqr(DownTypeQuark::electricCharge) * calc_DeltaAh(betaOS);
 
-               const auto gbHoVEV_P = HBBbarVertexDR_P/mdqDR;
+               const auto gbHoVEV_P = HQQbarVertexDR_P/mdqDR;
                if (!is_zero(gbHoVEV_P)) {
                   const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
                   const auto gtHoVEV_P = Httbar_P/context.mass<UpTypeQuark>({2});
