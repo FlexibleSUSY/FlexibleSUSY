@@ -101,7 +101,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 
             // 1L QED correction - eq. 17 in FD paper
             const double alpha_red = get_alpha(context)/Pi;
-            const double deltaqq_QED_DR = 17./4.*Sqr(UpTypeQuark::electric_charge)*alpha_red;
+            const double deltaqq_QED_DR = 17./4.*Sqr(UpTypeQuark::electricCharge)*alpha_red;
 
             deltaqq_QCD_DR_S +=
                2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
@@ -111,7 +111,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                4./3. * alpha_s_red * calc_DeltaH(betaOS);
 
             const double deltaqq_QED_OS_S =
-               alpha_red * Sqr(UpTypeQuark::electric_charge) * calc_DeltaH(betaOS);
+               alpha_red * Sqr(UpTypeQuark::electricCharge) * calc_DeltaH(betaOS);
 
             double deltaqq_QCD_OS_P = 0.;
             double deltaqq_QED_OS_P = 0.;
@@ -125,7 +125,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                   4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
                deltaqq_QED_OS_P =
-                  alpha_red * Sqr(UpTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
+                  alpha_red * Sqr(UpTypeQuark::electricCharge) * calc_DeltaAh(betaOS);
             }
 
             double deltaPhi2_S = 0.;
@@ -133,7 +133,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
             double deltaqq_QCDxQED_DR = 0.;
             if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
                deltaqq_QCDxQED_DR =
-                  deltaqq_QCDxQED*Sqr(UpTypeQuark::electric_charge)*alpha_red*alpha_s_red;
+                  deltaqq_QCDxQED*Sqr(UpTypeQuark::electricCharge)*alpha_red*alpha_s_red;
                if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
                   const double mtpole = qedqcd.displayPoleMt();
                   const double lt = std::log(Sqr(mHOS/mtpole));

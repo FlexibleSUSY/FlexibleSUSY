@@ -647,7 +647,7 @@ cxx_diagrams::ChiralVertex unit_charge(const context_base& context);
 inline double unit_charge(const context_base& context)
 {
    return -(detail::unit_charge(context).left().real() /
-            fields::Electron::electric_charge);
+            fields::Electron::electricCharge);
 }
 
 } // namespace standard_model_cxx_diagrams

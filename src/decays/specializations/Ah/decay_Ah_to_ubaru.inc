@@ -100,19 +100,19 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
 
             // 1L QED correction - eq. 17 in FD paper
             const double alpha_red = get_alpha(context)/Pi;
-            const double deltaqq_QED_DR = 17./4.*Sqr(UpTypeQuark::electric_charge)*alpha_red;
+            const double deltaqq_QED_DR = 17./4.*Sqr(UpTypeQuark::electricCharge)*alpha_red;
 
             const double deltaqq_QCD_OS_P =
                   4./3. * alpha_s_red * calc_DeltaAh(betaOS);
 
             const double deltaqq_QED_OS_P =
-                  alpha_red * Sqr(UpTypeQuark::electric_charge) * calc_DeltaAh(betaOS);
+                  alpha_red * Sqr(UpTypeQuark::electricCharge) * calc_DeltaAh(betaOS);
 
             double deltaqq_QCDxQED_DR = 0.;
             double deltaPhi2_P = 0.;
             if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
                deltaqq_QCDxQED_DR =
-                  deltaqq_QCDxQED*Sqr(UpTypeQuark::electric_charge)*alpha_red*alpha_s_red;
+                  deltaqq_QCDxQED*Sqr(UpTypeQuark::electricCharge)*alpha_red*alpha_s_red;
                if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
                   const double mtpole = qedqcd.displayPoleMt();
                   const double lt = std::log(Sqr(mAhOS/mtpole));
