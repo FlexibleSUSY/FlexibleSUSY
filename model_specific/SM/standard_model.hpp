@@ -534,10 +534,12 @@ public:
    double calculate_delta_alpha_s(double alphaS) const;
    void calculate_Lambdax_DRbar();
    std::pair<double,double> calculate_theta_w(const softsusy::QedQcd&, double alpha_em_drbar);
+   std::pair<double,double> calculate_theta_w(const softsusy::QedQcd&);
    void calculate_Yu_DRbar(const softsusy::QedQcd&);
    void calculate_Yd_DRbar(const softsusy::QedQcd&);
    void calculate_Ye_DRbar(const softsusy::QedQcd&);
    double recalculate_mw_pole(double);
+   double calculate_mw_pole(double) const;
    double max_rel_diff(const Standard_model& old) const;
 
 protected:
@@ -662,6 +664,7 @@ private:
    Eigen::Array<double,3,1> MFu{Eigen::Array<double,3,1>::Zero()};
    Eigen::Array<double,3,1> MFe{Eigen::Array<double,3,1>::Zero()};
    double MVWp{};
+   double MVWp_pole{};
    Eigen::Array<double,2,1> MVPVZ{Eigen::Array<double,2,1>::Zero()};
 
    // DR-bar mixing matrices
@@ -673,7 +676,7 @@ private:
    Eigen::Matrix<std::complex<double>,3,3> Ue{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
    Eigen::Matrix<double,2,2> ZZ{Eigen::Matrix<double,2,2>::Zero()};
 
-
+   double calculate_alpha_s_SM5_at(softsusy::QedQcd, double) const;
 };
 
 std::ostream& operator<<(std::ostream&, const Standard_model&);

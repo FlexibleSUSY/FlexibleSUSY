@@ -21,9 +21,12 @@
 
 #include "standard_model.hpp"
 #include "ew_input.hpp"
-#include <utility>
+
+#include <Eigen/Core>
 
 namespace flexiblesusy {
+
+namespace weinberg_angle {
 
 /**
  * @class Weinberg_angle
@@ -31,6 +34,56 @@ namespace flexiblesusy {
  */
 class Weinberg_angle {
 public:
+   /**
+    * @class Data
+    * @brief Model parameters necessary for calculating weak mixing angle
+    *
+    * @attention The W and Z self-energies are assumed to be
+    * calculated using the top quark pole mass, instead of the top
+    * quark DR-bar mass.
+    */
+   struct Data {
+      Data();
+
+      double scale;                  ///< renormalization scale
+      double alpha_em_drbar;         ///< alpha_em(MZ, DR-bar, SUSY)
+      double alpha_s_mz;             ///< alpha_s(MZ, MS-bar, SM)
+      double dalpha_s_5_had;         ///< 5-flavour hadronic contributions
+      double fermi_contant;          ///< Fermi constant
+      double self_energy_z_at_mz;    ///< self-energy Z at p = MZ, mt = mt_pole
+      double self_energy_w_at_0;     ///< self-energy W at p = 0, mt = mt_pole
+      double self_energy_w_at_mw;    ///< self-energy W at p = MW, mt = mt_pole
+      double mw_pole;                ///< W pole mass
+      double mz_pole;                ///< Z pole mass
+      double mt_pole;                ///< top quark pole mass
+      double mh_drbar;               ///< lightest CP-even Higgs DR-bar mass
+      double mh_pole;                ///< SM-like Higgs pole mass
+      double hmix_12;                ///< CP-even Higgs mixing Cos(alpha)
+      double msel_drbar;             ///< left-handed selectron DR-bar mass
+      double msmul_drbar;            ///< left-handed smuon DR-bar mass
+      double msve_drbar;             ///< electron-sneutrino DR-bar mass
+      double msvm_drbar;             ///< muon-sneutrino DR-bar mass
+      Eigen::ArrayXd mn_drbar;       ///< Neutralino DR-bar mass
+      Eigen::ArrayXd mc_drbar;       ///< Chargino DR-bar mass
+      Eigen::MatrixXcd zn;           ///< Neutralino mixing matrix
+      Eigen::MatrixXcd um;           ///< Chargino mixing matrix
+      Eigen::MatrixXcd up;           ///< Chargino mixing matrix
+      double gY;                     ///< U(1)_Y gauge coupling
+      double g2;                     ///< SU(2)_L gauge coupling
+      double g3;                     ///< SU(3)_c gauge coupling
+      double tan_beta;               ///< tan(beta) = vu / vd
+   };
+
+   struct Self_energy_data {
+      Self_energy_data();
+      double scale;                  ///< renormalization scale
+      double mt_pole;                ///< top quark pole mass
+      double mt_drbar;               ///< top quark DR-bar mass
+      double mb_drbar;               ///< bottom quark DR-bar mass
+      double gY;                     ///< U(1)_Y gauge coupling
+      double g2;                     ///< SU(2)_L gauge coupling
+   };
+
    /**
     * @class Sm_parameters
     * @brief SM parameters necessary for calculating the weak mixing angle
@@ -44,65 +97,77 @@ public:
       double alpha_s{0.};        ///< strong coupling at Q = mt_pole
       double alpha_s_mz{0.};     ///< strong coupling at Q = mz_pole
       double dalpha_s_5_had{Electroweak_constants::delta_alpha_s_5_had}; ///< 5-flavour hadronic contributions
-      int higgs_index{0};        ///< index of SM-like Higgs
    };
 
+   Weinberg_angle();
    Weinberg_angle(const standard_model::Standard_model*, const Sm_parameters&);
 
-   void set_number_of_iterations(int);       ///< set maximum number of iterations
-   void set_number_of_loops(int);            ///< set number of loops
-   void set_precision_goal(double);          ///< set precision goal
-   void enable_dvb_bsm();                    ///< enable bsm wave, vertex and box corrections
-   void disable_dvb_bsm();                   ///< disable bsm wave, vertex and box corrections
-   void set_model(const standard_model::Standard_model*);  ///< set pointer to investigated model
-   void set_sm_parameters(const Sm_parameters&);  ///< set sm_parameters member variable
+   void enable_susy_contributions(); ///< enable susy contributions
+   void disable_susy_contributions(); ///< disable susy contributions
+
+   void set_data(const Data&);       ///< set data necessary for the calculation
+   void set_number_of_iterations(int); ///< maximum number of iterations
+   void set_number_of_loops(int);    ///< set number of loops
+   void set_precision_goal(double);  ///< set precision goal
+   double get_rho_hat() const;       ///< returns the rho parameter
+   double get_sin_theta() const;     ///< returns sin(theta_w)
+   double get_mw_pole() const;       ///< returns (re-calculated) W pole mass
+
+   /// calculates the sinus of the Weinberg angle
+   int calculate(double rho_start = 1.0, double sin_start = 0.48);
+
+   static double replace_mtop_in_self_energy_z(double, double, const Self_energy_data&);
+   static double replace_mtop_in_self_energy_w(double, double, const Self_energy_data&);
 
    /// calculates and returns the sine of the Weinberg angle and the W pole mass
-   std::pair<double,double> calculate(double sinThetaW_start = 0.48);
-   double calculate_mw_pole() const;
-
+   std::pair<double,double> calculate2(double sinThetaW_start = 0.48);
 private:
-   int number_of_iterations{20};      ///< maximum number of iterations
-   int number_of_loops{2};            ///< number of loops
-   double precision_goal{1e-8};       ///< precision goal
-   bool include_dvb_bsm{true};        ///< bsm wave, vertex and box corrections are included or not
+   int number_of_iterations; ///< maximum number of iterations
+   int number_of_loops;      ///< number of loops
+   double precision_goal;         ///< precision goal
+   double rho_hat;                ///< output rho-hat parameter
+   double sin_theta;              ///< output sin(theta)
+   double mw_pole;                ///< output W pole mass
+   Data data;
+   bool susy_contributions;       ///< model type
+
    const standard_model::Standard_model* model{nullptr}; ///< pointer to investigated model
    Sm_parameters sm_parameters{};     ///< SM parameters
+   double calculate_self_energy_VZ(double p) const;
+   double calculate_self_energy_VZ_top(double p, double mt) const;
+   double calculate_self_energy_VWp(double p) const;
+   double calculate_self_energy_VWp_top(double p, double mt) const;
+   double calculate_delta_rho_hat(double sinThetaW) const;
    double pizzt_MZ{0.};               ///< transverse Z self-energy at p^2 = MZ^2
    double piwwt_MW{0.};               ///< transverse W self-energy at p^2 = MW^2
    double piwwt_0{0.};                ///< transverse W self-energy at p^2 = 0
-
-   double calculate_rho_hat_tree() const;
-   double calculate_delta_rho_hat(double) const;
-   double calculate_delta_r_hat(double, double) const;
-   double calculate_delta_vb(double, double) const;
-   double calculate_delta_vb_sm(double) const;
-   int get_neutrino_index(int) const;
-   double calculate_delta_vb_bsm(double) const;
-   double calculate_mw_pole(double) const;
-   double calculate_delta_alpha_hat_bsm(double) const;
-
-   std::complex<double> CpbarFeFehhPL(int gI1, int gI2) const;
-   std::complex<double> CpbarFvFeVWpPL(int gO1, int gI2) const;
-   std::complex<double> delta_vb_wave_Fv(int gO1) const;
+   double calculate_mw_pole(double sinThetaW) const;
+   double calculate_delta_vb_bsm(double sinThetaW) const;
+   double calculate_delta_alpha_hat_bsm(double alpha_em) const;
    std::complex<double> delta_vb_wave_Fe(int gO1) const;
-   std::complex<double> delta_vb_vertex(int gO1, int gO2) const;
-   std::complex<double> delta_vb_box(int gO1, int gO2, int gO3, int gO4) const;
+   bool include_dvb_bsm{true};        ///< bsm wave, vertex and box corrections are included or not
+   int get_neutrino_index(int FeIdx) const;
+   std::complex<double> CpbarFvFeVWpPL(int gO1, int gI2) const;
+   std::complex<double> CpbarFeFehhPL(int gI1, int gI2) const;
+   double B1(double p2, double m12, double m22) const noexcept;
+   double calculate_delta_r_hat(double rhohat_ratio, double sinThetaW) const;
+   double calculate_delta_vb(double rhohat_ratio, double sinThetaW) const;
+   double calculate_delta_vb_sm(double sinThetaW) const;
 
-   // Passarino-Veltman loop functions
-   double B0(double, double, double) const noexcept;
-   double B1(double, double, double) const noexcept;
-   double C0(double, double, double) const noexcept;
-   double D0(double, double, double, double) const noexcept;
-   double D27(double, double, double, double) const noexcept;
+   double calculate_mw_pole() const;
 
+   static double calculate_delta_r(double, double, const Data&, bool add_susy_contributions = true, int number_of_loops = 2);
+   static double calculate_delta_rho(double, double, const Data&, bool add_susy_contributions = true, int number_of_loops = 2);
+   static double calculate_delta_vb(double, double, const Data&, bool add_susy_contributions = true);
+   static double calculate_delta_vb_sm(double, double, const Data&);
+   static double calculate_delta_vb_susy(double, const Data&);
    static double rho_2(double);
 
-   double calculate_self_energy_VZ(double) const;
-   double calculate_self_energy_VWp(double) const;
-   double calculate_self_energy_VZ_top(double, double) const;
-   double calculate_self_energy_VWp_top(double, double) const;
+   static double calculate_self_energy_z_top(double, double, const Self_energy_data&);
+   static double calculate_self_energy_w_top(double, double, const Self_energy_data&);
 };
+
+} // namespace weinberg_angle
 
 } // namespace flexiblesusy
 

@@ -876,9 +876,10 @@ void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
       const double alpha_em_drbar = alpha_em / (1.0 - delta_alpha_em);
       const double alpha_s_drbar  = alpha_s / (1.0 - delta_alpha_s);
       const double e_drbar        = Sqrt(4.0 * Pi * alpha_em_drbar);
-      const auto theta_w_mw_pole  = calculate_theta_w(qedqcd, alpha_em_drbar);
+      const auto theta_w_mw_pole  = calculate_theta_w(qedqcd);
       const double theta_w_drbar  = theta_w_mw_pole.first;
       const double mw_pole        = theta_w_mw_pole.second;
+      MVWp_pole = mw_pole;
 
       v = Re((2 * mz_run) / Sqrt(0.6 * Sqr(g1) + Sqr(g2)));
 
@@ -1117,12 +1118,51 @@ std::pair<double,double> Standard_model::calculate_theta_w(const softsusy::QedQc
 
    theta_w = ArcSin(weinberg.get_sin_theta());
 
-   if (error)
-      problems.flag_no_sinThetaW_convergence();
-   else
-      problems.unflag_no_sinThetaW_convergence();
+   return weinberg.calculate2(0.48);
+}
 
-   return std::make_pair(theta_w, weinberg.get_mw_pole());
+std::pair<double,double> Standard_model::calculate_theta_w(const softsusy::QedQcd& qedqcd)
+{
+   double theta_w = std::asin(Electroweak_constants::sinThetaW);
+   double mw = Electroweak_constants::MW;
+
+   const auto get_mh_pole = [&] () {
+      double mh_pole = this->get_physical().Mhh;
+      if (mh_pole == 0) {
+         mh_pole = Electroweak_constants::MH;
+      }
+      return mh_pole;
+   };
+
+   weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
+   sm_pars.fermi_constant = qedqcd.displayFermiConstant();
+   sm_pars.mw_pole = qedqcd.displayPoleMW();
+   sm_pars.mz_pole = qedqcd.displayPoleMZ();
+   sm_pars.mt_pole = qedqcd.displayPoleMt();
+   sm_pars.mh_pole = get_mh_pole();
+   sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
+   sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+
+   const int number_of_iterations =
+       std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)
+          ));
+
+   using namespace weinberg_angle;
+   Weinberg_angle weinberg(this, sm_pars);
+   weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
+   weinberg.set_number_of_iterations(number_of_iterations);
+
+   try {
+      const auto result = weinberg.calculate2();
+      theta_w = ArcSin(result.first);
+      mw = result.second;
+   } catch (const Error& e) {
+      VERBOSE_MSG(e.what_detailed());
+      this->get_problems().flag_no_sinThetaW_convergence();
+   }
+
+   return {theta_w, mw};
 }
 
 void Standard_model::calculate_Yu_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1189,7 +1229,7 @@ double Standard_model::recalculate_mw_pole(double mw_pole)
    if (mw_pole_sqr < 0.)
       problems.flag_pole_tachyon(standard_model_info::VWp);
 
-   return AbsSqrt(mw_pole_sqr);
+   return MVWp_pole;
 }
 
 double Standard_model::max_rel_diff(const Standard_model& old) const
@@ -4820,7 +4860,7 @@ void Standard_model::calculate_MVWp_pole()
    if (mass_sqr < 0.)
       problems.flag_pole_tachyon(standard_model_info::VWp);
 
-   PHYSICAL(MVWp) = AbsSqrt(mass_sqr);
+   PHYSICAL(MVWp) = MVWp_pole;
 }
 
 double Standard_model::calculate_MVWp_pole(double p)
@@ -4834,7 +4874,7 @@ double Standard_model::calculate_MVWp_pole(double p)
    if (mass_sqr < 0.)
       problems.flag_pole_tachyon(standard_model_info::VWp);
 
-   return AbsSqrt(mass_sqr);
+   return MVWp_pole;
 }
 
 double Standard_model::calculate_MVZ_pole(double p)
@@ -4995,6 +5035,13 @@ std::ostream& operator<<(std::ostream& ostr, const Standard_model& model)
 {
    model.print(ostr);
    return ostr;
+}
+
+double Standard_model::calculate_alpha_s_SM5_at(
+   softsusy::QedQcd qedqcd_tmp, double scale) const
+{
+   qedqcd_tmp.run_to(scale); // running in SM(5)
+   return qedqcd_tmp.displayAlpha(softsusy::ALPHAS);
 }
 
 } // namespace standard_model
