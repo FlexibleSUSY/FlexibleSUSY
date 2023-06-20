@@ -992,7 +992,8 @@ void SLHA_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::s
 
    ss << block_head("HIGGSBOUNDS", 0.0);
    for (auto const& el : v) {
-      ss << FORMAT_ELEMENT(std::get<0>(el), std::get<1>(el), std::get<3>(el));
+      ss << FORMAT_MIXING_MATRIX(std::get<0>(el), 1, std::get<1>(el), std::get<3>(el));
+      ss << FORMAT_MIXING_MATRIX(std::get<0>(el), 2, std::get<2>(el), "expRatio");
    }
 
    set_block(ss);
