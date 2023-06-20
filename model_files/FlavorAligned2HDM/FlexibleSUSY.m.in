@@ -184,7 +184,7 @@ InitialGuessAtLowScale = {
 };
 
 DefaultPoleMassPrecision = MediumPrecision;
-HighPoleMassPrecision    = {hh, Ah, Hpm};
+HighPoleMassPrecision    = {hh, Hm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 

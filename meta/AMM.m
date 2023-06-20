@@ -92,22 +92,22 @@ CXXEvaluatorForDiagramFromGraph[diagram_, barZeeGraph] :=
   ];
 
 CXXEvaluatorBZFL[photonEmitter_,exchangeParticle_] :=
-  "AMMBarZeeFermionLoop<Lepton," <>
+  "AMMBarrZeeFermionLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZFLZ[photonEmitter_,exchangeParticle_] :=
-  "AMMBarZeeFermionLoopZ<Lepton," <>
+  "AMMBarrZeeFermionLoopZ<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZSL[photonEmitter_,exchangeParticle_] :=
-  "AMMBarZeeScalarLoop<Lepton," <>
+  "AMMBarrZeeScalarLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZVL[photonEmitter_,exchangeParticle_] :=
-  "AMMBarZeeVectorLoop<Lepton," <>
+  "AMMBarrZeeVectorLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
@@ -137,7 +137,7 @@ AMMForwardDeclaration[field_Symbol, functionName_String] :=
 "template double " <> FlexibleSUSY`FSModelName <> "_amm::" <> functionName <> "<" <>
    CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
    ">(" <>
-   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
+   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&, const Spectrum_generator_settings&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
 
 End[];
 EndPackage[];

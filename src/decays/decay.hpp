@@ -33,7 +33,17 @@ namespace flexiblesusy {
 
 class Decay {
 public:
-   Decay(int, std::initializer_list<int>, double, std::string const&);
+
+template <typename T>
+   Decay(
+      int pid_in_, std::initializer_list<int> pids_out_, double width_, T&& proc_string_)
+      : pid_in{pid_in_}
+      , pids_out{pids_out_}
+      , width{width_}
+      , proc_string{std::forward<T>(proc_string_)}
+   {
+      std::sort(pids_out.begin(), pids_out.end());
+   }
    ~Decay() = default;
    Decay(const Decay&) = default;
    Decay(Decay&&) = default;
@@ -84,7 +94,29 @@ public:
    std::size_t size() const noexcept { return decays.size(); }
 
    void clear();
-   void set_decay(double width, std::initializer_list<int> products, std::string const&);
+
+   template <typename T>
+   void set_decay(double width, std::initializer_list<int> pids_out, T&& proc_string)
+   {
+      const Decay decay(initial_pdg, pids_out, width, std::forward<T>(proc_string));
+      const auto decay_hash = hash_decay(decay);
+
+      const auto pos = decays.find(decay_hash);
+      if (pos != std::end(decays)) {
+         total_width -= pos->second.get_width();
+         pos->second.set_width(width);
+      } else {
+         decays.insert(pos, std::make_pair(decay_hash, decay));
+      }
+
+      // some channels give small negative withs
+      // we later check if for channels with width < 0
+      // |width/total_width| < threshold
+      // for that it makes more sense to calculate total_width
+      // as the sum of |width|
+      total_width += std::abs(width);
+   }
+
    int get_particle_id() const { return initial_pdg; }
    const Decay& get_decay(std::initializer_list<int> products) const;
    double get_total_width() const { return total_width; }
@@ -111,20 +143,24 @@ std::string create_process_string(
          return std::string();
       }
       else {
-         return "(" + std::to_string(v[0]) + ")";
+         // in the output we count particles from 1 (not 0)
+         return "(" + std::to_string(v[0]+1) + ")";
       }
    };
 
    using boost::core::demangle;
    std::string process_string =
          strip_field_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
-         + "->{" +
-         strip_field_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + "," +
-         strip_field_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2) +
-         "}";
+         + " -> " +
+         strip_field_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + " " +
+         strip_field_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2);
 
    return process_string;
 }
+
+// https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2593r0.html
+template <typename... T>
+constexpr bool always_false = false;
 
 // returns a squared color generator for a 3 point amplitude with FieldIn, FieldOut1 and FieldOut2
 // averaged over inital state colors
@@ -132,159 +168,127 @@ std::string create_process_string(
 // This is not a bulletproof solution and might fail in general but is enough for
 // decays of color singlets
 
-// 1 -> 1, 1
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-cxx_diagrams::fields::is_singlet_v<FieldIn> &&
-cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-cxx_diagrams::fields::is_singlet_v<FieldOut2>, double>
-squared_color_generator() {return 1.;}
-
-// 1 -> 3, 3bar
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-   cxx_diagrams::fields::is_singlet_v<FieldIn>
-   &&
-   (
-   (cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-   cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
-   ||
-   (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-   cxx_diagrams::fields::is_triplet_v<FieldOut2>)
-   ), double
->
-squared_color_generator() {return 3.;}
-
-// 1 -> 8, 8
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-cxx_diagrams::fields::is_singlet_v<FieldIn> &&
-cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-cxx_diagrams::fields::is_octet_v<FieldOut2>, double>
-squared_color_generator() {return 8.;}
-
-// 3 -> 3, 1; 3bar -> 3bar, 1
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-(
-cxx_diagrams::fields::is_triplet_v<FieldIn> &&
-((cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
-(cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-cxx_diagrams::fields::is_triplet_v<FieldOut2>))
-)
-||
-(
-cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
-((cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
-(cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
-)
-, double>
-squared_color_generator() {return 1.;}
-
-// 3 -> 3, 8; 3bar -> 3bar, 8
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-(
-cxx_diagrams::fields::is_triplet_v<FieldIn> &&
-((cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
-(cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-cxx_diagrams::fields::is_triplet_v<FieldOut2>))
-)
-||
-(
-cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
-((cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
-(cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
-)
-, double>
-squared_color_generator() {return 4.;}
-
-// 8 -> 8, 1
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-cxx_diagrams::fields::is_octet_v<FieldIn> &&
-((cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
-(cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-cxx_diagrams::fields::is_octet_v<FieldOut2>))
-, double>
-squared_color_generator() {return 1.;}
-
-// 8 -> 3, 3bar
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-   cxx_diagrams::fields::is_octet_v<FieldIn>
-   &&
-   (
-   (cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-   cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
-   ||
-   (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-   cxx_diagrams::fields::is_triplet_v<FieldOut2>)
-   ), double
->
-squared_color_generator() {return 1./2.;}
-
-// 8 -> 8, 8 with identical particles in the final state
-// because of symmetry of the final state it must be proportional to d^2
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-cxx_diagrams::fields::is_octet_v<FieldIn> &&
-cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-cxx_diagrams::fields::is_octet_v<FieldOut2> &&
-std::is_same<FieldOut1, FieldOut2>::value
-, double>
-// color:   d^2 = (2 (4 - 5 Nc^2 + Nc^4) TR)/Nc = 40/3
-// average: 1/8
-squared_color_generator() {return 40/24.;}
-
-// 8 -> 8, 8 with differnt particles in the final state
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-constexpr
-std::enable_if_t<
-cxx_diagrams::fields::is_octet_v<FieldIn> &&
-cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-cxx_diagrams::fields::is_octet_v<FieldOut2> &&
-!std::is_same<FieldOut1, FieldOut2>::value
-, double>
-// color:   f^2 = 2 Nc (-1 + Nc^2) TR = 24
-// average: 1/8
-squared_color_generator() {return 3.;}
-
-template <typename Field1, typename Field2>
-constexpr std::enable_if_t<!std::is_same<Field1, Field2>::value, double>
-final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type const& idx1,
-                            typename cxx_diagrams::field_indices<Field2>::type const& idx2)
-{
-   return 1.;
+constexpr double squared_color_generator() noexcept {
+   if constexpr (cxx_diagrams::fields::is_singlet_v<FieldIn>) {
+      // 1 -> 1, 1
+      if constexpr (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>) {
+         return 1.;
+      }
+      // 1 -> 3, -3
+      else if constexpr (
+         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+         || (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+      ) {
+         return 3.;
+      }
+      // 1 -> 8, 8
+      else if constexpr (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2>) {
+         return 8.;
+      }
+      else {
+         static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
+      }
+   }
+   else if constexpr (cxx_diagrams::fields::is_triplet_v<FieldIn>) {
+      // 3 -> 1, 3
+      if constexpr (
+         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+      ) {
+         return 1.;
+      }
+      // 3 -> 3, 8
+      else if constexpr (
+         (cxx_diagrams::fields::is_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
+         || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+      ) {
+         return 4.;
+      }
+      else {
+         static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
+      }
+   }
+   else if constexpr (cxx_diagrams::fields::is_anti_triplet_v<FieldIn>) {
+      // -3 -> 1, -3
+      if constexpr (
+         (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+      ) {
+         return 1.;
+      }
+      // -3 -> -3, 8
+      else if constexpr (
+         (cxx_diagrams::fields::is_anti_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
+         || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+      ) {
+         return 4.;
+      }
+      else {
+         static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
+      }
+   }
+   else if constexpr (cxx_diagrams::fields::is_octet_v<FieldIn>) {
+      // 8 -> 1, 8
+      if constexpr (
+         (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
+      ) {
+         return 1.;
+      }
+      else if constexpr (
+         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+         || (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+      ) {
+         return 1./2.;
+      }
+      // 8 -> 8, 8 with identical particles in the final state
+      // because of symmetry of the final state it must be proportional to d^2
+      else if constexpr (
+         cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2> && std::is_same_v<FieldOut1, FieldOut2>
+      ) {
+         // color:   d^2 = (2 (4 - 5 Nc^2 + Nc^4) TR)/Nc = 40/3
+         // average: 1/8
+         return 40/24.;
+      }
+      // 8 -> 8, 8 with differnt particles in the final state
+      else if constexpr (
+         cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2> && !std::is_same_v<FieldOut1, FieldOut2>
+      ) {
+         // color:   f^2 = 2 Nc (-1 + Nc^2) TR = 24
+         // average: 1/8
+         return 3.;
+      }
+      else {
+         static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
+      }
+   }
 }
 
 template <typename Field1, typename Field2>
-std::enable_if_t<std::is_same<Field1, Field2>::value, double>
-final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type const& idx1,
+double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
-   if (boost::range::equal(idx1, idx2)) {
-      return 0.5;
-   }
-   else {
+   if constexpr (!std::is_same_v<Field1, Field2>) {
       return 1.;
    }
+   else {
+      if (boost::range::equal(idx1, idx2)) {
+         return 0.5;
+      }
+      else {
+         return 1.;
+      }
+   }
 }
+
+// utility functions for H->V*V*
+double hVV_4body(double *q2, size_t dim, void *params);
+struct hVV_4body_params {
+   double mHOS {};
+   double mVOS {};
+   double GammaV {};
+};
 
 } // namespace flexiblesusy
 

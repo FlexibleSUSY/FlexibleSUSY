@@ -3,17 +3,17 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       const context_base& context,
       const typename field_indices<PseudoscalarHiggs>::type& in_idx,
       const typename field_indices<Photon>::type& out1_idx,
-      const typename field_indices<Photon>::type& out2_idx) const
+      const typename field_indices<Photon>::type& out2_idx)
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Photon,Photon>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
    const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
-   const double mH = context.physical_mass<PseudoscalarHiggs>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
-   const double flux = 0.5/mH;
+   const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
+   static constexpr double ps {1./(8.*Pi)};
+   static constexpr double ps_symmetry {0.5};
+   const double flux = 0.5/mAh;
    auto res = flux * ps * ps_symmetry * amp.square();
 
    // use alpha_em in the Thomson limit
