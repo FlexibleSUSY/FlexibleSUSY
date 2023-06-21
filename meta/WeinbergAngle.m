@@ -441,8 +441,9 @@ WaveResult[diagr_List, includeGoldstones_] :=
 CompleteWaveResult[particle_, includeGoldstones_] :=
     Plus @@ (WaveResult[#, includeGoldstones] &) /@
        ExcludeDiagrams[GenerateDiagramsWave[particle],
-                       If[includeGoldstones, TreeMasses`IsVector,
-                          TreeMasses`IsVector[#] || TreeMasses`IsGoldstone[#] &]];
+		       (If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] === 1, TreeMasses`IsSMHiggs[#], False] ||
+                       If[includeGoldstones, TreeMasses`IsVector[#],
+                          TreeMasses`IsVector[#] || TreeMasses`IsGoldstone[#]])&];
 
 (*returns the complete wave-function renormalization part of deltaVB*)
 DeltaVBwave[includeGoldstones_:False] :=
