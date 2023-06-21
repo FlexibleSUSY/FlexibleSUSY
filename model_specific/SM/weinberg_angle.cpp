@@ -369,7 +369,6 @@ std::pair<double,double> Weinberg_angle::calculate2(double sinThetaW_start)
 
    const double mw_pole = calculate_mw_pole(sinThetaW_new);
 
-   std::cout << "Doing calculate 2 " << mw_pole << std::endl;
    return std::make_pair(sinThetaW_new, mw_pole);
 }
 
