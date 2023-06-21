@@ -50,6 +50,7 @@
 #include <iostream>
 #include <memory>
 #include <algorithm>
+#include <optional>
 
 namespace flexiblesusy {
 
@@ -102,6 +103,102 @@ namespace standard_model_info {
       "Re(Ue(2,2))", "Im(Ue(2,2))"};
 
    const std::string model_name = "SM";
+
+int get_pdg_code_for_particle(Particles p)
+{
+   if (particle_multiplicities[p] > 1) {
+      throw OutOfBoundsError(particle_names[p] + " must have a generation index");
+   }
+
+   int pdg = 0;
+   switch (p) {
+
+   case VG: pdg = 21; break;
+   case Hp: pdg = 0; break;
+   case Ah: pdg = 0; break;
+   case hh: pdg = 25; break;
+   case VWp: pdg = 24; break;
+   case VP: pdg = 22; break;
+   case VZ: pdg = 23; break;
+
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   return pdg;
+}
+
+int get_pdg_code_for_particle(Particles p, int index)
+{
+   if (particle_multiplicities[p] == 1) {
+      throw OutOfBoundsError(particle_names[p] + " does not carry an index");
+   }
+
+   std::vector<int> pdg_codes;
+   switch (p) {
+
+   case Fv: pdg_codes = {12, 14, 16}; break;
+   case Fd: pdg_codes = {1, 3, 5}; break;
+   case Fu: pdg_codes = {2, 4, 6}; break;
+   case Fe: pdg_codes = {11, 13, 15}; break;
+
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   if (index < 0 || index >= pdg_codes.size()) {
+      throw OutOfBoundsError("index " + std::to_string(index) + " out of bounds");
+   }
+
+   return pdg_codes[index];
+}
+
+std::pair<std::string, std::optional<unsigned int>> get_multiplet_and_index_from_pdg(int pdg)
+{
+   std::pair<std::string, std::optional<unsigned int>> name;
+
+   switch (pdg) {
+
+   case 21: name = {"VG", {}}; break;
+   case 12: name = {"Fv", 1}; break;
+   case 14: name = {"Fv", 2}; break;
+   case 16: name = {"Fv", 3}; break;
+   case 25: name = {"hh", {}}; break;
+   case 1: name = {"Fd", 1}; break;
+   case 3: name = {"Fd", 2}; break;
+   case 5: name = {"Fd", 3}; break;
+   case 2: name = {"Fu", 1}; break;
+   case 4: name = {"Fu", 2}; break;
+   case 6: name = {"Fu", 3}; break;
+   case 11: name = {"Fe", 1}; break;
+   case 13: name = {"Fe", 2}; break;
+   case 15: name = {"Fe", 3}; break;
+   case 24: name = {"VWp", {}}; break;
+   case 22: name = {"VP", {}}; break;
+   case 23: name = {"VZ", {}}; break;
+   case -12: name = {"barFv", 1}; break;
+   case -14: name = {"barFv", 2}; break;
+   case -16: name = {"barFv", 3}; break;
+   case -1: name = {"barFd", 1}; break;
+   case -3: name = {"barFd", 2}; break;
+   case -5: name = {"barFd", 3}; break;
+   case -2: name = {"barFu", 1}; break;
+   case -4: name = {"barFu", 2}; break;
+   case -6: name = {"barFu", 3}; break;
+   case -11: name = {"barFe", 1}; break;
+   case -13: name = {"barFe", 2}; break;
+   case -15: name = {"barFe", 3}; break;
+   case -24: name = {"conjVWp", {}}; break;
+
+   default: name = {"", {}};
+   }
+
+   return name;
+}
+
+std::string get_particle_name_from_pdg(int pdg)
+{
+   std::pair<std::string, std::optional<unsigned int>> const pair = get_multiplet_and_index_from_pdg(pdg);
+   return pair.first + (pair.second.has_value() ? "(" + std::to_string(pair.second.value()) + ")" : "");
+}
 
 void print(std::ostream& ostr)
 {
