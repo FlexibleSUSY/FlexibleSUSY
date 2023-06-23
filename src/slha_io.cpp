@@ -30,6 +30,8 @@
 #include "string_conversion.hpp"
 #include "string_format.hpp"
 
+#include <boost/math/distributions/chi_squared.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -983,6 +985,8 @@ void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double c
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
+   boost::math::chi_squared dist(2);
+   ss << FORMAT_ELEMENT(4, 1-boost::math::cdf(dist, std::abs(chi2-chi2SMmin)), "p-value");
 
    set_block(ss);
 }

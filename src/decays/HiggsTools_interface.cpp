@@ -40,73 +40,36 @@
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
 
+namespace HP = Higgs::predictions;
+
 namespace flexiblesusy {
 
 namespace {
-   // whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
-   // or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
-   constexpr bool calcggH = false;
-   // whether to calculate the H->gaga decay width in terms of the effective couplings
-   // or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
-   constexpr bool calcHgamgam = false;
-   constexpr double relMassError = 0.03;
-}
 
-namespace HP = Higgs::predictions;
+// whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
+// or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
+constexpr bool calcggH = false;
+// whether to calculate the H->gaga decay width in terms of the effective couplings
+// or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
+constexpr bool calcHgamgam = false;
 
-std::pair<double, double> minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
+constexpr double relMassError = 0.03;
+
+double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
    const auto signals = Higgs::Signals {higgssignals_dataset};
 
-   auto chi2ForMass = [&signals](double mass) {
-      auto pred = Higgs::Predictions();
-      auto& s = pred.addParticle(HP::BsmParticle("hSM", HP::ECharge::neutral, HP::CP::even));
-      auto effc = HP::scaledSMlikeEffCouplings(1.0);
-      s.setMass(mass);
-      effectiveCouplingInput(
-            s, effc,
-            HP::ReferenceModel::SMHiggsInterp,
-            calcggH, calcHgamgam
-      );
-      return signals(pred);
-   };
+   auto pred = Higgs::Predictions();
+   auto& s = pred.addParticle(HP::BsmParticle("hSM", HP::ECharge::neutral, HP::CP::even));
+   auto effc = HP::scaledSMlikeEffCouplings(1.0);
+   s.setMass(mhSM);
+   effectiveCouplingInput(
+      s, effc,
+      HP::ReferenceModel::SMHiggsInterp,
+      calcggH, calcHgamgam
+   );
+   return signals(pred);
+}
 
-   int status, iter = 0;
-   static constexpr int max_iter = 50;
-   const gsl_min_fminimizer_type *T;
-   gsl_min_fminimizer *sGSL;
-   double a = 123, b = 127, m = mhSM;
-
-   // hack to pass lambda-function to GSL
-   std::function<double(double)> f = std::bind(chi2ForMass, std::placeholders::_1);
-   gsl_function F = {
-      [](double d, void* vf) -> double {
-         auto& f = *static_cast<std::function<double(double)>*>(vf);
-         return f(d);
-      },
-      &f
-   };
-
-   T = gsl_min_fminimizer_brent;
-   sGSL = gsl_min_fminimizer_alloc (T);
-
-   status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
-
-   do
-   {
-        iter++;
-        status = gsl_min_fminimizer_iterate (sGSL);
-
-        m = gsl_min_fminimizer_x_minimum (sGSL);
-        a = gsl_min_fminimizer_x_lower (sGSL);
-        b = gsl_min_fminimizer_x_upper (sGSL);
-
-              status
-     = gsl_min_test_interval (a, b, 0.001, 0.0);
-   }
-   while (status == GSL_CONTINUE && iter < max_iter);
-
-   gsl_min_fminimizer_free (sGSL);
-   return {m, chi2ForMass(m)};
 }
 
 std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_HiggsTools(
@@ -331,8 +294,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
    const double hs_chisq = signals(pred);
 
    auto smChi2 = minChi2SM(physical_input.get(Physical_input::mh_pole), higgssignals_dataset);
-   const std::string tag = std::to_string(physical_input.get(Physical_input::mh_pole)) + " ± " + std::to_string(physical_input.get(Physical_input::mh_pole)*relMassError);
-   return {signals.observableCount(), hs_chisq, smChi2.second, std::to_string(smChi2.first), hb_return};
+   return {signals.observableCount(), hs_chisq, smChi2, std::to_string(physical_input.get(Physical_input::mh_pole)), hb_return};
 }
 
 } // flexiblesusy
