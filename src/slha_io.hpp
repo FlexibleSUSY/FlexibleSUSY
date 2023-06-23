@@ -144,7 +144,7 @@ public:
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block_imag(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
-   void set_higgssignals(int /* n.d.o.f. */, double /* chi2 */);
+   void set_higgssignals(int /* n.d.o.f. */, double /* chi2 */, double /* min chi2 in the SM */, std::string const&);
    void set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const&);
    void set_modsel(const Modsel&);
    void set_physical_input(const Physical_input&);

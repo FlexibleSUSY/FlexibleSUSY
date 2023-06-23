@@ -477,9 +477,9 @@ void @ModelName@_slha_io::set_effectivecouplings_block(const std::vector<Effecti
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
 
-void @ModelName@_slha_io::set_higgssignals(int ndof, double chi2)
+void @ModelName@_slha_io::set_higgssignals(const int ndof, const double chi2, const double chi2SMmin, std::string const& tag)
 {
-   slha_io.set_higgssignals(ndof, chi2);
+   slha_io.set_higgssignals(ndof, chi2, chi2SMmin, tag);
 }
 
 void @ModelName@_slha_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& hb)

@@ -975,13 +975,14 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
-void SLHA_io::set_higgssignals(int ndof, double chi2)
+void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double chi2SMmin, std::string const& tag)
 {
    std::ostringstream ss;
 
    ss << block_head("HIGGSSIGNALS", 0.0);
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
+   ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
 
    set_block(ss);
 }
