@@ -33,7 +33,12 @@ struct Output_1loop {
    double lambda_0L{};
    double lambda_1L{};
 };
-using Output_2loop = std::array<double,2>;
+
+struct Output_2loop {
+   double Mh_2L_at_as{};
+   double Mh_2L_at_at{};
+};
+
 using Output_3loop = std::array<double,1>;
 
 
@@ -136,11 +141,12 @@ Output_2loop calc_output_2loop(char const * const slha_input)
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 2); 
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 2);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
-   results.at(0) = calc_Mh(input, qedqcd, settings);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 0);
+   results.Mh_2L_at_as = calc_Mh(input, qedqcd, settings);
 
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 0);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
-   results.at(1) = calc_Mh(input, qedqcd, settings);
+   results.Mh_2L_at_at = calc_Mh(input, qedqcd, settings);
 
    return results;
 }
@@ -988,9 +994,8 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
 
    for (const auto& d: data) {
       const auto output = calc_output_2loop(d.slha_input);
-      for (int i = 0; i < d.expected_output.size(); i++) {
-         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
-      }
+      BOOST_CHECK_CLOSE_FRACTION(output.Mh_2L_at_as, d.expected_output.Mh_2L_at_as, d.eps);
+      BOOST_CHECK_CLOSE_FRACTION(output.Mh_2L_at_at, d.expected_output.Mh_2L_at_at, d.eps);
    }
 }
 
