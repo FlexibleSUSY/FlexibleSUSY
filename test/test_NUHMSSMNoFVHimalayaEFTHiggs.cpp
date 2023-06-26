@@ -29,7 +29,7 @@
 using namespace flexiblesusy;
 
 struct Output_1loop {
-   double Mh_1l{};
+   double Mh_1L{};
    double lambda_0L{};
    double lambda_1L{};
 };
@@ -122,7 +122,7 @@ Output_1loop calc_output_1loop(char const * const slha_input)
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
 
-   results.Mh_1l = calc_Mh(input, qedqcd, settings);
+   results.Mh_1L = calc_Mh(input, qedqcd, settings);
    results.lambda_1L = calc_lambda(input, qedqcd, settings, Qmatch);
 
    return results;
@@ -966,15 +966,15 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
       Output_1loop expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_1, {129.024202, 0.125588145, 0.125768663}, 2e-4},
-      {slha_input_case_2, {132.709997, 0.125588071, 0.147703015}, 8e-5},
-      {slha_input_case_3, {128.315047, 0.12558815 , 0.121657248}, 8e-5},
-      {slha_input_case_4, {130.665551, 0.125588152, 0.135417609}, 8e-5},
+      {slha_input_case_1, Output_1loop{ .Mh_1L = 129.024202, .lambda_0L = 0.125588145, .lambda_1L = 0.125768663 }, 2e-4},
+      {slha_input_case_2, Output_1loop{ .Mh_1L = 132.709997, .lambda_0L = 0.125588071, .lambda_1L = 0.147703015 }, 8e-5},
+      {slha_input_case_3, Output_1loop{ .Mh_1L = 128.315047, .lambda_0L = 0.12558815 , .lambda_1L = 0.121657248 }, 8e-5},
+      {slha_input_case_4, Output_1loop{ .Mh_1L = 130.665551, .lambda_0L = 0.125588152, .lambda_1L = 0.135417609 }, 8e-5},
    };
 
    for (const auto& d: data) {
       const auto output = calc_output_1loop(d.slha_input);
-      BOOST_CHECK_CLOSE_FRACTION(output.Mh_1l, d.expected_output.Mh_1l, d.eps);
+      BOOST_CHECK_CLOSE_FRACTION(output.Mh_1L, d.expected_output.Mh_1L, d.eps);
       BOOST_CHECK_CLOSE_FRACTION(output.lambda_0L, d.expected_output.lambda_0L, d.eps);
       BOOST_CHECK_CLOSE_FRACTION(output.lambda_1L, d.expected_output.lambda_1L, d.eps);
    }
@@ -988,10 +988,10 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_2loop )
       Output_2loop expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_5, {128.16151975160173, 127.9817088038441 }, 5e-4},
-      {slha_input_case_6, {130.42485668023875, 130.15819922320634}, 5e-4},
-      {slha_input_case_7, {130.86500014892152, 130.66749808261707}, 5e-4},
-      {slha_input_case_8, {128.87146686565686, 128.53192456935258}, 5e-4},
+      {slha_input_case_5, Output_2loop{ .Mh_2L_at_as = 128.16151975160173, .Mh_2L_at_at = 127.9817088038441  }, 5e-4},
+      {slha_input_case_6, Output_2loop{ .Mh_2L_at_as = 130.42485668023875, .Mh_2L_at_at = 130.15819922320634 }, 5e-4},
+      {slha_input_case_7, Output_2loop{ .Mh_2L_at_as = 130.86500014892152, .Mh_2L_at_at = 130.66749808261707 }, 5e-4},
+      {slha_input_case_8, Output_2loop{ .Mh_2L_at_as = 128.87146686565686, .Mh_2L_at_at = 128.53192456935258 }, 5e-4},
    };
 
    for (const auto& d: data) {
@@ -1009,8 +1009,8 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
       Output_3loop expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_5, {0.11685905941993063}, 5e-5},
-      {slha_input_case_8, {0.12118666568388101}, 5e-5},
+      {slha_input_case_5, Output_3loop{ .lambda_3L = 0.11685905941993063 }, 5e-5},
+      {slha_input_case_8, Output_3loop{ .lambda_3L = 0.12118666568388101 }, 5e-5},
    };
 
    for (const auto& d: data) {
