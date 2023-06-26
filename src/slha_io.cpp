@@ -1004,4 +1004,27 @@ void SLHA_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::s
    set_block(ss);
 }
 
+void SLHA_io::set_effectivecouplings_block(const EffectiveCoupling_list& list)
+{
+   std::ostringstream decay;
+   decay << "Block EFFHIGGSCOUPLINGS\n";
+
+   for (auto const& effC : list) {
+      // gauge bosons
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  21, 21, effC.gg, "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  22, 22, effC.gamgam, "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  22, 23, effC.Zgam, "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -24, 24, effC.WW, "");
+      // fermions
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1, 1, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2, 2, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -3, 3, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -4, 4, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -5, 5, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -6, 6, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+   }
+
+   set_block(decay);
+}
+
 } // namespace flexiblesusy
