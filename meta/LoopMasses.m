@@ -102,15 +102,16 @@ FillMt2LStruct[] := "\
 double mst_1, mst_2, theta_t;
 " <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
 
-mssm_twoloop_mt::Parameters pars;
-pars.g3 = " <> CConversion`RValueToCFormString[SARAH`strongCoupling /. Parameters`ApplyGUTNormalization[]] <> ";
-pars.mt = " <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[]]] <> ";
-pars.mg = " <> CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]] <> ";
-pars.mst1 = mst_1;
-pars.mst2 = mst_2;
-pars.msusy = " <> CConversion`RValueToCFormString[Sqrt[Sqrt[Abs[SARAH`SoftSquark[2,2]] Abs[SARAH`SoftDown[2,2]]]]] <> ";
-pars.xt = Sin(2*theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt);
-pars.Q = get_scale();";
+const mssm_twoloop_mt::Parameters pars{
+   .g3 = " <> CConversion`RValueToCFormString[SARAH`strongCoupling /. Parameters`ApplyGUTNormalization[]] <> ",
+   .mt = " <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[]]] <> ",
+   .mg = " <> CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]] <> ",
+   .mst1 = mst_1,
+   .mst2 = mst_2,
+   .msusy = " <> CConversion`RValueToCFormString[Sqrt[Sqrt[Abs[SARAH`SoftSquark[2,2]] Abs[SARAH`SoftDown[2,2]]]]] <> ",
+   .xt = Sin(2*theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt),
+   .Q = get_scale()
+};";
 
 
 AddMtPoleQCDCorrections[1, expr_] :=

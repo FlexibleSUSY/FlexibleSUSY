@@ -81,22 +81,22 @@ struct Results {
 
 Parameters make_point()
 {
-   Parameters pars;
-
    const double mt = 173.0;
    const double mst1 = 200.0;
    const double mst2 = 300.0;
    const double SX = 0.5;
    const double xt = SX / (2.0 * mt);
 
-   pars.g3    = 2.0;
-   pars.mt    = mt;
-   pars.mg    = 400.0;
-   pars.mst1  = mst1;
-   pars.mst2  = mst2;
-   pars.msusy = 500.0;
-   pars.xt    = xt;
-   pars.Q     = 100.0;
+   const Parameters pars{
+      .g3    = 2.0;
+      .mt    = mt;
+      .mg    = 400.0;
+      .mst1  = mst1;
+      .mst2  = mst2;
+      .msusy = 500.0;
+      .xt    = xt;
+      .Q     = 100.0;
+   };
 
    return pars;
 }
