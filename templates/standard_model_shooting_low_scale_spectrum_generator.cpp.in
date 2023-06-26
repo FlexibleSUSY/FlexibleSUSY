@@ -51,8 +51,9 @@ double @ModelName@_spectrum_generator<Shooting>::get_eft_pole_mass_scale(double 
    double Q_higgs =
       settings.get(Spectrum_generator_settings::eft_pole_mass_scale);
 
-   if (Q_higgs == 0.)
+   if (Q_higgs == 0.) {
       Q_higgs = std::min(susy_scale, Mt);
+   }
 
    return Q_higgs;
 }
