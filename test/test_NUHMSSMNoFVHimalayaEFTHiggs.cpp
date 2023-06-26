@@ -28,7 +28,11 @@
 
 using namespace flexiblesusy;
 
-using Output_1loop = std::array<double,3>;
+struct Output_1loop {
+   double Mh_1l{};
+   double lambda_0L{};
+   double lambda_1L{};
+};
 using Output_2loop = std::array<double,2>;
 using Output_3loop = std::array<double,1>;
 
@@ -107,12 +111,12 @@ Output_1loop calc_output_1loop(char const * const slha_input)
    const double Qmatch = settings.get(Spectrum_generator_settings::eft_matching_scale);
 
    Output_1loop results{};
-   results.at(1) = calc_lambda(input, qedqcd, settings, Qmatch);
+   results.lambda_0L = calc_lambda(input, qedqcd, settings, Qmatch);
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
 
-   results.at(0) = calc_Mh(input, qedqcd, settings);
-   results.at(2) = calc_lambda(input, qedqcd, settings, Qmatch);
+   results.Mh_1l = calc_Mh(input, qedqcd, settings);
+   results.lambda_1L = calc_lambda(input, qedqcd, settings, Qmatch);
 
    return results;
 }
@@ -962,9 +966,9 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_1loop )
 
    for (const auto& d: data) {
       const auto output = calc_output_1loop(d.slha_input);
-      for (int i = 0; i < d.expected_output.size(); i++) {
-         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
-      }
+      BOOST_CHECK_CLOSE_FRACTION(output.Mh_1l, d.expected_output.Mh_1l, d.eps);
+      BOOST_CHECK_CLOSE_FRACTION(output.lambda_0L, d.expected_output.lambda_0L, d.eps);
+      BOOST_CHECK_CLOSE_FRACTION(output.lambda_1L, d.expected_output.lambda_1L, d.eps);
    }
 }
 
