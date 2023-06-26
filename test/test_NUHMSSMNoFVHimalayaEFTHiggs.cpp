@@ -39,7 +39,9 @@ struct Output_2loop {
    double Mh_2L_at_at{};
 };
 
-using Output_3loop = std::array<double,1>;
+struct Output_3loop{
+   double lambda_3L{};
+};
 
 
 /// calculate lambda at the precision given in `settings'
@@ -170,7 +172,7 @@ Output_3loop calc_output_3loop(char const * const slha_input)
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
 
-   results.at(0) = calc_lambda(input, qedqcd, settings, Qmatch);
+   results.lambda_3L = calc_lambda(input, qedqcd, settings, Qmatch);
 
    return results;
 }
@@ -1013,8 +1015,6 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
 
    for (const auto& d: data) {
       const auto output = calc_output_3loop(d.slha_input);
-      for (int i = 0; i < d.expected_output.size(); i++) {
-         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
-      }
+      BOOST_CHECK_CLOSE_FRACTION(output.lambda_3L, d.expected_output.lambda_3L, d.eps);
    }
 }
