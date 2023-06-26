@@ -466,7 +466,7 @@ Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
     0   1.000000000e-05      # precision goal
-    1   0                    # max. iterations (0 = automatic)
+    1   1000                 # max. iterations (0 = automatic)
     2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
     3   0                    # calculate SM pole masses
     4   1                    # pole mass loop order
