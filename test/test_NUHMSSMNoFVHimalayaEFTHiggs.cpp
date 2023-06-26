@@ -104,7 +104,7 @@ Output_1loop calc_output_1loop(char const * const slha_input)
 
    std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
 
-   const double Qmatch = 40000;
+   const double Qmatch = settings.get(Spectrum_generator_settings::eft_matching_scale);
 
    Output_1loop results{};
    results.at(1) = calc_lambda(input, qedqcd, settings, Qmatch);
@@ -190,7 +190,7 @@ Block FlexibleSUSY
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
-   19   40000                    # EFT matching scale (0 = SUSY scale)
+   19   40000                # EFT matching scale (0 = SUSY scale)
    20   1                    # EFT loop order for upwards matching
    21   0                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
@@ -286,7 +286,7 @@ Block FlexibleSUSY
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
-   19   40000                    # EFT matching scale (0 = SUSY scale)
+   19   40000                # EFT matching scale (0 = SUSY scale)
    20   1                    # EFT loop order for upwards matching
    21   0                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
@@ -385,7 +385,7 @@ Block FlexibleSUSY
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
-   19   40000                    # EFT matching scale (0 = SUSY scale)
+   19   40000                # EFT matching scale (0 = SUSY scale)
    20   1                    # EFT loop order for upwards matching
    21   0                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
@@ -484,7 +484,7 @@ Block FlexibleSUSY
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
-   19   40000                    # EFT matching scale (0 = SUSY scale)
+   19   40000                # EFT matching scale (0 = SUSY scale)
    20   1                    # EFT loop order for upwards matching
    21   0                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
