@@ -430,24 +430,31 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    qedqcd_GF.setPoleMW(eft.get_physical().MVWp);
    qedqcd_GF.setPoleMZ(eft.get_physical().MVZ);
 
-   const double g_fermi        = eft.calculate_G_fermi(qedqcd_GF);
+   const double g_fermi        = qedqcd.displayFermiConstant();
+   const double g_fermi_p      = eft.calculate_G_fermi(qedqcd_GF);
    const double Mtop           = qedqcd.displayPoleMt();
+   const double Mtop_p         = eft.get_physical().MFu(2);
+   const double MZ             = qedqcd.displayPoleMZ();
+   const double MZ_p           = eft.get_physical().MVZ;
    const double mb_qedqcd      = qedqcd.displayMass(softsusy::mBottom);
+   const double mb_p           = eft.get_MFd(2);
+   const double Mtau           = qedqcd.displayPoleMtau();
+   const double Mtau_p         = eft.get_physical().MFe(2);
    const double alpha_em_SM5   = qedqcd.displayAlpha(softsusy::ALPHA);
    const double alpha_s_SM5    = qedqcd.displayAlpha(softsusy::ALPHAS);
    const double delta_alpha_em = eft.calculate_delta_alpha_em(alpha_em_msbar);
    const double delta_alpha_s  = eft.calculate_delta_alpha_s(alpha_s_SM5);
    const double alpha_em_SM5_p = alpha_em_msbar/(1 + delta_alpha_em);
    const double alpha_s_SM5_p  = alpha_s_msbar*(1 - delta_alpha_s);
-   const double mb_p           = eft.calculate_MFd_DRbar(mb_qedqcd, 2);
+   const double mb             = eft.calculate_MFd_DRbar(mb_qedqcd, 2);
 
    diff(0) = (alpha_em_SM5 - alpha_em_SM5_p)/alpha_em_SM5;
    diff(1) = (alpha_s_SM5 - alpha_s_SM5_p)/alpha_s_SM5;
-   diff(2) = (qedqcd.displayFermiConstant() -  g_fermi)/qedqcd.displayFermiConstant();
-   diff(3) = (Mtop -  eft.get_physical().MFu(2))/Mtop;
-   diff(4) = (qedqcd.displayPoleMZ() - eft.get_physical().MVZ)/qedqcd.displayPoleMZ();
-   diff(5) = (mb_p - eft.get_MFd(2))/mb_p;
-   diff(6) = (qedqcd.displayPoleMtau() - eft.get_physical().MFe(2))/qedqcd.displayPoleMtau();
+   diff(2) = (g_fermi - g_fermi_p)/g_fermi;
+   diff(3) = (Mtop -  Mtop_p)/Mtop;
+   diff(4) = (MZ - MZ_p)/MZ;
+   diff(5) = (mb - mb_p)/mb;
+   diff(6) = (Mtau - Mtau_p)/Mtau;
 
    VERBOSE_MSG("\t[4] relative deviation from input observables: " <<  diff.transpose());
 
