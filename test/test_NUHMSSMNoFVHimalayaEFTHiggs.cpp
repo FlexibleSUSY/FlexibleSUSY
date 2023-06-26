@@ -38,14 +38,14 @@ double calc_lambda(
    const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters& input,
    const softsusy::QedQcd& qedqcd,
    const Spectrum_generator_settings& settings,
-   double Qmatch)
+   double scale)
 {
    NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
    auto sm  = spectrum_generator.get_sm();
-   sm.run_to(Qmatch);
+   sm.run_to(scale);
    return sm.get_Lambdax();
 }
 
