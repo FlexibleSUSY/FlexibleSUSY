@@ -153,7 +153,7 @@ Output_3loop calc_output_3loop(char const * const slha_input)
 
    Output_3loop results{};
 
-   const double Qmatch = 50000;
+   const double Qmatch = settings.get(Spectrum_generator_settings::eft_matching_scale);
 
    settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 3); 
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
