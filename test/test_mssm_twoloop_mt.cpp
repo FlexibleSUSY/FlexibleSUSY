@@ -88,14 +88,14 @@ Parameters make_point()
    const double xt = SX / (2.0 * mt);
 
    const Parameters pars{
-      .g3    = 2.0;
-      .mt    = mt;
-      .mg    = 400.0;
-      .mst1  = mst1;
-      .mst2  = mst2;
-      .msusy = 500.0;
-      .xt    = xt;
-      .Q     = 100.0;
+      .g3    = 2.0,
+      .mt    = mt,
+      .mg    = 400.0,
+      .mst1  = mst1,
+      .mst2  = mst2,
+      .msusy = 500.0,
+      .xt    = xt,
+      .Q     = 100.0
    };
 
    return pars;
