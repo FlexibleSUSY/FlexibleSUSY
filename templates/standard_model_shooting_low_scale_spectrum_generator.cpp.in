@@ -109,6 +109,8 @@ void @ModelName@_spectrum_generator<Shooting>::init(
    sm.set_ewsb_iteration_precision(this->model.get_ewsb_iteration_precision());
    sm.set_loop_corrections(this->model.get_loop_corrections());
    sm.set_threshold_corrections(this->model.get_threshold_corrections());
+   sm.set_precision(this->model.get_precision());
+   sm.set_scale(this->model.get_scale());
 }
 
 /**
@@ -311,8 +313,6 @@ standard_model::StandardModel<Shooting>
    VERBOSE_MSG("\t\t[a] initialize SM ...");
 
    standard_model::StandardModel<Shooting> sm;
-   sm.set_precision(model.get_precision());
-   sm.set_scale(model.get_scale());
    init(sm);
 
    const int loops = settings.get(Spectrum_generator_settings::eft_matching_loop_order_down);
