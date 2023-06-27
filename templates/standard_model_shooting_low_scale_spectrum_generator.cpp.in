@@ -416,8 +416,6 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
 
    VERBOSE_MSG("\t[3] calculating observables ...");
 
-   Vec_t diff(Vec_t::Zero());
-
    const double gY             = eft.get_g1() * standard_model_info::normalization_g1;
    const double g2             = eft.get_g2() * standard_model_info::normalization_g2;
    const double g3             = eft.get_g3() * standard_model_info::normalization_g3;
@@ -448,17 +446,15 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    const double alpha_s_SM5_p  = alpha_s_msbar*(1 - delta_alpha_s);
    const double mb             = eft.calculate_MFd_DRbar(mb_qedqcd, 2);
 
-   diff(0) = (alpha_em_SM5 - alpha_em_SM5_p)/alpha_em_SM5;
-   diff(1) = (alpha_s_SM5 - alpha_s_SM5_p)/alpha_s_SM5;
-   diff(2) = (g_fermi - g_fermi_p)/g_fermi;
-   diff(3) = (Mtop -  Mtop_p)/Mtop;
-   diff(4) = (MZ - MZ_p)/MZ;
-   diff(5) = (mb - mb_p)/mb;
-   diff(6) = (Mtau - Mtau_p)/Mtau;
+   using Arr_t = Eigen::Array<double, N, 1>;
+
+   const Arr_t input = (Arr_t() << alpha_em_SM5, alpha_s_SM5, g_fermi, Mtop, MZ, mb, Mtau).finished();
+   const Arr_t predicted = (Arr_t() << alpha_em_SM5_p, alpha_s_SM5_p, g_fermi_p, Mtop_p, MZ_p, mb_p, Mtau_p).finished();
+   const Arr_t diff = (input - predicted)/predicted;
 
    VERBOSE_MSG("\t[4] relative deviation from input observables: " <<  diff.transpose());
 
-   return diff;
+   return diff.matrix();
 }
 
 } // namespace flexiblesusy
