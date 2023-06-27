@@ -409,6 +409,11 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    auto eft = eft_;
    eft.run_to(Q_low);
 
+   // ensure that scale of EFT and QedQcd are equal
+   if (eft.get_scale() != qedqcd.get_scale()) {
+      throw SetupError("renormalization scale of EFT != renormalization scale of QedQcd.");
+   }
+
    VERBOSE_MSG("\t[2] calculating pole masses ...");
 
    eft.solve_ewsb();
