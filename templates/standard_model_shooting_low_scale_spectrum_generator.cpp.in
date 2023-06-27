@@ -308,24 +308,22 @@ standard_model::StandardModel<Shooting>
 {
    using namespace @ModelName@_standard_model_matching;
 
-   VERBOSE_MSG("Matching to the SM ...");
+   VERBOSE_MSG("\t\t[a] initialize SM ...");
 
-   const int loops =
-      settings.get(Spectrum_generator_settings::eft_matching_loop_order_down);
-
-   /// TODO: use class member
    standard_model::StandardModel<Shooting> sm;
    sm.set_precision(model.get_precision());
    sm.set_scale(model.get_scale());
    init(sm);
 
-   VERBOSE_MSG("\t[1] match BSM to SM at " << loops << "-loop level ...");
+   const int loops = settings.get(Spectrum_generator_settings::eft_matching_loop_order_down);
+
+   VERBOSE_MSG("\t\t[b] match BSM to SM at " << loops << "-loop level ...");
 
    const int index = settings.get(Spectrum_generator_settings::eft_higgs_index);
 
    match_high_to_low_scale_model(sm, model, loops, index);
 
-   VERBOSE_MSG("\t[2] lambda(Q_match = " << sm.get_scale() << ") = " << sm.get_Lambdax());
+   VERBOSE_MSG("\t\t[c] lambda(Q_match = " << sm.get_scale() << ") = " << sm.get_Lambdax());
 
    return sm;
 }
@@ -340,11 +338,9 @@ void @ModelName@_spectrum_generator<Shooting>::match(
    const softsusy::QedQcd& qedqcd,
    Single_scale_constraint& constraint)
 {
-   VERBOSE_MSG("Running down ...");
-
    const auto Q_match = get_matching_scale(constraint);
 
-   VERBOSE_MSG("\t[1] running to matching scale Q_match = "
+   VERBOSE_MSG("\t[1] running BSM model to matching scale Q_match = "
                << Q_match << " GeV ...");
 
    model.run_to(Q_match);
@@ -356,7 +352,7 @@ void @ModelName@_spectrum_generator<Shooting>::match(
 
    VERBOSE_MSG("\t[3] start matching to SM ...");
 
-   // calculate lambda and run down
+   // calculate SM parameters at Q_match
    eft = match_to_SM();
 }
 
