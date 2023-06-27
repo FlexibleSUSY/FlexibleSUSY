@@ -423,18 +423,12 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    const double alpha_em_SM6_p = Sqr(e)*oneOver4Pi;
    const double alpha_s_SM6_p  = Sqr(g3)*oneOver4Pi;
 
-   auto qedqcd_GF = qedqcd;
-   qedqcd_GF.setPoleMt(eft.get_physical().MFu(2));
-   qedqcd_GF.setPoleMW(eft.get_physical().MVWp);
-   qedqcd_GF.setPoleMZ(eft.get_physical().MVZ);
-
-   const double g_fermi        = qedqcd.displayFermiConstant();
-   const double g_fermi_p      = eft.calculate_G_fermi(qedqcd_GF);
-   const double Mtop           = qedqcd.displayPoleMt();
-   const double Mtop_p         = eft.get_physical().MFu(2);
+   const double Mt             = qedqcd.displayPoleMt();
+   const double Mt_p           = eft.get_physical().MFu(2);
    const double MZ             = qedqcd.displayPoleMZ();
    const double MZ_p           = eft.get_physical().MVZ;
    const double mb_qedqcd      = qedqcd.displayMass(softsusy::mBottom);
+   const double mb             = eft.calculate_MFd_DRbar(mb_qedqcd, 2);
    const double mb_p           = eft.get_MFd(2);
    const double Mtau           = qedqcd.displayPoleMtau();
    const double Mtau_p         = eft.get_physical().MFe(2);
@@ -444,12 +438,20 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    const double delta_alpha_s  = eft.calculate_delta_alpha_s(alpha_s_SM5);
    const double alpha_em_SM5_p = alpha_em_SM6_p/(1 + delta_alpha_em);
    const double alpha_s_SM5_p  = alpha_s_SM6_p*(1 - delta_alpha_s);
-   const double mb             = eft.calculate_MFd_DRbar(mb_qedqcd, 2);
+   const double MW_p           = eft.get_physical().MVWp;
+
+   auto qedqcd_GF = qedqcd;
+   qedqcd_GF.setPoleMt(Mt_p);
+   qedqcd_GF.setPoleMW(MW_p);
+   qedqcd_GF.setPoleMZ(MZ_p);
+
+   const double GF             = qedqcd.displayFermiConstant();
+   const double GF_p           = eft.calculate_G_fermi(qedqcd_GF);
 
    using Arr_t = Eigen::Array<double, N, 1>;
 
-   const Arr_t input = (Arr_t() << alpha_em_SM5, alpha_s_SM5, g_fermi, Mtop, MZ, mb, Mtau).finished();
-   const Arr_t predicted = (Arr_t() << alpha_em_SM5_p, alpha_s_SM5_p, g_fermi_p, Mtop_p, MZ_p, mb_p, Mtau_p).finished();
+   const Arr_t input = (Arr_t() << alpha_em_SM5, alpha_s_SM5, GF, Mt, MZ, mb, Mtau).finished();
+   const Arr_t predicted = (Arr_t() << alpha_em_SM5_p, alpha_s_SM5_p, GF_p, Mt_p, MZ_p, mb_p, Mtau_p).finished();
    const Arr_t diff = (input - predicted)/predicted;
 
    VERBOSE_MSG("\t[4] relative deviation from input observables: " <<  diff.transpose());
