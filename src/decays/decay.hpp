@@ -71,8 +71,10 @@ private:
 
 struct NeutralHiggsEffectiveCouplings {
    std::string particle = "";
+   int pdgid = 0;
    double mass = 0.;
    double width = 0.;
+   int CP = 0;
    std::complex<double> dd = 0.;
    std::complex<double> uu = 0.;
    std::complex<double> ss = 0.;
@@ -216,7 +218,8 @@ std::string field_as_string(std::array<int, Field::numberOfFieldIndices> const& 
          return std::string();
       }
       else {
-         return "(" + std::to_string(v[0]) + ")";
+         // in the output we count particles from 1 (not 0)
+         return "(" + std::to_string(v[0]+1) + ")";
       }
    };
 
@@ -242,10 +245,8 @@ std::string create_process_string(
 
    using boost::core::demangle;
    std::string process_string =
-         strip_field_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
-         + " -> " +
-         strip_field_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + " " +
-         strip_field_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2);
+      field_as_string<FieldIn>(in) + " -> " +
+      field_as_string<FieldOut1>(out1) + " " + field_as_string<FieldOut2>(out2);
 
    return process_string;
 }

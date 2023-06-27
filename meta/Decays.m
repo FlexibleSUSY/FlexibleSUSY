@@ -984,7 +984,9 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   "auto found = std::find_if(std::begin(higgstools_input), std::end(higgstools_input), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
                   "found->width = decays.get_total_width();\n" <>
-                  "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n"] <>
+                  "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n" <>
+                  "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, 1], -1] <> ";\n" <>
+                  "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n"] <>
                   "}\n"] <>
                   "\r#endif",
                   ""
@@ -2257,7 +2259,7 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
                     Flatten[Last /@ particleDecays, 1]
                  ]
            ];
-           Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
+           Print["The creation of C++ code for decays took", FSRound[First@specializations, 1], "s"];
            specializations = Last@specializations;
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]

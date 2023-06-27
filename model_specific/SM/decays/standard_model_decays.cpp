@@ -5782,8 +5782,7 @@ void CLASSNAME::calculate_hh_decays()
             model.run_to(decay_mass);
          }
          catch (const NonPerturbativeRunningError& e) {
-            std::cout << e.what() << '\n';
-            std::cout << "λ(μ=" << decay_mass << " GeV) = " << model.get_Lambdax() << '\n';
+            WARNING(std::string(e.what()) + " λ(μ=" + std::to_string(decay_mass) + " GeV) = " + std::to_string(model.get_Lambdax()));
          }
          model.solve_ewsb_tree_level();
          model.calculate_DRbar_masses();

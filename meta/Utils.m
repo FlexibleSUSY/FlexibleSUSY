@@ -171,6 +171,7 @@ FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles 
 
 DecomposeVersionString::usage = "Return a list for string containing a version number";
 VersionOrderGtEqThan::usage = "Checks if version is >= than a given one";
+FSRound::usage = "FSRound[x, n] rounds number x to n digits after dot.";
 
 Begin["`Private`"];
 
@@ -458,6 +459,9 @@ VersionOrderGtEqThan[version_List, minimRequired_List] /;
               (version[[1]] == minimRequired[[1]] &&
                version[[2]] == minimRequired[[2]] &&
                version[[3]] < minimRequired[[3]]));
+
+FSRound[num_, prec_] :=
+   PaddedForm[num, {IntegerPart[Log[10, Abs[num]]] + prec + 1, prec}];
 
 End[];
 

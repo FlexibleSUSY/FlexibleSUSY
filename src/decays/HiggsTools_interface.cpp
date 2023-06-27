@@ -35,13 +35,44 @@
 #include <fstream>
 #include <iostream>
 #include <functional>
+#include <random>
 
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
 
+namespace HP = Higgs::predictions;
+
 namespace flexiblesusy {
 
-std::pair<int, double> call_HiggsTools(
+namespace {
+
+// whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
+// or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
+constexpr bool calcggH = false;
+// whether to calculate the H->gaga decay width in terms of the effective couplings
+// or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
+constexpr bool calcHgamgam = false;
+
+constexpr double relMassError = 0.03;
+
+double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
+   const auto signals = Higgs::Signals {higgssignals_dataset};
+
+   auto pred = Higgs::Predictions();
+   auto& s = pred.addParticle(HP::BsmParticle("hSM", HP::ECharge::neutral, HP::CP::even));
+   auto effc = HP::scaledSMlikeEffCouplings(1.0);
+   s.setMass(mhSM);
+   effectiveCouplingInput(
+      s, effc,
+      HP::ReferenceModel::SMHiggsInterp,
+      calcggH, calcHgamgam
+   );
+   return signals(pred);
+}
+
+}
+
+std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_HiggsTools(
    EffectiveCoupling_list const& bsm_input,
    std::vector<SingleChargedHiggsInput> const& bsm_input2,
    Physical_input const& physical_input,
@@ -49,6 +80,22 @@ std::pair<int, double> call_HiggsTools(
    Spectrum_generator_settings const& spectrum_generator_settings,
    FlexibleDecay_settings const& flexibledecay_settings,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
+
+   // check location of databases
+   // HiggsBounds
+   if (higgsbounds_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsBounds database");
+   }
+   else if (!std::filesystem::exists(higgsbounds_dataset)) {
+      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
+   }
+   // HiggsSignals
+   if (higgssignals_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsSignals database");
+   }
+   else if (!std::filesystem::exists(higgssignals_dataset)) {
+      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
+   }
 
    auto pred = Higgs::Predictions();
    namespace HP = Higgs::predictions;
@@ -67,9 +114,9 @@ std::pair<int, double> call_HiggsTools(
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
       if (mass > 700) continue;
 
-      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
+      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
       s.setMass(mass);
-      s.setMassUnc(0.03*mass); // set mass uncertainty to 3%
+      s.setMassUnc(relMassError*mass); // set mass uncertainty to 3%
 
       // create a SM equivalent to the BSM model, with mhSM == mass
       standard_model::Standard_model sm {};
@@ -91,14 +138,14 @@ std::pair<int, double> call_HiggsTools(
          return std::abs(sm.get_physical().Mhh - mass);
       };
 
-      int status;
-      int iter = 0, max_iter = 100;
+      int status, iter = 0;
+      static constexpr int max_iter = 50;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
-      double a = 0.001, b = 5;
-
-      double m = 0.1;
+      double a = 0.0001, b = 5;
+      // initial guess for the location of minimum: λ=(mass/v)^2/2
+      double m = 0.5*Sqr(mass/247);
 
       // hack to pass lambda-function to GSL
       std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
@@ -113,9 +160,26 @@ std::pair<int, double> call_HiggsTools(
       // checked on a single point in the MRSSM2:
       //    brent seems faster and more accurate than quad_golden
       T = gsl_min_fminimizer_brent;
-      //T = gsl_min_fminimizer_quad_golden;
       sGSL = gsl_min_fminimizer_alloc (T);
-      gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+
+      // gsl_min_fminimizer_set expects f(m) < f(a) && f(m) < f(b),
+      // otherwise it returns GSL_EINVAL status.
+      // In this case we randomly try different m from [max(a, 0.01m), min(b, 100m)]
+      // until status != GSL_EINVAL
+      gsl_error_handler_t * _error_handler = gsl_set_error_handler_off();
+      status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+      if (status == GSL_EINVAL) {
+         std::random_device rd;
+         std::mt19937 gen(rd());
+         std::uniform_real_distribution<> dis(std::max(a,1e-2*m), std::min(b,1e+2*m));
+         do {
+            m = dis(gen);
+            status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+         } while (status == GSL_EINVAL);
+      }
+      gsl_set_error_handler (_error_handler);
+
+      static constexpr double mass_precision = 1e-4;
 
       do
       {
@@ -125,24 +189,20 @@ std::pair<int, double> call_HiggsTools(
            m = gsl_min_fminimizer_x_minimum (sGSL);
            a = gsl_min_fminimizer_x_lower (sGSL);
            b = gsl_min_fminimizer_x_upper (sGSL);
-
-          // this seems to give a relative error < 0.1%
-          status
-             = gsl_min_test_interval (a, b, 0.0, 9e-5);
       }
-      while (status == GSL_CONTINUE && iter < max_iter);
+      while (std::abs(1. - sm.get_physical().Mhh/mass) > mass_precision && iter < max_iter);
 
       gsl_min_fminimizer_free (sGSL);
 
-      sm.calculate_pole_masses();
-
-      if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > 1e-3) {
-         throw Error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
-                     " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations."
+      if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > mass_precision) {
+         throw std::runtime_error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
+                     " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations. "
                      "Mass difference: " + std::to_string(mass) + " GeV (BSM) vs " +
                      std::to_string(sm.get_physical().Mhh) + " GeV (SM) for λSM = " + std::to_string(m) +
                      ". Difference: " + std::to_string(100*diff) + "%. ");
       }
+
+      sm.calculate_pole_masses();
 
       if (sm.get_physical().Mhh > 0) {
          // calculate decays in the SM equivalent
@@ -154,7 +214,6 @@ std::pair<int, double> call_HiggsTools(
 
          // fermion channels are given as complex numbers
          // we normalize to real part of SM coupling
-
          // quarks
          effc.dd = std::abs(sm_input[0].dd) > 0 ? el.dd/sm_input[0].dd.real() : 0.;
          effc.uu = std::abs(sm_input[0].uu) > 0 ? el.uu/sm_input[0].uu.real() : 0.;
@@ -166,6 +225,7 @@ std::pair<int, double> call_HiggsTools(
          effc.ee = std::abs(sm_input[0].ee)         > 0 ? el.ee/sm_input[0].ee.real()         : 0.;
          effc.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
          effc.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
+
          // gauge bosons
          effc.WW = std::abs(sm_input[0].WW) > 0         ? el.WW/sm_input[0].WW         : 0.;
          effc.ZZ = std::abs(sm_input[0].ZZ) > 0         ? el.ZZ/sm_input[0].ZZ         : 0.;
@@ -175,13 +235,7 @@ std::pair<int, double> call_HiggsTools(
 
          effectiveCouplingInput(
             s, effc,
-            // choosing reference model
-            // from HiggsTools manual (Sec. 4.1 of arXiv:2210.09332):
-            //    The option SMHiggs is the preferred choice for particles that have a mass comparable to the
-            //    top-quark mass or larger, whereas for a particle state at 125 GeV one should use SMHiggsEW
-            //    in order to include the QCD corrections beyond the NNLO.
-            // Threshold of 150 GeV choosen based on comment https://gitlab.com/higgsbounds/higgstools/-/releases/v1.0.1
-            (mass > 150 ? HP::ReferenceModel::SMHiggs : HP::ReferenceModel::SMHiggsEW),
+            HP::ReferenceModel::SMHiggsInterp,
             calcggH, calcHgamgam
          );
 
@@ -198,6 +252,7 @@ std::pair<int, double> call_HiggsTools(
       }
    }
 
+   /*
    for (auto const& el : bsm_input2) {
       auto& Hpm = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::single));
       // set mass
@@ -220,28 +275,26 @@ std::pair<int, double> call_HiggsTools(
       double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, el.brtHpb);
       Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
    }
-
-   // HiggsBounds
-   if (higgsbounds_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsBounds database");
-   }
-   else if (!std::filesystem::exists(higgsbounds_dataset)) {
-      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
-   }
+   */
    auto bounds = Higgs::Bounds {higgsbounds_dataset};
    auto hbResult = bounds(pred);
+   std::vector<std::tuple<int, double, double, std::string>> hb_return {};
+   for (auto const& _hb: hbResult.selectedLimits) {
+      auto found = std::find_if(
+         std::begin(bsm_input), std::end(bsm_input),
+         [&_hb](auto const& el) { return el.particle==_hb.first; }
+      );
+      hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
+   }
 
-   // HiggsSignals
-   if (higgssignals_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsSignals database");
-   }
-   else if (!std::filesystem::exists(higgssignals_dataset)) {
-      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
-   }
    const auto signals = Higgs::Signals {higgssignals_dataset};
+   //for (const auto &m : signals.measurements()) {
+   //   std::cout << m.reference() << " " << m(pred) << std::endl;
+   //}
    const double hs_chisq = signals(pred);
 
-   return {signals.observableCount(), hs_chisq};
+   auto smChi2 = minChi2SM(physical_input.get(Physical_input::mh_pole), higgssignals_dataset);
+   return {signals.observableCount(), hs_chisq, smChi2, std::to_string(physical_input.get(Physical_input::mh_pole)), hb_return};
 }
 
 } // flexiblesusy

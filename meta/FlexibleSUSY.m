@@ -2102,7 +2102,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
               ]
            ];
            Print[""];
-           Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
+           Print["Creation of decay amplitudes took", FSRound[First@decaysLists, 1], "s"];
            decaysLists = Last@decaysLists;
 
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
@@ -2143,7 +2143,8 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
               ];
 
            higgstoolsChargedInputDecl = If[
-              TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] <= TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]],
+              TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] <= TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] &&
+              MemberQ[FlexibleSUSY`FSDecayParticles, If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]],
               "std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <>
               FlexibleSUSY`FSModelName <> "_mass_eigenstates const&, " <>
               FlexibleSUSY`FSModelName <> "_decays const&);",
@@ -2736,17 +2737,20 @@ IndentText@IndentText@IndentText[
 "if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
 IndentText[
    "std::vector<SingleChargedHiggsInput> higgstools_charged_input = " <>
-   If[TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] >= TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]],
+   If[TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] >= TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] &&
+      MemberQ[FlexibleSUSY`FSDecayParticles, If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]],
       "get_charged_higgstools_input(std::get<0>(models), decays)",
       "{}"
    ] <> ";\n" <>
    "try {\n" <>
    IndentText[
-      "std::tie(higgssignals_ndof, higgssignals_chi2) = call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
+      "// structured bindings creates new variables - need to use std::tie
+std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
+   call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
    ] <>
    "}\n" <>
-   "catch (const Error& error) {\n" <>
-      "WARNING(error.what_detailed());\n" <>
+   "catch (const std::exception& error) {\n" <>
+      IndentText["ERROR(error.what());\n"] <>
    "}\n"
 ] <>
 "}\n"
@@ -2769,7 +2773,8 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) && higgssignals_ndof > 0) {
-      slha_io.set_higgssignals(higgssignals_ndof, higgssignals_chi2);
+      slha_io.set_higgssignals(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag);
+      slha_io.set_higgsbounds(higgsbounds_v);
    }
 #endif
 }";
@@ -2784,7 +2789,9 @@ if (spectrum_generator.get_exit_code() == 0 && loop_library_for_decays) {
    decays.calculate_decays();
 }";
 
-CreateHiggsToolsChargedInput[] := If[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] > TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], "", "\
+CreateHiggsToolsChargedInput[] := If[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] > TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], "",
+If[!MemberQ[FlexibleSUSY`FSDecayParticles, If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]],
+Utils`FSFancyWarning["Charged Higgs boson exists in the model but its decays are not computed. It will not be checked by HiggsTools."]; "", "\
 std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates const& m, " <> FlexibleSUSY`FSModelName <> "_decays const& decays) {
    std::vector<SingleChargedHiggsInput> v {};
    static constexpr int chargeSign = " <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> "::electricCharge > 0 ? 1 : -1;
@@ -2847,6 +2854,7 @@ std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <> FlexibleS
    return v;
 }
 "
+]
 ];
 
 WriteExampleCmdLineOutput[enableDecays_] :=

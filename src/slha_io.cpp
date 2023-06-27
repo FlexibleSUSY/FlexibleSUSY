@@ -30,6 +30,8 @@
 #include "string_conversion.hpp"
 #include "string_format.hpp"
 
+#include <boost/math/distributions/chi_squared.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -975,15 +977,54 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
-void SLHA_io::set_higgssignals(int ndof, double chi2)
+void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double chi2SMmin, std::string const& tag)
 {
    std::ostringstream ss;
 
    ss << block_head("HIGGSSIGNALS", 0.0);
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
+   ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
+   boost::math::chi_squared dist(2);
+   ss << FORMAT_ELEMENT(4, 1-boost::math::cdf(dist, std::abs(chi2-chi2SMmin)), "p-value");
 
    set_block(ss);
+}
+
+void SLHA_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& v)
+{
+   std::ostringstream ss;
+
+   ss << block_head("HIGGSBOUNDS", 0.0);
+   for (auto const& el : v) {
+      ss << FORMAT_MIXING_MATRIX(std::get<0>(el), 1, std::get<1>(el), std::get<3>(el));
+      ss << FORMAT_MIXING_MATRIX(std::get<0>(el), 2, std::get<2>(el), "expRatio");
+   }
+
+   set_block(ss);
+}
+
+void SLHA_io::set_effectivecouplings_block(const EffectiveCoupling_list& list)
+{
+   std::ostringstream decay;
+   decay << "Block EFFHIGGSCOUPLINGS\n";
+
+   for (auto const& effC : list) {
+      // gauge bosons
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  21, 21, effC.gg, "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  22, 22, effC.gamgam, "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  22, 23, effC.Zgam, "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -24, 24, effC.WW, "");
+      // fermions
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1, 1, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2, 2, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -3, 3, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -4, 4, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -5, 5, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -6, 6, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+   }
+
+   set_block(decay);
 }
 
 } // namespace flexiblesusy

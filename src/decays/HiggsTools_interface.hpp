@@ -38,7 +38,7 @@
 
 namespace flexiblesusy {
 
-std::pair<int, double> call_HiggsTools(
+std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_HiggsTools(
    EffectiveCoupling_list const&,
    std::vector<SingleChargedHiggsInput> const&,
    Physical_input const&,

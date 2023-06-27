@@ -1255,7 +1255,7 @@ Module[{cxxVertices, vertexPartition,
       Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
    ];
    Print[""];
-   Print["The creation of C++ vertices took ", Round[First@cxxVertices, 0.1], "s"];
+   Print["The creation of C++ vertices took", FSRound[First@cxxVertices, 1], "s"];
    cxxVertices = Last@cxxVertices;
 
    (* Mathematica 7 does not support the `UpTo[n]` notation *)
