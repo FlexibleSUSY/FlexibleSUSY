@@ -301,34 +301,6 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
 }
 
 /**
- * @brief Calculates SM parameters from high-scale BSM model at the matching scale.
- *
- * @return Standard Model at matching scale
- */
-standard_model::StandardModel<Shooting>
-@ModelName@_spectrum_generator<Shooting>::match_to_SM() const
-{
-   using namespace @ModelName@_standard_model_matching;
-
-   VERBOSE_MSG("\t\t[a] initialize SM ...");
-
-   standard_model::StandardModel<Shooting> sm;
-   init(sm);
-
-   const int loops = settings.get(Spectrum_generator_settings::eft_matching_loop_order_down);
-
-   VERBOSE_MSG("\t\t[b] match BSM to SM at " << loops << "-loop level ...");
-
-   const int index = settings.get(Spectrum_generator_settings::eft_higgs_index);
-
-   match_high_to_low_scale_model(sm, model, loops, index);
-
-   VERBOSE_MSG("\t\t[c] lambda(Q_match = " << sm.get_scale() << ") = " << sm.get_Lambdax());
-
-   return sm;
-}
-
-/**
  * Runs BSM model to matching scale and matches BSM model to the SM.
  *
  * @param qedqcd low-energy parameters
@@ -350,10 +322,16 @@ void @ModelName@_spectrum_generator<Shooting>::match(
    model.calculate_DRbar_masses();
    model.solve_ewsb();
 
-   VERBOSE_MSG("\t[3] start matching to SM ...");
+   eft.clear();
+   init(eft);
 
-   // calculate SM parameters at Q_match
-   eft = match_to_SM();
+   const int loops = settings.get(Spectrum_generator_settings::eft_matching_loop_order_down);
+   const int index = settings.get(Spectrum_generator_settings::eft_higgs_index);
+
+   VERBOSE_MSG("\t[3] matching BSM to SM at " << loops << "-loop level ...");
+
+   // perform matching: calculate SM parameters at Q_match
+   @ModelName@_standard_model_matching::match_high_to_low_scale_model(eft, model, loops, index);
 }
 
 /**

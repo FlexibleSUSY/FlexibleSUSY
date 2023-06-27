@@ -76,8 +76,6 @@ private:
    Vec_t initial_guess(const softsusy::QedQcd&);
    /// run whole tower down
    void match(const softsusy::QedQcd&, Single_scale_constraint&);
-   /// create SM and run it down
-   standard_model::StandardModel<Shooting> match_to_SM() const;
    /// overwrite SM-like BSM parameters
    void set_SM_parameters(const Vec_t&);
 };
