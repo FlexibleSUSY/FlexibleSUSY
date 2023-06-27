@@ -416,22 +416,20 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
 
    VERBOSE_MSG("\t[3] calculating observables ...");
 
-   const double gY             = eft.get_g1() * standard_model_info::normalization_g1;
-   const double g2             = eft.get_g2() * standard_model_info::normalization_g2;
-   const double g3             = eft.get_g3() * standard_model_info::normalization_g3;
-   const double e              = gY*g2/Sqrt(Sqr(gY) + Sqr(g2));
-   const double alpha_em_SM6_p = Sqr(e)*oneOver4Pi;
-   const double alpha_s_SM6_p  = Sqr(g3)*oneOver4Pi;
-
    const double Mt             = qedqcd.displayPoleMt();
    const double Mt_p           = eft.get_physical().MFu(2);
    const double MZ             = qedqcd.displayPoleMZ();
    const double MZ_p           = eft.get_physical().MVZ;
-   const double mb_qedqcd      = qedqcd.displayMass(softsusy::mBottom);
-   const double mb             = eft.calculate_MFd_DRbar(mb_qedqcd, 2);
+   const double mb             = eft.calculate_MFd_DRbar(qedqcd.displayMass(softsusy::mBottom), 2);
    const double mb_p           = eft.get_MFd(2);
    const double Mtau           = qedqcd.displayPoleMtau();
    const double Mtau_p         = eft.get_physical().MFe(2);
+   const double gY_p           = eft.get_g1() * standard_model_info::normalization_g1;
+   const double g2_p           = eft.get_g2() * standard_model_info::normalization_g2;
+   const double g3_p           = eft.get_g3() * standard_model_info::normalization_g3;
+   const double e_p            = gY_p*g2_p/Sqrt(Sqr(gY_p) + Sqr(g2_p));
+   const double alpha_em_SM6_p = Sqr(e_p)*oneOver4Pi;
+   const double alpha_s_SM6_p  = Sqr(g3_p)*oneOver4Pi;
    const double alpha_em_SM5   = qedqcd.displayAlpha(softsusy::ALPHA);
    const double alpha_s_SM5    = qedqcd.displayAlpha(softsusy::ALPHAS);
    const double delta_alpha_em = eft.calculate_delta_alpha_em(alpha_em_SM6_p);
