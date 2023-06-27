@@ -70,7 +70,7 @@ private:
 };
 
 struct NeutralHiggsEffectiveCouplings {
-   std::string particle = "";
+   std::string particle;
    int pdgid = 0;
    double mass = 0.;
    double width = 0.;
@@ -95,7 +95,7 @@ struct NeutralHiggsEffectiveCouplings {
 };
 
 struct SingleChargedHiggsInput {
-   std::string particle = "";
+   std::string particle;
 
    // mass
    double mass = 0.;
