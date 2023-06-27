@@ -299,11 +299,9 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
 }
 
 /**
- * @brief calculate lambda and run down
+ * @brief Calculates SM parameters from high-scale BSM model at the matching scale.
  *
- * @param model runnign BSM parameters
- *
- * @return SM at Q_low
+ * @return Standard Model at matching scale
  */
 standard_model::StandardModel<Shooting>
 @ModelName@_spectrum_generator<Shooting>::match_to_SM() const
@@ -459,13 +457,13 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
 
    const Arr_t input = (Arr_t() << alpha_em_SM5, alpha_s_SM5, GF, Mt, MZ, mb, Mtau).finished();
    const Arr_t predicted = (Arr_t() << alpha_em_SM5_p, alpha_s_SM5_p, GF_p, Mt_p, MZ_p, mb_p, Mtau_p).finished();
-   const Arr_t diff = (input - predicted)/predicted;
+   const Arr_t rel_diff = (input - predicted)/predicted;
 
    VERBOSE_MSG("\t[4] input observables: " <<  input.transpose());
    VERBOSE_MSG("\t[4] predicted observables: " <<  predicted.transpose());
-   VERBOSE_MSG("\t[4] relative deviation between input and predicted observables: " <<  diff.transpose());
+   VERBOSE_MSG("\t[4] relative deviation between input and predicted observables: " <<  rel_diff.transpose());
 
-   return diff.matrix();
+   return rel_diff.matrix();
 }
 
 } // namespace flexiblesusy
