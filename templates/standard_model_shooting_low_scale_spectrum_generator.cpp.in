@@ -40,33 +40,27 @@ namespace flexiblesusy {
 
 double @ModelName@_spectrum_generator<Shooting>::get_pole_mass_scale(double susy_scale) const
 {
-   return settings.get(Spectrum_generator_settings::pole_mass_scale) != 0. ?
+   return
+      settings.get(Spectrum_generator_settings::pole_mass_scale) != 0. ?
       settings.get(Spectrum_generator_settings::pole_mass_scale) :
       susy_scale;
 }
 
 double @ModelName@_spectrum_generator<Shooting>::get_eft_pole_mass_scale(double susy_scale, double Mt) const
 {
-   double Q_higgs =
-      settings.get(Spectrum_generator_settings::eft_pole_mass_scale);
-
-   if (Q_higgs == 0.) {
-      Q_higgs = std::min(susy_scale, Mt);
-   }
-
-   return Q_higgs;
+   return
+      settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ?
+      settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :
+      std::min(susy_scale, Mt);
 }
 
 double @ModelName@_spectrum_generator<Shooting>::get_matching_scale(
    const Single_scale_constraint& constraint) const
 {
-   double Q_match = settings.get(Spectrum_generator_settings::eft_matching_scale);
-
-   if (is_zero(Q_match)) {
-      Q_match = constraint.get_scale();
-   }
-
-   return Q_match;
+   return
+      settings.get(Spectrum_generator_settings::eft_matching_scale) != 0. ?
+      settings.get(Spectrum_generator_settings::eft_matching_scale) :
+      constraint.get_scale();
 }
 
 void @ModelName@_spectrum_generator<Shooting>::init(
@@ -74,35 +68,24 @@ void @ModelName@_spectrum_generator<Shooting>::init(
    const @ModelName@_input_parameters& input) const
 {
    model.set_input_parameters(input);
-   model.do_calculate_sm_pole_masses(
-      settings.get(Spectrum_generator_settings::calculate_sm_masses));
-   model.do_calculate_bsm_pole_masses(
-      settings.get(Spectrum_generator_settings::calculate_bsm_masses));
-   model.do_force_output(
-      settings.get(Spectrum_generator_settings::force_output));
+   model.do_calculate_sm_pole_masses(settings.get(Spectrum_generator_settings::calculate_sm_masses));
+   model.do_calculate_bsm_pole_masses(settings.get(Spectrum_generator_settings::calculate_bsm_masses));
+   model.do_force_output(settings.get(Spectrum_generator_settings::force_output));
    model.set_loops(settings.get(Spectrum_generator_settings::beta_loop_order));
-   model.set_thresholds(
-      settings.get(
-         Spectrum_generator_settings::threshold_corrections_loop_order));
-   model.set_zero_threshold(
-      settings.get(Spectrum_generator_settings::beta_zero_threshold));
+   model.set_thresholds(settings.get(Spectrum_generator_settings::threshold_corrections_loop_order));
+   model.set_zero_threshold(settings.get(Spectrum_generator_settings::beta_zero_threshold));
 
    @ModelName@_ewsb_solver<Shooting> ewsb_solver;
-   model.set_ewsb_solver(
-      std::make_shared<@ModelName@_ewsb_solver<Shooting> >(ewsb_solver));
+   model.set_ewsb_solver(std::make_shared<@ModelName@_ewsb_solver<Shooting> >(ewsb_solver));
 }
 
 void @ModelName@_spectrum_generator<Shooting>::init(
    standard_model::StandardModel<Shooting>& sm) const
 {
-   sm.do_force_output(
-      settings.get(Spectrum_generator_settings::force_output));
+   sm.do_force_output(settings.get(Spectrum_generator_settings::force_output));
    sm.set_loops(settings.get(Spectrum_generator_settings::beta_loop_order));
-   sm.set_thresholds(
-      settings.get(
-         Spectrum_generator_settings::threshold_corrections_loop_order));
-   sm.set_zero_threshold(
-      settings.get(Spectrum_generator_settings::beta_zero_threshold));
+   sm.set_thresholds(settings.get(Spectrum_generator_settings::threshold_corrections_loop_order));
+   sm.set_zero_threshold(settings.get(Spectrum_generator_settings::beta_zero_threshold));
    sm.set_pole_mass_loop_order(this->model.get_pole_mass_loop_order());
    sm.set_ewsb_loop_order(this->model.get_ewsb_loop_order());
    sm.set_ewsb_iteration_precision(this->model.get_ewsb_iteration_precision());
@@ -213,23 +196,19 @@ void @ModelName@_spectrum_generator<Shooting>::write_running_couplings(
 
 void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
 {
-   const auto Q_pole = get_pole_mass_scale(susy_scale);
-
    VERBOSE_MSG("Calculating spectrum ...");
-   VERBOSE_MSG("\t[1] running BSM model to Q_pole = " << Q_pole << " GeV ...");
+   VERBOSE_MSG("\t[1] running BSM model to Q_pole = " << get_pole_mass_scale(susy_scale) << " GeV ...");
 
-   model.run_to(Q_pole);
+   model.run_to(get_pole_mass_scale(susy_scale));
 
    VERBOSE_MSG("\t[2] calculating BSM pole mass spectrum ...");
 
    model.solve_ewsb();
    model.calculate_spectrum();
 
-   const auto Q_pole_eft = get_eft_pole_mass_scale(susy_scale, Mt);
+   VERBOSE_MSG("\t[3] running SM to Q_pole_eft = " << get_eft_pole_mass_scale(susy_scale, Mt) << " GeV ...");
 
-   VERBOSE_MSG("\t[3] running SM to Q_pole_eft = " << Q_pole_eft << " GeV ...");
-
-   eft.run_to(Q_pole_eft);
+   eft.run_to(get_eft_pole_mass_scale(susy_scale, Mt));
 
    VERBOSE_MSG("\t[4] calculating SM pole mass spectrum ...");
 
