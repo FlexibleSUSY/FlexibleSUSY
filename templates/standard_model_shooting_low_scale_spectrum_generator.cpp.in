@@ -279,16 +279,18 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
    @ModelName@_standard_model_initial_guesser<Shooting> ig(&model, qedqcd);
    ig.guess();
 
-   Vec_t vec;
-   vec(0) = model.get_@hyperchargeCoupling@();
-   vec(1) = model.get_@leftCoupling@();
-   vec(2) = model.get_@strongCoupling@();
-   vec(3) = model.get_@UpYukawa@(2,2);
-   vec(4) = model.get_@DownYukawa@(2,2);
-   vec(5) = model.get_@ElectronYukawa@(2,2);
-   vec(6) = model.VEV();
-
    VERBOSE_MSG("\tinitial guess finished.");
+
+   const Vec_t vec =
+      (Vec_t() <<
+       model.get_@hyperchargeCoupling@(),
+       model.get_@leftCoupling@(),
+       model.get_@strongCoupling@(),
+       model.get_@UpYukawa@(2,2),
+       model.get_@DownYukawa@(2,2),
+       model.get_@ElectronYukawa@(2,2),
+       model.VEV()
+       ).finished();
 
    return vec;
 }
