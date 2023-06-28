@@ -235,18 +235,11 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
 
    eft.run_to(Q_pole_eft);
 
-   // computation of pole mass spectrum in the SM
-   const int eft_pole_loops = eft.get_pole_mass_loop_order();
-   const int eft_ewsb_loops = eft.get_ewsb_loop_order();
-
    VERBOSE_MSG("\t[4] calculating SM pole mass spectrum ...");
 
    eft.calculate_DRbar_masses();
    eft.solve_ewsb();
    eft.calculate_spectrum();
-
-   eft.set_pole_mass_loop_order(eft_pole_loops);
-   eft.set_ewsb_loop_order(eft_ewsb_loops);
 
    const int index = settings.get(Spectrum_generator_settings::eft_higgs_index);
 
