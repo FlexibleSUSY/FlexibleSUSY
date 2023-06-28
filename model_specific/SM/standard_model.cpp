@@ -419,8 +419,9 @@ int Standard_model::solve_ewsb()
 {
    VERBOSE_MSG("\t\tSolving Standard model EWSB at " << ewsb_loop_order << "-loop order");
 
-   if (ewsb_loop_order == 0)
+   if (ewsb_loop_order == 0) {
       return solve_ewsb_tree_level();
+   }
 
    return solve_ewsb_iteratively(ewsb_loop_order);
 }
@@ -651,7 +652,6 @@ void Standard_model::copy_DRbar_masses_to_pole_masses()
    PHYSICAL(MVWp) = MVWp;
    PHYSICAL(MVPVZ) = MVPVZ;
    PHYSICAL(ZZ) = ZZ;
-
 }
 
 /**
@@ -660,7 +660,6 @@ void Standard_model::copy_DRbar_masses_to_pole_masses()
 void Standard_model::check_pole_masses_for_tachyons()
 {
    if (PHYSICAL(Mhh) < 0.) problems.flag_pole_tachyon(standard_model_info::hh);
-
 }
 
 /**
@@ -670,8 +669,10 @@ void Standard_model::check_pole_masses_for_tachyons()
 void Standard_model::calculate_spectrum()
 {
    calculate_DRbar_masses();
-   if (pole_mass_loop_order > 0)
+
+   if (pole_mass_loop_order > 0) {
       calculate_pole_masses();
+   }
 
    if (pole_mass_loop_order == 0) {
       copy_DRbar_masses_to_pole_masses();
