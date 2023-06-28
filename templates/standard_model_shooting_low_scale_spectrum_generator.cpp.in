@@ -298,12 +298,10 @@ void @ModelName@_spectrum_generator<Shooting>::match(
    const softsusy::QedQcd& qedqcd,
    const Single_scale_constraint& constraint)
 {
-   const auto Q_match = get_matching_scale(constraint);
-
    VERBOSE_MSG("\t[1] running BSM model to matching scale Q_match = "
-               << Q_match << " GeV ...");
+               << get_matching_scale(constraint) << " GeV ...");
 
-   model.run_to(Q_match);
+   model.run_to(get_matching_scale(constraint));
 
    VERBOSE_MSG("\t[2] calculate BSM tree-level mass spectrum ...");
 
@@ -318,7 +316,7 @@ void @ModelName@_spectrum_generator<Shooting>::match(
 
    VERBOSE_MSG("\t[3] matching BSM to SM at " << loops << "-loop level ...");
 
-   // perform matching: calculate SM parameters at Q_match
+   // perform matching: calculate SM parameters at matching scale
    @ModelName@_standard_model_matching::match_high_to_low_scale_model(eft, model, loops, index);
 }
 
@@ -359,13 +357,10 @@ void @ModelName@_spectrum_generator<Shooting>::set_BSM_parameters(
    const softsusy::QedQcd& qedqcd) const
 {
    VERBOSE_MSG("Calculating deviation from SM input observables ...");
-
-   const double Q_low = get_low_scale();
-
-   VERBOSE_MSG("\t[1] running SM to Q_low = " << Q_low << " GeV ...");
+   VERBOSE_MSG("\t[1] running SM to Q_low = " << get_low_scale() << " GeV ...");
 
    auto eft = eft_;
-   eft.run_to(Q_low);
+   eft.run_to(get_low_scale());
 
    // ensure that scale of EFT and QedQcd are equal
    if (eft.get_scale() != qedqcd.get_scale()) {
@@ -415,8 +410,10 @@ void @ModelName@_spectrum_generator<Shooting>::set_BSM_parameters(
 
    using Arr_t = Eigen::Array<double, N, 1>;
 
-   const Arr_t input = (Arr_t() << alpha_em_SM5, alpha_s_SM5, GF, Mt, MZ, mb, Mtau).finished();
-   const Arr_t predicted = (Arr_t() << alpha_em_SM5_p, alpha_s_SM5_p, GF_p, Mt_p, MZ_p, mb_p, Mtau_p).finished();
+   const Arr_t input
+      = (Arr_t() << alpha_em_SM5, alpha_s_SM5, GF, Mt, MZ, mb, Mtau).finished();
+   const Arr_t predicted
+      = (Arr_t() << alpha_em_SM5_p, alpha_s_SM5_p, GF_p, Mt_p, MZ_p, mb_p, Mtau_p).finished();
    const Arr_t rel_diff = (input - predicted)/predicted;
 
    VERBOSE_MSG("\t[4] input observables: " <<  input.transpose());
