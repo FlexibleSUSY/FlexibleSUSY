@@ -46,14 +46,19 @@ namespace flexiblesusy {
 
 namespace {
 
-// whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
-// or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
+// whether to calculate the ggH cross-section in terms of the effective
+// top and bottom Yukawa couplings or by rescaling the SM-like ggH XS
+// by the squared of the effective gg coupling (no effects from colored
+// BSM particles are taken into account)
 constexpr bool calcggH = false;
-// whether to calculate the H->gaga decay width in terms of the effective couplings
-// or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
+// whether to calculate the H->gaga decay width in terms of the
+// effective couplings or by rescaling the SM-like H->gaga decay by the
+// squared of the effective gamgam coupling (no effects from charged
+// BSM particles are taken into account).
 constexpr bool calcHgamgam = false;
 
 constexpr double relMassError = 0.03;
+constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
 double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
    const auto signals = Higgs::Signals {higgssignals_dataset};
@@ -62,15 +67,16 @@ double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
    auto& s = pred.addParticle(HP::BsmParticle("hSM", HP::ECharge::neutral, HP::CP::even));
    auto effc = HP::scaledSMlikeEffCouplings(1.0);
    s.setMass(mhSM);
+   s.setMassUnc(0.);
    effectiveCouplingInput(
       s, effc,
-      HP::ReferenceModel::SMHiggsInterp,
+      refModel,
       calcggH, calcHgamgam
    );
    return signals(pred);
 }
 
-}
+} // anonymous
 
 std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_HiggsTools(
    EffectiveCoupling_list const& bsm_input,
@@ -235,7 +241,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
 
          effectiveCouplingInput(
             s, effc,
-            HP::ReferenceModel::SMHiggsInterp,
+            refModel,
             calcggH, calcHgamgam
          );
 
