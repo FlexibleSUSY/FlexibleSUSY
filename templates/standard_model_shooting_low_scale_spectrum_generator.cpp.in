@@ -156,13 +156,13 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd
    // sets the SM-like parameters of the BSM model at the matching scale
    Shooting_solver<N>::Set_t setter = [&](const Vec_t& pars) {
       VERBOSE_MSG("Running SM-like BSM parameters: " << pars.transpose());
-      set_SM_parameters(pars);
+      set_BSM_parameters(pars);
    };
 
    // function to find root of
    Shooting_solver<N>::Pre_t predictor = [&]() -> Vec_t {
       match(qedqcd, susy_scale_constraint);
-      return deviation_from_observables(eft, qedqcd);
+      return calculate_deviation(eft, qedqcd);
    };
 
    Shooting_solver<N> solver;
@@ -331,7 +331,7 @@ void @ModelName@_spectrum_generator<Shooting>::match(
  *
  * @param vec vector of parameters
  */
-void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
+void @ModelName@_spectrum_generator<Shooting>::set_BSM_parameters(
    const Vec_t& vec)
 {
    VERBOSE_MSG("Overwriting SM-like BSM parameters with " << vec.transpose());
@@ -358,7 +358,7 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
  * @param qedqcd user-given values for the observables
  */
 @ModelName@_spectrum_generator<Shooting>::Vec_t
-@ModelName@_spectrum_generator<Shooting>::deviation_from_observables(
+@ModelName@_spectrum_generator<Shooting>::calculate_deviation(
    const standard_model::StandardModel<Shooting>& eft_,
    const softsusy::QedQcd& qedqcd) const
 {
