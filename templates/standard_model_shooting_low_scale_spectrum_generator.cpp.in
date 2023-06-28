@@ -337,8 +337,6 @@ void @ModelName@_spectrum_generator<Shooting>::match(
 void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
    const Vec_t& vec)
 {
-   using namespace @ModelName@_standard_model_matching;
-
    VERBOSE_MSG("Overwriting SM-like BSM parameters with " << vec.transpose());
 
    model.set_@hyperchargeCoupling@(vec(0));
@@ -352,7 +350,7 @@ void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
 
    VERBOSE_MSG("Imposing user-defined matching condition ...");
 
-   impose_user_matching(model, VEV);
+   @ModelName@_standard_model_matching::impose_user_matching(model, VEV);
 }
 
 /**
