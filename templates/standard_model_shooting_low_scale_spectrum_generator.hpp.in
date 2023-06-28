@@ -61,7 +61,7 @@ private:
    /// calculate pole mass spectrum
    void calculate_spectrum(double);
    /// calculate deviation of SM parameters from input observables
-   Vec_t calculate_deviation(const standard_model::StandardModel<Shooting>&, const softsusy::QedQcd&) const;
+   Vec_t calculate_deviation(const softsusy::QedQcd&);
    /// returns pole mass scale in the EFT
    double get_eft_pole_mass_scale(double, double) const;
    /// returns matching scale

@@ -158,7 +158,7 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(
    // function to find root of
    Shooting_solver<N>::Pre_t predictor = [&]() -> Vec_t {
       match(qedqcd, susy_scale_constraint);
-      return calculate_deviation(eft, qedqcd);
+      return calculate_deviation(qedqcd);
    };
 
    Shooting_solver<N> solver;
@@ -348,18 +348,15 @@ void @ModelName@_spectrum_generator<Shooting>::set_BSM_parameters(
  * Calculates deviation between the observables predicted by the
  * BSM->EFT matching and the user-given values for the observables.
  *
- * @param eft_ EFT model parameters
  * @param qedqcd user-given values for the observables
  */
 @ModelName@_spectrum_generator<Shooting>::Vec_t
 @ModelName@_spectrum_generator<Shooting>::calculate_deviation(
-   const standard_model::StandardModel<Shooting>& eft_,
-   const softsusy::QedQcd& qedqcd) const
+   const softsusy::QedQcd& qedqcd)
 {
    VERBOSE_MSG("Calculating deviation from SM input observables ...");
    VERBOSE_MSG("\t[1] running SM to Q_low = " << get_low_scale() << " GeV ...");
 
-   auto eft = eft_;
    eft.run_to(get_low_scale());
 
    // ensure that scale of EFT and QedQcd are equal
