@@ -24,7 +24,6 @@
 #include "@ModelName@_shooting_initial_guesser.hpp"
 #include "@ModelName@_shooting_susy_scale_constraint.hpp"
 #include "@ModelName@_standard_model_matching.hpp"
-#include "standard_model_shooting_low_scale_constraint.hpp"
 
 #include "error.hpp"
 #include "lowe.h"
@@ -124,8 +123,9 @@ void @ModelName@_spectrum_generator<Shooting>::init(
  * @param qedqcd Standard Model input parameters
  * @param input model input parameters
  */
-void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd& qedqcd,
-                                const @ModelName@_input_parameters& input)
+void @ModelName@_spectrum_generator<Shooting>::run_except(
+   const softsusy::QedQcd& qedqcd,
+   const @ModelName@_input_parameters& input)
 {
    VERBOSE_MSG("Solving BVP using shooting solver");
 
@@ -137,15 +137,9 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd
    eft.clear();
    init(eft);
 
-   standard_model::Standard_model_low_scale_constraint<Shooting>
-      low_scale_constraint(&eft, qedqcd);
-   low_scale_constraint.initialize();
-
-   @ModelName@_susy_scale_constraint<Shooting> susy_scale_constraint(&model, qedqcd);
-   susy_scale_constraint.initialize();
-
+   // initialize scales
+   low_scale = qedqcd.displayPoleMZ();
    susy_scale = 0.;
-   low_scale = low_scale_constraint.get_scale();
 
    VERBOSE_MSG("\t[0] perform initial guess ...");
 
@@ -158,6 +152,8 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd
       VERBOSE_MSG("Running SM-like BSM parameters: " << pars.transpose());
       set_BSM_parameters(pars);
    };
+
+   @ModelName@_susy_scale_constraint<Shooting> susy_scale_constraint(&model, qedqcd);
 
    // function to find root of
    Shooting_solver<N>::Pre_t predictor = [&]() -> Vec_t {
