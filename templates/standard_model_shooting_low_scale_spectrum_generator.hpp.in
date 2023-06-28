@@ -75,7 +75,7 @@ private:
    /// perform initial guess
    Vec_t initial_guess(const softsusy::QedQcd&);
    /// run whole tower down
-   void match(const softsusy::QedQcd&, Single_scale_constraint&);
+   void match(const softsusy::QedQcd&, const Single_scale_constraint&);
    /// overwrite SM-like BSM parameters
    void set_SM_parameters(const Vec_t&);
 };

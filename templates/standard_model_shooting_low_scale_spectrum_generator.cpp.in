@@ -300,7 +300,7 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
  */
 void @ModelName@_spectrum_generator<Shooting>::match(
    const softsusy::QedQcd& qedqcd,
-   Single_scale_constraint& constraint)
+   const Single_scale_constraint& constraint)
 {
    const auto Q_match = get_matching_scale(constraint);
 
