@@ -281,18 +281,15 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
 
    VERBOSE_MSG("\tinitial guess finished.");
 
-   const Vec_t vec =
-      (Vec_t() <<
-       model.get_@hyperchargeCoupling@(),
-       model.get_@leftCoupling@(),
-       model.get_@strongCoupling@(),
-       model.get_@UpYukawa@(2,2),
-       model.get_@DownYukawa@(2,2),
-       model.get_@ElectronYukawa@(2,2),
-       model.VEV()
-       ).finished();
-
-   return vec;
+   return (Vec_t() <<
+           model.get_@hyperchargeCoupling@(),
+           model.get_@leftCoupling@(),
+           model.get_@strongCoupling@(),
+           model.get_@UpYukawa@(2,2),
+           model.get_@DownYukawa@(2,2),
+           model.get_@ElectronYukawa@(2,2),
+           model.VEV()
+           ).finished();
 }
 
 /**
