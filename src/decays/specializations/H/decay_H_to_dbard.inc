@@ -92,7 +92,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
             default:
                throw std::runtime_error(
                   create_process_string<Higgs,bar<DownTypeQuark>::type, DownTypeQuark>(indexIn, indexOut1, indexOut2)
-                     + ": Cannot determine the number of active quark flavours."
+                     + ": Cannot determine the number of active quark flavours"
                );
          }
          double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf, flexibledecay_settings);
