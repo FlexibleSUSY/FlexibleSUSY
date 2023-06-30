@@ -986,7 +986,7 @@ void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double c
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
    boost::math::chi_squared dist(2);
-   ss << FORMAT_ELEMENT(4, 1-boost::math::cdf(dist, std::abs(chi2-chi2SMmin)), "p-value");
+   ss << FORMAT_ELEMENT(4, boost::math::cdf(complement(dist, std::abs(chi2-chi2SMmin))), "p-value");
 
    set_block(ss);
 }
