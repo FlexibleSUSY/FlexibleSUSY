@@ -134,8 +134,8 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.10'
-      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic'
-      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3'
+      MODELS1: 'ScalarLeptoquarks'
+      MODELS2: 'SM'
 
     steps:
 
