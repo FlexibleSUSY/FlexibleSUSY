@@ -146,7 +146,7 @@ Parameters`SetRealParameters[oneIndependentSubeqEwsbOutputParameters];
 
 TestEquality[oneIndependentSubeqFreePhases, {}];
 
-TestEquality[Sort /@ oneIndependentSubeqSolution,
+TestEquality[Sort /@ Simplify[oneIndependentSubeqSolution],
              Sort /@ { s -> -(Z/mS2),
                        vu -> -((s*(mHd2 - X))/(mHd2*mHu2 - X*Y)),
                        vd -> (-s - mHu2*vu)/X
