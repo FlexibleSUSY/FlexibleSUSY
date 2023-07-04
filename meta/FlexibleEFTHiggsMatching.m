@@ -468,12 +468,8 @@ SetLimit[struct_String, limit_List] :=
    Switch[limit,
 	  {}, "",
 	  {{_,_}..},
-	  "{\n" <>
-	     TextFormatting`IndentText[
-		Parameters`CreateLocalConstRefs[(#[[2]])& /@ limit] <> "\n" <>
-		StringJoin[FEFTApplyParameterSetting[#, struct]& /@ limit]
-		] <>
-	  "}\n",
+	  Parameters`CreateLocalConstRefs[(#[[2]])& /@ limit] <> "\n" <>
+	  StringJoin[FEFTApplyParameterSetting[#, struct]& /@ limit],
 	  _,
 	  Print["Error: The list is malformed (neither empty nor a list of 2-component lists): ", limit];
 	  Quit[1];
