@@ -444,25 +444,27 @@ SetBSMParameters[susyScaleMatching_List, higgsMassMatrix_, struct_String:""] :=
            StringJoin[SetBSMParameterAtLoopOrder[#[[1]], #[[2]], struct]& /@ Utils`Zip[pars, loopOrder]]
           ];
 
-(* extract expression for parameter `par' in terms of model parameters
-   from susyScaleInput *)
-GetExprFrom[par_, susyScaleInput_] :=
-  Module[{repl, expr},
-	 (* reversed replacement rules from susyScaleInput *)
-	 repl = Cases[susyScaleInput, l:{Except[par], _} :> Reverse[Rule @@ l]];
-	 (* expression for par from susyScaleInput *)
-	 expr = Cases[susyScaleInput, {par, expr_} :> expr] //. repl;
-	 If[MatchQ[expr, {__}],
-	    Last[expr],
-	    Null
-	 ]
-  ]; 
+(* set `parameter' to `value' for given model `struct' *)
+FEFTApplyParameterSetting[{parameter_, value_}, struct_String] :=
+    Which[Parameters`IsModelParameter[parameter],
+          Parameters`SetParameter[parameter, value, struct],
+          Parameters`IsInputParameter[parameter],
+          Parameters`SetInputParameter[parameter, value, "INPUTPARAMETER"],
+          Parameters`IsPhase[parameter],
+          Parameters`SetPhase[parameter, value, struct],
+          Parameters`IsExtraParameter[parameter],
+          Parameters`SetParameter[parameter, value, struct],
+          True,
+          Print["Error: ", parameter, " cannot be set for the MSSM-limit,",
+                " because it is neither a model nor an input parameter!"];
+          Quit[1];
+          ""
+         ];
 
-(* @todo: generalize gaugeless limit for any model 
-   Set all dimensionless parameter to zero except (yt, yb, ytau, g3) in the MSSM.  
-   In other models, need to check which 2-loop contributions to Mh are available.
+(* @todo: Set all dimensionless parameters to zero except (yt, yb, ytau, g3) in the MSSM.  
+   @todo: Check which 2-loop contributions to Mh are available.
  *)
-SetGaugeLessLimit[struct_String] :=
+SetGaugeLessLimit[struct_String, mssmLimit_List] :=
     Module[{result = "",
             g1str = CConversion`ToValidCSymbolString[SARAH`hyperchargeCoupling],
             g2str = CConversion`ToValidCSymbolString[SARAH`leftCoupling],
@@ -472,27 +474,29 @@ SetGaugeLessLimit[struct_String] :=
             vSexpr, tlambdaExpr},
            (* set g1 = 0 *)
            If[ValueQ[SARAH`hyperchargeCoupling],
-              result = result <> Parameters`SetParameter[SARAH`hyperchargeCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g1str, struct <> "."];
+              result = result <> Parameters`SetParameter[SARAH`hyperchargeCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g1str, struct];
              ];
            (* set g2 = 0 *)
            If[ValueQ[SARAH`leftCoupling],
-              result = result <> Parameters`SetParameter[SARAH`leftCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g2str, struct <> "."];
+              result = result <> Parameters`SetParameter[SARAH`leftCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g2str, struct];
              ];
-           (* set lambda = 0 *)
-           If[lambda =!= Null && vs =!= Null,
-	      vSexpr = GetExprFrom[vs, FlexibleSUSY`SUSYScaleInput];
-	      tlambdaExpr = GetExprFrom[SARAH`T[lambda], FlexibleSUSY`SUSYScaleInput];
-	      If[vSexpr =!= Null,
-		 result = result <> Parameters`SetParameter[lambda, "gauge_less", struct <> "."];
-		 result = result <> Parameters`CreateLocalConstRefs[{vSexpr, tlambdaExpr}];
-		 result = result <> Parameters`SetParameter[vs, vSexpr, struct <> "."];
-		 result = result <> Parameters`SetParameter[SARAH`T[lambda], tlambdaExpr, struct <> "."];
+           (* impose MSSM limit *)
+	   result = result <>
+              Switch[mssmLimit,
+		     {},
+		     "",
+                     {{_,_}..},
+		     "{\n" <>
+                        TextFormatting`IndentText[
+                           Parameters`CreateLocalConstRefs[(#[[2]])& /@ mssmLimit] <> "\n" <>
+                           StringJoin[FEFTApplyParameterSetting[#, struct]& /@ mssmLimit]
+			] <>
+                     "}",
+		     _,
+		     Print["Error: The list FSMSSMLimit is malformed (neither empty nor a list of 2-component lists): ", mssmLimit];
+		     Quit[1];
+		     ""
 	      ];
-           ];
-           (* set kappa = 0 *)
-           If[kappa =!= Null,
-              result = result <> Parameters`SetParameter[kappa, "gauge_less", struct <> "."];
-           ];
            result
     ];
 

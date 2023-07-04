@@ -52,6 +52,7 @@ namespace @ModelName@_standard_model_matching {
 #define HIGGS_2LOOP_CORRECTION_AT_AS get_loop_corrections().higgs_at_as
 #define HIGGS_2LOOP_CORRECTION_AB_AS get_loop_corrections().higgs_ab_as
 #define HIGGS_2LOOP_CORRECTION_AT_AT get_loop_corrections().higgs_at_at
+#define FSGaugeLess gauge_less
 
 namespace {
 

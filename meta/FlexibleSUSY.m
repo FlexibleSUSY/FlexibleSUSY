@@ -214,6 +214,10 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
+FSGaugeLess;
+FSGaugeLess::usage = "Symbol to represent a small number to impose the gauge-less limit.";
+FSMSSMLimit = {};
+FSMSSMLimit::usage = "List of 2-component lists {parameter, value} to set parameter to obtain the MSSM-limit.";
 
 (* Standard Model input parameters (SLHA input parameters) *)
 (* {parameter, {"block", entry}, type}                     *)
@@ -1472,7 +1476,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setRunningDownQuarkMasses         = FlexibleEFTHiggsMatching`CalculateRunningDownQuarkMasses[];
               setRunningDownLeptonMasses        = FlexibleEFTHiggsMatching`CalculateRunningDownLeptonMasses[];
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
-              setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetGaugeLessLimit["model"];
+              setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetGaugeLessLimit["model.", FlexibleSUSY`FSMSSMLimit];
               calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
               If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
 		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", "idx"];

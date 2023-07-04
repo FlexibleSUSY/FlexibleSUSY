@@ -138,6 +138,14 @@ UseHiggs2LoopNMSSM = True;
 EffectiveMu = \[Lambda] vS / Sqrt[2];
 EffectiveMASqr = (T[\[Lambda]] vS / Sqrt[2] + 0.5 \[Lambda] \[Kappa] vS^2) (vu^2 + vd^2) / (vu vd);
 
+(* MSSM-limit for 2-loop contributions to Mhh *)
+FSMSSMLimit = {
+   {\[Kappa], FSGaugeLess},
+   {\[Lambda], FSGaugeLess},
+   {vS, Sqrt[2] MuInput/FSGaugeLess},
+   {T[\[Lambda]], ALambdaInput FSGaugeLess}
+};
+
 DefaultPoleMassPrecision = HighPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
