@@ -464,22 +464,25 @@ FEFTApplyParameterSetting[{parameter_, value_}, struct_String] :=
 (* @todo: Set all dimensionless parameters to zero except (yt, yb, ytau, g3) in the MSSM.  
    @todo: Check which 2-loop contributions to Mh are available.
  *)
-SetGaugeLessLimit[struct_String, mssmLimit_List] :=
-    Module[{result = "",
-            g1str = CConversion`ToValidCSymbolString[SARAH`hyperchargeCoupling],
-            g2str = CConversion`ToValidCSymbolString[SARAH`leftCoupling],
-            lambda = Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"],
-            kappa = Parameters`GetParameterFromDescription["Singlet Self-Interaction"],
-            vs = Parameters`GetParameterFromDescription["Singlet-VEV"],
-            vSexpr, tlambdaExpr},
-           (* set g1 = 0 *)
-           If[ValueQ[SARAH`hyperchargeCoupling],
-              result = result <> Parameters`SetParameter[SARAH`hyperchargeCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g1str, struct];
-             ];
-           (* set g2 = 0 *)
-           If[ValueQ[SARAH`leftCoupling],
-              result = result <> Parameters`SetParameter[SARAH`leftCoupling, "gauge_less / " <> ToString[FlexibleSUSY`FSModelName] <> "_info::normalization_" <> g2str, struct];
-             ];
+SetGaugeLessLimit[struct_String, gaugelessLimit_List, mssmLimit_List] :=
+    Module[{result = ""},
+           (* impose gauge-less limit *)
+	   result = result <>
+              Switch[gaugelessLimit,
+		     {},
+		     "",
+                     {{_,_}..},
+		     "{\n" <>
+                        TextFormatting`IndentText[
+                           Parameters`CreateLocalConstRefs[(#[[2]])& /@ gaugelessLimit] <> "\n" <>
+                           StringJoin[FEFTApplyParameterSetting[#, struct]& /@ gaugelessLimit]
+			] <>
+                     "}",
+		     _,
+		     Print["Error: The list FSGaugeLess is malformed (neither empty nor a list of 2-component lists): ", gaugelessLimit];
+		     Quit[1];
+		     ""
+	      ];
            (* impose MSSM limit *)
 	   result = result <>
               Switch[mssmLimit,

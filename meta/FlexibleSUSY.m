@@ -214,8 +214,12 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
-FSGaugeLess;
 FSGaugeLess::usage = "Symbol to represent a small number to impose the gauge-less limit.";
+FSGaugeLessLimit = {
+   {SARAH`hyperchargeCoupling, FSGaugeLess/Parameters`GetGUTNormalization[SARAH`hyperchargeCoupling]},
+   {SARAH`leftCoupling, FSGaugeLess/Parameters`GetGUTNormalization[SARAH`leftCoupling]}
+};
+FSGaugeLessLimit::usage = "List of 2-component lists {parameter, value} to set parameter to obtain the gauge-less limit.";
 FSMSSMLimit = {};
 FSMSSMLimit::usage = "List of 2-component lists {parameter, value} to set parameter to obtain the MSSM-limit.";
 
@@ -1476,7 +1480,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setRunningDownQuarkMasses         = FlexibleEFTHiggsMatching`CalculateRunningDownQuarkMasses[];
               setRunningDownLeptonMasses        = FlexibleEFTHiggsMatching`CalculateRunningDownLeptonMasses[];
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
-              setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetGaugeLessLimit["model.", FlexibleSUSY`FSMSSMLimit];
+              setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetGaugeLessLimit["model.", FlexibleSUSY`FSGaugeLessLimit, FlexibleSUSY`FSMSSMLimit];
               calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
               If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
 		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", "idx"];
