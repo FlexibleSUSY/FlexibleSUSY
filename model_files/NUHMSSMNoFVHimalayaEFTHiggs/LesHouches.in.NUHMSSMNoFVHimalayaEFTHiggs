@@ -22,7 +22,7 @@ Block FlexibleSUSY
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
    19   0                    # EFT matching scale (0 = SUSY scale)
    20   2                    # EFT loop order for upwards matching
-   21   1                    # EFT loop order for downwards matching
+   21   3                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   0                    # calculate BSM pole masses
    24   123111321            # individual threshold correction loop orders
@@ -57,7 +57,7 @@ Block EXTPAR
     3   2000                 # M3(MSUSY)
     4   2000                 # Mu(MSUSY)
     5   2000                 # mA(MSUSY)
-   25   5                    # TanBeta(MSUSY)
+   25   20                   # TanBeta(MSUSY)
 Block MSQ2IN
   1  1     4.00000000E+06   # mq2(1,1)
   2  2     4.00000000E+06   # mq2(2,2)
@@ -81,7 +81,7 @@ Block MSD2IN
 Block AUIN
   1  1     400   # Au(1,1)
   2  2     400   # Au(2,2)
-  3  3     400   # Au(3,3)
+  3  3     4998.98 # Au(3,3) # At = Xt + Mu/TanBeta, Xt = Sqrt[6] MS
 Block ADIN
   1  1     1e4   # Ad(1,1)
   2  2     1e4   # Ad(2,2)
