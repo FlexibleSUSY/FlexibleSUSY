@@ -605,9 +605,8 @@ standard_model::Standard_model make_yukawaless(
 
    for (int i = 0; i < nrows; i++) {
       for (int k = 0; k < ncols; k++) {
-         // keep 3rd generation Yukawa couplings when 2-loop
-         // contributions of O(at^2) shall be included later
-         if (sm_yl.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+         // keep 3rd generation Yukawa couplings
+         if (i==2 && k==2) {
             continue;
          }
          sm_yl.set_Yu(i, k, 0.);
@@ -871,14 +870,13 @@ double calculate_Mh2_2l_shift(
    double mh2_shift = -self_energy_2l;
 
    if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
-      const auto sm_yl = make_yukawaless(sm);
-      const double mh2_shift_1l = calculate_Mh2_1l_shift(make_yukawaless(model), idx);
-      const double Q = sm_yl.get_scale();
+      const double mh2_shift_1l = calculate_Mh2_1l_shift(model, idx);
+      const double Q = sm.get_scale();
 
       mh2_shift += mh2_shift_1l *
-         (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm_yl.get_MFu(2), sm_yl.get_Yu(2,2))
-          + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm_yl.get_MFd(2), sm_yl.get_Yd(2,2))
-          + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm_yl.get_MFe(2), sm_yl.get_Ye(2,2)));
+         (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(p, Q, sm.get_MFu(2), sm.get_Yu(2,2))
+          + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(p, Q, sm.get_MFd(2), sm.get_Yd(2,2))
+          + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(p, Q, sm.get_MFe(2), sm.get_Ye(2,2)));
    }
 
    return mh2_shift;
@@ -1091,7 +1089,7 @@ void match_high_to_low_scale_sm_2l(
    }
 
    const double mh2_bsm_shift    = calculate_Mh2_2l_shift(model_gl, idx);
-   const double mh2_sm_shift     = calculate_Mh2_2l_shift(sm_0l_gl, model_gl, idx);
+   const double mh2_sm_shift     = calculate_Mh2_2l_shift(make_yukawaless(sm_0l_gl), make_yukawaless(model_gl), idx);
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(make_yukawaless(sm_0l_gl));
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(make_yukawaless(model_gl), idx);
 
