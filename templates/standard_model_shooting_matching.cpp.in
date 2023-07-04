@@ -518,11 +518,25 @@ calculate_MFe_SM_MSbar_1l(
   return Abs(mf_sm_1l);
 }
 
+/// returns a copy of the given model in the MSSM limit
+@ModelName@_mass_eigenstates make_mssm_limit(
+   const @ModelName@_mass_eigenstates& model_)
+{
+   auto model = model_;
+   model.get_problems().clear();
+
+@setMSSMLimit@
+
+   model.calculate_DRbar_masses();
+
+   return model;
+}
+
 /// returns a copy of the given model in the gaugeless limit g1 = g2 = 0
 @ModelName@_mass_eigenstates make_gaugeless_g1_g2(
    const @ModelName@_mass_eigenstates& model_)
 {
-   auto model = model_;
+   auto model = make_mssm_limit(model_);
    model.get_problems().clear();
 
 @setGaugeLessLimit@

@@ -35,7 +35,7 @@ CalculateMDownLeptonPole1L::usage = "";
 FillSMFermionPoleMasses::usage = "Set SM fermion pole masses from BSM fermion pole masses";
 GetFixedBSMParameters::usage="Returns a list of the BSM parameters fixed by matching SM -> BSM.";
 SetBSMParameters::usage = "";
-SetGaugeLessLimit::usage = "applies gauge-less limit to given model";
+SetLimit::usage = "applies a given limit to given model";
 
 Begin["`Private`"];
 
@@ -461,47 +461,24 @@ FEFTApplyParameterSetting[{parameter_, value_}, struct_String] :=
           ""
          ];
 
-(* @todo: Set all dimensionless parameters to zero except (yt, yb, ytau, g3) in the MSSM.  
+(* @todo: Set all dimensionless parameters to zero except (yt, yb, ytau, g3) in the MSSM.
    @todo: Check which 2-loop contributions to Mh are available.
  *)
-SetGaugeLessLimit[struct_String, gaugelessLimit_List, mssmLimit_List] :=
-    Module[{result = ""},
-           (* impose gauge-less limit *)
-	   result = result <>
-              Switch[gaugelessLimit,
-		     {},
-		     "",
-                     {{_,_}..},
-		     "{\n" <>
-                        TextFormatting`IndentText[
-                           Parameters`CreateLocalConstRefs[(#[[2]])& /@ gaugelessLimit] <> "\n" <>
-                           StringJoin[FEFTApplyParameterSetting[#, struct]& /@ gaugelessLimit]
-			] <>
-                     "}",
-		     _,
-		     Print["Error: The list FSGaugeLess is malformed (neither empty nor a list of 2-component lists): ", gaugelessLimit];
-		     Quit[1];
-		     ""
-	      ];
-           (* impose MSSM limit *)
-	   result = result <>
-              Switch[mssmLimit,
-		     {},
-		     "",
-                     {{_,_}..},
-		     "{\n" <>
-                        TextFormatting`IndentText[
-                           Parameters`CreateLocalConstRefs[(#[[2]])& /@ mssmLimit] <> "\n" <>
-                           StringJoin[FEFTApplyParameterSetting[#, struct]& /@ mssmLimit]
-			] <>
-                     "}",
-		     _,
-		     Print["Error: The list FSMSSMLimit is malformed (neither empty nor a list of 2-component lists): ", mssmLimit];
-		     Quit[1];
-		     ""
-	      ];
-           result
-    ];
+SetLimit[struct_String, limit_List] :=
+   Switch[limit,
+	  {}, "",
+	  {{_,_}..},
+	  "{\n" <>
+	     TextFormatting`IndentText[
+		Parameters`CreateLocalConstRefs[(#[[2]])& /@ limit] <> "\n" <>
+		StringJoin[FEFTApplyParameterSetting[#, struct]& /@ limit]
+		] <>
+	  "}\n",
+	  _,
+	  Print["Error: The list is malformed (neither empty nor a list of 2-component lists): ", limit];
+	  Quit[1];
+	  ""
+   ];
 
 End[];
 
