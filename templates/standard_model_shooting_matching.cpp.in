@@ -852,28 +852,27 @@ double calculate_Mh2_2l_shift(
    const @ModelName@_mass_eigenstates& model,
    int idx)
 {
-   const auto model_yl = make_yukawaless_3rd_gen(model);
-   const auto mh2_tree = calculate_mh2_0l(model_yl);
-   const double mh2_0l = Sqr(model_yl.get_M@HiggsBoson(idx)@);
-   const double mh2_shift_1l = calculate_Mh2_pole_1l(model_yl, idx) - mh2_0l;
+   const auto mh2_tree = calculate_mh2_0l(model);
+   const double mh2_0l = Sqr(model.get_M@HiggsBoson(idx)@);
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(model, idx) - mh2_0l;
    const double p = 0.;
 
    // calculate 2-loop self-energy using tree-level parameters in the
    // gauge-less limit (g1 = g2 = 0)
-   const auto self_energy_2l = Re(model_yl.self_energy_hh_2loop());
+   const auto self_energy_2l = Re(model.self_energy_hh_2loop());
 
    // calculate 2-loop contribution from momentum iteration using
    // tree-level parameters in the gauge-less limit (g1 = g2 = 0) and
    // Yukawa-less limit
-   decltype(model_yl.self_energy_hh_1loop_deriv_p2(p)) self_energy_2l_mom;
+   decltype(model.self_energy_hh_1loop_deriv_p2(p)) self_energy_2l_mom;
    self_energy_2l_mom.setZero();
 
    if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
-      self_energy_2l_mom += Re(model_yl.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
+      self_energy_2l_mom += Re(model.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
    }
 
    const auto self_energy = self_energy_2l + self_energy_2l_mom;
-   const auto tadpole = calculate_tadpole_over_vevs(model_yl, 2);
+   const auto tadpole = calculate_tadpole_over_vevs(model, 2);
 
    double Mh2_pole = 0.;
 
@@ -1126,7 +1125,7 @@ void match_high_to_low_scale_sm_2l(
       delta_v_gl += sm_1l.get_v() - v;
    }
 
-   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(model_gl, idx);
+   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(make_yukawaless_3rd_gen(model_gl), idx);
    const double mh2_sm_shift     = calculate_Mh2_2l_shift(make_yukawaless(sm_0l_gl), make_yukawaless(model_gl), idx);
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(make_yukawaless(sm_0l_gl));
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(make_yukawaless(model_gl), idx);
