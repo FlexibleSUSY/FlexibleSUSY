@@ -865,7 +865,7 @@ double calculate_Mh2_2l_shift(
    // calculate 2-loop contribution from momentum iteration using
    // tree-level parameters in the gauge-less limit (g1 = g2 = 0) and
    // Yukawa-less limit
-   const auto self_energy_2l_mom = Re(model_yl.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
+   const auto self_energy_2l_mom = Re(model_yl_3rd_gen.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
 
    const auto self_energy = self_energy_2l + self_energy_2l_mom;
    const auto tadpole = calculate_tadpole_over_vevs(model_yl_3rd_gen, 2);
