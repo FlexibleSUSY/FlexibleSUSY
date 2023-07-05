@@ -85,6 +85,7 @@ public:
    void set_precision(double);
    double get_precision() const;
    void clear() override;
+   void set_use_pole_higgs_mixings(bool var) { use_pole_higgs_mixings = var; };
 
    // mass_eigenstates_interface functions
 
@@ -123,6 +124,7 @@ public:
 private:
    bool force_output{false};              ///< switch to force output of pole masses
    double precision{1.e-4};               ///< mass eigenstate precision
+   bool use_pole_higgs_mixings {false};      ///< use pole Higgs mixing matrices in vertices
    @ModelName@_physical physical{}; ///< contains the pole masses and mixings
    Problems problems{@ModelName@_info::model_name,
                      &@ModelName@_info::particle_names_getter,
