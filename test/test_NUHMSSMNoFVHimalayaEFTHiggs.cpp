@@ -21,6 +21,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <tuple>
+#include "error.hpp"
 #include "lowe.h"
 #include "NUHMSSMNoFVHimalayaEFTHiggs_shooting_spectrum_generator.hpp"
 #include "NUHMSSMNoFVHimalayaEFTHiggs_slha_io.hpp"
@@ -69,15 +70,27 @@ double calc_Mh(
 {
    NUHMSSMNoFVHimalayaEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
-   spectrum_generator.run(qedqcd, input);
-   auto sm  = spectrum_generator.get_sm();
 
-   const double Q_pole = settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ? settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :  qedqcd.displayPoleMt();
+   double Mh = 0.;
 
-   sm.run_to(Q_pole);
-   sm.solve_ewsb();
-   sm.calculate_Mhh_pole();
-   return sm.get_physical().Mhh;
+   try {
+      spectrum_generator.run(qedqcd, input);
+      auto sm = spectrum_generator.get_sm();
+
+      const double Q_pole =
+         settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ?
+         settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :
+         qedqcd.displayPoleMt();
+
+      sm.run_to(Q_pole);
+      sm.solve_ewsb();
+      sm.calculate_Mhh_pole();
+      Mh = sm.get_physical().Mhh;
+   } catch (const flexiblesusy::Error& e) {
+      BOOST_TEST_MESSAGE(e.what_detailed());
+   }
+
+   return Mh;
 }
 
 
@@ -97,8 +110,8 @@ extract_slha_input(char const * const slha_input)
       slha_io.fill(settings);
       slha_io.fill(qedqcd);
       slha_io.fill(input);
-   } catch (const Error& error) {
-      BOOST_TEST_MESSAGE(error.what());
+   } catch (const flexiblesusy::Error& error) {
+      BOOST_TEST_MESSAGE(error.what_detailed());
       BOOST_TEST(false);
    }
 
