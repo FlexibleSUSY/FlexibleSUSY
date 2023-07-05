@@ -563,7 +563,8 @@ calculate_MFe_SM_MSbar_1l(
  * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
  * contributions of O(at^2) shall be included later
  */
-@ModelName@_mass_eigenstates make_yukawaless(const @ModelName@_mass_eigenstates& model)
+@ModelName@_mass_eigenstates make_yukawaless(
+   const @ModelName@_mass_eigenstates& model)
 {
    auto model_yl = model;
 
@@ -575,6 +576,37 @@ calculate_MFe_SM_MSbar_1l(
          // keep 3rd generation Yukawa couplings when 2-loop
          // contributions of O(at^2) shall be included later
          if (model_yl.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
+            continue;
+         }
+         model_yl.set_@UpYukawa@(i, k, 0.);
+         model_yl.set_@DownYukawa@(i, k, 0.);
+         model_yl.set_@ElectronYukawa@(i, k, 0.);
+         model_yl.set_@TrilinearUp@(i, k, 0.);
+         model_yl.set_@TrilinearDown@(i, k, 0.);
+         model_yl.set_@TrilinearLepton@(i, k, 0.);
+      }
+   }
+
+   model_yl.calculate_DRbar_masses();
+
+   return model_yl;
+}
+
+/**
+ * Set Yukawa couplings to zero, except for 3rd generation
+ */
+@ModelName@_mass_eigenstates make_yukawaless_3rd_gen(
+   const @ModelName@_mass_eigenstates& model)
+{
+   auto model_yl = model;
+
+   const int nrows = model_yl.get_@UpYukawa@().rows();
+   const int ncols = model_yl.get_@UpYukawa@().cols();
+
+   for (int i = 0; i < nrows; i++) {
+      for (int k = 0; k < ncols; k++) {
+         // keep 3rd generation Yukawa couplings
+         if (i==2 && k==2) {
             continue;
          }
          model_yl.set_@UpYukawa@(i, k, 0.);
@@ -821,6 +853,7 @@ double calculate_Mh2_2l_shift(
    int idx)
 {
    const auto model_yl = make_yukawaless(model);
+   const auto model_yl_3rd_gen = make_yukawaless_3rd_gen(model);
    const auto mh2_tree = calculate_mh2_0l(model_yl);
    const double mh2_0l = Sqr(model_yl.get_M@HiggsBoson(idx)@);
    const double mh2_shift_1l = calculate_Mh2_pole_1l(model_yl, idx) - mh2_0l;
@@ -828,14 +861,14 @@ double calculate_Mh2_2l_shift(
 
    // calculate 2-loop self-energy using tree-level parameters in the
    // gauge-less limit (g1 = g2 = 0)
-   const auto self_energy_2l = Re(model.self_energy_hh_2loop());
+   const auto self_energy_2l = Re(model_yl_3rd_gen.self_energy_hh_2loop());
    // calculate 2-loop contribution from momentum iteration using
    // tree-level parameters in the gauge-less limit (g1 = g2 = 0) and
    // Yukawa-less limit
    const auto self_energy_2l_mom = Re(model_yl.self_energy_hh_1loop_deriv_p2(p) * mh2_shift_1l);
 
    const auto self_energy = self_energy_2l + self_energy_2l_mom;
-   const auto tadpole = calculate_tadpole_over_vevs(model, 2);
+   const auto tadpole = calculate_tadpole_over_vevs(model_yl_3rd_gen, 2);
 
    double Mh2_pole = 0.;
 
