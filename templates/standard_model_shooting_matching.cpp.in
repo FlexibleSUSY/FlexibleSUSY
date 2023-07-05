@@ -1126,7 +1126,7 @@ void match_high_to_low_scale_sm_2l(
    }
 
    const double mh2_bsm_shift    = calculate_Mh2_2l_shift(make_yukawaless_3rd_gen(model_gl), idx);
-   const double mh2_sm_shift     = calculate_Mh2_2l_shift(make_yukawaless(sm_0l_gl), make_yukawaless(model_gl), idx);
+   const double mh2_sm_shift     = calculate_Mh2_2l_shift(make_yukawaless(sm_0l_gl), make_yukawaless_3rd_gen(model_gl), idx);
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(make_yukawaless(sm_0l_gl));
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(make_yukawaless(model_gl), idx);
 
