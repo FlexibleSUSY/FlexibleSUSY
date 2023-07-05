@@ -854,8 +854,8 @@ double calculate_Mh2_2l_shift(
 {
    const auto model_yl = make_yukawaless(model);
    const auto model_yl_3rd_gen = make_yukawaless_3rd_gen(model);
-   const auto mh2_tree = calculate_mh2_0l(model_yl);
-   const double mh2_0l = Sqr(model_yl.get_M@HiggsBoson(idx)@);
+   const auto mh2_tree = calculate_mh2_0l(model_yl_3rd_gen);
+   const double mh2_0l = Sqr(model_yl_3rd_gen.get_M@HiggsBoson(idx)@);
    const double mh2_shift_1l = calculate_Mh2_pole_1l(model_yl, idx) - mh2_0l;
    const double p = 0.;
 
