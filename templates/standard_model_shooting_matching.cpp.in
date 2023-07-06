@@ -560,42 +560,9 @@ calculate_MFe_SM_MSbar_1l(
 }
 
 /**
- * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
- * contributions of O(at^2) shall be included later
- */
-@ModelName@_mass_eigenstates make_yukawaless(
-   const @ModelName@_mass_eigenstates& model)
-{
-   auto model_yl = model;
-
-   const int nrows = model_yl.get_@UpYukawa@().rows();
-   const int ncols = model_yl.get_@UpYukawa@().cols();
-
-   for (int i = 0; i < nrows; i++) {
-      for (int k = 0; k < ncols; k++) {
-         // keep 3rd generation Yukawa couplings when 2-loop
-         // contributions of O(at^2) shall be included later
-         if (model_yl.HIGGS_2LOOP_CORRECTION_AT_AT && i==2 && k==2) {
-            continue;
-         }
-         model_yl.set_@UpYukawa@(i, k, 0.);
-         model_yl.set_@DownYukawa@(i, k, 0.);
-         model_yl.set_@ElectronYukawa@(i, k, 0.);
-         model_yl.set_@TrilinearUp@(i, k, 0.);
-         model_yl.set_@TrilinearDown@(i, k, 0.);
-         model_yl.set_@TrilinearLepton@(i, k, 0.);
-      }
-   }
-
-   model_yl.calculate_DRbar_masses();
-
-   return model_yl;
-}
-
-/**
  * Set Yukawa couplings to zero, except for 3rd generation
  */
-@ModelName@_mass_eigenstates make_yukawaless_3rd_gen(
+@ModelName@_mass_eigenstates make_yukawaless(
    const @ModelName@_mass_eigenstates& model)
 {
    auto model_yl = model;
@@ -624,8 +591,7 @@ calculate_MFe_SM_MSbar_1l(
 }
 
 /**
- * Set Yukawa couplings to zero, except for 3rd generation if 2-loop
- * contributions of O(at^2) shall be included later
+ * Set Yukawa couplings to zero, except for 3rd generation
  */
 standard_model::Standard_model make_yukawaless(
    const standard_model::Standard_model& sm)
@@ -1125,10 +1091,10 @@ void match_high_to_low_scale_sm_2l(
       delta_v_gl += sm_1l.get_v() - v;
    }
 
-   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(make_yukawaless_3rd_gen(model_gl), idx);
-   const double mh2_sm_shift     = calculate_Mh2_2l_shift(make_yukawaless(sm_0l_gl), make_yukawaless_3rd_gen(model_gl), idx);
+   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(make_yukawaless(model_gl), idx);
+   const double mh2_sm_shift     = calculate_Mh2_2l_shift(make_yukawaless(sm_0l_gl), make_yukawaless(model_gl), idx);
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(make_yukawaless(sm_0l_gl));
-   const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(make_yukawaless_3rd_gen(model_gl), idx);
+   const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(make_yukawaless(model_gl), idx);
 
    const double Q = sm_0l_gl.get_scale();
    const double mt = sm_0l_gl.get_MFu(2);
