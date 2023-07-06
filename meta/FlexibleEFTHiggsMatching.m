@@ -49,7 +49,9 @@ fs_diagonalize_hermitian(mass_matrix, eigenvalues);
 " <> outVar <> " = eigenvalues(idx);"
 
 
-Create3LoopMatching[inputModel_String, outputModel_String, higgsIndex_String] :=
+Create3LoopMatching[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=
+   Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
+	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]]},
 "// calculate running masses of the input model
 const auto model = [] (const auto& model_input) {
    auto model = model_input;
@@ -110,34 +112,34 @@ const double S2_deriv_gs =
 
 // sum on the r.h.s. in Eq.(4.26c) JHEP07(2020)197
 const double mh2_conversion = S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs;
-const double mh2_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
-const double mh2_bsm_shift = [] (standard_model::Standard_model& sm, const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model, int idx) {
-   double mh2_bsm_shift = 0;
+const double mh2_3l_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
+const double mh2_3l_bsm_shift = [] (standard_model::Standard_model& sm, const " <> modelNameStr <> "_mass_eigenstates& model, int idx) {
+   double mh2_3l_bsm_shift = 0;
    try {
       // 3-loop self-energy, calculated using tree-level parameters
-      const auto self_energy_3l = Re(model.self_energy_hh_3loop());
+      const auto self_energy_3l = Re(model." <> SelfEnergies`CreateSelfEnergyFunctionName[higgsBoson, 3] <> "());
       const auto higgs_mass_matrix = (calculate_mh2_0l(model) - self_energy_3l).eval();
 
       // calculate 3-loop Higgs pole mass in the gauge-less limit
-      Eigen::Array<double, 2, 1> Mh2_pole;
+      decltype(model.get_physical()." <> higgsMassStr <> ") Mh2_pole;
       fs_diagonalize_hermitian(higgs_mass_matrix, Mh2_pole);
 
       // calculate 3-loop Higgs mass loop correction in the gauge-less limit
-      mh2_bsm_shift = Mh2_pole(idx) - Sqr(model.get_Mhh(idx));
+      mh2_3l_bsm_shift = Mh2_pole(idx) - Sqr(model.get_" <> higgsMassStr <> "(idx));
    } catch (const flexiblesusy::Error& e) {
-      VERBOSE_MSG(\"Error: Calculation of 3-loop Higgs pole mass in the gauge-less limit in the " <> ToString[FlexibleSUSY`FSModelName] <> " at the matching scale failed: \" << e.what());
+      VERBOSE_MSG(\"Error: Calculation of 3-loop Higgs pole mass in the gauge-less limit in the " <> modelNameStr <> " at the matching scale failed: \" << e.what());
       " <> outputModel <> ".get_problems().flag_bad_mass(standard_model_info::hh);
    }
-   return mh2_bsm_shift;
+   return mh2_3l_bsm_shift;
 }(sm, model_gl, idx);
 
 // calculate Delta lambda^(3l) from Eq.(4.28d) JHEP07(2020)197
-const double delta_lambda_3l = (mh2_bsm_shift - mh2_sm_shift - mh2_conversion)/v2;
+const double delta_lambda_3l = (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_conversion)/v2;
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
 " <> outputModel <> ".set_Lambdax(lambda_3l);
-" <> outputModel <> ".calculate_DRbar_masses();";
-
+" <> outputModel <> ".calculate_DRbar_masses();"
+];
 
 CallMatch2LoopTopMass[smStr_:"sm."] :=
 smStr <> "set_Yu(2, 2, calculate_yt_sm_2l(sm_0l, sm_1l, model));"

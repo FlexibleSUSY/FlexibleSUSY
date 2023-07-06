@@ -1485,7 +1485,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
 	      setMSSMLimit                      = FlexibleEFTHiggsMatching`SetLimit["model.", FlexibleSUSY`FSMSSMLimit];
               calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
               If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
-		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", "idx"];
+		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMt2LoopFunction[];
 		 callMatch2LoopTopMass = FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[];
 		 includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
