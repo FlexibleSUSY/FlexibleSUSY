@@ -811,16 +811,17 @@ double calculate_Mh2_1l_shift(
  *
  * @param model BSM parameters
  * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ * @param mh2_1l_bsm_shift 1-loop BSM shift of Mh^2
  *
  * @return Mh_pole^2 - mh_tree^2 (only 2-loop terms)
  */
 double calculate_Mh2_2l_shift(
    const @ModelName@_mass_eigenstates& model,
-   int idx)
+   int idx,
+   double mh2_1l_bsm_shift)
 {
    const auto mh2_tree = calculate_mh2_0l(model);
    const double mh2_0l = Sqr(model.get_M@HiggsBoson(idx)@);
-   const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model, idx);
    const double p = 0.;
 
    // calculate 2-loop self-energy using tree-level parameters in the
@@ -833,7 +834,7 @@ double calculate_Mh2_2l_shift(
    decltype(model.self_energy_hh_1loop_deriv_p2(p)) self_energy_2l_mom;
    self_energy_2l_mom.setZero();
 
-   if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
+   if (mh2_1l_bsm_shift != 0.) {
       self_energy_2l_mom += Re(model.self_energy_hh_1loop_deriv_p2(p) * mh2_1l_bsm_shift);
    }
 
@@ -1092,7 +1093,7 @@ void match_high_to_low_scale_sm_2l(
 
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model_gl_yl, idx);
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(sm_0l_gl_yl);
-   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(model_gl_yl, idx);
+   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(model_gl_yl, idx, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
    const double mh2_sm_shift     = calculate_Mh2_2l_shift(sm_0l_gl_yl, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
 
    const double Q = sm_0l_gl.get_scale();
