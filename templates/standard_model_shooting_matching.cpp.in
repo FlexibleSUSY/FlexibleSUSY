@@ -792,7 +792,7 @@ double calculate_Mh2_1l_shift(
    const @ModelName@_mass_eigenstates& model, int idx)
 {
    const double mh2_tree = Sqr(model.get_M@HiggsBoson(idx)@);
-   const double mh2_shift_1l = calculate_Mh2_pole_1l(model,idx) - mh2_tree;
+   const double mh2_shift_1l = calculate_Mh2_pole_1l(model, idx) - mh2_tree;
 
    return mh2_shift_1l;
 }
@@ -820,7 +820,7 @@ double calculate_Mh2_2l_shift(
 {
    const auto mh2_tree = calculate_mh2_0l(model);
    const double mh2_0l = Sqr(model.get_M@HiggsBoson(idx)@);
-   const double mh2_shift_1l = calculate_Mh2_pole_1l(model, idx) - mh2_0l;
+   const double mh2_shift_1l = calculate_Mh2_1l_shift(model, idx);
    const double p = 0.;
 
    // calculate 2-loop self-energy using tree-level parameters in the
