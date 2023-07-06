@@ -838,7 +838,7 @@ double calculate_Mh2_2l_shift(
       self_energy_2l_mom += Re(model.self_energy_hh_1loop_deriv_p2(p) * mh2_1l_bsm_shift);
    }
 
-   const auto self_energy = self_energy_2l + self_energy_2l_mom;
+   const auto self_energy = (self_energy_2l + self_energy_2l_mom).eval();
    const auto tadpole = calculate_tadpole_over_vevs(model, 2);
 
    double Mh2_pole = 0.;
