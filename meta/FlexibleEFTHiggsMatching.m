@@ -65,7 +65,7 @@ const auto sm_0l = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", mod
 const auto sm_1l = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
 const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
 const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
-const auto sm_1l_gl_g3less = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_no_g3, " <> higgsIndex <> ");
+const auto sm_1l_gl_no_g3 = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_no_g3, " <> higgsIndex <> ");
 const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ", 2);
 
 " <> outputModel <> " = sm_2l;
@@ -92,7 +92,7 @@ const double k = oneOver16PiSqr;
 const double k2 = twoLoop;
 const double k3 = threeLoop;
 
-const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_g3less.get_Yu(2, 2);
+const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_no_g3.get_Yu(2, 2);
 const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
 const double sqr_delta_yt_1l = Sqr(delta_yt_1l);
 const double delta_g3_1l = sm_1l.get_g3() - gs;
