@@ -1058,6 +1058,7 @@ void match_high_to_low_scale_sm_2l(
    }(model_input);
    const auto model_gl = make_gaugeless_g1_g2(model_input);
    const auto model_no_g3 = make_gaugeless_g3(model_gl);
+   const auto model_gl_yl = make_yukawaless(model_gl);
 
    const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
    const auto sm_1l = match_high_to_low_scale_sm_1l_copy(sm, model, idx);
@@ -1065,6 +1066,7 @@ void match_high_to_low_scale_sm_2l(
    const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(sm, model_gl, idx);
    const auto sm_0l_no_g3 = match_high_to_low_scale_sm_0l_copy(sm, model_no_g3, idx);
    const auto sm_1l_no_g3 = match_high_to_low_scale_sm_1l_copy(sm, model_no_g3, idx);
+   const auto sm_0l_gl_yl = make_yukawaless(sm_0l_gl);
 
    const double v         = sm_0l.get_v();
    const double v2        = Sqr(v);
@@ -1091,10 +1093,10 @@ void match_high_to_low_scale_sm_2l(
       delta_v_gl += sm_1l.get_v() - v;
    }
 
-   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(make_yukawaless(model_gl), idx);
-   const double mh2_sm_shift     = calculate_Mh2_2l_shift(make_yukawaless(sm_0l_gl), make_yukawaless(model_gl), idx);
-   const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(make_yukawaless(sm_0l_gl));
-   const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(make_yukawaless(model_gl), idx);
+   const double mh2_bsm_shift    = calculate_Mh2_2l_shift(model_gl_yl, idx);
+   const double mh2_sm_shift     = calculate_Mh2_2l_shift(sm_0l_gl_yl, model_gl_yl, idx);
+   const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(sm_0l_gl_yl);
+   const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model_gl_yl, idx);
 
    const double Q = sm_0l_gl.get_scale();
    const double mt = sm_0l_gl.get_MFu(2);
