@@ -838,8 +838,8 @@ double calculate_Mh2_2l_shift(
 /**
  * @brief Calculates pure 2-loop contributions to the SM Higgs pole mass.
  *
- * @note The given SM and BSM model parameters should be in the
- * gauge-less limit (g1 = g2 = 0).
+ * @note The given SM model parameters should be in the gauge-less
+ * limit (g1 = g2 = 0).
  *
  * @param sm SM parameters
  * @param mh2_1l_bsm_shift 1-loop BSM shift to Mh^2
@@ -1083,7 +1083,11 @@ void match_high_to_low_scale_sm_2l(
    const double v2 = Sqr(v);
    const double lambda_1l = sm_1l.get_Lambdax();
 
-   const double mh2_conversion =
+   // 2-loop parameter conversion terms from the sum in Eq.(4.26b)
+   // [arxiv:2003.04639] for P = {yt, yb, ytau, g3, v}. The terms in
+   // the sum that involve a derivative w.r.t. p^2 are not included
+   // here.
+   const double mh2_2l_parameter_conversion =
       + delta_yt * sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(p, Q, mt, yt)
       + delta_yb * sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_yb(p, Q, mb, yb)
       + delta_ytau * sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_ytau(p, Q, mtau, ytau)
@@ -1091,14 +1095,18 @@ void match_high_to_low_scale_sm_2l(
                       + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_v(p, Q, mb, yb)
                       + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_v(p, Q, mtau, ytau));
 
+   // Eq.(4.21) [arxiv:2003.04639] for n=1
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model_gl_yl, idx);
+   // Eq.(4.26a) [arxiv:2003.04639]
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(sm_0l_gl_yl);
+   // Eq.(4.21) [arxiv:2003.04639] for n=2
    const double mh2_2l_bsm_shift = calculate_Mh2_2l_shift(model_gl_yl, idx, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
+   // Eq.(4.26b) [arxiv:2003.04639]
    const double mh2_2l_sm_shift  = calculate_Mh2_2l_shift(sm_0l_gl_yl, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
 
    // Eq.(4.28c) [arxiv:2003.04639]
    const double delta_lambda_2l =
-      (mh2_2l_bsm_shift - mh2_2l_sm_shift - mh2_conversion)/v2
+      (mh2_2l_bsm_shift - mh2_2l_sm_shift - mh2_2l_parameter_conversion)/v2
       + 2*delta_v_gl/(v*v2)*(mh2_1l_sm_shift - mh2_1l_bsm_shift);
 
    // Eq.(4.28a) [arxiv:2003.04639] up to (including) 2-loop terms
