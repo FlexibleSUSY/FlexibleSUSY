@@ -77,9 +77,9 @@ const double lambda_2l = sm_2l.get_Lambdax();
 const double v2 = Sqr(sm_0l_gl.get_v());
 const double yt = sm_0l_gl.get_Yu(2, 2);
 const double yt2 = Sqr(yt);
-const double gs = sm_0l_gl.get_g3();
-const double gs2 = Sqr(gs);
-const double gs4 = Sqr(gs2);
+const double g3 = sm_0l_gl.get_g3();
+const double g32 = Sqr(g3);
+const double g34 = Sqr(g32);
 const double MS = Sqrt(model_gl.get_MSt(0) * model_gl.get_MSt(1));
 const double Q = sm_0l_gl.get_scale();
 const double Q2 = Sqr(Q);
@@ -95,7 +95,7 @@ const double k3 = threeLoop;
 const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_no_g3.get_Yu(2, 2);
 const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
 const double sqr_delta_yt_1l = Sqr(delta_yt_1l);
-const double delta_g3_1l = sm_1l.get_g3() - gs;
+const double delta_g3_1l = sm_1l.get_g3() - g3;
 
 // 1st derivative of 1-loop SM contribution to Mh w.r.t. yt, times Delta yt(2l)
 const double S1_deriv_yt =
@@ -105,14 +105,19 @@ const double S1_deriv_yt2 =
    -0.5*(24*k*mt2*(7 + 6*logmt)) * sqr_delta_yt_1l;
 // 1st derivative of 2-loop SM contribution to Mh w.r.t. yt, times Delta yt(1l)
 const double S2_deriv_yt =
-   64*k2*gs2*mt2*yt*(1 + 8*logmt + 6*logmt2) * delta_yt_1l;
+   64*k2*g32*mt2*yt*(1 + 8*logmt + 6*logmt2) * delta_yt_1l;
 // 1st derivative of 2-loop SM contribution to Mh w.r.t. g3, times Delta g3(1l)
-const double S2_deriv_gs =
-   64*k2*gs*mt2*yt2*logmt*(1 + 3*logmt) * delta_g3_1l;
+const double S2_deriv_g3 =
+   64*k2*g3*mt2*yt2*logmt*(1 + 3*logmt) * delta_g3_1l;
 
-// sum on the r.h.s. in Eq.(4.26c) JHEP07(2020)197
-const double mh2_conversion = S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_gs;
+// 3-loop parameter conversion terms from thesum on the r.h.s.
+// of Eq.(4.26c) [arxiv:2003.04639]
+const double mh2_3l_parameter_conversion = S1_deriv_yt + S1_deriv_yt2 + S2_deriv_yt + S2_deriv_g3;
+
+// Eq.(4.26c) [arxiv:2003.04639] w/o the sum
 const double mh2_3l_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
+
+// Eq.(4.21) [arxiv:2003.04639] for n=3
 const double mh2_3l_bsm_shift = [] (standard_model::Standard_model& sm, const " <> modelNameStr <> "_mass_eigenstates& model, int idx) {
    double mh2_3l_bsm_shift = 0;
    try {
@@ -133,8 +138,10 @@ const double mh2_3l_bsm_shift = [] (standard_model::Standard_model& sm, const " 
    return mh2_3l_bsm_shift;
 }(sm, model_gl, idx);
 
-// calculate Delta lambda^(3l) from Eq.(4.28d) JHEP07(2020)197
-const double delta_lambda_3l = (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_conversion)/v2;
+// Eq.(4.28d) [arxiv:2003.04639], Delta lambda^(3l)
+const double delta_lambda_3l = (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2;
+
+// Eq.(4.28a) [arxiv:2003.04639] up to (including) 3-loop terms
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
 " <> outputModel <> ".set_Lambdax(lambda_3l);
@@ -275,8 +282,9 @@ double calculate_MFt_MSbar_sm_2l(
    const double Mt_bsm = calculate_Mt_bsm_2l(model);
    const auto [mt_sm_0l, Mt_sm] = calculate_mt_sm_2l(sm);
 
-   // determine SM MS-bar top quark mass from top quark pole mass matching
-   const double mt_sm = Mt_bsm - Mt_sm + mt_sm_0l - mt_con; // Eq.(4.18b) JHEP07(2020)197
+   // determine SM MS-bar top quark mass from top quark pole mass matching,
+   // Eq.(4.18b) [arxiv:2003.04639]
+   const double mt_sm = Mt_bsm - Mt_sm + mt_sm_0l - mt_con;
 
    return Abs(mt_sm);
 }
