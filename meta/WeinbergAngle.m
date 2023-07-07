@@ -441,7 +441,7 @@ WaveResult[diagr_List, includeGoldstones_] :=
 CompleteWaveResult[particle_, includeGoldstones_] :=
     Plus @@ (WaveResult[#, includeGoldstones] &) /@
        ExcludeDiagrams[GenerateDiagramsWave[particle],
-		       (If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] === 1, TreeMasses`IsSMHiggs[#], False] ||
+		       (TreeMasses`IsSMHiggs[#] ||
                        If[includeGoldstones, TreeMasses`IsVector[#],
                           TreeMasses`IsVector[#] || TreeMasses`IsGoldstone[#]])&];
 
