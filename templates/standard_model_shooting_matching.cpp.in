@@ -1099,9 +1099,9 @@ void match_high_to_low_scale_sm_2l(
    const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model_gl_yl, idx);
    // Eq.(4.26a) [arxiv:2003.04639]
    const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(sm_0l_gl_yl);
-   // Eq.(4.21) [arxiv:2003.04639] for n=2
+   // Eq.(4.21) [arxiv:2003.04639] for n=2, including derivative term w.r.t. p^2 (momentum iteration)
    const double mh2_2l_bsm_shift = calculate_Mh2_2l_shift(model_gl_yl, idx, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
-   // Eq.(4.26b) [arxiv:2003.04639]
+   // Eq.(4.26b) [arxiv:2003.04639], including derivative term w.r.t. p^2 (momentum iteration)
    const double mh2_2l_sm_shift  = calculate_Mh2_2l_shift(sm_0l_gl_yl, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
 
    // Eq.(4.28c) [arxiv:2003.04639]
