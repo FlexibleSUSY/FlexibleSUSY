@@ -59,13 +59,13 @@ const auto model = [] (const auto& model_input) {
    return model;
 }(" <> inputModel <> ");
 const auto model_gl = make_gaugeless_g1_g2(model);
-const auto model_no_g3 = make_gaugeless_g3(model_gl);
+const auto model_gl_no_g3 = make_gaugeless_g3(model_gl);
 
 const auto sm_0l = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
 const auto sm_1l = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
 const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
 const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
-const auto sm_1l_gl_no_g3 = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_no_g3, " <> higgsIndex <> ");
+const auto sm_1l_gl_no_g3 = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl_no_g3, " <> higgsIndex <> ");
 const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ", 2);
 
 " <> outputModel <> " = sm_2l;
