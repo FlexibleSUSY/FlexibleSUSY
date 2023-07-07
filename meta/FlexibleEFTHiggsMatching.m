@@ -163,8 +163,12 @@ std::tuple<double, double> calculate_mt_sm_2l(
    const standard_model::Standard_model& sm)
 {
    auto sm_2l = sm;
+   auto loop_corrections = sm_2l.get_loop_corrections();
+   loop_corrections.top_qcd = 1; // enable 2-loop QCD contributions
+
    sm_2l.set_pole_mass_loop_order(2);
-   set_top_QCD_order(sm_2l, 1);
+   sm_2l.set_loop_corrections(loop_corrections);
+
    sm_2l.calculate_MFu_pole();
 
    const auto Mt = sm_2l.get_physical().MFu(2);
@@ -199,8 +203,11 @@ double calculate_Mt_bsm_2l(
    const " <> ToString[FlexibleSUSY`FSModelName] <> "_mass_eigenstates& model)
 {
    auto model_2l = model;
+   auto loop_corrections = model_2l.get_loop_corrections();
+   loop_corrections.top_qcd = 1; // enable 2-loop QCD contributions
+
    model_2l.set_pole_mass_loop_order(2);
-   set_top_QCD_order(model_2l, 1);
+   model_2l.set_loop_corrections(loop_corrections);
 
    model_2l." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
 
