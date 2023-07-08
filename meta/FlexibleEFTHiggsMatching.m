@@ -23,6 +23,7 @@
 BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopMasses`", "Constraint`", "ThresholdCorrections`", "Parameters`", "Utils`"}];
 
 CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
+Create2LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 2-loop level.";
 Create3LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 3-loop level.";
 CallMatch2LoopTopMass::usage = "Sets SM top Yukawa coupling to 2-loop value, determined from BSM model";
 CreateSMMt2LoopFunction::usage = "Creates a function that calculates the running MS-bar top quark mass in the SM from the BSM parameters";
@@ -47,6 +48,99 @@ CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] :=
 " <> CreateCType[CConversion`ArrayType[CConversion`realScalarCType, GetDimension[particle]]] <> " eigenvalues;
 fs_diagonalize_hermitian(mass_matrix, eigenvalues);
 " <> outVar <> " = eigenvalues(idx);"
+
+
+Create2LoopMatching[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=
+   Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
+	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]]},
+"   // calculate running parameters of BSM model
+   const auto model = [] (const auto& model_input) {
+      auto model = model_input;
+      model.calculate_DRbar_masses();
+      return model;
+   }(model_input);
+   const auto model_gl = make_gaugeless_g1_g2(model_input);
+   const auto model_gl_no_g3 = make_gaugeless_g3(model_gl);
+   const auto model_gl_yl = make_yukawaless(model_gl);
+
+   const auto sm_0l = match_high_to_low_scale_sm_0l_copy(sm, model, idx);
+   const auto sm_1l = match_high_to_low_scale_sm_1l_copy(sm, model, idx);
+   const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(sm, model_gl, idx);
+   const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(sm, model_gl, idx);
+   const auto sm_0l_gl_no_g3 = match_high_to_low_scale_sm_0l_copy(sm, model_gl_no_g3, idx);
+   const auto sm_1l_gl_no_g3 = match_high_to_low_scale_sm_1l_copy(sm, model_gl_no_g3, idx);
+   const auto sm_0l_gl_yl = make_yukawaless(sm_0l_gl);
+
+   double delta_yt   = 0;
+   double delta_yb   = 0;
+   double delta_ytau = 0;
+   double delta_v_gl = 0;
+   double p          = 0;
+
+   if (model.HIGGS_2LOOP_CORRECTION_AT_AS) {
+      delta_yt += sm_1l_gl.get_Yu(2,2) - sm_1l_gl_no_g3.get_Yu(2,2);
+   }
+
+   if (model.HIGGS_2LOOP_CORRECTION_AB_AS) {
+      delta_yb += sm_1l_gl.get_Yd(2,2) - sm_1l_gl_no_g3.get_Yd(2,2);
+   }
+
+   if (model.HIGGS_2LOOP_CORRECTION_AT_AT) {
+      delta_yt   += sm_1l_gl_no_g3.get_Yu(2,2) - sm_0l_gl.get_Yu(2,2);
+      delta_yb   += sm_1l_gl_no_g3.get_Yd(2,2) - sm_0l_gl.get_Yd(2,2);
+      delta_ytau += sm_1l.get_Ye(2,2) - sm_0l_gl.get_Ye(2,2);
+      delta_v_gl += sm_1l.get_v() - sm_0l.get_v();
+   }
+
+   const double Q = sm_0l_gl.get_scale();
+   const double mt = sm_0l_gl.get_MFu(2);
+   const double mb = sm_0l_gl.get_MFd(2);
+   const double mtau = sm_0l_gl.get_MFe(2);
+   const double yt = sm_0l_gl.get_Yu(2,2);
+   const double yb = sm_0l_gl.get_Yd(2,2);
+   const double ytau = sm_0l_gl.get_Ye(2,2);
+   const double v = sm_0l.get_v();
+   const double v2 = Sqr(v);
+   const double lambda_1l = sm_1l.get_Lambdax();
+
+   // 2-loop parameter conversion terms from the sum in Eq.(4.26b)
+   // [arxiv:2003.04639] for P = {yt, yb, ytau, g3, v}. The terms in
+   // the sum that involve a derivative w.r.t. p^2 are not included
+   // here.
+   const double mh2_2l_parameter_conversion =
+      + delta_yt * sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(p, Q, mt, yt)
+      + delta_yb * sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_yb(p, Q, mb, yb)
+      + delta_ytau * sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_ytau(p, Q, mtau, ytau)
+      + delta_v_gl * (+ sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_v(p, Q, mt, yt)
+                      + sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_v(p, Q, mb, yb)
+                      + sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_v(p, Q, mtau, ytau));
+
+   // Eq.(4.21) [arxiv:2003.04639] for n=1
+   const double mh2_1l_bsm_shift = calculate_Mh2_1l_shift(model_gl_yl, idx);
+   // Eq.(4.26a) [arxiv:2003.04639]
+   const double mh2_1l_sm_shift  = calculate_Mh2_1l_shift(sm_0l_gl_yl);
+   // Eq.(4.21) [arxiv:2003.04639] for n=2, including derivative term w.r.t. p^2 (momentum iteration)
+   const double mh2_2l_bsm_shift = calculate_Mh2_2l_shift(model_gl_yl, idx, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
+   // Eq.(4.26b) [arxiv:2003.04639], including derivative term w.r.t. p^2 (momentum iteration)
+   const double mh2_2l_sm_shift  = calculate_Mh2_2l_shift(sm_0l_gl_yl, model.HIGGS_2LOOP_CORRECTION_AT_AT ? mh2_1l_bsm_shift : 0.);
+
+   // Eq.(4.28c) [arxiv:2003.04639]
+   const double delta_lambda_2l =
+      (mh2_2l_bsm_shift - mh2_2l_sm_shift - mh2_2l_parameter_conversion)/v2
+      + 2*delta_v_gl/(v*v2)*(mh2_1l_sm_shift - mh2_1l_bsm_shift);
+
+   // Eq.(4.28a) [arxiv:2003.04639] up to (including) 2-loop terms
+   const double lambda_2l = lambda_1l + delta_lambda_2l;
+
+   sm = sm_1l;
+   sm.set_Lambdax(lambda_2l);
+
+   if (yt_loop_order > 1) {
+" <> If[FlexibleSUSY`UseHiggs3LoopMSSM === True, FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[], ""] <> "
+   }
+
+   sm.calculate_DRbar_masses();"
+];
 
 
 Create3LoopMatching[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=

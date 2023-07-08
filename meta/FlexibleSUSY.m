@@ -1456,7 +1456,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             calculateMDownLeptonPole1L = "",
             calculateMHiggsPoleNoMomentumIteration = "",
             threeLoopLambdaMatching = "throw SetupError(\"3-loop matching not enabled.\");",
-            callMatch2LoopTopMass = "",
+            twoLoopLambdaMatching = "throw SetupError(\"2-loop matching not enabled.\");",
             setGaugeLessLimit = "",
             setMSSMLimit = "",
             includeMSSMTwoLoopTopMassHeader = "",
@@ -1484,10 +1484,12 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetLimit["model.", FlexibleSUSY`FSGaugeLessLimit];
 	      setMSSMLimit                      = FlexibleEFTHiggsMatching`SetLimit["model.", FlexibleSUSY`FSMSSMLimit];
               calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
+              If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True, 
+ 		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
+	      ];
               If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
-		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
+ 		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMt2LoopFunction[];
-		 callMatch2LoopTopMass = FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[];
 		 includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
               ];
 
@@ -1510,8 +1512,8 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@calculateMHiggsPoleNoMomentumIteration@" -> IndentText[calculateMHiggsPoleNoMomentumIteration],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
+                         "@twoLoopLambdaMatching@" -> IndentText[twoLoopLambdaMatching],
                          "@createSMMt2LoopFunction@" -> createSMMt2LoopFunction,
-                         "@callMatch2LoopTopMass@" -> IndentText[IndentText[callMatch2LoopTopMass]],
                          "@setGaugeLessLimit@" -> IndentText[setGaugeLessLimit],
                          "@setMSSMLimit@" -> IndentText[setMSSMLimit],
                          "@includeMSSMTwoLoopTopMassHeader@" -> includeMSSMTwoLoopTopMassHeader,
