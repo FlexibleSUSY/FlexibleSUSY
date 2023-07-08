@@ -928,6 +928,14 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "case 1: {\n" <>
                  TextFormatting`IndentText[
                     "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(model.get_input());\n" <>
+                    If[
+                       MemberQ[
+                          DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[] /. Susyno`LieGroups`conj->Identity}, Null],
+                          particle /. Susyno`LieGroups`conj->Identity
+                       ],
+                       "dm->set_use_pole_higgs_mixings(static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::use_pole_higgs_mixings)));\n",
+                       ""
+                    ] <>
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
                     "dm->fill_from(model);\n" <>

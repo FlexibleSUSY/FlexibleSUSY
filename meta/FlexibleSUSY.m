@@ -1943,6 +1943,14 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@setDecouplingYukawaDownLeptons@"  -> IndentText @ IndentText[
                                 ThresholdCorrections`SetDRbarYukawaCouplingElectron[FlexibleSUSY`LowScaleInput]
                                                                              ],
+                            "@overrideTreeHiggsMixings@" -> IndentText@StringJoin[
+                               With[{mixingMatrix = FindMixingMatrixSymbolFor[#]},
+                                  If[mixingMatrix =!= Null,
+                                     ToString@mixingMatrix <> " = this->get_physical()." <> ToString@mixingMatrix <> ";\n",
+                                      ""
+                                  ]
+                               ]& /@ DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[]}, Null]
+                            ],
                             "@copyRunningBSMMassesToDecouplingMasses@" -> IndentText[copyRunningBSMMassesToDecouplingMasses],
                             "@reorderDRbarMasses@"     -> IndentText[reorderDRbarMasses],
                             "@reorderPoleMasses@"      -> IndentText[reorderPoleMasses],
