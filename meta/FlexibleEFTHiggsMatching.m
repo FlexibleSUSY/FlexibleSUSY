@@ -23,6 +23,7 @@
 BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopMasses`", "Constraint`", "ThresholdCorrections`", "Parameters`", "Utils`"}];
 
 CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
+CalculateMHiggs2LoopShift::usage = "Calculates 2-loop shift to the Higgs pole mass in the BSM model.";
 Create2LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 2-loop level.";
 Create3LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 3-loop level.";
 CallMatch2LoopTopMass::usage = "Sets SM top Yukawa coupling to 2-loop value, determined from BSM model";
@@ -48,6 +49,40 @@ CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] :=
 " <> CreateCType[CConversion`ArrayType[CConversion`realScalarCType, GetDimension[particle]]] <> " eigenvalues;
 fs_diagonalize_hermitian(mass_matrix, eigenvalues);
 " <> outVar <> " = eigenvalues(idx);"
+
+CalculateMHiggs2LoopShift[inputModel_String, higgsBoson_, higgsIndex_String] :=
+   Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
+	   higgsBosonStr = CConversion`RValueToCFormString[higgsBoson],
+	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]]},
+"const auto mh2_tree = calculate_mh2_0l(model);
+const double mh2_0l = Sqr(model.get_" <> higgsMassStr <> "(" <> higgsIndex <> "));
+const double p = 0.;
+
+// calculate 2-loop self-energy using tree-level parameters in the
+// gauge-less limit (g1 = g2 = 0)
+const auto self_energy_2l = Re(model.self_energy_" <> higgsBosonStr <> "_2loop());
+
+// calculate 2-loop contribution from momentum iteration using
+// tree-level parameters in the gauge-less limit (g1 = g2 = 0) and
+// Yukawa-less limit
+decltype(model.self_energy_" <> higgsBosonStr <> "_1loop_deriv_p2(p)) self_energy_2l_mom;
+self_energy_2l_mom.setZero();
+
+if (mh2_1l_bsm_shift != 0.) {
+   self_energy_2l_mom += Re(model.self_energy_" <> higgsBosonStr <> "_1loop_deriv_p2(p) * mh2_1l_bsm_shift);
+}
+
+const auto self_energy = (self_energy_2l + self_energy_2l_mom).eval();
+const auto tadpole = calculate_tadpole_over_vevs(model, 2);
+
+double Mh2_pole = 0.;
+
+" <> CalculateMHiggsPoleNoMomentumIteration[higgsBoson, "Mh2_pole"] <> "
+
+const double mh2_shift_2l = Mh2_pole - mh2_0l;
+
+return mh2_shift_2l;"
+];
 
 
 Create2LoopMatching[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=

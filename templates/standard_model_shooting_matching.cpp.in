@@ -685,6 +685,7 @@ double calculate_Mh2_pole_1l(const @ModelName@_mass_eigenstates& model, int idx)
    double Mh2_pole = 0.;
 
    // calculate BSM Higgs mass at 1-loop level w/o momentum iteration
+   // @todo(alex) extract to separate function and re-use it in the meta code
 @calculateMHiggsPoleNoMomentumIteration@
 
    return Mh2_pole;
@@ -805,34 +806,7 @@ double calculate_Mh2_2l_shift(
    int idx,
    double mh2_1l_bsm_shift)
 {
-   const auto mh2_tree = calculate_mh2_0l(model);
-   const double mh2_0l = Sqr(model.get_M@HiggsBoson(idx)@);
-   const double p = 0.;
-
-   // calculate 2-loop self-energy using tree-level parameters in the
-   // gauge-less limit (g1 = g2 = 0)
-   const auto self_energy_2l = Re(model.self_energy_@HiggsBoson@_2loop());
-
-   // calculate 2-loop contribution from momentum iteration using
-   // tree-level parameters in the gauge-less limit (g1 = g2 = 0) and
-   // Yukawa-less limit
-   decltype(model.self_energy_@HiggsBoson@_1loop_deriv_p2(p)) self_energy_2l_mom;
-   self_energy_2l_mom.setZero();
-
-   if (mh2_1l_bsm_shift != 0.) {
-      self_energy_2l_mom += Re(model.self_energy_@HiggsBoson@_1loop_deriv_p2(p) * mh2_1l_bsm_shift);
-   }
-
-   const auto self_energy = (self_energy_2l + self_energy_2l_mom).eval();
-   const auto tadpole = calculate_tadpole_over_vevs(model, 2);
-
-   double Mh2_pole = 0.;
-
-@calculateMHiggsPoleNoMomentumIteration@
-
-   const double mh2_shift_2l = Mh2_pole - mh2_0l;
-
-   return mh2_shift_2l;
+@calculateMHiggs2LoopShift@
 }
 
 /**

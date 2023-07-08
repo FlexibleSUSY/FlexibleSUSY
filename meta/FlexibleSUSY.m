@@ -1455,6 +1455,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             calculateMUpQuarkPole1L = "", calculateMDownQuarkPole1L = "",
             calculateMDownLeptonPole1L = "",
             calculateMHiggsPoleNoMomentumIteration = "",
+	    calculateMHiggs2LoopShift = "throw SetupError(\"2-loop Higgs self-energy not enabled.\");",
             threeLoopLambdaMatching = "throw SetupError(\"3-loop matching not enabled.\");",
             twoLoopLambdaMatching = "throw SetupError(\"2-loop matching not enabled.\");",
             setGaugeLessLimit = "",
@@ -1486,6 +1487,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
               If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True, 
  		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
+		 calculateMHiggs2LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs2LoopShift["model", SARAH`HiggsBoson, "idx"];
 	      ];
               If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
  		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
@@ -1510,6 +1512,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@setYukawas@"              -> IndentText[WrapLines[setYukawas]],
                          "@applyUserMatching@"       -> IndentText[WrapLines[userMatching]],
                          "@calculateMHiggsPoleNoMomentumIteration@" -> IndentText[calculateMHiggsPoleNoMomentumIteration],
+			 "@calculateMHiggs2LoopShift@" -> IndentText[calculateMHiggs2LoopShift],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
                          "@twoLoopLambdaMatching@" -> IndentText[twoLoopLambdaMatching],
