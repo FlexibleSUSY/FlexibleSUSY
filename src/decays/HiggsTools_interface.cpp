@@ -118,7 +118,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
       // in the SM, λ = (mh/v)^2/2
       // for mh > 700 GeV this gives λ > 4
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
-      if (mass > 700) continue;
+      if (mass > 650) continue;
 
       auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
       s.setMass(mass);
@@ -178,10 +178,12 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
          std::random_device rd;
          std::mt19937 gen(rd());
          std::uniform_real_distribution<> dis(std::max(a,1e-2*m), std::min(b,1e+2*m));
+         int iterCount = 0;
          do {
             m = dis(gen);
             status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
-         } while (status == GSL_EINVAL);
+            iterCount++;
+         } while (status == GSL_EINVAL && iterCount < 100);
       }
       gsl_set_error_handler (_error_handler);
 
