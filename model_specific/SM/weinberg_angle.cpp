@@ -570,10 +570,7 @@ double Weinberg_angle::calculate_delta_vb(double rhohat_ratio, double sinThetaW)
 {
    const double deltaVbSM = calculate_delta_vb_sm(sinThetaW);
 
-   const double deltaVbBSM = include_dvb_bsm ?
-      calculate_delta_vb_bsm(sinThetaW) : 0.;
-
-   const double deltaVb = rhohat_ratio * (deltaVbSM + deltaVbBSM);
+   const double deltaVb = rhohat_ratio * deltaVbSM;
 
    return deltaVb;
 }
@@ -996,7 +993,7 @@ double Weinberg_angle::replace_mtop_in_self_energy_z(
 double Weinberg_angle::calculate_mw_pole() const
 {
    const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
-      data.mh_pole, data.mt_pole, data.alpha_s_mz, data.dalpha_s_5_had);
+      sm_parameters.mh_pole, sm_parameters.mt_pole, sm_parameters.alpha_s_mz, sm_parameters.dalpha_s_5_had);
 
    return sm_mw.first;
 }
@@ -1155,41 +1152,6 @@ double Weinberg_angle::calculate_delta_rho_hat(double sinThetaW) const
 }
 
 /**
- * Calculates the BSM vertex, box and external wave-function renormalization
- * corrections \f$\delta_{\text{VB}}^{\text{BSM}}\f$ for the specific model
- * as e.g. given in Eqs. (C.13)-(C.16), (C.20) from hep-ph/9606211 for the MSSM.
- *
- * @param sinThetaW sin(theta_W)
- *
- * @return \f$\delta_{\text{VB}}^{\text{BSM}}\f$
- */
-double Weinberg_angle::calculate_delta_vb_bsm(double sinThetaW) const
-{
-   const double mz = sm_parameters.mz_pole;
-   const auto gY = model->get_g1() * standard_model_info::normalization_g1;
-   const auto g2 = model->get_g2() * standard_model_info::normalization_g2;
-   const double sinThetaW2 = Sqr(sinThetaW);
-   const double outcos2    = 1.0 - sinThetaW2;
-
-   const double eDRbar     = gY * g2 / Sqrt(Sqr(gY) + Sqr(g2));
-   const double alphaDRbar = Sqr(eDRbar) / (4.0 * Pi);
-
-   const int FveIdx = get_neutrino_index(0);
-   const int FvmIdx = get_neutrino_index(1);
-
-   const std::complex<double> a1 = 0.;
-   const std::complex<double> deltaV = 0.;
-   const std::complex<double> deltaZ =
-      delta_vb_wave_Fe(0) + delta_vb_wave_Fe(1);
-
-   const double deltaVbBSM = oneOver16PiSqr *
-      (- sinThetaW2 * outcos2 / (2.0 * Pi * alphaDRbar) * Sqr(mz) * a1.real() +
-       deltaV.real() + 0.5 * deltaZ.real());
-
-   return deltaVbBSM;
-}
-
-/**
  * Calculates BSM threshold corrections to alpha_em
  *
  * @param alpha_em
@@ -1203,76 +1165,6 @@ double Weinberg_angle::calculate_delta_alpha_hat_bsm(double alpha_em) const
    
    delta_alpha_hat_bsm += alpha_em/(2.*Pi)*(0);
    return delta_alpha_hat_bsm;
-}
-
-std::complex<double> Weinberg_angle::delta_vb_wave_Fe(int gO1) const
-{
-   const auto Mhh = MODELPARAMETER(Mhh);
-   const auto MFe = MODELPARAMETER(MFe);
-
-   const std::complex<double> result = SUM(gI2,0,2,-(AbsSqr(CpbarFeFehhPL(gI2,gO1)
-      )*B1(0,Sqr(MFe(gI2)),Sqr(Mhh))));
-
-   return result;
-}
-
-/**
- * Calculates the index of the neutrino belonging to the charged lepton with
- * index FeIdx (in NoFV models there are no such indices since every lepton
- * has its own field)
- *
- * @param index of the charged lepton
- *
- * @return index of the corresponding neutrino
- */
-int Weinberg_angle::get_neutrino_index(int FeIdx) const
-{
-   const auto Cp0 = Abs(CpbarFvFeVWpPL(0,FeIdx));
-   const auto Cp1 = Abs(CpbarFvFeVWpPL(1,FeIdx));
-   const auto Cp2 = Abs(CpbarFvFeVWpPL(2,FeIdx));
-
-   if (Cp0 >= std::max(Cp1,Cp2))
-      return 0;
-   if (Cp1 >= std::max(Cp0,Cp2))
-      return 1;
-   if (Cp2 >= std::max(Cp0,Cp1))
-      return 2;
-
-   throw NonPerturbativeSinThetaW();
-}
-
-std::complex<double> Weinberg_angle::CpbarFvFeVWpPL(int gO1, int gI2) const
-{
-   const auto g2 = MODELPARAMETER(g2);
-   const auto Ve = MODELPARAMETER(Ve);
-
-   const std::complex<double> result = IF(gO1 < 3,-0.7071067811865475*g2*Conj(Ve(
-      gI2,gO1)),0);
-
-   return result;
-}
-
-/**
- * Routines for computation of couplings and terms included in
- * \f$\delta_{\text{VB}}^{\text{BSM}}\f$
- */
-
-std::complex<double> Weinberg_angle::CpbarFeFehhPL(int gI1, int gI2) const
-{
-   const auto Ye = MODELPARAMETER(Ye);
-   const auto Ve = MODELPARAMETER(Ve);
-   const auto Ue = MODELPARAMETER(Ue);
-
-   const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,Conj(Ve(gI2,
-      j2))*SUM(j1,0,2,Conj(Ue(gI1,j1))*Ye(j1,j2)));
-
-   return result;
-}
-
-double Weinberg_angle::B1(double p2, double m12, double m22) const noexcept
-{
-   // @note this minus sign is very confusing
-   return -1. * Loop_library::get().B1(p2, m12, m22, Sqr(model->get_scale())).real();
 }
 
 /**

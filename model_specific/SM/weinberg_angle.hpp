@@ -141,14 +141,7 @@ private:
    double pizzt_MZ{0.};               ///< transverse Z self-energy at p^2 = MZ^2
    double piwwt_MW{0.};               ///< transverse W self-energy at p^2 = MW^2
    double piwwt_0{0.};                ///< transverse W self-energy at p^2 = 0
-   double calculate_delta_vb_bsm(double sinThetaW) const;
    double calculate_delta_alpha_hat_bsm(double alpha_em) const;
-   std::complex<double> delta_vb_wave_Fe(int gO1) const;
-   bool include_dvb_bsm{true};        ///< bsm wave, vertex and box corrections are included or not
-   int get_neutrino_index(int FeIdx) const;
-   std::complex<double> CpbarFvFeVWpPL(int gO1, int gI2) const;
-   std::complex<double> CpbarFeFehhPL(int gI1, int gI2) const;
-   double B1(double p2, double m12, double m22) const noexcept;
    double calculate_delta_r_hat(double rhohat_ratio, double sinThetaW) const;
    double calculate_delta_vb(double rhohat_ratio, double sinThetaW) const;
    double calculate_delta_vb_sm(double sinThetaW) const;
