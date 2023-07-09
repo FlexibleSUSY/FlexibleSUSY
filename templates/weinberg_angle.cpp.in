@@ -551,7 +551,7 @@ double CLASSNAME::calculate_self_energy_@VectorW@(double p) const
 double CLASSNAME::calculate_self_energy_@VectorZ@_top(double p, double mt) const
 {
    const double q  = model->get_scale();
-   const double Nc = 3.0;
+   static constexpr double Nc = 3.0;
    @DefSMhyperCoupling@
    @DefSMleftCoupling@
    const double gY2 = Sqr(gY);
@@ -581,7 +581,7 @@ double CLASSNAME::calculate_self_energy_@VectorW@_top(double p, double mt) const
 {
    const double q  = model->get_scale();
    const double mb = @GetBottomMass@;
-   const double Nc = 3.0;
+   static constexpr double Nc = 3.0;
    @DefSMleftCoupling@
 
    const double self_energy_w_top =
