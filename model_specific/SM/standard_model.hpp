@@ -534,7 +534,6 @@ public:
    void calculate_Yd_DRbar(const softsusy::QedQcd&);
    void calculate_Ye_DRbar(const softsusy::QedQcd&);
    double recalculate_mw_pole(double);
-   double calculate_mw_pole(double) const;
    double max_rel_diff(const Standard_model& old) const;
 
 protected:

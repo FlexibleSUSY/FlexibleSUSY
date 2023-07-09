@@ -367,7 +367,7 @@ std::pair<double,double> Weinberg_angle::calculate2(double sinThetaW_start)
    if (not_converged)
       throw NoSinThetaWConvergenceError(number_of_iterations, sinThetaW_new);
 
-   const double mw_pole = calculate_mw_pole(sinThetaW_new);
+   const double mw_pole = calculate_mw_pole();
 
    return std::make_pair(sinThetaW_new, mw_pole);
 }
@@ -999,76 +999,6 @@ double Weinberg_angle::calculate_mw_pole() const
       data.mh_pole, data.mt_pole, data.alpha_s_mz, data.dalpha_s_5_had);
 
    return sm_mw.first;
-}
-
-/**
- * Calculates W boson pole mass from SM value and BSM contributions
- * taken into account strictly on 1-loop level
- *
- * @param sinThetaW sin(theta_W)
- *
- * @return W boson pole mass
- */
-double Weinberg_angle::calculate_mw_pole(double sinThetaW) const
-{
-   const auto gY = model->get_g1() * standard_model_info::normalization_g1;
-   const auto g2 = model->get_g2() * standard_model_info::normalization_g2;
-   const double eDRbar     = gY * g2 / Sqrt(Sqr(gY) + Sqr(g2));
-   const double alphaDRbar = Sqr(eDRbar) / (4.0 * Pi);
-   const double sinThetaW2 = Sqr(sinThetaW);
-   const double cosThetaW2 = 1.0 - sinThetaW2;
-
-   const double mz = model->get_MVZ();
-   const double mw = model->get_MVWp();
-
-   standard_model::Standard_model sm;
-   sm.set_scale(model->get_scale());
-
-   const double SMvev = 2.0 * mw / g2;
-
-   sm.set_g1(gY / standard_model_info::normalization_g1);
-   sm.set_g2(g2 / standard_model_info::normalization_g2);
-   sm.set_g3(model->get_g3());
-   sm.set_v(SMvev);
-   sm.set_Lambdax(Sqr(model->get_Mhh() / SMvev));
-
-   const auto v = MODELPARAMETER(v);
-
-   sm.set_Yu(Re(model->get_Yu()*v/SMvev));
-   sm.set_Yd(Re(model->get_Yd()*v/SMvev));
-   sm.set_Ye(Re(model->get_Ye()*v/SMvev));
-
-   sm.calculate_DRbar_masses();
-
-   const double sigma_Z_MZ_SM = Re(sm.self_energy_VZ_1loop(mz));
-   const double sigma_W_MW_SM = Re(sm.self_energy_VWp_1loop(mw));
-   const double sigma_W_0_SM  = Re(sm.self_energy_VWp_1loop(0.));
-   const double sigma_Z_MZ_Model = Re(model->self_energy_VZ_1loop(mz));
-   const double sigma_W_MW_Model = Re(model->self_energy_VWp_1loop(mw));
-   const double sigma_W_0_Model  = Re(model->self_energy_VWp_1loop(0.));
-
-   const double deltaVbBSM = include_dvb_bsm ?
-      calculate_delta_vb_bsm(sinThetaW) : 0.;
-
-   const double delta_rho_hat_BSM  =
-      (sigma_Z_MZ_Model - sigma_Z_MZ_SM) / Sqr(mz) -
-      (sigma_W_MW_Model - sigma_W_MW_SM) / Sqr(mw);
-   const double delta_rw_hat_BSM   =
-      (sigma_W_0_Model - sigma_W_0_SM -
-       sigma_W_MW_Model + sigma_W_MW_SM) / Sqr(mw) + deltaVbBSM;
-   const double delta_alpha_hat_BSM =
-      calculate_delta_alpha_hat_bsm(alphaDRbar);
-
-   const auto sm_mw_dmw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
-      sm_parameters.mh_pole, sm_parameters.mt_pole,
-      sm_parameters.alpha_s_mz, sm_parameters.dalpha_s_5_had);
-
-   const double mwSM = sm_mw_dmw.first;
-
-   return mwSM * Sqrt(1.0 + sinThetaW2 / (cosThetaW2 - sinThetaW2) *
-                    (cosThetaW2 / sinThetaW2 *
-                     delta_rho_hat_BSM
-                     - delta_rw_hat_BSM - delta_alpha_hat_BSM));
 }
 
 /**
