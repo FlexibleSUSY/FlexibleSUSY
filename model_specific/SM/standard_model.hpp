@@ -34,6 +34,7 @@
 #include "names.hpp"
 #include "problems.hpp"
 #include "physical_input.hpp"
+#include "lowe.h"
 
 #include <array>
 #include <iosfwd>
@@ -41,10 +42,6 @@
 #include <utility>
 
 #include <Eigen/Core>
-
-namespace softsusy {
-   class QedQcd;
-} // namespace softsusy
 
 namespace flexiblesusy {
 
@@ -533,8 +530,7 @@ public:
    double calculate_delta_alpha_em(double alphaEm) const;
    double calculate_delta_alpha_s(double alphaS) const;
    void calculate_Lambdax_DRbar();
-   std::pair<double,double> calculate_theta_w(const softsusy::QedQcd&, double alpha_em_drbar);
-   std::pair<double,double> calculate_theta_w(const softsusy::QedQcd&);
+   std::pair<double,double> calculate_theta_w();
    void calculate_Yu_DRbar(const softsusy::QedQcd&);
    void calculate_Yd_DRbar(const softsusy::QedQcd&);
    void calculate_Ye_DRbar(const softsusy::QedQcd&);
@@ -676,6 +672,7 @@ private:
    Eigen::Matrix<double,2,2> ZZ{Eigen::Matrix<double,2,2>::Zero()};
 
    double calculate_alpha_s_SM5_at(softsusy::QedQcd, double) const;
+   softsusy::QedQcd qedqcd;
 };
 
 std::ostream& operator<<(std::ostream&, const Standard_model&);

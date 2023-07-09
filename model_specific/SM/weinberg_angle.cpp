@@ -993,7 +993,7 @@ double Weinberg_angle::replace_mtop_in_self_energy_z(
 double Weinberg_angle::calculate_mw_pole() const
 {
    const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
-      data.mh_pole, data.mt_pole, data.alpha_s_mz, data.dalpha_s_5_had);
+      sm_parameters.mh_pole, sm_parameters.mt_pole, sm_parameters.alpha_s_mz, sm_parameters.dalpha_s_5_had);
 
    return sm_mw.first;
 }
