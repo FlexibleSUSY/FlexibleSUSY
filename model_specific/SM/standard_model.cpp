@@ -954,15 +954,25 @@ double Standard_model::calculate_theta_w()
       return mh_pole;
    };
 
+   const double mt_pole = qedqcd.displayPoleMt();
+   const double alpha_s_mz = qedqcd.displayAlphaSInput();
+   const double dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   const double mh_pole = get_mh_pole();
+
+   const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
+      this->get_physical().Mhh, mt_pole, alpha_s_mz, dalpha_s_5_had);
+
+   qedqcd.setPoleMW(sm_mw.first);
+
    weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
    sm_pars.fermi_constant = qedqcd.displayFermiConstant();
-   sm_pars.mw_pole = qedqcd.displayPoleMW();
    sm_pars.mz_pole = qedqcd.displayPoleMZ();
-   sm_pars.mt_pole = qedqcd.displayPoleMt();
-   sm_pars.mh_pole = get_mh_pole();
+   sm_pars.mt_pole = mt_pole;
+   sm_pars.mh_pole = mh_pole;
    sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
    sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
-   sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   sm_pars.dalpha_s_5_had = dalpha_s_5_had;
+   sm_pars.mw_pole = sm_mw.first;
 
    const int number_of_iterations =
        std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)
