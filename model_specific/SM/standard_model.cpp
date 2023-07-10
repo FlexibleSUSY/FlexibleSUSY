@@ -44,6 +44,7 @@
 #include "sm_threeloophiggs.hpp"
 #include "sm_fourloophiggs.hpp"
 #include "sm_fourloop_as.hpp"
+#include "sm_mw.hpp"
 
 #include <cmath>
 #include <functional>
@@ -626,6 +627,12 @@ void Standard_model::calculate_pole_masses()
    calculate_MFe_pole();
 
 #endif
+   double mt_pole = qedqcd.displayPoleMt();
+   double alpha_s_mz = qedqcd.displayAlphaSInput();
+   double dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
+      this->get_physical().Mhh, mt_pole, alpha_s_mz, dalpha_s_5_had);
+   this->get_physical().MVWp = sm_mw.first;
 }
 
 void Standard_model::copy_DRbar_masses_to_pole_masses()
@@ -777,9 +784,7 @@ void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
       const double alpha_em_drbar = alpha_em / (1.0 - delta_alpha_em);
       const double alpha_s_drbar  = alpha_s / (1.0 - delta_alpha_s);
       const double e_drbar        = Sqrt(4.0 * Pi * alpha_em_drbar);
-      const auto theta_w_mw_pole  = calculate_theta_w();
-      const double theta_w_drbar  = theta_w_mw_pole.first;
-      const double mw_pole        = theta_w_mw_pole.second;
+      const auto theta_w_drbar = calculate_theta_w();
 
       v = Re((2 * mz_run) / Sqrt(0.6 * Sqr(g1) + Sqr(g2)));
 
@@ -808,11 +813,6 @@ void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
          problems.flag_non_perturbative_parameter(
             standard_model_info::g2, g2, get_scale());
          g2 = Electroweak_constants::g2;
-      }
-
-      if (get_thresholds() && threshold_corrections.sin_theta_w > 0) {
-         qedqcd.setPoleMW(mw_pole);
-         this->get_physical().MVWp = mw_pole;
       }
 
       converged = check_convergence(old);
@@ -941,7 +941,7 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 }
 
-std::pair<double,double> Standard_model::calculate_theta_w()
+double Standard_model::calculate_theta_w()
 {
    double theta_w = std::asin(Electroweak_constants::sinThetaW);
    double mw = Electroweak_constants::MW;
@@ -974,15 +974,13 @@ std::pair<double,double> Standard_model::calculate_theta_w()
    weinberg.set_number_of_iterations(number_of_iterations);
 
    try {
-      const auto result = weinberg.calculate2();
-      theta_w = ArcSin(result.first);
-      mw = result.second;
+      theta_w = ArcSin(weinberg.calculate());
    } catch (const Error& e) {
       VERBOSE_MSG(e.what_detailed());
       this->get_problems().flag_no_sinThetaW_convergence();
    }
 
-   return {theta_w, mw};
+   return theta_w;
 }
 
 void Standard_model::calculate_Yu_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1049,7 +1047,7 @@ double Standard_model::recalculate_mw_pole(double mw_pole)
    if (mw_pole_sqr < 0.)
       problems.flag_pole_tachyon(standard_model_info::VWp);
 
-   return MVWp_pole;
+   return AbsSqrt(mw_pole_sqr);
 }
 
 double Standard_model::max_rel_diff(const Standard_model& old) const

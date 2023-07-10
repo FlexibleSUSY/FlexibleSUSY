@@ -525,7 +525,7 @@ public:
    double calculate_delta_alpha_em(double alphaEm) const;
    double calculate_delta_alpha_s(double alphaS) const;
    void calculate_Lambdax_DRbar();
-   std::pair<double,double> calculate_theta_w();
+   double calculate_theta_w();
    void calculate_Yu_DRbar(const softsusy::QedQcd&);
    void calculate_Yd_DRbar(const softsusy::QedQcd&);
    void calculate_Ye_DRbar(const softsusy::QedQcd&);
