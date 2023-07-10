@@ -177,106 +177,6 @@ double Weinberg_angle::get_mw_pole() const
 /**
  * Calculates the DR-bar weak mixing angle \f$\sin\hat{\theta}_W\f$ as
  * defined in Eq. (C.3) from hep-ph/9606211 given the Fermi constant,
- * the Z-boson pole mass and the DR-bar electromagnetic coupling as
- * input.
- *
- * The function returns 1 if the iterative procedure to determine the
- * weak mixing angle does not converge.
- *
- * @param rho_start initial guess for the rho-hat-parameter
- * @param sin_start initial guess for the sinus of the weak mixing angle
- *
- * @return value != 0 if an error has occured
- */
-int Weinberg_angle::calculate(double rho_start, double sin_start)
-{
-   const double alphaDRbar = data.alpha_em_drbar;
-   const double mz_pole    = data.mz_pole;
-   const double gfermi     = data.fermi_contant;
-
-   int iteration = 0;
-   bool not_converged = true;
-   double rho_old = rho_start, sin_old = sin_start;
-   double rho_new = rho_start, sin_new = sin_start;
-
-   while (not_converged && iteration < number_of_iterations) {
-      double deltaR
-         = calculate_delta_r(rho_old, sin_old, data, susy_contributions,
-                             number_of_loops);
-
-      if (deltaR > 1.) {
-#if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
-         WARNING("delta_r > 1");
-#endif
-         deltaR = 0.;
-      }
-
-      if (!std::isfinite(deltaR)) {
-#if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
-         WARNING("delta_r non-finite");
-#endif
-         deltaR = 0.;
-      }
-
-      double sin2thetasqO4 = Pi * alphaDRbar /
-         (ROOT2 * sqr(mz_pole) * gfermi * (1.0 - deltaR));
-
-      if (sin2thetasqO4 >= 0.25)
-         sin2thetasqO4 = 0.25;
-
-      if (sin2thetasqO4 < 0.0)
-         sin2thetasqO4 = 0.0;
-
-      const double sin2theta = std::sqrt(4.0 * sin2thetasqO4);
-      const double theta = 0.5 * std::asin(sin2theta);
-
-      sin_new = std::sin(theta);
-
-      double deltaRho
-         = calculate_delta_rho(rho_old, sin_new, data, susy_contributions,
-                               number_of_loops);
-
-      if (!std::isfinite(deltaRho)) {
-#if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
-         WARNING("delta_rho non-finite");
-#endif
-         deltaRho = 0.;
-      }
-
-      if (std::abs(deltaRho) < 1.0)
-         rho_new = 1.0 / (1.0 - deltaRho);
-      else
-         rho_new = 1.0;
-
-      const double precision
-         = std::abs(rho_old / rho_new - 1.0) + std::abs(sin_old / sin_new - 1.0);
-
-      VERBOSE_MSG("\t\tIteration step " << iteration
-                  << ": prec=" << precision
-                  << " dr=" << deltaR
-                  << " drho=" << deltaRho
-                  << " rho_new=" << rho_new
-                  << " sin_new=" << sin_new);
-
-      not_converged = precision >= precision_goal;
-
-      rho_old = rho_new;
-      sin_old = sin_new;
-      iteration++;
-   }
-
-   rho_hat = rho_new;
-   sin_theta = sin_new;
-   mw_pole = calculate_mw_pole();
-
-   const int no_convergence_error = iteration == number_of_iterations;
-
-   return no_convergence_error;
-}
-
-/**
- * Calculates the DR-bar weak mixing angle \f$\sin\hat{\theta}_W\f$ as
- * defined in Eq. (C.3) from hep-ph/9606211 given the Fermi constant,
  * the Z-boson pole mass and the DR-bar electromagnetic coupling as input
  * and taking the tree-level value of the \f$\hat{\rho}\f$ parameter into account.
  * Furthermore the W boson pole mass is determined from the final result.
@@ -288,7 +188,7 @@ int Weinberg_angle::calculate(double rho_start, double sin_start)
  *
  * @return sine of the DR-bar weak mixing angle (#1) and W pole mass (#2)
  */
-std::pair<double,double> Weinberg_angle::calculate2(double sinThetaW_start)
+double Weinberg_angle::calculate(double sinThetaW_start)
 {
    const auto gY = model->get_g1() * standard_model_info::normalization_g1;
    const auto g2 = model->get_g2() * standard_model_info::normalization_g2;
@@ -367,9 +267,7 @@ std::pair<double,double> Weinberg_angle::calculate2(double sinThetaW_start)
    if (not_converged)
       throw NoSinThetaWConvergenceError(number_of_iterations, sinThetaW_new);
 
-   const double mw_pole = calculate_mw_pole();
-
-   return std::make_pair(sinThetaW_new, mw_pole);
+   return sinThetaW_new;
 }
 
 /**

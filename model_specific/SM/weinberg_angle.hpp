@@ -113,14 +113,11 @@ public:
    double get_sin_theta() const;     ///< returns sin(theta_w)
    double get_mw_pole() const;       ///< returns (re-calculated) W pole mass
 
-   /// calculates the sinus of the Weinberg angle
-   int calculate(double rho_start = 1.0, double sin_start = 0.48);
-
    static double replace_mtop_in_self_energy_z(double, double, const Self_energy_data&);
    static double replace_mtop_in_self_energy_w(double, double, const Self_energy_data&);
 
-   /// calculates and returns the sine of the Weinberg angle and the W pole mass
-   std::pair<double,double> calculate2(double sinThetaW_start = 0.48);
+   /// calculates and returns the sine of the Weinberg angle
+   double calculate(double sinThetaW_start = 0.48);
 private:
    int number_of_iterations; ///< maximum number of iterations
    int number_of_loops;      ///< number of loops
