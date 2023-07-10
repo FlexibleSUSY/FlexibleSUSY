@@ -34,16 +34,6 @@ namespace weinberg_angle {
  */
 class Weinberg_angle {
 public:
-   struct Self_energy_data {
-      Self_energy_data();
-      double scale;                  ///< renormalization scale
-      double mt_pole;                ///< top quark pole mass
-      double mt_drbar;               ///< top quark DR-bar mass
-      double mb_drbar;               ///< bottom quark DR-bar mass
-      double gY;                     ///< U(1)_Y gauge coupling
-      double g2;                     ///< SU(2)_L gauge coupling
-   };
-
    /**
     * @class Sm_parameters
     * @brief SM parameters necessary for calculating the weak mixing angle
@@ -67,10 +57,6 @@ public:
    void set_precision_goal(double);  ///< set precision goal
    double get_rho_hat() const;       ///< returns the rho parameter
    double get_sin_theta() const;     ///< returns sin(theta_w)
-   double get_mw_pole() const;       ///< returns (re-calculated) W pole mass
-
-   static double replace_mtop_in_self_energy_z(double, double, const Self_energy_data&);
-   static double replace_mtop_in_self_energy_w(double, double, const Self_energy_data&);
 
    /// calculates and returns the sine of the Weinberg angle
    double calculate(double sinThetaW_start = 0.48);
@@ -80,7 +66,6 @@ private:
    double precision_goal;         ///< precision goal
    double rho_hat;                ///< output rho-hat parameter
    double sin_theta;              ///< output sin(theta)
-   double mw_pole;                ///< output W pole mass
 
    const standard_model::Standard_model* model{nullptr}; ///< pointer to investigated model
    Sm_parameters sm_parameters{};     ///< SM parameters
@@ -98,9 +83,6 @@ private:
    double calculate_delta_vb_sm(double sinThetaW) const;
 
    static double rho_2(double);
-
-   static double calculate_self_energy_z_top(double, double, const Self_energy_data&);
-   static double calculate_self_energy_w_top(double, double, const Self_energy_data&);
 };
 
 } // namespace weinberg_angle
