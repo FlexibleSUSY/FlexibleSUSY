@@ -55,16 +55,6 @@ namespace weinberg_angle {
 
 using namespace softsusy;
 
-Weinberg_angle::Self_energy_data::Self_energy_data()
-   : scale(0.)
-   , mt_pole(0.)
-   , mt_drbar(0.)
-   , mb_drbar(0.)
-   , gY(0.)
-   , g2(0.)
-{
-}
-
 /**
  * Sets the maximum number of iterations to 20 and
  * sets the precision goal to 1.0e-8 and
@@ -76,7 +66,6 @@ Weinberg_angle::Weinberg_angle()
    , precision_goal(1.0e-8)
    , rho_hat(0.)
    , sin_theta(0.)
-   , mw_pole(0.)
 {
 }
 
@@ -88,7 +77,6 @@ Weinberg_angle::Weinberg_angle(
    , precision_goal(1.0e-8)
    , rho_hat(0.)
    , sin_theta(0.)
-   , mw_pole(0.)
    , model(model_)
    , sm_parameters(sm_parameters_)
 {
@@ -117,11 +105,6 @@ double Weinberg_angle::get_rho_hat() const
 double Weinberg_angle::get_sin_theta() const
 {
    return sin_theta;
-}
-
-double Weinberg_angle::get_mw_pole() const
-{
-   return mw_pole;
 }
 
 /**
