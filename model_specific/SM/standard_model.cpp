@@ -943,8 +943,6 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 double Standard_model::calculate_theta_w()
 {
-   double theta_w = std::asin(Electroweak_constants::sinThetaW);
-   double mw = Electroweak_constants::MW;
 
    const auto get_mh_pole = [&] () {
       double mh_pole = this->get_physical().Mhh;
@@ -983,6 +981,7 @@ double Standard_model::calculate_theta_w()
    weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
    weinberg.set_number_of_iterations(number_of_iterations);
 
+   double theta_w;
    try {
       theta_w = ArcSin(weinberg.calculate());
    } catch (const Error& e) {
