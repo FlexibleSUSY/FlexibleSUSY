@@ -2798,6 +2798,10 @@ WriteUserExample[inputParameters_List, files_List] :=
       spectrum_generator_settings.set(
          Spectrum_generator_settings::calculate_bsm_masses, 1.0);
    }
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block) && " <> FlexibleSUSY`FSModelName <> "_info::is_CP_violating_Higgs_sector) {
+      WARNING(\"Printing of EFFHIGGSCOUPLINGS block is disabled in models with CP-violating Higgs sector\");
+      flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, 0.);
+   }
 }",
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, flexibledecay_settings);"
              ];

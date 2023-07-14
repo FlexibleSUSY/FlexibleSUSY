@@ -150,12 +150,12 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
  */
 void FlexibleDecay_settings::reset()
 {
-   values[calculate_decays]                 = 1.0;
-   values[min_br_to_print]                  = 1e-5;
-   values[include_higher_order_corrections] = 4.0;
+   values[calculate_decays]                           = 1.0;
+   values[min_br_to_print]                            = 1e-5;
+   values[include_higher_order_corrections]           = 4.0;
    values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
-   values[offshell_VV_decays]               = 2.0;
-   values[print_effc_block]                 = 1.0;
+   values[offshell_VV_decays]                         = 2.0;
+   values[print_effc_block]                           = 0.0;
 }
 bool is_integer(double value)
 {
