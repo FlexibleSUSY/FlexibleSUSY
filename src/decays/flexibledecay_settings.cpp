@@ -33,6 +33,7 @@ const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descrip
    "include higher order corrections in decays",
    "use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ",
    "off-shell decays into VV pair",
+   "print EFFHIGGSCOUPLINGS block"
 };
 
 bool is_integer(double value)
@@ -125,6 +126,8 @@ void FlexibleDecay_settings::set(Settings o, double value)
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 2, descriptions.at(o).c_str());
       break;
+   case print_effc_block: // 1 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
    default:
       break;
    }
@@ -152,6 +155,7 @@ void FlexibleDecay_settings::reset()
    values[include_higher_order_corrections] = 4.0;
    values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
    values[offshell_VV_decays]               = 2.0;
+   values[print_effc_block]                 = 1.0;
 }
 bool is_integer(double value)
 {
