@@ -68,7 +68,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                     2*std::norm(HQQbarVertexDR_P) * Sqr(muqOS / muqDR);
       }
 
-
       const int Nf = number_of_active_flavours(qedqcd, mHOS);
       if (Nf < 5) {
          problems.add_warning(

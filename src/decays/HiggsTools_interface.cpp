@@ -54,7 +54,10 @@ namespace {
 constexpr bool calcggH     = false;
 constexpr bool calcHgamgam = false;
 
+// relative BSM Higgs-like state mass uncertainty
+// example: 0.03 means 3% uncertainty
 constexpr double relMassError = 0.03;
+// Ref. model for computing brs and xsections on the HiggsTools side
 constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
 double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
@@ -71,6 +74,25 @@ double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
       calcggH, calcHgamgam
    );
    return signals(pred);
+}
+
+void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
+   std::cout << "Effective couplings for particle of mass " << mass << '\n';
+   std::cout << "dd     " << effC.dd << std::endl;
+   std::cout << "uu     " << effC.uu << std::endl;
+   std::cout << "ss     " << effC.ss << std::endl;
+   std::cout << "cc     " << effC.cc << std::endl;
+   std::cout << "bb     " << effC.bb << std::endl;
+   std::cout << "tt     " << effC.tt << std::endl;
+   std::cout << "ee     " << effC.ee << std::endl;
+   std::cout << "mumu   " << effC.mumu << std::endl;
+   std::cout << "tautau " << effC.tautau << std::endl;
+
+   std::cout << "WW     " << effC.WW << std::endl;
+   std::cout << "ZZ     " << effC.ZZ << std::endl;
+   std::cout << "gamgam " << effC.gamgam << std::endl;
+   std::cout << "Zgam   " << effC.Zgam << std::endl;
+   std::cout << "gg     " << effC.gg << std::endl;
 }
 
 } // anonymous
