@@ -18,9 +18,17 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
+   const int Nf = number_of_active_flavours(qedqcd, mAh);
+   if (Nf < 5) {
+      problems.add_warning(
+         create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx)
+         + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections."
+      );
+   }
+
    // higher order QCD corrections
    const double tau = Sqr(mAh/(2.*context.mass<UpTypeQuark>({2})));
-   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && Nf >= 5 && tau < 0.7) {
       // number of active light flavours
       static constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
