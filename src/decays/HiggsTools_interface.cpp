@@ -115,7 +115,8 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
       // in the SM, λ = (mh/v)^2/2
       // for mh > 700 GeV this gives λ > 4
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
-      if (mass > 650) continue;
+      // On the other hand there's a problem with finding a SM equivalent of very light states
+      if (mass > 650 || mass < 1) continue;
 
       auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
       s.setMass(mass);
