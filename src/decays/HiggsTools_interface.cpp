@@ -46,15 +46,12 @@ namespace flexiblesusy {
 
 namespace {
 
-// whether to calculate the ggH cross-section in terms of the effective
-// top and bottom Yukawa couplings or by rescaling the SM-like ggH XS
-// by the squared of the effective gg coupling (no effects from colored
-// BSM particles are taken into account)
-constexpr bool calcggH = false;
-// whether to calculate the H->gaga decay width in terms of the
-// effective couplings or by rescaling the SM-like H->gaga decay by the
-// squared of the effective gamgam coupling (no effects from charged
-// BSM particles are taken into account).
+// Whether to calculate the X->gaga and X->gg decay widths in terms of the
+// effective tree-level couplings (calcHgamgam=calcggH=true) or by rescaling
+// the X->gaga and X->gg decay by the squared of the effective gamgam and gg
+// couplings (calcHgamgam=calcggH=false). True would make sense only if we
+// would not compute those loop-induced decays ourself.
+constexpr bool calcggH     = false;
 constexpr bool calcHgamgam = false;
 
 constexpr double relMassError = 0.03;
