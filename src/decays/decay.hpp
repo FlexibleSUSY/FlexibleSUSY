@@ -27,6 +27,7 @@
 #include <boost/core/demangle.hpp>
 #include <boost/range/algorithm/equal.hpp>
 
+#include "always_false.hpp"
 #include "cxx_qft/fields.hpp"
 
 namespace flexiblesusy {
@@ -132,35 +133,33 @@ std::vector<Decay> sort_decays_list(const Decays_list&);
 
 std::string strip_field_namespace(std::string const&);
 
+template<typename Field>
+std::string field_as_string(std::array<int, Field::numberOfFieldIndices> const& idx) {
+   const std::string field = strip_field_namespace(boost::core::demangle(typeid(Field).name()));
+   if constexpr (Field::numberOfFieldIndices == 0) {
+      return field;
+   }
+   else if constexpr (Field::numberOfFieldIndices == 1) {
+      // in the output we count particles from 1 (not 0)
+      return field + "(" + std::to_string(idx[0]+1) + ")";
+   }
+   else {
+      static_assert(always_false<Field>, "Field is expected to have 0 or 1 index");
+   }
+}
+
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 std::string create_process_string(
       std::array<int, FieldIn::numberOfFieldIndices> const in,
       std::array<int, FieldOut1::numberOfFieldIndices> const out1,
       std::array<int, FieldOut2::numberOfFieldIndices> const out2) {
 
-   auto vector_to_idx = [](auto v) {
-      if (v.empty()) {
-         return std::string();
-      }
-      else {
-         // in the output we count particles from 1 (not 0)
-         return "(" + std::to_string(v[0]+1) + ")";
-      }
-   };
-
-   using boost::core::demangle;
    std::string process_string =
-         strip_field_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
-         + " -> " +
-         strip_field_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + " " +
-         strip_field_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2);
+      field_as_string<FieldIn>(in) + " -> " +
+      field_as_string<FieldOut1>(out1) + " " + field_as_string<FieldOut2>(out2);
 
    return process_string;
 }
-
-// https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2593r0.html
-template <typename... T>
-constexpr bool always_false = false;
 
 // returns a squared color generator for a 3 point amplitude with FieldIn, FieldOut1 and FieldOut2
 // averaged over inital state colors

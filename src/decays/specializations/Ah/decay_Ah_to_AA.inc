@@ -23,5 +23,15 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       res *= Sqr(alpha_em_0/alpha_em);
    }
 
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
+      effhiggscouplings_block_input.push_back(
+         {
+            36 + 10*(in_idx.size()>0 ? in_idx.at(0)-1 : 0), 22, 22,
+            std::sqrt(res/(flux * ps * ps_symmetry)/(0.5*Power4(mAh))),
+            field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<Photon>(out2_idx)
+         }
+      );
+   }
+
    return res;
 }
