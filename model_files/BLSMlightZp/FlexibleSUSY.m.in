@@ -61,6 +61,12 @@ InitialGuessAtLowScale = {
 PotentialLSPParticles = {};
 
 ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy, {
+         {20, FlexibleSUSYObservable`AMM[Fe[1]]},
+         {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+         {22, FlexibleSUSYObservable`AMM[Fe[3]]}
+      }
+   },
    {FlexibleSUSYOutput,
            {{1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } }
