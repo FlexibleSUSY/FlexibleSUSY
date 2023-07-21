@@ -122,14 +122,13 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
       throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
    }
 
+   // make sure we don't compute input for the EFFHIGGSCOUPLINGS block in the
+   // built in SM
+   auto flexibledecay_settings_ = flexibledecay_settings;
+   flexibledecay_settings_.set(FlexibleDecay_settings::print_effc_block, 0.0);
+
    auto pred = Higgs::Predictions();
    namespace HP = Higgs::predictions;
-   // whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
-   // or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
-   static constexpr bool calcggH = false;
-   // whether to calculate the H->gaga decay width in terms of the effective couplings
-   // or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
-   static constexpr bool calcHgamgam = false;
 
    for (auto const& el : bsm_input) {
 
@@ -234,7 +233,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
 
       if (sm.get_physical().Mhh > 0) {
          // calculate decays in the SM equivalent
-         flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
+         flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings_);
          sm_decays.calculate_decays();
          const auto sm_input = sm_decays.get_higgstools_input();
 
