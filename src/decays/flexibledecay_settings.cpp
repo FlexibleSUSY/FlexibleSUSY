@@ -33,6 +33,7 @@ const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descrip
    "include higher order corrections in decays",
    "use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ",
    "off-shell decays into VV pair",
+   "print EFFHIGGSCOUPLINGS block"
    "use pole Higgs mixings in vertices",
    "call HiggsTools"
 };
@@ -127,10 +128,12 @@ void FlexibleDecay_settings::set(Settings o, double value)
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 2, descriptions.at(o).c_str());
       break;
-   case use_pole_higgs_mixings: // 5 [bool]
+   case print_effc_block: // 5 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+   case use_pole_higgs_mixings: // 6 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
-   case call_higgstools: // 6 [bool]
+   case call_higgstools: // 7 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
    default:
@@ -165,6 +168,7 @@ void FlexibleDecay_settings::reset()
    values[include_higher_order_corrections]           = 4.0;
    values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
    values[offshell_VV_decays]                         = 2.0;
+   values[print_effc_block]                           = 0.0;
    values[use_pole_higgs_mixings]                     = 0.0;
    values[call_higgstools]                            = 1.0;
 }
