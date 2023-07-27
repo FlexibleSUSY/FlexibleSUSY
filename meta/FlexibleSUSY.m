@@ -1456,6 +1456,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             calculateMDownLeptonPole1L = "",
             calculateMHiggsPoleNoMomentumIteration = "",
 	    calculateMHiggs2LoopShift = "throw SetupError(\"2-loop Higgs self-energy not enabled.\");",
+	    calculateMHiggs3LoopShift = "throw SetupError(\"3-loop Higgs self-energy not enabled.\");",
             threeLoopLambdaMatching = "throw SetupError(\"3-loop matching not enabled.\");",
             twoLoopLambdaMatching = "throw SetupError(\"2-loop matching not enabled.\");",
             setGaugeLessLimit = "",
@@ -1491,6 +1492,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
 	      ];
               If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
  		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
+		 calculateMHiggs3LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs3LoopShift["model", "sm", SARAH`HiggsBoson, "idx"];
 		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMtop2LoopFunction[];
 		 includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
               ];
@@ -1513,6 +1515,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@applyUserMatching@"       -> IndentText[WrapLines[userMatching]],
                          "@calculateMHiggsPoleNoMomentumIteration@" -> IndentText[calculateMHiggsPoleNoMomentumIteration],
 			 "@calculateMHiggs2LoopShift@" -> IndentText[calculateMHiggs2LoopShift],
+			 "@calculateMHiggs3LoopShift@" -> IndentText[calculateMHiggs3LoopShift],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],
                          "@threeLoopLambdaMatching@" -> IndentText[threeLoopLambdaMatching],
                          "@twoLoopLambdaMatching@" -> IndentText[twoLoopLambdaMatching],

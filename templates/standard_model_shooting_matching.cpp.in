@@ -842,6 +842,32 @@ double calculate_Mh2_2l_shift(
    return mh2_shift;
 }
 
+/**
+ * @brief Calculates pure 3-loop contributions to the BSM Higgs pole mass.
+ *
+ * Calculates difference between BSM Higgs pole mass (calculated using
+ * only 3-loop contributions (i.e. no inclusion of 1-loop or 2-loop
+ * contributions) using the given BSM parameters) and the BSM Higgs
+ * tree-level mass (calculated with the given BSM parameters at
+ * tree-level).
+ *
+ * @note The given BSM model parameters should be in the gauge-less
+ * limit (g1 = g2 = 0).
+ *
+ * @param model BSM parameters
+ * @param sm SM model, used for error handling
+ * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
+ *
+ * @return Mh_pole^2 - mh_tree^2 (only 3-loop terms)
+ */
+double calculate_Mh2_3l_shift(
+   const @ModelName@_mass_eigenstates& model,
+   standard_model::Standard_model& sm,
+   int idx)
+{
+@calculateMHiggs3LoopShift@
+}
+
 /// wrapper around `match_high_to_low_scale_sm_0l' that returns a copy
 standard_model::Standard_model match_high_to_low_scale_sm_0l_copy(
    const standard_model::Standard_model& sm,
