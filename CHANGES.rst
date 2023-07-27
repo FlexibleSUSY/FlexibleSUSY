@@ -48,6 +48,54 @@ New features
   generated UFO and CalcHEP models (the latter one being also used by
   micrOMEGAs).
 
+* Added shooting algorithm to solve the boundary value problem for
+  FlexibleEFTHiggs models. The shooting algorithm allows for
+  resummation of certain higher-order contributions and for the
+  inclusion of 2- and 3-loop contributions to the Higgs pole mass in
+  FlexibleEFTHiggs models, leading to an improved precision of the
+  lightest Higgs pole mass prediction in supersymmetric models such as
+  the MSSM or NMSSM [`arXiv:2003.04639
+  <https://arxiv.org/abs/2003.04639>`_].
+
+  To enable the shooting algorithm for a FlexibleEFTHiggs model, add
+  to the FlexibleSUSY model file (see
+  e.g. `NUHMSSMNoFVHimalayaEFTHiggs`)::
+
+      FSBVPSolvers = { ShootingSolver };
+
+  To use 2-loop contributions to the Higgs boson pole mass in the
+  MSSM-limit (in non-minimal supersymmetric models such as the NMSSM),
+  add the following lines to the FlexibleSUSY model file (see
+  e.g. `NMSSMEFThiggs`)::
+
+      FSMSSMLimit = {
+         {\[Kappa], FSGaugeLess},
+         {\[Lambda], FSGaugeLess},
+         {vS, Sqrt[2] MuInput/FSGaugeLess},
+         {T[\[Lambda]], ALambdaInput FSGaugeLess}
+      };
+
+  Suported models: `NUHMSSMNoFVHimalayaEFTHiggs` (3-loop precision,
+  requires Himalaya), `NMSSMEFTHiggs` (2-loop precision).
+
+  Example (`NUHMSSMNoFVHimalayaEFTHiggs`)::
+
+      HIMALAYA_DIR=/path/to/Himalaya-4.2.2
+
+      ./createmodel --name=NUHMSSMNoFVHimalayaEFTHiggs -f
+
+      ./configure --with-models=NUHMSSMNoFVHimalayaEFTHiggs \
+         --enable-himalaya \
+         --with-himalaya-incdir=${HIMALAYA_DIR}/include \
+         --with-himalaya-libdir=${HIMALAYA_DIR}/build
+
+      make
+
+      models/NUHMSSMNoFVHimalayaEFTHiggs/run_NUHMSSMNoFVHimalayaEFTHiggs.x \
+         --slha-input-file=models/NUHMSSMNoFVHimalayaEFTHiggs/LesHouches.in.NUHMSSMNoFVHimalayaEFTHiggs
+
+  Thanks to Thomas Kwasnitza, Dominik Stöckinger and Alexander Voigt.
+
 Fixed bugs
 ----------
 
