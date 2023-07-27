@@ -27,7 +27,7 @@ CalculateMHiggs2LoopShift::usage = "Calculates 2-loop shift to the Higgs pole ma
 Create2LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 2-loop level.";
 Create3LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 3-loop level.";
 CallMatch2LoopTopMass::usage = "Sets SM top Yukawa coupling to 2-loop value, determined from BSM model";
-CreateSMMt2LoopFunction::usage = "Creates a function that calculates the running MS-bar top quark mass in the SM from the BSM parameters";
+CreateSMMtop2LoopFunction::usage = "Creates a function that calculates the running MS-bar top quark mass in the SM from the BSM parameters";
 CalculateRunningUpQuarkMasses::usage = "";
 CalculateRunningDownQuarkMasses::usage = "";
 CalculateRunningDownLeptonMasses::usage = "";
@@ -280,7 +280,7 @@ const double lambda_3l = lambda_2l + delta_lambda_3l;
 CallMatch2LoopTopMass[smStr_:"sm."] :=
 smStr <> "set_Yu(2, 2, calculate_yt_sm_2l(sm_0l, sm_1l, model));"
 
-CreateSMMt2LoopFunction[] :=
+CreateSMMtop2LoopFunction[] :=
 Module[{g3str = ToString[TreeMasses`GetStrongCoupling[]], 
         mglustr = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]],
         md2str = CConversion`RValueToCFormString[SARAH`SoftDown],

@@ -1491,7 +1491,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
 	      ];
               If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
  		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
-		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMt2LoopFunction[];
+		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMtop2LoopFunction[];
 		 includeMSSMTwoLoopTopMassHeader = "#include \"mssm_twoloop_mt.hpp\"";
               ];
 
