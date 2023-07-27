@@ -2,7 +2,7 @@ template <>
 double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
    const context_base& context, typename field_indices<Higgs>::type const& indexIn,
    typename field_indices<WpBoson>::type const& indexOut1,
-   typename field_indices<WmBoson>::type const& indexOut2) const
+   typename field_indices<WmBoson>::type const& indexOut2)
 {
 
    const double mHOS = context.physical_mass<Higgs>(indexIn);
@@ -45,13 +45,12 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
       res *= normalization;
       err *= normalization;
       const double rel_err = err/res;
-      if (rel_err > 1e-3) {
-         std::ostringstream oss;
-         oss <<
-            "Warning: result of H->WW is "
-            << res << " +/- " << err << " GeV (" << 1e+2*rel_err
-            << "%). Relative error > 0.1%.\n";
-         WARNING (oss.str());
+      static constexpr double errorThresholdPerc = 0.1;
+      if (rel_err*100 > errorThresholdPerc) {
+         problems.add_warning(
+            create_process_string<Higgs,WpBoson,WmBoson>(indexIn, indexOut1, indexOut2)
+               + ": Relative integration error > " + std::to_string(errorThresholdPerc) + "%"
+         );
       }
    }
    // three-body decays form mW < mH < 2*mW

@@ -66,6 +66,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/zeta.cpp
 
 LIBFLEXI_HDR := \
+		$(DIR)/always_false.hpp \
 		$(DIR)/amm_loop_functions.hpp \
 		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
@@ -348,7 +349,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
+$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)

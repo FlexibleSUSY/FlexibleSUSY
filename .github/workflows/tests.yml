@@ -124,7 +124,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.15.2
+      image: navir/opensuseleap-for-flexiblesusy:0.17.0
 
     strategy:
       fail-fast: false
@@ -134,7 +134,7 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.10'
-      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic MSSMNoFVEFTHiggs'
       MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3'
 
     steps:
@@ -201,6 +201,9 @@ jobs:
             --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
             --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
             --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --enable-higgstools \
+            --with-higgstools-incdir=$FS_DEPENDENCIES_DIR/HiggsTools/include \
+            --with-higgstools-libdir=$FS_DEPENDENCIES_DIR/HiggsTools/lib64 \
             --enable-himalaya \
             --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
             --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \

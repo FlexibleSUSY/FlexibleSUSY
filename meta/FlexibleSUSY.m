@@ -2146,8 +2146,10 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                           FileByteCount::fdnfnd warning. This is harmless because at this point in
                           the code we know that the model does exist at least somewhere. *)
                        Off[FileByteCount::fdnfnd];
+                       Off[Superpotential::ViolationGlobal];
                        Start@modelName;
                        On[FileByteCount::fdnfnd];
+                       On[Superpotential::ViolationGlobal];
                     ];,
                     DistributedContexts -> None
                  ];
@@ -2172,7 +2174,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
               ]
            ];
            Print[""];
-           Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
+           Print["Creation of decay amplitudes took", FSRound[First@decaysLists, 1], "s"];
            decaysLists = Last@decaysLists;
 
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
@@ -2214,7 +2216,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@decaysGetters@" -> IndentText[WrapLines[decaysGetters]],
                             "@decaysCalculationPrototypes@" -> IndentText[decaysCalculationPrototypes],
                             "@decaysCalculationFunctions@" -> WrapLines[decaysCalculationFunctions],
-                            "@partialWidthCalculationPrototypes@" -> partialWidthCalculationPrototypes,
+                            "@partialWidthCalculationPrototypes@" -> TextFormatting`IndentText[partialWidthCalculationPrototypes],
                             "@partialWidthCalculationFunctions@" -> partialWidthCalculationFunctions,
                             "@calcAmplitudeSpecializationDecls@" -> calcAmplitudeSpecializationDecls,
                             "@calcAmplitudeSpecializationDefs@" -> calcAmplitudeSpecializationDefs,
@@ -2640,7 +2642,7 @@ double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 StringRiffle[
 (
 "template <typename Lepton>
-std::enable_if_t<std::is_same<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">::value, double>
+std::enable_if_t<std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">, double>
 lepton_pole_mass(const softsusy::QedQcd& qedqcd)
 {\n" <>
 TextFormatting`IndentText[
@@ -2650,7 +2652,7 @@ TextFormatting`IndentText[
       GetParticleFromDescription["Tau"],      "return qedqcd.displayPoleMtau()"
    ] <> ";\n"
 ] <>
-"}")& /@ fields,
+"}")& /@ If[fields =!= {}, fields, {GetParticleFromDescription["Electron"], GetParticleFromDescription["Muon"], GetParticleFromDescription["Tau"]}],
 "\n\n"
 ]
          ];
@@ -2806,11 +2808,14 @@ const bool show_decays = !decays.get_problems().have_problem() ||
 if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
+      slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());
+   }
 }";
 
 ExampleCalculateCmdLineDecays[] :=
-FlexibleSUSY`FSModelName <> "_decays decays;" <>
-"decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
+FlexibleSUSY`FSModelName <> "_decays decays " <>
+"= " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
 const bool loop_library_for_decays =
    (Loop_library::get_type() == Loop_library::Library::Collier) ||
    (Loop_library::get_type() == Loop_library::Library::Looptools);
@@ -2875,6 +2880,10 @@ WriteUserExample[inputParameters_List, files_List] :=
       WARNING(\"Decay module requires BSM pole masses. Setting FlexibleSUSY[23] = 1.\");
       spectrum_generator_settings.set(
          Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+   }
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block) && " <> FlexibleSUSY`FSModelName <> "_info::is_CP_violating_Higgs_sector) {
+      WARNING(\"Printing of EFFHIGGSCOUPLINGS block is disabled in models with CP-violating Higgs sector\");
+      flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, 0.);
    }
 }",
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, flexibledecay_settings);"

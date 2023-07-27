@@ -1391,7 +1391,7 @@ CreateRunningDRbarMassFunction[particle_, _] :=
               "const double mass_sqr = Sqr(m_pole) + self_energy;\n\n" <>
               "if (mass_sqr < 0.) {\n" <>
               IndentText[TreeMasses`FlagPoleTachyon[particleName] <>
-                         "return m_pole;"] <> "\n}\n\n" <>
+                         "\nreturn m_pole;"] <> "\n}\n\n" <>
               "return AbsSqrt(mass_sqr);\n";
              ];
            Return[result <> IndentText[body] <> "}\n\n"];

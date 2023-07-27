@@ -735,7 +735,7 @@ CreatePartialWidthCalculationPrototype[decay_FSParticleDecay] :=
                           StringJoin[If[# > 1, ", int", ""]& /@ finalStateDims];
            functionName = CreatePartialWidthCalculationName[decay];
            returnType = CConversion`CreateCType[CConversion`ScalarType[CConversion`realScalarCType]];
-           returnType <> " " <> functionName <> "(" <> functionArgs <> ") const;"
+           returnType <> " " <> functionName <> "(" <> functionArgs <> ");"
           ];
 
 CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :=
@@ -768,7 +768,7 @@ CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :
                                                   If[finalStateDims[[First[#2]]] > 1, "gO" <> ToString[First[#2]], ""]}&, finalState]]];
            body = body <> "\nreturn " <> CreateSpecializedPartialWidthCalculationName[initialState, finalState] <>
                   "(context, in_indices" <> StringJoin[Table[", out_" <> ToString[i] <> "_indices", {i, 1, Length[finalState]}]] <> ");\n";
-           returnType <> " " <> functionName <> "(" <> functionArgs <> ") const\n{\n" <>
+           returnType <> " " <> functionName <> "(" <> functionArgs <> ")\n{\n" <>
                   TextFormatting`IndentText[body] <> "}\n"
           ];
 
@@ -914,8 +914,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
                  "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
                  TextFormatting`IndentText[
-                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
-                    "model.solve_ewsb();\n"
+                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
                  ] <> "}\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
@@ -954,12 +953,18 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "break;\n"
                  ] <>
                  "}\n" <>
-                 "case 2:\n" <>
+                 "case 2: {\n" <>
                  TextFormatting`IndentText[
+                    "model.solve_ewsb_tree_level();\n" <>
+                    "model.calculate_DRbar_masses();\n" <>
+                    "// decoupling scheme automatically reorders Goldstones to first\n" <>
+                    "// positions in tree-level mass and mixing matrices. The\n" <>
+                    "// non-decoupled model does not.\n" <>
+                    "model.reorder_DRbar_masses();\n" <>
                     "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
                     "break;\n"
                   ] <>
-                  "default:\n" <>
+                  "}\ndefault:\n" <>
                   TextFormatting`IndentText[
                      "throw SetupError(\"flag value is not supported\");\n"
                  ]
@@ -2210,7 +2215,7 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
                     Flatten[Last /@ particleDecays, 1]
                  ]
            ];
-           Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
+           Print["The creation of C++ code for decays took", FSRound[First@specializations, 1], "s"];
            specializations = Last@specializations;
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
@@ -2226,7 +2231,7 @@ CreatePartialWidthSpecializationDecl[decay_FSParticleDecay, modelName_] :=
            "template <>\n" <>
            "double " <> modelName <> "_decays::" <>
            CreateSpecializedPartialWidthCalculationName[initialParticle, finalState, fieldsNamespace] <>
-           "(" <> args <> ") const;"
+           "(" <> args <> ");"
           ];
 
 CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=

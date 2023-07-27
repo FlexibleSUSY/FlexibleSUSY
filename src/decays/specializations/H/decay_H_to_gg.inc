@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       const context_base& context,
       const typename field_indices<Higgs>::type& in_idx,
       const typename field_indices<Gluon>::type& out1_idx,
-      const typename field_indices<Gluon>::type& out2_idx) const
+      const typename field_indices<Gluon>::type& out2_idx)
 {
    const auto amp = calculate_amplitude<Higgs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<Higgs>(in_idx);
@@ -90,11 +90,14 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       const double Gamma0 = std::norm(3./4*A12_H);
       switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
          case 4:
+            [[fallthrough]];
          case 3:
             scalar_corr += deltaNNNLO_S*alpha_s_red;
+            [[fallthrough]];
          case 2:
             scalar_corr += deltaNNLO_S;
             scalar_corr *= alpha_s_red;
+            [[fallthrough]];
          case 1:
             scalar_corr += deltaNLO_S;
             scalar_corr *= alpha_s_red/Gamma0;
@@ -133,9 +136,12 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
          double pseudoscalar_corr = 0.0;
          switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
             case 4:
+               [[fallthrough]];
             case 3:
+               [[fallthrough]];
             case 2:
                pseudoscalar_corr += deltaNNLO_P*alpha_s_red;
+               [[fallthrough]];
             case 1:
                pseudoscalar_corr += deltaNLO_P;
                pseudoscalar_corr *= alpha_s_red/std::norm(0.5*A12_A);
@@ -147,6 +153,16 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
          }
          result += pseudoscalar_corr;
       }
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
+      effhiggscouplings_block_input.push_back(
+         {
+            25 + 10*(in_idx.size()>0 ? in_idx.at(0) : 0), 21, 21,
+            std::sqrt(result/(flux * color_fact * ps * ps_symmetry)/(0.5*Power4(mH))),
+            field_as_string<Higgs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx)
+         }
+      );
    }
 
    return result;

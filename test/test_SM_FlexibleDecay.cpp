@@ -13,8 +13,6 @@
 // #include "wrappers.hpp"
 #include "lowe.h"
 // #include "standard_model.hpp"
-// TODO: remove before release
-#include <iomanip>
 #include "loop_libraries/loop_library.hpp"
 
 using namespace flexiblesusy;
