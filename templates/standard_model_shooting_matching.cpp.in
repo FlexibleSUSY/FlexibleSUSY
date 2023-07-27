@@ -854,15 +854,15 @@ double calculate_Mh2_2l_shift(
  * @note The given BSM model parameters should be in the gauge-less
  * limit (g1 = g2 = 0).
  *
- * @param model BSM parameters
  * @param sm SM model, used for error handling
+ * @param model BSM parameters
  * @param idx Index of the SM-like Higgs in the BSM Higgs multiplet
  *
  * @return Mh_pole^2 - mh_tree^2 (only 3-loop terms)
  */
 double calculate_Mh2_3l_shift(
-   const @ModelName@_mass_eigenstates& model,
    standard_model::Standard_model& sm,
+   const @ModelName@_mass_eigenstates& model,
    int idx)
 {
 @calculateMHiggs3LoopShift@

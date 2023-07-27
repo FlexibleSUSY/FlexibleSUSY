@@ -88,7 +88,6 @@ return mh2_shift_2l;"
 
 CalculateMHiggs3LoopShift[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=
    Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
-	   higgsBosonStr = CConversion`RValueToCFormString[higgsBoson],
 	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]]},
 "double mh2_shift_3l = 0;
 
@@ -274,7 +273,7 @@ const double mh2_3l_parameter_conversion = S1_deriv_yt + S1_deriv_yt2 + S2_deriv
 const double mh2_3l_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
 
 // Eq.(4.21) [arxiv:2003.04639] for n=3
-const double mh2_3l_bsm_shift = calculate_Mh2_3l_shift(model_gl, sm, idx);
+const double mh2_3l_bsm_shift = calculate_Mh2_3l_shift(sm, model_gl, idx);
 
 // Eq.(4.28d) [arxiv:2003.04639], Delta lambda^(3l)
 const double delta_lambda_3l = (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2;
