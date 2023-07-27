@@ -5194,7 +5194,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ];
 
               If[FlexibleSUSY`FlexibleEFTHiggs === True,
-                 Print["Creating matching class ..."];
+                 Print["Creating shooting matching class ..."];
                  WriteMatchingClass[FlexibleSUSY`MatchingScaleInput, massMatrices,
                                     {{FileNameJoin[{$flexiblesusyTemplateDir, "standard_model_shooting_matching.hpp.in"}],
                                       FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_standard_model_matching.hpp"}]},
