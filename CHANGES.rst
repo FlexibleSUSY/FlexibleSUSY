@@ -59,14 +59,14 @@ New features
 
   To enable the shooting algorithm for a FlexibleEFTHiggs model, add
   to the FlexibleSUSY model file (see
-  e.g. `NUHMSSMNoFVHimalayaEFTHiggs`)::
+  e.g. ``NUHMSSMNoFVHimalayaEFTHiggs``)::
 
       FSBVPSolvers = { ShootingSolver };
 
   To use 2-loop contributions to the Higgs boson pole mass in the
   MSSM-limit (in non-minimal supersymmetric models such as the NMSSM),
   add the following lines to the FlexibleSUSY model file (see
-  e.g. `NMSSMEFThiggs`)::
+  e.g. ``NMSSMEFThiggs``)::
 
       FSMSSMLimit = {
          {\[Kappa], FSGaugeLess},
@@ -75,10 +75,10 @@ New features
          {T[\[Lambda]], ALambdaInput FSGaugeLess}
       };
 
-  Suported models: `NUHMSSMNoFVHimalayaEFTHiggs` (3-loop precision,
-  requires Himalaya), `NMSSMEFTHiggs` (2-loop precision).
+  Suported models: ``NUHMSSMNoFVHimalayaEFTHiggs`` (3-loop precision,
+  requires Himalaya), ``NMSSMEFTHiggs`` (2-loop precision).
 
-  Example (`NUHMSSMNoFVHimalayaEFTHiggs`)::
+  Example (``NUHMSSMNoFVHimalayaEFTHiggs``)::
 
       HIMALAYA_DIR=/path/to/Himalaya-4.2.2
 
