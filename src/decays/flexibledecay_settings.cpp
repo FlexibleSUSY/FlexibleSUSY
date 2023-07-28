@@ -158,6 +158,7 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
  * | include_higher_order_corrections           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  * | use_Thomson_alpha_in_Phigamgam_and_PhigamZ | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  * | offshell_VV_decays                         | 0 (no) or 1 (single offshell) or 2 (double offshell) | 2 (= double offshell) |
+ * | print_effc_block                           | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
  * | use_pole_higgs_mixings                     | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
  * | call_higgstools                            | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  */
@@ -172,6 +173,7 @@ void FlexibleDecay_settings::reset()
    values[use_pole_higgs_mixings]                     = 0.0;
    values[call_higgstools]                            = 1.0;
 }
+
 bool is_integer(double value)
 {
    double intpart;
