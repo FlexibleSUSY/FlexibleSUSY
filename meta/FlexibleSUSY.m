@@ -2596,7 +2596,7 @@ TextFormatting`IndentText[
       GetParticleFromDescription["Tau"],      "return qedqcd.displayPoleMtau()"
    ] <> ";\n"
 ] <>
-"}")& /@ fields,
+"}")& /@ If[fields =!= {}, fields, {GetParticleFromDescription["Electron"], GetParticleFromDescription["Muon"], GetParticleFromDescription["Tau"]}],
 "\n\n"
 ]
          ];
