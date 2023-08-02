@@ -38,6 +38,32 @@
 
 namespace flexiblesusy {
 
+namespace {
+
+/**
+ * Disables unhandled loop corrections.
+ *
+ * @param model model
+ */
+template <class T>
+void disable_unhandled_loop_corrections(T& model)
+{
+   auto lc = model.get_loop_corrections();
+
+   // 2-loop
+   lc.higgs_atau_atau = false;
+   // 3-loop
+   lc.higgs_ab_as_as = false;
+   lc.higgs_at_at_as = false;
+   lc.higgs_at_at_at = false;
+   // 4-loop
+   lc.higgs_at_as_as_as = false;
+
+   model.set_loop_corrections(lc);
+}
+
+} // anonymous namespace
+
 double @ModelName@_spectrum_generator<Shooting>::get_pole_mass_scale(double susy_scale) const
 {
    return
@@ -77,6 +103,8 @@ void @ModelName@_spectrum_generator<Shooting>::init(
 
    @ModelName@_ewsb_solver<Shooting> ewsb_solver;
    model.set_ewsb_solver(std::make_shared<@ModelName@_ewsb_solver<Shooting> >(ewsb_solver));
+
+   disable_unhandled_loop_corrections(model);
 }
 
 void @ModelName@_spectrum_generator<Shooting>::init(
@@ -93,6 +121,8 @@ void @ModelName@_spectrum_generator<Shooting>::init(
    sm.set_threshold_corrections(this->model.get_threshold_corrections());
    sm.set_precision(this->model.get_precision());
    sm.set_scale(this->model.get_scale());
+
+   disable_unhandled_loop_corrections(sm);
 }
 
 /**

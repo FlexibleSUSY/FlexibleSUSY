@@ -107,7 +107,7 @@ Block FlexibleSUSY
     8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
     9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
    10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
-   11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
+   11   0                    # Higgs 2-loop corrections O(alpha_tau^2)
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
@@ -122,11 +122,11 @@ Block FlexibleSUSY
    23   0                    # calculate BSM pole masses
    24   123111321            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
-   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
-   27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
-   28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
-   29   1                    # Higgs 3-loop corrections O(alpha_t^3)
-   30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+   26   0                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   0                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   0                    # loop library (0 = softsusy)
 Block SMINPUTS               # Standard Model inputs
     1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
@@ -207,7 +207,7 @@ Block FlexibleSUSY
     8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
     9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
    10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
-   11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
+   11   0                    # Higgs 2-loop corrections O(alpha_tau^2)
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
@@ -222,11 +222,11 @@ Block FlexibleSUSY
    23   0                    # calculate BSM pole masses
    24   123111321            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
-   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
-   27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
-   28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
-   29   1                    # Higgs 3-loop corrections O(alpha_t^3)
-   30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+   26   0                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   0                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   0                    # loop library (0 = softsusy)
 Block SMINPUTS               # Standard Model inputs
     1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
       double eps{0.0};
    } data[] = {
       {slha_input_case_1, {1.08559604e+02}, 1e-4}, // obtained from NMSSMEFTHiggsTwoScale in EFT parametrization
-      {slha_input_case_2, {1.20086001e+02}, 1e-6}, // obtained from MSSMEFTHiggs2loop in full-model parametrization
+      {slha_input_case_2, {1.20055553e+02}, 1e-6}, // obtained from MSSMEFTHiggs2loop in full-model parametrization w/ only 2-loop contributions of O((at+ab)*as + (at+ab)^2), i.e. no 2-loop O(atau^2) contributions and not 3- or 4-loop contributions
    };
 
    for (const auto& d: data) {
