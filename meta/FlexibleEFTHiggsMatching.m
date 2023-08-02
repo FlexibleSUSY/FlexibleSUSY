@@ -249,7 +249,6 @@ const double k3 = threeLoop;
 
 const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_no_g3.get_Yu(2, 2);
 const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
-const double sqr_delta_yt_1l = Sqr(delta_yt_1l);
 const double delta_g3_1l = sm_1l.get_g3() - g3;
 
 // 1st derivative of 1-loop SM contribution to Mh w.r.t. yt, times Delta yt(2l)
@@ -257,7 +256,7 @@ const double S1_deriv_yt =
    delta_yt_2l * sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(0, Q, sm_0l_gl.get_MFu(2), yt);
 // 2nd derivative of 1-loop SM contribution to Mh w.r.t. yt, times [Delta yt(1l)]^2
 const double S1_deriv_yt2 =
-   -0.5*(24*k*mt2*(7 + 6*logmt)) * sqr_delta_yt_1l;
+   -0.5*(24*k*mt2*(7 + 6*logmt)) * Sqr(delta_yt_1l);
 // 1st derivative of 2-loop SM contribution to Mh w.r.t. yt, times Delta yt(1l)
 const double S2_deriv_yt =
    64*k2*g32*mt2*yt*(1 + 8*logmt + 6*logmt2) * delta_yt_1l;
