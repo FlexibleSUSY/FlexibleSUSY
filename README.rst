@@ -4,9 +4,11 @@
 FlexibleSUSY
 ============
 
-|release| |static-analysis| |tests|
+|release| |commits-since| |static-analysis| |tests|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |commits-since| image:: https://img.shields.io/github/commits-since/FlexibleSUSY/FlexibleSUSY/latest/development
+   :alt: GitHub commits since latest release (by SemVer including pre-releases)
 .. |static-analysis| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/static%20analysis/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/static-analysis.yml
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development

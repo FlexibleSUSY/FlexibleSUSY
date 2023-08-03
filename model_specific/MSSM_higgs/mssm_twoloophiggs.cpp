@@ -47,8 +47,6 @@ template <typename T> T logabs(T x) { return std::log(std::abs(x)); }
 
 double phi(double x, double y, double z)
 {
-   using std::log;
-
    const double u = x/z, v = y/z;
    const double lambda = sqrtabs(sqr(1 - u - v) - 4*u*v);
    const double xp = 0.5 * (1 + (u - v) - lambda);
@@ -61,11 +59,6 @@ double phi(double x, double y, double z)
 /// First derivative of phi[t,T,g] w.r.t. T
 double dphi_010(double t, double T, double g)
 {
-   using std::fabs;
-   using std::sqrt;
-   using std::log;
-   using std::pow;
-
    constexpr double Pi2 = M_PI * M_PI;
    const double g2 = sqr(g);
    const double abbr = (-4*t*T)/g2 + sqr(1 - t/g - T/g);
@@ -83,18 +76,16 @@ double dphi_010(double t, double T, double g)
       T*logabs((g - rabbr*g - t + T)/g) + g*logabs((g + rabbr*g - t +
       T)/g) - rabbr*g*logabs((g + rabbr*g - t + T)/g) - t*logabs((g +
       rabbr*g - t + T)/g) + T*logabs((g + rabbr*g - t + T)/g)) ) ) /
-      (T*(g - rabbr*g - t + T)))/(3.*pow(fabs(abbr),1.5)*g2);
+      (T*(g - rabbr*g - t + T)))/(3.*std::pow(std::fabs(abbr),1.5)*g2);
 }
 
 /// First derivative of phi[g,t,T] w.r.t. T
 double dphi_001(double g, double t, double T)
 {
-   using std::sqrt;
-
    const double Pi2 = 9.869604401089359;
    const double T2 = sqr(T);
    const double T3 = T2*T;
-   const double x = sqrt(sqr(1 - g/T - t/T) - 4*g*t/T2);
+   const double x = sqrtabs(sqr(1 - g/T - t/T) - 4*g*t/T2);
    const double y = -(2*(g/T2 + t/T2)*(1 - g/T - t/T) + (8*g*t)/T3)/(2*x);
    const double ym = -g/T + t/T;
    const double yp = g/T - t/T;
@@ -134,10 +125,6 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm_st_0(
    double /* sxt */, double /* cxt */, double scale2,
    double mu, double tanb, double vev2, double gs)
 {
-   using std::atan;
-   using std::sin;
-   using std::cos;
-
    const double gs2 = sqr(gs);
    const double g = sqr(mg);
    const double q = scale2;
@@ -192,10 +179,6 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm_st_0_mst1_eq_mst2(
    double /* sxt */, double /* cxt */, double scale2,
    double mu, double tanb, double vev2, double gs)
 {
-   using std::atan;
-   using std::sin;
-   using std::cos;
-
    const double gs2 = sqr(gs);
    const double q = scale2;
    const double q2 = sqr(q);
@@ -213,12 +196,13 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm_st_0_mst1_eq_mst2(
    const double beta = std::atan(tanb);
    const double v2 = v * std::sin(beta);
    const double v1 = v * std::cos(beta);
+   const double dphi = dphi_001(g, t, T);
 
    const double t1 =
       (16*mg*mu*(-((g2 - 2*g*t + sqr(t) - Tsqr)*phi(g,t,T)) +
                  T*(ltg*(-g + t) + (1 + lgtq2 - lgq*ltq - 4*lTq + lgtq2*lTq)*T +
                     (g2 - 2*t*T - 2*g*(t + T) + sqr(t) + Tsqr)*
-                    dphi_001(g,t,T))))/(tanb*Tsqr*sqr(v1));
+                    dphi)))/(tanb*Tsqr*sqr(v1));
 
    const double t2 =
       (-16*(-((g2*(mg*mu + 2*T*tanb) + mg*mu*(sqr(t) - Tsqr) -
@@ -229,7 +213,7 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm_st_0_mst1_eq_mst2(
                           t*(-5 - 2*lTq + 2*ltq*(3 + lTq) - 3*sqr(ltq)) +
                           T*(5 - 4*lTq + sqr(lTq)))) +
                mg*mu*(g2 - 2*t*T - 2*g*(t + T) + sqr(t) + Tsqr)*
-               dphi_001(g,t,T))))/(tanb*Tsqr*sqr(v2));
+               dphi)))/(tanb*Tsqr*sqr(v2));
 
    Eigen::Matrix<double, 2, 1> result;
    result << t1, t2;
@@ -253,8 +237,9 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm_general(
 
    // workaround for intel or Eigen bug causing unexpected behaviour
    // of result.allFinite()
-   if (!std::isfinite(result(0)) || !std::isfinite(result(1)))
+   if (!std::isfinite(result(0)) || !std::isfinite(result(1))) {
        result.setZero();
+   }
 
    return -result;
 }
@@ -265,9 +250,6 @@ Eigen::Matrix<double, 2, 2> self_energy_higgs_2loop_at_as_mssm_with_tadpoles_st_
    double /* sxt */, double /* cxt */, double scale2, double mu,
    double tanb, double vev2, double gs, int /* scheme */)
 {
-   using std::atan;
-   using std::sin;
-
    const double gs2 = sqr(gs);
    const double g = sqr(mg);
    const double g2 = sqr(g);
@@ -285,13 +267,14 @@ Eigen::Matrix<double, 2, 2> self_energy_higgs_2loop_at_as_mssm_with_tadpoles_st_
    const double lgq = logabs(g/q);
    const double lT2t2 = logabs(Tsqr/t2);
    const double del = g2 + t2 + Tsqr - 2*(g*t + g*T + t*T);
-   const double sb = sin(atan(tanb));
+   const double sb = std::sin(std::atan(tanb));
    const double ht2 = 2./vev2*mt2/sqr(sb);
+   const double dphi = dphi_010(t,T,g);
 
    Eigen::Matrix<double, 2, 2> result;
 
    result(0,0) = 0.;
-   result(0,1) = (32*mg*mu*(-1 + ltq - T*dphi_010(t,T,g)))/T;
+   result(0,1) = (32*mg*mu*(-1 + ltq - T*dphi))/T;
    result(1,0) = result(0,1);
    result(1,1) =
       (8*(8*del*mg*mu - 8*del*ltq*mg*mu + 8*del*g*tanb - 8*del*g*lgq*tanb +
@@ -302,7 +285,7 @@ Eigen::Matrix<double, 2, 2> self_energy_higgs_2loop_at_as_mssm_with_tadpoles_st_
           12*ltg*T*t2*tanb - 8*ltg*t3*tanb - 4*ltg*tanb*Tcub +
           8*g*(g + t - T)*T*tanb*phi(t,T,g) + del*T*tanb*sqr(lT2t2) +
           8*del*T*tanb*sqr(ltq) - 8*del*T*tanb*sqr(lTq) +
-          8*del*mg*mu*T*dphi_010(t,T,g)))/(del*T*tanb);
+          8*del*mg*mu*T*dphi))/(del*T*tanb);
 
    const double k2 = 0.00004010149318236068; // 1/(4 Pi)^4
    const double pref = k2*ht2*mt2*gs2;
@@ -332,10 +315,6 @@ double self_energy_pseudoscalar_2loop_at_as_mssm_with_tadpoles_mst1_eq_mst2(
    double sxt, double cxt, double scale2, double mu,
    double tanb, double vev2, double gs)
 {
-   using std::atan;
-   using std::log;
-   using std::sin;
-
    constexpr double Pi2 = M_PI * M_PI;
    const double g = sqr(mg);
    const double g2 = sqr(g);
@@ -343,7 +322,7 @@ double self_energy_pseudoscalar_2loop_at_as_mssm_with_tadpoles_mst1_eq_mst2(
    const double q2 = sqr(scale2);
    const double t = mt2;
    const double T = mst12;
-   const double sb = sin(atan(tanb));
+   const double sb = std::sin(std::atan(tanb));
    const double ht2 = 2./vev2*mt2/sqr(sb);
    const double At = calc_At(mt2, mst12, mst22, sxt, cxt, mu, tanb);
 
@@ -381,9 +360,10 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm(
    double mu, double tanb, double vev2, double gs)
 {
    if (std::abs(sxt) < 1e-8) {
-      if (std::abs((mst12 - mst22)/mst12) < 1e-6)
+      if (std::abs((mst12 - mst22)/mst12) < 1e-6) {
          return tadpole_higgs_2loop_at_as_mssm_st_0_mst1_eq_mst2(
             mt2, mg, mst12, mst22, sxt, cxt, scale2, mu, tanb, vev2, gs);
+      }
 
       return tadpole_higgs_2loop_at_as_mssm_st_0(
          mt2, mg, mst12, mst22, sxt, cxt, scale2, mu, tanb, vev2, gs);
@@ -411,8 +391,9 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_at_mssm(
 
    // workaround for intel or Eigen bug causing unexpected behaviour
    // of result.allFinite()
-   if (!std::isfinite(result(0)) || !std::isfinite(result(1)))
+   if (!std::isfinite(result(0)) || !std::isfinite(result(1))) {
        result.setZero();
+   }
 
    return -result;
 }
@@ -443,8 +424,9 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_atau_atau_mssm(
 
    // workaround for intel or Eigen bug causing unexpected behaviour
    // of result.allFinite()
-   if (!std::isfinite(result(0)) || !std::isfinite(result(1)))
+   if (!std::isfinite(result(0)) || !std::isfinite(result(1))) {
        result.setZero();
+   }
 
    return -result;
 }
@@ -454,9 +436,10 @@ Eigen::Matrix<double, 2, 2> self_energy_higgs_2loop_at_as_mssm_with_tadpoles(
    double sxt, double cxt, double scale2, double mu,
    double tanb, double vev2, double gs, int scheme)
 {
-   if (std::abs((mst12 - mst22)/mst12) < 1e-8)
+   if (std::abs((mst12 - mst22)/mst12) < 1e-8) {
       return self_energy_higgs_2loop_at_as_mssm_with_tadpoles_st_0_mst1_eq_mst2(
          mt2, mg, mst12, mst22, sxt, cxt, scale2, mu, tanb, vev2, gs, scheme);
+   }
 
    return self_energy_higgs_2loop_at_as_mssm_with_tadpoles_general(
       mt2, mg, mst12, mst22, sxt, cxt, scale2, mu, tanb, vev2, gs, scheme);
@@ -522,8 +505,9 @@ double self_energy_pseudoscalar_2loop_at_as_mssm_with_tadpoles(
       const double At = calc_At(mt2, mst12, mst22, sxt, cxt, mu, tanb);
 
       // if At = 0 => mu = 0 => dMA(2L) = 0
-      if (std::abs(At) < std::numeric_limits<double>::epsilon())
+      if (std::abs(At) < std::numeric_limits<double>::epsilon()) {
          return 0.;
+      }
 
       return self_energy_pseudoscalar_2loop_at_as_mssm_with_tadpoles_mst1_eq_mst2(
          mt2, mg, mst12, mst22, sxt, cxt, scale2, mu, tanb, vev2, gs);
