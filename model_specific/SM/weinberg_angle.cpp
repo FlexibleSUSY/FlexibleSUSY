@@ -55,29 +55,10 @@ namespace weinberg_angle {
 
 using namespace softsusy;
 
-/**
- * Sets the maximum number of iterations to 20 and
- * sets the precision goal to 1.0e-8 and
- * sets enables the SUSY contributions by default.
- */
-Weinberg_angle::Weinberg_angle()
-   : number_of_iterations(20)
-   , number_of_loops(2)
-   , precision_goal(1.0e-8)
-   , rho_hat(0.)
-   , sin_theta(0.)
-{
-}
-
 Weinberg_angle::Weinberg_angle(
    const standard_model::Standard_model* model_,
    const Sm_parameters& sm_parameters_)
-   : number_of_iterations(20)
-   , number_of_loops(2)
-   , precision_goal(1.0e-8)
-   , rho_hat(0.)
-   , sin_theta(0.)
-   , model(model_)
+   : model(model_)
    , sm_parameters(sm_parameters_)
 {
 }

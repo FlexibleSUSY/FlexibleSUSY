@@ -61,11 +61,11 @@ public:
    /// calculates and returns the sine of the Weinberg angle
    double calculate(double sinThetaW_start = 0.48);
 private:
-   int number_of_iterations; ///< maximum number of iterations
-   int number_of_loops;      ///< number of loops
-   double precision_goal;         ///< precision goal
-   double rho_hat;                ///< output rho-hat parameter
-   double sin_theta;              ///< output sin(theta)
+   int number_of_iterations = 20; ///< maximum number of iterations
+   int number_of_loops = 2;      ///< number of loops
+   double precision_goal = 1e-8;         ///< precision goal
+   double rho_hat = 0.;                ///< output rho-hat parameter
+   double sin_theta = 0.;              ///< output sin(theta)
 
    const standard_model::Standard_model* model{nullptr}; ///< pointer to investigated model
    Sm_parameters sm_parameters{};     ///< SM parameters
