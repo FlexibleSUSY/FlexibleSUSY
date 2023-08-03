@@ -953,7 +953,7 @@ double Standard_model::calculate_theta_w()
    const double mh_pole = get_mh_pole();
 
    const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
-      this->get_physical().Mhh, mt_pole, alpha_s_mz, dalpha_s_5_had);
+      mh_pole, mt_pole, alpha_s_mz, dalpha_s_5_had);
 
    qedqcd.setPoleMW(sm_mw.first);
 
