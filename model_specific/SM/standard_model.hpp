@@ -653,6 +653,7 @@ private:
    Eigen::Array<double,3,1> MFd{Eigen::Array<double,3,1>::Zero()};
    Eigen::Array<double,3,1> MFu{Eigen::Array<double,3,1>::Zero()};
    Eigen::Array<double,3,1> MFe{Eigen::Array<double,3,1>::Zero()};
+   // running W boson mass
    double MVWp{};
    // W boson pole mass (determined from fit formula)
    double MVWp_pole{};
