@@ -397,22 +397,6 @@ double Weinberg_angle::calculate_delta_rho_hat(double sinThetaW) const
 }
 
 /**
- * Calculates BSM threshold corrections to alpha_em
- *
- * @param alpha_em
- *
- * @return BSM threshold corrections to alpha_em
- */
-double Weinberg_angle::calculate_delta_alpha_hat_bsm(double alpha_em) const
-{
-   const double currentScale = model->get_scale();
-   double delta_alpha_hat_bsm = 0.;
-   
-   delta_alpha_hat_bsm += alpha_em/(2.*Pi)*(0);
-   return delta_alpha_hat_bsm;
-}
-
-/**
  * Calculates the \f$\Delta\hat{r}\f$ corrections as defined in
  * Eqs. (C.3), (C.5) from hep-ph/9606211 taking the tree-level
  * value of the rhohat parameter into account.
