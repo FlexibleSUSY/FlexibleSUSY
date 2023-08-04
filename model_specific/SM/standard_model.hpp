@@ -668,7 +668,7 @@ private:
    Eigen::Matrix<double,2,2> ZZ{Eigen::Matrix<double,2,2>::Zero()};
 
    double calculate_alpha_s_SM5_at(softsusy::QedQcd, double) const;
-   void calculate_MVWp_pole_fit();
+   void calculate_MVWp_pole_fit(double);
    softsusy::QedQcd qedqcd;
 };
 
