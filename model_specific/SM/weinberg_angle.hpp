@@ -77,7 +77,6 @@ private:
    double pizzt_MZ{0.};               ///< transverse Z self-energy at p^2 = MZ^2
    double piwwt_MW{0.};               ///< transverse W self-energy at p^2 = MW^2
    double piwwt_0{0.};                ///< transverse W self-energy at p^2 = 0
-   double calculate_delta_alpha_hat_bsm(double alpha_em) const;
    double calculate_delta_r_hat(double rhohat_ratio, double sinThetaW) const;
    double calculate_delta_vb(double rhohat_ratio, double sinThetaW) const;
    double calculate_delta_vb_sm(double sinThetaW) const;
