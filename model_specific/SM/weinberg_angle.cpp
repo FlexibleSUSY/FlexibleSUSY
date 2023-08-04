@@ -279,7 +279,7 @@ double Weinberg_angle::calculate_self_energy_VZ(double p) const
 double Weinberg_angle::calculate_self_energy_VZ_top(double p, double mt) const
 {
    const double q  = model->get_scale();
-   const double Nc = 3.0;
+   static constexpr double Nc = 3.0;
    const auto gY = model->get_g1() * standard_model_info::normalization_g1;
    const auto g2 = model->get_g2() * standard_model_info::normalization_g2;
    const double gY2 = Sqr(gY);
@@ -334,7 +334,7 @@ double Weinberg_angle::calculate_self_energy_VWp_top(double p, double mt) const
 {
    const double q  = model->get_scale();
    const double mb = model->get_MFd(2);
-   const double Nc = 3.0;
+   static constexpr double Nc = 3.0;
    const auto g2 = model->get_g2() * standard_model_info::normalization_g2;
 
    const double self_energy_w_top =
