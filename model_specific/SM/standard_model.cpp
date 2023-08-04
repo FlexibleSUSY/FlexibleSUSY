@@ -724,7 +724,7 @@ void Standard_model::calculate_pole_masses()
    calculate_MFe_pole();
 
 #endif
-   calculate_MVWp_pole_fit();
+   calculate_MVWp_pole_fit(this->get_physical().Mhh);
 }
 
 void Standard_model::copy_DRbar_masses_to_pole_masses()
@@ -1044,7 +1044,7 @@ double Standard_model::calculate_theta_w()
       return mh_pole;
    };
 
-   calculate_MVWp_pole_fit();
+   calculate_MVWp_pole_fit(get_mh_pole());
    qedqcd.setPoleMW(this->get_physical().MVWp);
 
    weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
@@ -4956,13 +4956,13 @@ double Standard_model::calculate_alpha_s_SM5_at(
    return qedqcd_tmp.displayAlpha(softsusy::ALPHAS);
 }
 
-void Standard_model::calculate_MVWp_pole_fit() {
+void Standard_model::calculate_MVWp_pole_fit(const double mh_pole) {
    double mt_pole = qedqcd.displayPoleMt();
    double alpha_s_mz = qedqcd.displayAlphaSInput();
    double dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
 
    const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
-      this->get_physical().Mhh, mt_pole, alpha_s_mz, dalpha_s_5_had);
+      mh_pole, mt_pole, alpha_s_mz, dalpha_s_5_had);
 
    this->get_physical().MVWp = sm_mw.first;
 }
