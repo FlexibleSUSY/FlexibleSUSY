@@ -976,7 +976,7 @@ double Standard_model::calculate_theta_w()
    weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
    weinberg.set_number_of_iterations(number_of_iterations);
 
-   double theta_w;
+   double theta_w = std::asin(Electroweak_constants::sinThetaW);
    try {
       theta_w = ArcSin(weinberg.calculate());
    } catch (const Error& e) {
