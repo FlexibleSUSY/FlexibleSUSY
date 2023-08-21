@@ -772,7 +772,7 @@ This is achieved by setting the ``FFLAGS`` variable during LoopTools configurati
 
 .. code-block:: shell
 
-    FFLAGS=-fPIC ./configure
+    FFLAGS="-O3 -fPIC" ./configure
 
 COLLIER support
 ```````````````
