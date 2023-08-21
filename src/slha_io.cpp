@@ -986,7 +986,7 @@ void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double c
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
    boost::math::chi_squared dist(2);
-   const double pval = boost::math::cdf(complement(dist, std::abs(chi2-chi2SMmin)));
+   const double pval = 1. ? chi2<chi2SMmin : boost::math::cdf(complement(dist, chi2-chi2SMmin));
    // SLHA doesn't print nicelly numbers with 3 digit exponent
    ss << FORMAT_ELEMENT(4, pval > 1e-100 ? pval : 0., "p-value");
 
