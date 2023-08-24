@@ -2595,7 +2595,7 @@ TextFormatting`IndentText[
 
       WriteOut`ReplaceInFiles[files,
         {"@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
-         "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 2],
+         "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 1],
          "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
