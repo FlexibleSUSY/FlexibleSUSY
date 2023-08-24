@@ -188,7 +188,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 @leptonPoleMass@
 
 template <typename Lepton>
-double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    using namespace @ModelName@_cxx_diagrams::fields;
 
@@ -196,7 +196,7 @@ double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass
 
    // Im[F2]/Re[F2] ~ 0
    if (!is_zero((form_factors[2] + form_factors[3]).real())) {
-      double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
+      const double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
       if (!is_zero(ratio)) {
          ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[Fe]/Re[F2] = " + std::to_string(ratio));
          return std::numeric_limits<double>::quiet_NaN();
@@ -216,7 +216,7 @@ double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass
       // reinstate the mass that was factored out in definition of form factor
       * context.mass<Lepton>({@extraIdxUsageNoComma@})
       // factor out e/(2*lepton pole mass)
-      / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
+      / (unit_charge(context)/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
       // definition of photon momentum flow for g-2 is opposite than for form factors
       * (-1.);
 
@@ -236,7 +236,7 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    // 1L
    if (settings.get(Spectrum_generator_settings::calculate_amm) > 0.5) {
-      val += calculate_amm_impl_1l<Lepton>(context, model, qedqcd, settings@extraIdxUsage@);
+      val += calculate_amm_impl_1l<Lepton>(context, model, qedqcd@extraIdxUsage@);
    }
 
    // 2L QED
