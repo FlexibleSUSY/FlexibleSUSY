@@ -236,14 +236,16 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    double val = 0.;
 
-   // 1L
    if (loops > 0.5) {
-      val += calculate_amm_impl_1l<Lepton>(context, model, ml_pole@extraIdxUsage@);
-   }
+      const double amu_1l = calculate_amm_impl_1l<Lepton>(context, model, ml_pole@extraIdxUsage@);
 
-   // 2L QED logarithms
-   if (loops > 1.25) {
-      val *= 1. + get_QED_2L<Lepton>(context, qedqcd, ml_pole);
+      // 1L
+      val += amu_1l;
+
+      // 2L QED logarithms
+      if (loops > 1.25) {
+         val += amu_1l*get_QED_2L<Lepton>(context, qedqcd, ml_pole);
+      }
    }
 
    // 2L Barr-Zee contributions
