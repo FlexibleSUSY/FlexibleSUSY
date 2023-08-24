@@ -44,7 +44,7 @@ using namespace @ModelName@_cxx_diagrams;
 namespace {
 
 template <typename Lepton>
-double get_QED_2L(const context_base&, const softsusy::QedQcd&, double);
+double get_QED_2L(const context_base&, double);
 
 /**
  * @class AMMBarrZeeFermionLoop
@@ -244,7 +244,7 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
       // 2L QED logarithms
       if (loops > 1.25) {
-         val += amu_1l*get_QED_2L<Lepton>(context, qedqcd, ml_pole);
+         val += amu_1l*get_QED_2L<Lepton>(context, ml_pole);
       }
    }
 
@@ -335,7 +335,7 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
 
 namespace {
 template <typename Lepton>
-double get_QED_2L(const context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
+double get_QED_2L(const context_base& context, double m_lepton)
 {
    const double MSUSY = Abs(get_MSUSY(context.model));
    const double alpha_em = Sqr(Lepton::electricCharge * unit_charge(context))/(4*Pi);
