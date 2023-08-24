@@ -44,7 +44,7 @@ using namespace @ModelName@_cxx_diagrams;
 namespace {
 
 template <typename Lepton>
-double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
+double get_QED_2L(const context_base&, const softsusy::QedQcd&, double);
 
 /**
  * @class AMMBarrZeeFermionLoop
@@ -188,7 +188,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 @leptonPoleMass@
 
 template <typename Lepton>
-double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates& model, double ml_pole@extraIdxDecl@)
 {
    using namespace @ModelName@_cxx_diagrams::fields;
 
@@ -216,7 +216,7 @@ double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass
       // reinstate the mass that was factored out in definition of form factor
       * context.mass<Lepton>({@extraIdxUsageNoComma@})
       // factor out e/(2*lepton pole mass)
-      / (unit_charge(context)/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
+      / (unit_charge(context)/(2.*ml_pole))
       // definition of photon momentum flow for g-2 is opposite than for form factors
       * (-1.);
 
@@ -228,26 +228,26 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 {
    VERBOSE_MSG("@ModelName@_amm: calculating a_mu at Q = " << model.get_scale());
 
-   context_base context{ model };
-
    using namespace @ModelName@_cxx_diagrams::fields;
+
+   const context_base context{model};
+   const double ml_pole = lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@);
+   const double loops = settings.get(Spectrum_generator_settings::calculate_amm);
 
    double val = 0.;
 
    // 1L
-   if (settings.get(Spectrum_generator_settings::calculate_amm) > 0.5) {
-      val += calculate_amm_impl_1l<Lepton>(context, model, qedqcd@extraIdxUsage@);
+   if (loops > 0.5) {
+      val += calculate_amm_impl_1l<Lepton>(context, model, ml_pole@extraIdxUsage@);
    }
 
-   // 2L QED
-   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.25) {
-      // add 2-loop QED logarithms
-      val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
+   // 2L QED logarithms
+   if (loops > 1.25) {
+      val *= 1. + get_QED_2L<Lepton>(context, qedqcd, ml_pole);
    }
 
-   // Barr-Zee
-   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.75) {
-
+   // 2L Barr-Zee contributions
+   if (loops > 1.75) {
 @AMMBarrZeeCalculation@
    }
 
@@ -333,7 +333,7 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
 
 namespace {
 template <typename Lepton>
-double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
+double get_QED_2L(const context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
 {
    const double MSUSY = Abs(get_MSUSY(context.model));
    const double alpha_em = Sqr(Lepton::electricCharge * unit_charge(context))/(4*Pi);
