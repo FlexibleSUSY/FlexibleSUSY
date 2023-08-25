@@ -2514,7 +2514,7 @@ WriteAMMClass[fields_List, files_List] :=
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPoleMass,
-            BarrZeeLeptonIdx, ammWrapperDecl, ammWrapperDef, ammUncWrapperDecl, ammUncWrapperDef},
+            ammWrapperDecl, ammWrapperDef, ammUncWrapperDecl, ammUncWrapperDef},
 
       calculation =
          If[Length[fields] =!= 0,
@@ -2578,8 +2578,6 @@ TextFormatting`IndentText[
 ]
          ];
 
-      BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
-
       ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammWrapperDef = StringRiffle[
@@ -2603,7 +2601,6 @@ TextFormatting`IndentText[
          "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
          "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
-         "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
          "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 1],
          "@ammWrapperDecl@" -> ammWrapperDecl,
          "@ammWrapperDef@" -> ammWrapperDef,
