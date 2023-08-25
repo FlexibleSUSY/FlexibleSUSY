@@ -296,6 +296,26 @@ EOF
     fi
 }
 
+# compares two values $1 < $2
+test_lt() {
+    local val1
+    local val2
+    local diff
+
+    val1="$1"
+    val2="$2"
+    diff=$(cat <<EOF | bc
+scale=100
+${val1} < ${val2}
+EOF
+        )
+
+    if test $diff -ne 1 ; then
+        echo "Error: ${val1} !< ${val2}"
+        errors=1
+    fi
+}
+
 ### test 2L GM2Calc vs. embedded 2L GM2Calc
 test_close "${amu_2l_gm2calc_fs}" "${amu_2l_gm2calc}" "0.0000001"
 
@@ -313,6 +333,10 @@ test_close "${amu_1l_fs}" "${amu_1l_gm2calc}" "0.2"
 ### test 2L GM2Calc vs. 2L FS
 
 # test_close "${amu_2l_fs}" "${amu_2l_gm2calc}" "0.2"
+
+### test uncertainties
+
+test_lt "${damu_2l_fs}" "${damu_1l_fs}"
 
 echo "FlexibleSUSY 1L         : amu = ${amu_1l_fs} +/- ${damu_1l_fs}"
 echo "FlexibleSUSY 2L         : amu = ${amu_2l_fs} +/- ${damu_2l_fs}"

@@ -43,6 +43,11 @@ using namespace @ModelName@_cxx_diagrams;
 
 namespace {
 
+constexpr double amm_threshold_1l = 0.5;          ///< threshold for inclusion of 1-loop contributions
+constexpr double amm_threshold_2l_qed = 1.25;     ///< threshold for inclusion of 2-loop QED logarithmic contributions
+constexpr double amm_threshold_2l_barrzee = 1.75; ///< threshold for inclusion of 2-loop Barr-Zee contributions
+constexpr double amm_threshold_3l = 2.25;         ///< threshold for inclusion of 3-loop contributions
+
 template <typename Lepton>
 double calculate_qed_1l_log(const context_base&, double);
 
@@ -257,52 +262,24 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    double val = 0.;
 
-   if (loops > 0.5) {
+   if (loops > amm_threshold_1l) {
       const double amu_1l = calculate_amm_impl_1l<Lepton>(context, model, ml_pole@extraIdxUsage@);
 
       // 1L
       val += amu_1l;
 
       // 2L QED logarithms
-      if (loops > 1.25) {
+      if (loops > amm_threshold_2l_qed) {
          val += calculate_amm_impl_2l_qed<Lepton>(context, ml_pole, amu_1l);
       }
    }
 
    // 2L Barr-Zee contributions
-   if (loops > 1.75) {
+   if (loops > amm_threshold_2l_barrzee) {
       val += calculate_amm_impl_2l_barrzee<Lepton>(context, ml_pole@extraIdxUsage@);
    }
 
    return val;
-}
-
-/// returns minimum and maximum a_mu when scale is varied by a factor 2
-template <typename Lepton>
-std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
-{
-   auto scales = subdivide_log(0.5*model.get_scale(), 2*model.get_scale(), 6);
-
-   std::transform(scales.begin(), scales.end(), scales.begin(),
-                  [&model,&qedqcd,&settings@extraIdxUsage@] (double scale) {
-                     double amu = 0.;
-                     try {
-                        auto m = model;
-                        m.run_to(scale);
-                        m.get_physical().clear();
-                        m.calculate_DRbar_masses();
-                        m.solve_ewsb();
-                        amu = calculate_amm_impl<Lepton>(m, qedqcd, settings@extraIdxUsage@);
-                     }
-                     catch(const Error& e) {
-                        ERROR("@ModelName@_amm: scale variation: " << e.what_detailed());
-                     }
-                     return amu;
-                  });
-
-   const auto minmax = std::minmax_element(scales.cbegin(), scales.cend());
-
-   return std::make_pair(*(minmax.first), *(minmax.second));
 }
 
 } // anonymous namespace
@@ -344,10 +321,38 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   const auto delta_amu_scale_minmax = vary_scale<Lepton>(model, qedqcd, settings@extraIdxUsage@);
-   const auto delta_amu_scale = std::abs(delta_amu_scale_minmax.second - delta_amu_scale_minmax.first);
+   const context_base context{model};
+   const double ml_pole = lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@);
+   const double loops = settings.get(Spectrum_generator_settings::calculate_amm);
 
-   return delta_amu_scale;
+   const double amu_1l = calculate_amm_impl_1l<Lepton>(context, model, ml_pole@extraIdxUsage@);
+   const double amu_2l_qed = calculate_amm_impl_2l_qed<Lepton>(context, ml_pole, amu_1l);
+   const double amu_2l_barrzee = calculate_amm_impl_2l_barrzee<Lepton>(context, ml_pole@extraIdxUsage@);
+   const double amu_2l = amu_2l_qed + amu_2l_barrzee;
+
+   double damu = 0.;
+
+   if (loops <= amm_threshold_1l) {
+      // add 1-loop uncertainty from missing 1-loop contributions
+      damu += Abs(amu_1l);
+   }
+
+   if (loops <= amm_threshold_2l_qed) {
+      // add 2-loop uncertainty from missing 2-loop QED contributions
+      damu += Abs(amu_2l_qed);
+   }
+
+   if (loops <= amm_threshold_2l_barrzee) {
+      // add 2-loop uncertainty from missing 2-loop Barr-Zee contributions
+      damu += Abs(amu_2l_barrzee);
+   }
+
+   if (loops <= amm_threshold_3l) {
+      // add 3-loop uncertainty from missing 3-loop QED contributions
+      damu += Abs(amu_2l*calculate_qed_1l_log<Lepton>(context, ml_pole));
+   }
+
+   return damu;
 }
 
 // spliting templated function into header and cpp
