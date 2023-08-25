@@ -187,6 +187,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 
 @leptonPoleMass@
 
+/// 1-loop scalar/fermionic contributions
 template <typename Lepton>
 double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates& model, double ml_pole@extraIdxDecl@)
 {
@@ -223,10 +224,24 @@ double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass
    return result;
 }
 
+/// 2-loop QED logarithmic contributions
 template <typename Lepton>
 double calculate_amm_impl_2l_qed(const context_base& context, double ml_pole, double amu_1l)
 {
    return amu_1l*get_QED_2L<Lepton>(context, ml_pole);
+}
+
+/// 2-loop Barr-Zee contributions
+template <typename Lepton>
+double calculate_amm_impl_2l_barrzee(const context_base& context, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+{
+   using namespace @ModelName@_cxx_diagrams::fields;
+
+   double val = 0.;
+
+@AMMBarrZeeCalculation@
+
+   return val;
 }
 
 template <typename Lepton>
@@ -256,7 +271,7 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 
    // 2L Barr-Zee contributions
    if (loops > 1.75) {
-@AMMBarrZeeCalculation@
+      val += calculate_amm_impl_2l_barrzee<Lepton>(context, qedqcd@extraIdxUsage@);
    }
 
    return val;

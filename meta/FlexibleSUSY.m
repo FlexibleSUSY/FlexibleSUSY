@@ -2604,7 +2604,7 @@ TextFormatting`IndentText[
          "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
-         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 2],
+         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 1],
          "@ammWrapperDecl@" -> ammWrapperDecl,
          "@ammWrapperDef@" -> ammWrapperDef,
          "@ammUncWrapperDecl@" -> ammUncWrapperDecl,
