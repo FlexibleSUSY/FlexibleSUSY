@@ -44,7 +44,7 @@ using namespace @ModelName@_cxx_diagrams;
 namespace {
 
 template <typename Lepton>
-double get_QED_2L(const context_base&, double);
+double calculate_qed_1l_log(const context_base&, double);
 
 /**
  * @class AMMBarrZeeFermionLoop
@@ -228,7 +228,7 @@ double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass
 template <typename Lepton>
 double calculate_amm_impl_2l_qed(const context_base& context, double ml_pole, double amu_1l)
 {
-   return amu_1l*get_QED_2L<Lepton>(context, ml_pole);
+   return amu_1l*calculate_qed_1l_log<Lepton>(context, ml_pole);
 }
 
 /// 2-loop Barr-Zee contributions
@@ -355,14 +355,16 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
 @calculateAUncertaintyForwardDeclaration@
 
 namespace {
+
+/// returns 1-loop logarithmic term, necessary to calculate the 2-loop QED logarithmic contributions
 template <typename Lepton>
-double get_QED_2L(const context_base& context, double m_lepton)
+double calculate_qed_1l_log(const context_base& context, double m_lepton)
 {
    const double MSUSY = Abs(get_MSUSY(context.model));
    const double alpha_em = Sqr(Lepton::electricCharge * unit_charge(context))/(4*Pi);
-   const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
+   const double result = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
 
-   return qed_2L;
+   return result;
 }
 
 template<typename Lepton, class Fermion, class Scalar>
