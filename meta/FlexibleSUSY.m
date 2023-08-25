@@ -2549,7 +2549,7 @@ WriteAMMClass[fields_List, files_List] :=
                      If[Im[colFac] == 0, colFac, Print["Error: Colour prefactor of a Barr-Zee diagram should be real!"]; Quit[1]]
                   ], 16] <> " * " <>
                 ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
-                "::value({" <> leptonIndex <> "}, context, qedqcd);\n"
+                "::value({" <> leptonIndex <> "}, context, ml_pole);\n"
          ];
       ];
 
