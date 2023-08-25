@@ -2508,7 +2508,7 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
 
 (* Write the AMM c++ files *)
 WriteAMMClass[fields_List, files_List] :=
-    Module[{calculation, getMSUSY,
+    Module[{calculation, getMLCP,
             (* in models without flavour violation (no FV models) lepton does not have an index *)
             leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
@@ -2527,7 +2527,7 @@ WriteAMMClass[fields_List, files_List] :=
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
 
-      getMSUSY = AMM`AMMGetMSUSY[];
+      getMLCP = AMM`AMMGetMLCP[];
 
       (* only Barr-Zee graphs
          1-loop diagrams will be provided by the FFMasslessV module and are taken care of elsewhere *)
@@ -2594,7 +2594,7 @@ TextFormatting`IndentText[
       WriteOut`ReplaceInFiles[files,
         {"@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
          "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 1],
-         "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
+         "@AMMGetMLCP@"           -> TextFormatting`IndentText[WrapLines[getMLCP]],
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],

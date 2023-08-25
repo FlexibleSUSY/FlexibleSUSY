@@ -151,9 +151,10 @@ struct AMMBarrZeeVectorLoop {
                        double ml_pole);
 };
 
-double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
+/// returns mass of lightest electrically charged BSM particle
+double get_MLCP(const @ModelName@_mass_eigenstates_interface& model)
 {
-@AMMGetMSUSY@
+@AMMGetMLCP@
 }
 
 void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
@@ -167,7 +168,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    VERBOSE_MSG("@ModelName@_amm: iterate to run to MSUSY ...");
 
    do {
-      MSUSY_new = get_MSUSY(model);
+      MSUSY_new = get_MLCP(model);
 
       if (MSUSY_new <= 0.)
          return;
@@ -365,7 +366,7 @@ namespace {
 template <typename Lepton>
 double calculate_qed_1l_log(const context_base& context, double m_lepton)
 {
-   const double MSUSY = Abs(get_MSUSY(context.model));
+   const double MSUSY = Abs(get_MLCP(context.model));
    const double alpha_em = Sqr(Lepton::electricCharge * unit_charge(context))/(4*Pi);
    const double result = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
 
