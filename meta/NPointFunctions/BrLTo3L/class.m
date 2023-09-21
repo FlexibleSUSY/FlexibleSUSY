@@ -46,7 +46,7 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
       If[And[obs =!= {},
             FlexibleSUSY`FSFeynArtsAvailable,
             FlexibleSUSY`FSFormCalcAvailable],
-         Print@"Creating BrLTo3L class ...";
+         Print@"\nCreating BrLTo3L class ...";
          Get@main;
          fermions = DeleteDuplicates@Cases[obs, {_, f_, bf_} :> {bf, f},
             Infinity] /. f_[_Integer]:>f;
@@ -66,11 +66,13 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
             "@calc_prototypes@" -> calcProto,
             "@calc_definitions@" -> calcDef,
             "@get_MSUSY@" -> TextFormatting`IndentText@
-               TextFormatting`WrapLines@AMuon`AMuonGetMSUSY[],
+               TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
             Sequence@@GeneralReplacementRules[]
          }
       ];
-      {ffvFields, Join[ffvV, npfV], {}}];];
+      {ffvFields, Join[ffvV, npfV], {}}
+   ];
+];
 WriteBrLTo3LClass // Utils`MakeUnknownInputDefinition;
 WriteBrLTo3LClass // Protect;
 

@@ -3,6 +3,7 @@ name: static analysis
 on:
   push:
     paths:
+      - '.github/workflows/static-analysis.yml'
       - 'configure'
       - 'createmodel'
       - 'install-sarah'
@@ -13,6 +14,7 @@ on:
 
   pull_request:
     paths:
+      - '.github/workflows/static-analysis.yml'
       - 'configure'
       - 'createmodel'
       - 'install-sarah'
@@ -23,14 +25,17 @@ on:
 
 jobs:
   check-scripts:
-    runs-on: ubuntu-latest
-    container:
-      image: navir/opensuseleap-for-flexiblesusy:latest
+    runs-on: ubuntu-22.04
 
     steps:
 
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
+
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check scripts
         run: |

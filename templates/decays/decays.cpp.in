@@ -38,6 +38,7 @@
 #include <boost/mpl/list.hpp>
 
 #include "@ModelName@_decays.hpp"
+#include "cxx_qft/@ModelName@_particle_aliases.hpp"
 #include "@ModelName@_info.hpp"
 #include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
@@ -113,8 +114,6 @@ double get_alpha(context_base const&  context)
 @calcAmplitudeSpecializationDefs@
 
 // -------- specializations for decays needing higher order SM corrections --------
-
-@create_SM_particle_usings@
 
 @create_BSM_particle_list@
 

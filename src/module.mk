@@ -6,6 +6,7 @@ LIBFLEXI_MK  := \
 		$(DIR)/module.mk
 
 LIBFLEXI_SRC := \
+		$(DIR)/amm_loop_functions.cpp \
 		$(DIR)/betafunction.cpp \
 		$(DIR)/build_info.cpp \
 		$(DIR)/bvp_solver_problems.cpp \
@@ -22,6 +23,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/eta.cpp \
 		$(DIR)/factorial.cpp \
+		$(DIR)/ffv_loop_functions.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
 		$(DIR)/gsl_multimin_fminimizer.cpp \
@@ -65,6 +67,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/zeta.cpp
 
 LIBFLEXI_HDR := \
+		$(DIR)/always_false.hpp \
+		$(DIR)/amm_loop_functions.hpp \
 		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
 		$(DIR)/betafunction.hpp \
@@ -100,6 +104,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/ew_input.hpp \
 		$(DIR)/ewsb_solver.hpp \
 		$(DIR)/factorial.hpp \
+		$(DIR)/ffv_loop_functions.hpp \
 		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/for_each.hpp \
@@ -340,7 +345,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
+$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)

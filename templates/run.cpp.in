@@ -98,6 +98,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
             qedqcd,
             @LToLConversion_class_name@
             physical_input,
+            spectrum_generator_settings,
             scales.pole_mass_scale);
       }
    }

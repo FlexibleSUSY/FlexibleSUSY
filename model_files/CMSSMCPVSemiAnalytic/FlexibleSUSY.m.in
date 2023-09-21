@@ -110,7 +110,7 @@ ExtraSLHAOutputBlocks = {
             {2, ImBMu0},
             {3, m0Sq} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon},
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]},
             {23, FlexibleSUSYObservable`EDM[Fe[1]]},
             {24, FlexibleSUSYObservable`EDM[Fe[2]]},
             {25, FlexibleSUSYObservable`EDM[Fe[3]]} } },

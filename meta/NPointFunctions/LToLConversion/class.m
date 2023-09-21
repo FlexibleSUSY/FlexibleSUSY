@@ -58,7 +58,7 @@ Module[
    If[And[observables =!= {},
          FlexibleSUSY`FSFeynArtsAvailable,
          FlexibleSUSY`FSFormCalcAvailable],
-      Print["Creating LToLConversion class ..."];
+      Print["\nCreating LToLConversion class ..."];
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
       (* additional vertices needed for the 1 loop calculation *)
@@ -85,7 +85,7 @@ Module[
          "@calculate_prototypes@" -> prototypes,
          "@calculate_definitions@" -> definitions,
          "@get_MSUSY@" -> TextFormatting`IndentText@
-            TextFormatting`WrapLines@AMuon`AMuonGetMSUSY[],
+            TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
          Sequence@@GeneralReplacementRules[]
       }
    ];

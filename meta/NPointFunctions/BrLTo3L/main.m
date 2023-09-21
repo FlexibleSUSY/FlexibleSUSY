@@ -135,6 +135,7 @@ Module[{keep, peng, out, boxQ},
    boxQ = True;
    keep = `npf`parse@obs;
    peng = Complement[keep, {Boxes}];
+
    Utils`FSFancyLine@"<";
    Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
       peng, ",\n                ", SymbolName]<>" started"];
@@ -149,7 +150,10 @@ Module[{keep, peng, out, boxQ},
       (* both *) _,
          out = `npf`code@`npf`match@`npf`clean@`npf`create[obs, peng];];
    Utils`FSFancyLine@">";
-   {out, boxQ}];
+   Print[];
+
+   {out, boxQ}
+];
 `npf`assemble // Utils`MakeUnknownInputDefinition;
 `npf`assemble // Protect;
 
@@ -175,10 +179,6 @@ npf /.
 `npf`clean // Utils`MakeUnknownInputDefinition;
 `npf`clean // Protect;
 
-`npf`match::usage = "
-@note String names on the lhs. are representing the final names of coefficients
-      for the C++ code, after applying some relations on the C++ level! Check
-      appropriate file in templates directory to see them.";
 `npf`match[npf:NPointFunctions`Private`type`npf] :=
 Module[{fields, sp, dc, dim6},
    fields = Flatten@NPointFunctions`Private`getProcess@npf;

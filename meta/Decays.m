@@ -37,7 +37,6 @@ CreateCompleteParticleList::usage="";
 GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
-CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
 CreateBSMParticleAliasList::usage="";
 
 CallDecaysCalculationFunctions::usage="creates calls to functions calculating
@@ -195,41 +194,22 @@ GenericVectorName[] := "vector";
 GenericFermionName[] := "fermion";
 GenericGhostName[] := "ghost";
 
-SimplifiedName[Susyno`LieGroups`conj[particle_]] :=
-    Susyno`LieGroups`conj[SimplifiedName[particle]];
-SimplifiedName[SARAH`bar[particle_]] :=
-    SARAH`bar[SimplifiedName[particle]];
-
-SimplifiedName[particle_?TreeMasses`IsSMLepton] := "lep";
-SimplifiedName[particle_?TreeMasses`IsSMDownQuark] := "dq";
-SimplifiedName[particle_?TreeMasses`IsSMUpQuark] := "uq";
+SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] =!= SARAH`bar] := "l";
+SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] === SARAH`bar] := "lbar";
+SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] =!= SARAH`bar] := "d";
+SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] === SARAH`bar] := "dbar";
+SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] =!= SARAH`bar] := "u";
+SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] === SARAH`bar] := "ubar";
 SimplifiedName[particle_ /; TreeMasses`GetHiggsBoson[] =!= Null && particle === TreeMasses`GetHiggsBoson[]] := "H";
-SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "AH";
-SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === TreeMasses`GetWBoson[]] := "W";
+SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "Ah";
+SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]]] := "Wm";
+SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] := "Wp";
 SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === TreeMasses`GetZBoson[]] := "Z";
 SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === TreeMasses`GetPhoton[]] := "A";
-SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "G";
+SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "g";
+SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]]] := "Hm";
+SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]] := "Hp";
 SimplifiedName[particle_] := particle;
-
-CreateParticleAlias[particle_, namespace_String] :=
-    "using " <> SimplifiedName[particle] <> " = " <>
-    CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
-
-CreateParticleAliases[particles_, namespace_:""] :=
-    Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
-
-CreateSMParticleAliases[namespace_:""] :=
-    Module[{smParticlesToAlias},
-           smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
-                                        TreeMasses`GetPseudoscalarHiggsBoson[],
-                                        TreeMasses`GetWBoson[], TreeMasses`GetZBoson[],
-                                        TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
-                                        TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field
-                                       }, (# =!= Null)&];
-           CreateParticleAliases[smParticlesToAlias, namespace]
-          ];
 
 CreateBSMParticleAliasList[namespace_:""] :=
    Module[{bsmForZdecay, bsmForWdecay},
@@ -252,7 +232,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
             ]
          ];
       bsmForWdecay =
-         Select[Prepend[#, TreeMasses`GetWBoson[]]& /@
+         Select[Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] & /@
             DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
             IsPossibleNonZeroVertex[#, True]&
          ];
@@ -260,7 +240,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
          Join[
             bsmForWdecay,
             Select[
-               Prepend[#, TreeMasses`GetWBoson[]]& /@
+               Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]& /@
                   DeleteDuplicates@Sort@Tuples[{
                      Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]],
                      Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]
@@ -417,9 +397,13 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
               is such a coupling, it must be 0. So for those processes
               we start generating amplitudes from the 1-loop level. *)
            minLoops =
-              If[MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
+              If[(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
                  (Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
-                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]),
+                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
+                 ||
+                 (* a photon or a gluon always couples diagonally at the tree-level - e.g. no γXY coupling when X =! Y *)
+                 (MemberQ[finalParticles, TreeMasses`GetPhoton[]] && !MemberQ[finalParticles, initialParticle]) ||
+                 (MemberQ[finalParticles, TreeMasses`GetGluon[]] && !MemberQ[finalParticles, initialParticle]),
                  1,
                  0
               ];
@@ -431,8 +415,11 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
            {#[[1]], With[{toposAndDiags = #[[2]]}, {#[[1]], Select[#[[2]], IsSupportedDiagram]}& /@ toposAndDiags]}& /@ diagrams
           ];
 
+(* in the MRSSM this 1-loop decay amplitude for Fu crashes the code
+   {Fu, bar[Fd], conj[SRdp], {Fu, Chi, conj[Su]}, {bar[Fd], bar[Chi], Sd}, {conj[SRdp], Su, conj[Sd]}}
+   Temporarily disable 1-loop Fu decay *)
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List] :=
-    GetContributingGraphsForDecay[initialParticle, finalParticles, 1];
+    GetContributingGraphsForDecay[initialParticle, finalParticles, If[initialParticle === First@TreeMasses`GetSMUpQuarks[], 0, 1]];
 
 (* defines a fixed ordering for final state particles  *)
 (* @todo decide on what this ordering actually will be *)
@@ -453,7 +440,11 @@ OrderFinalState[initialParticle_?TreeMasses`IsScalar, finalParticles_List] :=
                 ];
               If[TreeMasses`IsVector[orderedFinalState[[1]]] && TreeMasses`IsVector[orderedFinalState[[2]]],
                  If[Head[orderedFinalState[[2]]] === Susyno`LieGroups`conj && !Head[orderedFinalState[[1]]] === Susyno`LieGroups`conj,
+                    If[
+                     {If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]],
+                        Susyno`LieGroups`conj[If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]} =!= orderedFinalState,
                     orderedFinalState = Reverse[orderedFinalState];
+                    ]
                  ];
               ];
            ];
@@ -744,7 +735,7 @@ CreatePartialWidthCalculationPrototype[decay_FSParticleDecay] :=
                           StringJoin[If[# > 1, ", int", ""]& /@ finalStateDims];
            functionName = CreatePartialWidthCalculationName[decay];
            returnType = CConversion`CreateCType[CConversion`ScalarType[CConversion`realScalarCType]];
-           returnType <> " " <> functionName <> "(" <> functionArgs <> ") const;"
+           returnType <> " " <> functionName <> "(" <> functionArgs <> ");"
           ];
 
 CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :=
@@ -777,7 +768,7 @@ CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :
                                                   If[finalStateDims[[First[#2]]] > 1, "gO" <> ToString[First[#2]], ""]}&, finalState]]];
            body = body <> "\nreturn " <> CreateSpecializedPartialWidthCalculationName[initialState, finalState] <>
                   "(context, in_indices" <> StringJoin[Table[", out_" <> ToString[i] <> "_indices", {i, 1, Length[finalState]}]] <> ");\n";
-           returnType <> " " <> functionName <> "(" <> functionArgs <> ") const\n{\n" <>
+           returnType <> " " <> functionName <> "(" <> functionArgs <> ")\n{\n" <>
                   TextFormatting`IndentText[body] <> "}\n"
           ];
 
@@ -920,11 +911,10 @@ CreateDecaysCalculationFunction[decaysList_] :=
 
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
-                 CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
+                 CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
                  "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
                  TextFormatting`IndentText[
-                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
-                    "model.solve_ewsb();\n"
+                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
                  ] <> "}\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
@@ -949,7 +939,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "if (run_to_decay_particle_scale) {\n" <>
                     TextFormatting`IndentText[
                        "auto decay_mass = PHYSICAL(" <>
-                          CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
+                          CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle  /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
                        "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
                        TextFormatting`IndentText[
                           "sm.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
@@ -963,12 +953,18 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "break;\n"
                  ] <>
                  "}\n" <>
-                 "case 2:\n" <>
+                 "case 2: {\n" <>
                  TextFormatting`IndentText[
+                    "model.solve_ewsb_tree_level();\n" <>
+                    "model.calculate_DRbar_masses();\n" <>
+                    "// decoupling scheme automatically reorders Goldstones to first\n" <>
+                    "// positions in tree-level mass and mixing matrices. The\n" <>
+                    "// non-decoupled model does not.\n" <>
+                    "model.reorder_DRbar_masses();\n" <>
                     "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
                     "break;\n"
                   ] <>
-                  "default:\n" <>
+                  "}\ndefault:\n" <>
                   TextFormatting`IndentText[
                      "throw SetupError(\"flag value is not supported\");\n"
                  ]
@@ -1040,7 +1036,7 @@ GetDecayAmplitudeType[decay_FSParticleDecay] :=
     GetDecayAmplitudeType[GetInitialState[decay], GetFinalState[decay]];
 
 CreateFieldIndices[particle_String] :=
-    "typename cxx_diagrams::field_indices<" <> particle <> " >::type";
+    "typename cxx_diagrams::field_indices<" <> particle <> ">::type";
 
 CreateFieldIndices[particle_, fieldsNamespace_] :=
     CreateFieldIndices[CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> fieldsNamespace]];
@@ -1181,40 +1177,6 @@ FillMasses[decay_FSParticleDecay] :=
       "Decay_amplitude_FFV", "result.m_decay, result.m_fermion, result.m_vector",
       _, ""
    ];
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SSS",
-                              structName_] :=
-    structName <> ".form_factor = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SSV",
-                              structName_] :=
-    structName <> ".form_factor = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SVV",
-                              structName_] :=
-    structName <> ".form_factor_g = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_11 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_12 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_21 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_22 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_eps = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SFF",
-                              structName_] :=
-    structName <> ".form_factor_left = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_right = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_FFS",
-                              structName_] :=
-    structName <> ".form_factor_left = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_right = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_FFV",
-                              structName_] :=
-    structName <> ".form_factor_gam_left = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_gam_right = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_p_1 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_p_2 = std::complex<double>(0., 0.);\n";
 
 GetTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay] :=
     Module[{treeLevelDiags, vertices = {}},
@@ -1918,7 +1880,7 @@ If[Length@positions =!= 1, Quit[1]];
          cppVertices <>
 
          (* diagram symmetry factor *)
-          "\nconstexpr double " <> ToString@symmetryFac <> " {" <>
+          "\nstatic constexpr double " <> ToString@symmetryFac <> " {" <>
              ToString @
                N[With[{topoName = FeynArtsTopologyName[topology]},
 
@@ -1932,7 +1894,7 @@ If[Length@positions =!= 1, Quit[1]];
          "};\n" <>
 
          (* color factor *)
-         "\nconstexpr " <>
+         "\nstatic constexpr " <>
          With[{cf = CXXDiagrams`ExtractColourFactor @
                 CXXDiagrams`ColorFactorForDiagram[topology, diagram]},
             If[Head[cf] === Complex,
@@ -2001,24 +1963,20 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            body = body <> "\n// external particles' masses\n";
            body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct];
 
-           (* @todo: it might be less verbose to by default initialize amplitude to 0 *)
-           body = body <> "\n// set the initial value of an amplitude to 0\n";
-           body = body <> ZeroDecayAmplitudeFormFactors[decay, returnVar];
-
            If[IsPossibleTreeLevelDecay[decay, True],
-              body = body <> "// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
+              body = body <> "\n// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
 
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
                 If[res[[1]],
                   body = body <> "\n// FormCalc's Finite variable\n";
-                  body = body <>"constexpr double Finite {1.};\n"
+                  body = body <>"static constexpr double Finite {1.};\n"
                 ];
                 body = body <>"\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
              ]
-             ];
+           ];
 
            body = body <> "return " <> returnVar <> ";\n";
 
@@ -2237,7 +2195,7 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
               specializations =
                  AbsoluteTiming@ParallelMap[
                     CreateTotalAmplitudeSpecialization[#, modelName]&,
-                    Flatten[Last @@@ particleDecays, 1],
+                    Flatten[Last /@ particleDecays, 1],
                     DistributedContexts -> All, Method -> "FinestGrained"
                  ];
               Needs["Parallel`Developer`"];
@@ -2254,10 +2212,10 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
                        ];
                        CreateTotalAmplitudeSpecialization[#, modelName]
                     )&,
-                    Flatten[Last @@@ particleDecays, 1]
+                    Flatten[Last /@ particleDecays, 1]
                  ]
            ];
-           Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
+           Print["The creation of C++ code for decays took", FSRound[First@specializations, 1], "s"];
            specializations = Last@specializations;
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
@@ -2273,16 +2231,16 @@ CreatePartialWidthSpecializationDecl[decay_FSParticleDecay, modelName_] :=
            "template <>\n" <>
            "double " <> modelName <> "_decays::" <>
            CreateSpecializedPartialWidthCalculationName[initialParticle, finalState, fieldsNamespace] <>
-           "(" <> args <> ") const;"
+           "(" <> args <> ");"
           ];
 
 CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             declaration = "", includeStatement = ""},
            declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-           includeStatement = "#include \"decays/H_SM_decays/decay_" <>
+           includeStatement = "#include \"decays/specializations/" <> SimplifiedName[initialParticle] <> "/decay_" <>
                               SimplifiedName[initialParticle] <> "_to_" <>
-                              StringJoin[SimplifiedName[# /. SARAH`bar|Susyno`LieGroups`conj -> Identity]& /@ finalState] <>
+                              StringJoin[SimplifiedName[#]& /@ finalState] <>
                               ".inc\"";
            {declaration, includeStatement}
           ];

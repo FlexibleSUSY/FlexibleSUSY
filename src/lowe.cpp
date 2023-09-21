@@ -210,6 +210,46 @@ flexiblesusy::PMNS_parameters QedQcd::displayPMNS() const
    return pmns;
 }
 
+double QedQcd::displayUpQuarkRunningMass(int i) const
+{
+   switch (i) {
+   case 0: return displayMass(mUp);
+   case 1: return displayMass(mCharm);
+   case 2: return displayMass(mTop);
+   }
+   throw flexiblesusy::OutOfBoundsError("displayUpQuarkRunningMass: generation index out of bounds.");
+}
+
+double QedQcd::displayDownQuarkRunningMass(int i) const
+{
+   switch (i) {
+   case 0: return displayMass(mDown);
+   case 1: return displayMass(mStrange);
+   case 2: return displayMass(mBottom);
+   }
+   throw flexiblesusy::OutOfBoundsError("displayDownQuarkRunningMass: generation index out of bounds.");
+}
+
+double QedQcd::displayLeptonPoleMass(int i) const
+{
+   switch (i) {
+   case 0: return displayPoleMel();
+   case 1: return displayPoleMmuon();
+   case 2: return displayPoleMtau();
+   }
+   throw flexiblesusy::OutOfBoundsError("displayLeptonPoleMass: generation index out of bounds.");
+}
+
+double QedQcd::displayLeptonRunningMass(int i) const
+{
+   switch (i) {
+   case 0: return displayMass(mElectron);
+   case 1: return displayMass(mMuon);
+   case 2: return displayMass(mTau);
+   }
+   throw flexiblesusy::OutOfBoundsError("displayLeptonRunningMass: generation index out of bounds.");
+}
+
 std::ostream& operator<<(std::ostream &left, const QedQcd &m) {
   left << "mU: " << m.displayMass(mUp)
        << "  mC: " << m.displayMass(mCharm)
@@ -254,7 +294,7 @@ double QedQcd::qedBeta() const {
 /// that if quark masses are running, the number of active quarks will
 /// be taken into account.
 double QedQcd::qcdBeta() const {
-  static const double INVPI = 1.0 / flexiblesusy::Pi;
+  static constexpr double INVPI = 1.0 / flexiblesusy::Pi;
   const int quarkFlavours = flavours(get_scale());
   const double qb0 = (11.0e0 - (2.0e0 / 3.0e0 * quarkFlavours)) / 4.0;
   const double qb1 = (102.0e0 - (38.0e0 * quarkFlavours) / 3.0e0) / 16.0;
@@ -284,7 +324,7 @@ double QedQcd::qcdBeta() const {
 
 /// returns fermion mass beta functions
 Eigen::Array<double,9,1> QedQcd::massBeta() const {
-  static const double INVPI = 1.0 / flexiblesusy::Pi;
+  static constexpr double INVPI = 1.0 / flexiblesusy::Pi;
 
   // qcd bits: 1,2,3 loop resp.
   double qg1 = 0., qg2 = 0., qg3 = 0.;

@@ -420,28 +420,6 @@ void @ModelName@_slha_io::set_dcinfo(
 }
 
 /**
- * Sort decays of every particle according to their width
- *
- */
-std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
-   std::vector<Decay> decays_list_as_vector;
-   decays_list_as_vector.reserve(decays_list.size());
-   for (const auto& el : decays_list) {
-      decays_list_as_vector.push_back(el.second);
-   }
-
-   std::sort(
-      decays_list_as_vector.begin(),
-      decays_list_as_vector.end(),
-      [](const auto& d1, const auto& d2) {
-         return d1.get_width() > d2.get_width();
-      }
-   );
-
-   return decays_list_as_vector;
-}
-
-/**
  * Stores the branching ratios for a given particle in the SLHA
  * object.
  *
@@ -489,6 +467,11 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
    }
 
    slha_io.set_block(decay);
+}
+
+void @ModelName@_slha_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings)
+{
+   slha_io.set_effectivecouplings_block(effCouplings);
 }
 
 @setDecaysFunctions@

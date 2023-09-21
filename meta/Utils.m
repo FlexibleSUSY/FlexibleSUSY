@@ -174,11 +174,12 @@ MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c+
 FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
 
 DumpStart::usage ="
-@brief Used to start the model from existing \"kernel snapshot\", i.e. from
-       the existing copy of kernel definitions after the first initialization
-       of the model via \"normal\" SARAH`Start way.
-@param model The name of the model to work with.
-@returns Null.";
+Used to start the model from existing \"kernel snapshot\", i.e. from
+the existing copy of kernel definitions after the first initialization
+of the model via \"normal\" SARAH`Start way.";
+DecomposeVersionString::usage = "Return a list for string containing a version number";
+VersionOrderGtEqThan::usage = "Checks if version is >= than a given one";
+FSRound::usage = "FSRound[x, n] rounds number x to n digits after dot.";
 
 Begin["`Private`"];
 
@@ -514,6 +515,21 @@ FSPermutationSign[perm_?PermutationCyclesQ] :=
     Apply[Times, (-1)^(Length /@ First[perm] - 1)];
 FSPermutationSign[perm___] :=
     (Print[perm, " is not a permutation in disjoint cyclic form."];Quit[1]);
+
+DecomposeVersionString[version_String] :=
+    ToExpression /@ StringSplit[version, "."];
+
+VersionOrderGtEqThan[version_List, minimRequired_List] /;
+   Length[version] ===3 && Length[minimRequired] ===3 && And@@(IntegerQ /@ Join[version, minimRequired]) :=
+      !(version[[1]] < minimRequired[[1]] ||
+           (version[[1]] == minimRequired[[1]] &&
+            version[[2]] < minimRequired[[2]]) ||
+              (version[[1]] == minimRequired[[1]] &&
+               version[[2]] == minimRequired[[2]] &&
+               version[[3]] < minimRequired[[3]]));
+
+FSRound[num_, prec_] :=
+   PaddedForm[num, {IntegerPart[Log[10, Abs[num]]] + prec + 1, prec}];
 
 End[];
 

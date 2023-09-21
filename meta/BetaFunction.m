@@ -311,7 +311,7 @@ ConvertSarahRGEs[beta_List] :=
                (* beta[[k,1]] == name, beta[[k,2]] == 1 loop beta function *)
                name = beta[[k,1]];
                type = GuessType[name];
-               expr = Drop[beta[[k]], 1];
+               expr = Drop[beta[[k]], 1] /. Indeterminate -> 0;
                (* protect tensor products *)
                expr = CConversion`ProtectTensorProducts[#, name]& /@ expr;
                (* simplify expressions *)

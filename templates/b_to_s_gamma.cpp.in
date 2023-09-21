@@ -26,7 +26,6 @@
 #include <array>
 #include <complex>
 #include <fstream>
-#include <iomanip>
 
 #include "@ModelName@_b_to_s_gamma.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"

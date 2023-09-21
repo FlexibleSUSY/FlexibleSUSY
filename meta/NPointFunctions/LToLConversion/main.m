@@ -122,6 +122,7 @@ Module[{parsed},
 `npf`create[obs:`type`observable] :=
 Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
    keep = `npf`parse@obs;
+
    Utils`FSFancyLine@"<";
    Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
       keep, ",\n                ", SymbolName]<>" started."];
@@ -161,6 +162,7 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
    codeD = NPointFunctions`CreateCXXFunctions[
       npfD, `cxx`classD, SARAH`Delta, dim6@SARAH`DownQuark][[2]];
    Utils`FSFancyLine@">";
+   Print[];
 
    {  DeleteDuplicates@Join[
          NPointFunctions`VerticesForNPointFunction@npfU,
