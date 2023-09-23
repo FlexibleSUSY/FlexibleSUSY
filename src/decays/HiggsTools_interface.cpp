@@ -97,39 +97,19 @@ void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
 
 } // anonymous
 
-std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_HiggsTools(
+EffectiveCoupling_list get_normalized_effective_couplings(
    EffectiveCoupling_list const& bsm_input,
-   std::vector<SingleChargedHiggsInput> const& bsm_input2,
    Physical_input const& physical_input,
    softsusy::QedQcd const& qedqcd,
    Spectrum_generator_settings const& spectrum_generator_settings,
-   FlexibleDecay_settings const& flexibledecay_settings,
-   std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
-
-   // check location of databases
-   // HiggsBounds
-   if (higgsbounds_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsBounds database");
-   }
-   else if (!std::filesystem::exists(higgsbounds_dataset)) {
-      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
-   }
-   // HiggsSignals
-   if (higgssignals_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsSignals database");
-   }
-   else if (!std::filesystem::exists(higgssignals_dataset)) {
-      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
-   }
-
+   FlexibleDecay_settings const& flexibledecay_settings)
+{
    // make sure we don't compute input for the EFFHIGGSCOUPLINGS block in the
    // built in SM
    auto flexibledecay_settings_ = flexibledecay_settings;
    flexibledecay_settings_.set(FlexibleDecay_settings::print_effc_block, 0.0);
 
-   auto pred = Higgs::Predictions();
-   namespace HP = Higgs::predictions;
-
+   EffectiveCoupling_list _bsm_input;
    for (auto const& el : bsm_input) {
 
       const double mass = el.mass;
@@ -138,10 +118,6 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
       // On the other hand there's a problem with finding a SM equivalent of very light states
       if (mass > 650 || mass < 1) continue;
-
-      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
-      s.setMass(mass);
-      s.setMassUnc(relMassError*mass); // set mass uncertainty to 3%
 
       // create a SM equivalent to the BSM model, with mhSM == mass
       standard_model::Standard_model sm {};
@@ -164,7 +140,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
       };
 
       int status, iter = 0;
-      static constexpr int max_iter = 60;
+      static constexpr int max_iter = 100;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
@@ -237,45 +213,100 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
          sm_decays.calculate_decays();
          const auto sm_input = sm_decays.get_higgstools_input();
 
-         auto effc = HP::NeutralEffectiveCouplings {};
-
          // fermion channels are given as complex numbers
          // we normalize to real part of SM coupling
          // quarks
-         effc.dd = std::abs(sm_input[0].dd) > 0 ? el.dd/sm_input[0].dd.real() : 0.;
-         effc.uu = std::abs(sm_input[0].uu) > 0 ? el.uu/sm_input[0].uu.real() : 0.;
-         effc.ss = std::abs(sm_input[0].ss) > 0 ? el.ss/sm_input[0].ss.real() : 0.;
-         effc.cc = std::abs(sm_input[0].cc) > 0 ? el.cc/sm_input[0].cc.real() : 0.;
-         effc.bb = std::abs(sm_input[0].bb) > 0 ? el.bb/sm_input[0].bb.real() : 0.;
-         effc.tt = std::abs(sm_input[0].tt) > 0 ? el.tt/sm_input[0].tt.real() : 0.;
+         NeutralHiggsEffectiveCouplings _coups {el};
+         _coups.width_sm = sm_input[0].width;
+         _coups.dd = std::abs(sm_input[0].dd) > 0 ? el.dd/sm_input[0].dd.real() : 0.;
+         _coups.uu = std::abs(sm_input[0].uu) > 0 ? el.uu/sm_input[0].uu.real() : 0.;
+         _coups.ss = std::abs(sm_input[0].ss) > 0 ? el.ss/sm_input[0].ss.real() : 0.;
+         _coups.cc = std::abs(sm_input[0].cc) > 0 ? el.cc/sm_input[0].cc.real() : 0.;
+         _coups.bb = std::abs(sm_input[0].bb) > 0 ? el.bb/sm_input[0].bb.real() : 0.;
+         _coups.tt = std::abs(sm_input[0].tt) > 0 ? el.tt/sm_input[0].tt.real() : 0.;
          // leptons
-         effc.ee = std::abs(sm_input[0].ee)         > 0 ? el.ee/sm_input[0].ee.real()         : 0.;
-         effc.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
-         effc.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
+         _coups.ee = std::abs(sm_input[0].ee)         > 0 ? el.ee/sm_input[0].ee.real()         : 0.;
+         _coups.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
+         _coups.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
 
          // gauge bosons
-         effc.WW = std::abs(sm_input[0].WW) > 0         ? el.WW/sm_input[0].WW         : 0.;
-         effc.ZZ = std::abs(sm_input[0].ZZ) > 0         ? el.ZZ/sm_input[0].ZZ         : 0.;
-         effc.gamgam = std::abs(sm_input[0].gamgam) > 0 ? el.gamgam/sm_input[0].gamgam : 0.;
-         effc.Zgam = std::abs(sm_input[0].Zgam) > 0     ? el.Zgam/sm_input[0].Zgam     : 0.;
-         effc.gg = std::abs(sm_input[0].gg) > 0         ? el.gg/sm_input[0].gg         : 0.;
+         _coups.WW = std::abs(sm_input[0].WW) > 0         ? el.WW/sm_input[0].WW         : 0.;
+         _coups.ZZ = std::abs(sm_input[0].ZZ) > 0         ? el.ZZ/sm_input[0].ZZ         : 0.;
+         _coups.gamgam = std::abs(sm_input[0].gamgam) > 0 ? el.gamgam/sm_input[0].gamgam : 0.;
+         _coups.Zgam = std::abs(sm_input[0].Zgam) > 0     ? el.Zgam/sm_input[0].Zgam     : 0.;
+         _coups.gg = std::abs(sm_input[0].gg) > 0         ? el.gg/sm_input[0].gg         : 0.;
+         _bsm_input.push_back(std::move(_coups));
+      }
+   }
 
-         effectiveCouplingInput(
-            s, effc,
-            refModel,
-            calcggH, calcHgamgam
-         );
+   return _bsm_input;
+}
 
-         // effective coupligs are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
-         // so taking a norm gives a total partial width
-         s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu));
-         s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau));
-         s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau));
-         // set total width to the one computed by FD as HiggsTools doesn't calculate
-         // some decays of Higgs at all, e.g. H -> Ah Z
-         if (el.width > s.totalWidth()) {
-            s.setDecayWidth("NP", "NP", el.width - s.totalWidth());
-         }
+std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
+   EffectiveCoupling_list const& bsm_input,
+   std::vector<SingleChargedHiggsInput> const& bsm_input2,
+   Physical_input const& physical_input,
+   std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
+
+   // check location of databases
+   // HiggsBounds
+   if (higgsbounds_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsBounds database");
+   }
+   else if (!std::filesystem::exists(higgsbounds_dataset)) {
+      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
+   }
+   // HiggsSignals
+   if (higgssignals_dataset.empty()) {
+      throw SetupError("Need to specify location of HiggsSignals database");
+   }
+   else if (!std::filesystem::exists(higgssignals_dataset)) {
+      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
+   }
+
+   auto pred = Higgs::Predictions();
+   namespace HP = Higgs::predictions;
+
+   for (auto const& el : bsm_input) {
+      auto effc = HP::NeutralEffectiveCouplings {};
+      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
+      s.setMass(el.mass);
+      s.setMassUnc(relMassError*el.mass); // set mass uncertainty to 3%
+
+      // quarks
+      effc.dd = el.dd;
+      effc.uu = el.uu;
+      effc.ss = el.ss;
+      effc.cc = el.cc;
+      effc.bb = el.bb;
+      effc.tt = el.tt;
+
+      // leptons
+      effc.ee = el.ee;
+      effc.mumu = el.mumu;
+      effc.tautau = el.tautau;
+
+      // gauge bosons
+      effc.WW = el.WW;
+      effc.ZZ = el.ZZ;
+      effc.gamgam = el.gamgam;
+      effc.Zgam = el.Zgam;
+      effc.gg = el.gg;
+      effectiveCouplingInput(
+         s, effc,
+         refModel,
+         calcggH, calcHgamgam
+      );
+
+      // effective coupligs are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
+      // so taking a norm gives a total partial width
+      s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu));
+      s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau));
+      s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau));
+      // set total width to the one computed by FD as HiggsTools doesn't calculate
+      // some decays of Higgs at all, e.g. H -> Ah Z
+      if (el.width > s.totalWidth()) {
+         s.setDecayWidth("NP", "NP", el.width - s.totalWidth());
       }
    }
 

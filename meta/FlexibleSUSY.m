@@ -2753,8 +2753,10 @@ IndentText[
    "try {\n" <>
    IndentText[
       "// structured bindings creates new variables - need to use std::tie
-std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
-   call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, higgsbounds_dataset, higgssignals_dataset);\n"
+      effc =
+         get_normalized_effective_couplings(decays.get_higgstools_input(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
+      std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
+         call_higgstools(effc, higgstools_charged_input, physical_input, higgsbounds_dataset, higgssignals_dataset);\n"
    ] <>
    "}\n" <>
    "catch (const std::exception& error) {\n" <>
@@ -2781,6 +2783,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());
+      slha_io.set_normalized_effectivecouplings_block(effc);
    }
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) && higgssignals_ndof > 0) {

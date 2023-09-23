@@ -1017,4 +1017,28 @@ void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int
 
    set_block(decay);
 }
+
+void SLHA_io::set_normalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   std::ostringstream ss;
+   ss << "Block NORMALIZEDEFFHIGGSCOUPLINGS\n";
+   for (auto const& effC : effCouplings) {
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1,  1, std::real(effC.dd), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2,  2, std::real(effC.uu), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -3,  3, std::real(effC.ss), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -4,  4, std::real(effC.cc), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -5,  5, std::real(effC.bb), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -6,  6, std::real(effC.tt), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -11,  11, std::real(effC.ee), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -13,  13, std::real(effC.mumu), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -15,  15, std::real(effC.tautau), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -24,  24, effC.WW, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 23,  23, effC.ZZ, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 21,  21, effC.gg, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 22,  22, effC.gamgam, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 23,  22, effC.Zgam, "");
+   }
+
+   set_block(ss);
+}
 } // namespace flexiblesusy
