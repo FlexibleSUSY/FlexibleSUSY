@@ -21,24 +21,34 @@
 *)
 
 Needs["Utils`",
-   FileNameJoin@{ParentDirectory@DirectoryName@$InputFileName, "Utils.m"}];
+   FileNameJoin@{ParentDirectory@DirectoryName@$InputFileName, "Utils.m"}
+];
 
 Block[{Format},
    Needs@"FeynArts`";
    Needs@"FormCalc`";
-   Print[];];
+   Print[];
+];
 
 BeginPackage@"NPointFunctions`";
 
-(* Reserving names *)
+(* Start reserving names *)
+
 Off[General::shdw];
-{  DiracChain, Mat};
+   DiracChain;
+   Mat;
 On[General::shdw];
 
-{  NPointFunction};
-{  LorentzIndex, GenericSum, GenericIndex,
-   GenericS, GenericF, GenericV, GenericU,
-   OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
+NPointFunction;
+SetAttributes[
+   {
+      LorentzIndex, GenericSum, GenericIndex, OperatorsOnly, ExceptLoops,
+      GenericS, GenericF, GenericV, GenericU
+   },
+   Protected
+];
+
+(* End reserving names *)
 
 Begin@"`Private`";
 
@@ -46,61 +56,51 @@ Utils`DynamicInclude/@
    {"tools.m", "type.m", "rules.m", "settings.m", "chains.m", "topologies.m",
     "tree.m", "mass.m"};
 
-NPointFunction::usage = "
-@brief The entry point of the calculation.
-       Sets files and options up, calculates diagrams and amplitudes using
-       ``FeynArts`` and ``FormCalc``.
-@param formcalc A ``String`` directory of ``FormCalc`` output.
-@param model A ``String`` name of ``FeynArts`` model file.
-@param particles A ``String`` name of a file, which is created by ``SARAH``
-       and contains ``FeynArts`` particle names.
-@param contexts A ``String`` name of a file, which contains information
-       about particle contexts in ``SARAH`` conventions.
-@param in An expression, containing ``FeynArts`` fields (each as ``String``),
-       required to be *incoming* fields for the amplitude.
-@param out An expression, containing ``FeynArts`` fields (each as ``String``),
-       required to be *outgoing* fields for the amplitude.
-@param observable An observable name in the form
-       ``FlexibleSUSYObservable`<Name>[<Arguments>]``.
-@param loops The loop level of calculation (as ``Integer``).
-@param processes A list of processes to calculate.
-@param momenta A ``Symbol``, which defines how to treat momenta of external
-       particles.
-@param onShell A flag, corresponding to the \"on-shellness\" of external
-       particles.
-@param scheme The main regularization scheme to be used.
-       Can be overriden by ```settings`regularization``.
-@returns An object of the n-point function in ``FlexibleSUSY`` conventions."
+NPointFunction::usage = "Sets files, options; makes diagrams and amplitudes."
 NPointFunction[
-   {formcalc_, model_, particles_, contexts_, in_List, out_List},
-   {observable_, loops_, processes:{___String}, momenta_, onShell_, scheme_}] :=
-   Module[{tree},
+   {
+      FCOutputDir:_String,
+      FAModelName:_String,
+      FAParticleNames:_?FileExistsQ,
+      SARAHParticleContexts:_?FileExistsQ,
+      FAIncomingFields:{__String},
+      FAOutgoingFields:{__String}
+   },
+   {
+      observable:None | _?(Context@Evaluate@Head[#] == "FlexibleSUSYObservable`"&),
+      loops:_?IntegerQ,
+      processes:{___String},
+      momenta:_Symbol,
+      onShell:_Symbol,
+      mainRegularization:_Symbol
+   }
+] :=  Module[{tree},
       BeginPackage["NPointFunction`"];
       Begin["`Private`"];
-      `file`particles[] := particles;
-      `file`contexts[] := contexts;
+      `file`particles[] := FAParticleNames;
+      `file`contexts[] := SARAHParticleContexts;
       `options`observable[] := SymbolName@Head@observable;
-      `options`observable[Outer] := {Length@in, Length@out};
+      `options`observable[Outer] := {Length@FAIncomingFields, Length@FAOutgoingFields};
       `options`loops[] := loops;
       `options`processes[] := processes;
       `options`momenta[] := momenta;
       `options`onShell[] := onShell;
       `options`scheme[] :=
-         Switch[scheme, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
+         Switch[mainRegularization, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
       End[];
       EndPackage[];
 
       FeynArts`$FAVerbose = 0;
-      FeynArts`InitializeModel@model;
+      FeynArts`InitializeModel@FAModelName;
       SetOptions[FeynArts`InsertFields,
-         FeynArts`Model -> model,
+         FeynArts`Model -> FAModelName,
          FeynArts`InsertionLevel -> FeynArts`Classes];
       FormCalc`$FCVerbose = 0;
-      If[!DirectoryQ@formcalc, CreateDirectory@formcalc];
-      SetDirectory@formcalc;
+      If[!DirectoryQ@FCOutputDir, CreateDirectory@FCOutputDir];
+      SetDirectory@FCOutputDir;
 
       settings[];
-      tree = settings[plant[in, out], diagrams];
+      tree = settings[plant[FAIncomingFields, FAOutgoingFields], diagrams];
       tree = settings[plant@tree, amplitudes];
       picture@tree;
       {`rules`fields@fields@tree, calculateAmplitudes@tree}];
@@ -157,21 +157,15 @@ Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
    fieldsGen = toGenericIndexConventionRules[[All,1]];
    genericInsertions = Cases[#,
       Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
-      Rule[genericField, stripIndices@classesField]] &/@ insert;
+      Rule[genericField, removeParticleIndices@classesField]] &/@ insert;
    SortBy[#,First]&/@ If[keepNumQ,
       List @@ genericInsertions,
       List @@ genericInsertions /. toGenericIndexConventionRules]];
 fieldInsertions // tools`secure;
 
-stripIndices::usage = "
-@brief Removes particle indices from a given field.
-@param field the given field.
-@returns The given field with all indices removed.";
-stripIndices[Times[-1, field_]] :=
-   -stripIndices@field;
-stripIndices[name_[class_, ___]] :=
-   name@class;
-stripIndices // tools`secure;
+removeParticleIndices[Times[-1, field_]] := -removeParticleIndices@field;
+removeParticleIndices[name_[class_, ___]] := name@class;
+removeParticleIndices // tools`secure;
 
 calculateAmplitudes::usage = "
 @brief Applies ``FormCalc`` routines to amplitude set, simplifies the result.
@@ -202,7 +196,6 @@ Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
       "Amplitude calculation"
    ] //. FormCalc`GenericList[];
 
-(* v-------v TODO(uukhas): make a normalê generic call.                      *)
    generic = MapThread[getGenericSum, {feynAmps, settings[tree, sum]}];
 
    {generic, chains, subs} = proceedChains[tree, generic];
