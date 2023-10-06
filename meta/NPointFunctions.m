@@ -321,8 +321,8 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
    With[{path = $Path,
          data = {formCalcDir, feynArtsModel, particleNamesFile,
             particleNamespaceFile,
-            convertFields[inFields, particleNamesFile],
-            convertFields[outFields, particleNamesFile]},
+            renameFields[inFields, particleNamesFile, "SARAH"->"FeynArts"],
+            renameFields[outFields, particleNamesFile, "SARAH"->"FeynArts"]},
          options = {OptionValue@Observable,
             OptionValue@LoopLevel,
             SymbolName/@If[List=!=Head@#, {#}, #]&@OptionValue@KeepProcesses,
@@ -513,12 +513,7 @@ Module[{fileHandle = OpenWrite@fileName},
    Close@fileHandle;];
 writeNamespaceFile // secure;
 
-convertFields::usage = "
-@brief Changes given ``SARAH`` fields to ``FeynArts`` ones.
-@param fields List of ``SARAH`` fields.
-@param particles A name of a file, which contains ``FeynArts`` particle names.
-@returns A set of ``FeynArts`` names for a given ``SARAH`` fields.";
-convertFields[fields_, particles_String] :=
+renameFields[fields_, particles_String, "SARAH" -> "FeynArts"] :=
    Module[{unique, faNames},
       unique = DeleteDuplicates[
          CXXDiagrams`RemoveLorentzConjugation[#]&/@ fields];
@@ -529,7 +524,7 @@ convertFields[fields_, particles_String] :=
       fields /. MapThread[Rule, {unique, faNames}] /.
          {  SARAH`bar@field_String :> "-" <> field,
             Susyno`LieGroups`conj@field_String :> "-" <> field}];
-convertFields // secure;
+renameFields // secure;
 
 RemoveEmptyGenSums::usage = "
 @brief Somehing went wrong in a subkernel. Most likely, it is dead.
