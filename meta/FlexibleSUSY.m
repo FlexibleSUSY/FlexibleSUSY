@@ -5116,10 +5116,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             Module[{files, obs, classes, namespaces, newRules = {}, down, dir},
                dir = FileNameJoin@{FSOutputDir, "npointfunctions"};
                If[!DirectoryQ@dir, CreateDirectory@dir];
-               files = Utils`DynamicInclude@FileNameJoin@{
-                  FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions",
-                  "*", "class.m"};
 
+               files = Utils`DynamicInclude@$npfObsWildcard@"class.m";
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
                classes = Symbol["FlexibleSUSY`Private`Write"<>#<>"Class"]&/@obs;
                namespaces = ToExpression[#<>"`namespace[File]"]&/@obs;
@@ -5143,7 +5141,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                down = Insert[down, newRules, {1,2,-1}];
                DownValues@GeneralReplacementRules = down;
 
-               AllNPFVertices = DeleteDuplicates@AllNPFVertices;];
+               AllNPFVertices = DeleteDuplicates@AllNPFVertices;
+           ];
 
            Print["Creating lepton AMM class ..."];
            ammFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
