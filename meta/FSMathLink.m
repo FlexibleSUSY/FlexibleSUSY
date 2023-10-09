@@ -238,11 +238,7 @@ MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToSt
 
 PutObservables[obs_List, link_String] := (
    If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Module[{files},
-         files = FileNames["librarylink.m",
-            FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
-         Get/@files;
-      ];
+      Utils`DynamicInclude@FlexibleSUSY`$npfObsWildcard@"librarylink.m";
    ];
    StringJoin[PutObservable[#, Observables`GetObservableType[#], link]& /@ obs]
 );
