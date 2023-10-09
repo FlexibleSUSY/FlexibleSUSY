@@ -20,9 +20,10 @@
 
 *)
 
+Utils`DynamicInclude@"type.m";
+
 Off[LToLConversion`write::shdw];
 BeginPackage["LToLConversion`"];
-
 LToLConversion`write::usage = "
 @brief Write observable in the C++ Les Houshes block.
        Please, don't change write interface.

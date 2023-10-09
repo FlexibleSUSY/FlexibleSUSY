@@ -23,9 +23,7 @@
 Off[LToLConversion`arguments::shdw];
 BeginPackage["LToLConversion`"];
 
-namespace::usage = "
-@brief Returns a namespace for C++ code of a given observable.
-@note Convention: the name of a corresponding C++ file without ``.cpp``.";
+namespace::usage = "Returns a namespace for C++ code of a given observable.";
 
 arguments::usage = "
 @param in A symbol for incoming lepton.

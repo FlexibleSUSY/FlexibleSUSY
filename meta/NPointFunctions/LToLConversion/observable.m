@@ -20,33 +20,32 @@
 
 *)
 
-Utils`DynamicInclude@"type.m";
-
 Begin@"Observables`Private`";
-With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, loopN],
-      obs = FlexibleSUSYObservable`LToLConversion,
-      cxx = CConversion`ToValidCSymbolString,
-      namespace = LToLConversion`namespace@C},
+Block[{inF, inG, outF, outG, nucl, contr, loopN},
+With[{
+   obs = FlexibleSUSYObservable`LToLConversion,
+   lhs = Sequence[inF_@inG_ -> outF_@outG_, nucl_, contr_, loopN_],
+   rhs = Sequence[inF, inG, outF, outG, nucl, contr, loopN],
+   cxx = CConversion`ToValidCSymbolString},
 
-   AppendTo[FlexibleSUSYObservable`FSObservables, obs];
+AppendTo[FlexibleSUSYObservable`FSObservables, obs];
 
-   GetObservableName@obs@args := StringJoin[
-      cxx@in, cxx@inN, "to", cxx@out, cxx@outN, "conversion_in",
-      cxx@nucl, "_for", SymbolName@proc, "_", cxx[loopN+0], "loop"];
+GetObservableName@obs@lhs := StringTemplate[
+   "`1``2`to`3``4`conversion_`5`_`6`_`7`loop",
+   InsertionFunction -> cxx]@rhs;
 
-   GetObservableDescription@obs@args := StringJoin[
-      cxx@in, "(", cxx@inN, ") to ", cxx@out, "(", cxx@outN, ") conversion in ",
-      cxx@nucl, " for ", SymbolName@proc, " ", cxx[loopN+0], " loop"];
+GetObservableDescription@obs@lhs := StringTemplate[
+   "`1`(`2`) to `3`(`4`) conversion in `5` for `6` at `7` loop",
+   InsertionFunction -> cxx]@rhs;
 
-   GetObservableType@obs@args :=
-      CConversion`ArrayType[CConversion`complexScalarCType, 13];
+GetObservableType@obs@lhs := CConversion`ArrayType[CConversion`complexScalarCType, 13];
 
-   CalculateObservable[obs@args, structName:_String] := StringJoin[
-      structName, ".",
-      GetObservableName@obs[in@inN -> out@outN, nucl, proc, loopN], " = ",
-      namespace, "calculate_", cxx@in, cxx@out, "_for",
-      SymbolName@proc, "_", cxx[loopN+0], "loop(", cxx@inN, ", ", cxx@outN, ", ",
-      namespace, "Nucleus::", cxx@nucl, ", MODEL, ",
-      "ltolconversion_settings, qedqcd);"];];
+CalculateObservable[obs@lhs, structName:_String] := StringTemplate[
+   "`9`.`1``2`to`3``4`conversion_`5`_`6`_`7`loop = `8`_ltolconversion::" <>
+   "calculate_`1``3`_for`6`_`7`loop"<>
+   "(`2`, `4`, `8`_ltolconversion::Nucleus::`5`, MODEL, ltolconversion_settings, qedqcd);",
+   InsertionFunction -> cxx][rhs, FlexibleSUSY`FSModelName, structName];
 
+]; (* With *)
+]; (* Block *)
 End[];
