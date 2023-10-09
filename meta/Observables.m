@@ -26,9 +26,7 @@ BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Param
 Begin["FlexibleSUSYObservable`"];
 FSObservables = { AMM, AMMUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   EDM, BrLToLGamma, bsgamma };
-
-Utils`DynamicInclude@FileNameJoin@{
-   FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions", "*", "observable.m"};
+Utils`DynamicInclude@$npfObsWildcard@"observable.m";
 End[];
 
 GetRequestedObservables::usage="";

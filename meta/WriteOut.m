@@ -450,14 +450,15 @@ WriteSLHABlockEntry[blockName_, {Hold[par_], idx___}, comment_String:""] :=
 
 ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 
-Module[{files, obs, pattern = 0, once},
-WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] := (
-   If[!TrueQ@once,
-      files = Utils`DynamicInclude@FileNameJoin@{
-         FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions", "*", "write.m"};
-      obs = StringSplit[files, $PathnameSeparator][[All, -2]];
-      pattern = Alternatives@@(ToExpression["_FlexibleSUSYObservable`"<>#]&/@obs);
-      once = True;];
+Module[{npfFiles, npfObservables, npfPattern, executedAlready},
+WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
+Module[{},
+   If[executedAlready =!= True,
+      npfFiles = Utils`DynamicInclude@FlexibleSUSY`$npfObsWildcard@"write.m";
+      npfObservables = StringSplit[npfFiles, $PathnameSeparator][[All, -2]];
+      npfPattern = Alternatives@@(ToExpression["_FlexibleSUSYObservable`"<>#]&/@npfObservables);
+      executedAlready = True;
+   ];
    Switch[par,
          FlexibleSUSYObservable`AMM[_],
              WriteSLHABlockEntry[blockName,
@@ -487,10 +488,12 @@ WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment
              WriteSLHABlockEntry[blockName,
                                  {"OBSERVABLES.b_to_s_gamma", idx},
                                  "Re(C7) for b -> s gamma"],
-         pattern,
-            (ToExpression[SymbolName@Head[#2]<>"`write"][##])&[blockName, par, idx, comment],
+         npfPattern,
+            ToExpression[SymbolName@Head@par<>"`write"][blockName, par, idx, comment],
          _,
-             WriteSLHABlockEntry[blockName, {"", idx}, ""]]);];
+             WriteSLHABlockEntry[blockName, {"", idx}, ""]
+   ]
+];];
 
 WriteSLHABlockEntry::errDiffLength =
 "Length of Eigen::Array should be equal to Length@description+1";
