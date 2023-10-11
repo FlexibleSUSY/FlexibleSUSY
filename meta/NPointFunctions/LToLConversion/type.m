@@ -20,19 +20,9 @@
 
 *)
 
-Off[LToLConversion`arguments::shdw];
 BeginPackage["LToLConversion`"];
 
 namespace::usage = "Returns a namespace for C++ code of a given observable.";
-
-arguments::usage = "
-@param in A symbol for incoming lepton.
-@param inN A symbol for incoming lepton generation.
-@param out A symbol for outgoing lepton.
-@param outN A symbol for outgoing lepton generation.
-@param nucleus A symbol for a nucleus.
-@param contribution A symbol for a desired contribution.
-@return A sequence of arguments for the observable.";
 
 Begin["`Private`"];
 
@@ -41,23 +31,8 @@ namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};
 
-Off@RuleDelayed::rhs;
-arguments[in_Symbol[inN_Symbol],
-          out_Symbol[outN_Symbol],
-          nucleus_Symbol,
-          contribution_Symbol,
-          loopN_Symbol] :=
-   Sequence[Rule[(in_Symbol?TreeMasses`IsLepton)[inN_Integer],
-                 (out_Symbol?TreeMasses`IsLepton)[outN_Integer]],
-            nucleus_Symbol,
-            contribution:_Symbol|{__Symbol},
-            loopN:0|1];
-On@RuleDelayed::rhs;
-arguments // Utils`MakeUnknownInputDefinition;
-arguments ~ SetAttributes ~ {Protected, Locked};
-
-`type`observable = FlexibleSUSYObservable`LToLConversion@
-   arguments[in@iIn, out@iOut, nucleus, con, loopN];
+`type`observable = FlexibleSUSYObservable`LToLConversion[
+   in_@iIn_ -> out_@iOut_, nucleus_, con_, loopN_];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
 End[];
