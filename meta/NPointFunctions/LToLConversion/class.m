@@ -41,7 +41,7 @@ Module[
       ],
       fields = {}, vertices = {}, additionalVertices = {},
       prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
-      masslessNeutralVectorBosons, newRules
+      newRules
    },
 
    newRules = {
@@ -57,9 +57,7 @@ Module[
       "@LToLConversion_set_slha@" -> "slha_io.set_LToLConversion_settings(ltolconversion_settings);",
       "@LToLConversion_reset@" -> "ltolconversion_settings.reset();"};
 
-   If[Or[observables === {},
-         Not@FlexibleSUSY`FSFeynArtsAvailable,
-         Not@FlexibleSUSY`FSFormCalcAvailable],
+   If[observables === {} || !FlexibleSUSY`FSFeynArtsAvailable || !FlexibleSUSY`FSFormCalcAvailable,
       newRules = newRules /. Rule[x_, _]:> Rule[x, ""];
    ];
 
@@ -70,16 +68,8 @@ Module[
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
       (* additional vertices needed for the 1 loop calculation *)
-      masslessNeutralVectorBosons =
-         Select[TreeMasses`GetVectorBosons[],
-            And[TreeMasses`IsMassless@#,
-               !TreeMasses`IsElectricallyCharged@#,
-               !TreeMasses`ColorChargedQ@#]&];
-
-      vertices = Flatten/@ Tuples[
-         {  {CXXDiagrams`LorentzConjugate@#, #}&/@
-               Flatten@Join[TreeMasses`GetSMQuarks[], vertices],
-            masslessNeutralVectorBosons}];
+      vertices = Flatten/@Tuples@
+         {{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
 
       {additionalVertices,
          {npfHeaders, npfDefinitions},
