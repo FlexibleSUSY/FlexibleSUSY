@@ -5123,7 +5123,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                namespaces = ToExpression[#<>"`namespace[File]"]&/@obs;
                files = {
                   FileNameJoin@{$flexiblesusyTemplateDir, "npointfunctions", #<>".in"},
-                  FileNameJoin@{FSOutputDir, "npointfunctions", FSModelName<>"_"<>#}}&/@
+                  FileNameJoin@{dir, FSModelName<>"_"<>#}}&/@
                      {#<>".hpp", #<>".cpp"}&/@ namespaces;
 
                (* Evaluate write classes *)

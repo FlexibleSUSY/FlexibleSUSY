@@ -42,7 +42,7 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
          calcProto = "", npfHead = "", calcDef = "", npfDef = ""},
       obs = DeleteDuplicates@Cases[
          Observables`GetRequestedObservables@blocks,
-         FlexibleSUSYObservable`BrLTo3L[__]];
+         _FlexibleSUSYObservable`BrLTo3L];
       If[And[obs =!= {},
             FlexibleSUSY`FSFeynArtsAvailable,
             FlexibleSUSY`FSFormCalcAvailable],

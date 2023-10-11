@@ -19,7 +19,15 @@
 
 *)
 
-Utils`DynamicInclude@"type.m";
+BeginPackage["LToLConversion`"];
+namespace[File] := "ltolconversion";
+namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
+Begin["`Private`"];
+`type`observable = FlexibleSUSYObservable`LToLConversion[
+   in_@iIn_ -> out_@iOut_, nucleus_, con_, loopN_];
+End[];
+Block[{$ContextPath}, EndPackage[]];
+
 Utils`DynamicInclude@"main.m";
 
 Begin@"FlexibleSUSY`Private`";
@@ -29,7 +37,7 @@ Module[
    {
       observables = DeleteDuplicates@Cases[
          Observables`GetRequestedObservables@extraSLHAOutputBlocks,
-         FlexibleSUSYObservable`LToLConversion[pIn_[_]->pOut_[_],__]
+         _FlexibleSUSYObservable`LToLConversion
       ],
       fields = {}, vertices = {}, additionalVertices = {},
       prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
