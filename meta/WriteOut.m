@@ -24,6 +24,7 @@ BeginPackage["WriteOut`", {"SARAH`", "TextFormatting`", "CConversion`",
                            "Parameters`", "TreeMasses`",
                            "Utils`"}];
 
+WriteObservable::usage="Prepares SLHA or FLHA output for NPointFunctions observable";
 ReplaceInFiles::usage="Replaces tokens in files.";
 PrintParameters::usage="Creates parameter printout statements";
 PrintInputParameters::usage="Creates input parameter printout statements";
@@ -463,11 +464,11 @@ Module[{},
          FlexibleSUSYObservable`AMM[_],
              WriteSLHABlockEntry[blockName,
                                  {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                 Observables`GetObservableDescription[par]],
+                                 Observables`GetObservableDescription@par],
          FlexibleSUSYObservable`AMMUncertainty[_],
              WriteSLHABlockEntry[blockName,
                                  {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                 Observables`GetObservableDescription[par]],
+                                 Observables`GetObservableDescription@par],
          FlexibleSUSYObservable`aMuonGM2Calc,
              WriteSLHABlockEntry[blockName,
                                  {"OBSERVABLES.a_muon_gm2calc", idx},
@@ -479,43 +480,28 @@ Module[{},
          FlexibleSUSYObservable`EDM[_],
              WriteSLHABlockEntry[blockName,
                                  {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                 Observables`GetObservableDescription[par]],
+                                 Observables`GetObservableDescription@par],
          FlexibleSUSYObservable`BrLToLGamma[__],
              WriteSLHABlockEntry[blockName,
                                  {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                 Observables`GetObservableDescription[par]],
+                                 Observables`GetObservableDescription@par],
          FlexibleSUSYObservable`bsgamma,
              WriteSLHABlockEntry[blockName,
                                  {"OBSERVABLES.b_to_s_gamma", idx},
                                  "Re(C7) for b -> s gamma"],
          npfPattern,
-            ToExpression[SymbolName@Head@par<>"`write"][blockName, par, idx, comment],
+             WriteSLHABlockEntry[blockName,
+                                 {WriteObservable[blockName, par], idx},
+                                 Observables`GetObservableDescription@par],
          _,
              WriteSLHABlockEntry[blockName, {"", idx}, ""]
    ]
 ];];
 
-WriteSLHABlockEntry::errDiffLength =
-"Length of Eigen::Array should be equal to Length@description+1";
-WriteSLHABlockEntry[
-   blockName:"FWCOEF"|"IMFWCOEF",
-   {
-      observable:_String,
-      CConversion`ArrayType[CConversion`complexScalarCType, num_Integer]
-   },
-   flha:{{Repeated[_String,{6}]}..}
-] :=
-Module[
-   {
-      type = If[blockName === "FWCOEF","Re","Im"], i
-   },
-   Utils`AssertOrQuit[Length@flha+1 === num, WriteSLHABlockEntry::errDiffLength];
-
-   Table["      << FORMAT_WILSON_COEFFICIENTS(" <> flha[[i,1]] <> ", " <>
-      flha[[i,2]] <> ", " <> flha[[i,3]] <> ", " <> flha[[i,4]] <> ", " <>
-      flha[[i,5]] <> ", " <> type <> "(" <> observable <> "(" <> ToString@i <>
-      ")), " <> "\"" <> flha[[i,6]] <> "\")\n",
-      {i, num-1}]
+WriteSLHABlockEntry["FWCOEF"|"IMFWCOEF", {flha_List, _}, _] := MapIndexed[
+   StringReplace["      << FORMAT_WILSON_COEFFICIENTS(" <> #1 <> ")\n",
+      ")," -> "(" <> ToString@First@#2 <> ")),"]&,
+   flha
 ];
 
 WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment_String:""] :=
