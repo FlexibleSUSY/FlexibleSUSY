@@ -20,6 +20,8 @@
 
 *)
 
+Utils`DynamicInclude@"type.m";
+
 Off[BrLTo3L`write::shdw];
 BeginPackage["BrLTo3L`"];
 

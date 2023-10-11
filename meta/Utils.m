@@ -135,7 +135,8 @@ FSFancyPrint::usage = "Print text in fancy headline style";
 
 FSFancyLine::usage = "Print separator line in command line mode";
 
-FSFancyWarning::usage = "Print a warning with a style."
+FSFancyWarning::usage = "Print a warning with a style. Note, if <> used in
+argument, might be printed twice.";
 
 PrintHeadline::usage = "Print fancy head line";
 
