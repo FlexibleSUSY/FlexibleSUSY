@@ -144,6 +144,7 @@ public:
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block_imag(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
+   void set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>&);
    void set_modsel(const Modsel&);
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);

@@ -1,0 +1,41 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file standard_model_particle_aliases.hpp
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "cxx_qft/standard_model_fields.hpp"
+
+namespace flexiblesusy {
+
+using Higgs = standard_model_cxx_diagrams::fields::hh;
+using WpBoson = standard_model_cxx_diagrams::fields::VWp;
+using WmBoson = typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type;
+using Photon = standard_model_cxx_diagrams::fields::VP;
+using ZBoson = standard_model_cxx_diagrams::fields::VZ;
+using Gluon = standard_model_cxx_diagrams::fields::VG;
+using ChargedLepton = standard_model_cxx_diagrams::fields::Fe;
+using Neutrino = standard_model_cxx_diagrams::fields::Fv;
+using UpTypeQuark = standard_model_cxx_diagrams::fields::Fu;
+using DownTypeQuark = standard_model_cxx_diagrams::fields::Fd;
+
+}

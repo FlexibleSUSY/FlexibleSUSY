@@ -46,7 +46,7 @@ namespace @ModelName@_l_to_lgamma {
 
 template <typename FIn, typename FOut, typename T1, typename T2>
 double lepton_total_decay_width(
-      T1 const& indices1, T2 const& indices2, 
+      T1 const& indices1, T2 const& indices2,
       const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
@@ -55,7 +55,7 @@ double lepton_total_decay_width(
    const auto leptonOutMass = context.mass<FOut>(indices2);
    const auto r = Power2(leptonOutMass/leptonInMass);
    const auto GF2 = Power2(qedqcd.displayFermiConstant());
-   const double Alpha = Power2(FIn::electric_charge * unit_charge(context))/(4*Pi);
+   const double Alpha = Power2(FIn::electricCharge * unit_charge(context))/(4*Pi);
 
    // eq. 10.6 of http://pdg.lbl.gov/2018/reviews/rpp2018-rev-standard-model.pdf
    return

@@ -40,5 +40,7 @@ const char * const spinfo_formatter = " %5d   %s\n";
 const char * const obsinfo_formatter = " %5d %5d   %s\n";
 /// SLHA line formatter for the DECAY block
 const char * const format_total_width = "%9d   %16.8E   # %s\n";
+/// SLHA line formatter for the EFFECTIVECOUPLINGS block
+const char * const format_effectivecouplings = "%9d   %9d   %9d   %16.8E   # %s\n";
 
 } // namespace flexiblesusy

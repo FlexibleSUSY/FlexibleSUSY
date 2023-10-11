@@ -1,0 +1,62 @@
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = S3;
+
+MINPAR = {{1, LambdaIN}};
+
+EXTPAR = {
+   {0, Qin},
+   {1, QEWSB},
+   {2, mS3IN},
+   {3, LambdaS3IN},
+   {4, LambdaHS3IN}
+};
+
+EWSBOutputParameters = { mu2 };
+
+HighScale = Qin;
+
+HighScaleFirstGuess = Qin;
+
+HighScaleInput = {{\[Lambda], LambdaIN}};
+
+SUSYScale = QEWSB;
+
+SUSYScaleFirstGuess = QEWSB;
+
+SUSYScaleInput = {{YS3L, LHInput[YS3L]}, {mS3, mS3IN}, {lambdaS3, LambdaS3IN}, {lambdaHS3, LambdaHS3IN}};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+   {Yu, Sqrt[2] MatMul[upQuarksDRbar, CKM] / v},
+   {Yd, Sqrt[2] downQuarksDRbar / v},
+   {Ye, Sqrt[2] downLeptonsDRbar / v}
+};
+
+InitialGuessAtLowScale = {
+   {v, LowEnergyConstant[vev]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYOutput,
+           {{1, Hold[SUSYScale]},
+            {2, Hold[LowScale]} } },
+   {FlexibleSUSYLowEnergy, {
+         {20, FlexibleSUSYObservable`AMM[Fe[1]]},
+         {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
+         {27, FlexibleSUSYObservable`bsgamma}
+      }
+   }
+};
+
+FSCalculateDecays = True;
+FSDecayParticles = {hh, phi13, phi23, phi43};

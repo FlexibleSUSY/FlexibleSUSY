@@ -186,26 +186,58 @@ BOOST_AUTO_TEST_CASE( MSSM_tadpole_at_at_st_0 )
 
 BOOST_AUTO_TEST_CASE( MSSM_tadpole_at_as_st_0_mst1_eq_mst2 )
 {
-   Point p_close, p_exact;
-   p_close.st = 0.0000001;
-   p_close.mst12 = sqr(4000);
-   p_close.mst22 = sqr(4000.01);
-   p_exact.st = 0;
-   p_exact.mst12 = sqr(4000);
-   p_exact.mst22 = sqr(4000);
+   {
+      Point p_close, p_exact;
+      p_close.st = 0.0000001;
+      p_close.mst12 = sqr(4000);
+      p_close.mst22 = sqr(4000.01);
+      p_exact.st = 0;
+      p_exact.mst12 = sqr(4000);
+      p_exact.mst22 = sqr(4000);
 
-   const auto tad_ps       = calc_tad_at_as_PS(p_close);
-   const auto tad_fs_close = calc_tad_at_as_FS(p_close);
-   const auto tad_fs_exact = calc_tad_at_as_FS(p_exact);
+      const auto tad_ps       = calc_tad_at_as_PS(p_close);
+      const auto tad_fs_close = calc_tad_at_as_FS(p_close);
+      const auto tad_fs_exact = calc_tad_at_as_FS(p_exact);
 
-   BOOST_CHECK_EQUAL(tad_ps(0), tad_fs_close(0));
-   BOOST_CHECK_EQUAL(tad_ps(1), tad_fs_close(1));
+      BOOST_CHECK_EQUAL(tad_ps(0), tad_fs_close(0));
+      BOOST_CHECK_EQUAL(tad_ps(1), tad_fs_close(1));
 
-   BOOST_CHECK_CLOSE(tad_ps(0), tad_fs_exact(0), 1e-3);
-   BOOST_CHECK_CLOSE(tad_ps(1), tad_fs_exact(1), 1e-3);
+      BOOST_CHECK_CLOSE(tad_ps(0), tad_fs_exact(0), 1e-3);
+      BOOST_CHECK_CLOSE(tad_ps(1), tad_fs_exact(1), 1e-3);
 
-   BOOST_TEST_MESSAGE("Pietro Slavich                : " << tad_ps.transpose());
-   BOOST_TEST_MESSAGE("Limit st -> 0 and mst1 -> mst2: " << tad_fs_exact.transpose());
+      BOOST_TEST_MESSAGE("Pietro Slavich                : " << tad_ps.transpose());
+      BOOST_TEST_MESSAGE("Limit st -> 0 and mst1 -> mst2: " << tad_fs_exact.transpose());
+   }
+
+   {
+      const double eps = 1e-6;
+
+      Point p_close, p_exact;
+      p_close.st = eps;
+      p_close.mst12 = sqr(3000);
+      p_close.mst22 = sqr(3000*(1 + eps));
+      p_close.mg = 3000*(1 + eps);
+      p_exact.st = 0;
+      p_exact.mst12 = sqr(3000);
+      p_exact.mst22 = sqr(3000);
+      p_exact.mg = 3000;
+
+      const auto tad_ps       = calc_tad_at_as_PS(p_close);
+      const auto tad_fs_close = calc_tad_at_as_FS(p_close);
+      const auto tad_fs_exact = calc_tad_at_as_FS(p_exact);
+
+      BOOST_CHECK(std::isfinite(tad_fs_exact(0)));
+      BOOST_CHECK(std::isfinite(tad_fs_exact(1)));
+
+      BOOST_CHECK_EQUAL(tad_ps(0), tad_fs_close(0));
+      BOOST_CHECK_EQUAL(tad_ps(1), tad_fs_close(1));
+
+      BOOST_CHECK_CLOSE_FRACTION(tad_ps(0), tad_fs_exact(0), 3e-2);
+      BOOST_CHECK_CLOSE_FRACTION(tad_ps(1), tad_fs_exact(1), 1e-3);
+
+      BOOST_TEST_MESSAGE("Pietro Slavich                : " << tad_ps.transpose());
+      BOOST_TEST_MESSAGE("Limit st -> 0 and mst1 -> mst2: " << tad_fs_exact.transpose());
+   }
 }
 
 BOOST_AUTO_TEST_CASE( MSSM_tadpole_at_at_st_0_mst1_eq_mst2 )

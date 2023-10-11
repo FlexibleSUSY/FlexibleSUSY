@@ -31,6 +31,8 @@ namespace softsusy {
 } // namespace softsusy
 
 namespace flexiblesusy {
+class Spectrum_generator_settings;
+
 class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_amm {
@@ -39,14 +41,14 @@ namespace @ModelName@_amm {
 * @brief Calculates \f$a = Delta(g-2)/2\f$ of the lepton.
 */
 template <typename Lepton>
-double calculate_amm(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@);
+double calculate_amm(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings&@extraIdxDecl@);
 
 /**
 * @fn calculate_amm_uncertainty
 * @brief Calculates uncertainty of \f$\Delta a\f$ of the lepton.
 */
 template <typename Lepton>
-double calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@);
+double calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings&@extraIdxDecl@);
 } // namespace @ModelName@_amm
 } // namespace flexiblesusy
 

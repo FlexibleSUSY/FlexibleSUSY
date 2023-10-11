@@ -95,6 +95,7 @@ options="                    \
    enable_debug              \
    enable_fflite             \
    enable_gm2calc            \
+   enable_higgstools         \
    enable_himalaya           \
    enable_librarylink        \
    enable_looptools          \
@@ -123,6 +124,7 @@ enable_debug=""
 enable_mass_error_check="no"
 enable_fflite="no"
 enable_gm2calc="automatic"
+enable_higgstools="automatic"
 enable_himalaya="automatic"
 enable_librarylink="automatic"
 enable_looptools="no"
@@ -147,6 +149,7 @@ DEFINE_ENABLE_DEBUG="#undef ENABLE_DEBUG"
 DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR="#undef CHECK_EIGENVALUE_ERROR"
 DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
 DEFINE_ENABLE_GM2CALC="#undef ENABLE_GM2CALC"
+DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
 DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
@@ -174,7 +177,7 @@ collier_lib_dir=""
 collier_inc_dir=""
 GSLFLAGS=""
 CPPFLAGS=""
-CXXFLAGS="-std=c++14 -O2 -fPIC"
+CXXFLAGS="-std=c++17 -O2 -fPIC"
 FFLAGS="-O2 -fPIC"
 FLIBS=""
 FMOD=""
@@ -211,6 +214,8 @@ LDFLAGS="$SHARED_LDFLAGS"
 LDLIBS="$SHARED_LDLIBS"
 LLFLAGS=""
 LLLIBS=""
+higgstools_inc_dir=""
+higgstools_lib_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
 sqlite_lib_dir=""
@@ -237,9 +242,9 @@ cxx_compiler_version="unknown"
 
 # required C++ compiler versions
 required_cxx_compiler_version="unknown"
-required_gpp_compiler_version="5.0.0"
-required_clang_compiler_version="3.8.1"
-required_icpc_compiler_version="17.0.0"
+required_gpp_compiler_version="7.0.0"
+required_clang_compiler_version="4.0.0"
+required_icpc_compiler_version="18.0.0"
 
 # required boost version
 required_boost_version="1.37.0"
@@ -1770,6 +1775,9 @@ check_cxxflags() {
             CXXFLAGS="${CXXFLAGS} -Wall -pedantic -Wextra\
  -Wcast-align -Woverloaded-virtual -Wnon-virtual-dtor\
  -Wno-unused-local-typedefs"
+        elif test "x${cxx_compiler_type}" = "xclang"; then
+            CXXFLAGS="${CXXFLAGS} -Wall -pedantic -Wextra\
+ -Wcast-align -Woverloaded-virtual -Wnon-virtual-dtor"
         elif test "x${cxx_compiler_type}" = "xintel"; then
             CXXFLAGS="${CXXFLAGS} -w3 -Wnon-virtual-dtor"
         fi
@@ -2148,6 +2156,80 @@ int main() {
         message "Warning: An old version of Himalaya has been detected ($HIMALAYA_VERSION)."
         message "   Please consider upgrading to version 2.0.0 (or higher)."
     }
+}
+
+check_higgstools_incl() {
+    check_header "Higgs/Predictions.hpp" "$higgstools_inc_dir"
+    if test "x$found_hdr" = "x" ; then
+        if test "x$enable_higgstools" = "xyes" ; then
+            message "Error: HiggsTools's Predictions.hpp must be installed if you want"
+            message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
+            message "   You can use the --with-higgstools-incdir= option to specify the"
+            message "   location of Higgs/Predictions.hpp and the other headers."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
+        return 0
+    fi
+    return 0
+}
+
+check_higgstools_libs() {
+    check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
+    if test "x$found_lib" = "x" ; then
+        if test "x$enable_higgstools" = "xyes" ; then
+            message "Error: The HiggsTools library must be installed if you want"
+            message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
+            message "   You can use the --with-higgstools-libdir option to specify the"
+            message "   location of the HiggsTools library."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        local filename
+        filename=$(basename -- "$found_lib")
+        local extension="${filename##*.}"
+        local HIGGSTOOLSLIBS_="-lHiggsTools"
+        if [ "$extension" = "a" ] ; then
+            if [ -z "$higgstools_lib_dir" ]; then
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+            else
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+            fi
+        elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
+            if [ "x$enable_static" = xyes ] ; then
+               message "Warning: Requested creation of statically link executable but"
+               message "         HiggsTools was compiled as a shared library."
+	         fi
+            if [ -z "$higgstools_lib_dir" ]; then
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
+            else
+                # assume that the linker will look in the default paths
+                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+            fi
+        else
+	         message "Error: Cannot identify the type (static or shared) of"
+	         message "       HiggsTools library."
+	         exit 1
+	     fi
+        return 0
+    fi
+    return 0
+}
+
+check_higgstools() {
+    if check_higgstools_incl && check_higgstools_libs ; then
+        enable_higgstools=yes
+    else
+        enable_higgstools=no
+    fi
 }
 
 #_____________________________________________________________________
@@ -3311,6 +3393,13 @@ enable_defines() {
     fi
     logmsg "   ${DEFINE_ENABLE_HIMALAYA}"
 
+    if test "x$enable_higgstools" = "xyes" ; then
+        DEFINE_ENABLE_HIGGSTOOLS="#define ENABLE_HIGGSTOOLS 1"
+    else
+        DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
+    fi
+    logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
+
     if test "x$enable_librarylink" = "xyes" ; then
         DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
         logmsg "Enabling LibraryLink"
@@ -3537,6 +3626,7 @@ replace_markers() {
 	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
 	-e "s|@ENABLE_GM2CALC@|$enable_gm2calc|" \
+	-e "s|@ENABLE_HIGGSTOOLS@|$enable_higgstools|" \
 	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
@@ -3549,6 +3639,8 @@ replace_markers() {
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
         -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
         -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
+        -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
+        -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
         -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
         -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
@@ -3592,6 +3684,7 @@ enable/disable options, prefix with either --enable- or --disable-
   debug             Debug messages and assertions (no default)
   fflite            Use fflite to compute the loop functions (default: $enable_fflite)
   gm2calc           Enable GM2Calc (default: $enable_gm2calc)
+  higgstools        Enable HiggsTools (default: $enable_higgstools)
   himalaya          Enable Himalaya (default: $enable_himalaya)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
@@ -3632,6 +3725,8 @@ Package directories, compilation settings and model selection
   --with-gsl-config=        Path to gsl-config (default: $gsl_config)
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
+  --with-higgstools-libdir= Path to search for HiggsTools library
+  --with-higgstools-incdir= Path to search for HiggsTools header
   --with-install-dir=       Path to source code installation directory
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
@@ -3758,6 +3853,8 @@ if test $# -gt 0 ; then
             --with-gm2calc-incdir=*) gm2calc_inc_dir=$optarg ;;
             --with-gm2calc-libdir=*) gm2calc_lib_dir=$optarg ;;
             --with-gsl-config=*)     gsl_config=$optarg ;;
+            --with-higgstools-incdir=*) higgstools_inc_dir=$optarg ;;
+            --with-higgstools-libdir=*) higgstools_lib_dir=$optarg ;;
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
@@ -3846,6 +3943,7 @@ if test "x${enable_compile}" = "xyes"; then
     check_gsl_config
     check_gm2calc
     check_himalaya
+    check_higgstools
     if use_solver "lattice"; then
         check_boost_thread_incl
         check_boost_thread_libs
@@ -3911,6 +4009,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
     -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"               \
     -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"             \
+    -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"         \
+    -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"       \
     -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
     -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
@@ -3939,6 +4039,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_FFLITE@|$DEFINE_ENABLE_FFLITE|" \
     -e "s|@DEFINE_ENABLE_GM2CALC@|$DEFINE_ENABLE_GM2CALC|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
+    -e "s|@DEFINE_ENABLE_HIGGSTOOLS@|$DEFINE_ENABLE_HIGGSTOOLS|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \

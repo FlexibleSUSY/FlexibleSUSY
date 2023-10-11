@@ -24,7 +24,6 @@
 #include "wrappers.hpp"
 #include "stopwatch.hpp"
 #include <boost/lexical_cast.hpp>
-#include <boost/math/special_functions/zeta.hpp>
 #include <boost/math/constants/constants.hpp>
 
 #if defined(__CYGWIN__) || defined(__FreeBSD__)
@@ -49,8 +48,8 @@ BOOST_AUTO_TEST_CASE( test_Constants )
    BOOST_CHECK(True);
    BOOST_CHECK_EQUAL(zeta2         , boost::math::constants::zeta_two<double>());
    BOOST_CHECK_EQUAL(zeta3         , boost::math::constants::zeta_three<double>());
-   BOOST_CHECK_EQUAL(zeta4         , boost::math::zeta(4));
-   BOOST_CHECK_EQUAL(zeta5         , boost::math::zeta(5));
+   BOOST_CHECK_CLOSE_FRACTION(zeta4, std::riemann_zeta(4), 3e-16);
+   BOOST_CHECK_EQUAL(zeta5         , std::riemann_zeta(5));
    BOOST_CHECK_EQUAL(ln2           , boost::math::constants::ln_two<double>());
 }
 

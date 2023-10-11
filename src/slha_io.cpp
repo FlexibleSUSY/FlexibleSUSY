@@ -975,5 +975,15 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
+void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings)
+{
+   std::ostringstream decay;
+   decay << "Block EFFHIGGSCOUPLINGS\n";
 
+   for (auto const& effC : effCouplings) {
+      decay << FORMAT_EFFECTIVECOUPLINGS(std::get<0>(effC),  std::get<1>(effC), std::get<2>(effC), std::get<3>(effC), std::get<4>(effC));
+   }
+
+   set_block(decay);
+}
 } // namespace flexiblesusy

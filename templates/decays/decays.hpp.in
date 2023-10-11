@@ -65,9 +65,19 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
+   std::vector<std::tuple<int, int, int, double, std::string>> get_effhiggscouplings_block_input() const {
+      return effhiggscouplings_block_input;
+   }
 
 @decaysGetters@
 @decaysCalculationPrototypes@
+
+   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+   double get_partial_width(
+      const @ModelName@_cxx_diagrams::context_base&,
+      typename cxx_diagrams::field_indices<FieldIn>::type const&,
+      typename cxx_diagrams::field_indices<FieldOut1>::type const&,
+      typename cxx_diagrams::field_indices<FieldOut2>::type const&);
 
 @partialWidthCalculationPrototypes@
 
@@ -76,7 +86,7 @@ private:
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};
-   bool run_to_decay_particle_scale {true};
+   static constexpr bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    FlexibleDecay_problems problems{};
 
@@ -93,13 +103,7 @@ private:
                   typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
                   typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
                   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const;
-
-   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-   double get_partial_width(
-      const @ModelName@_cxx_diagrams::context_base&,
-      typename cxx_diagrams::field_indices<FieldIn>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut1>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut2>::type const&) const;
+   std::vector<std::tuple<int, int, int, double, std::string>> effhiggscouplings_block_input {};
 };
 
 @calcAmplitudeSpecializationDecls@
@@ -123,8 +127,7 @@ double @ModelName@_decays::get_partial_width(
    const @ModelName@_cxx_diagrams::context_base& context,
    typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
    typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
-   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2
-   ) const
+   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2)
 {
 
    // on-shell masses
@@ -134,7 +137,10 @@ double @ModelName@_decays::get_partial_width(
 
    // is decay kinematically allowed?
    if(mIn < mOut1 + mOut2) {
-      WARNING("Called kinematically forbidden decay");
+      problems.add_warning(
+         create_process_string<FieldIn,FieldOut1,FieldOut2>(indexIn, indexOut1, indexOut2)
+            + ": Called kinematically forbidden decay."
+      );
       return 0.;
    }
 

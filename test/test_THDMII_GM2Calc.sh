@@ -63,6 +63,7 @@ Block FlexibleSUSY
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   0                    # loop library (0 = softsusy)
+   32   2                    # 2-loop calculation of amu
 Block FlexibleSUSYInput
     0   0.00729735           # alpha_em(0)
     1   125.09               # Mh pole
@@ -138,6 +139,7 @@ fi
   cat <<EOF
 Block FlexibleSUSY
     15  1   # calculate observables (a_muon, ...)
+    32  1   # 1-loop calculation of amu
 EOF
   } | "${THDMII_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
 
@@ -148,6 +150,22 @@ EOF
 
 # amu from FS
 amu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 21) print $2 }')
+
+{ printf "%s\n" "${SLHA_IN}";
+  cat <<EOF
+Block FlexibleSUSY
+    15  1   # calculate observables (a_muon, ...)
+    32  2   # 2-loop calculation of amu
+EOF
+  } | "${THDMII_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
+
+[ $? = 0 ] || {
+    echo "Error: ${THDMII_EXE} failed!"
+    exit 1
+}
+
+# amu from FS
+amu_2l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 21) print $2 }')
 
 # Mh from FS
 mh_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=MASS | awk '{ if ($1 == 25) print $2 }')
@@ -241,6 +259,7 @@ EOF
 
 # convert scientific notation to bc friendly notation
 amu_1l_fs=$(echo "${amu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_2l_fs=$(echo "${amu_2l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 damu_2l_gm2calc_fs=$(echo "${damu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
@@ -280,9 +299,19 @@ test_close "${amu_2l_gm2calc_fs}" "${amu_2l_gm2calc}" "0.0000001"
 test_close "${damu_2l_gm2calc_fs}" "${damu_2l_gm2calc}" "0.0000001"
 
 ### test 1L GM2Calc vs. 1L FS
-test_close "${amu_1l_fs}" "${amu_1l_gm2calc}" "0.3"
+test_close "${amu_1l_fs}" "${amu_1l_gm2calc}" "0.2"
 
-echo "FlexibleSUSY 1L + 2L QED: amu = ${amu_1l_fs}"
+# The following test does not work out, because for this THDM-II
+# parameter point the Barr-Zee diagrams implemented in FS are
+# negligible, while the bosonic diagrams from GM2Calc (not implemented
+# in FS) are dominant.
+
+### test 2L GM2Calc vs. 2L FS
+
+# test_close "${amu_2l_fs}" "${amu_2l_gm2calc}" "0.2"
+
+echo "FlexibleSUSY 1L         : amu = ${amu_1l_fs}"
+echo "FlexibleSUSY 2L         : amu = ${amu_2l_fs}"
 echo "original GM2Calc 1L     : amu = ${amu_1l_gm2calc} +/- ${damu_1l_gm2calc}"
 echo "original GM2Calc 2L     : amu = ${amu_2l_gm2calc} +/- ${damu_2l_gm2calc}"
 echo "embedded GM2Calc 2L     : amu = ${amu_2l_gm2calc_fs} +/- ${damu_2l_gm2calc_fs}"

@@ -65,6 +65,8 @@ public:
    const std::string& get_program_name() const { return program; }
    const std::string& get_rgflow_file() const { return rgflow_file; }
    const std::string& get_spectrum_file() const { return spectrum_file; }
+   const std::string& get_higgsbounds_dataset() const { return higgsbounds_dataset; }
+   const std::string& get_higgssignals_dataset() const { return higgssignals_dataset; }
 
    static bool get_parameter_value(const std::string&, const std::string&, double&);
    static bool get_parameter_value(const std::string&, const std::string&, int&);
@@ -76,6 +78,8 @@ private:
    int exit_status{EXIT_SUCCESS};
    std::string program{};
    std::string database_output_file{};
+   std::string higgssignals_dataset{};
+   std::string higgsbounds_dataset{};
    std::string rgflow_file{};
    std::string slha_input_file{};
    std::string slha_output_file{"-"};

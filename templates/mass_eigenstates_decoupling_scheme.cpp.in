@@ -264,6 +264,9 @@ void CLASSNAME::calculate_tree_level_mass_spectrum()
    solve_ewsb_equations_tree_level();
 
 @calculateAllMasses@
+
+   // move goldstone bosons to the front
+   reorder_tree_level_masses();
 }
 
 /**
@@ -275,8 +278,6 @@ void CLASSNAME::calculate_tree_level_mass_spectrum()
 void CLASSNAME::calculate_pole_mass_spectrum()
 {
    calculate_tree_level_mass_spectrum();
-   // move goldstone bosons to the front
-   reorder_tree_level_masses();
    copy_tree_level_masses_to_pole_masses();
    check_pole_masses_for_tachyons();
 }

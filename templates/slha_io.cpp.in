@@ -459,6 +459,11 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
    slha_io.set_block(decay);
 }
 
+void @ModelName@_slha_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings)
+{
+   slha_io.set_effectivecouplings_block(effCouplings);
+}
+
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
 

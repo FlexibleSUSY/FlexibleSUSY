@@ -231,9 +231,8 @@ ParticleTypeAsString[part_] := Module[
 ];
 
 (** \brief Creates c++ code that makes all fields and their properties
- * available as c++ types. Also creates two using declarations for
- * the following fields:
- * - Photon
+ * available as c++ types. Also creates one using declaration for
+ * the following field:
  * - Electron
  * Furthermore create the necessary boilerplate code to conjugate any
  * given c++ field as well as convenience `boost::mpl::vector<>`
@@ -268,8 +267,8 @@ CreateFields[] :=
        StringRiffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
-              "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
-              "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
+              "static constexpr auto particleType = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
+              "static constexpr auto colorRep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
               "static constexpr auto massless = " <> CConversion`CreateCBoolValue @ TreeMasses`IsMassless[#] <> ";\n" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
@@ -290,14 +289,13 @@ CreateFields[] :=
                    ] <> ">;\n" <>
               "static constexpr int numberOfFieldIndices = " <>
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
-              "static constexpr double electric_charge = " <>
+              "static constexpr double electricCharge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
               "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
               "};" &) /@ fields, "\n\n"] <> "\n\n" <>
 
        "// Named fields\n" <>
-       "using Photon = " <> CXXNameOfField[SARAH`Photon] <> ";\n" <>
        "using Electron = " <> CXXNameOfField[AtomHead @ TreeMasses`GetSMElectronLepton[]] <> ";\n\n" <>
 
        "using scalars = boost::mpl::vector<" <>
@@ -1254,7 +1252,7 @@ Module[{cxxVertices, vertexPartition,
       Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
    ];
    Print[""];
-   Print["The creation of C++ vertices took ", Round[First@cxxVertices, 0.1], "s"];
+   Print["The creation of C++ vertices took", FSRound[First@cxxVertices, 1], "s"];
    cxxVertices = Last@cxxVertices;
 
    (* Mathematica 7 does not support the `UpTo[n]` notation *)

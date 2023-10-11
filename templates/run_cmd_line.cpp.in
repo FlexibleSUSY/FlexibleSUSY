@@ -103,7 +103,7 @@ int run_solver(int loop_library, const @ModelName@_input_parameters& input)
    auto models = spectrum_generator.get_models_slha();
 
    const auto observables = calculate_observables(
-      std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
+      std::get<0>(models), qedqcd, physical_input, settings, scales.pole_mass_scale);
 
    FlexibleDecay_settings flexibledecay_settings;
 @calculateCmdLineDecays@

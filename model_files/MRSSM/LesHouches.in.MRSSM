@@ -45,6 +45,7 @@ Block FlexibleSUSY
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   0                    # loop library (0 = softsusy)
+   32   2                    # loop level to calculate AMM
 Block SPhenoInput         # SPheno specific input
     1 -1          # error level
     2  1          # SPA conventions

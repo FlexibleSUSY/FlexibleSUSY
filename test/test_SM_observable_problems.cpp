@@ -7,6 +7,7 @@
 #include "lowe.h"
 #include "observable_problems_format_slha.hpp"
 #include "physical_input.hpp"
+#include "spectrum_generator_settings.hpp"
 #include "SM_mass_eigenstates.hpp"
 #include "SM_input_parameters.hpp"
 #include "SM_observables.hpp"
@@ -18,11 +19,12 @@ BOOST_AUTO_TEST_CASE( test_non_perturbative_running )
    flexiblesusy::Physical_input physical_input;
    flexiblesusy::SM_input_parameters input;
    flexiblesusy::SM_mass_eigenstates sm;
+   flexiblesusy::Spectrum_generator_settings settings;
    const double scale = 0.0;
 
    setup_SM_const(sm, input);
 
-   const auto obs = flexiblesusy::calculate_observables(sm, qedqcd, physical_input, scale);
+   const auto obs = flexiblesusy::calculate_observables(sm, qedqcd, physical_input, settings, scale);
    const auto op = obs.problems;
 
    // BOOST_CHECK(op.have_problem());
