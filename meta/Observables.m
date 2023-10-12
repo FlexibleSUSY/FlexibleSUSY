@@ -26,10 +26,10 @@ BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Param
 Begin["FlexibleSUSYObservable`"];
 FSObservables = { AMM, AMMUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   EDM, BrLToLGamma, bsgamma };
-Utils`DynamicInclude@FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions", "define-observable.m"};
-Utils`DynamicInclude@$npfObsWildcard@"observable.m";
+Utils`DynamicInclude@$npfObsWildcard@"Observable.m";
 End[];
 
+DefineObservable::usage="Defines all C++ names for an observable.";
 GetRequestedObservables::usage="";
 CountNumberOfObservables::usage="";
 CreateObservablesDefinitions::usage="";
@@ -270,6 +270,65 @@ CalculateObservables[something_, structName_String] :=
            FillInterfaceData[observables] <> "\n" <>
            Utils`StringJoinWithSeparator[CalculateObservable[#,structName]& /@ observables, "\n"]
           ];
+
+Options@DefineObservable = {
+   InsertionFunction -> CConversion`ToValidCSymbolString,
+   GetObservableName -> Unset,
+   GetObservableDescription -> Unset,
+   GetObservableType -> Unset,
+   CalculateObservable -> Unset,
+   Context -> Unset
+};
+
+DefineObservable[obs_@pattern___, OptionsPattern[]] :=
+Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn},
+   warn := Utils`FSFancyWarning[#," for ", ToString@obs, " might not be specified."]&;
+
+   stringPattern = ToString@FullForm@{pattern};
+   patternNames = StringCases[stringPattern, "Pattern[" ~~ Shortest@x__ ~~ "," :> x];
+   uniqueNames = Unique[#<>"$"]&/@patternNames;
+
+   lhsRepl = MapThread[Rule, {patternNames, ToString/@uniqueNames}];
+   rhsRepl = MapThread[
+      RuleDelayed[#1, OptionValue[InsertionFunction]@#2]&,
+      {patternNames, uniqueNames}
+   ];
+
+   If[OptionValue@Context === Unset,
+      warn@"Context";,
+      AppendTo[rhsRepl, "context" :> OptionValue[InsertionFunction][
+         FlexibleSUSY`FSModelName <> "_" <> OptionValue@Context]];
+   ];
+
+   With[{args = Sequence@@ToExpression@StringReplace[stringPattern, lhsRepl],
+         repl = rhsRepl,
+         name = OptionValue@GetObservableName,
+         description = OptionValue@GetObservableDescription,
+         type = OptionValue@GetObservableType,
+         calculate = OptionValue@CalculateObservable
+      },
+      AppendTo[FlexibleSUSYObservable`FSObservables, obs];
+      If[name === Unset,
+         warn@"GetObservableName";,
+         GetObservableName@obs@args := StringReplace[name, repl];
+      ];
+      If[description === Unset,
+         warn@"GetObservableDescription";,
+         GetObservableDescription@obs@args := StringReplace[description, repl];
+      ];
+      If[type === Unset,
+         warn@"GetObservableType";,
+         GetObservableType@obs@args := type;
+      ];
+      If[calculate === Unset,
+         warn@"CalculateObservable";,
+         CalculateObservable[obs@args, structName:_String] :=
+            structName <> "." <> StringReplace[name, repl] <>
+            StringReplace[" = context::"<>calculate<>";", repl];
+      ];
+   ];
+];
+Utils`MakeUnknownInputDefinition@DefineObservable;
 
 End[];
 
