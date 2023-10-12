@@ -20,21 +20,17 @@
 
 *)
 
-Utils`DynamicInclude@"type.m";
+BeginPackage["BrLTo3L`"];
+Begin["`Private`"];
+`type`observable = FlexibleSUSYObservable`BrLTo3L[lep_@nI_ -> {lep_@nO_, lep_@nA_, SARAH`bar@lep_@nA_}, proc_, loopN_];
+End[];
+Block[{$ContextPath}, EndPackage[]];
+
 Utils`DynamicInclude@"main.m";
 
 Begin@"FlexibleSUSY`Private`";
 
-WriteBrLTo3LClass::usage = "
-@brief Takes corresponding to the observable .hpp.in and .cpp.in files from
-       template directory. Then inserts parts of code, generated with help of
-       main.m and puts resulting files inside directory of configured model.
-@param blocks A list of extra slha output blocks. It should contain calls for
-       the observable in order to calculate it.
-@param files A list of input-output file names to work with.
-@returns A list with two entries: 1) a list of all external fields of the
-         observable, 2) a list of all vertices, required by the observable.";
-WriteBrLTo3LClass[blocks:_List, files:{{_?FileExistsQ, _String}..}] :=
+WriteClass[FlexibleSUSYObservable`BrLTo3L, blocks:_List, files:{{_?FileExistsQ, _String}..}] :=
 Module[{obs, ffvFields = {},
       fermions = {}, ffvV = {}, npfV = {},
       calcProto = "", npfHead = "", calcDef = "", npfDef = ""},
@@ -66,7 +62,5 @@ Module[{obs, ffvFields = {},
    ];
    {ffvFields, Join[ffvV, npfV], {}}
 ];
-WriteBrLTo3LClass // Utils`MakeUnknownInputDefinition;
-WriteBrLTo3LClass // Protect;
 
 End[];

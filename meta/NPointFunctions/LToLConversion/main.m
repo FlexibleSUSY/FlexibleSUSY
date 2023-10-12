@@ -46,14 +46,7 @@ Module[{cxx = CConversion`ToValidCSymbolString},
 
    (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>cxx@in<>cxx@out<>"_for"<>SymbolName@con<>
-      "_"<> ToString[loopN]<>"loop(\n"<>
-      "   int in, int out,\n"<>
-      "   const " <> namespace@C <> "Nucleus nucleus,\n" <>
-      "   const " <> FlexibleSUSY`FSModelName <>
-      "_mass_eigenstates& model, "<>
-      "const LToLConversion_settings& parameters, "<>
-      "const softsusy::QedQcd& qedqcd)";
+      " " <> Observables`GetObservablePrototype@obs;
    Protect@"LToLConversion`Private`cxx`*";
 ];
 setCxx // Utils`MakeUnknownInputDefinition;
@@ -78,7 +71,7 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
       "<>If[loopN === 0, "zero", `cxx`penguin]<>",
       npointfunctions::"<>`cxx`classU<>",
       npointfunctions::"<>`cxx`classD<>"
-   >(in, out, nucleus, model, parameters, qedqcd);\n}";
+   >(in, out, n, model, parameters, qedqcd);\n}";
 
    {
       npfVertices,

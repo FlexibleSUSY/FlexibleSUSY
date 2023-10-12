@@ -41,11 +41,11 @@ Module[{cxx = CConversion`ToValidCSymbolString},
    Unprotect@"BrLTo3L`Private`$*";
    $fields = Utils`StringJoinWithSeparator["fields::"<>#&/@ cxx/@
       {lep, TreeMasses`GetPhoton[]}, ", "];
-   $calculate = StringReplace[calculate[obs, Head], s_~~"("~~__ :> s];
+   $calculate = StringReplace[Observables`GetObservablePrototype@obs, s_~~"("~~__ :> s];
    $penguin = StringJoin["calculate_", cxx@lep, "_", cxx@lep, "_",
       cxx@TreeMasses`GetPhoton[], "_form_factors"];
    $prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " " <> calculate[obs, Head];
+      " " <> Observables`GetObservablePrototype@obs;
    Protect@"BrLTo3L`Private`$*";];
 setGlobals // Utils`MakeUnknownInputDefinition;
 setGlobals // Protect;

@@ -20,8 +20,6 @@
 *)
 
 BeginPackage["LToLConversion`"];
-namespace[File] := "ltolconversion";
-namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 Begin["`Private`"];
 `type`observable = FlexibleSUSYObservable`LToLConversion[
    in_@iIn_ -> out_@iOut_, nucleus_, con_, loopN_];
@@ -32,7 +30,7 @@ Utils`DynamicInclude@"main.m";
 
 Begin@"FlexibleSUSY`Private`";
 
-WriteLToLConversionClass[extraSLHAOutputBlocks:_List, files:{{_?FileExistsQ,_String}..}] :=
+WriteClass[FlexibleSUSYObservable`LToLConversion, extraSLHAOutputBlocks:_List, files:{{_?FileExistsQ,_String}..}] :=
 Module[
    {
       observables = DeleteDuplicates@Cases[
@@ -93,7 +91,5 @@ Module[
       newRules
    }
 ];
-WriteLToLConversionClass // Utils`MakeUnknownInputDefinition;
-WriteLToLConversionClass // Protect;
 
 End[];

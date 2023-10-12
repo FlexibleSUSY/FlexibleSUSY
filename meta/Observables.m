@@ -26,10 +26,11 @@ BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Param
 Begin["FlexibleSUSYObservable`"];
 FSObservables = { AMM, AMMUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   EDM, BrLToLGamma, bsgamma };
-Utils`DynamicInclude@$npfObsWildcard@"Observable.m";
 End[];
 
-DefineObservable::usage="Defines all C++ names for an observable.";
+DefineObservable::usage="Defines all C++ names for an observable";
+GetObservableFileName::usage="Returns the C++ file name of a given observable";
+GetObservablePrototype::usage="Returns the C++ prototype as string";
 GetRequestedObservables::usage="";
 CountNumberOfObservables::usage="";
 CreateObservablesDefinitions::usage="";
@@ -277,11 +278,14 @@ Options@DefineObservable = {
    GetObservableDescription -> Unset,
    GetObservableType -> Unset,
    CalculateObservable -> Unset,
+   GetObservableFileName -> Unset,
+   GetObservablePrototype -> Unset,
    Context -> Unset
 };
 
 DefineObservable[obs_@pattern___, OptionsPattern[]] :=
-Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn},
+Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
+      obsStr = SymbolName@obs},
    warn := Utils`FSFancyWarning[#," for ", ToString@obs, " might not be specified."]&;
 
    stringPattern = ToString@FullForm@{pattern};
@@ -295,41 +299,63 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn},
    ];
 
    If[OptionValue@Context === Unset,
-      warn@"Context";,
-      AppendTo[rhsRepl, "context" :> OptionValue[InsertionFunction][
+      warn@"Context";
+      If[OptionValue@GetObservableFileName === Unset,
+         warn@"GetObservableFileName";
+      ];,
+      GetObservableFileName[obs | obsStr] := OptionValue@Context;
+      AppendTo[rhsRepl, "context" -> OptionValue[InsertionFunction][
          FlexibleSUSY`FSModelName <> "_" <> OptionValue@Context]];
    ];
+
+   AppendTo[rhsRepl, "eigenstates" -> OptionValue[InsertionFunction][
+         FlexibleSUSY`FSModelName <> "_mass_eigenstates"]];
 
    With[{args = Sequence@@ToExpression@StringReplace[stringPattern, lhsRepl],
          repl = rhsRepl,
          name = OptionValue@GetObservableName,
          description = OptionValue@GetObservableDescription,
          type = OptionValue@GetObservableType,
-         calculate = OptionValue@CalculateObservable
+         calculate = OptionValue@CalculateObservable,
+         prototype = OptionValue@GetObservablePrototype
       },
       AppendTo[FlexibleSUSYObservable`FSObservables, obs];
+
+      If[OptionValue@GetObservableFileName =!= Unset,
+         GetObservableFileName[obs | obsStr] := OptionValue@GetObservableFileName;
+      ];
+
       If[name === Unset,
          warn@"GetObservableName";,
          GetObservableName@obs@args := StringReplace[name, repl];
       ];
+
       If[description === Unset,
          warn@"GetObservableDescription";,
          GetObservableDescription@obs@args := StringReplace[description, repl];
       ];
+
       If[type === Unset,
          warn@"GetObservableType";,
          GetObservableType@obs@args := type;
       ];
+
       If[calculate === Unset,
          warn@"CalculateObservable";,
          CalculateObservable[obs@args, structName:_String] :=
             structName <> "." <> StringReplace[name, repl] <>
             StringReplace[" = context::"<>calculate<>";", repl];
       ];
+
+      If[prototype === Unset,
+         warn@"GetObservablePrototype";,
+         GetObservablePrototype@obs@args := StringReplace[prototype, repl];
+      ];
    ];
 ];
 Utils`MakeUnknownInputDefinition@DefineObservable;
 
-End[];
+Utils`DynamicInclude@$npfObsWildcard@"Observable.m";
 
+End[];
 EndPackage[];

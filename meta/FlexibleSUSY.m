@@ -5113,25 +5113,26 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
             (* Load and evaluate NPointFunctions write classes for observables *)
-            Module[{files, obs, classes, namespaces, newRules = {}, down, dir},
+            Module[{files, obs, newRules = {}, down, dir},
                dir = FileNameJoin@{FSOutputDir, "npointfunctions"};
                If[!DirectoryQ@dir, CreateDirectory@dir];
 
                files = Utils`DynamicInclude@$npfObsWildcard@"class.m";
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
-               classes = Symbol["FlexibleSUSY`Private`Write"<>#<>"Class"]&/@obs;
-               namespaces = ToExpression[#<>"`namespace[File]"]&/@obs;
+
                files = {
                   FileNameJoin@{$flexiblesusyTemplateDir, "npointfunctions", #<>".in"},
                   FileNameJoin@{dir, FSModelName<>"_"<>#}}&/@
-                     {#<>".hpp", #<>".cpp"}&/@ namespaces;
+                     {#<>".hpp", #<>".cpp"}&/@ (Observables`GetObservableFileName/@obs);
 
-               (* Evaluate write classes *)
-               Do[With[{lhs = {FieldsNPF@obs[[i]], VerticesNPF@obs[[i]], RulesNPF@obs[[i]]}},
-                     lhs = classes[[i]][extraSLHAOutputBlocks, files[[i]]];];
+               Do[
+                  With[{lhs = {FieldsNPF@obs[[i]], VerticesNPF@obs[[i]], RulesNPF@obs[[i]]}},
+                     lhs = WriteClass[Symbol["FlexibleSUSYObservable`"<>obs[[i]]], extraSLHAOutputBlocks, files[[i]]];
+                  ];
                   AllNPFVertices = Join[AllNPFVertices, VerticesNPF@obs[[i]]];
                   newRules = Join[newRules, RulesNPF@obs[[i]]];,
-                  {i, Length@classes}];
+                  {i, Length@obs}
+               ];
 
                FieldsNPF[_] = {};
                VerticesNPF[_] = {};

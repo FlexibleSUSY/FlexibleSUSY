@@ -1,5 +1,5 @@
 Begin@"FSMathLink`Private`";
-Module[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc, loopN],
+Module[{args = Sequence[lep_@nI_ -> {lep_@nO_, lep_@nA_, SARAH`bar@lep_@nA_}, proc_, loopN_],
       obs = FlexibleSUSYObservable`BrLTo3L,
       cxx = CConversion`ToValidCSymbolString},
       PutObservable[obs@args, type_, link_String, heads_:{}] := StringJoin[
@@ -18,7 +18,7 @@ Module[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc, loopN],
                         "MLPutInteger(link, ", ObsToStr@nA, ");",
             "MLPutSymbol(link, \"", SymbolName@proc, "\");",
             "MLPutInteger(link, ", ObsToStr@loopN, ");",
-         "MLPutReal(link, Re(OBSERVABLE(", GetObservableName@obs@##&[
+         "MLPutReal(link, Re(OBSERVABLE(", GetObservableName@obs[
             lep@nI -> {lep@nO, lep@nA, SARAH`bar@lep@nA},
             proc,
             loopN], ")(0)));"];];
