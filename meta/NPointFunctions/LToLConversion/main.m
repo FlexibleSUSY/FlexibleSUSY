@@ -44,7 +44,6 @@ Module[{cxx = CConversion`ToValidCSymbolString},
    `cxx`penguin = StringJoin["calculate_", cxx@in, "_", cxx@out, "_",
       cxx@SARAH`Photon, "_form_factors"];
 
-   (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
       " " <> Observables`GetObservablePrototype@obs;
    Protect@"LToLConversion`Private`cxx`*";

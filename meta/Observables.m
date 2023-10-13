@@ -29,6 +29,7 @@ FSObservables = { AMM, AMMUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
 End[];
 
 DefineObservable::usage="Defines all C++ names for an observable";
+GetObservablesHeaders::usage="Return the names of C++ headers with #include.";
 GetObservableFileName::usage="Returns the C++ file name of a given observable";
 GetObservablePrototype::usage="Returns the C++ prototype as string";
 GetRequestedObservables::usage="";
@@ -355,7 +356,15 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
 ];
 Utils`MakeUnknownInputDefinition@DefineObservable;
 
-Utils`DynamicInclude@$npfObsWildcard@"Observable.m";
+GetObservablesHeaders[] =
+Module[{files, obs},
+   files = Utils`DynamicInclude@$npfObsWildcard@"Observable.m";
+   obs = StringSplit[files, $PathnameSeparator][[All, -2]];
+   StringRiffle[
+      "#include \"npointfunctions/"<>FlexibleSUSY`FSModelName<>"_"<>Observables`GetObservableFileName@#<>".hpp\""&/@obs,
+      "\n"
+   ]
+];
 
 End[];
 EndPackage[];

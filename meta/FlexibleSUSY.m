@@ -100,6 +100,7 @@ ReadSARAHBetaFunctions::usage="";
 SetupModelParameters::usage="";
 SetupMassMatrices::usage="";
 SetupOutputParameters::usage="";
+WriteClass::usage="Writes a C++ class for an observable";
 
 MakeFlexibleSUSY::usage="Creates a spectrum generator given a
  FlexibleSUSY model file (FlexibleSUSY.m).
@@ -2283,6 +2284,8 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
                Observables`CreateSetAndDisplayObservablesFunctions[requestedObservables];
            clearObservables = Observables`CreateClearObservablesFunction[requestedObservables];
            calculateObservables = Observables`CalculateObservables[requestedObservables, "observables"];
+
+
            WriteOut`ReplaceInFiles[files,
                                    {   "@numberOfObservables@" -> ToString[numberOfObservables],
                                        "@observablesDef@" -> IndentText[observablesDef],
@@ -2292,6 +2295,7 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
                                        "@clearObservables@" -> IndentText[clearObservables],
                                        "@setObservables@" -> IndentText[setObservables],
                                        "@calculateObservables@" -> IndentText @ IndentText[calculateObservables],
+                                       "@observablesHeaders@" -> Observables`GetObservablesHeaders[],
                                        Sequence @@ GeneralReplacementRules[]
                                    } ];
            ];
@@ -5166,7 +5170,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.hpp"}]},
                              {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
-
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
