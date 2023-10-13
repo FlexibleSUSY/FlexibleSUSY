@@ -30,7 +30,7 @@ Utils`DynamicInclude@"main.m";
 
 Begin@"FlexibleSUSY`Private`";
 
-WriteClass[obs:FlexibleSUSYObservable`LToLConversion, slha_List, files_] :=
+WriteClass[obs:FlexibleSUSYObservable`LToLConversion, slha_, files_] :=
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],

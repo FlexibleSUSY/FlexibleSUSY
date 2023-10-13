@@ -28,40 +28,38 @@ Block[{$ContextPath}, EndPackage[]];
 
 Utils`DynamicInclude@"main.m";
 
-Begin@"FlexibleSUSY`Private`";
+FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`BrLTo3L, slha_, files_] :=
+Module[
+   {
+      observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
+      exportFields = {}, exportVertices = {}, exportRules = {},
+      npfHeaders = "", npfDefinitions = "", prototypes = "", definitions = "",
+      ffvV = {}, npfV = {}, fermions = {}
+   },
 
-WriteClass[obs:FlexibleSUSYObservable`BrLTo3L, blocks_List, files_] :=
-Module[{observables, ffvFields = {},
-      fermions = {}, ffvV = {}, npfV = {},
-      calcProto = "", npfHead = "", calcDef = "", npfDef = ""},
-   observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@blocks, _obs];
-   If[And[observables =!= {},
-         FlexibleSUSY`FSFeynArtsAvailable,
-         FlexibleSUSY`FSFormCalcAvailable],
-      Print@"\nCreating BrLTo3L class ...";
-      fermions = DeleteDuplicates@Cases[observables, {_, f_, bf_} :> {bf, f},
-         Infinity] /. f_[_Integer]:>f;
-      ffvFields = DeleteDuplicates@Cases[observables,
-         Rule[in_, {out, __}] :> {in, out}, Infinity] /. f_[_Integer]:>f;
+   If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+      Print["Creating ", SymbolName@obs, " class ..."];
 
+      exportFields = Cases[observables, {f_@_, __} :> {f, f}, Infinity];
+      fermions =     Cases[observables, {f_@_, __} :> {SARAH`bar@f, f}, Infinity];
       ffvV = Flatten/@Tuples@{fermions, {TreeMasses`GetPhoton[]}};
 
-      {npfV, npfHead, npfDef, calcProto, calcDef} = BrLTo3L`create@observables;];
+      {npfV, npfHeaders, npfDefinitions, prototypes, definitions} = BrLTo3L`create@observables;
+   ];
+
    WriteOut`ReplaceInFiles[files,
       {
-         "@npf_headers@" -> npfHead,
-         "@npf_definitions@" -> npfDef,
-         "@calculate_prototypes@" -> calcProto,
-         "@calculate_definitions@" -> calcDef,
+         "@npointfunctions_headers@" -> npfHeaders,
+         "@npointfunctions_definitions@" -> npfDefinitions,
+         "@calculate_prototypes@" -> prototypes,
+         "@calculate_definitions@" -> definitions,
          "@include_guard@" -> SymbolName@obs,
          "@namespace@" -> Observables`GetObservableNamespace@obs,
          "@filename@" -> Observables`GetObservableFileName@obs,
          "@get_MSUSY@" -> TextFormatting`IndentText@
             TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
-         Sequence@@GeneralReplacementRules[]
+         Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];
-   {ffvFields, Join[ffvV, npfV], {}}
+   DeleteDuplicates/@{exportFields, Join[ffvV, npfV], exportRules}
 ];
-
-End[];

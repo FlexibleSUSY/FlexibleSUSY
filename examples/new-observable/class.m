@@ -7,7 +7,7 @@ Module[
    },
 
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Print["Creating ", SymbolName@obs," class ..."];
+      Print["Creating ", SymbolName@obs, " class ..."];
 
       prototypes = CConversion`CreateCType@Observables`GetObservableType@# <> " " <>
          Observables`GetObservablePrototype@# <> ";"&/@observables;
@@ -31,5 +31,5 @@ Module[
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];
-   {exportFields, exportVertices, exportRules}
+   DeleteDuplicates/@{exportFields, exportVertices, exportRules}
 ];
