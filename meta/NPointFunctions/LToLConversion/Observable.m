@@ -10,5 +10,5 @@ DefineObservable[
       "calculate_pIpI_forcontr_loopNloop(iI, iO, context::Nucleus::nucl, MODEL, ltolconversion_settings, qedqcd)",
    GetObservablePrototype ->
       "calculate_pIpI_forcontr_loopNloop(int in, int out, const context::Nucleus n, const eigenstates& model, const LToLConversion_settings& parameters, const softsusy::QedQcd& qedqcd)",
-   Context -> "ltolconversion"
+   GetObservableNamespace -> "ltolconversion"
 ];

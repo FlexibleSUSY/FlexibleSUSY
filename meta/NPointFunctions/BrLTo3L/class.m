@@ -30,31 +30,32 @@ Utils`DynamicInclude@"main.m";
 
 Begin@"FlexibleSUSY`Private`";
 
-WriteClass[FlexibleSUSYObservable`BrLTo3L, blocks:_List, files:{{_?FileExistsQ, _String}..}] :=
-Module[{obs, ffvFields = {},
+WriteClass[obs:FlexibleSUSYObservable`BrLTo3L, blocks_List, files_] :=
+Module[{observables, ffvFields = {},
       fermions = {}, ffvV = {}, npfV = {},
       calcProto = "", npfHead = "", calcDef = "", npfDef = ""},
-   obs = DeleteDuplicates@Cases[
-      Observables`GetRequestedObservables@blocks,
-      _FlexibleSUSYObservable`BrLTo3L];
-   If[And[obs =!= {},
+   observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@blocks, _obs];
+   If[And[observables =!= {},
          FlexibleSUSY`FSFeynArtsAvailable,
          FlexibleSUSY`FSFormCalcAvailable],
       Print@"\nCreating BrLTo3L class ...";
-      fermions = DeleteDuplicates@Cases[obs, {_, f_, bf_} :> {bf, f},
+      fermions = DeleteDuplicates@Cases[observables, {_, f_, bf_} :> {bf, f},
          Infinity] /. f_[_Integer]:>f;
-      ffvFields = DeleteDuplicates@Cases[obs,
+      ffvFields = DeleteDuplicates@Cases[observables,
          Rule[in_, {out, __}] :> {in, out}, Infinity] /. f_[_Integer]:>f;
 
       ffvV = Flatten/@Tuples@{fermions, {TreeMasses`GetPhoton[]}};
 
-      {npfV, npfHead, npfDef, calcProto, calcDef} = BrLTo3L`create@obs;];
+      {npfV, npfHead, npfDef, calcProto, calcDef} = BrLTo3L`create@observables;];
    WriteOut`ReplaceInFiles[files,
       {
          "@npf_headers@" -> npfHead,
          "@npf_definitions@" -> npfDef,
-         "@calc_prototypes@" -> calcProto,
-         "@calc_definitions@" -> calcDef,
+         "@calculate_prototypes@" -> calcProto,
+         "@calculate_definitions@" -> calcDef,
+         "@include_guard@" -> SymbolName@obs,
+         "@namespace@" -> Observables`GetObservableNamespace@obs,
+         "@filename@" -> Observables`GetObservableFileName@obs,
          "@get_MSUSY@" -> TextFormatting`IndentText@
             TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
          Sequence@@GeneralReplacementRules[]

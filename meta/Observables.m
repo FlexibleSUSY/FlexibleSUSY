@@ -29,7 +29,8 @@ FSObservables = { AMM, AMMUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
 End[];
 
 DefineObservable::usage="Defines all C++ names for an observable";
-GetObservablesHeaders::usage="Return the names of C++ headers with #include.";
+GetObservablesHeaders::usage="Return the names of C++ headers with #include";
+GetObservableNamespace::usage="Return the C++ context name of an observable";
 GetObservableFileName::usage="Returns the C++ file name of a given observable";
 GetObservablePrototype::usage="Returns the C++ prototype as string";
 GetRequestedObservables::usage="";
@@ -281,7 +282,7 @@ Options@DefineObservable = {
    CalculateObservable -> Unset,
    GetObservableFileName -> Unset,
    GetObservablePrototype -> Unset,
-   Context -> Unset
+   GetObservableNamespace -> Unset
 };
 
 DefineObservable[obs_@pattern___, OptionsPattern[]] :=
@@ -299,14 +300,17 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
       {patternNames, uniqueNames}
    ];
 
-   If[OptionValue@Context === Unset,
-      warn@"Context";
+   If[OptionValue@GetObservableNamespace === Unset,
+      warn@"GetObservableNamespace";
       If[OptionValue@GetObservableFileName === Unset,
          warn@"GetObservableFileName";
       ];,
-      GetObservableFileName[obs | obsStr] := OptionValue@Context;
-      AppendTo[rhsRepl, "context" -> OptionValue[InsertionFunction][
-         FlexibleSUSY`FSModelName <> "_" <> OptionValue@Context]];
+      GetObservableNamespace[obs | obsStr] =
+      OptionValue[InsertionFunction][
+         FlexibleSUSY`FSModelName <> "_" <> OptionValue@GetObservableNamespace
+      ];
+      GetObservableFileName[obs | obsStr] := OptionValue@GetObservableNamespace;
+      AppendTo[rhsRepl, "context" -> GetObservableNamespace@obs];
    ];
 
    AppendTo[rhsRepl, "eigenstates" -> OptionValue[InsertionFunction][

@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_lto3l.cpp
+ * @file @ModelName@_@filename@.cpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
@@ -29,7 +29,7 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
-#include "@ModelName@_lto3l.hpp"
+#include "@ModelName@_@filename@.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "wrappers.hpp"
@@ -81,7 +81,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    double precision = 0.;
    double MSUSY_old = 0., MSUSY_new = 0.;
 
-   VERBOSE_MSG("@ModelName@_lto3l: iterate to run to MSUSY ...");
+   VERBOSE_MSG("@namespace@: iterate to run to MSUSY ...");
 
    do {
       MSUSY_new = get_MSUSY(model);
@@ -89,7 +89,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       if (MSUSY_new <= 0.)
          return;
 
-      VERBOSE_MSG("@ModelName@_lto3l:    running to new MSUSY = " << MSUSY_new);
+      VERBOSE_MSG("@namespace@:    running to new MSUSY = " << MSUSY_new);
 
       model.run_to(MSUSY_new);
       model.calculate_DRbar_masses();
@@ -98,10 +98,10 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       MSUSY_old = MSUSY_new;
    } while (precision > precision_goal && ++it < Nmax);
 
-   VERBOSE_MSG("@ModelName@_lto3l: iteration finished. MSUSY = " << MSUSY_new);
+   VERBOSE_MSG("@namespace@: iteration finished. MSUSY = " << MSUSY_new);
 
    if (precision > precision_goal) {
-      WARNING("@ModelName@_lto3l: run_to_MSUSY(): "
+      WARNING("@namespace@: run_to_MSUSY(): "
               "Iteration did not converge after " << Nmax
               << " iterations (precision goal: " << precision_goal << ")");
    }
@@ -112,7 +112,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace @ModelName@_lto3l {
+namespace @namespace@ {
 
 typedef std::valarray<std::complex<double>> (*ffv)(
    int, int, const @ModelName@_mass_eigenstates&, bool);
@@ -384,7 +384,7 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
       model.get_physical().clear();
       model.solve_ewsb();
    } catch (const Error& e) {
-      ERROR("@ModelName@_lto3l:" << e.what_detailed());
+      ERROR("@namespace@:" << e.what_detailed());
       return std::numeric_limits<Eigen::Array<std::complex<double>,13,1>>::quiet_NaN();
    }
 
@@ -437,7 +437,7 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    return res;
 }
 
-@calc_definitions@
+@calculate_definitions@
 
-} // namespace @ModelName@_lto3l
+} // namespace @namespace@
 } // namespace flexiblesusy

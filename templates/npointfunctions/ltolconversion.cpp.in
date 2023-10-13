@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_ltolconversion.cpp
+ * @file @ModelName@_@filename@.cpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
@@ -29,7 +29,7 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
-#include "@ModelName@_ltolconversion.hpp"
+#include "@ModelName@_@filename@.hpp"
 #include "npointfunctions/ltolconversion/settings.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
@@ -77,7 +77,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    double precision = 0.;
    double MSUSY_old = 0., MSUSY_new = 0.;
 
-   VERBOSE_MSG("@ModelName@_ltolconversion: iterate to run to MSUSY ...");
+   VERBOSE_MSG("@namespace@: iterate to run to MSUSY ...");
 
    do {
       MSUSY_new = get_MSUSY(model);
@@ -85,7 +85,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       if (MSUSY_new <= 0.)
          return;
 
-      VERBOSE_MSG("@ModelName@_ltolconversion:    running to new MSUSY = " << MSUSY_new);
+      VERBOSE_MSG("@namespace@:    running to new MSUSY = " << MSUSY_new);
 
       model.run_to(MSUSY_new);
       model.calculate_DRbar_masses();
@@ -94,10 +94,10 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       MSUSY_old = MSUSY_new;
    } while (precision > precision_goal && ++it < Nmax);
 
-   VERBOSE_MSG("@ModelName@_ltolconversion: iteration finished. MSUSY = " << MSUSY_new);
+   VERBOSE_MSG("@namespace@: iteration finished. MSUSY = " << MSUSY_new);
 
    if (precision > precision_goal) {
-      WARNING("@ModelName@_ltolconversion: run_to_MSUSY(): "
+      WARNING("@namespace@: run_to_MSUSY(): "
               "Iteration did not converge after " << Nmax
               << " iterations (precision goal: " << precision_goal << ")");
    }
@@ -108,7 +108,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace @ModelName@_ltolconversion {
+namespace @namespace@ {
 
 struct overlap_integrals {
    double D;
@@ -296,7 +296,7 @@ Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
 template<class Lepton, class Up, class Down, class Photon,
    ffv_function photon, npf_function npf_up, npf_function npf_down>
 Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
-   const @ModelName@_ltolconversion::Nucleus nucleus,
+   const @namespace@::Nucleus nucleus,
    const @ModelName@_mass_eigenstates& model_,
    const LToLConversion_settings& parameters,
    const softsusy::QedQcd& qedqcd) {
@@ -307,7 +307,7 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
       model.get_physical().clear();
       model.solve_ewsb();
    } catch (const Error& e) {
-      ERROR("@ModelName@_ltolconversion:" << e.what_detailed());
+      ERROR("@namespace@:" << e.what_detailed());
       return std::numeric_limits<Eigen::Array<std::complex<double>,13,1>>::quiet_NaN();
    }
 
@@ -407,5 +407,5 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
 
 @calculate_definitions@
 
-} // namespace @ModelName@_ltolconversion
+} // namespace @namespace@
 } // namespace flexiblesusy

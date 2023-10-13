@@ -10,5 +10,5 @@ DefineObservable[
       "calculate_pI_to_pIpIbarpI_for_contr_loopNloop(iI, iO, iA, MODEL, qedqcd)",
    GetObservablePrototype ->
       "calculate_pI_to_pIpIbarpI_for_contr_loopNloop(int nI, int nO, int nA, const eigenstates& model, const softsusy::QedQcd& qedqcd)",
-   Context -> "lto3l"
+   GetObservableNamespace -> "lto3l"
 ];

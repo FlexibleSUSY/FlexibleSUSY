@@ -30,13 +30,10 @@ Utils`DynamicInclude@"main.m";
 
 Begin@"FlexibleSUSY`Private`";
 
-WriteClass[FlexibleSUSYObservable`LToLConversion, extraSLHAOutputBlocks:_List, files:{{_?FileExistsQ,_String}..}] :=
+WriteClass[obs:FlexibleSUSYObservable`LToLConversion, slha_List, files_] :=
 Module[
    {
-      observables = DeleteDuplicates@Cases[
-         Observables`GetRequestedObservables@extraSLHAOutputBlocks,
-         _FlexibleSUSYObservable`LToLConversion
-      ],
+      observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
       fields = {}, vertices = {}, additionalVertices = {},
       prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
       newRules
@@ -80,6 +77,9 @@ Module[
          "@npf_definitions@" -> npfDefinitions,
          "@calculate_prototypes@" -> prototypes,
          "@calculate_definitions@" -> definitions,
+         "@include_guard@" -> SymbolName@obs,
+         "@namespace@" -> Observables`GetObservableNamespace@obs,
+         "@filename@" -> Observables`GetObservableFileName@obs,
          "@get_MSUSY@" -> TextFormatting`IndentText@
             TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
          Sequence@@GeneralReplacementRules[]

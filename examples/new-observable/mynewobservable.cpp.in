@@ -17,29 +17,44 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_@filename@.hpp
+ * @file @ModelName@_@filename@.cpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
  */
 
-#ifndef @ModelName@_@include_guard@_H
-#define @ModelName@_@include_guard@_H
+#include <valarray>
+#include <complex>
 
-#include "lowe.h"
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "cxx_qft/@ModelName@_qft.hpp"
+
+#include "@ModelName@_mynewobservable.hpp"
+#include "@ModelName@_FFV_form_factors.hpp"
+
+#include "wrappers.hpp"
+
+@npointfunctions_headers@
 
 namespace flexiblesusy {
-class @ModelName@_mass_eigenstates;
-class LToLConversion_settings;
+
+namespace @ModelName@_cxx_diagrams {
+namespace npointfunctions {
+
+@npointfunctions_definitions@
+
+} // namespace npointfunctions
+} // namespace @ModelName@_cxx_diagrams
+
+namespace {
+
+} // anonymous namespace
+
+using namespace @ModelName@_cxx_diagrams;
 
 namespace @namespace@ {
 
-enum class Nucleus { Au, Al, Ti };
-
-@calculate_prototypes@
+@calculate_definitions@
 
 } // namespace @namespace@
-
 } // namespace flexiblesusy
-
-#endif

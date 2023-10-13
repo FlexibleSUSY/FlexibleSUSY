@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# directory of this script
+BASEDIR=$(dirname $0)
+
+cp ${BASEDIR}/mynewobservable.* ${BASEDIR}/../../templates/npointfunctions
+
+META=${BASEDIR}/../../meta/NPointFunctions/MyNewObservable
+mkdir ${META}
+cp ${BASEDIR}/class.m ${META}
+cp ${BASEDIR}/Observable.m ${META}
+cp ${BASEDIR}/WriteOut.m ${META}
