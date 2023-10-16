@@ -301,16 +301,21 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
    ];
 
    If[OptionValue@GetObservableNamespace === Unset,
-      warn@"GetObservableNamespace";
-      If[OptionValue@GetObservableFileName === Unset,
-         warn@"GetObservableFileName";
-      ];,
+      warn@"GetObservableNamespace";,
       GetObservableNamespace[obs | obsStr] =
       OptionValue[InsertionFunction][
          FlexibleSUSY`FSModelName <> "_" <> OptionValue@GetObservableNamespace
       ];
-      GetObservableFileName[obs | obsStr] := OptionValue@GetObservableNamespace;
       AppendTo[rhsRepl, "context" -> GetObservableNamespace@obs];
+   ];
+
+   If[OptionValue@GetObservableFileName === Unset,
+      Utils`FSFancyWarning["GetObservableFileName for ", ToString@obs, " is not specified explicitly. Trying to use GetObservableNamespace ..."];
+      If[OptionValue@GetObservableNamespace === Unset,
+         warn@"GetObservableFileName";,
+         GetObservableFileName[obs | obsStr] := OptionValue@GetObservableNamespace;
+      ];,
+      GetObservableFileName[obs | obsStr] := OptionValue@GetObservableFileName;
    ];
 
    AppendTo[rhsRepl, "eigenstates" -> OptionValue[InsertionFunction][
@@ -325,10 +330,6 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
          prototype = OptionValue@GetObservablePrototype
       },
       AppendTo[FlexibleSUSYObservable`FSObservables, obs];
-
-      If[OptionValue@GetObservableFileName =!= Unset,
-         GetObservableFileName[obs | obsStr] := OptionValue@GetObservableFileName;
-      ];
 
       If[name === Unset,
          warn@"GetObservableName";,
