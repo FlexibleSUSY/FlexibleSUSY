@@ -168,7 +168,7 @@ npf /.
 
 `npf`match[npf:NPointFunctions`Private`type`npf] :=
 Module[{fields, sp, dc, dim6},
-   fields = Flatten@NPointFunctions`Private`getProcess@npf;
+   fields = Flatten@NPointFunctions`GetProcess@npf;
    sp[i_] := SARAH`DiracSpinor[fields[[i]], 0, 0];
    dc[a_, b__, c_] := NPointFunctions`DiracChain[sp@a, b, sp@c];
    dim6 = With[{l = SARAH`Lorentz, R = 6, L = 7},

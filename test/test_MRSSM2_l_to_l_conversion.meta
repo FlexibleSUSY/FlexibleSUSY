@@ -94,8 +94,8 @@ Needs@"WilsonCoeffs`";
       NPointFunctions`KeepProcesses -> {Vectors},
       NPointFunctions`Observable -> FlexibleSUSYObservable`LToLConversion[]] &/@
          {Fu, Fd};
-   dressedU = Flatten@NPointFunctions`Private`getProcess@uNPF;
-   dressedD = Flatten@NPointFunctions`Private`getProcess@dNPF;
+   dressedU = Flatten@NPointFunctions`GetProcess@uNPF;
+   dressedD = Flatten@NPointFunctions`GetProcess@dNPF;
    assumptionReplacements =
       {  SARAH`sum[__] -> 0,
          LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
@@ -104,8 +104,8 @@ Needs@"WilsonCoeffs`";
    {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
 
    Print["Analytical calculation for Fe->Fe done."];
-   fields[SARAH`UpQuark] = Flatten@NPointFunctions`Private`getProcess@uNPF;
-   fields[SARAH`DownQuark] = Flatten@NPointFunctions`Private`getProcess@dNPF;
+   fields[SARAH`UpQuark] = Flatten@NPointFunctions`GetProcess@uNPF;
+   fields[SARAH`DownQuark] = Flatten@NPointFunctions`GetProcess@dNPF;
    dim6[q_] := Module[{sp, dc, l = SARAH`Lorentz, R = 6, L = 7},
       sp[f_, n_] := SARAH`DiracSpinor[fields[f][[n]], 0, 0];
       dc[a_, b__, c_] := NPointFunctions`DiracChain[sp[q, a], b, sp[q, c]];

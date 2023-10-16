@@ -24,117 +24,100 @@ BeginPackage@"LToLConversion`";
 create::usage = "";
 Begin@"`Private`";
 
-`type`observable = FlexibleSUSYObservable`LToLConversion[
-   in_@iIn_ -> out_@iOut_, nucleus_, con_, loopN_];
+create[obs:_[in_@_ -> _, _, con_, loopN_]] :=
+Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition, prototype},
+   {npfVertices, npfHeader, npfDefinition} = generate@obs;
 
-setCxx[obs:`type`observable] :=
-Module[{cxx = CConversion`ToValidCSymbolString},
-   Unprotect@"LToLConversion`Private`cxx`*";
-   `cxx`in = cxx@in;
-   `cxx`out = cxx@out;
-
-   `cxx`fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
-      {in, SARAH`UpQuark, SARAH`DownQuark, SARAH`Photon}, ", "];
-
-   {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to",
-      cxx@out, #, "_for", SymbolName@con, "_", cxx[loopN+0], "loop"]&/@ cxx/@
-         {SARAH`UpQuark, SARAH`DownQuark};
-
-   `cxx`penguin = StringJoin["calculate_", cxx@in, "_", cxx@out, "_",
-      cxx@SARAH`Photon, "_form_factors"];
-
-   `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
+   prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
       " " <> Observables`GetObservablePrototype@obs;
-   Protect@"LToLConversion`Private`cxx`*";
-];
-setCxx // Utils`MakeUnknownInputDefinition;
-setCxx ~ SetAttributes ~ {Protected, Locked};
 
-create[list:{__}] := Module[{unique, clearGenerations},
-   clearGenerations[_[a_, rest__]] := {a/. _Integer:> Sequence, rest};
-   unique = DeleteDuplicates[list, SameQ@@(clearGenerations/@{##})&];
-   {  DeleteDuplicates[Join@@#[[All,1]]],
-      {  #[[1,2,1]], StringRiffle[#[[All,2,2]], "\n\n"]},
-      {  StringRiffle[#[[All,3,1]], "\n\n"],
-         StringRiffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
-
-create[obs:`type`observable] :=
-Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
-   setCxx@obs;
-   {npfVertices, npfHeader, npfDefinition} = `npf`create@obs;
-
-   calculateDefinition = `cxx`prototype <> " {
-   return forge_conversion<
-      "<>`cxx`fields<>",
-      "<>If[loopN === 0, "zero", `cxx`penguin]<>",
-      npointfunctions::"<>`cxx`classU<>",
-      npointfunctions::"<>`cxx`classD<>"
-   >(in, out, n, model, parameters, qedqcd);\n}";
+   {calculateDefinition, npfDefinition} = FixedPoint[
+      StringReplace[#,
+         {
+            "@L@"   -> CConversion`ToValidCSymbolString@in,
+            "@U@"   -> CConversion`ToValidCSymbolString@SARAH`UpQuark,
+            "@D@"   -> CConversion`ToValidCSymbolString@SARAH`DownQuark,
+            "@Ph@"  -> CConversion`ToValidCSymbolString@SARAH`Photon,
+            "@N@"   -> CConversion`ToValidCSymbolString@loopN,
+            "@con@" -> CConversion`ToValidCSymbolString@con,
+            "@photon_penguin@" -> If[loopN === 0, "zero", "calculate_@L@_@L@_@Ph@_form_factors"],
+            "@classU@" -> "conversion_@L@@U@_to_@L@@U@_@con@@N@loop",
+            "@classD@" -> "conversion_@L@@D@_to_@L@@D@_@con@@N@loop"
+         }
+      ]&,
+      {
+         prototype <> " {
+         return forge_conversion<
+            fields::@L@, fields::@U@, fields::@D@, fields::@Ph@,
+            @photon_penguin@,
+            npointfunctions::@classU@,
+            npointfunctions::@classD@
+         >(in, out, n, model, parameters, qedqcd);\n}",
+         npfDefinition
+      }
+   ];
 
    {
       npfVertices,
       {npfHeader, npfDefinition},
-      {`cxx`prototype <> ";", calculateDefinition}}];
-
-create // Utils`MakeUnknownInputDefinition;
-create ~ SetAttributes ~ {Protected, Locked};
-
-`npf`clean[npf:NPointFunctions`Private`type`npf] :=
-npf /.
-   {  SARAH`sum[__] -> 0,
-      LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
-      LoopTools`C0i[i_, Repeated[_, {3}], mm__] :>
-         LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
-      LoopTools`D0i[i_, Repeated[_, {6}], mm__] :>
-         LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]};
-`npf`clean // Utils`MakeUnknownInputDefinition;
-`npf`clean // Protect;
-
-`npf`parse[obs:`type`observable] :=
-Module[{parsed},
-   parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
-   Switch[loopN,
-      0,
-         Switch[parsed,
-            {"All"}, {Vectors, Scalars},
-            {"NoScalars"}, {Vectors},
-            _, Symbol/@parsed],
-      1,
-         Switch[parsed,
-            {"All"}, {Vectors, Scalars, Boxes},
-            {"NoScalars"}, {Vectors, Boxes},
-            {"Penguins"}, {Vectors, Scalars},
-            _, Symbol/@parsed]
-   ]
+      {prototype <> ";", calculateDefinition}
+   }
 ];
-`npf`parse // Utils`MakeUnknownInputDefinition;
-`npf`parse // Protect;
 
-`npf`create[obs:`type`observable] :=
+create[manyObservables_List] :=
+Module[{unique},
+   unique = DeleteDuplicates[manyObservables /. f_@_Integer -> f@_];
+   {
+      DeleteDuplicates[Join@@#[[All,1]]],
+      {#[[1,2,1]], StringRiffle[#[[All,2,2]], "\n\n"]},
+      {StringRiffle[#[[All,3,1]], "\n\n"], StringRiffle[#[[All,3,2]], "\n\n"]}
+   }&[create/@unique]
+];
+
+cleanLeftovers[npf_] := npf /. {
+   SARAH`sum[__] -> 0,
+   LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+   LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
+   LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
+};
+
+parseSynonyms[_[__, con_, loopN_]] :=
+Module[{parsed, result},
+   parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
+   result = Switch[{loopN, parsed},
+      {0, {"All"}},       {Vectors, Scalars},
+      {0, {"NoScalars"}}, {Vectors},
+      {1, {"All"}},       {Vectors, Scalars, Boxes},
+      {1, {"NoScalars"}}, {Vectors, Boxes},
+      {1, {"Penguins"}},  {Vectors, Scalars},
+      _, Symbol/@parsed
+   ];
+   Print["Contributions: ", SymbolName/@result];
+   Print["Loop level: ", loopN];
+   result
+];
+
+generate[obs:_[in_@_ -> _, __, loopN_]] :=
 Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
-   keep = `npf`parse@obs;
-
-   Utils`FSFancyLine@"<";
-   Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
-      keep, ",\n                ", SymbolName]<>" started."];
-   Print["Case of "<>ToString@loopN<>" loop(s) is considered."];
+   Utils`FSFancyLine[];
+   keep = parseSynonyms@obs;
    {npfU, npfD} = NPointFunctions`NPointFunction[
-      {in,#},{out,#},
+      {in, #}, {in, #},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> keep,
       NPointFunctions`LoopLevel -> loopN,
       NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark, SARAH`DownQuark};
-   {npfU, npfD} = `npf`clean/@{npfU, npfD};
+   {npfU, npfD} = cleanLeftovers/@{npfU, npfD};
 
-   fields[SARAH`UpQuark] = Flatten@NPointFunctions`Private`getProcess@npfU;
-   fields[SARAH`DownQuark] = Flatten@NPointFunctions`Private`getProcess@npfD;
-
+   fields[SARAH`UpQuark] = Flatten@NPointFunctions`GetProcess@npfU;
+   fields[SARAH`DownQuark] = Flatten@NPointFunctions`GetProcess@npfD;
    dim6[q_] := Module[{sp, dc, l = SARAH`Lorentz, R = 6, L = 7},
       sp[f_, n_] := SARAH`DiracSpinor[fields[f][[n]], 0, 0];
       dc[a_, b__, c_] := NPointFunctions`DiracChain[sp[q, a], b, sp[q, c]];
-      {  "S_LL" -> dc[3,L,1] dc[4,L,2],
+      {
+         "S_LL" -> dc[3,L,1] dc[4,L,2],
          "S_LR" -> dc[3,L,1] dc[4,R,2],
          "S_RL" -> dc[3,R,1] dc[4,L,2],
          "S_RR" -> dc[3,R,1] dc[4,R,2],
@@ -143,24 +126,25 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
          "V_RL" -> dc[3,L,l@1,1] dc[4,R,l@1,2],
          "V_RR" -> dc[3,L,l@1,1] dc[4,L,l@1,2],
          "T_LL" -> dc[3,-L,l@1,l@2,1] dc[4,-L,l@1,l@2,2],
-         "T_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]}];
-
+         "T_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]
+      }
+   ];
    npfU = WilsonCoeffs`InterfaceToMatching[npfU, dim6@SARAH`UpQuark];
    npfD = WilsonCoeffs`InterfaceToMatching[npfD, dim6@SARAH`DownQuark];
 
-   codeU = NPointFunctions`CreateCXXFunctions[
-      npfU, `cxx`classU, SARAH`Delta, dim6@SARAH`UpQuark][[2]];
-   codeD = NPointFunctions`CreateCXXFunctions[
-      npfD, `cxx`classD, SARAH`Delta, dim6@SARAH`DownQuark][[2]];
-   Utils`FSFancyLine@">";
+   codeU = NPointFunctions`CreateCXXFunctions[npfU, "@classU@", SARAH`Delta, dim6@SARAH`UpQuark][[2]];
+   codeD = NPointFunctions`CreateCXXFunctions[npfD, "@classD@", SARAH`Delta, dim6@SARAH`DownQuark][[2]];
+   Utils`FSFancyLine[];
 
-   {  DeleteDuplicates@Join[
+   {
+      DeleteDuplicates@Join[
          NPointFunctions`VerticesForNPointFunction@npfU,
-         NPointFunctions`VerticesForNPointFunction@npfD],
+         NPointFunctions`VerticesForNPointFunction@npfD
+      ],
       NPointFunctions`CreateCXXHeaders[],
-      codeU<>"\n\n"<>codeD}];
-`npf`create // Utils`MakeUnknownInputDefinition;
-`npf`create ~ SetAttributes ~ {Locked,Protected};
+      codeU<>"\n\n"<>codeD
+   }
+];
 
 End[];
 Block[{$ContextPath}, EndPackage[]];

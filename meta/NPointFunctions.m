@@ -32,10 +32,11 @@ Needs[# <> "`", FileNameJoin@{DirectoryName@$InputFileName, # <> ".m"}] &/@
 BeginPackage@"NPointFunctions`";
 
 (* Names of externally used functions *)
-{
-   VerticesForNPointFunction, CreateCXXHeaders,
-   CreateCXXFunctions, NPointFunction
-};
+VerticesForNPointFunction;
+CreateCXXHeaders;
+CreateCXXFunctions;
+NPointFunction;
+GetProcess;
 
 (* Names of externally used symbols *)
 SetAttributes[
@@ -165,9 +166,9 @@ StringJoin[
       StringReplace[StringSplit[removeIndent@code,"\n"],rules]~Riffle~"\n"];
 replaceTokens // secure;
 
-getProcess[obj:`type`npf] :=
+GetProcess[obj:`type`npf] :=
    obj[[1]];
-getProcess // secure;
+GetProcess // secure;
 
 getExternalMomenta[obj:`type`npf] :=
    DeleteDuplicates@Cases[{getGenericSums@obj, getSubexpressions@obj},
@@ -175,7 +176,7 @@ getExternalMomenta[obj:`type`npf] :=
 getExternalMomenta // secure;
 
 getExternalIndices[obj:`type`npf] :=
-   DeleteDuplicates@Flatten@Level[getProcess@obj, {4,5}];
+   DeleteDuplicates@Flatten@Level[GetProcess@obj, {4,5}];
 getExternalIndices // secure;
 
 getGenericSums::errSimpleOnly = "
@@ -186,7 +187,7 @@ getGenericSums[obj:`type`npf] :=
    obj[[2,1,1]];
 getGenericSums[obj:`type`npf, int:{__Integer}] :=
 Module[{unique = DeleteDuplicates@int},
-   {  getProcess@obj,
+   {  GetProcess@obj,
       {  {  getGenericSums[obj][[unique]],
             getClassFields[obj][[unique]],
             getClassCombinatoricalFactors[obj][[unique]],
@@ -625,7 +626,7 @@ setHelperClassName::usage = "
 @brief Sets the C++ name for the helper class of a n-point function.
 @param obj n-point function object.";
 setHelperClassName[obj:`type`npf] :=
-Module[{fieldNames = Vertices`StripFieldIndices/@Join@@getProcess[obj]},
+Module[{fieldNames = Vertices`StripFieldIndices/@Join@@GetProcess[obj]},
    Unprotect@$helperClassName;
    $helperClassName = "nPoint" <>
       StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}] <> "_" <>
@@ -933,7 +934,7 @@ Module[{extIndices = getExternalIndices@npf},
       "std::array<int, 1> i" <> ToString@# <>
          " {this->external_indices("<>ToString[#-1]<>")};\n"&,
       Length@extIndices];
-   If[Length@extIndices < Length[Flatten@getProcess@npf],
+   If[Length@extIndices < Length[Flatten@GetProcess@npf],
       PrependTo[indices, "std::array<int, 0> i0 {};\n"];];
    StringJoin@indices];
 `cxx`initializeExternalIndices // secure;
