@@ -26,15 +26,14 @@ Begin["`Private`"];
 End[];
 Block[{$ContextPath}, EndPackage[]];
 
-Utils`DynamicInclude@"main.m";
+Utils`DynamicInclude@"NPointFunctions.m";
 
 Begin@"FlexibleSUSY`Private`";
 
 WriteClass[obs:FlexibleSUSYObservable`LToLConversion, slha_, files_] :=
-Module[
-   {
+Module[{
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      fields = {}, vertices = {}, additionalVertices = {},
+      fields = {}, verticesFFV = {}, additionalVertices = {},
       prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
       newRules
    },
@@ -50,31 +49,26 @@ Module[
       "@LToLConversion_setter@" -> "void set_ltolconversion_settings(const LToLConversion_settings& s) { ltolconversion_settings = s; }",
       "@LToLConversion_set_data@" -> "data.set_ltolconversion_settings(ltolconversion_settings);",
       "@LToLConversion_set_slha@" -> "slha_io.set_LToLConversion_settings(ltolconversion_settings);",
-      "@LToLConversion_reset@" -> "ltolconversion_settings.reset();"};
-
+      "@LToLConversion_reset@" -> "ltolconversion_settings.reset();"
+   };
    If[observables === {} || !FlexibleSUSY`FSFeynArtsAvailable || !FlexibleSUSY`FSFormCalcAvailable,
       newRules = newRules /. Rule[x_, _]:> Rule[x, ""];
    ];
 
-   If[And[observables =!= {},
-         FlexibleSUSY`FSFeynArtsAvailable,
-         FlexibleSUSY`FSFormCalcAvailable],
+   If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
       Print["\nCreating LToLConversion class ..."];
       fields = Head/@#&/@observables[[All,1]]/.Rule->List;
 
-      (* additional vertices needed for the 1 loop calculation *)
-      vertices = Flatten/@Tuples@
-         {{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
+      verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
 
-      {additionalVertices,
-         {npfHeaders, npfDefinitions},
-         {prototypes, definitions}} = LToLConversion`create@observables;];
+      {additionalVertices, {npfHeaders, npfDefinitions}, {prototypes, definitions}} = LToLConversion`create@observables;
+   ];
 
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@npf_headers@" -> npfHeaders,
-         "@npf_definitions@" -> npfDefinitions,
+         "@npointfunctions_headers@" -> npfHeaders,
+         "@npointfunctions_definitions@" -> npfDefinitions,
          "@calculate_prototypes@" -> prototypes,
          "@calculate_definitions@" -> definitions,
          "@include_guard@" -> SymbolName@obs,
@@ -87,7 +81,7 @@ Module[
    ];
    {
       "FFV fields" -> DeleteDuplicates@fields,
-      "C++ vertices" -> DeleteDuplicates@Join[vertices, additionalVertices],
+      "C++ vertices" -> DeleteDuplicates@Join[verticesFFV, additionalVertices],
       "C++ replacements" -> newRules
    }
 ];

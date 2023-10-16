@@ -5121,7 +5121,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                dir = FileNameJoin@{FSOutputDir, "npointfunctions"};
                If[!DirectoryQ@dir, CreateDirectory@dir];
 
-               files = Utils`DynamicInclude@$npfObsWildcard@"class.m";
+               files = Utils`DynamicInclude@$npfObsWildcard@"FlexibleSUSY.m";
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
 
                files = {

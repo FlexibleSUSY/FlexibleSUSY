@@ -41,14 +41,14 @@
 #define GV(N,Q) parameters.get(LToLConversion_settings::vector_##N##Q)
 #define GT(N,Q) parameters.get(LToLConversion_settings::tensor_##N##Q)
 
-@npf_headers@
+@npointfunctions_headers@
 
 namespace flexiblesusy {
 
 namespace @ModelName@_cxx_diagrams {
 namespace npointfunctions {
 
-@npf_definitions@
+@npointfunctions_definitions@
 
 } // namespace npointfunctions
 } // namespace @ModelName@_cxx_diagrams
