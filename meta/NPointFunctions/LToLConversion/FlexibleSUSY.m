@@ -19,21 +19,13 @@
 
 *)
 
-BeginPackage["LToLConversion`"];
-Begin["`Private`"];
-`type`observable = FlexibleSUSYObservable`LToLConversion[
-   in_@iIn_ -> out_@iOut_, nucleus_, con_, loopN_];
-End[];
-Block[{$ContextPath}, EndPackage[]];
-
 Utils`DynamicInclude@"NPointFunctions.m";
-
 Begin@"FlexibleSUSY`Private`";
 
 WriteClass[obs:FlexibleSUSYObservable`LToLConversion, slha_, files_] :=
 Module[{
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      fields = {}, verticesFFV = {}, additionalVertices = {},
+      fieldsFFV = {}, verticesFFV = {}, additionalVertices = {},
       prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
       newRules
    },
@@ -57,7 +49,7 @@ Module[{
 
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
       Print["\nCreating LToLConversion class ..."];
-      fields = Head/@#&/@observables[[All,1]]/.Rule->List;
+      fieldsFFV = Head/@#&/@observables[[All,1]]/.Rule->List;
 
       verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
 
@@ -80,7 +72,7 @@ Module[{
       }
    ];
    {
-      "FFV fields" -> DeleteDuplicates@fields,
+      "FFV fields" -> DeleteDuplicates@fieldsFFV,
       "C++ vertices" -> DeleteDuplicates@Join[verticesFFV, additionalVertices],
       "C++ replacements" -> newRules
    }

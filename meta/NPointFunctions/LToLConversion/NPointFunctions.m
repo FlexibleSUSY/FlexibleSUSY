@@ -20,13 +20,12 @@
 
 *)
 
-Off[LToLConversion`create::shdw];
 BeginPackage@"LToLConversion`";
-
-LToLConversion`create::usage =
-"@brief Main entrance point for the calculation.";
-
+create::usage = "";
 Begin@"`Private`";
+
+`type`observable = FlexibleSUSYObservable`LToLConversion[
+   in_@iIn_ -> out_@iOut_, nucleus_, con_, loopN_];
 
 setCxx[obs:`type`observable] :=
 Module[{cxx = CConversion`ToValidCSymbolString},
@@ -154,7 +153,6 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
    codeD = NPointFunctions`CreateCXXFunctions[
       npfD, `cxx`classD, SARAH`Delta, dim6@SARAH`DownQuark][[2]];
    Utils`FSFancyLine@">";
-   Print[];
 
    {  DeleteDuplicates@Join[
          NPointFunctions`VerticesForNPointFunction@npfU,

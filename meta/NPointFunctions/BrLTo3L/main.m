@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 (* :Copyright:
 
    ====================================================================
@@ -22,16 +20,11 @@
 
 *)
 
-BeginPackage@"BrLTo3L`";Quiet[
+BeginPackage@"BrLTo3L`";
+BrLTo3L`create::usage = "";
+Begin@"`Private`";
 
-BrLTo3L`create::usage = "
-@brief An interface function to make C++ code for an observable.
-@param obs A sigle observable to calculate.
-@param list A list of observables to calculate.
-@returns A set of required vertices, headers and definitions for npf functions,
-         prototypes and definitions for calculate function.";
-
-];Begin@"`Private`";
+`type`observable = FlexibleSUSYObservable`BrLTo3L[lep_@nI_ -> {lep_@nO_, lep_@nA_, SARAH`bar@lep_@nA_}, proc_, loopN_];
 
 $boxes = "boxes_1loop";
 $boxes // Protect;
@@ -56,13 +49,7 @@ create::usage = "
        contributions and penguins will be taken for t-contribution only, because
        of the simple and predictable structure of the result. It means, that
        we can reduce the computation time by separating those contributions and
-       using one general function to calculate boxes.
-@param obs An observable definition.
-@param list A list of all requested observables.
-@returns A list of vertices, npf headers string, npf definition string,
-         calculate function prototypes, calculate function definitions.
-@note We assume that generations for leptons are given by integer numbers,
-      rather then different field names.";
+       using one general function to calculate boxes.";
 create[list:{__}] :=
 Module[{unique, box, join = Utils`StringJoinWithSeparator, clearGenerations},
    clearGenerations[_[a_, rest__]] := {a/. _Integer:> Sequence, rest};

@@ -20,12 +20,6 @@
 
 *)
 
-BeginPackage["BrLTo3L`"];
-Begin["`Private`"];
-`type`observable = FlexibleSUSYObservable`BrLTo3L[lep_@nI_ -> {lep_@nO_, lep_@nA_, SARAH`bar@lep_@nA_}, proc_, loopN_];
-End[];
-Block[{$ContextPath}, EndPackage[]];
-
 Utils`DynamicInclude@"main.m";
 
 FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`BrLTo3L, slha_, files_] :=
