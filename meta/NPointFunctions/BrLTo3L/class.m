@@ -32,7 +32,7 @@ FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`BrLTo3L, slha_, files_] :=
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      exportFields = {}, exportVertices = {}, exportRules = {},
+      exportFields = {},
       npfHeaders = "", npfDefinitions = "", prototypes = "", definitions = "",
       ffvV = {}, npfV = {}, fermions = {}
    },
@@ -61,5 +61,8 @@ Module[
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];
-   DeleteDuplicates/@{exportFields, Join[ffvV, npfV], exportRules}
+   {
+      "FFV fields" -> DeleteDuplicates@exportFields,
+      "C++ vertices" -> DeleteDuplicates@Join[ffvV, npfV]
+   }
 ];

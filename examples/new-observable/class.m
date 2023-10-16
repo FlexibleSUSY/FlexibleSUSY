@@ -2,11 +2,10 @@ FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`MyNewObservable, slha_, files
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      exportFields = {}, exportVertices = {}, exportRules = {},
       npfHeaders = "", npfDefinitions = "", prototypes = "", definitions = ""
    },
 
-   If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+   If[observables =!= {},
       Print["Creating ", SymbolName@obs, " class ..."];
 
       prototypes = CConversion`CreateCType@Observables`GetObservableType@# <> " " <>
@@ -31,5 +30,5 @@ Module[
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];
-   DeleteDuplicates/@{exportFields, exportVertices, exportRules}
+   {}
 ];

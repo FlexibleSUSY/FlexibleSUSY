@@ -4230,7 +4230,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             QToQGammaFields = {},
             LToLGammaFields = {},
             FFMasslessVVertices = {},
-            FieldsNPF, VerticesNPF, RulesNPF, AllNPFVertices = {},
+            ObservablesExtraOutput, observablesExtraVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
             susyBetaFunctions, susyBreakingBetaFunctions,
@@ -5117,7 +5117,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
             (* Load and evaluate NPointFunctions write classes for observables *)
-            Module[{files, obs, newRules = {}, down, dir},
+            Module[{files, obs, newRules = {}, down, dir, observablesExtraEntity},
                dir = FileNameJoin@{FSOutputDir, "npointfunctions"};
                If[!DirectoryQ@dir, CreateDirectory@dir];
 
@@ -5125,28 +5125,34 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
 
                files = {
-                  FileNameJoin@{$flexiblesusyTemplateDir, "npointfunctions", #<>".in"},
-                  FileNameJoin@{dir, FSModelName<>"_"<>#}}&/@
-                     {#<>".hpp", #<>".cpp"}&/@ (Observables`GetObservableFileName/@obs);
+                     FileNameJoin@{$flexiblesusyTemplateDir, "npointfunctions", #<>".in"},
+                     FileNameJoin@{dir, FSModelName<>"_"<>#}
+                  } &/@ {#<>".hpp", #<>".cpp"} &/@ (Observables`GetObservableFileName/@obs);
 
                Do[
-                  With[{lhs = {FieldsNPF@obs[[i]], VerticesNPF@obs[[i]], RulesNPF@obs[[i]]}},
-                     lhs = WriteClass[Symbol["FlexibleSUSYObservable`"<>obs[[i]]], extraSLHAOutputBlocks, files[[i]]];
+                  ObservablesExtraOutput@obs[[i]] = WriteClass[Symbol["FlexibleSUSYObservable`"<>obs[[i]]], extraSLHAOutputBlocks, files[[i]]];
+
+                  observablesExtraEntity = FilterRules[ObservablesExtraOutput@obs[[i]], "C++ vertices"];
+                  Switch[observablesExtraEntity,
+                     {_ -> _}, observablesExtraVertices = Join[observablesExtraVertices, observablesExtraEntity[[1, 2]]],
+                     _, Null
                   ];
-                  AllNPFVertices = Join[AllNPFVertices, VerticesNPF@obs[[i]]];
-                  newRules = Join[newRules, RulesNPF@obs[[i]]];,
+
+                  observablesExtraEntity = FilterRules[ObservablesExtraOutput@obs[[i]], "C++ replacements"];
+                  Switch[observablesExtraEntity,
+                     {_ -> _}, newRules = Join[newRules, observablesExtraEntity[[1, 2]]],
+                     _, Null
+                  ];,
                   {i, Length@obs}
                ];
-
-               FieldsNPF[_] = {};
-               VerticesNPF[_] = {};
+               ObservablesExtraOutput@_ = {};
 
                (* Inserting new rules before default ones *)
                down = DownValues@GeneralReplacementRules;
                down = Insert[down, newRules, {1,2,-1}];
                DownValues@GeneralReplacementRules = down;
 
-               AllNPFVertices = DeleteDuplicates@AllNPFVertices;
+               observablesExtraVertices = DeleteDuplicates@observablesExtraVertices;
            ];
 
            Print["Creating lepton AMM class ..."];
@@ -5189,17 +5195,19 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      (* b -> s gamma *)
                      QToQGammaFields,
 
-                     (* L -> L conversion in nucleus *)
-                     If[FieldsNPF@"LToLConversion" === {},
-                        {},
-                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@
-                           FieldsNPF@"LToLConversion"],
+                     Module[{npfFields = FilterRules[ObservablesExtraOutput@"LToLConversion", "FFV fields"]},
+                        Switch[npfFields,
+                           {_ -> _}, (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ npfFields[[1, 2]],
+                           _, {}
+                        ]
+                     ],
 
-                     (* L -> 3L LVF decay *)
-                     If[FieldsNPF@"BrLTo3L" === {},
-                        {},
-                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@
-                           FieldsNPF@"BrLTo3L"]
+                     Module[{npfFields = FilterRules[ObservablesExtraOutput@"BrLTo3L", "FFV fields"]},
+                        Switch[npfFields,
+                           {_ -> _}, (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ npfFields[[1, 2]],
+                           _, {}
+                        ]
+                     ]
                   ],
 
                   {{FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.hpp.in"}],
@@ -5230,7 +5238,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               CreateDirectory[cxxQFTOutputDir]];
 
            WriteCXXDiagramClass[
-              Join[aMMVertices, FFMasslessVVertices, decaysVertices, AllNPFVertices],
+              Join[aMMVertices, FFMasslessVVertices, decaysVertices, observablesExtraVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

@@ -60,7 +60,7 @@ Module[
          FlexibleSUSY`FSFeynArtsAvailable,
          FlexibleSUSY`FSFormCalcAvailable],
       Print["\nCreating LToLConversion class ..."];
-      fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
+      fields = Head/@#&/@observables[[All,1]]/.Rule->List;
 
       (* additional vertices needed for the 1 loop calculation *)
       vertices = Flatten/@Tuples@
@@ -86,9 +86,9 @@ Module[
       }
    ];
    {
-      fields,
-      DeleteDuplicates@Join[vertices, additionalVertices],
-      newRules
+      "FFV fields" -> DeleteDuplicates@fields,
+      "C++ vertices" -> DeleteDuplicates@Join[vertices, additionalVertices],
+      "C++ replacements" -> newRules
    }
 ];
 

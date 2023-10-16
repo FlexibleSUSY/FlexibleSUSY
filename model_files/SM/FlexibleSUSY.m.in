@@ -66,7 +66,10 @@ ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
            {{20, FlexibleSUSYObservable`AMM[Fe[1]]},
             {21, FlexibleSUSYObservable`AMM[Fe[2]]},
-            {22, FlexibleSUSYObservable`AMM[Fe[3]]} } }
+            {22, FlexibleSUSYObservable`AMM[Fe[3]]},
+            {31, FlexibleSUSYObservable`BrLTo3L[Fe[2] -> {Fe[1], Fe[1], SARAH`bar[Fe[1]]}, All, 1]},
+            {41, FlexibleSUSYObservable`LToLConversion[Fe[2] -> Fe[1], Al, All, 1]}
+            } }
 };
 
 FSCalculateDecays = True;
