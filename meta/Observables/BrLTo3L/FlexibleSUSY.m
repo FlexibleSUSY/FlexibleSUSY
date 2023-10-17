@@ -16,7 +16,7 @@ Module[
       fermions =     Cases[observables, {f_@_, __} :> {SARAH`bar@f, f}, Infinity];
       ffvV = Flatten/@Tuples@{fermions, {TreeMasses`GetPhoton[]}};
 
-      {npfV, npfDefinitions, obsPrototypes, obsDefinitions} = BrLTo3L`create@observables;
+      {npfV, npfDefinitions, obsPrototypes, obsDefinitions} = create@observables;
    ];
 
    WriteOut`ReplaceInFiles[files,
