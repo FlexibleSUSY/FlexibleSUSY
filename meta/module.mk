@@ -72,7 +72,7 @@ META_SRC     := \
 		$(DIR)/GM2Calc.m \
 		$(DIR)/NPointFunctions.m \
 		$(wildcard $(DIR)/NPointFunctions/*.m) \
-		$(wildcard $(DIR)/NPointFunctions/*/*.m) \
+		$(wildcard $(DIR)/Observables/*/*.m) \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \

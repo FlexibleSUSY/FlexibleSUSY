@@ -24,9 +24,16 @@ BeginPackage@"LToLConversion`";
 create::usage = "";
 Begin@"`Private`";
 
+create[manyObservables_List] := {
+   DeleteDuplicates[Join@@#[[All,1]]],
+   StringRiffle[#[[All, 2]], "\n\n"],
+   StringRiffle[#[[All, 3]], "\n\n"],
+   StringRiffle[#[[All, 4]], "\n\n"]
+}&[create/@DeleteDuplicates[manyObservables /. f_@_Integer -> f@_]];
+
 create[obs:_[in_@_ -> _, _, con_, loopN_]] :=
-Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition, prototype},
-   {npfVertices, npfHeader, npfDefinition} = generate@obs;
+Module[{npfVertices, npfDefinition, calculateDefinition, prototype},
+   {npfVertices, npfDefinition} = generate@obs;
 
    prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
       " " <> Observables`GetObservablePrototype@obs;
@@ -57,27 +64,14 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition, prototype},
       }
    ];
 
-   {
-      npfVertices,
-      {npfHeader, npfDefinition},
-      {prototype <> ";", calculateDefinition}
-   }
+   {npfVertices, npfDefinition, prototype <> ";", calculateDefinition}
 ];
 
-create[manyObservables_List] :=
-Module[{unique},
-   unique = DeleteDuplicates[manyObservables /. f_@_Integer -> f@_];
-   {
-      DeleteDuplicates[Join@@#[[All,1]]],
-      {#[[1,2,1]], StringRiffle[#[[All,2,2]], "\n\n"]},
-      {StringRiffle[#[[All,3,1]], "\n\n"], StringRiffle[#[[All,3,2]], "\n\n"]}
-   }&[create/@unique]
-];
-
-parseSynonyms[_[__, con_, loopN_]] :=
-Module[{parsed, result},
+generate[obs:_[in_@_ -> _, _, con_, loopN_]] :=
+Module[{npfU, npfD, fields, keep, dim6, codeU, codeD, parsed},
+   Utils`FSFancyLine[];
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
-   result = Switch[{loopN, parsed},
+   keep = Switch[{loopN, parsed},
       {0, {"All"}},       {Vectors, Scalars},
       {0, {"NoScalars"}}, {Vectors},
       {1, {"All"}},       {Vectors, Scalars, Boxes},
@@ -85,22 +79,9 @@ Module[{parsed, result},
       {1, {"Penguins"}},  {Vectors, Scalars},
       _, Symbol/@parsed
    ];
-   Print["Contributions: ", SymbolName/@result];
+   Print["Contributions: ", SymbolName/@keep];
    Print["Loop level: ", loopN];
-   result
-];
 
-cleanLeftovers[npf_] := npf /. {
-   SARAH`sum[__] -> 0,
-   LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
-   LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
-   LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
-};
-
-generate[obs:_[in_@_ -> _, __, loopN_]] :=
-Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
-   Utils`FSFancyLine[];
-   keep = parseSynonyms@obs;
    {npfU, npfD} = NPointFunctions`NPointFunction[
       {in, #}, {in, #},
       NPointFunctions`OnShellFlag -> True,
@@ -109,7 +90,12 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
       NPointFunctions`KeepProcesses -> keep,
       NPointFunctions`LoopLevel -> loopN,
       NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark, SARAH`DownQuark};
-   {npfU, npfD} = cleanLeftovers/@{npfU, npfD};
+   {npfU, npfD} = {npfU, npfD} /. {
+      SARAH`sum[__] -> 0,
+      LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+      LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
+      LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
+   };
 
    fields[SARAH`UpQuark] = Flatten@NPointFunctions`GetProcess@npfU;
    fields[SARAH`DownQuark] = Flatten@NPointFunctions`GetProcess@npfD;
@@ -141,7 +127,6 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
          NPointFunctions`VerticesForNPointFunction@npfU,
          NPointFunctions`VerticesForNPointFunction@npfD
       ],
-      NPointFunctions`CreateCXXHeaders[],
       codeU<>"\n\n"<>codeD
    }
 ];

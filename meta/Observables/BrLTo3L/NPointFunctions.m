@@ -78,13 +78,13 @@ Module[{
       _, Symbol/@parsed
    ];
 
+   Utils`FSFancyLine[];
    If[Not@MemberQ[keep, #],
       forge@# = "zero",
       funName = ToLowerCase@SymbolName@# <>ToString@loopN<>"loop";
       forge@# = "npointfunctions::" <> funName;
       If[MemberQ[unevaluatedContributions, {loopN, #}],
          unevaluatedContributions = unevaluatedContributions /. {loopN, #} :> Sequence[];
-         Utils`FSFancyLine[];
          Print["Contribution: "<>SymbolName@#];
          Print["Loop level: ", loopN];
          npf = NPointFunctions`NPointFunction[{lep, lep}, {lep, lep},
@@ -95,26 +95,26 @@ Module[{
             NPointFunctions`LoopLevel -> loopN,
             NPointFunctions`Observable -> obs
          ];
-         {npf, operatorRules} = match@cleanLeftovers@npf;
+         npf = npf /. {
+            SARAH`sum[__] -> 0,
+            LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+            LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
+            LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
+         };
+
+         {npf, operatorRules} = match@npf;
          extraVertices = NPointFunctions`VerticesForNPointFunction@npf;
          extraCode = NPointFunctions`CreateCXXFunctions[npf, funName, Identity, operatorRules][[2]];
 
          npfVertices = Join[npfVertices, extraVertices];
          npfCode = npfCode <> "\n" <> extraCode;
-         Utils`FSFancyLine[];
       ];
    ] &/@ {Scalars, Vectors, Boxes};
+   Utils`FSFancyLine[];
 
    {{npfVertices, npfCode}, Last/@DownValues@forge}
 ];
 ];
-
-cleanLeftovers[npf_] := npf /. {
-   SARAH`sum[__] -> 0,
-   LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
-   LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
-   LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
-};
 
 match[npf_] :=
 Module[{fields, sp, dc, dim6},

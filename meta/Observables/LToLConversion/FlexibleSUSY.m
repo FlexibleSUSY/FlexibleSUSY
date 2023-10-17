@@ -53,13 +53,13 @@ Module[{
 
       verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
 
-      {additionalVertices, {npfHeaders, npfDefinitions}, {prototypes, definitions}} = LToLConversion`create@observables;
+      {additionalVertices, npfDefinitions, prototypes, definitions} = LToLConversion`create@observables;
    ];
 
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@npointfunctions_headers@" -> npfHeaders,
+         "@npointfunctions_headers@" -> NPointFunctions`CreateCXXHeaders[],
          "@npointfunctions_definitions@" -> npfDefinitions,
          "@calculate_prototypes@" -> prototypes,
          "@calculate_definitions@" -> definitions,
