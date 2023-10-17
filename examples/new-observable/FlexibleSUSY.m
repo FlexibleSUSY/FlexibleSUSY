@@ -23,7 +23,7 @@ Module[
          "@npointfunctions_headers@" -> npfHeaders,
          "@npointfunctions_definitions@" -> npfDefinitions,
          "@calculate_prototypes@" -> DeleteDuplicates@StringRiffle[prototypes, "\n"],
-         "@calculate_definitions@" -> DeleteDuplicates@StringRiffle[idefinitions, "\n"],
+         "@calculate_definitions@" -> DeleteDuplicates@StringRiffle[definitions, "\n"],
          "@include_guard@" -> SymbolName@obs,
          "@namespace@" -> Observables`GetObservableNamespace@obs,
          "@filename@" -> Observables`GetObservableFileName@obs,
