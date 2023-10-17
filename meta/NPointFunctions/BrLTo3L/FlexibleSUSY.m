@@ -20,14 +20,15 @@
 
 *)
 
-Utils`DynamicInclude@"main.m";
+Utils`DynamicInclude@"NPointFunctions.m";
+Begin@"FlexibleSUSY`Private`";
 
 FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`BrLTo3L, slha_, files_] :=
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
       exportFields = {},
-      npfHeaders = "", npfDefinitions = "", prototypes = "", definitions = "",
+      npfDefinitions = "", obsPrototypes = "", obsDefinitions = "",
       ffvV = {}, npfV = {}, fermions = {}
    },
 
@@ -38,20 +39,19 @@ Module[
       fermions =     Cases[observables, {f_@_, __} :> {SARAH`bar@f, f}, Infinity];
       ffvV = Flatten/@Tuples@{fermions, {TreeMasses`GetPhoton[]}};
 
-      {npfV, npfHeaders, npfDefinitions, prototypes, definitions} = BrLTo3L`create@observables;
+      {npfV, npfDefinitions, obsPrototypes, obsDefinitions} = BrLTo3L`create@observables;
    ];
 
    WriteOut`ReplaceInFiles[files,
       {
-         "@npointfunctions_headers@" -> npfHeaders,
+         "@npointfunctions_headers@" -> NPointFunctions`CreateCXXHeaders[],
          "@npointfunctions_definitions@" -> npfDefinitions,
-         "@calculate_prototypes@" -> prototypes,
-         "@calculate_definitions@" -> definitions,
+         "@calculate_prototypes@" -> obsPrototypes,
+         "@calculate_definitions@" -> obsDefinitions,
          "@include_guard@" -> SymbolName@obs,
          "@namespace@" -> Observables`GetObservableNamespace@obs,
          "@filename@" -> Observables`GetObservableFileName@obs,
-         "@get_MSUSY@" -> TextFormatting`IndentText@
-            TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
+         "@get_MSUSY@" -> TextFormatting`IndentText@TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];
@@ -60,3 +60,5 @@ Module[
       "C++ vertices" -> DeleteDuplicates@Join[ffvV, npfV]
    }
 ];
+
+End[];

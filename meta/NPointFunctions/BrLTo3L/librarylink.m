@@ -16,7 +16,7 @@ Module[{args = Sequence[lep_@nI_ -> {lep_@nO_, lep_@nA_, SARAH`bar@lep_@nA_}, pr
                   "MLPutFunction(link, \"SARAH`bar\", 1);",
                      "MLPutFunction(link, \"", cxx@lep, "\", 1);",
                         "MLPutInteger(link, ", ObsToStr@nA, ");",
-            "MLPutSymbol(link, \"", SymbolName@proc, "\");",
+            "MLPutSymbol(link, \"", CConversion`ToValidCSymbolString@proc, "\");",
             "MLPutInteger(link, ", ObsToStr@loopN, ");",
          "MLPutReal(link, Re(OBSERVABLE(", GetObservableName@obs[
             lep@nI -> {lep@nO, lep@nA, SARAH`bar@lep@nA},

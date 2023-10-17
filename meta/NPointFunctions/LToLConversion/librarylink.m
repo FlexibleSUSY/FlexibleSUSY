@@ -11,7 +11,7 @@ Module[{args = Sequence[in_@inN_ -> _@outN_, nucl_, proc_, loopN_],
                "MLPutFunction(link, \"", cxx@in, "\", 1);",
                   "MLPutInteger(link, ", ObsToStr@outN, ");",
             "MLPutSymbol(link, \"", SymbolName@nucl, "\");",
-            "MLPutSymbol(link, \"", SymbolName@proc, "\");",
+            "MLPutSymbol(link, \"", CConversion`ToValidCSymbolString@proc, "\");",
             "MLPutInteger(link, ", ObsToStr@loopN, ");",
          "MLPutReal(link, Re(OBSERVABLE(", GetObservableName@obs[
             in@inN -> in@outN, nucl, proc, loopN], ")(0)));"];];

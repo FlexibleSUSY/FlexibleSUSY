@@ -73,8 +73,7 @@ Module[{basisPos},
    basisPos = Position[subs, #]& /@ chiralBasis[[All, 2]];
    Table[
       If[basisPos[[i]] === {},
-         Utils`FSFancyWarning[chiralBasis[[i,1]] <> " is zero. "<>
-               "It might be expected or accidential."];
+         Utils`FSFancyWarning[chiralBasis[[i,1]], " is zero. ", "It might be expected or accidential."];
          chiralBasis[[i,1]]->NPointFunctions`Mat[],
          (*else*)
          chiralBasis[[i,1]]->NPointFunctions`Mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]

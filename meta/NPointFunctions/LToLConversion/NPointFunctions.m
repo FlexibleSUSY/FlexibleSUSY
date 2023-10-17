@@ -40,7 +40,7 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition, prototype},
             "@Ph@"  -> CConversion`ToValidCSymbolString@SARAH`Photon,
             "@N@"   -> CConversion`ToValidCSymbolString@loopN,
             "@con@" -> CConversion`ToValidCSymbolString@con,
-            "@photon_penguin@" -> If[loopN === 0, "zero", "calculate_@L@_@L@_@Ph@_form_factors"],
+            "@photon_penguin@" -> If[loopN === 1, "calculate_@L@_@L@_@Ph@_form_factors", "zero"],
             "@classU@" -> "conversion_@L@@U@_to_@L@@U@_@con@@N@loop",
             "@classD@" -> "conversion_@L@@D@_to_@L@@D@_@con@@N@loop"
          }
@@ -74,13 +74,6 @@ Module[{unique},
    }&[create/@unique]
 ];
 
-cleanLeftovers[npf_] := npf /. {
-   SARAH`sum[__] -> 0,
-   LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
-   LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
-   LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
-};
-
 parseSynonyms[_[__, con_, loopN_]] :=
 Module[{parsed, result},
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
@@ -96,6 +89,13 @@ Module[{parsed, result},
    Print["Loop level: ", loopN];
    result
 ];
+
+cleanLeftovers[npf_] := npf /. {
+   SARAH`sum[__] -> 0,
+   LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+   LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
+   LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
+};
 
 generate[obs:_[in_@_ -> _, __, loopN_]] :=
 Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
