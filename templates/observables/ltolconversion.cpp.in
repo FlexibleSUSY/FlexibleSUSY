@@ -30,7 +30,7 @@
 #include "cxx_qft/@ModelName@_qft.hpp"
 
 #include "@ModelName@_@filename@.hpp"
-#include "npointfunctions/ltolconversion/settings.hpp"
+#include "observables/ltolconversion/settings.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "wrappers.hpp"

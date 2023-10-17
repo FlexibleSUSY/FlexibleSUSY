@@ -26,7 +26,7 @@
 #include "decays/flexibledecay_problems.hpp"
 #include "slha_io.hpp"
 #include "for_each.hpp"
-#include "npointfunctions/ltolconversion/settings.hpp"
+#include "observables/ltolconversion/settings.hpp"
 #include "decays/decay.hpp"
 #include "decays/flexibledecay_settings.hpp"
 

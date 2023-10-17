@@ -455,7 +455,7 @@ Module[{npfFiles, npfObservables, npfPattern, executedAlready},
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
 Module[{},
    If[executedAlready =!= True,
-      npfFiles = Utils`DynamicInclude@FlexibleSUSY`$npfObsWildcard@"WriteOut.m";
+      npfFiles = Utils`DynamicInclude@FlexibleSUSY`$observablesWildcard@"WriteOut.m";
       npfObservables = StringSplit[npfFiles, $PathnameSeparator][[All, -2]];
       npfPattern = Alternatives@@(ToExpression["_FlexibleSUSYObservable`"<>#]&/@npfObservables);
       executedAlready = True;

@@ -3,10 +3,10 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-cp ${BASEDIR}/mynewobservable.* ${BASEDIR}/../../templates/npointfunctions
+cp ${BASEDIR}/mynewobservable.* ${BASEDIR}/../../templates/observables
 
-META=${BASEDIR}/../../meta/NPointFunctions/MyNewObservable
+META=${BASEDIR}/../../meta/Observables/MyNewObservable
 mkdir ${META}
-cp ${BASEDIR}/class.m ${META}
-cp ${BASEDIR}/Observable.m ${META}
+cp ${BASEDIR}/FlexibleSUSY.m ${META}
+cp ${BASEDIR}/Observables.m ${META}
 cp ${BASEDIR}/WriteOut.m ${META}

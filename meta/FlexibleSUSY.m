@@ -67,7 +67,7 @@ BeginPackage["FlexibleSUSY`",
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
 $flexiblesusyConfigDir   = FileNameJoin[{ParentDirectory[$flexiblesusyMetaDir], "config"}];
 $flexiblesusyTemplateDir = FileNameJoin[{ParentDirectory[$flexiblesusyMetaDir], "templates"}];
-$npfObsWildcard[file:_:""] := FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions", "*", file};
+$observablesWildcard[file:_:""] := FileNameJoin@{$flexiblesusyMetaDir, "Observables", "*", file};
 
 FS`Version = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"flexiblesusy-version"}]]];
 FS`GitCommit = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"git_commit"}]]];
@@ -5118,14 +5118,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
             (* Load and evaluate NPointFunctions write classes for observables *)
             Module[{files, obs, newRules = {}, down, dir, observablesExtraEntity},
-               dir = FileNameJoin@{FSOutputDir, "npointfunctions"};
+               dir = FileNameJoin@{FSOutputDir, "observables"};
                If[!DirectoryQ@dir, CreateDirectory@dir];
 
-               files = Utils`DynamicInclude@$npfObsWildcard@"FlexibleSUSY.m";
+               files = Utils`DynamicInclude@$observablesWildcard@"FlexibleSUSY.m";
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
 
                files = {
-                     FileNameJoin@{$flexiblesusyTemplateDir, "npointfunctions", #<>".in"},
+                     FileNameJoin@{$flexiblesusyTemplateDir, "observables", #<>".in"},
                      FileNameJoin@{dir, FSModelName<>"_"<>#}
                   } &/@ {#<>".hpp", #<>".cpp"} &/@ (Observables`GetObservableFileName/@obs);
 

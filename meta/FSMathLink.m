@@ -238,9 +238,9 @@ MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToSt
 
 PutObservables[obs_List, link_String] := (
    If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Utils`DynamicInclude@FlexibleSUSY`$npfObsWildcard@"librarylink.m";
+      Utils`DynamicInclude@FlexibleSUSY`$observablesWildcard@"FSMathLink.m";
    ];
-   StringJoin[PutObservable[#, Observables`GetObservableType[#], link]& /@ obs]
+   StringJoin[PutObservable[#, Observables`GetObservableType@#, link]& /@ obs]
 );
 
 CreateSeparatorLine[len_:66] := Module[{i}, "/" <> StringJoin[Table["*", {i, 1, len}]] <> "/"];

@@ -51,7 +51,7 @@ With[{dir = DirectoryName@$InputFileName},
          BeginPackage@"NPointFunctions`";
          Begin@"`Private`";
          If[FileExistsQ@#, Get@#;]&@FileNameJoin@
-            {dir, `options`observable[], "settings.m"};
+            {ParentDirectory@dir, "Observables", `options`observable[], "settings.m"};
          End[];
          EndPackage[];);];
 

@@ -363,10 +363,10 @@ Utils`MakeUnknownInputDefinition@DefineObservable;
 
 GetObservablesHeaders[] =
 Module[{files, obs},
-   files = Utils`DynamicInclude@$npfObsWildcard@"Observable.m";
+   files = Utils`DynamicInclude@$observablesWildcard@"Observables.m";
    obs = StringSplit[files, $PathnameSeparator][[All, -2]];
    StringRiffle[
-      "#include \"npointfunctions/"<>FlexibleSUSY`FSModelName<>"_"<>Observables`GetObservableFileName@#<>".hpp\""&/@obs,
+      "#include \"observables/"<>FlexibleSUSY`FSModelName<>"_"<>Observables`GetObservableFileName@#<>".hpp\""&/@obs,
       "\n"
    ]
 ];
