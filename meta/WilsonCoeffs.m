@@ -25,7 +25,6 @@ BeginPackage@"WilsonCoeffs`";
 {InterfaceToMatching,neglectBasisElements};
 
 Begin["`Private`"];
-`type`npf = NPointFunctions`Private`type`npf;
 getGenericSums = NPointFunctions`Private`getGenericSums;
 getSubexpressions = NPointFunctions`Private`getSubexpressions;
 getName = NPointFunctions`Private`getName;
@@ -36,7 +35,7 @@ neglectBasisElements::usage = "
 @param <{Rule[_String,_]..}> operatorBasis list with
 {string name,fermion chain multiplication} pairs.
 @returns <npf> object";
-neglectBasisElements[obj:`type`npf, operatorBasis:{Rule[_String,_]..}]:=
+neglectBasisElements[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]..}]:=
 Module[
    {
       basis = Last /@ findFermionChains[getSubexpressions[obj],operatorBasis],
@@ -55,8 +54,8 @@ InterfaceToMatching::usage = "
 @param obj np-function object.
 @param operatorBasis list with pairs of string and dirac chain.
 @returns Corresponding GenericSum which matches to a given basis.";
-InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]}] := obj;
-InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]..}] :=
+InterfaceToMatching[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]}] := obj;
+InterfaceToMatching[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]..}] :=
 Module[{basis},
    basis = findFermionChains[getSubexpressions@obj, operatorBasis];
    removeFermionChains[createNewNPF[obj, basis]]];
@@ -84,7 +83,7 @@ Module[{basisPos},
 
 createNewNPF::usage =
 "@brief Extracts the coefficients for a given basis and NPF object.";
-createNewNPF[obj:`type`npf,
+createNewNPF[obj_?NPointFunctions`IsNPointFunction,
    chiralBasis:{Rule[_String,_NPointFunctions`Mat]..}
 ] :=
 Module[
@@ -117,7 +116,7 @@ Module[
 
 removeFermionChains::usage =
 "@brief Removes DiracChains from the abbreviations rules.";
-removeFermionChains[npointExpression:`type`npf] :=
+removeFermionChains[npointExpression_?NPointFunctions`IsNPointFunction] :=
 Module[{pos},
    pos = Take[#, 3]& /@ Position[npointExpression, NPointFunctions`DiracChain];
    Delete[npointExpression, pos]

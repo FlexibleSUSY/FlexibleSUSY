@@ -4303,7 +4303,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            (* load additional packages if prerequisites are met *)
            If[FSFeynArtsAvailable && FSFormCalcAvailable,
                Needs@"NPointFunctions`";
-               Needs@"WilsonCoeffs`";];
+               Needs@"WilsonCoeffs`";
+           ];
 
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
