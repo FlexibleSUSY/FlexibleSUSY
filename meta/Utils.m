@@ -174,10 +174,6 @@ Warning: This function may ignore empty lines.";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
 
-DumpStart::usage ="
-Used to start the model from existing \"kernel snapshot\", i.e. from
-the existing copy of kernel definitions after the first initialization
-of the model via \"normal\" SARAH`Start way.";
 DecomposeVersionString::usage = "Return a list for string containing a version number";
 VersionOrderGtEqThan::usage = "Checks if version is >= than a given one";
 FSRound::usage = "FSRound[x, n] rounds number x to n digits after dot.";

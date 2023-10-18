@@ -25,9 +25,6 @@ BeginPackage@"WilsonCoeffs`";
 {InterfaceToMatching,neglectBasisElements};
 
 Begin["`Private`"];
-getGenericSums = NPointFunctions`Private`getGenericSums;
-getSubexpressions = NPointFunctions`Private`getSubexpressions;
-getName = NPointFunctions`Private`getName;
 
 neglectBasisElements::usage = "
 @brief Deletes specified basis elements with not anymore used subexpressions.
@@ -38,13 +35,13 @@ neglectBasisElements::usage = "
 neglectBasisElements[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]..}]:=
 Module[
    {
-      basis = Last /@ findFermionChains[getSubexpressions[obj],operatorBasis],
+      basis = Last /@ findFermionChains[NPointFunctions`GetSubexpressions[obj],operatorBasis],
       objNew,positionsToDelete,
-      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(getName@getSubexpressions@obj),Infinity]&
+      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(NPointFunctions`GetParticleName@NPointFunctions`GetSubexpressions@obj),Infinity]&
    },
    If[basis === {},Return@obj];
    objNew = ReplaceAll[obj,#->0 &/@ basis];
-   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[getName@getSubexpressions@obj,subsOnly@objNew[[2,1,1]]];
+   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[NPointFunctions`GetParticleName@NPointFunctions`GetSubexpressions@obj,subsOnly@objNew[[2,1,1]]];
    Delete[objNew,positionsToDelete]
 ];
 SetAttributes[neglectBasisElements,{Locked,Protected}];
@@ -57,7 +54,7 @@ InterfaceToMatching::usage = "
 InterfaceToMatching[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]}] := obj;
 InterfaceToMatching[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]..}] :=
 Module[{basis},
-   basis = findFermionChains[getSubexpressions@obj, operatorBasis];
+   basis = findFermionChains[NPointFunctions`GetSubexpressions@obj, operatorBasis];
    removeFermionChains[createNewNPF[obj, basis]]];
 InterfaceToMatching // Utils`MakeUnknownInputDefinition;
 InterfaceToMatching // Protect;
@@ -91,7 +88,7 @@ Module[
       newSums,
       newNPF=obj
    },
-   newSums = extractCoeffs[#,chiralBasis]& /@ getGenericSums[obj];
+   newSums = extractCoeffs[#,chiralBasis]& /@ NPointFunctions`GetGenericSums[obj];
    newNPF[[2, 1, 1]] = newSums;
    newNPF
 ];

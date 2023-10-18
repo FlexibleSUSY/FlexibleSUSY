@@ -310,7 +310,7 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
    ];
 
    If[OptionValue@GetObservableFileName === Unset,
-      Utils`FSFancyWarning["GetObservableFileName for ", ToString@obs, " is not specified explicitly. Trying to use GetObservableNamespace ..."];
+      Utils`FSFancyWarning["GetObservableFileName for ", ToString@obs, " is not specified explicitly. Trying to use GetObservableNamespace."];
       If[OptionValue@GetObservableNamespace === Unset,
          warn@"GetObservableFileName";,
          GetObservableFileName[obs | obsStr] := OptionValue@GetObservableNamespace;
