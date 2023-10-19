@@ -22,7 +22,6 @@
 
 BeginPackage@"NPointFunctions`";
 
-(* Functions *)
 VerticesForNPointFunction;
 CreateCXXHeaders;
 CreateCXXFunctions;
@@ -33,7 +32,6 @@ GetParticleName;
 NPointFunction;
 IsNPointFunction;
 
-(* Symbols *)
 SetAttributes[
    {
       LoopLevel, Regularize, UseCache, ZeroExternalMomenta, OnShellFlag,
@@ -78,17 +76,6 @@ secure // secure;
 
 GetIndex[obj_?IsGenericParticle] := First@Level[obj, {-1}];
 GetIndex // secure;
-
-GetCXXIndex[obj_?IsGenericParticle] :=
-   "i"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ conj@obj;
-GetCXXIndex[obj:_?IsParticle] :=
-Module[{nakedField},
-   nakedField = obj /. {SARAH`bar->Identity, Susyno`LieGroups`conj->Identity};
-   Switch[nakedField,
-   _Symbol,              "",
-   (_Symbol)[{_Symbol}], StringDrop[ToString[nakedField[[1, 1]]],2]]
-];
-GetCXXIndex // secure;
 
 GetLength[obj_?IsWilsonBasis] := ToString@Length@obj;
 GetLength // secure;
@@ -166,21 +153,14 @@ Module[{result},
 ];
 ApplySubexpressions // secure;
 
-conj[obj_?IsGenericParticle] :=
-Switch[Head@obj,
-   SARAH`bar | Susyno`LieGroups`conj, First@obj,
-   GenericS | GenericV,               Susyno`LieGroups`conj@obj,
-   GenericF | GenericU,               SARAH`bar@obj
-];
-conj[obj_?TreeMasses`IsScalar|_?TreeMasses`IsVector] := Susyno`LieGroups`conj@obj;
-conj[obj_?TreeMasses`IsFermion] := SARAH`bar@obj;
-conj // secure;
+subWrite[str_String] := WriteString[$Output, str];
+subWrite // secure;
 
 OutputPaths[] := Module[{outputPath, eigenstates = ToString@FlexibleSUSY`FSEigenstates},
    outputPath = {SARAH`$sarahCurrentOutputMainDir, eigenstates};
    FileNameJoin@*Flatten /@
    {
-      {outputPath, "NPointFunctionis"},
+      {outputPath, "NPointFunctions"},
       {outputPath, "FormCalc"},
       {outputPath, "FeynArts", SARAH`ModelName<>eigenstates},
       {outputPath, "FeynArts", "ParticleNamesFeynArts.dat"},
@@ -223,13 +203,13 @@ NPointFunction[
 Module[{
       npfDir, fcDir, faModel, particleNamesFile,
       particleNamespaceFile, kernel, currentDirectory,
-      nPointFunction, metaInfo = {Join[inFields, outFields], OptionValue@KeepProcesses}
+      npf, metaInfo = {Join[inFields, outFields], OptionValue@KeepProcesses}
    },
    {npfDir, fcDir, faModel, particleNamesFile, particleNamespaceFile} = OutputPaths[];
    If[DirectoryQ@npfDir === False, CreateDirectory@npfDir];
    If[OptionValue@UseCache,
-      nPointFunction = GetCache[inFields, outFields, npfDir, metaInfo];
-      If[nPointFunction =!= Null, Return@nPointFunction];
+      npf = GetCache[inFields, outFields, npfDir, metaInfo];
+      If[npf =!= Null, Return@npf];
    ];
    If[FileExistsQ[faModel <> ".mod"] === False,
       {kernel} = LaunchKernels@1;
@@ -254,7 +234,7 @@ Module[{
          },
          meta = FlexibleSUSY`$flexiblesusyMetaDir
       },
-      nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
+      npf = DeleteZeroGenericSum@ParallelEvaluate[
          $Path = path;
          Get@FileNameJoin@{meta, "NPointFunctions", "internal.m"};
          NPointFunction[data, options],
@@ -265,28 +245,21 @@ Module[{
    CloseKernels@kernel;
    UnsetShared[subWrite, Print];
 
-   WriteCache[nPointFunction, npfDir, metaInfo];
-   nPointFunction
+   WriteCache[npf, npfDir, metaInfo];
+   npf
 ];
 NPointFunction // secure;
 
-subWrite[str_String] := WriteString[$Output, str];
-subWrite // secure;
-
-VerticesForNPointFunction::usage = "
-@brief Return a list of all vertices needed to calculate a given
-       n-point correlation function.
-@param obj The n-point correlation function.
-@returns A list of all vertices needed for the calculation.";
 VerticesForNPointFunction[obj_?IsNPointFunction] :=
 Module[{v, getVertex},
    getVertex[vertGen_, rules_] := vertGen/.#&/@rules;
-   v = DeleteDuplicates@
-      Cases[#, SARAH`Cp[f__] :> {f}, Infinity, Heads->True] &/@
-         GetGenericSums@obj;
+   v = DeleteDuplicates[
+      Cases[#, SARAH`Cp[f__] :> {f}, Infinity, Heads->True] &/@ GetGenericSums@obj
+   ];
    DeleteDuplicates[
-      Vertices`StripFieldIndices/@#&/@
-         Flatten[MapThread[getVertex, {v, GetClassFieldRules@obj}],2]]];
+      Vertices`StripFieldIndices/@ #&/@ Flatten[MapThread[getVertex, {v, GetClassFieldRules@obj}], 2]
+   ]
+];
 VerticesForNPointFunction // secure;
 
 CacheNameForMeta[meta:{__}] := Utils`StringJoinWithSeparator[Flatten@meta, "", SymbolName]<>".m";
@@ -310,9 +283,9 @@ Module[{path, file, npfs, iosition},
 ];
 WriteCache // secure;
 
-GetCache[inFields_, outFields_, cacheDir_, nPointMeta:{__}] :=
+GetCache[inFields_, outFields_, cacheDir_, meta:{__}] :=
 Module[{nPointFunctionsFile, nPointFunctions, position},
-   nPointFunctionsFile = FileNameJoin@{cacheDir, CacheNameForMeta@nPointMeta};
+   nPointFunctionsFile = FileNameJoin@{cacheDir, CacheNameForMeta@meta};
    If[FileExistsQ@nPointFunctionsFile === False,
       Return@Null
    ];
@@ -350,14 +323,12 @@ With[{currentPath = $Path,
    UnsetShared[Print];
    Print["Generating FeynArts model file ... done"];
 ];
-WriteModelFile // secure;
 
 WriteNamespaceFile[fileName_String] :=
 Module[{fileHandle = OpenWrite@fileName},
    Write[fileHandle, {ToString@#, Context@#}&/@ TreeMasses`GetParticles[]];
    Close@fileHandle;
 ];
-WriteNamespaceFile // secure;
 
 ToFeynArtsFields[fields_, namesFile_String] :=
 Module[{unique, faNames},
@@ -373,30 +344,36 @@ Module[{unique, faNames},
          Susyno`LieGroups`conj@field_String :> "-" <> field
       }
 ];
-ToFeynArtsFields // secure;
 
-RemoveEmptyGenSums::usage = "
-@brief Somehing went wrong in a subkernel. Most likely, it is dead.
-@param npfObject n-point function object to clean.
-@returns Cleaned from empty GenericSums npfObject.";
-RemoveEmptyGenSums[npf_?IsNPointFunction] := npf;
-RemoveEmptyGenSums[
-   {  fields:{{__},{__}},
-      {  {  sums:{GenericSum[_,{___}]..},
-            rules:{{{__}..}..},
-            comb:{{__Integer}..},
-            col:{{__}..}},
-         subs:{Rule[_,_]...}}}]:=
-Module[{poss=Position[sums,GenericSum[{0},{}]]},
-   Print["Removing zero GenericSum at positions ",
-      Utils`StringJoinWithSeparator[Flatten@poss,", "],"."];
-   {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}
+DeleteZeroGenericSum[npf_?IsNPointFunction] := npf;
+DeleteZeroGenericSum[{fields_, {{sums_, rules_, comb_, col}, subs_}}]:=
+Module[{pos = Position[sums, GenericSum[{0}, {}]]},
+   Print["Removing zero GenericSum"];
+   {fields, {Delete[#,pos]&/@{sums,rules,comb,col}, subs}}
 ];
-RemoveEmptyGenSums // secure;
+DeleteZeroGenericSum // secure;
 
-CreateCXXHeaders::usage = "
-@brief Create the C++ code for the necessary headers.
-@returns The C++ code for the necessary headers.";
+conj[obj_?IsGenericParticle] :=
+Switch[Head@obj,
+   SARAH`bar | Susyno`LieGroups`conj, First@obj,
+   GenericS | GenericV,               Susyno`LieGroups`conj@obj,
+   GenericF | GenericU,               SARAH`bar@obj
+];
+conj[obj_?TreeMasses`IsScalar|_?TreeMasses`IsVector] := Susyno`LieGroups`conj@obj;
+conj[obj_?TreeMasses`IsFermion] := SARAH`bar@obj;
+conj // secure;
+
+CXXIndex[obj_?IsGenericParticle] :=
+   "i"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ conj@obj;
+CXXIndex[obj:_?IsParticle] :=
+Module[{nakedField},
+   nakedField = obj /. {SARAH`bar->Identity, Susyno`LieGroups`conj->Identity};
+   Switch[nakedField,
+   _Symbol,              "",
+   (_Symbol)[{_Symbol}], StringDrop[ToString[nakedField[[1, 1]]],2]]
+];
+CXXIndex // secure;
+
 CreateCXXHeaders[] :=
 TextFormatting`ReplaceCXXTokens["
    #include \"loop_libraries/loop_library.hpp\"
@@ -405,134 +382,125 @@ TextFormatting`ReplaceCXXTokens["
    #include <limits>
    #include <boost/fusion/include/at_key.hpp>
    #include <boost/core/is_same.hpp>",
-   {"@ModelName@"->FlexibleSUSY`FSModelName}];
+   {"@ModelName@" -> FlexibleSUSY`FSModelName}
+];
 CreateCXXHeaders // secure;
 
-CreateCXXFunctions::usage = "
-@brief Creates a C++ code for the n-point correllation functions.
-@param npf n-point correlation function object.
-@param name function name
-@param colourProjector A function that represents color structure of ampitudes.
-@param wilsonBasis Basis for matching.
-@returns A list with C++ prototypes and definitions.";
 CreateCXXFunctions[
    npf_?IsNPointFunction,
-   name:_String,
-   colourProjector:_?IsColorProjector,
+   functionName_String,
+   colorProjector_?IsColorProjector,
    wilsonBasis:_?IsWilsonBasis:{"value"->"dummy string"}] :=
-Module[{mainFunction, prototype, definition},
-   mainFunction = "std::array<std::complex<double>,"<>
-      GetLength@wilsonBasis<>"> "<>name<>"("<>#<>")"&;
-   setHelperClassName@npf;
-   setBasis@wilsonBasis;
-   prototype = mainFunction@`cxx`arguments[npf,Default]<>";";
-   definition =
-      `cxx`npfClass[ApplySubexpressions@npf,colourProjector] <> "\n\n" <>
-      mainFunction@`cxx`arguments@npf <>
-      "{\n   "<>$helperClassName<>
-      " helper{ model, indices, momenta };\n   return helper.calculate();\n}";
-   {prototype, definition}] /; And@@
-      (Utils`AssertOrQuit[Length@wilsonBasis === Length@#,
-         CreateCXXFunctions::errNoMatch]&/@GetSumExpression/@GetGenericSums@npf);
-CreateCXXFunctions::errNoMatch = "
-Length of basis and the given n-point function one does not match."
+Module[{GetFunctionPrototype, prototype, definition},
+   GetFunctionPrototype = StringReplace[
+      "std::array<std::complex<double>, L> name(arg)",
+      {"L" -> GetLength@wilsonBasis, "name" -> functionName, "arg" -> #}
+   ]&;
+   SetHelperClassName@npf;
+   SetBasis@wilsonBasis;
+   SetColorProjector@colorProjector;
+   prototype = GetFunctionPrototype@GetCXXArguments[npf, Default]<>";";
+   definition = TextFormatting`ReplaceCXXTokens["
+      @class_body@
+
+      @npf_function@ {
+         @class_name@ helper{model, indices, momenta};
+         return helper.calculate();
+      }",
+      {
+         "@class_name@" -> GetHelperClassName[],
+         "@class_body@" -> CreateClassBody@ApplySubexpressions@npf,
+         "@npf_function@" -> GetFunctionPrototype@GetCXXArguments@npf
+      }
+   ];
+   {prototype, definition}
+];
 CreateCXXFunctions // secure;
 
-`cxx`arguments::usage = "
-@brief Returns the C++ arguments that the C++ version of the given n-point
-       correlation function shall take.
-       ``Default`` value of zero for all external momenta is chosen if the
-       second parameter is ``Default``.
-@param npf The given n-point correlation function
-@param control String that sets up the type of argument string
-@returns The C++ arguments that the C++ version of the given n-point
-         correlation function shall take.";
-`cxx`arguments[npf_?IsNPointFunction,control:Null|Default:Null] :=
-   "const "<>#1<>" &model,"<>
-   " const std::array<int,"<>#2<>"> &indices,"<>
-   " const std::array<Eigen::Vector4d,"<>#3<>"> &momenta"<>
-   If[control === Default," = { "<>#4<>" }",""]&[
-      FlexibleSUSY`FSModelName<>"_mass_eigenstates",
-      ToString@Length@GetExternalIndices@npf,
-      ToString@#,
-      Utils`StringJoinWithReplacement@Array["Eigen::Vector4d::Zero()",#]] &@
-         Length@GetExternalMomenta@npf;
-`cxx`arguments // secure;
+GetCXXArguments[npf_?IsNPointFunction, control_:Null] :=
+TextFormatting`ReplaceCXXTokens["
+   const @eigenstates@ &model,
+   const std::array<int, @indices_length@> &indices,
+   const std::array<Eigen::Vector4d, @momenta_length@> &momenta
+   @default@",
+   {
+      "@eigenstates@" -> FlexibleSUSY`FSModelName<>"_mass_eigenstates",
+      "@indices_length@" -> ToString@Length@GetExternalIndices@npf,
+      "@momenta_length@" -> ToString@Length@GetExternalMomenta@npf,
+      "@default@" -> If[control === Default,
+            "= { "<> Utils`StringJoinWithReplacement@Array["Eigen::Vector4d::Zero()", Length@GetExternalMomenta@npf]<>" }", ""
+         ]
+   }
+];
+GetCXXArguments // secure;
 
-$basis = {"value"->"dummy string"};
-$basis ~ SetAttributes ~ {Protected};
-
-setBasis[obj:_?IsWilsonBasis] :=
-(  Unprotect@$basis;
-   $basis = obj;
-   Protect@$basis;);
-setBasis // secure;
-
-$helperClassName = "";
-$helperClassName ~ SetAttributes ~ {Protected};
-
-setHelperClassName::usage = "
-@brief Sets the C++ name for the helper class of a n-point function.
-@param obj n-point function object.";
-setHelperClassName[obj_?IsNPointFunction] :=
+Module[{helperClassName, basis, projector},
+SetHelperClassName[obj_?IsNPointFunction] :=
 Module[{fieldNames = Vertices`StripFieldIndices/@Join@@GetProcess[obj]},
-   Unprotect@$helperClassName;
-   $helperClassName = "nPoint" <>
-      StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}] <> "_" <>
+   helperClassName = "nPoint" <>
+      StringJoin@Map[ToString, fieldNames/.a_[b_] :> Sequence@@{a,b}] <> "_" <>
       ToString@Ceiling[10^6*AbsoluteTime[]];
-   Protect@$helperClassName;];
-setHelperClassName // secure;
+];
+SetHelperClassName // secure;
+GetHelperClassName[] := helperClassName;
 
-`cxx`npfClass::usage = "
-@param npf The given n-point correlation function.
-@param projCol The colour factor projection to be applied for the
-       given n-point correlation function.
-@returns The C++ code for the helper class of n-point function.";
-`cxx`npfClass[npf_?IsNPointFunction, projCol:_?IsColorProjector] :=
+SetBasis[obj_?IsWilsonBasis] := (basis = obj);
+SetBasis // secure;
+GetBasis[] := basis;
+
+SetColorProjector[colorProjector_?IsColorProjector] := (projector = colorProjector);
+SetColorProjector // secure;
+GetColorProjector[] := projector;
+];
+
+CreateClassBody[npf_?IsNPointFunction] :=
 Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
    genSums = GetGenericSums@npf;
    extIndices = GetExternalIndices@npf;
    numberOfMomenta = Length[GetExternalMomenta@npf];
    genFields = DeleteDuplicates[Flatten@GetClassFieldRules@npf /. Rule[x_,_] :> x];
-   code = "
-   class @ClassName@ : public @Context@
-   {
-      using generic_sum_base = @Context@;
-
-      template<class GenericFieldMap>
-      struct subexpression_base :
-      generic_sum_base, index_map_interface<GenericFieldMap>
+   genSumNames = Array["genericSum"<>ToString@#&, Length@genSums];
+   SetCXXRules[extIndices, genFields];
+   TextFormatting`ReplaceCXXTokens["
+      class @ClassName@ : public @Context@
       {
-         subexpression_base( const subexpression_base & ) = default;
+         using generic_sum_base = @Context@;
 
-         subexpression_base( const generic_sum_base &gsb,
-            const typename field_index_map<GenericFieldMap>::type &fim ) :
-         generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )
+         template<class GenericFieldMap>
+         struct subexpression_base :
+         generic_sum_base, index_map_interface<GenericFieldMap>
+         {
+            subexpression_base( const subexpression_base & ) = default;
+
+            subexpression_base( const generic_sum_base &gsb,
+               const typename field_index_map<GenericFieldMap>::type &fim ) :
+            generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )
+            {}
+         }; // End of subexpression_base<GenericFieldMap>
+
+         @KeyStructsInitialization@
+
+         @GenericSums@
+
+         public:
+         @ClassName@( @Arguments@ ) :
+         @Context@ { model, indices, momenta }
          {}
-      }; // End of subexpression_base<GenericFieldMap>
 
-      @KeyStructsInitialization@
-
-      @GenericSums@
-
-      public:
-      @ClassName@( @Arguments@ ) :
-      @Context@ { model, indices, momenta }
-      {}
-
-      @CalculateFunction@
-   }; // End of @ClassName@";
-   genSumNames = Array["genericSum"<>ToString@#&,Length@genSums];
-   `cxx`setRules[extIndices,genFields];
-   TextFormatting`ReplaceCXXTokens[code,
-      {  "@ClassName@"->$helperClassName,
-         "@Context@"->"correlation_function_context<"<>
-            ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">",
-         "@KeyStructsInitialization@"->`cxx`initializeKeyStructs@genFields,
-         "@GenericSums@"->`cxx`genericSum[npf,projCol,genSumNames],
-         "@Arguments@"->`cxx`arguments@npf,
-         "@CalculateFunction@"->`cxx`calculateFunction@genSumNames}]];
-`cxx`npfClass // secure;
+         @CalculateFunction@
+      }; // End of @ClassName@"
+      ,
+      {
+         "@ClassName@" -> GetHelperClassName[],
+         "@Context@" -> "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">",
+         "@KeyStructsInitialization@" -> `cxx`initializeKeyStructs@genFields,
+         "@GenericSums@" -> `cxx`genericSum[npf, genSumNames],
+         "@Arguments@" -> GetCXXArguments@npf,
+         "@CalculateFunction@" -> `cxx`calculateFunction@genSumNames
+      }
+   ]
+];
+CreateClassBody // secure;
 
 `cxx`initializeKeyStructs::usage = "
 @brief Generates required C++ code for key structs initialization.
@@ -545,29 +513,19 @@ Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
 `cxx`initializeKeyStructs // secure;
 
 Module[{rules = {{}}},
-
-`cxx`setRules::usage = "
-@brief Generate a list of rules for translating Mathematica expressions to
-       C++ ones.
-@param extIndices The external indices of an n-point correlation function.
-@param genericFields The generic fields appearing in an n-point correlation
-       function.
-@returns A list of rules for translating Mathematica expressions to C++ ones.
-@note All couplings have to be multiplied by ``I``.";
-`cxx`setRules[extIndices:{___Symbol},genericFields:{__?IsGenericParticle}] :=
+SetCXXRules[extIdx:{___Symbol}, genericFields:{__?IsGenericParticle}] :=
 Module[{externalIndexRules, wrap, index, genericRules, massRules, couplingRules},
-   externalIndexRules = MapThread[Rule,
-      {  extIndices,
-         Array["i"<>ToString[#]&,Length@extIndices]}];
-   genericRules=Flatten[Thread@Rule[
-      {conj[#],#},
-      {  `cxx`fieldName[conj@#][GetCXXIndex@#],
-         `cxx`fieldName[#][GetCXXIndex@#]}] &/@ genericFields];
-   wrap[fields__] := Utils`StringJoinWithSeparator[`cxx`fieldAlias/@{fields},", "];
+   externalIndexRules = MapIndexed[#1 -> "i"<>ToString@@#2&, extIdx];
+   genericRules = Flatten[
+      {conj@# -> CXXFullFieldName[conj@#][CXXIndex@#], # -> CXXFullFieldName[#][CXXIndex@#]}&/@
+      genericFields
+   ];
+   wrap[fields__] := Utils`StringJoinWithSeparator[CXXShortFieldName/@{fields},", "];
    index[fields__] := Utils`StringJoinWithSeparator[`cxx`fieldIndices/@{fields},", "];
 
    couplingRules =
-   {  SARAH`Cp[fields__][1] :>
+   {
+      SARAH`Cp[fields__][1] :>
          ("NPF_S(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
       SARAH`Cp[fields__][SARAH`PL] :>
          ("NPF_L(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
@@ -591,23 +549,24 @@ Module[{externalIndexRules, wrap, index, genericRules, massRules, couplingRules}
       SARAH`Cp[fields__][(SARAH`Mom[f2_, _]-SARAH`Mom[f1_, _])*SARAH`g[_,_],
          (SARAH`Mom[f1_,_]-SARAH`Mom[f3_,_])*SARAH`g[_,_],
          (SARAH`Mom[f3_,_]-SARAH`Mom[f2_,_])*SARAH`g[_,_]] :>
-         ("NPF_T(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")")};
+         ("NPF_T(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")")
+   };
 
    massRules = {SARAH`Mass[f_] :>
-      StringJoin["context.mass<",`cxx`fieldAlias@f,">(",
+      StringJoin["context.mass<",CXXShortFieldName@f,">(",
          `cxx`fieldIndices@f,")"]};
 
    rules = {externalIndexRules, massRules, couplingRules, genericRules};];
-`cxx`setRules // secure;
+SetCXXRules // secure;
 
 `cxx`applyRules[obj_] :=
 StringReplace[
    Parameters`ExpressionToString[Fold[ReplaceAll, obj, rules]],
    "\"" -> ""];
-`cxx`applyRules // secure;];
+`cxx`applyRules // secure;
+];
 
 Module[{strip, sandwich, n},
-
 strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
 
 sandwich[f_] = Switch[Head@f,
@@ -615,19 +574,16 @@ sandwich[f_] = Switch[Head@f,
    Susyno`LieGroups`conj, "typename cxx_diagrams::conj<" <> # <> ">::type",
    _, #]&;
 
-`cxx`fieldName::usage = "
-@brief Returns a C++ representation for a field expression or a field name.
-@param f A generic or external field, or an explicit field name.
-@returns A C++ representation for a field.";
-`cxx`fieldName[f_?IsParticle] :=
+CXXFullFieldName[f_?IsParticle] :=
 (  n = strip@f;
    sandwich[f]["fields::" <> ToString@Switch[n, _Symbol, n, _, Head@n]]);
 
-`cxx`fieldName[f_?IsGenericParticle] :=
+CXXFullFieldName[f_?IsGenericParticle] :=
 (  n = strip@f;
    sandwich[f]["g"<>StringTake[ToString@Head@n, -1] <> ToString@Part[n, 1, 1]]);
 
-`cxx`fieldName // secure;];
+CXXFullFieldName // secure;
+];
 
 `cxx`fieldIndices::usage = "
 @brief Return the C++ expression for the given field.
@@ -697,15 +653,14 @@ are numbers.";
 @param obj n-point function object.
 @param colourProjector An expression, representing the projector.
 @param genSumNames Set of names for generic sums.";
-`cxx`genericSum[obj_?IsNPointFunction, colourProjector:_?IsColorProjector,
-   genSumNames:{__String}] :=
+`cxx`genericSum[obj_?IsNPointFunction, genSumNames:{__String}] :=
 Utils`StringJoinWithSeparator[
    MapThread[
       `cxx`genericSum[##,GetSubexpressions@obj,obj]&,
       {  GetGenericSums@obj,
          GetClassFields@obj,
          GetCombinatoricalFactors@obj,
-         colorFactor[GetColorFactors@obj,colourProjector],
+         colorFactor[GetColorFactors@obj, GetColorProjector[]],
          genSumNames}],
    "\n\n"];
 `cxx`genericSum[
@@ -763,15 +718,15 @@ TextFormatting`ReplaceCXXTokens["
       "@GenericFieldShortNames@"->`cxx`shortNames@GetGenericFields@sum,
       "@ExternalIndices@"->`cxx`initializeExternalIndices@npf,
       "@InitializeOutputVars@"->Utils`StringJoinWithSeparator[
-         "std::complex<double> "<>#<>" = 0.0;"&/@First/@$basis,"\n"],
+         "std::complex<double> "<>#<>" = 0.0;"&/@First/@GetBasis[],"\n"],
       "@SummationOverGenericFields@"->`cxx`changeGenericExpressions[
          GetSumParticles@sum,GetSumExpression@sum],
-      "@ReturnOutputVars@"->ToString[First/@$basis],
+      "@ReturnOutputVars@"->ToString[First/@GetBasis[]],
       "@GenericKeys@"->`cxx`genericFieldKey@GetGenericFields@sum,
       "@ClassInsertions@"->`cxx`insertFields@genericInsertions,
       "@CombinatoricalFactors@"->`cxx`insertFactors@combinatorialFactors,
       "@ColorFactors@"->`cxx`insertColours@colourFactors,
-      "@WilsonBasisLength@"->GetLength@$basis}];
+      "@WilsonBasisLength@"->GetLength@GetBasis[]}];
 `cxx`genericSum // secure;
 `cxx`genericSum::errColours = "
 Colour factor is not a number after projection: `1`";
@@ -833,7 +788,7 @@ Module[{
       createLoopFunctions@modifiedExpr;
 
    cxxExpr = `cxx`applyRules/@modifiedExpr;
-   updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@$basis, cxxExpr}];
+   updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@GetBasis[], cxxExpr}];
 
    TextFormatting`ReplaceCXXTokens[code,{
       "@fieldAliases@"->`cxx`setFieldAliases@couplings,
@@ -862,24 +817,20 @@ func = If[#1 =!= #2, "using " <> #1 <> " = " <> #2 <> ";\n", ""]&;
 @returns A string with C++ code of alias definitions.";
 `cxx`setFieldAliases[couplings:{{SARAH`Cp[__][___], _Integer}..}] :=
 Module[{l = Sort@DeleteDuplicates[(Sequence@@Head@First@#&)/@couplings]},
-   StringJoin@MapThread[func, {`cxx`fieldAlias/@l, `cxx`fieldName/@l}]];
+   StringJoin@MapThread[func, {CXXShortFieldName/@l, CXXFullFieldName/@l}]];
 `cxx`setFieldAliases // secure;
 
 ];
 
 Module[{c, name, strip},
-
 c[f_] := Switch[Head@f, SARAH`bar|Susyno`LieGroups`conj, "_"<>#, _, #]&;
 name[f_] := ToString@Switch[f, _Symbol, f, _, Head@f];
 strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
 
-`cxx`fieldAlias::usage = "
-@brief Generates a short C++ name for a field, whether conjugated or not.
-@param f A external or generic field.
-@returns A C++ name for a field.";
-`cxx`fieldAlias[f:_?IsParticle] := c[f][name@strip@f];
-`cxx`fieldAlias[f_?IsGenericParticle] := c[f][`cxx`fieldName@strip@f];
-`cxx`fieldAlias // secure;];
+CXXShortFieldName[f_?IsParticle] := c[f][name@strip@f];
+CXXShortFieldName[f_?IsGenericParticle] := c[f][CXXFullFieldName@strip@f];
+CXXShortFieldName // secure;
+];
 
 createLoopFunctions[modifiedExpr:{__}] :=
 Module[{onePoint,
@@ -993,7 +944,7 @@ Switch[GetParticleName@obj,
    GenericV, "mV",
    GenericU, "mU"]<>ToString@GetIndex@obj;
 `cxx`getVariableName[SARAH`Mass[obj:_?IsParticle]] :=
-   "m"<>ToString@GetParticleName@obj<>GetCXXIndex@obj;
+   "m"<>ToString@GetParticleName@obj<>CXXIndex@obj;
 `cxx`getVariableName // secure;
 
 Module[{
@@ -1062,7 +1013,7 @@ Module[{
 `cxx`shortNames[genFields:{__?IsGenericParticle}] :=
    Utils`StringJoinWithSeparator[Apply[
       "using "<>#1<>" = typename at<GenericFieldMap,"<>ToString@#2<>">::type;"&,
-      {`cxx`fieldName@#,`cxx`genericFieldKey@#}&/@genFields,
+      {CXXFullFieldName@#,`cxx`genericFieldKey@#}&/@genFields,
       {1}],"\n"];
 `cxx`shortNames // secure;
 
@@ -1073,10 +1024,10 @@ Module[{
 @returns String C++ code for sum beginning used inside generic sums.";
 `cxx`beginSum[summation_?IsSummation]:=
 Module[{beginsOfFor},
-   beginsOfFor = "for( const auto &"<>GetCXXIndex[#[[1]]]<>" : "<>
-      "index_range<"<> `cxx`fieldName[#[[1]]]<>">() ) {\n"<>
+   beginsOfFor = "for( const auto &"<>CXXIndex[#[[1]]]<>" : "<>
+      "index_range<"<> CXXFullFieldName[#[[1]]]<>">() ) {\n"<>
       "at_key<"<>`cxx`genericFieldKey@#[[1]]<>">( index_map ) = "<>
-      GetCXXIndex[#[[1]]]<>";"<>parseRestrictionRule[#] &/@summation;
+      CXXIndex[#[[1]]]<>";"<>parseRestrictionRule[#] &/@summation;
    Utils`StringJoinWithSeparator[beginsOfFor,"\n"]];
 `cxx`beginSum // secure;
 
@@ -1086,11 +1037,11 @@ Module[{f1,f2,GetIndexOfExternalField,OrTwoDifferent},
    GetIndexOfExternalField[_[{ind_}]] := `cxx`applyRules@ind;
    GetIndexOfExternalField[_] := "i0";
    OrTwoDifferent[] :=
-   Module[{type1 = `cxx`fieldName@First@rule,
-         type2 = `cxx`fieldName@Last@rule,
+   Module[{type1 = CXXFullFieldName@First@rule,
+         type2 = CXXFullFieldName@Last@rule,
          ind = GetIndexOfExternalField@First@rule,
-         typeGen = `cxx`fieldName@genericField,
-         indGen = GetCXXIndex@genericField},
+         typeGen = CXXFullFieldName@genericField,
+         indGen = CXXIndex@genericField},
       "\nif( (boost::core::is_same<"<>typeGen<>","<>type1<>
          ">::value || boost::core::is_same<"<>typeGen<>","<>type2<>
          ">::value) && "<>indGen<>" == "<>ind<>" ) continue;"];
@@ -1141,7 +1092,7 @@ Module[{
          }
          return genericSummation;
       } // End of calculate()",
-      {  "@BasisLength@"->GetLength@$basis,
+      {  "@BasisLength@"->GetLength@GetBasis[],
          "@InitializeVariablesWhichStoreGenericSumsOutput@"->initVars,
          "@SumOfVariables@"->sumOfSums}]];
 `cxx`calculateFunction // secure;
@@ -1152,7 +1103,7 @@ Module[{
 @returns String C++ code for class insertions inside GenericSum.";
 `cxx`insertFields[genInsertions_?IsClassFields] :=
    Utils`StringJoinWithSeparator["boost::mpl::vector<"<>
-      Utils`StringJoinWithSeparator[`cxx`fieldName@#&/@#,", "]<>
+      Utils`StringJoinWithSeparator[CXXFullFieldName@#&/@#,", "]<>
       ">"&/@genInsertions,",\n"];
 `cxx`insertFields // secure;
 
