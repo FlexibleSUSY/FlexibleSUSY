@@ -159,7 +159,8 @@ Module[{result},
          obj,
          {2, 1, 1} -> ReplaceRepeated[GetGenericSums@obj, GetSubexpressions@obj]
       ],
-      {}];
+      {}
+   ];
    WriteString[$Output, "done\n"];
    result
 ];
@@ -187,7 +188,7 @@ OutputPaths[] := Module[{outputPath, eigenstates = ToString@FlexibleSUSY`FSEigen
    }
 ];
 
-Options[NPointFunction] =
+Options@NPointFunction =
 {
    LoopLevel -> 1,
    Regularize -> FlexibleSUSY`FSRenormalizationScheme,
@@ -198,113 +199,79 @@ Options[NPointFunction] =
    Observable -> None
 };
 
-NPointFunction[inFields_List, outFields_List, opts:OptionsPattern[]] :=
+CheckOptionValues[opts___] := (
+   Cases[{opts},
+      Rule[First@#, v_] :>
+         Utils`AssertOrQuit[MemberQ[Last@#, v], NPointFunction::errOption, v, First@#, Last@#]
+   ] &/@
+   {
+      LoopLevel -> {0, 1},
+      Regularize -> {FlexibleSUSY`MSbar, FlexibleSUSY`DRbar},
+      UseCache -> {True, False},
+      ZeroExternalMomenta -> {True, False, OperatorsOnly, ExceptLoops},
+      OnShellFlag -> {True, False}
+   };
+   True
+);
+
+NPointFunction::errOption = "Value `1` for `2` option must be from `3`.";
+NPointFunction[
+   inFields: {__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
+   outFields:{__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
+   opts:OptionsPattern[] /; CheckOptionValues@opts
+] :=
 Module[{
       npfDir, fcDir, faModel, particleNamesFile,
-      particleNamespaceFile, subKernel, currentDirectory,
-      nPointFunction
+      particleNamespaceFile, kernel, currentDirectory,
+      nPointFunction, metaInfo = {Join[inFields, outFields], OptionValue@KeepProcesses}
    },
    {npfDir, fcDir, faModel, particleNamesFile, particleNamespaceFile} = OutputPaths[];
-   If[!DirectoryQ@npfDir,
-      CreateDirectory@npfDir
-   ];
+   If[DirectoryQ@npfDir === False, CreateDirectory@npfDir];
    If[OptionValue@UseCache,
-      nPointFunction = CachedNPointFunction[
-         inFields,outFields,npfDir,
-         {Join[inFields, outFields], OptionValue@KeepProcesses}];
+      nPointFunction = GetCache[inFields, outFields, npfDir, metaInfo];
       If[nPointFunction =!= Null, Return@nPointFunction];
    ];
-   If[!FileExistsQ[faModel <> ".mod"],
-      subKernel = LaunchSubkernelFor@"creation of FeynArts model file";
-      makeModelFile@subKernel;
-      writeNamespaceFile@particleNamespaceFile;
-      CloseKernels@subKernel;
+   If[FileExistsQ[faModel <> ".mod"] === False,
+      {kernel} = LaunchKernels@1;
+      WriteModelFile@kernel;
+      WriteNamespaceFile@particleNamespaceFile;
+      CloseKernels@kernel;
    ];
 
-   subKernel = LaunchSubkernelFor@"FormCalc code generation";
+   {kernel} = LaunchKernels@1;
    SetSharedFunction[subWrite, Print];
    With[{path = $Path,
-         data = {fcDir, faModel, particleNamesFile,
-            particleNamespaceFile,
-            renameFields[inFields, particleNamesFile, "SARAH"->"FeynArts"],
-            renameFields[outFields, particleNamesFile, "SARAH"->"FeynArts"]},
+         data = {fcDir, faModel, particleNamesFile, particleNamespaceFile,
+            ToFeynArtsFields[inFields, particleNamesFile],
+            ToFeynArtsFields[outFields, particleNamesFile]
+         },
          options = {OptionValue@Observable,
             OptionValue@LoopLevel,
             SymbolName/@If[List=!=Head@#, {#}, #]&@OptionValue@KeepProcesses,
             OptionValue@ZeroExternalMomenta,
             OptionValue@OnShellFlag,
-            OptionValue@Regularize},
-         meta = FlexibleSUSY`$flexiblesusyMetaDir},
+            OptionValue@Regularize
+         },
+         meta = FlexibleSUSY`$flexiblesusyMetaDir
+      },
       nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
          $Path = path;
          Get@FileNameJoin@{meta, "NPointFunctions", "internal.m"};
          NPointFunction[data, options],
-         subKernel,
-         DistributedContexts -> None];];
-   CloseKernels@subKernel;
-
+         kernel,
+         DistributedContexts -> None
+      ];
+   ];
+   CloseKernels@kernel;
    UnsetShared[subWrite, Print];
 
-   cache[nPointFunction, npfDir,
-      {Join[inFields, outFields], OptionValue@KeepProcesses}];
-   nPointFunction] /; inputCheck[inFields,outFields,opts];
-NPointFunction::errFields = "
-The field '`1`' must belong to (bar or conj can be applied):
-   `2`.";
-NPointFunction::errOptions = "
-Unknown option(s):
-   `1`.
-Currently supported options are:
-   `2`.";
-NPointFunction::errLoopLevel = "
-Currently loop levels <= 1 are supported.";
-NPointFunction::errRegularize = "
-Unknown regularization scheme `1`.
-Supported schemes:
-   FlexibleSUSY`.`DRbar,
-   FlexibleSUSY`.`MSbar.";
-NPointFunction::errUseCache=
-"UseCache must be either True or False.";
-NPointFunction::errZeroExternalMomenta=
-"ZeroExternalMomenta must be True, False, ExceptLoops, OperatorsOnly.";
-NPointFunction::errOnShellFlag=
-"OnShellFlag must be either True or False.";
+   WriteCache[nPointFunction, npfDir, metaInfo];
+   nPointFunction
+];
 NPointFunction // secure;
 
-subWrite::usage = "
-@brief Prints a string.
-@note ``SetSharedFunction`` does not cause names leaking.";
 subWrite[str_String] := WriteString[$Output, str];
 subWrite // secure;
-
-inputCheck[inFields:{__},outFields:{__},opts___] :=
-Module[{aoq, ip, allowedParticles, options, unknown},
-   aoq = Utils`AssertOrQuit;
-   ip = TreeMasses`IsParticle;
-   (* TODO add |_?TreeMasses`IsVector *)
-   allowedParticles = Cases[
-      TreeMasses`GetParticles[],
-      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion];
-   aoq[ip@#, NPointFunction::errFields, #, allowedParticles] &/@ inFields;
-   aoq[ip@#, NPointFunction::errFields, #, allowedParticles] &/@ outFields;
-   options = Options[NPointFunction][[All,1]];
-   unknown = FilterRules[{opts}, Except@options];
-   aoq[unknown === {}, NPointFunction::errOptions, unknown, options];
-   (*Now we know that all options are iside allowed list.*)
-   Cases[{opts}, Rule[LoopLevel, x_] :>
-      aoq[0<=x<=1, NPointFunction::errLoopLevel]];
-   Cases[{opts}, Rule[Regularize, x_] :>
-      aoq[MemberQ[{FlexibleSUSY`MSbar, FlexibleSUSY`DRbar}, x],
-         NPointFunction::errRegularize, x]];
-   Cases[{opts}, Rule[UseCache, x_] :>
-      aoq[x===True || x===False, NPointFunction::errUseCache]];
-   Cases[{opts}, Rule[ZeroExternalMomenta,x_] :>
-      aoq[MemberQ[{True, False, OperatorsOnly, ExceptLoops}, x],
-         NPointFunction::errZeroExternalMomenta]];
-   Cases[{opts}, Rule[OnShellFlag, x_] :>
-      aoq[x===True || x===False, NPointFunction::errOnShellFlag]];
-   True];
-inputCheck // secure;
 
 VerticesForNPointFunction::usage = "
 @brief Return a list of all vertices needed to calculate a given
@@ -322,120 +289,97 @@ Module[{v, getVertex},
          Flatten[MapThread[getVertex, {v, GetClassFieldRules@obj}],2]]];
 VerticesForNPointFunction // secure;
 
-GetSARAHModelName::usage = "
-@returns The ``SARAH`` model name as to be passed to ``SARAH`Start``.";
-GetSARAHModelName[] :=
-If[SARAH`submodeldir =!= False,
-      SARAH`modelDir <> "-" <> SARAH`submodeldir,
-      SARAH`modelDir];
-GetSARAHModelName // secure;
-
-LaunchSubkernelFor::usage = "
-@brief Tries to launch a subkernel without errors.
-@param message String with a reason to launch a subkernel.
-@returns A subkernels name.";
-LaunchSubkernelFor[message_String] :=
-Module[{kernelName},
-   kernelName = LaunchKernels@1;
-   If[Head@kernelName === List, kernelName[[1]], kernelName]];
-LaunchSubkernelFor // secure;
-
-CacheNameForMeta::usage = "
-@param meta The given meta information.
-@returns The name of the cache file for given meta information.";
-CacheNameForMeta[meta:{__}] :=
-   Utils`StringJoinWithSeparator[Flatten@meta, "", SymbolName]<>".m";
+CacheNameForMeta[meta:{__}] := Utils`StringJoinWithSeparator[Flatten@meta, "", SymbolName]<>".m";
 CacheNameForMeta // secure;
 
-cache::usage = "
-@brief Writes a given n-point function to the cache.
-@param new The given n-point function.
-@param dir The directory to save cache.
-@param meta The meta information about the given n-point function.";
-cache[new_, dir_, meta:{__}] :=
-Module[{path, file, npfs, position},
+WriteCache[new_, dir_, meta:{__}] :=
+Module[{path, file, npfs, iosition},
    path = FileNameJoin@{dir, CacheNameForMeta@meta};
    If[FileExistsQ@path,
       npfs = Get@path;,
-      npfs = {};];
+      npfs = {};
+   ];
    position = Position[npfs[[All,1]], new[[1]]];
    If[Length@position === 1,
       npfs[[position[[1]]]] = new;,
-      AppendTo[npfs, new];];
+      AppendTo[npfs, new];
+   ];
    file = OpenWrite@path;
    Write[file, npfs];
-   Close@file;];
-cache // secure;
+   Close@file;
+];
+WriteCache // secure;
 
-CachedNPointFunction::usage = "
-@brief Retrieve an n-point correlation function from the cache.
-@param inFields the incoming fields of the n-point correlation function.
-@param outFields the outgoing fields of the n-point correlation function.
-@param cacheDir the directory to save cache.
-@param nPointMeta the meta information of the n-point correlation function.
-@returns The n-point function from cache or ``Null`` if the function is missing.";
-CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta:{__}] :=
+GetCache[inFields_, outFields_, cacheDir_, nPointMeta:{__}] :=
 Module[{nPointFunctionsFile, nPointFunctions, position},
-   nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta};
-   If[!FileExistsQ@nPointFunctionsFile,Return@Null];
+   nPointFunctionsFile = FileNameJoin@{cacheDir, CacheNameForMeta@nPointMeta};
+   If[FileExistsQ@nPointFunctionsFile === False,
+      Return@Null
+   ];
    nPointFunctions = Get@nPointFunctionsFile;
-   position = Position[Vertices`StripFieldIndices[ nPointFunctions[[All,1]] ],
-      {inFields, outFields}];
-   If[Length@position == 1,nPointFunctions[[ position[[1,1]] ]],Null]];
-CachedNPointFunction // secure;
+   position = Position[
+      Vertices`StripFieldIndices@nPointFunctions[[All,1]],
+      {inFields, outFields}
+   ];
+   If[Length@position == 1, nPointFunctions[[position[[1,1]]]], Null]
+];
+GetCache // secure;
 
-makeModelFile::usage = "
-@brief Generate the ``FeynArts`` model file on a given subkernel.";
-makeModelFile[kernel:_Parallel`Kernels`kernel|_KernelObject] :=
+WriteModelFile[kernel_] :=
 With[{currentPath = $Path,
       currentDir = Directory[],
-      fsMetaDir = FlexibleSUSY`$flexiblesusyMetaDir,
+      metaDir = FlexibleSUSY`$flexiblesusyMetaDir,
       sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
       sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
-      SARAHModelName = GetSARAHModelName[],
-      eigenstates = FlexibleSUSY`FSEigenstates},
+      SARAHModelName = If[SARAH`submodeldir =!= False,
+         SARAH`modelDir <> "-" <> SARAH`submodeldir,
+         SARAH`modelDir
+      ],
+      eigenstates = FlexibleSUSY`FSEigenstates
+   },
    Print["Generating FeynArts model file ..."];
    SetSharedFunction[Print];
    ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDir;
-      Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "MakeModelFile.m"};
-      NPointFunctions`MakeModelFile[sarahInputDirs,sarahOutputDir,
-         SARAHModelName, eigenstates];,
-      kernel, DistributedContexts -> None];
+      Get@FileNameJoin@{metaDir, "NPointFunctions", "MakeModelFile.m"};
+      NPointFunctions`MakeModelFile[sarahInputDirs,sarahOutputDir, SARAHModelName, eigenstates];,
+      kernel,
+      DistributedContexts -> None
+   ];
    UnsetShared[Print];
-   Print["Generating FeynArts model file ... done"];];
-makeModelFile // secure;
+   Print["Generating FeynArts model file ... done"];
+];
+WriteModelFile // secure;
 
-writeNamespaceFile::usage = "
-@brief Write a file containing all field names and the contexts in which they
-       live in ``Mathematica``.
-@note This is necessary because ``SARAH`` puts fields into different
-      contexts.";
-writeNamespaceFile[fileName_String] :=
+WriteNamespaceFile[fileName_String] :=
 Module[{fileHandle = OpenWrite@fileName},
-   Write[fileHandle, {ToString@#, Context@#} & /@ TreeMasses`GetParticles[]];
-   Close@fileHandle;];
-writeNamespaceFile // secure;
+   Write[fileHandle, {ToString@#, Context@#}&/@ TreeMasses`GetParticles[]];
+   Close@fileHandle;
+];
+WriteNamespaceFile // secure;
 
-renameFields[fields_, particles_String, "SARAH" -> "FeynArts"] :=
-   Module[{unique, faNames},
-      unique = DeleteDuplicates[
-         CXXDiagrams`RemoveLorentzConjugation[#]&/@ fields];
-      faNames = Flatten[
-         StringCases[Utils`ReadLinesInFile@particles,
-            ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :>
-               "FeynArts`" <> x <> "]"]&/@ unique];
-      fields /. MapThread[Rule, {unique, faNames}] /.
-         {  SARAH`bar@field_String :> "-" <> field,
-            Susyno`LieGroups`conj@field_String :> "-" <> field}];
-renameFields // secure;
+ToFeynArtsFields[fields_, namesFile_String] :=
+Module[{unique, faNames},
+   unique = DeleteDuplicates[CXXDiagrams`RemoveLorentzConjugation/@fields];
+   faNames = Flatten[
+      StringCases[Utils`ReadLinesInFile@namesFile,
+         SymbolName@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :> "FeynArts`" <> x <> "]"
+      ]&/@ unique
+   ];
+   fields /. MapThread[Rule, {unique, faNames}] /.
+      {
+         SARAH`bar@field_String :> "-" <> field,
+         Susyno`LieGroups`conj@field_String :> "-" <> field
+      }
+];
+ToFeynArtsFields // secure;
 
 RemoveEmptyGenSums::usage = "
 @brief Somehing went wrong in a subkernel. Most likely, it is dead.
 @param npfObject n-point function object to clean.
 @returns Cleaned from empty GenericSums npfObject.";
-RemoveEmptyGenSums[npfObject_?IsNPointFunction]:=npfObject;
+RemoveEmptyGenSums[npf_?IsNPointFunction] := npf;
 RemoveEmptyGenSums[
    {  fields:{{__},{__}},
       {  {  sums:{GenericSum[_,{___}]..},
@@ -446,7 +390,8 @@ RemoveEmptyGenSums[
 Module[{poss=Position[sums,GenericSum[{0},{}]]},
    Print["Removing zero GenericSum at positions ",
       Utils`StringJoinWithSeparator[Flatten@poss,", "],"."];
-   {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}];
+   {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}
+];
 RemoveEmptyGenSums // secure;
 
 CreateCXXHeaders::usage = "
