@@ -498,7 +498,7 @@ Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
          "@KeyStructsInitialization@" -> InitializeKeyStructs@genFields,
          "@GenericSums@" -> CXXGenericSum[npf, genSumNames],
          "@Arguments@" -> GetCXXArguments@npf,
-         "@CalculateFunction@" -> `cxx`calculateFunction@genSumNames
+         "@CalculateFunction@" -> CXXCalculateFunction@genSumNames
       }
    ]
 ];
@@ -699,9 +699,9 @@ TextFormatting`ReplaceCXXTokens["
       "@SummationOverGenericFields@" -> CXXSumOverGeneric[GetSumParticles@sum, GetSumExpression@sum],
       "@ReturnOutputVars@" -> ToString[First/@GetBasis[]],
       "@GenericKeys@" -> CXXGenericKey@GetGenericFields@sum,
-      "@ClassInsertions@" -> `cxx`insertFields@genericInsertions,
-      "@CombinatoricalFactors@" -> `cxx`insertFactors@combinatorialFactors,
-      "@ColorFactors@" -> `cxx`insertColors@colorFactors,
+      "@ClassInsertions@" -> CXXInsertFields@genericInsertions,
+      "@CombinatoricalFactors@" -> CXXInsertFactors@combinatorialFactors,
+      "@ColorFactors@" -> CXXInsertColors@colorFactors,
       "@WilsonBasisLength@" -> GetLength@GetBasis[]
    }
 ];
@@ -734,7 +734,7 @@ Module[{modifiedExpr = expr,
    {couplingDefine, codeCoupling, couplingRules} = NameCouplings@couplings;
 
    modifiedExpr = modifiedExpr /. couplingRules;
-   {loopRules, loopArrayDefine, loopArraySet, modifiedExpr} = createLoopFunctions@modifiedExpr;
+   {loopRules, loopArrayDefine, loopArraySet, modifiedExpr} = CreateLoopFunctions@modifiedExpr;
 
    cxxExpr = ApplyCXXRules/@modifiedExpr;
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@GetBasis[], cxxExpr}];
@@ -758,39 +758,29 @@ Module[{modifiedExpr = expr,
 
       @EndSum@",
       {
-         "@fieldAliases@"->`cxx`setFieldAliases@couplings,
-         "@defineMasses@"->massDefine,
-         "@defineCouplings@"->couplingDefine,
-         "@defineLoopFunctions@"->loopArrayDefine,
-         "@BeginSum@"->`cxx`beginSum@summation,
-         "@setMasses@"->codeMass,
-         "@setCouplings@"->codeCoupling,
-         "@skipZeroAmplitude@"->`cxx`skipZeroAmplitude[
-            modifiedExpr,loopRules,massRules],
-         "@setLoopFunctions@"->loopArraySet,
-         "@ChangeOutputValues@"->Utils`StringJoinWithSeparator[updatingVars,"\n"],
-         "@EndSum@"->`cxx`endSum@GetGenericFields@summation
+         "@fieldAliases@" -> CXXSetFieldAliases@couplings,
+         "@defineMasses@" -> massDefine,
+         "@defineCouplings@" -> couplingDefine,
+         "@defineLoopFunctions@" -> loopArrayDefine,
+         "@BeginSum@" -> CXXGenericSumBegin@summation,
+         "@setMasses@" -> codeMass,
+         "@setCouplings@" -> codeCoupling,
+         "@skipZeroAmplitude@" -> CXXSkipZeroAmplitude[modifiedExpr, loopRules, massRules],
+         "@setLoopFunctions@" -> loopArraySet,
+         "@ChangeOutputValues@" -> Utils`StringJoinWithSeparator[updatingVars,"\n"],
+         "@EndSum@" -> CXXGenericSumEnd@GetGenericFields@summation
       }
    ]
 ];
 CXXSumOverGeneric::errUnimplementedLoops = "Loop functions `1` are not supported.";
 CXXSumOverGeneric // secure;
 
-Module[{func},
-
-func = If[#1 =!= #2, "using " <> #1 <> " = " <> #2 <> ";\n", ""]&;
-
-`cxx`setFieldAliases::usage = "
-@brief C++ names for fields with bar and conj are cumbersome. In order to
-       improve readaability and simplify checks some aliases are generated.
-@param couplings A list of tuples with couplings.
-@returns A string with C++ code of alias definitions.";
-`cxx`setFieldAliases[couplings:{SARAH`Cp[__][___]..}] :=
-Module[{l = Sort@DeleteDuplicates[(Sequence@@Head@#&)/@couplings]},
-   StringJoin@MapThread[func, {CXXShortFieldName/@l, CXXFullFieldName/@l}]];
-`cxx`setFieldAliases // secure;
-
+CXXSetFieldAliases[couplings:{SARAH`Cp[__][___]..}] :=
+Module[{l = Sort@DeleteDuplicates[(Sequence@@Head@#&)/@couplings], func},
+   func = If[#1 =!= #2, "using " <> #1 <> " = " <> #2 <> ";\n", ""]&;
+   StringJoin@MapThread[func, {CXXShortFieldName/@l, CXXFullFieldName/@l}]
 ];
+CXXSetFieldAliases // secure;
 
 Module[{c, name},
 c[f_] := Switch[Head@f, SARAH`bar|Susyno`LieGroups`conj, "_"<>#, _, #]&;
@@ -803,7 +793,7 @@ CXXShortFieldName[f_?IsGenericParticle] :=
 CXXShortFieldName // secure;
 ];
 
-createLoopFunctions[modifiedExpr:{__}] :=
+CreateLoopFunctions[modifiedExpr:{__}] :=
 Module[{onePoint,
       onePointTemplate =
          {  LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
@@ -838,75 +828,90 @@ Module[{onePoint,
       append,
       loopRules = {},
       loopArrayDefine = {},
-      loopArraySet = {}},
+      loopArraySet = {}
+   },
    append[loopFunctions_List,function_,functionName_String,arrayName_String] :=
    If[loopFunctions=!={},
-      AppendTo[loopArrayDefine,Array[
-         "looplibrary::"<>functionName<>"coeff_t "<>arrayName<>ToString@#<>"{}"&,
-         Length@loopFunctions]];
-      AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString[
-            StringJoin["Loop_library::get().",functionName][
-               arrayName<>ToString@#,
-               Sequence@@loopFunctions[[#,1]],
-               "Sqr(context.scale())"]]<>"; // "<>
+      AppendTo[
+         loopArrayDefine,
+         Array[
+            "looplibrary::"<>functionName<>"coeff_t "<>arrayName<>ToString@#<>"{}"&,
+            Length@loopFunctions
+         ]
+      ];
+      AppendTo[
+         loopArraySet,
+         Array[
+            Parameters`ExpressionToString[
+               StringJoin["Loop_library::get().",functionName][
+                  arrayName<>ToString@#,
+                  Sequence@@loopFunctions[[#,1]],
+                  "Sqr(context.scale())"]]<>"; // "<>
             ToString@loopFunctions[[#,2]]<>" copies."&,
-         Length@loopFunctions]];
-      AppendTo[loopRules,
-         Join@@function@@@Array[{ToString@#,loopFunctions[[#,1]]}&,
-         Length@loopFunctions]];];
+            Length@loopFunctions
+         ]
+      ];
+      AppendTo[
+         loopRules,
+         Join@@function@@@Array[{ToString@#,loopFunctions[[#,1]]}&, Length@loopFunctions]
+      ];
+   ];
    onePoint = Tally@Join[
-      Cases[modifiedExpr,LoopTools`A0i[_,args:__]:>{args},Infinity],
-      Cases[modifiedExpr,LoopTools`A0[args:__]:>{args},Infinity]];
+      Cases[modifiedExpr, LoopTools`A0i[_,args:__]:>{args}, Infinity],
+      Cases[modifiedExpr, LoopTools`A0[args:__]:>{args}, Infinity]
+   ];
    twoPoint = Tally@Join[
-      Cases[modifiedExpr,LoopTools`B0i[_,args:__]:>{args},Infinity],
-      Cases[modifiedExpr,(LoopTools`B0|LoopTools`B0)[args:__]:>{args},
-         Infinity]];
+      Cases[modifiedExpr, LoopTools`B0i[_,args:__]:>{args}, Infinity],
+      Cases[modifiedExpr, LoopTools`B0[args:__]:>{args}, Infinity]
+   ];
    threePoint = Tally@Join[
-      Cases[modifiedExpr,LoopTools`C0i[_,args:__]:>{args},Infinity],
-      Cases[modifiedExpr,(LoopTools`C0)[args:__]:>{args},Infinity]];
+      Cases[modifiedExpr, LoopTools`C0i[_,args:__]:>{args}, Infinity],
+      Cases[modifiedExpr, LoopTools`C0[args:__]:>{args}, Infinity]
+   ];
    fourPoint = Tally@Join[
-      Cases[modifiedExpr,LoopTools`D0i[_,args:__]:>{args},Infinity],
-      Cases[modifiedExpr,(LoopTools`D0)[args:__]:>{args},Infinity]];
+      Cases[modifiedExpr, LoopTools`D0i[_,args:__]:>{args}, Infinity],
+      Cases[modifiedExpr, LoopTools`D0[args:__]:>{args}, Infinity]
+   ];
    append[onePoint,onePointTemplate,"A","a"];
    append[twoPoint,twoPointTemplate,"B","b"];
    append[threePoint,threePointTemplate,"C","c"];
    append[fourPoint,fourPointTemplate,"D","d"];
-   {  Flatten@loopRules,
+   {
+      Flatten@loopRules,
       Utils`StringJoinWithSeparator[Join@@loopArrayDefine,";\n"]<>";\n",
       Utils`StringJoinWithReplacement[Join@@loopArraySet,"\n","\""->""],
-      modifiedExpr/.Flatten@loopRules}];
-createLoopFunctions // secure;
+      modifiedExpr/.Flatten@loopRules
+   }
+];
+CreateLoopFunctions // secure;
 
-`cxx`skipZeroAmplitude::usage = "
-@brief If some combination of couplings in the amplitude is zero, then the full
-       amplitude is zero as well, so that we can skip it.
-@note How this is implemented? Any amplitude has the following form: several
-      couplings times some masses times loop integral. We can get all different
-      combinations of this coupling coefficients and if all of them are zero,
-      then amplitude is zero as well.";
-`cxx`skipZeroAmplitude[
+CXXSkipZeroAmplitude[
    modifiedExpr:{__},
    loopRules:{Rule[_,_]...},
-   massRules:{Rule[_,_]..}] :=
+   massRules:{Rule[_,_]..}
+] :=
 Module[{massesToOne = Rule[#,1] & /@ massRules[[All,2]],
       loopsToOne = {},
-      result, func = "z[" <> # <> "]"&},
+      result, func = "z[" <> # <> "]"&
+   },
    If[0 < Length@loopRules,
       loopsToOne = Rule[#,1] & /@ loopRules[[All,2]]
    ];
    result = RemoveNumbers[ExpandAll[modifiedExpr]] /.Plus->List/.
       massesToOne/.loopsToOne;
    result = DeleteDuplicates[Flatten@DeleteCases[result,1]];
-   If[ 2 === LeafCount@result,
+   If[2 === LeafCount@result,
       result = func@@result,
-      result = Plus@@(result/.HoldPattern[Times[x__]]:>Times@@(func@#&/@{x}))];
+      result = Plus@@(result/.HoldPattern[Times[x__]]:>Times@@(func@#&/@{x}))
+   ];
    result = "if( "<>
       StringReplace[Parameters`ExpressionToString@result,"\""->""]<>
       " == 0 ) continue;";
    StringReplace[result,
-      RegularExpression["g(\\d+)"]:> ToString[ToExpression@"$1"-1]]];
-`cxx`skipZeroAmplitude // secure;
+      RegularExpression["g(\\d+)"]:> ToString[ToExpression@"$1"-1]
+   ]
+];
+CXXSkipZeroAmplitude // secure;
 
 CXXMassAbbreviation[SARAH`Mass[obj_?IsGenericParticle]] :=
 Switch[GetParticleName@obj,
@@ -964,19 +969,15 @@ Utils`StringJoinWithSeparator[
 ];
 CXXGenericAbbreviations // secure;
 
-`cxx`beginSum::usage = "
-@brief Generates C++ code for sum beginning used inside GenericSum.
-@param summation List of generic index restriction rules pares, which,
-       if are true should lead to a skip of summation.
-@returns String C++ code for sum beginning used inside generic sums.";
-`cxx`beginSum[summation_?IsSummation]:=
+CXXGenericSumBegin[summation_?IsSummation]:=
 Module[{beginsOfFor},
    beginsOfFor = "for( const auto &"<>CXXIndex[#[[1]]]<>" : "<>
       "index_range<"<> CXXFullFieldName[#[[1]]]<>">() ) {\n"<>
       "at_key<"<>CXXGenericKey@#[[1]]<>">( index_map ) = "<>
       CXXIndex[#[[1]]]<>";"<>parseRestrictionRule[#] &/@summation;
-   Utils`StringJoinWithSeparator[beginsOfFor,"\n"]];
-`cxx`beginSum // secure;
+   Utils`StringJoinWithSeparator[beginsOfFor, "\n"]
+];
+CXXGenericSumBegin // secure;
 
 parseRestrictionRule[{genericField_?IsGenericParticle,rule_}] :=
 Module[{f1,f2,GetIndexOfExternalField,OrTwoDifferent},
@@ -1001,33 +1002,23 @@ Module[{f1,f2,GetIndexOfExternalField,OrTwoDifferent},
          "@todo This rule is not implemented yet!";Quit[1]]];
 parseRestrictionRule // secure;
 
-`cxx`endSum::usage = "
-@brief Generates C++ code for end of sum over generic fields inside
-       GenericSum.
-@param genFields List of generic fields.
-@returns String C++ code for end of sum over generic fields inside
-         GenericSum.";
-`cxx`endSum[genFields:{__?IsGenericParticle}] :=
-   StringJoin[
-      Array["}"&,Length@genFields],
-      " // End of summation over generic fields"];
-`cxx`endSum // secure;
+CXXGenericSumEnd[genFields:{__?IsGenericParticle}] :=
+StringJoin[
+   Array["}"&,Length@genFields],
+   " // End of summation over generic fields"
+];
+CXXGenericSumEnd // secure;
 
-`cxx`calculateFunction::usage = "
-@brief Generates C++ code for functions which return result of generic sum
-       calculation.
-@param genSumNames list of strings with names of generic sums.
-@returns Generates C++ code for functions which return result of
-         generic sum calculation.";
-`cxx`calculateFunction[genSumNames:{__String}] :=
+CXXCalculateFunction[genSumNames:{__String}] :=
 Module[{
       varName = "genericsum" (* Feel free to change me to another C++ name *),
       varNames,initVars,sumOfSums},
    varNames = Array[varName<>ToString@#&,Length@genSumNames];
    initVars = Utils`StringJoinWithSeparator[
-      MapThread["const auto "<>#1<>" = "<>#2<>"();"&,{varNames,genSumNames}],
-      "\n"];
-   sumOfSums = Utils`StringJoinWithSeparator[#<>"[i]"&/@varNames,"+"];
+      MapThread["const auto "<>#1<>" = "<>#2<>"();"&, {varNames, genSumNames}],
+      "\n"
+   ];
+   sumOfSums = Utils`StringJoinWithSeparator[#<>"[i]"&/@varNames, "+"];
    TextFormatting`ReplaceCXXTokens["
       std::array<std::complex<double>,@BasisLength@> calculate( void ) {
          std::array<std::complex<double>,@BasisLength@> genericSummation;
@@ -1039,48 +1030,49 @@ Module[{
          }
          return genericSummation;
       } // End of calculate()",
-      {  "@BasisLength@"->GetLength@GetBasis[],
+      {
+         "@BasisLength@"->GetLength@GetBasis[],
          "@InitializeVariablesWhichStoreGenericSumsOutput@"->initVars,
-         "@SumOfVariables@"->sumOfSums}]];
-`cxx`calculateFunction // secure;
+         "@SumOfVariables@"->sumOfSums
+      }
+   ]
+];
+CXXCalculateFunction // secure;
 
-`cxx`insertFields::usage = "
-@brief Generates C++ code for class insertions inside GenericSum.
-@param genInsertions list of list with SARAH particle names.
-@returns String C++ code for class insertions inside GenericSum.";
-`cxx`insertFields[genInsertions_?IsClassFields] :=
-   Utils`StringJoinWithSeparator["boost::mpl::vector<"<>
-      Utils`StringJoinWithSeparator[CXXFullFieldName@#&/@#,", "]<>
-      ">"&/@genInsertions,",\n"];
-`cxx`insertFields // secure;
+CXXInsertFields[genInsertions_?IsClassFields] :=
+Utils`StringJoinWithSeparator["boost::mpl::vector<"<>
+   Utils`StringJoinWithSeparator[CXXFullFieldName@#&/@#, ", "]<>
+   ">"&/@genInsertions,
+   ",\n"
+];
+CXXInsertFields // secure;
 
-`cxx`insertFactors::usage = "
-@brief Generates C++ code for combinatorical factor insertions inside GenericSum.
-@param combinatorialFactors List of integers.
-@returns String C++ code for combinatorical factor insertions inside GenericSum.";
-`cxx`insertFactors[combinatorialFactors_?IsCombinatoricalFactors] :=
-   Utils`StringJoinWithSeparator["boost::mpl::int_<"<>ToString@#<>
-      ">"&/@combinatorialFactors,",\n"];
-`cxx`insertFactors // secure;
+CXXInsertFactors[combinatorialFactors_?IsCombinatoricalFactors] :=
+Utils`StringJoinWithSeparator["boost::mpl::int_<"<>ToString@#<>
+   ">"&/@combinatorialFactors,
+   ",\n"
+];
+CXXInsertFactors // secure;
 
-`cxx`insertColors::usage = "
-@brief Generates C++ code for color factor insertions inside GenericSum.
-@param colorFactors list of numbers.
-@returns String C++ code for color factor insertions inside GenericSum.";
-`cxx`insertColors[colorFactors:{__?NumberQ}] :=
+CXXInsertColors[colorFactors:{__?NumberQ}] :=
 Module[{
-      ReRatioColorFactors = {Numerator@#,Denominator@#} &/@ Re@colorFactors,
-      ImRatioColorFactors = {Numerator@#,Denominator@#} &/@ Im@colorFactors},
+      ReRatioColorFactors = {Numerator@#, Denominator@#} &/@ Re@colorFactors,
+      ImRatioColorFactors = {Numerator@#, Denominator@#} &/@ Im@colorFactors
+   },
    Utils`StringJoinWithSeparator[
       StringReplace[
          MapThread[
             "detail::complex_helper<"<>
             "detail::ratio_helper<"<>ToString@#1<>">,"<>
             "detail::ratio_helper<"<>ToString@#2 <> ">>"&,
-            {ReRatioColorFactors, ImRatioColorFactors}],
-         {"{" -> "", "}" -> ""}],
-   ",\n"]];
-`cxx`insertColors // secure;
+            {ReRatioColorFactors, ImRatioColorFactors}
+         ],
+         {"{" -> "", "}" -> ""}
+      ],
+   ",\n"
+   ]
+];
+CXXInsertColors // secure;
 
 End[];
 EndPackage[];
