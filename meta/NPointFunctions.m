@@ -112,8 +112,10 @@ GetSubexpressions // secure;
 GetGenericSums[obj_?IsNPointFunction] := obj[[2, 1, 1]];
 GetGenericSums // secure;
 
-GetParticleName[particle_?IsParticle] := particle /. {_@n_@_List :> n, n_@_List :> n, _@n_ :> n};
-GetParticleName[particle_?IsGenericParticle] := particle /. {_@n_@_@_ :> n, n_@_ :> n};
+GetParticleName[particle_?IsParticle] :=
+   CXXDiagrams`RemoveLorentzConjugation[particle] /. {_@n_@_List :> n, n_@_List :> n, _@n_ :> n};
+GetParticleName[particle_?IsGenericParticle] :=
+   CXXDiagrams`RemoveLorentzConjugation[particle] /. {n_@_ :> n};
 GetParticleName // secure;
 
 GetGenericFields[obj_?IsSummation] := First/@obj;
@@ -353,24 +355,24 @@ Module[{pos = Position[sums, GenericSum[{0}, {}]]},
 ];
 DeleteZeroGenericSum // secure;
 
-conj[obj_?IsGenericParticle] :=
+LorentzConjugation[obj_?IsGenericParticle] :=
 Switch[Head@obj,
-   SARAH`bar | Susyno`LieGroups`conj, First@obj,
+   SARAH`bar | Susyno`LieGroups`conj, CXXDiagrams`RemoveLorentzConjugation@obj,
    GenericS | GenericV,               Susyno`LieGroups`conj@obj,
    GenericF | GenericU,               SARAH`bar@obj
 ];
-conj[obj_?TreeMasses`IsScalar|_?TreeMasses`IsVector] := Susyno`LieGroups`conj@obj;
-conj[obj_?TreeMasses`IsFermion] := SARAH`bar@obj;
-conj // secure;
+LorentzConjugation[obj_?TreeMasses`IsScalar|_?TreeMasses`IsVector] := Susyno`LieGroups`conj@obj;
+LorentzConjugation[obj_?TreeMasses`IsFermion] := SARAH`bar@obj;
+LorentzConjugation // secure;
 
 CXXIndex[obj_?IsGenericParticle] :=
-   "i"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ conj@obj;
+   "i"<>StringTake[SymbolName[obj[[0]]], -1]<>ToString[obj[[1, 1]]] &@ LorentzConjugation@obj;
 CXXIndex[obj:_?IsParticle] :=
 Module[{nakedField},
-   nakedField = obj /. {SARAH`bar->Identity, Susyno`LieGroups`conj->Identity};
+   nakedField = CXXDiagrams`RemoveLorentzConjugation@obj;
    Switch[nakedField,
    _Symbol,              "",
-   (_Symbol)[{_Symbol}], StringDrop[ToString[nakedField[[1, 1]]],2]]
+   (_Symbol)[{_Symbol}], StringDrop[ToString[nakedField[[1, 1]]], 2]]
 ];
 CXXIndex // secure;
 
@@ -493,8 +495,8 @@ Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
       {
          "@ClassName@" -> GetHelperClassName[],
          "@Context@" -> "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">",
-         "@KeyStructsInitialization@" -> `cxx`initializeKeyStructs@genFields,
-         "@GenericSums@" -> `cxx`genericSum[npf, genSumNames],
+         "@KeyStructsInitialization@" -> InitializeKeyStructs@genFields,
+         "@GenericSums@" -> CXXGenericSum[npf, genSumNames],
          "@Arguments@" -> GetCXXArguments@npf,
          "@CalculateFunction@" -> `cxx`calculateFunction@genSumNames
       }
@@ -502,175 +504,150 @@ Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
 ];
 CreateClassBody // secure;
 
-`cxx`initializeKeyStructs::usage = "
-@brief Generates required C++ code for key structs initialization.
-@param fields List of generic fields.
-@returns C++ code for subexpression if generic fields present there.";
-`cxx`initializeKeyStructs[fields:{__?IsGenericParticle}]:=
-   Utils`StringJoinWithSeparator[
-      "struct "<>#<>" {};"&/@`cxx`genericFieldKey/@fields,
-      "\n"];
-`cxx`initializeKeyStructs // secure;
+InitializeKeyStructs[fields:{__?IsGenericParticle}]:=
+Utils`StringJoinWithSeparator[
+   "struct "<>#<>" {};" &/@ CXXGenericKey/@fields,
+   "\n"
+];
+InitializeKeyStructs // secure;
 
 Module[{rules = {{}}},
 SetCXXRules[extIdx:{___Symbol}, genericFields:{__?IsGenericParticle}] :=
-Module[{externalIndexRules, wrap, index, genericRules, massRules, couplingRules},
+Module[{externalIndexRules, short, index, genericRules, massRules, couplingRules},
    externalIndexRules = MapIndexed[#1 -> "i"<>ToString@@#2&, extIdx];
    genericRules = Flatten[
-      {conj@# -> CXXFullFieldName[conj@#][CXXIndex@#], # -> CXXFullFieldName[#][CXXIndex@#]}&/@
-      genericFields
+      {
+         LorentzConjugation@# -> CXXFullFieldName[LorentzConjugation@#][CXXIndex@#],
+         # -> CXXFullFieldName[#][CXXIndex@#]
+      } &/@ genericFields
    ];
-   wrap[fields__] := Utils`StringJoinWithSeparator[CXXShortFieldName/@{fields},", "];
-   index[fields__] := Utils`StringJoinWithSeparator[`cxx`fieldIndices/@{fields},", "];
 
+   short[fields__] := Utils`StringJoinWithSeparator[CXXShortFieldName/@{fields}, ", "];
+   index[fields__] := Utils`StringJoinWithSeparator[CXXFieldIndices/@{fields}, ", "];
    couplingRules =
    {
-      SARAH`Cp[fields__][1] :>
-         ("NPF_S(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
-      SARAH`Cp[fields__][SARAH`PL] :>
-         ("NPF_L(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
-      SARAH`Cp[fields__][SARAH`PR] :>
-         ("NPF_R(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
-      (* On C++ level this vertex is such, that _D should have 0 and 1.
-       * The first position corresponds to the momenta with + sign.
-       * The second position corresponds to the momenta with - sign.
-       * Example: Cp[S1, S2, V][Mom@S1 - Mom@S2] leads to
-       *          NPF_MD(S1, S2, V) NPF_D(0, 1) <indices>
-       * Example: Cp[S1, S2, V][Mom@S2 - Mom@S1] leads to
-       *          NPF_MD(S1, S2, V) NPF_D(1, 0) <indices>*)
-      SARAH`Cp[fields__][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
-      StringReplace["NPF_MD(`1`) NPF_D(`2`, `3`) NPF_I(`4`)",
-         {  "`1`"->ToString@wrap@fields,
-            "`2`"->ToString[First@@Position[{fields},f1,{1}]-1],
-            "`3`"->ToString[First@@Position[{fields},f2,{1}]-1],
-            "`4`"->ToString@index@fields}],
-      SARAH`Cp[fields__][SARAH`g[_, _]] :>
-         ("NPF_G(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
-      SARAH`Cp[fields__][(SARAH`Mom[f2_, _]-SARAH`Mom[f1_, _])*SARAH`g[_,_],
+      SARAH`Cp[fields__][1] :>                                 StringJoin["NPF_S(", short@fields, ") NPF_I(", index@fields, ")"],
+      SARAH`Cp[fields__][SARAH`PL] :>                          StringJoin["NPF_L(", short@fields, ") NPF_I(", index@fields, ")"],
+      SARAH`Cp[fields__][SARAH`PR] :>                          StringJoin["NPF_R(", short@fields, ") NPF_I(", index@fields, ")"],
+      SARAH`Cp[s1_, s2_, v_][SARAH`Mom@s1_-SARAH`Mom@s2_] :>   StringJoin["NPF_SSV(", short[s1, s2, v], ") NPF_D(0, 1) NPF_I(", index[s1, s2, v], ")"],
+      SARAH`Cp[s1_, s2_, v_][SARAH`Mom@s2_-SARAH`Mom@s1_] :>   StringJoin["NPF_SSV(", short[s1, s2, v], ") NPF_D(1, 0) NPF_I(", index[s1, s2, v], ")"],
+      SARAH`Cp[fields__][SARAH`g[_,_]] :>                      StringJoin["NPF_G(", short@fields, ") NPF_I(", index@fields, ")"],
+      SARAH`Cp[fields__][
+         (SARAH`Mom[f2_,_]-SARAH`Mom[f1_,_])*SARAH`g[_,_],
          (SARAH`Mom[f1_,_]-SARAH`Mom[f3_,_])*SARAH`g[_,_],
-         (SARAH`Mom[f3_,_]-SARAH`Mom[f2_,_])*SARAH`g[_,_]] :>
-         ("NPF_T(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")")
+         (SARAH`Mom[f3_,_]-SARAH`Mom[f2_,_])*SARAH`g[_,_]] :>  StringJoin["NPF_T(", short@fields, ") NPF_I(", index@fields, ")"]
    };
 
-   massRules = {SARAH`Mass[f_] :>
-      StringJoin["context.mass<",CXXShortFieldName@f,">(",
-         `cxx`fieldIndices@f,")"]};
+   massRules =
+   {
+      SARAH`Mass[f_] :> StringJoin["context.mass<", CXXShortFieldName@f, ">(", CXXFieldIndices@f, ")"]
+   };
 
-   rules = {externalIndexRules, massRules, couplingRules, genericRules};];
+   rules = {externalIndexRules, massRules, couplingRules, genericRules};
+];
 SetCXXRules // secure;
 
-`cxx`applyRules[obj_] :=
+ApplyCXXRules[obj_] :=
 StringReplace[
    Parameters`ExpressionToString[Fold[ReplaceAll, obj, rules]],
-   "\"" -> ""];
-`cxx`applyRules // secure;
+   "\"" -> ""
+   ];
 ];
 
-Module[{strip, sandwich, n},
-strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
+Module[{sandwich, n},
 
 sandwich[f_] = Switch[Head@f,
    SARAH`bar, "typename cxx_diagrams::bar<" <> # <> ">::type",
    Susyno`LieGroups`conj, "typename cxx_diagrams::conj<" <> # <> ">::type",
    _, #]&;
 
-CXXFullFieldName[f_?IsParticle] :=
-(  n = strip@f;
-   sandwich[f]["fields::" <> ToString@Switch[n, _Symbol, n, _, Head@n]]);
+CXXFullFieldName[f_?IsParticle] := (
+   n = CXXDiagrams`RemoveLorentzConjugation@f;
+   sandwich[f]["fields::" <> ToString@Switch[n, _Symbol, n, _, Head@n]]
+);
 
-CXXFullFieldName[f_?IsGenericParticle] :=
-(  n = strip@f;
-   sandwich[f]["g"<>StringTake[ToString@Head@n, -1] <> ToString@Part[n, 1, 1]]);
+CXXFullFieldName[f_?IsGenericParticle] := (
+   n = CXXDiagrams`RemoveLorentzConjugation@f;
+   sandwich[f]["g"<>StringTake[ToString@Head@n, -1] <> ToString@GetIndex@n]
+);
 
 CXXFullFieldName // secure;
 ];
 
-`cxx`fieldIndices::usage = "
-@brief Return the C++ expression for the given field.
-@param field The given field.
-@returns The C++ expression for the given field.
-@note Saves its previous calls to improve the speed.";
-`cxx`fieldIndices[SARAH`bar[field_]] := `cxx`fieldIndices[SARAH`bar[field]] =
-   `cxx`fieldIndices@field;
-`cxx`fieldIndices[Susyno`LieGroups`conj[field_]] :=
-   `cxx`fieldIndices[Susyno`LieGroups`conj[field]] =
-      `cxx`fieldIndices@field;
-`cxx`fieldIndices[head_[GenericIndex[index_Integer]]] :=
-   `cxx`fieldIndices[head[GenericIndex[index]]] =
-      "i"<>StringTake[SymbolName@head,-1]<>ToString@index;
-`cxx`fieldIndices[field_] := `cxx`fieldIndices[field] =
+CXXFieldIndices[SARAH`bar[field_]] :=
+   CXXFieldIndices[SARAH`bar[field]] =
+      CXXFieldIndices@field;
+
+CXXFieldIndices[Susyno`LieGroups`conj[field_]] :=
+   CXXFieldIndices[Susyno`LieGroups`conj[field]] =
+      CXXFieldIndices@field;
+
+CXXFieldIndices[head_[GenericIndex[index_Integer]]] :=
+   CXXFieldIndices[head[GenericIndex[index]]] =
+      "i"<>StringTake[SymbolName@head, -1]<>ToString@index;
+
+CXXFieldIndices[field_] := CXXFieldIndices[field] =
    If[Length@field === 0, "i0", field[[1, 1]]];
-`cxx`fieldIndices // Utils`MakeUnknownInputDefinition;
-`cxx`fieldIndices ~ SetAttributes ~ {Locked};
 
-`cxx`genericFieldKey::usage = "
-@brief Determines C++ key type for a generic field.
-@param genericField Given generic field.
-@returns C++ key type of a generic field(s).";
-`cxx`genericFieldKey[fields:{__}] :=
-   Utils`StringJoinWithSeparator[fields, ", ", `cxx`genericFieldKey];
-`cxx`genericFieldKey[head_[GenericIndex[index:_Integer]]] :=
-   SymbolName@head<>ToString@index<>"Key";
-`cxx`genericFieldKey // secure;
+CXXFieldIndices // Utils`MakeUnknownInputDefinition;
 
-removeNumbers[expr_] :=
-   expr /. {_Integer-> 1, _Rational-> 1, _Complex-> 1, Pi-> 1};
-removeNumbers // secure;
+CXXGenericKey[fields:{__}] := Utils`StringJoinWithSeparator[fields, ", ", CXXGenericKey];
 
-colorFactor::usage = "
-@brief Extracts the colour factor for a given colour structure.";
-colorFactor[colourfactors:{__?IsColorFactors},
-            projection:_?IsColorProjector] :=
+CXXGenericKey[head_[GenericIndex[index_Integer]]] := SymbolName@head<>ToString@index<>"Key";
+
+CXXGenericKey // secure;
+
+RemoveNumbers[expr_] := expr /. {_Integer-> 1, _Rational-> 1, _Complex-> 1, Pi-> 1};
+
+ExtractColorFactor[colorfactors:{__?IsColorFactors}, projection_?IsColorProjector] :=
 Module[{projectedFactors},
-   projectedFactors =
-      Switch[projection,
-         Identity,
-            colourfactors,
-         _,
-            Utils`AssertOrQuit[
-               And@@Flatten[MatchQ[#, _projection]&/@#&/@ removeNumbers@colourfactors],
-               colorFactor::errMultipleColourStructures,
-               colourfactors,
-               projection];
-            colourfactors /. _projection -> 1];
+   projectedFactors = Switch[projection,
+      Identity,
+         colorfactors,
+      _,
+         Utils`AssertOrQuit[
+            And@@Flatten[MatchQ[#, _projection]&/@#&/@ RemoveNumbers@colorfactors],
+            ExtractColorFactor::errMultipleStructures,
+            colorfactors,
+            projection
+         ];
+         colorfactors /. _projection -> 1
+   ];
    Utils`AssertOrQuit[
-      And@@Flatten[NumericQ[#]&/@#&/@ projectedFactors],
-      colorFactor::errNotNumber,
-      projectedFactors];
-   projectedFactors];
-colorFactor // secure;
-colorFactor::errMultipleColourStructures = "
-Not all colour factors in
-   `1`
-have head `2`.";
-colorFactor::errNotNumber = "
-Not all colour factors in
-   `1`
-are numbers.";
+      And@@Flatten[NumericQ/@#&/@ projectedFactors],
+      ExtractColorFactor::errNotNumber,
+      projectedFactors
+   ];
+   projectedFactors
+];
+ExtractColorFactor::errMultipleStructures = "Some color factors in `1` have no head `2`.";
+ExtractColorFactor::errNotNumber = "Some color factors in `1` are not numbers.";
+ExtractColorFactor // secure;
 
-`cxx`genericSum::usage = "
-@brief Create the C++ code form of a generic sums.
-@param obj n-point function object.
-@param colourProjector An expression, representing the projector.
-@param genSumNames Set of names for generic sums.";
-`cxx`genericSum[obj_?IsNPointFunction, genSumNames:{__String}] :=
+CXXGenericSum[npf_?IsNPointFunction, genSumNames:{__String}] :=
 Utils`StringJoinWithSeparator[
    MapThread[
-      `cxx`genericSum[##,GetSubexpressions@obj,obj]&,
-      {  GetGenericSums@obj,
-         GetClassFields@obj,
-         GetCombinatoricalFactors@obj,
-         colorFactor[GetColorFactors@obj, GetColorProjector[]],
-         genSumNames}],
-   "\n\n"];
-`cxx`genericSum[
+      CXXGenericSum[##, GetSubexpressions@npf, npf]&,
+      {
+         GetGenericSums@npf,
+         GetClassFields@npf,
+         GetCombinatoricalFactors@npf,
+         ExtractColorFactor[GetColorFactors@npf, GetColorProjector[]],
+         genSumNames
+      }
+   ],
+   "\n\n"
+];
+
+CXXGenericSum[
    sum_?IsGenericSum,
    genericInsertions_?IsClassFields,
    combinatorialFactors_?IsCombinatoricalFactors,
-   colourFactors:{__?NumericQ},
+   colorFactors:{__?NumericQ},
    genSumName_String,
    subexpressions_?IsSubexpressions,
-   npf_?IsNPointFunction] :=
+   npf_?IsNPointFunction
+] :=
 TextFormatting`ReplaceCXXTokens["
    template<class GenericFieldMap>
    struct @GenericSum_NAME@_impl : generic_sum_base {
@@ -702,36 +679,36 @@ TextFormatting`ReplaceCXXTokens["
       using combinatorial_factors = boost::mpl::vector<
          @CombinatoricalFactors@
          >;
-      using colour_factors = boost::mpl::vector<
+      using color_factors = boost::mpl::vector<
          @ColorFactors@
          >;
       return accumulate_generic<
          GenericKeys,
          GenericInsertions,
          combinatorial_factors,
-         colour_factors,
+         color_factors,
          boost::mpl::int_<@WilsonBasisLength@>,
          @GenericSum_NAME@_impl
          >( *this );
    } // End of function @GenericSum_NAME@()",
-   {  "@GenericSum_NAME@"->genSumName,
-      "@GenericFieldShortNames@"->`cxx`shortNames@GetGenericFields@sum,
-      "@ExternalIndices@"->`cxx`initializeExternalIndices@npf,
-      "@InitializeOutputVars@"->Utils`StringJoinWithSeparator[
-         "std::complex<double> "<>#<>" = 0.0;"&/@First/@GetBasis[],"\n"],
-      "@SummationOverGenericFields@"->`cxx`changeGenericExpressions[
-         GetSumParticles@sum,GetSumExpression@sum],
-      "@ReturnOutputVars@"->ToString[First/@GetBasis[]],
-      "@GenericKeys@"->`cxx`genericFieldKey@GetGenericFields@sum,
-      "@ClassInsertions@"->`cxx`insertFields@genericInsertions,
-      "@CombinatoricalFactors@"->`cxx`insertFactors@combinatorialFactors,
-      "@ColorFactors@"->`cxx`insertColours@colourFactors,
-      "@WilsonBasisLength@"->GetLength@GetBasis[]}];
-`cxx`genericSum // secure;
-`cxx`genericSum::errColours = "
-Colour factor is not a number after projection: `1`";
+   {
+      "@GenericSum_NAME@" -> genSumName,
+      "@GenericFieldShortNames@" -> CXXGenericAbbreviations@GetGenericFields@sum,
+      "@ExternalIndices@" -> InitializeExternalIndices@npf,
+      "@InitializeOutputVars@" -> Utils`StringJoinWithSeparator["std::complex<double> "<>#<>" = 0.0;"&/@First/@GetBasis[],"\n"],
+      "@SummationOverGenericFields@" -> CXXSumOverGeneric[GetSumParticles@sum, GetSumExpression@sum],
+      "@ReturnOutputVars@" -> ToString[First/@GetBasis[]],
+      "@GenericKeys@" -> CXXGenericKey@GetGenericFields@sum,
+      "@ClassInsertions@" -> `cxx`insertFields@genericInsertions,
+      "@CombinatoricalFactors@" -> `cxx`insertFactors@combinatorialFactors,
+      "@ColorFactors@" -> `cxx`insertColors@colorFactors,
+      "@WilsonBasisLength@" -> GetLength@GetBasis[]
+   }
+];
+CXXGenericSum // secure;
+CXXGenericSum::errColors = "Color factor is not a number after projection: `1`";
 
-`cxx`initializeExternalIndices[npf_?IsNPointFunction] :=
+InitializeExternalIndices[npf_?IsNPointFunction] :=
 Module[{extIndices = GetExternalIndices@npf},
    indices = Array[
       "std::array<int, 1> i" <> ToString@# <>
@@ -740,20 +717,29 @@ Module[{extIndices = GetExternalIndices@npf},
    If[Length@extIndices < Length[Flatten@GetProcess@npf],
       PrependTo[indices, "std::array<int, 0> i0 {};\n"];];
    StringJoin@indices];
-`cxx`initializeExternalIndices // secure;
+InitializeExternalIndices // secure;
 
-`cxx`changeGenericExpressions::usage = "
-@brief Generates C++ code for output value updating inside generic sum.
-@param summation Summation structure of generic index.
-@param expr List of expressions to be converted into C++ code.
-@returns C++ code for output value initializations inside generic sum.";
-`cxx`changeGenericExpressions::errUnimplementedLoops =
-"Unsupported loop functions
-   `1`
-were detected.";
-`cxx`changeGenericExpressions[summation_?IsSummation, expr:{__}] :=
-Module[{
-      code = "
+CXXSumOverGeneric[summation_?IsSummation, expr:{__}] :=
+Module[{modifiedExpr = expr,
+      masses,massDefine,codeMass,massRules,
+      couplings,couplingDefine,codeCoupling,couplingRules,
+      loopRules,loopArrayDefine,loopArraySet,
+      cxxExpr,updatingVars
+   },
+   masses = Cases[modifiedExpr, _SARAH`Mass, Infinity, Heads -> True];
+   {massDefine, codeMass, massRules} = NameMasses@masses;
+   modifiedExpr = modifiedExpr /. massRules;
+
+   couplings = Cases[modifiedExpr, SARAH`Cp[__][___], Infinity, Heads -> True];
+   {couplingDefine, codeCoupling, couplingRules} = NameCouplings@couplings;
+
+   modifiedExpr = modifiedExpr /. couplingRules;
+   {loopRules, loopArrayDefine, loopArraySet, modifiedExpr} = createLoopFunctions@modifiedExpr;
+
+   cxxExpr = ApplyCXXRules/@modifiedExpr;
+   updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@GetBasis[], cxxExpr}];
+
+   TextFormatting`ReplaceCXXTokens["
       // Shorter aliases for large types
       @fieldAliases@
       // These definitions are repeated multiple times.
@@ -771,40 +757,24 @@ Module[{
          @ChangeOutputValues@
 
       @EndSum@",
-      modifiedExpr = expr,
-      masses,massDefine,codeMass,massRules,
-      couplings,couplingDefine,codeCoupling,couplingRules,
-      loopRules,loopArrayDefine,loopArraySet,
-      cxxExpr,updatingVars},
-   masses = Tally@Cases[modifiedExpr, _SARAH`Mass, Infinity, Heads->True];
-   {massDefine, codeMass, massRules} = `cxx`nameMasses@masses;
-   modifiedExpr = modifiedExpr /. massRules;
-
-   couplings = Tally@Cases[modifiedExpr,SARAH`Cp[__][___],Infinity,Heads->True];
-   {couplingDefine, codeCoupling, couplingRules} = `cxx`nameCouplings@couplings;
-   modifiedExpr = modifiedExpr /. couplingRules;
-
-   {loopRules,loopArrayDefine,loopArraySet,modifiedExpr} =
-      createLoopFunctions@modifiedExpr;
-
-   cxxExpr = `cxx`applyRules/@modifiedExpr;
-   updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@GetBasis[], cxxExpr}];
-
-   TextFormatting`ReplaceCXXTokens[code,{
-      "@fieldAliases@"->`cxx`setFieldAliases@couplings,
-      "@defineMasses@"->massDefine,
-      "@defineCouplings@"->couplingDefine,
-      "@defineLoopFunctions@"->loopArrayDefine,
-      "@BeginSum@"->`cxx`beginSum@summation,
-      "@setMasses@"->codeMass,
-      "@setCouplings@"->codeCoupling,
-      "@skipZeroAmplitude@"->`cxx`skipZeroAmplitude[
-         modifiedExpr,loopRules,massRules],
-      "@setLoopFunctions@"->loopArraySet,
-      "@ChangeOutputValues@"->Utils`StringJoinWithSeparator[updatingVars,"\n"],
-      "@EndSum@"->`cxx`endSum@GetGenericFields@summation
-   }]];
-`cxx`changeGenericExpressions // secure;
+      {
+         "@fieldAliases@"->`cxx`setFieldAliases@couplings,
+         "@defineMasses@"->massDefine,
+         "@defineCouplings@"->couplingDefine,
+         "@defineLoopFunctions@"->loopArrayDefine,
+         "@BeginSum@"->`cxx`beginSum@summation,
+         "@setMasses@"->codeMass,
+         "@setCouplings@"->codeCoupling,
+         "@skipZeroAmplitude@"->`cxx`skipZeroAmplitude[
+            modifiedExpr,loopRules,massRules],
+         "@setLoopFunctions@"->loopArraySet,
+         "@ChangeOutputValues@"->Utils`StringJoinWithSeparator[updatingVars,"\n"],
+         "@EndSum@"->`cxx`endSum@GetGenericFields@summation
+      }
+   ]
+];
+CXXSumOverGeneric::errUnimplementedLoops = "Loop functions `1` are not supported.";
+CXXSumOverGeneric // secure;
 
 Module[{func},
 
@@ -815,20 +785,21 @@ func = If[#1 =!= #2, "using " <> #1 <> " = " <> #2 <> ";\n", ""]&;
        improve readaability and simplify checks some aliases are generated.
 @param couplings A list of tuples with couplings.
 @returns A string with C++ code of alias definitions.";
-`cxx`setFieldAliases[couplings:{{SARAH`Cp[__][___], _Integer}..}] :=
-Module[{l = Sort@DeleteDuplicates[(Sequence@@Head@First@#&)/@couplings]},
+`cxx`setFieldAliases[couplings:{SARAH`Cp[__][___]..}] :=
+Module[{l = Sort@DeleteDuplicates[(Sequence@@Head@#&)/@couplings]},
    StringJoin@MapThread[func, {CXXShortFieldName/@l, CXXFullFieldName/@l}]];
 `cxx`setFieldAliases // secure;
 
 ];
 
-Module[{c, name, strip},
+Module[{c, name},
 c[f_] := Switch[Head@f, SARAH`bar|Susyno`LieGroups`conj, "_"<>#, _, #]&;
 name[f_] := ToString@Switch[f, _Symbol, f, _, Head@f];
-strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
 
-CXXShortFieldName[f_?IsParticle] := c[f][name@strip@f];
-CXXShortFieldName[f_?IsGenericParticle] := c[f][CXXFullFieldName@strip@f];
+CXXShortFieldName[f_?IsParticle] :=
+   c[f][name@CXXDiagrams`RemoveLorentzConjugation@f];
+CXXShortFieldName[f_?IsGenericParticle] :=
+   c[f][CXXFullFieldName@CXXDiagrams`RemoveLorentzConjugation@f];
 CXXShortFieldName // secure;
 ];
 
@@ -924,7 +895,7 @@ Module[{massesToOne = Rule[#,1] & /@ massRules[[All,2]],
    If[0 < Length@loopRules,
       loopsToOne = Rule[#,1] & /@ loopRules[[All,2]]
    ];
-   result = removeNumbers[ExpandAll[modifiedExpr]] /.Plus->List/.
+   result = RemoveNumbers[ExpandAll[modifiedExpr]] /.Plus->List/.
       massesToOne/.loopsToOne;
    result = DeleteDuplicates[Flatten@DeleteCases[result,1]];
    If[ 2 === LeafCount@result,
@@ -937,85 +908,61 @@ Module[{massesToOne = Rule[#,1] & /@ massRules[[All,2]],
       RegularExpression["g(\\d+)"]:> ToString[ToExpression@"$1"-1]]];
 `cxx`skipZeroAmplitude // secure;
 
-`cxx`getVariableName[SARAH`Mass[obj_?IsGenericParticle]] :=
+CXXMassAbbreviation[SARAH`Mass[obj_?IsGenericParticle]] :=
 Switch[GetParticleName@obj,
    GenericS, "mS",
    GenericF, "mF",
    GenericV, "mV",
-   GenericU, "mU"]<>ToString@GetIndex@obj;
-`cxx`getVariableName[SARAH`Mass[obj:_?IsParticle]] :=
-   "m"<>ToString@GetParticleName@obj<>CXXIndex@obj;
-`cxx`getVariableName // secure;
+   GenericU, "mU"
+]<>ToString@GetIndex@obj;
 
-Module[{
-      info = {`cxx`getVariableName@#1, `cxx`applyRules@#1, #1, #2}&@@#&,
-      d = "double " <> Utils`StringJoinWithSeparator[#, ", "] <> ";"&,
-      i = #1 <> " = " <> #2 <> "; // " <> ToString@#4 <>" copies.\n"&@@#&,
-      r = Rule@@@#[[All, {3, 1}]]&},
+CXXMassAbbreviation[SARAH`Mass[obj:_?IsParticle]] := "m"<>ToString@GetParticleName@obj<>CXXIndex@obj;
 
-`cxx`nameMasses::usage = "
-@brief Generates names for masses to be used inside generic sums and then
-       creates:
+CXXMassAbbreviation // secure;
 
-       1. a C++ code for definition and initialisation for masses,
-       2. a ``Mathematica`` to C++ rules for generated names of masses.
-@param masses A list of tallies with Mathematica expressions for mass and the
-       number of repetition of it.
-@returns A list of:
+NameMasses[masses:{__}] :=
+Module[{info, i, r, sortedMasses, abbr, full},
+   sortedMasses = Sort@DeleteDuplicates@masses;
+   abbr = CXXMassAbbreviation /@ sortedMasses;
+   full = ApplyCXXRules /@ sortedMasses;
+   {
+      "double "<>Utils`StringJoinWithSeparator[abbr, ", "]<>";",
+      StringJoin@MapThread[#1<>" = "<>#2<>";\n"&, {abbr, full}],
+      MapThread[Rule, {sortedMasses, abbr}]
+   }
+];
+NameMasses // secure;
 
-         1. a C++ string with definitions,
-         2. a C++ string with initialisations,
-         3. a Mathematica list of rules for mass convertion
-            to C++ code.";
-`cxx`nameMasses[masses:{{_, _Integer}..}] :=
-   {d[First/@#], StringJoin[i/@#], r@#} &@ Table[info@m, {m, Sort@masses}];
-`cxx`nameMasses // secure;
+NameCouplings[couplings:{__}] :=
+Module[{sortedCpl, abbr, full, initCpl, initZero},
+   sortedCpl = Sort@DeleteDuplicates@couplings;
+   abbr = Table["g"<>ToString@n, {n, Length@sortedCpl}];
+   full = ApplyCXXRules/@sortedCpl;
 
-`cxx`nameCouplings::usage = "
-@brief Generates names for couplings to be used inside generic sums and then
-       creates:
+   initCpl = StringJoin@MapThread[#1<>" = "<>#2<>";\n"&, {abbr, full}];
+   initZero = Table["z[" <> ToString[n-1] <> "] = (std::abs(g" <> ToString@n <> ") < std::numeric_limits<double>::epsilon())?0:1;\n", {n, Length@sortedCpl}];
 
-       1. C++ code for definition and initialisation for couplings,
-       2. ``Mathematica`` to C++ rules for generated names of couplings.
-@param masses A list of tallies with Mathematica expressions for coupling
-       and the number of repetition of it.
-@returns A list of:
 
-         1. a C++ string with definitions,
-         2. a C++ string with initialisations,
-         3. a ``Mathematica`` list of rules for coupling convertion
-            to C++ code.
-@note All couplings have to be multiplied by ``I``, as it is done in these
-      rule replacements.";
-`cxx`nameCouplings[couplings:{{_,_Integer}..}] :=
-Module[{
-      sort = Sort@couplings, info, isZero,
-      d = "std::complex<double> " <> Utils`StringJoinWithSeparator[#, ", "] <>
-         ";"&,
-      timesI = Rule[#1, I*#2]&@@#&,
-      setZero},
-   isZero = "std::array<int, "<> ToString@Length@sort <> "> z{};";
-   setZero = "z[" <> ToString[#-1] <> "] = (std::abs(g" <> ToString@# <>
-      ") < std::numeric_limits<double>::epsilon()) ? 0: 1;\n"&;
-   info = {"g"<>ToString@#, `cxx`applyRules@sort[[#,1]], sort[[#,1]],
+   info = {"g"<>ToString@#, ApplyCXXRules@sort[[#,1]], sort[[#,1]],
       sort[[#,2]]}&;
-   {  d[First/@#]<>"\n"<>isZero,
-      StringJoin[i/@#]<>"\n"<>StringJoin[setZero/@Range@Length@sort],
-      timesI/@r@#} &@ Array[info, Length@sort]];
-`cxx`nameCouplings // secure;];
+   {
+      "std::complex<double> "<>Utils`StringJoinWithSeparator[abbr, ", "]<>";\nstd::array<int, "<> ToString@Length@sortedCpl <> "> z{};",
+      initCpl <> "\n" <> initZero,
+      MapThread[#1 -> I*#2&, {sortedCpl, abbr}]
+   }
+];
+NameCouplings // secure;
 
-`cxx`shortNames::usage = "
-@brief Generates C++ code for type abbreviations stored in
-       ``GenericFieldMap`` (Associative Sequence) at ``Key`` positions.
-@param genFields List of generic fields.
-@returns String C++ code for type abbreviations stored in GenericFieldMap
-         (Associative Sequence) at Key positions.";
-`cxx`shortNames[genFields:{__?IsGenericParticle}] :=
-   Utils`StringJoinWithSeparator[Apply[
+CXXGenericAbbreviations[genFields:{__?IsGenericParticle}] :=
+Utils`StringJoinWithSeparator[
+   Apply[
       "using "<>#1<>" = typename at<GenericFieldMap,"<>ToString@#2<>">::type;"&,
-      {CXXFullFieldName@#,`cxx`genericFieldKey@#}&/@genFields,
-      {1}],"\n"];
-`cxx`shortNames // secure;
+      {CXXFullFieldName@#, CXXGenericKey@#} &/@ genFields,
+      {1}
+   ],
+   "\n"
+];
+CXXGenericAbbreviations // secure;
 
 `cxx`beginSum::usage = "
 @brief Generates C++ code for sum beginning used inside GenericSum.
@@ -1026,15 +973,15 @@ Module[{
 Module[{beginsOfFor},
    beginsOfFor = "for( const auto &"<>CXXIndex[#[[1]]]<>" : "<>
       "index_range<"<> CXXFullFieldName[#[[1]]]<>">() ) {\n"<>
-      "at_key<"<>`cxx`genericFieldKey@#[[1]]<>">( index_map ) = "<>
+      "at_key<"<>CXXGenericKey@#[[1]]<>">( index_map ) = "<>
       CXXIndex[#[[1]]]<>";"<>parseRestrictionRule[#] &/@summation;
    Utils`StringJoinWithSeparator[beginsOfFor,"\n"]];
 `cxx`beginSum // secure;
 
 parseRestrictionRule[{genericField_?IsGenericParticle,rule_}] :=
 Module[{f1,f2,GetIndexOfExternalField,OrTwoDifferent},
-   GetIndexOfExternalField[_[_[{ind_}]]] := `cxx`applyRules@ind;
-   GetIndexOfExternalField[_[{ind_}]] := `cxx`applyRules@ind;
+   GetIndexOfExternalField[_[_[{ind_}]]] := ApplyCXXRules@ind;
+   GetIndexOfExternalField[_[{ind_}]] := ApplyCXXRules@ind;
    GetIndexOfExternalField[_] := "i0";
    OrTwoDifferent[] :=
    Module[{type1 = CXXFullFieldName@First@rule,
@@ -1116,24 +1063,24 @@ Module[{
       ">"&/@combinatorialFactors,",\n"];
 `cxx`insertFactors // secure;
 
-`cxx`insertColours::usage = "
-@brief Generates C++ code for colour factor insertions inside GenericSum.
-@param colourFactors list of numbers.
-@returns String C++ code for colour factor insertions inside GenericSum.";
-`cxx`insertColours[colourFactors:{__?NumberQ}] :=
+`cxx`insertColors::usage = "
+@brief Generates C++ code for color factor insertions inside GenericSum.
+@param colorFactors list of numbers.
+@returns String C++ code for color factor insertions inside GenericSum.";
+`cxx`insertColors[colorFactors:{__?NumberQ}] :=
 Module[{
-      ReRatioColourFactors = {Numerator@#,Denominator@#} &/@ Re@colourFactors,
-      ImRatioColourFactors = {Numerator@#,Denominator@#} &/@ Im@colourFactors},
+      ReRatioColorFactors = {Numerator@#,Denominator@#} &/@ Re@colorFactors,
+      ImRatioColorFactors = {Numerator@#,Denominator@#} &/@ Im@colorFactors},
    Utils`StringJoinWithSeparator[
       StringReplace[
          MapThread[
             "detail::complex_helper<"<>
             "detail::ratio_helper<"<>ToString@#1<>">,"<>
             "detail::ratio_helper<"<>ToString@#2 <> ">>"&,
-            {ReRatioColourFactors, ImRatioColourFactors}],
+            {ReRatioColorFactors, ImRatioColorFactors}],
          {"{" -> "", "}" -> ""}],
    ",\n"]];
-`cxx`insertColours // secure;
+`cxx`insertColors // secure;
 
 End[];
 EndPackage[];

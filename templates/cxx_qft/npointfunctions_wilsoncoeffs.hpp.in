@@ -55,7 +55,7 @@
 #define NPF_R(args...) context.vertex<args>(lorentz_right{},
 #define NPF_G(args...) context.vertex<args>(lorentz_inverse_metric{},
 #define NPF_T(args...) context.vertex<args>(triple_vector{},
-#define NPF_MD(args...) context.vertex<args>(lorentz_momentum_diff{
+#define NPF_SSV(args...) context.vertex<args>(lorentz_momentum_diff{
 #define NPF_D(i1, i2) i1, i2},
 #define NPF_I(args...) concatenate(args))
 
