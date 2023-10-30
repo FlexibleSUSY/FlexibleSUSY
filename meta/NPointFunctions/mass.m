@@ -32,7 +32,7 @@ rules::usage = "
 
 modify::usage = "
 @brief Sets the masses of external particles to zero according to
-       `options`momenta[].";
+       $zeroExternalMomenta.";
 
 Begin@"`Private`";
 

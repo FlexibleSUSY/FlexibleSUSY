@@ -52,7 +52,7 @@ plant::usage = "
 plant[in_, out_] :=
    Module[{topologies, diagrams},
       topologies = lengthyQ@FeynArts`CreateTopologies[
-         `options`loops[],
+         $loopNumber,
          Length@in -> Length@out,
          FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
       diagrams = lengthyQ@FeynArts`InsertFields[topologies,
@@ -109,7 +109,7 @@ picture[tree:type`tree] :=
    Module[{out = {}, directory, name},
       name = StringJoin[ToString /@ (
          `rules`fields@Join[fields[tree, Flatten],
-            `options`processes[]] /. e_@{_} :> e)];
+            $expressionsToDerive] /. e_@{_} :> e)];
       directory = DirectoryName[FeynArts`$Model<>".mod"];
       FeynArts`Paint[diagrams@tree,
          FeynArts`PaintLevel -> {Generic},

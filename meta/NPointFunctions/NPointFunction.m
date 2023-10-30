@@ -82,17 +82,16 @@ NPointFunction[
 Module[{tree},
    BeginPackage["NPointFunction`"];
    Begin["`Private`"];
+      $particleNamesFile = particleNamesFile;
+      $particleNamespaceFile = particleNamespaceFile;
 
-   $particleNamesFile = particleNamesFile;
-   $particleNamespaceFile = particleNamespaceFile;
-
-   `options`observable[] := SymbolName@Head@observable;
-   `options`observable[Outer] := {Length@FAIncomingFields, Length@FAOutgoingFields};
-   `options`loops[] := loops;
-   `options`processes[] := processes;
-   `options`momenta[] := momenta;
-   `options`onShell[] := onShell;
-   `options`scheme[] :=  Switch[mainRegularization, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
+      $observableName = SymbolName@Head@observable;
+      $externalFieldNumbers = {Length@FAIncomingFields, Length@FAOutgoingFields};
+      $loopNumber = loops;
+      $expressionsToDerive = processes;
+      $zeroExternalMomenta = momenta;
+      $onShell = onShell;
+      $regularizationScheme =  Switch[mainRegularization, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
    End[];
    EndPackage[];
 
@@ -100,7 +99,8 @@ Module[{tree},
    FeynArts`InitializeModel@FAModelName;
    SetOptions[FeynArts`InsertFields,
       FeynArts`Model -> FAModelName,
-      FeynArts`InsertionLevel -> FeynArts`Classes];
+      FeynArts`InsertionLevel -> FeynArts`Classes
+   ];
    FormCalc`$FCVerbose = 0;
    If[!DirectoryQ@FCOutputDir, CreateDirectory@FCOutputDir];
    SetDirectory@FCOutputDir;
@@ -186,7 +186,7 @@ calculateAmplitudes[tree:type`tree] :=
 Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    proc = process@amplitudes@tree;
    ampsGen = FeynArts`PickLevel[Generic][amplitudes@tree];
-   If[`options`momenta[],
+   If[$zeroExternalMomenta,
       ampsGen = FormCalc`OffShell[ampsGen,
          Sequence@@Array[#->0&, Plus@@Length/@proc]
       ]
@@ -194,7 +194,7 @@ Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    feynAmps = mapThread[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> #2,
-         FormCalc`OnShell -> `options`onShell[],
+         FormCalc`OnShell -> $onShell,
          FormCalc`FermionChains -> FormCalc`Chiral,
          FormCalc`FermionOrder -> settings@order,
          FormCalc`Invariants -> False,
@@ -210,7 +210,7 @@ Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    mass`rules[tree, feynAmps];
    {generic, chains, subs} = mass`modify[{generic, chains, subs},
       tree,
-      `options`momenta[]
+      $zeroExternalMomenta
    ];
 
    convertToFS[
@@ -219,7 +219,7 @@ Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
          combinatoricalFactors@tree,
          colorFactors@tree},
       chains,
-      subs] /. `rules`externalMomenta[tree, `options`momenta[]]];
+      subs] /. `rules`externalMomenta[tree, $zeroExternalMomenta]];
 calculatedAmplitudes // tools`secure;
 
 mapThread::usage = "

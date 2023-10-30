@@ -51,7 +51,7 @@ With[{dir = DirectoryName@$InputFileName},
          BeginPackage@"NPointFunctions`";
          Begin@"`Private`";
          If[FileExistsQ@#, Get@#;]&@FileNameJoin@
-            {ParentDirectory@dir, "Observables", `options`observable[], "NPointFunctions.m"};
+            {ParentDirectory@dir, "Observables", $observableName, "NPointFunctions.m"};
          End[];
          EndPackage[];);];
 
@@ -60,13 +60,13 @@ With[{dir = DirectoryName@$InputFileName},
 settings[tree:type`tree, settings:diagrams|amplitudes] :=
 Module[{doPresent, doAbsent, absent, todos, res = tree},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
-      settings[`options`loops[], #]&/@ {Plus, Minus};
+      settings[$loopNumber, #]&/@ {Plus, Minus};
    {doPresent, doAbsent} = tools`unzipRule/@ {doPresent, doAbsent};
    {doPresent, doAbsent} = Rule[SymbolName@First@#, Last@#]&/@ #&/@
       {doPresent, doAbsent};
-   absent = Complement[First/@doAbsent, `options`processes[]];
+   absent = Complement[First/@doAbsent, $expressionsToDerive];
    todos = DeleteDuplicates@Flatten[
-      Join[`options`processes[] /. doPresent, absent /. doAbsent]
+      Join[$expressionsToDerive /. doPresent, absent /. doAbsent]
    ];
    todos = Select[todos, Head@# === Rule&];
    Set[res, applySetting[res, #]]&/@ todos;
@@ -80,17 +80,17 @@ applySetting[tree:type`tree, tQ_ -> {str_String, fun_}] :=
 settings[order] :=
 If[Head@order[] === List,
    order[],
-   Reverse@Range@Tr@`options`observable@Outer
+   Reverse@Range@Tr@$externalFieldNumbers
 ];
 
 settings[tree:type`tree, settings:regularization|momenta|sum|mass] :=
 Module[{res = {tree}, default, head},
-   If[Head@settings@`options`loops[] === List,
+   If[Head@settings@$loopNumber === List,
       AppendTo[res, applySetting[tree, #]]&/@
-         tools`unzipRule@settings@`options`loops[];
+         tools`unzipRule@settings@$loopNumber;
    ];
    default = Switch[settings,
-      regularization, `options`scheme[],
+      regularization, $regularizationScheme,
       momenta, Automatic,
       sum, {},
       mass, {}

@@ -54,7 +54,7 @@ adjace[topology:type`topology] :=
 Module[{external, simple, graph, ordering, matrix},
 (* v------v Number of external particles.                                    *)
 (*            v--------------------------v Replace by number in the notebook.*)
-   external = Tr@`options`observable@Outer;
+   external = Tr@$externalFieldNumbers;
    simple = (#/. h_[i_, j_, _] :> h[i, j])&/@ topology;
    graph = List@@ (UndirectedEdge@@@ FeynArts`TopologySort@simple)/.
       FeynArts`Vertex[_][i_] :> i;
@@ -66,7 +66,7 @@ adjace // tools`secure;
 
 define[topologies] :=
 Module[{all, single, combined},
-   all = topologies@`options`observable@Outer;
+   all = topologies@$externalFieldNumbers;
    If[Head@all =!= List, Return[]];
    combined = Select[all, FreeQ[#, _Integer]&];
    single = Complement[all, combined];
@@ -101,11 +101,11 @@ Once@Module[{all, name, set, default},
       "Irreducible" -> (FreeQ[#, FeynArts`Internal]&),
       "Triangles"   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)
    };
-   set = If[MatchQ[#, {__}], #, {}]&[topologies@`options`loops[]];
+   set = If[MatchQ[#, {__}], #, {}]&[topologies@$loopNumber];
    set = Rule[SymbolName@First@#, With[{fun = Last@#}, fun@#&]]&/@ set;
    all = Join[default, set];
    FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
-      (`options`processes[]/.all)@#]];
+      ($expressionsToDerive/.all)@#]];
    name
 ];
 getExcludeTopologies // tools`secure;

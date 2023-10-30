@@ -44,7 +44,7 @@ modifyChains::usage = "
              ..}
 
        <symbol>
-          A symbol, which chooses (based on ```options`momenta[]``) the set
+          A symbol, which chooses (based on ``$zeroExternalMomenta``) the set
           of rules.
           Put different <symbol> in the same list, if you want to use the
           same rules for them.
@@ -74,7 +74,7 @@ modifyChains::usage = "
       conventions.";
 modifyChains[expression_] :=
 Module[{i = 0, rules, sp, L, reveal},
-   If[Head@chains@`options`loops[] =!= List, Return@expression];
+   If[Head@chains@$loopNumber =!= List, Return@expression];
 
    Block[{k = FormCalc`k, l = FormCalc`Lor, ch = DiracChain},
       sp[mom_] := FormCalc`Spinor[k@mom, _, _];
@@ -86,7 +86,7 @@ Module[{i = 0, rules, sp, L, reveal},
       reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
       chainRules = reveal@settings@order;
-      rules = `options`momenta[] /. tools`unzipRule@chains@`options`loops[] /. chainRules;
+      rules = $zeroExternalMomenta /. tools`unzipRule@chains@$loopNumber /. chainRules;
    ];
    Expand@expression //. rules
 ];
@@ -94,16 +94,16 @@ modifyChains // tools`secure;
 
 simplifyChains::usage = "
 @brief Simplifies some chains applying Dirac equation if
-       ```options`onShell[]`` is ``True``.
+       ``$onShell`` is ``True``.
 @param chain A chain to simplify.
 @param expr An expression to be modified.
 @returns A simplified chain.";
 simplifyChains[expr:_] :=
-   If[`options`onShell[],
+   If[$onShell,
       expr /. ch:DiracChain[__] :> simplifyChains@ch,
       expr];
 simplifyChains[chain:_DiracChain] :=
-   If[`options`onShell[],
+   If[$onShell,
       Module[{s = 6|7, a = -6|-7, ch = DiracChain, k = FormCalc`k,
             m, pair, sp, flip},
          m[FormCalc`Spinor[_, mass:_, type:_]] = type*mass;
