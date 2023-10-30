@@ -45,15 +45,16 @@ settings::usage = "
        order[]
           Overrides default fermion order.";
 With[{dir = DirectoryName@$InputFileName},
-   settings[] :=
-      (
-         define@topologies;
-         BeginPackage@"NPointFunctions`";
-         Begin@"`Private`";
-         If[FileExistsQ@#, Get@#;]&@FileNameJoin@
-            {ParentDirectory@dir, "Observables", $observableName, "NPointFunctions.m"};
-         End[];
-         EndPackage[];);];
+LoadAllSettings[] :=
+(
+   BeginPackage@"NPointFunctions`";
+   Begin@"`Private`";
+   If[FileExistsQ@#, Get@#]&@FileNameJoin@
+      {ParentDirectory@dir, "Observables", $observableName, "NPointFunctions.m"};
+   End[];
+   EndPackage[];
+);
+];
 
 (*       v--v This object is modified and returned.                          *)
 (*                       v------v Are defined in [OBSERVABLE/settings.m].    *)

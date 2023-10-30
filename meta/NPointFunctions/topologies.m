@@ -64,7 +64,7 @@ Module[{external, simple, graph, ordering, matrix},
 ];
 adjace // tools`secure;
 
-define[topologies] :=
+DefineAllowedTopologies[] :=
 Module[{all, single, combined},
    all = topologies@$externalFieldNumbers;
    If[Head@all =!= List, Return[]];

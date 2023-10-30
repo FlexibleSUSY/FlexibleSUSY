@@ -105,7 +105,8 @@ Module[{tree},
    If[!DirectoryQ@FCOutputDir, CreateDirectory@FCOutputDir];
    SetDirectory@FCOutputDir;
 
-   settings[];
+   DefineAllowedTopologies[];
+   LoadAllSettings[];
    tree = settings[plant[FAIncomingFields, FAOutgoingFields], diagrams];
    tree = settings[plant@tree, amplitudes];
    picture@tree;
