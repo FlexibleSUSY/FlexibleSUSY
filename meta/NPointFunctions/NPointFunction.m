@@ -20,9 +20,7 @@
 
 *)
 
-Needs["Utils`",
-   FileNameJoin@{ParentDirectory@DirectoryName@$InputFileName, "Utils.m"}
-];
+Needs["Utils`", FileNameJoin@{ParentDirectory@DirectoryName@$InputFileName, "Utils.m"}];
 
 Block[{Format},
    Needs@"FeynArts`";
@@ -52,58 +50,67 @@ SetAttributes[
 
 Begin@"`Private`";
 
-Utils`DynamicInclude/@
-   {"tools.m", "type.m", "rules.m", "settings.m", "chains.m", "topologies.m",
-    "tree.m", "mass.m"};
+Utils`DynamicInclude/@{
+   "tools.m",
+   "type.m",
+   "rules.m",
+   "settings.m",
+   "chains.m",
+   "topologies.m",
+   "tree.m",
+   "mass.m"
+};
 
-NPointFunction::usage = "Sets files, options; makes diagrams and amplitudes."
 NPointFunction[
    {
       FCOutputDir:_String,
       FAModelName:_String,
-      FAParticleNames:_?FileExistsQ,
-      SARAHParticleContexts:_?FileExistsQ,
+      particleNamesFile_?FileExistsQ,
+      particleNamespaceFile_?FileExistsQ,
       FAIncomingFields:{__String},
       FAOutgoingFields:{__String}
    },
    {
       observable:None | _?(Context@Evaluate@Head[#] == "FlexibleSUSYObservable`"&),
-      loops:_?IntegerQ,
+      loops_,
       processes:{___String},
       momenta:_Symbol,
       onShell:_Symbol,
       mainRegularization:_Symbol
    }
-] :=  Module[{tree},
-      BeginPackage["NPointFunction`"];
-      Begin["`Private`"];
-      `file`particles[] := FAParticleNames;
-      `file`contexts[] := SARAHParticleContexts;
-      `options`observable[] := SymbolName@Head@observable;
-      `options`observable[Outer] := {Length@FAIncomingFields, Length@FAOutgoingFields};
-      `options`loops[] := loops;
-      `options`processes[] := processes;
-      `options`momenta[] := momenta;
-      `options`onShell[] := onShell;
-      `options`scheme[] :=
-         Switch[mainRegularization, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
-      End[];
-      EndPackage[];
+] :=
+Module[{tree},
+   BeginPackage["NPointFunction`"];
+   Begin["`Private`"];
 
-      FeynArts`$FAVerbose = 0;
-      FeynArts`InitializeModel@FAModelName;
-      SetOptions[FeynArts`InsertFields,
-         FeynArts`Model -> FAModelName,
-         FeynArts`InsertionLevel -> FeynArts`Classes];
-      FormCalc`$FCVerbose = 0;
-      If[!DirectoryQ@FCOutputDir, CreateDirectory@FCOutputDir];
-      SetDirectory@FCOutputDir;
+   $particleNamesFile = particleNamesFile;
+   $particleNamespaceFile = particleNamespaceFile;
 
-      settings[];
-      tree = settings[plant[FAIncomingFields, FAOutgoingFields], diagrams];
-      tree = settings[plant@tree, amplitudes];
-      picture@tree;
-      {`rules`fields@fields@tree, calculateAmplitudes@tree}];
+   `options`observable[] := SymbolName@Head@observable;
+   `options`observable[Outer] := {Length@FAIncomingFields, Length@FAOutgoingFields};
+   `options`loops[] := loops;
+   `options`processes[] := processes;
+   `options`momenta[] := momenta;
+   `options`onShell[] := onShell;
+   `options`scheme[] :=  Switch[mainRegularization, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
+   End[];
+   EndPackage[];
+
+   FeynArts`$FAVerbose = 0;
+   FeynArts`InitializeModel@FAModelName;
+   SetOptions[FeynArts`InsertFields,
+      FeynArts`Model -> FAModelName,
+      FeynArts`InsertionLevel -> FeynArts`Classes];
+   FormCalc`$FCVerbose = 0;
+   If[!DirectoryQ@FCOutputDir, CreateDirectory@FCOutputDir];
+   SetDirectory@FCOutputDir;
+
+   settings[];
+   tree = settings[plant[FAIncomingFields, FAOutgoingFields], diagrams];
+   tree = settings[plant@tree, amplitudes];
+   picture@tree;
+   {`rules`fields@fields@tree, calculateAmplitudes@tree}
+];
 NPointFunction // tools`secure;
 
 genericIndex[index:_Integer] := FeynArts`Index[Generic, index];

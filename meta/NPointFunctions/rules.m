@@ -28,12 +28,12 @@ Module[{once},
    once[arg_] := once@arg =
       Module[{regex, lines, rules, names},
          regex = "(\\w+): ([SFVU])\\[(\\d+)\\]";
-         lines = Utils`ReadLinesInFile@`file`particles[];
-         rules = Rule[First@#, Sequence[Last@#, First@#]] &/@
-            Get@`file`contexts[];
+         lines = Utils`ReadLinesInFile@$particleNamesFile;
+         rules = Rule[First@#, Sequence[Last@#, First@#]] &/@ Get@$particleNamespaceFile;
          names = StringCases[lines, RegularExpression@regex :>
             {"$1","FeynArts`$2","$3"}];
-         Flatten[names, 1] /. rules];];
+         Flatten[names, 1] /. rules];
+];
 fieldData // tools`secure;
 
 Module[{once},

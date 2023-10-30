@@ -238,7 +238,7 @@ Module[{
       },
       npf = DeleteZeroGenericSum@ParallelEvaluate[
          $Path = path;
-         Get@FileNameJoin@{meta, "NPointFunctions", "internal.m"};
+         Get@FileNameJoin@{meta, "NPointFunctions", "NPointFunction.m"};
          NPointFunction[data, options],
          kernel,
          DistributedContexts -> None
