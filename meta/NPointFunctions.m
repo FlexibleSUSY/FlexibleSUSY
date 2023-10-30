@@ -724,7 +724,7 @@ Module[{modifiedExpr = expr,
       masses,massDefine,codeMass,massRules,
       couplings,couplingDefine,codeCoupling,couplingRules,
       loopRules,loopArrayDefine,loopArraySet,
-      cxxExpr,updatingVars
+      cxxExpr,updatingVars, loopIdentifiers
    },
    masses = Cases[modifiedExpr, _SARAH`Mass, Infinity, Heads -> True];
    {massDefine, codeMass, massRules} = NameMasses@masses;
@@ -732,9 +732,10 @@ Module[{modifiedExpr = expr,
 
    couplings = Cases[modifiedExpr, SARAH`Cp[__][___], Infinity, Heads -> True];
    {couplingDefine, codeCoupling, couplingRules} = NameCouplings@couplings;
-
    modifiedExpr = modifiedExpr /. couplingRules;
-   {loopRules, loopArrayDefine, loopArraySet, modifiedExpr} = CreateLoopFunctions@modifiedExpr;
+
+   {loopRules, loopArrayDefine, loopArraySet, loopIdentifiers} = CreateLoopFunctions@modifiedExpr;
+   modifiedExpr = modifiedExpr /. loopRules;
 
    cxxExpr = ApplyCXXRules/@modifiedExpr;
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@GetBasis[], cxxExpr}];
@@ -742,7 +743,9 @@ Module[{modifiedExpr = expr,
    TextFormatting`ReplaceCXXTokens["
       // Shorter aliases for large types
       @fieldAliases@
-      // These definitions are repeated multiple times.
+      // Aliases for loop function identifiers
+      @loopIdentifiers@
+
       @defineMasses@
       @defineCouplings@
       @defineLoopFunctions@
@@ -758,6 +761,7 @@ Module[{modifiedExpr = expr,
 
       @EndSum@",
       {
+         "@loopIdentifiers@" -> loopIdentifiers,
          "@fieldAliases@" -> CXXSetFieldAliases@couplings,
          "@defineMasses@" -> massDefine,
          "@defineCouplings@" -> couplingDefine,
@@ -793,95 +797,49 @@ CXXShortFieldName[f_?IsGenericParticle] :=
 CXXShortFieldName // secure;
 ];
 
+CXXLoopArray[num_Integer] := "l"<>ToString@num;
+CXXLoopArray // secure;
+
+CXXLoopType[sym_Symbol] :=
+sym /. {
+   LoopTools`A0i -> "looplibrary::Acoeff_t",
+   LoopTools`B0i -> "looplibrary::Bcoeff_t",
+   LoopTools`C0i -> "looplibrary::Ccoeff_t",
+   LoopTools`D0i -> "looplibrary::Dcoeff_t"
+};
+CXXLoopType // secure;
+
+CXXLoopLibrary[sym_Symbol] :=
+sym /. {
+   LoopTools`A0i -> "A",
+   LoopTools`B0i -> "B",
+   LoopTools`C0i -> "C",
+   LoopTools`D0i -> "D"
+};
+CXXLoopLibrary // secure;
+
 CreateLoopFunctions[modifiedExpr:{__}] :=
-Module[{onePoint,
-      onePointTemplate =
-         {  LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
-            LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"}&,
-      twoPoint,
-      twoPointTemplate =
-         {  LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>"[0]",
-            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>"[1]",
-            LoopTools`B0i[LoopTools`bb00,Sequence@@#2] -> "b"<>#1<>"[2]"}&,
-      threePoint,
-      threePointTemplate =
-         {  LoopTools`C0i[LoopTools`cc0,Sequence@@#2] -> "c"<>#1<>"[0]",
-            LoopTools`C0i[LoopTools`cc1,Sequence@@#2] -> "c"<>#1<>"[1]",
-            LoopTools`C0i[LoopTools`cc2,Sequence@@#2] -> "c"<>#1<>"[2]",
-            LoopTools`C0i[LoopTools`cc00,Sequence@@#2] -> "c"<>#1<>"[3]",
-            LoopTools`C0i[LoopTools`cc11,Sequence@@#2] -> "c"<>#1<>"[4]",
-            LoopTools`C0i[LoopTools`cc12,Sequence@@#2] -> "c"<>#1<>"[5]",
-            LoopTools`C0i[LoopTools`cc22,Sequence@@#2] -> "c"<>#1<>"[6]"}&,
-      fourPoint,
-      fourPointTemplate =
-         {  LoopTools`D0i[LoopTools`dd0,Sequence@@#2] -> "d"<>#1<>"[0]",
-            LoopTools`D0i[LoopTools`dd1,Sequence@@#2] -> "d"<>#1<>"[1]",
-            LoopTools`D0i[LoopTools`dd2,Sequence@@#2] -> "d"<>#1<>"[2]",
-            LoopTools`D0i[LoopTools`dd3,Sequence@@#2] -> "d"<>#1<>"[3]",
-            LoopTools`D0i[LoopTools`dd00,Sequence@@#2] -> "d"<>#1<>"[4]",
-            LoopTools`D0i[LoopTools`dd11,Sequence@@#2] -> "d"<>#1<>"[5]",
-            LoopTools`D0i[LoopTools`dd12,Sequence@@#2] -> "d"<>#1<>"[6]",
-            LoopTools`D0i[LoopTools`dd13,Sequence@@#2] -> "d"<>#1<>"[7]",
-            LoopTools`D0i[LoopTools`dd22,Sequence@@#2] -> "d"<>#1<>"[8]",
-            LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>"[9]",
-            LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>"[10]"}&,
-      append,
-      loopRules = {},
-      loopArrayDefine = {},
-      loopArraySet = {}
+Module[{
+      all, gathered, using, loopIdentifiers, abbreviate, abbreviations, loopRules,
+      define, loopArrayDefine, set, loopArraySet
    },
-   append[loopFunctions_List,function_,functionName_String,arrayName_String] :=
-   If[loopFunctions=!={},
-      AppendTo[
-         loopArrayDefine,
-         Array[
-            "looplibrary::"<>functionName<>"coeff_t "<>arrayName<>ToString@#<>"{}"&,
-            Length@loopFunctions
-         ]
-      ];
-      AppendTo[
-         loopArraySet,
-         Array[
-            Parameters`ExpressionToString[
-               StringJoin["Loop_library::get().",functionName][
-                  arrayName<>ToString@#,
-                  Sequence@@loopFunctions[[#,1]],
-                  "Sqr(context.scale())"]]<>"; // "<>
-            ToString@loopFunctions[[#,2]]<>" copies."&,
-            Length@loopFunctions
-         ]
-      ];
-      AppendTo[
-         loopRules,
-         Join@@function@@@Array[{ToString@#,loopFunctions[[#,1]]}&, Length@loopFunctions]
-      ];
-   ];
-   onePoint = Tally@Join[
-      Cases[modifiedExpr, LoopTools`A0i[_,args:__]:>{args}, Infinity],
-      Cases[modifiedExpr, LoopTools`A0[args:__]:>{args}, Infinity]
-   ];
-   twoPoint = Tally@Join[
-      Cases[modifiedExpr, LoopTools`B0i[_,args:__]:>{args}, Infinity],
-      Cases[modifiedExpr, LoopTools`B0[args:__]:>{args}, Infinity]
-   ];
-   threePoint = Tally@Join[
-      Cases[modifiedExpr, LoopTools`C0i[_,args:__]:>{args}, Infinity],
-      Cases[modifiedExpr, LoopTools`C0[args:__]:>{args}, Infinity]
-   ];
-   fourPoint = Tally@Join[
-      Cases[modifiedExpr, LoopTools`D0i[_,args:__]:>{args}, Infinity],
-      Cases[modifiedExpr, LoopTools`D0[args:__]:>{args}, Infinity]
-   ];
-   append[onePoint,onePointTemplate,"A","a"];
-   append[twoPoint,twoPointTemplate,"B","b"];
-   append[threePoint,threePointTemplate,"C","c"];
-   append[fourPoint,fourPointTemplate,"D","d"];
-   {
-      Flatten@loopRules,
-      Utils`StringJoinWithSeparator[Join@@loopArrayDefine,";\n"]<>";\n",
-      Utils`StringJoinWithReplacement[Join@@loopArraySet,"\n","\""->""],
-      modifiedExpr/.Flatten@loopRules
-   }
+   all = DeleteDuplicates@Cases[modifiedExpr, h_@__ /; Context@h == "LoopTools`", Infinity];
+   gathered = GatherBy[all, # /. _[_, a___] :> {a}&];
+
+   using[i_List] := i /. h_[id_, __] /; h =!= List :> "using looplibrary::" <> SymbolName@id <> ";";
+   loopIdentifiers = StringRiffle[DeleteDuplicates@Flatten@Map[using, gathered], "\n"];
+
+   abbreviate[i_List, {num_}] := i /. h_[id_, __] /; h =!= List :> CXXLoopArray@num <> "[" <> SymbolName@id <> "]";
+   abbreviations = MapIndexed[abbreviate, gathered];
+   loopRules = MapThread[Rule, Flatten/@{gathered, abbreviations}];
+
+   define[{h_@__, ___}, {num_}] := CXXLoopType@h <> " " <> CXXLoopArray@num <> " {};";
+   loopArrayDefine = StringRiffle[MapIndexed[define, gathered], "\n"];
+
+   set[{h_[_, args__], ___}, {num_}] := Parameters`ExpressionToString[StringJoin["Loop_library::get().", CXXLoopLibrary@h][CXXLoopArray@num, args, "Sqr(context.scale())"]] <> ";";
+   loopArraySet = Utils`StringJoinWithReplacement[MapIndexed[set, gathered], "\n", "\""->""];
+
+   {loopRules, loopArrayDefine, loopArraySet, loopIdentifiers}
 ];
 CreateLoopFunctions // secure;
 

@@ -45,6 +45,8 @@ hhSelfenergy = NPointFunctions`NPointFunction[
    NPointFunctions`ZeroExternalMomenta -> True,
    NPointFunctions`KeepProcesses -> {NPointFunctions`Irreducible}];
 
+hhSelfenergy = hhSelfenergy /. LoopTools`A0[args__] :> LoopTools`A0i[LoopTools`aa0, args];
+
 hhSelfenergyCode = NPointFunctions`CreateCXXFunctions[
    hhSelfenergy,
    "selfenergy_hh_1loop",
