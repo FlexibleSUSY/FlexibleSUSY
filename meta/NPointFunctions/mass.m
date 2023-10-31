@@ -20,7 +20,6 @@
 
 *)
 
-Utils`DynamicInclude@"tools.m";
 Utils`DynamicInclude@"type.m";
 
 BeginPackage@"mass`";
@@ -61,9 +60,9 @@ rules::errNotSet = "Call mass`rules[...] first.";
 
 modify[{generic_, chains_, subs_}, tree:type`tree, NPointFunctions`ExceptLoops] :=
 Module[{names, loops, uniqueIntegrals, hideInt, showInt, massRules, new},
-   tools`subWrite@"Applying subexpressions ... ";
+   subWrite@"Applying subexpressions ... ";
    new = generic //. subs;
-   tools`subWrite@"done\n";
+   subWrite@"done\n";
 
    names = ToExpression/@ Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
    loops = Alternatives@@ ( #[__] &/@ names );
@@ -84,10 +83,21 @@ Module[{names, loops, uniqueIntegrals, hideInt, showInt, massRules, new},
    }
 ];
 
+zeroRules[nonzeroRules:{Rule[_, _]...}, zeroRules:{Rule[_, 0]...}] :=
+Module[{newNonzero, newZeroRules},
+   newNonzero = Thread[
+      Rule[nonzeroRules[[All,1]], nonzeroRules[[All,2]]/. zeroRules]];
+   If[newNonzero === nonzeroRules, Return[{nonzeroRules, zeroRules}]];
+   newZeroRules = Cases[newNonzero, HoldPattern[_-> 0]];
+   newNonzero = Complement[newNonzero, newZeroRules];
+   zeroRules[newNonzero, Join[zeroRules, newZeroRules]]
+];
+zeroRules // secure;
+
 modify[{generic_, chains_, subs_}, _, True] :=
 Module[{zeroedRules, new},
    zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)];
-   {new, zeroedRules} = tools`zeroRules[subs, zeroedRules];
+   {new, zeroedRules} = zeroRules[subs, zeroedRules];
    {
       generic /. zeroedRules,
       NPointFunctions`Private`zeroMomenta@chains,

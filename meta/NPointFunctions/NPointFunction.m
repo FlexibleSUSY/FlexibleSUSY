@@ -54,8 +54,9 @@ secure[sym_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
+subWrite // Protect;
+
 Utils`DynamicInclude/@{
-   "tools.m",
    "type.m",
    "rules.m",
    "settings.m",
@@ -238,11 +239,11 @@ mapThread[func_, exprs:{__}, text_String] :=
       tot = Length@First@exprs;
       print[i_] :=
       (  delta = Floor[(def-StringLength[text]-4)*i/tot] - printed;
-         tools`subWrite[StringJoin@@Array["."&, delta]];
+         subWrite[StringJoin@@Array["."&, delta]];
          printed += delta;);
-      tools`subWrite[text<>": ["];
+      subWrite[text<>": ["];
       out = Table[print@i; func@@exprs[[All, i]], {i, tot}];
-      tools`subWrite@"]\n";
+      subWrite@"]\n";
       out];
 mapThread // secure;
 
