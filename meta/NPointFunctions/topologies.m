@@ -62,7 +62,7 @@ Module[{external, simple, graph, ordering, matrix},
    matrix = Normal[AdjacencyMatrix[graph]][[ordering, ordering]];
    Flatten@MapIndexed[Drop[#1, Max[external, #2-1]]&, matrix]
 ];
-adjace // tools`secure;
+adjace // secure;
 
 DefineAllowedTopologies[] :=
 Module[{all, single, combined},
@@ -77,19 +77,19 @@ Module[{all, single, combined},
 defineSingle[name_Symbol -> adjacencyVector:{__Integer}] :=
 With[{function = name, vector = adjacencyVector},
    function[t:type`topology] := adjace@t === vector;
-   function // tools`secure;
+   function // secure;
 ];
-defineSingle // tools`secure;
+defineSingle // secure;
 
 defineCombined[name_Symbol -> singleTopologies:{__Symbol}] :=
 With[{function = name, list = singleTopologies},
    function[t:type`topology] := Or@@ Through@list@t;
-   function // tools`secure;
+   function // secure;
 ];
-defineCombined // tools`secure;
+defineCombined // secure;
 
 getTopology[d:type`diagram] := First@d;
-getTopology // tools`secure;
+getTopology // secure;
 
 getExcludeTopologies::usage = "
 @brief Registers a function, whose outcome (``True`` or everything else)
@@ -108,7 +108,7 @@ Once@Module[{all, name, set, default},
       ($expressionsToDerive/.all)@#]];
    name
 ];
-getExcludeTopologies // tools`secure;
+getExcludeTopologies // secure;
 
 End[];
 EndPackage[];

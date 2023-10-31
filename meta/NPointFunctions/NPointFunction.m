@@ -50,6 +50,10 @@ SetAttributes[
 
 Begin@"`Private`";
 
+secure[sym_Symbol] :=
+   Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
+secure // secure;
+
 Utils`DynamicInclude/@{
    "tools.m",
    "type.m",
@@ -112,20 +116,20 @@ Module[{tree},
    picture@tree;
    {`rules`fields@fields@tree, calculateAmplitudes@tree}
 ];
-NPointFunction // tools`secure;
+NPointFunction // secure;
 
 genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
-genericIndex // tools`secure;
+genericIndex // secure;
 
 process[set:type`diagramSet|type`amplitudeSet] :=
    Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
 process[set:type`fc`amplitudeSet] :=
    Part[Head@Part[set, 1], 1];
-process // tools`secure;
+process // secure;
 
 getField[set:type`diagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
-getField // tools`secure;
+getField // secure;
 
 fieldInsertions::usage = "
 @brief Finds insertions, related to fields.
@@ -169,11 +173,11 @@ Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
    SortBy[#,First]&/@ If[keepNumQ,
       List @@ genericInsertions,
       List @@ genericInsertions /. toGenericIndexConventionRules]];
-fieldInsertions // tools`secure;
+fieldInsertions // secure;
 
 removeParticleIndices[Times[-1, field_]] := -removeParticleIndices@field;
 removeParticleIndices[name_[class_, ___]] := name@class;
-removeParticleIndices // tools`secure;
+removeParticleIndices // secure;
 
 calculateAmplitudes::usage = "
 @brief Applies ``FormCalc`` routines to amplitude set, simplifies the result.
@@ -221,7 +225,7 @@ Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
          colorFactors@tree},
       chains,
       subs] /. `rules`externalMomenta[tree, $zeroExternalMomenta]];
-calculatedAmplitudes // tools`secure;
+calculatedAmplitudes // secure;
 
 mapThread::usage = "
 @brief Behaves like ``MapThread``, but also prints a progress bar.
@@ -240,7 +244,7 @@ mapThread[func_, exprs:{__}, text_String] :=
       out = Table[print@i; func@@exprs[[All, i]], {i, tot}];
       tools`subWrite@"]\n";
       out];
-mapThread // tools`secure;
+mapThread // secure;
 
 getGenericFields::usage = "
 @brief Generates a list of unique sorted generic fields in expression.
@@ -248,7 +252,7 @@ getGenericFields::usage = "
 @returns A list of unique sorted generic fields.";
 getGenericFields[expr:_] :=
    Sort@DeleteDuplicates[Cases[expr, type`genericField, Infinity]];
-getGenericFields // tools`secure;
+getGenericFields // secure;
 
 getGenericSum::usage= "
 @brief Converts ``FormCalc`Amp`` into ``NPointFunctions`GenericSum`` object
@@ -263,7 +267,7 @@ Module[{sort, rules},
    GenericSum[
       List@@amplitude,
       sort /. f_[_[_,i_]] :> {f@GenericIndex@i, i /. rules}]];
-getGenericSum // tools`secure;
+getGenericSum // secure;
 
 convertToFS::usage = "
 @brief Translate a list of ``FormCalc`` amplitudes, abbreviations and
@@ -275,7 +279,7 @@ convertToFS::usage = "
 convertToFS[amplitudes_, abbreviations_, subexpressions_] :=
    {  `rules`amplitude@amplitudes,
       `rules`subexpressions/@Join[abbreviations, subexpressions]};
-convertToFS // tools`secure;
+convertToFS // secure;
 
 End[];
 Block[{$ContextPath}, EndPackage[]];

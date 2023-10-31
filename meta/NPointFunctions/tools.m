@@ -22,11 +22,6 @@
 
 BeginPackage@"tools`";
 
-secure::usage = "
-@brief Apply after all function definitions:
-       In[1]:= a[1] := b;
-               a // tools`secure;";
-
 zeroRules::usage = "
 @brief Given a set of rules that map to zero and a set that does
        not map to zero, apply the zero-rules to the non-zero ones
@@ -39,10 +34,6 @@ Begin@"`Private`";
 subWrite = NPointFunctions`Private`subWrite;
 subWrite // Protect;
 
-secure[sym_Symbol] :=
-   Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
-secure // secure;
-
 zeroRules[nonzeroRules:{Rule[_, _]...}, zeroRules:{Rule[_, 0]...}] :=
 Module[{newNonzero, newZeroRules},
    newNonzero = Thread[
@@ -52,7 +43,7 @@ Module[{newNonzero, newZeroRules},
    newNonzero = Complement[newNonzero, newZeroRules];
    zeroRules[newNonzero, Join[zeroRules, newZeroRules]]
 ];
-zeroRules // tools`secure;
+zeroRules // secure;
 
 End[];
 Block[{$ContextPath}, EndPackage[]];

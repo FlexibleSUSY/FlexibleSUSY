@@ -108,7 +108,7 @@ Module[{res = {tree}, default, head},
       {default, rest__} :> head@{rest} /. {default} -> default
 ];
 
-settings // tools`secure;
+settings // secure;
 
 (* -----v This is a generator function for 'applySetting'.                   *)
 makeApply[pattern_, function:_Symbol] :=
@@ -148,7 +148,7 @@ tree /. node[t:type`topology/; tQ@t, rest__] :> (
 (*                   v-----------v Head of expanded InternalMass.            *)
 append[{Append, mass_FeynArts`Mass :> ExternalMass[i_Integer]}, ___] :=
 With[{rhs = mass`rules[][[i, 1, 1]]}, Append[#, mass :> rhs]&];
-append // tools`secure;
+append // secure;
 
 applySetting[tree:type`tree, tQ_ -> {str_String, fun:{Hold, _}}] :=
 tree /. node[t:type`topology/; tQ@t, rest__] :> (
@@ -162,9 +162,9 @@ tree /. node[t:type`topology/; tQ@t, rest__] :> (
 hold[{Hold, {i_Integer}}, ___] :=
 With[{pos = i}, ReplacePart[#, pos -> {}]&];
 (*              ^---------^ First positions are for ext. particles [mass.m]. *)
-hold // tools`secure;
+hold // secure;
 
-applySetting // tools`secure;
+applySetting // secure;
 
 (* Functions below are supposed to be used in [OBSERVABLE/settings.m].       *)
 
@@ -189,11 +189,11 @@ InternalMass[f:type`field, index:_Integer] :=
 ExternalMass[index:_Integer] := {index};
 (*                              ^-----^ TODO(uukhas): replace.               *)
 
-LoopFields // tools`secure;
-TreeFields // tools`secure;
-Field // tools`secure;
-FieldPattern // tools`secure;
-InternalMass // tools`secure;
-ExternalMass // tools`secure;
+LoopFields // secure;
+TreeFields // secure;
+Field // secure;
+FieldPattern // secure;
+InternalMass // secure;
+ExternalMass // secure;
 End[];
 EndPackage[];

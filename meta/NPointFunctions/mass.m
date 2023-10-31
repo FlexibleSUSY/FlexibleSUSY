@@ -42,7 +42,7 @@ externalMasses[set:type`fc`amplitudeSet] :=
 externalMasses[tree:type`tree] :=
    FeynArts`Mass[# /. -1 -> 1]&/@ NPointFunctions`Private`fields[tree, Flatten];
 
-externalMasses // tools`secure;
+externalMasses // secure;
 
 (*                       v- FormCalc creates new masses - we also need them. *)
 Module[{data},
@@ -56,7 +56,7 @@ Module[{data},
       Utils`AssertOrQuit[Head@data =!= Symbol, rules::errNotSet];
       data);
 ];
-rules // tools`secure;
+rules // secure;
 rules::errNotSet = "Call mass`rules[...] first.";
 
 modify[{generic_, chains_, subs_}, tree:type`tree, NPointFunctions`ExceptLoops] :=
@@ -97,7 +97,7 @@ Module[{zeroedRules, new},
 
 modify[e:{_, _, _}, __] := e;
 
-modify // tools`secure;
+modify // secure;
 
 End[];
 Block[{$ContextPath}, EndPackage[]];
