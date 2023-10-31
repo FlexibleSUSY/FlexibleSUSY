@@ -27,19 +27,29 @@ removeColors[expr_] :=
    Delete[expr, Position[expr, type`colorIndex]];
 removeColors // secure;
 
-lengthyQ::usage = "
-@brief Checks, whether the ``Length`` of expression is zero or not.
-       In the latter case returns input, otherwise writes an error message
-       and stops the evaluation.
-@param input Any expression.
-@returns An input in case of non-zero ``Length`` of the input.";
-lengthyQ[input:_] := With[{sym = Head@Unevaluated@input},
-   If[Length@input =!= 0,
-      input,
-      sym::length = "The input has a zero lenght.";
-      Utils`AssertOrQuit[_, sym::length];]];
-lengthyQ // Utils`MakeUnknownInputDefinition;
-lengthyQ ~ SetAttributes ~ {Protected, HoldFirst};
+TreeFromDiagrams::topologies = "Zero topologies generated or selected.";
+TreeFromDiagrams::diagrams = "No diagrams generated after field insertions.";
+TreeFromDiagrams[in_, out_] :=
+Module[{topologies, diagrams},
+   topologies = FeynArts`CreateTopologies[
+      $loopNumber,
+      Length@in -> Length@out,
+      FeynArts`ExcludeTopologies -> GetExcludeTopologies[]
+   ];
+   Utils`AssertOrQuit[Length@topologies > 0, plant::topologies];
+
+   diagrams = FeynArts`InsertFields[
+      topologies,
+      ToExpression@in -> ToExpression@out
+   ];
+   Utils`AssertOrQuit[Length@diagrams > 0, plant::diagrams];
+
+   node[{Head@#}, Sequence@@#]&[diagrams] /.
+      Rule[t:type`topology, rest_] :> node[t, rest] /.
+      (h:_@Generic)[a__] :> Sequence@@(node@*h@@#&/@{a}) /.
+      (h:_@Generic)[a_, rest__] :> Sequence[h@a, rest] /.
+      (h:_@FeynArts`Classes)[a__] :> Sequence@@(node@*h/@{a})
+];
 
 plant::usage = "
 @brief Creates diagrams and amplitudes, forms a ``tree`` object.
@@ -49,21 +59,7 @@ plant::usage = "
        required to be *outgoing* fields for the amplitude.
 @param tree A ``tree`` object.
 @returns A ``tree`` object.";
-plant[in_, out_] :=
-   Module[{topologies, diagrams},
-      topologies = lengthyQ@FeynArts`CreateTopologies[
-         $loopNumber,
-         Length@in -> Length@out,
-         FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
-      diagrams = lengthyQ@FeynArts`InsertFields[topologies,
-         ToExpression@in -> ToExpression@out];
-
-      node[{Head@#}, Sequence@@#]&[diagrams] /.
-         Rule[t:type`topology, rest_] :> node[t, rest] /.
-         (h:_@Generic)@a__ :> Sequence@@(node@*h@@#&/@{a}) /.
-         (h:_@Generic)[a_, rest__] :> Sequence[h@a, rest] /.
-         (h:_@FeynArts`Classes)@a__ :> Sequence@@(node@*h/@{a})];
-plant[tree:type`tree] :=
+plant[tree:_?IsTree] :=
    Module[{amps, generic, classes, i = 1, j = 1},
       amps = removeColors@FeynArts`CreateFeynAmp@diagrams@tree;
       generic = Most/@List@@amps;
@@ -75,7 +71,7 @@ plant[tree:type`tree] :=
          node[e:type`classes] :> node@Append[e, classes[[j++]]]];
 plant // secure;
 
-info[tree:type`tree, str_String] :=
+info[tree:_?IsTree, str_String] :=
    (  Print@str;
       Print[" in total: ",
          Length@Cases[tree, type`generic, Infinity], " Generic, ",
@@ -83,7 +79,7 @@ info[tree:type`tree, str_String] :=
       tree);
 info // secure;
 
-diagrams[tree:type`tree] :=
+diagrams[tree:_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> First[e]@rest /.
       node[e:type`topology, rest__] :>
@@ -92,20 +88,20 @@ diagrams[tree:type`tree] :=
          First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
       node[e:type`classes] :> First@e;
 
-amplitudes[tree:type`tree] :=
+amplitudes[tree:_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> Part[e, 2]@rest /.
       node[e:type`topology, rest__] :> rest /.
       node[e:type`classes] :> Last@e /.
       node[e:type`generic, rest__] :> Append[Part[e, 2], wrap@rest];
 
-fields[tree:type`tree, Flatten] :=
+fields[tree:_?IsTree, Flatten] :=
    Flatten[fields@tree, 1];
-fields[tree:type`tree] :=
+fields[tree:_?IsTree] :=
    tree /. node[e:type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
 fields // secure;
 
-picture[tree:type`tree] :=
+picture[tree:_?IsTree] :=
    Module[{out = {}, directory, name},
       name = StringJoin[ToString /@ (
          `rules`fields@Join[fields[tree, Flatten],
@@ -138,7 +134,7 @@ cut::usage = "
              Out[1]= True
 @param info A Sequence of topology and topology list.
 @returns Nodes, cleaned by *fun*.";
-cut[tree:type`tree, tQ_, fun_] :=
+cut[tree:_?IsTree, tQ_, fun_] :=
    tree /.
       e:node[t:type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];
 
@@ -154,13 +150,13 @@ cut[n:node@type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
 
 cut // secure;
 
-head[tree:type`tree] := tree[[1, 1]];
+head[tree:_?IsTree] := tree[[1, 1]];
 head // secure;
 
 combinatoricalFactors::usage = "
 @param tree A ``tree`` object.
 @returns ``List`` of combinatorical factors for a given ``tree``.";
-combinatoricalFactors[tree:type`tree] :=
+combinatoricalFactors[tree:_?IsTree] :=
    combinatoricalFactors /@ List@@amplitudes@tree;
 combinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=
    {classes}[[All, #[[1, 1]]]] /.
@@ -177,7 +173,7 @@ colorFactors::usage = "
 @returns ``List`` (for a given topology) of several ``List``
          (for generic fields) of colour factors: ``{{__}..}``.
 @note External fields always come at first places in adjacency matrix.";
-colorFactors[tree:type`tree] :=
+colorFactors[tree:_?IsTree] :=
    `rules`fields@Flatten[colorFactors /@ List@@diagrams@tree, 1];
 colorFactors[diagram:Rule[_[_][props__], _[_][_[__][rules__]->_,___]]] :=
 Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram},

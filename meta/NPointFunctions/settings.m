@@ -20,11 +20,23 @@
 
 *)
 
-Utils`DynamicInclude@"type.m";
+Utils`DynamicInclude@"PatternChecks.m";
 Utils`DynamicInclude@"mass.m";
 
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
+
+With[{dir = DirectoryName@$InputFileName},
+LoadAllSettings[] :=
+(
+   BeginPackage@"NPointFunctions`";
+   Begin@"`Private`";
+   If[FileExistsQ@#, Get@#]&@FileNameJoin@
+      {ParentDirectory@dir, "Observables", $observableName, "NPointFunctions.m"};
+   End[];
+   EndPackage[];
+);
+];
 
 settings::usage = "
 @brief Loads default topologies from topologies.m file.
@@ -44,21 +56,9 @@ settings::usage = "
           Do not put some masses to zero.
        order[]
           Overrides default fermion order.";
-With[{dir = DirectoryName@$InputFileName},
-LoadAllSettings[] :=
-(
-   BeginPackage@"NPointFunctions`";
-   Begin@"`Private`";
-   If[FileExistsQ@#, Get@#]&@FileNameJoin@
-      {ParentDirectory@dir, "Observables", $observableName, "NPointFunctions.m"};
-   End[];
-   EndPackage[];
-);
-];
-
 (*       v--v This object is modified and returned.                          *)
 (*                       v------v Are defined in [OBSERVABLE/settings.m].    *)
-settings[tree:type`tree, settings:diagrams|amplitudes] :=
+settings[tree:_?IsTree, settings:diagrams|amplitudes] :=
 Module[{doPresent, doAbsent, absent, todos, res = tree},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
       settings[$loopNumber, #]&/@ {Plus, Minus};
@@ -75,7 +75,7 @@ Module[{doPresent, doAbsent, absent, todos, res = tree},
 ];
 
 (* --------v For diagrams and amplitudes.                                    *)
-applySetting[tree:type`tree, tQ_ -> {str_String, fun_}] :=
+applySetting[tree:_?IsTree, tQ_ -> {str_String, fun_}] :=
    info[cut[tree, tQ, fun], str];
 
 settings[order] :=
@@ -84,7 +84,7 @@ If[Head@order[] === List,
    Reverse@Range@Tr@$externalFieldNumbers
 ];
 
-settings[tree:type`tree, settings:regularization|momenta|sum|mass] :=
+settings[tree:_?IsTree, settings:regularization|momenta|sum|mass] :=
 Module[{res = {tree}, default, head},
    If[Head@settings@$loopNumber === List,
       AppendTo[res, applySetting[tree, #]]&/@
@@ -113,7 +113,7 @@ settings // secure;
 (* -----v This is a generator function for 'applySetting'.                   *)
 makeApply[pattern_, function:_Symbol] :=
 (  Off@RuleDelayed::rhs;
-   applySetting[tree:type`tree, pattern] :=
+   applySetting[tree:_?IsTree, pattern] :=
       Module[{once},
          once[arg_] := once@arg =
             If[# =!= {}, Print@@#]&@
@@ -134,7 +134,7 @@ restrict[{int_, fun_}, __, head_] :=
 
 (*                           v- Selects on which topology RHS is applied.    *)
 (*                                   v-- Will be printed during evaluation.  *)
-applySetting[tree:type`tree, tQ_ -> {str_String, fun:{Append, _}}] :=
+applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Append, _}}] :=
 tree /. node[t:type`topology/; tQ@t, rest__] :> (
    Print@str;
    node[t, rest] /. node[g:type`generic, __] :>
@@ -150,7 +150,7 @@ append[{Append, mass_FeynArts`Mass :> ExternalMass[i_Integer]}, ___] :=
 With[{rhs = mass`rules[][[i, 1, 1]]}, Append[#, mass :> rhs]&];
 append // secure;
 
-applySetting[tree:type`tree, tQ_ -> {str_String, fun:{Hold, _}}] :=
+applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Hold, _}}] :=
 tree /. node[t:type`topology/; tQ@t, rest__] :> (
    Print@str;
    node[t, rest] /. node[g:type`generic, __] :>
@@ -174,13 +174,13 @@ LoopFields[node[id_, ___], info__] :=
 TreeFields[node[id_, ___], info__] :=
    FeynArts`TreeFields[First@id, info];
 
-Field[d:Head@type`diagramSet, i_Integer] :=
+Field[d_?IsTopologyListHead, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
 
-FieldPattern[d:Head@type`diagramSet, i_Integer] :=
+FieldPattern[d_?IsTopologyListHead, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
       type`generationIndex :> Blank[];
-FieldPattern[d:Head@type`diagramSet, a:HoldPattern@Alternatives@__] :=
+FieldPattern[d_?IsTopologyListHead, a:HoldPattern@Alternatives@__] :=
    FieldPattern[d, #] &/@ a;
 
 InternalMass[f:type`field, index:_Integer] :=

@@ -23,13 +23,14 @@
 BeginPackage@"type`";
 
 vertex = FeynArts`Vertex[_Integer][_Integer];
+
 propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|
    FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][
       vertex, vertex, Repeated[FeynArts`Field[_Integer],{0,1}]];
 topology = FeynArts`Topology[_Integer][propagator..];
 
 diagram = Rule[topology, FeynArts`Insertions[Generic][__]];
-diagramSet = FeynArts`TopologyList[_][diagram..];
+
 
 amplitude = FeynArts`FeynAmp[
    FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
@@ -37,7 +38,6 @@ amplitude = FeynArts`FeynAmp[
    (* For 0loop. *)Integral[],
    _,
    {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]];
-amplitudeSet = FeynArts`FeynAmpList[__][amplitude..];
 
 colorIndex = FeynArts`Index[Global`Colour, _Integer];
 gluonIndex = FeynArts`Index[Global`Gluon, _Integer];
@@ -57,20 +57,22 @@ mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
    FormCalc`k@_Integer, `fc`mass, {}};
 `fc`process = {`fc`external..} -> {`fc`external..};
 `fc`amplitude = FormCalc`Amp[`fc`process][_];
-`fc`amplitudeSet = {`fc`amplitude..};
 
-head =
-   {_FeynArts`TopologyList, ___};
-generic =
-   FeynArts`Insertions[Generic]@__;
-classes =
-   FeynArts`Insertions[FeynArts`Classes]@__;
-With[{node = NPointFunctions`Private`node},
-   tree =
-      node[head,
-         node[topology,
-            node[generic,
-               node[classes]..]..]..];];
-
+head = {_FeynArts`TopologyList, ___};
+generic = FeynArts`Insertions[Generic][__];
+classes = FeynArts`Insertions[FeynArts`Classes][__];
 EndPackage[];
 $ContextPath = DeleteCases[$ContextPath, "type`"];
+
+Begin@"NPointFunctions`Private`";
+
+IsTopologyListHead[e_] := MatchQ[e, FeynArts`TopologyList[_]];
+IsDiagramSet[e_] := MatchQ[e, FeynArts`TopologyList[_][type`diagram..]];
+IsAmplitudeSet[e_] := MatchQ[e, FeynArts`FeynAmpList[__][type`amplitude..]];
+IsFormCalcSet[e_] := MatchQ[e, {type`fc`amplitude..}];
+IsTree[e_] := MatchQ[e,
+   node[type`head, node[type`topology, node[type`generic, node[type`classes]..]..]..]
+];
+
+End[];
+

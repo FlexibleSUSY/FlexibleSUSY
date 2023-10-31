@@ -23,9 +23,8 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-(*          v-- Number of incoming particles.                                *)
-(*             v-- Number of outgoing particles.                             *)
-topologies[{2, 2}] = {
+topologies[{2, 2}] =
+{
    treeS -> {1,0,1,0,0,1,0,1,0,1,0},
    treeT -> {1,0,0,1,1,0,0,1,0,1,0},
    treeU -> {1,0,0,1,0,1,1,0,0,1,0},
@@ -39,21 +38,14 @@ topologies[{2, 2}] = {
    boxU -> {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0},
    boxAll -> {boxS, boxT, boxU}
 };
-(* ^----^ Use these names in the 'settings.m' files for observables.         *)
-(*          ^---------------------^ Use 'adjace' for a single topology.      *)
-(*            ^--^ Use symbols from lhs. for a combination of topologies.    *)
 
-adjace::usage = "
-@brief Archivates the adjacency matrix of a given topology. Example:
-       In[1]:= << FeynArts`;
-               topologies = CreateTopologies[0, 1 -> 2];
-               adjace[topologies[[1]]]
-       Out[1]= {1, 1, 1, 0}";
-(*              v-----------v Replace by _ in the notebook.                  *)
+adjace::usage = "Archivates the adjacency matrix of a given topology:
+In[1]:= << FeynArts`;
+        topologies = CreateTopologies[0, 1 -> 2];
+        adjace[topologies[[1]]]
+Out[1]= {1, 1, 1, 0}";
 adjace[topology:type`topology] :=
 Module[{external, simple, graph, ordering, matrix},
-(* v------v Number of external particles.                                    *)
-(*            v--------------------------v Replace by number in the notebook.*)
    external = Tr@$externalFieldNumbers;
    simple = (#/. h_[i_, j_, _] :> h[i, j])&/@ topology;
    graph = List@@ (UndirectedEdge@@@ FeynArts`TopologySort@simple)/.
@@ -65,11 +57,11 @@ Module[{external, simple, graph, ordering, matrix},
 adjace // secure;
 
 DefineAllowedTopologies[] :=
-Module[{all, single, combined},
-   all = topologies@$externalFieldNumbers;
-   If[Head@all =!= List, Return[]];
-   combined = Select[all, FreeQ[#, _Integer]&];
-   single = Complement[all, combined];
+Module[{allTopologies, single, combined},
+   allTopologies = topologies@$externalFieldNumbers;
+   If[Head@allTopologies =!= List, Return[]];
+   combined = Select[allTopologies, FreeQ[#, _Integer]&];
+   single = Complement[allTopologies, combined];
    If[single =!= {}, defineSingle/@ single];
    If[combined =!= {}, defineCombined/@ combined];
 ];
@@ -91,24 +83,24 @@ defineCombined // secure;
 getTopology[d:type`diagram] := First@d;
 getTopology // secure;
 
-getExcludeTopologies::usage = "
+GetExcludeTopologies::usage = "
 @brief Registers a function, whose outcome (``True`` or everything else)
        determines whether the topology is kept or not.
 @returns A name of generated function.";
-getExcludeTopologies[] :=
-Once@Module[{all, name, set, default},
+GetExcludeTopologies[] :=
+Once@Module[{all, name, default, loaded},
    default = {
       "Irreducible" -> (FreeQ[#, FeynArts`Internal]&),
       "Triangles"   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)
    };
-   set = If[MatchQ[#, {__}], #, {}]&[topologies@$loopNumber];
-   set = Rule[SymbolName@First@#, With[{fun = Last@#}, fun@#&]]&/@ set;
-   all = Join[default, set];
-   FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
-      ($expressionsToDerive/.all)@#]];
+   loaded = If[MatchQ[#, {__}], #, {}]&[topologies@$loopNumber];
+   loaded = Rule[SymbolName@First@#, With[{fun = Last@#}, fun@#&]] &/@ Utils`UnzipRules@loaded;
+
+   all = Join[default, loaded];
+   FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[($expressionsToDerive/.all)@#]];
    name
 ];
-getExcludeTopologies // secure;
+GetExcludeTopologies // secure;
 
 End[];
 EndPackage[];

@@ -155,7 +155,7 @@ With[{lt = Unique@"SARAH`lt"},
       FeynArts`IndexSum -> Sum};
 `rules`amplitude // secure;
 
-`rules`externalMomenta[tree:type`tree,
+`rules`externalMomenta[tree_?IsTree,
    option:True|False|OperatorsOnly|ExceptLoops] :=
 Module[{fsFields},
    Switch[option,

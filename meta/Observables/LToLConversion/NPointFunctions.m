@@ -1,11 +1,9 @@
 topologies[0] = {
-   Vectors -> treeAll,
-   Scalars -> treeAll
+   {Vectors, Scalars} -> treeAll
 };
 
 topologies[1] = {
-   Vectors -> penguinT,
-   Scalars -> penguinT,
+   {Vectors, Scalars} -> penguinT,
    Boxes -> boxAll
 };
 

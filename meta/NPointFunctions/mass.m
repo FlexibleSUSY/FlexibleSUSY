@@ -20,7 +20,7 @@
 
 *)
 
-Utils`DynamicInclude@"type.m";
+Utils`DynamicInclude@"PatternChecks.m";
 
 BeginPackage@"mass`";
 
@@ -35,17 +35,17 @@ modify::usage = "
 
 Begin@"`Private`";
 
-externalMasses[set:type`fc`amplitudeSet] :=
+externalMasses[set_?NPointFunctions`Private`IsFormCalcSet] :=
    Flatten[List@@NPointFunctions`Private`process@set, 1][[All, 3]];
 
-externalMasses[tree:type`tree] :=
+externalMasses[tree:_?NPointFunctions`Private`IsTree] :=
    FeynArts`Mass[# /. -1 -> 1]&/@ NPointFunctions`Private`fields[tree, Flatten];
 
 externalMasses // secure;
 
 (*                       v- FormCalc creates new masses - we also need them. *)
 Module[{data},
-   rules[tree:type`tree, fc:type`fc`amplitudeSet] :=
+   rules[tree:_?NPointFunctions`Private`IsTree, fc_?NPointFunctions`Private`IsFormCalcSet] :=
    data = Partition[
       RuleDelayed[#, 0]&/@ Riffle[externalMasses@tree, externalMasses@fc],
       2
@@ -58,7 +58,7 @@ Module[{data},
 rules // secure;
 rules::errNotSet = "Call mass`rules[...] first.";
 
-modify[{generic_, chains_, subs_}, tree:type`tree, NPointFunctions`ExceptLoops] :=
+modify[{generic_, chains_, subs_}, tree:_?NPointFunctions`Private`IsTree, NPointFunctions`ExceptLoops] :=
 Module[{names, loops, uniqueIntegrals, hideInt, showInt, massRules, new},
    subWrite@"Applying subexpressions ... ";
    new = generic //. subs;

@@ -57,7 +57,7 @@ secure // secure;
 subWrite // Protect;
 
 Utils`DynamicInclude/@{
-   "type.m",
+   "PatternChecks.m",
    "rules.m",
    "settings.m",
    "chains.m",
@@ -112,7 +112,7 @@ Module[{tree},
 
    DefineAllowedTopologies[];
    LoadAllSettings[];
-   tree = settings[plant[FAIncomingFields, FAOutgoingFields], diagrams];
+   tree = settings[TreeFromDiagrams[FAIncomingFields, FAOutgoingFields], diagrams];
    tree = settings[plant@tree, amplitudes];
    picture@tree;
    {`rules`fields@fields@tree, calculateAmplitudes@tree}
@@ -122,13 +122,15 @@ NPointFunction // secure;
 genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
 genericIndex // secure;
 
-process[set:type`diagramSet|type`amplitudeSet] :=
-   Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
-process[set:type`fc`amplitudeSet] :=
+process[set:_?IsDiagramSet|_?IsAmplitudeSet] :=
+   FirstCase[Head@set, (FeynArts`Process -> e_) :> e];
+
+process[set_?IsFormCalcSet] :=
    Part[Head@Part[set, 1], 1];
+
 process // secure;
 
-getField[set:type`diagramSet, i:_Integer] :=
+getField[set:_?IsDiagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
 getField // secure;
 
@@ -158,7 +160,7 @@ fieldInsertions::usage = "
          * For a set of diagrams only <class field> is taken instead of the
            whole ``Rule``.
 @note All indices in rhs. of rules are removed.";
-fieldInsertions[tree:type`tree] :=
+fieldInsertions[tree:_?IsTree] :=
    Map[Last, #, {3}] &@ Flatten[ fieldInsertions /@ List@@diagrams@tree, 1];
 fieldInsertions[diag:type`diagram, keepNumQ:True|False:False] :=
    fieldInsertions[#, keepNumQ] &/@ Apply[List, Last@diag, {0, 1}];
@@ -188,7 +190,7 @@ calculateAmplitudes::usage = "
          * generic amplitudes,
          * class specific insertions,
          * subexpressions.";
-calculateAmplitudes[tree:type`tree] :=
+calculateAmplitudes[tree:_?IsTree] :=
 Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    proc = process@amplitudes@tree;
    ampsGen = FeynArts`PickLevel[Generic][amplitudes@tree];
