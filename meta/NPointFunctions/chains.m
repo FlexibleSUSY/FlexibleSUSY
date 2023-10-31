@@ -86,7 +86,7 @@ Module[{i = 0, rules, sp, L, reveal},
       reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
       chainRules = reveal@settings@order;
-      rules = $zeroExternalMomenta /. tools`unzipRule@chains@$loopNumber /. chainRules;
+      rules = $zeroExternalMomenta /. Utils`UnzipRules@chains@$loopNumber /. chainRules;
    ];
    Expand@expression //. rules
 ];

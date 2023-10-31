@@ -178,6 +178,11 @@ DecomposeVersionString::usage = "Return a list for string containing a version n
 VersionOrderGtEqThan::usage = "Checks if version is >= than a given one";
 FSRound::usage = "FSRound[x, n] rounds number x to n digits after dot.";
 
+UnzipRules::usage = "Expands a set of compact rules into the full one:
+In[1]:= rules = {a -> b, {c, d} -> e};
+        Utils`UnzipRules[rules]
+Out[1]= {a -> b, c -> e, d -> e}";
+
 Begin["`Private`"];
 
 AppendOrReplaceInList[values_List, elem_, test_:SameQ] :=
@@ -459,6 +464,11 @@ singleInclude // MakeUnknownInputDefinition;
 singleInclude // Protect;
 
 DynamicInclude::errNoFile = "\nFile\n`1`\ndoes not exist and can't be loaded!";
+
+UnzipRules[rules:{Rule[_|{__}, _]...}] :=
+   rules /. Rule[lhs:{__}, rhs_] :> Sequence@@ (Rule[#, rhs]&/@ lhs);
+UnzipRules // MakeUnknownInputDefinition;
+UnzipRules // Protect;
 
 abbreviateLongString[expr_] :=
 Module[{str, b},

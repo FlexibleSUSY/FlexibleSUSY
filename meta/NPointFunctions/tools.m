@@ -22,15 +22,6 @@
 
 BeginPackage@"tools`";
 
-unzipRule::usage = "
-@brief Expands a set of compact rules into the full one:
-       In[1]:= rules = {
-                  a -> b,
-                  {c, d} -> e
-               };
-               tools`unzipRule[rules]
-       Out[1]= {a -> b, c -> e, d -> e}";
-
 secure::usage = "
 @brief Apply after all function definitions:
        In[1]:= a[1] := b;
@@ -51,10 +42,6 @@ subWrite // Protect;
 secure[sym_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
-
-unzipRule[rules:{Rule[_|{__}, _]...}] :=
-   rules /. Rule[lhs:{__}, rhs_] :> Sequence@@ (Rule[#, rhs]&/@ lhs);
-unzipRule // secure;
 
 zeroRules[nonzeroRules:{Rule[_, _]...}, zeroRules:{Rule[_, 0]...}] :=
 Module[{newNonzero, newZeroRules},

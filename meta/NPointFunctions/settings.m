@@ -62,7 +62,7 @@ settings[tree:type`tree, settings:diagrams|amplitudes] :=
 Module[{doPresent, doAbsent, absent, todos, res = tree},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
       settings[$loopNumber, #]&/@ {Plus, Minus};
-   {doPresent, doAbsent} = tools`unzipRule/@ {doPresent, doAbsent};
+   {doPresent, doAbsent} = Utils`UnzipRules/@ {doPresent, doAbsent};
    {doPresent, doAbsent} = Rule[SymbolName@First@#, Last@#]&/@ #&/@
       {doPresent, doAbsent};
    absent = Complement[First/@doAbsent, $expressionsToDerive];
@@ -88,7 +88,7 @@ settings[tree:type`tree, settings:regularization|momenta|sum|mass] :=
 Module[{res = {tree}, default, head},
    If[Head@settings@$loopNumber === List,
       AppendTo[res, applySetting[tree, #]]&/@
-         tools`unzipRule@settings@$loopNumber;
+         Utils`UnzipRules@settings@$loopNumber;
    ];
    default = Switch[settings,
       regularization, $regularizationScheme,
