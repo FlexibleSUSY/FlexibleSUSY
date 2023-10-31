@@ -162,7 +162,7 @@ fieldInsertions::usage = "
 @note All indices in rhs. of rules are removed.";
 fieldInsertions[tree:_?IsTree] :=
    Map[Last, #, {3}] &@ Flatten[ fieldInsertions /@ List@@diagrams@tree, 1];
-fieldInsertions[diag:type`diagram, keepNumQ:True|False:False] :=
+fieldInsertions[diag_?IsDiagram, keepNumQ:True|False:False] :=
    fieldInsertions[#, keepNumQ] &/@ Apply[List, Last@diag, {0, 1}];
 fieldInsertions[{graph_, insert_}, keepNumQ_] :=
 Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},

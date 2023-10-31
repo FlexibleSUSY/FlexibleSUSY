@@ -27,9 +27,7 @@ vertex = FeynArts`Vertex[_Integer][_Integer];
 propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|
    FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][
       vertex, vertex, Repeated[FeynArts`Field[_Integer],{0,1}]];
-topology = FeynArts`Topology[_Integer][propagator..];
 
-diagram = Rule[topology, FeynArts`Insertions[Generic][__]];
 
 
 amplitude = FeynArts`FeynAmp[
@@ -66,12 +64,16 @@ $ContextPath = DeleteCases[$ContextPath, "type`"];
 
 Begin@"NPointFunctions`Private`";
 
+IsTopology[e_] := MatchQ[e, FeynArts`Topology[_Integer][type`propagator..]];
+IsDiagram[e_] := MatchQ[e, Rule[_?IsTopology, FeynArts`Insertions[Generic][__]]];
+
 IsTopologyListHead[e_] := MatchQ[e, FeynArts`TopologyList[_]];
-IsDiagramSet[e_] := MatchQ[e, FeynArts`TopologyList[_][type`diagram..]];
+IsDiagramSet[e_] := MatchQ[e, FeynArts`TopologyList[_][__?IsDiagram]];
 IsAmplitudeSet[e_] := MatchQ[e, FeynArts`FeynAmpList[__][type`amplitude..]];
 IsFormCalcSet[e_] := MatchQ[e, {type`fc`amplitude..}];
+
 IsTree[e_] := MatchQ[e,
-   node[type`head, node[type`topology, node[type`generic, node[type`classes]..]..]..]
+   node[type`head, node[_?IsTopology, node[type`generic, node[type`classes]..]..]..]
 ];
 
 End[];

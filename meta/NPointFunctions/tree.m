@@ -45,7 +45,7 @@ Module[{topologies, diagrams},
    Utils`AssertOrQuit[Length@diagrams > 0, plant::diagrams];
 
    node[{Head@#}, Sequence@@#]&[diagrams] /.
-      Rule[t:type`topology, rest_] :> node[t, rest] /.
+      Rule[t_?IsTopology, rest_] :> node[t, rest] /.
       (h:_@Generic)[a__] :> Sequence@@(node@*h@@#&/@{a}) /.
       (h:_@Generic)[a_, rest__] :> Sequence[h@a, rest] /.
       (h:_@FeynArts`Classes)[a__] :> Sequence@@(node@*h/@{a})
@@ -82,7 +82,7 @@ info // secure;
 diagrams[tree:_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> First[e]@rest /.
-      node[e:type`topology, rest__] :>
+      node[e:_?IsTopology, rest__] :>
          Rule[e, FeynArts`Insertions[Generic][rest]]  /.
       node[e:type`generic, rest__] :>
          First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
@@ -91,7 +91,7 @@ diagrams[tree:_?IsTree] :=
 amplitudes[tree:_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> Part[e, 2]@rest /.
-      node[e:type`topology, rest__] :> rest /.
+      node[e:_?IsTopology, rest__] :> rest /.
       node[e:type`classes] :> Last@e /.
       node[e:type`generic, rest__] :> Append[Part[e, 2], wrap@rest];
 
@@ -136,11 +136,11 @@ cut::usage = "
 @returns Nodes, cleaned by *fun*.";
 cut[tree:_?IsTree, tQ_, fun_] :=
    tree /.
-      e:node[t:type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];
+      e:node[t:_?IsTopology /; tQ@t, __] :> cut[e, fun, t, head@tree];
 
-cut[n:node[type`topology, __], fun_, info__] :=
+cut[n:node[_?IsTopology, __], fun_, info__] :=
    n /. e:node[type`generic, __] :> cut[e, fun, info] /.
-      node@type`topology :> Sequence[];
+      node@_?IsTopology :> Sequence[];
 
 cut[n:node[type`generic, __], fun_, info__] :=
    If[fun[#, info], # /. node@type`generic :> Sequence[], ##&[]]&[

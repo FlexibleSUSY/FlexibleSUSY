@@ -44,7 +44,7 @@ In[1]:= << FeynArts`;
         topologies = CreateTopologies[0, 1 -> 2];
         adjace[topologies[[1]]]
 Out[1]= {1, 1, 1, 0}";
-adjace[topology:type`topology] :=
+adjace[topology:_?IsTopology] :=
 Module[{external, simple, graph, ordering, matrix},
    external = Tr@$externalFieldNumbers;
    simple = (#/. h_[i_, j_, _] :> h[i, j])&/@ topology;
@@ -68,19 +68,19 @@ Module[{allTopologies, single, combined},
 
 defineSingle[name_Symbol -> adjacencyVector:{__Integer}] :=
 With[{function = name, vector = adjacencyVector},
-   function[t:type`topology] := adjace@t === vector;
+   function[t:_?IsTopology] := adjace@t === vector;
    function // secure;
 ];
 defineSingle // secure;
 
 defineCombined[name_Symbol -> singleTopologies:{__Symbol}] :=
 With[{function = name, list = singleTopologies},
-   function[t:type`topology] := Or@@ Through@list@t;
+   function[t:_?IsTopology] := Or@@ Through@list@t;
    function // secure;
 ];
 defineCombined // secure;
 
-getTopology[d:type`diagram] := First@d;
+getTopology[d_?IsDiagram] := First@d;
 getTopology // secure;
 
 GetExcludeTopologies::usage = "

@@ -102,7 +102,7 @@ Module[{res = {tree}, default, head},
    ];
    res = res /.
       node[type`generic, __] -> default /.
-         node[type`topology, rest__] :> rest /.
+         node[_?IsTopology, rest__] :> rest /.
             node[type`head, rest__] :> {rest};
    DeleteDuplicates/@Transpose@res /.
       {default, rest__} :> head@{rest} /. {default} -> default
@@ -119,7 +119,7 @@ makeApply[pattern_, function:_Symbol] :=
             If[# =!= {}, Print@@#]&@
                Cases[pattern, _String, Infinity, Heads -> True];
 
-         tree /. node[t:type`topology /; tQ@t, rest__] :>
+         tree /. node[t:_?IsTopology /; tQ@t, rest__] :>
             (once@_; node[t, rest] /. node[g:type`generic, __] :>
                function[fun, g, t, head@tree])];
    On@RuleDelayed::rhs;
@@ -135,7 +135,7 @@ restrict[{int_, fun_}, __, head_] :=
 (*                           v- Selects on which topology RHS is applied.    *)
 (*                                   v-- Will be printed during evaluation.  *)
 applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Append, _}}] :=
-tree /. node[t:type`topology/; tQ@t, rest__] :> (
+tree /. node[t:_?IsTopology/; tQ@t, rest__] :> (
    Print@str;
    node[t, rest] /. node[g:type`generic, __] :>
    append[fun]
@@ -151,7 +151,7 @@ With[{rhs = mass`rules[][[i, 1, 1]]}, Append[#, mass :> rhs]&];
 append // secure;
 
 applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Hold, _}}] :=
-tree /. node[t:type`topology/; tQ@t, rest__] :> (
+tree /. node[t:_?IsTopology/; tQ@t, rest__] :> (
    Print@str;
    node[t, rest] /. node[g:type`generic, __] :>
    hold[fun]
