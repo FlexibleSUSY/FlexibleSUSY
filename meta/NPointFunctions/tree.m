@@ -23,26 +23,26 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-removeColors[expr_] :=
+RemoveColors[expr_] :=
    Delete[expr, Position[expr, type`colorIndex]];
-removeColors // secure;
+RemoveColors // secure;
 
-TreeFromDiagrams::topologies = "Zero topologies generated or selected.";
-TreeFromDiagrams::diagrams = "No diagrams generated after field insertions.";
-TreeFromDiagrams[in_, out_] :=
+GenerateDiagrams::topologies = "Zero topologies generated or selected.";
+GenerateDiagrams::diagrams = "No diagrams generated after field insertions.";
+GenerateDiagrams[in_, out_] :=
 Module[{topologies, diagrams},
    topologies = FeynArts`CreateTopologies[
       $loopNumber,
       Length@in -> Length@out,
       FeynArts`ExcludeTopologies -> GetExcludeTopologies[]
    ];
-   Utils`AssertOrQuit[Length@topologies > 0, plant::topologies];
+   Utils`AssertOrQuit[Length@topologies > 0, GenerateDiagrams::topologies];
 
    diagrams = FeynArts`InsertFields[
       topologies,
       ToExpression@in -> ToExpression@out
    ];
-   Utils`AssertOrQuit[Length@diagrams > 0, plant::diagrams];
+   Utils`AssertOrQuit[Length@diagrams > 0, GenerateDiagrams::diagrams];
 
    node[{Head@#}, Sequence@@#]&[diagrams] /.
       Rule[t_?IsTopology, rest_] :> node[t, rest] /.
@@ -50,50 +50,43 @@ Module[{topologies, diagrams},
       (h:_@Generic)[a_, rest__] :> Sequence[h@a, rest] /.
       (h:_@FeynArts`Classes)[a__] :> Sequence@@(node@*h/@{a})
 ];
+GenerateDiagrams // secure;
 
-plant::usage = "
-@brief Creates diagrams and amplitudes, forms a ``tree`` object.
-@param in An expression, containing ``FeynArts`` fields (each as ``String``),
-       required to be *incoming* fields for the amplitude.
-@param out An expression, containing ``FeynArts`` fields (each as ``String``),
-       required to be *outgoing* fields for the amplitude.
-@param tree A ``tree`` object.
-@returns A ``tree`` object.";
-plant[tree:_?IsTree] :=
-   Module[{amps, generic, classes, i = 1, j = 1},
-      amps = removeColors@FeynArts`CreateFeynAmp@diagrams@tree;
-      generic = Most/@List@@amps;
-      classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :>
-         Sequence@@(Thread[lhs -> #]&/@{rhs});
-      removeColors@tree /.
-         node[e:type`head, r__] :> node[Append[e, Head@amps], r] /.
-         node[e:type`generic, r__] :> node[Append[e, generic[[i++]]], r] /.
-         node[e:type`classes] :> node@Append[e, classes[[j++]]]];
-plant // secure;
+GenerateColorlessAmplitudes[tree_?IsTree] :=
+Module[{amps, generic, classes, i = 1, j = 1},
+   amps = RemoveColors@FeynArts`CreateFeynAmp@diagrams@tree;
+   generic = Most/@List@@amps;
+   classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :> Sequence@@(Thread[lhs -> #]&/@{rhs});
+   RemoveColors@tree /.
+      node[e:type`head, r__] :> node[Append[e, Head@amps], r] /.
+      node[e_?IsGeneric, r__] :> node[Append[e, generic[[i++]]], r] /.
+      node[e_?IsClasses] :> node@Append[e, classes[[j++]]]
+];
+GenerateColorlessAmplitudes // secure;
 
 info[tree:_?IsTree, str_String] :=
    (  Print@str;
       Print[" in total: ",
-         Length@Cases[tree, type`generic, Infinity], " Generic, ",
-         Length@Cases[tree, type`classes, Infinity], " Classes insertions"];
+         Length@Cases[tree, _?IsGeneric, Infinity], " Generic, ",
+         Length@Cases[tree, _?IsClasses, Infinity], " Classes insertions"];
       tree);
 info // secure;
 
 diagrams[tree:_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> First[e]@rest /.
-      node[e:_?IsTopology, rest__] :>
+      node[e_?IsTopology, rest__] :>
          Rule[e, FeynArts`Insertions[Generic][rest]]  /.
-      node[e:type`generic, rest__] :>
+      node[e_?IsGeneric, rest__] :>
          First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
-      node[e:type`classes] :> First@e;
+      node[e_?IsClasses] :> First@e;
 
 amplitudes[tree:_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> Part[e, 2]@rest /.
-      node[e:_?IsTopology, rest__] :> rest /.
-      node[e:type`classes] :> Last@e /.
-      node[e:type`generic, rest__] :> Append[Part[e, 2], wrap@rest];
+      node[e_?IsTopology, rest__] :> rest /.
+      node[e_?IsClasses] :> Last@e /.
+      node[e_?IsGeneric, rest__] :> Append[Part[e, 2], wrap@rest];
 
 fields[tree:_?IsTree, Flatten] :=
    Flatten[fields@tree, 1];
@@ -101,21 +94,24 @@ fields[tree:_?IsTree] :=
    tree /. node[e:type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
 fields // secure;
 
-picture[tree:_?IsTree] :=
-   Module[{out = {}, directory, name},
-      name = StringJoin[ToString /@ (
-         `rules`fields@Join[fields[tree, Flatten],
-            $expressionsToDerive] /. e_@{_} :> e)];
-      directory = DirectoryName[FeynArts`$Model<>".mod"];
-      FeynArts`Paint[diagrams@tree,
-         FeynArts`PaintLevel -> {Generic},
-         FeynArts`ColumnsXRows -> 1,
-         FeynArts`FieldNumbers -> True,
-         FeynArts`SheetHeader -> None,
-         FeynArts`Numbering -> FeynArts`Simple,
-         DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)];
-      Put[out, FileNameJoin@{directory, name<>".m"}]];
-picture // secure;
+ExportFeynArtsPaint[tree:_?IsTree] :=
+Module[{out = {}, directory, name},
+   name = StringJoin[ToString /@ (
+      `rules`fields@Join[fields[tree, Flatten],
+         $expressionsToDerive] /. e_@{_} :> e)
+   ];
+   directory = DirectoryName[FeynArts`$Model<>".mod"];
+   FeynArts`Paint[diagrams@tree,
+      FeynArts`PaintLevel -> {Generic},
+      FeynArts`ColumnsXRows -> 1,
+      FeynArts`FieldNumbers -> True,
+      FeynArts`SheetHeader -> None,
+      FeynArts`Numbering -> FeynArts`Simple,
+      DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)
+   ];
+   Put[out, FileNameJoin@{directory, name<>".m"}]
+];
+ExportFeynArtsPaint // secure;
 
 wrap[data:{Rule[_, _]..}..] :=
    Module[{lhs, rhs},
@@ -124,31 +120,23 @@ wrap[data:{Rule[_, _]..}..] :=
       lhs -> rhs];
 wrap // secure;
 
-cut::usage = "
-@brief Removes nodes of a given tree from the deepest to the highest level.
-@param tQ A function to select a *topology* if:
-             In[1]:= tQ[id]
-             Out[1]= True
-@param fun A function to remove *class* or *generic* node if:
-             In[1]:= fun[node, info]
-             Out[1]= True
-@param info A Sequence of topology and topology list.
-@returns Nodes, cleaned by *fun*.";
-cut[tree:_?IsTree, tQ_, fun_] :=
+RemoveNode::usage = "Removes class or generic nodes from the deepest to the highest level if
+both tQ[id] is True and fun[node, info] is True.";
+RemoveNode[tree:_?IsTree, tQ_, fun_] :=
    tree /.
-      e:node[t:_?IsTopology /; tQ@t, __] :> cut[e, fun, t, head@tree];
+      e:node[t:_?IsTopology /; tQ@t, __] :> RemoveNode[e, fun, t, head@tree];
 
-cut[n:node[_?IsTopology, __], fun_, info__] :=
-   n /. e:node[type`generic, __] :> cut[e, fun, info] /.
+RemoveNode[n:node[_?IsTopology, __], fun_, info__] :=
+   n /. e:node[_?IsGeneric, __] :> RemoveNode[e, fun, info] /.
       node@_?IsTopology :> Sequence[];
 
-cut[n:node[type`generic, __], fun_, info__] :=
-   If[fun[#, info], # /. node@type`generic :> Sequence[], ##&[]]&[
-      n /. e:node@type`classes :> cut[e, fun, info]];
+RemoveNode[n:node[_?IsGeneric, __], fun_, info__] :=
+   If[fun[#, info], # /. node[_?IsGeneric] :> Sequence[], ##&[]]&[
+      n /. e:node[_?IsClasses] :> RemoveNode[e, fun, info]];
 
-cut[n:node@type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
+RemoveNode[n:node[_?IsClasses], fun_, info__] := If[fun[n, info], n, ##&[]];
 
-cut // secure;
+RemoveNode // secure;
 
 head[tree:_?IsTree] := tree[[1, 1]];
 head // secure;

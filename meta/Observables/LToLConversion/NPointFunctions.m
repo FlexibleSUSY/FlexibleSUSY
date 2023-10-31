@@ -7,7 +7,7 @@ topologies[1] = {
    Boxes -> boxAll
 };
 
-diagrams[0, Minus] = {
+diagrams[0, Absent] = {
    Vectors -> {
       treeAll -> {"remove vector bosons",
          FreeQ[TreeFields@##, FeynArts`V]&}},
@@ -16,7 +16,7 @@ diagrams[0, Minus] = {
          FreeQ[TreeFields@##, FeynArts`S]&}}
 };
 
-diagrams[1, Plus] = {
+diagrams[1, Present] = {
    Vectors -> {
       penguinT -> {"penguins: remove external leptons",
          FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
@@ -34,7 +34,7 @@ diagrams[1, Plus] = {
          FreeQ[LoopFields@##, FeynArts`V]&}}
 };
 
-diagrams[1, Minus] = {
+diagrams[1, Absent] = {
    Vectors -> {
       penguinT -> {"penguins: remove tree vectors",
          FreeQ[TreeFields@##, FeynArts`V]&}},
@@ -43,13 +43,13 @@ diagrams[1, Minus] = {
          FreeQ[TreeFields@##, FeynArts`S]&}}
 };
 
-amplitudes[0, Plus] = {
+amplitudes[0, Present] = {
    Vectors -> {
       treeAll -> {"remove photons",
          FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}}
 };
 
-amplitudes[1, Plus] = {
+amplitudes[1, Present] = {
    Vectors -> {
       penguinT -> {"penguins: remove tree photons",
          FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}}

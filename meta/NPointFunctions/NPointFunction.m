@@ -41,7 +41,7 @@ NPointFunction;
 SetAttributes[
    {
       LorentzIndex, GenericSum, GenericIndex, OperatorsOnly, ExceptLoops,
-      GenericS, GenericF, GenericV, GenericU
+      GenericS, GenericF, GenericV, GenericU, Present, Absent
    },
    Protected
 ];
@@ -112,9 +112,11 @@ Module[{tree},
 
    DefineAllowedTopologies[];
    LoadAllSettings[];
-   tree = settings[TreeFromDiagrams[FAIncomingFields, FAOutgoingFields], diagrams];
-   tree = settings[plant@tree, amplitudes];
-   picture@tree;
+   tree = GenerateDiagrams[FAIncomingFields, FAOutgoingFields];
+   tree = ApplyObservableSetting[tree, diagrams];
+   tree = GenerateColorlessAmplitudes[tree];
+   tree = ApplyObservableSetting[tree, amplitudes];
+   ExportFeynArtsPaint@tree;
    {`rules`fields@fields@tree, calculateAmplitudes@tree}
 ];
 NPointFunction // secure;

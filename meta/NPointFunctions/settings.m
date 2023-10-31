@@ -38,45 +38,22 @@ LoadAllSettings[] :=
 );
 ];
 
-settings::usage = "
-@brief Loads default topologies from topologies.m file.
-       Loads data from OBSERVABLE/settings.m file.
-       Parses the following settings:
-
-       diagrams[LOOPLEVEL, Plus] | diagrams[LOOPLEVEL, Minus]
-       amplitudes[LOOPLEVEL, Plus] | amplitudes[LOOPLEVEL, Minus]
-       regularization[LOOPLEVEL]
-          Amplitudes for some topologies are calculated with bugs in CDR.
-          One can override used scheme for desired topologies.
-       momenta[LOOPLEVEL]
-          Eliminate specific momenta in some topologies.
-       sum[LOOPLEVEL]
-          Skip summation over some indices of particles.
-       mass[LOOPLEVEL]
-          Do not put some masses to zero.
-       order[]
-          Overrides default fermion order.";
-(*       v--v This object is modified and returned.                          *)
-(*                       v------v Are defined in [OBSERVABLE/settings.m].    *)
-settings[tree:_?IsTree, settings:diagrams|amplitudes] :=
+ApplyObservableSetting[tree_?IsTree, settingType:diagrams|amplitudes] :=
 Module[{doPresent, doAbsent, absent, todos, res = tree},
-   {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
-      settings[$loopNumber, #]&/@ {Plus, Minus};
+   {doPresent, doAbsent} = If[Head@# === List, #, {}]&@ settingType[$loopNumber, #] &/@ {Present, Absent};
    {doPresent, doAbsent} = Utils`UnzipRules/@ {doPresent, doAbsent};
-   {doPresent, doAbsent} = Rule[SymbolName@First@#, Last@#]&/@ #&/@
-      {doPresent, doAbsent};
+   {doPresent, doAbsent} = Rule[SymbolName@First@#, Last@#] &/@ #&/@ {doPresent, doAbsent};
    absent = Complement[First/@doAbsent, $expressionsToDerive];
    todos = DeleteDuplicates@Flatten[
       Join[$expressionsToDerive /. doPresent, absent /. doAbsent]
    ];
    todos = Select[todos, Head@# === Rule&];
-   Set[res, applySetting[res, #]]&/@ todos;
+   Set[res, applySetting[res, #, settingType]] &/@ todos;
    res
 ];
 
-(* --------v For diagrams and amplitudes.                                    *)
-applySetting[tree:_?IsTree, tQ_ -> {str_String, fun_}] :=
-   info[cut[tree, tQ, fun], str];
+applySetting[tree_?IsTree, tQ_ -> {str_String, fun_}, diagrams|amplitudes] :=
+   info[RemoveNode[tree, tQ, fun], str];
 
 settings[order] :=
 If[Head@order[] === List,
@@ -101,7 +78,7 @@ Module[{res = {tree}, default, head},
       mass, Identity
    ];
    res = res /.
-      node[type`generic, __] -> default /.
+      node[_?IsGeneric, __] -> default /.
          node[_?IsTopology, rest__] :> rest /.
             node[type`head, rest__] :> {rest};
    DeleteDuplicates/@Transpose@res /.
@@ -120,7 +97,7 @@ makeApply[pattern_, function:_Symbol] :=
                Cases[pattern, _String, Infinity, Heads -> True];
 
          tree /. node[t:_?IsTopology /; tQ@t, rest__] :>
-            (once@_; node[t, rest] /. node[g:type`generic, __] :>
+            (once@_; node[t, rest] /. node[g_?IsGeneric, __] :>
                function[fun, g, t, head@tree])];
    On@RuleDelayed::rhs;
 );
@@ -132,17 +109,12 @@ makeApply[tQ_ -> {str_String, fun:{_Integer, _}}, restrict];
 restrict[{int_, fun_}, __, head_] :=
    {int -> Or[fun[_, _, head], -fun[_, _, head]]};
 
-(*                           v- Selects on which topology RHS is applied.    *)
-(*                                   v-- Will be printed during evaluation.  *)
 applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Append, _}}] :=
 tree /. node[t:_?IsTopology/; tQ@t, rest__] :> (
    Print@str;
-   node[t, rest] /. node[g:type`generic, __] :>
+   node[t, rest] /. node[g_?IsGeneric, __] :>
    append[fun]
 );
-(*                             ^--^ For topology nodes, allowed by tQ.       *)
-(*                       ^------------^ For all generic nodes.               *)
-(* ^----^ Apply this function.                                               *)
 
 (* --v Append the result to the list of all mass rules [mass.m].             *)
 (*                   v-----------v Head of expanded InternalMass.            *)
@@ -153,7 +125,7 @@ append // secure;
 applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Hold, _}}] :=
 tree /. node[t:_?IsTopology/; tQ@t, rest__] :> (
    Print@str;
-   node[t, rest] /. node[g:type`generic, __] :>
+   node[t, rest] /. node[g_?IsGeneric, __] :>
    hold[fun]
 );
 
