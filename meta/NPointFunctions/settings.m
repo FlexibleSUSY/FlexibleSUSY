@@ -21,7 +21,7 @@
 *)
 
 Utils`DynamicInclude@"PatternChecks.m";
-Utils`DynamicInclude@"mass.m";
+Utils`DynamicInclude@"ModifyMasses.m";
 
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
@@ -55,17 +55,16 @@ Module[{doPresent, doAbsent, absent, todos, res = tree},
 applySetting[tree_?IsTree, tQ_ -> {str_String, fun_}, diagrams|amplitudes] :=
    info[RemoveNode[tree, tQ, fun], str];
 
-settings[order] :=
+GetObservableSetting[order] :=
 If[Head@order[] === List,
    order[],
    Reverse@Range@Tr@$externalFieldNumbers
 ];
 
-settings[tree:_?IsTree, settings:regularization|momenta|sum|mass] :=
+ApplyObservableSetting[tree:_?IsTree, settings:regularization|momenta|sum|mass] :=
 Module[{res = {tree}, default, head},
    If[Head@settings@$loopNumber === List,
-      AppendTo[res, applySetting[tree, #]]&/@
-         Utils`UnzipRules@settings@$loopNumber;
+      AppendTo[res, applySetting[tree, #]] &/@ Utils`UnzipRules@settings@$loopNumber;
    ];
    default = Switch[settings,
       regularization, $regularizationScheme,
@@ -85,20 +84,22 @@ Module[{res = {tree}, default, head},
       {default, rest__} :> head@{rest} /. {default} -> default
 ];
 
-settings // secure;
+ApplyObservableSetting // secure;
 
-(* -----v This is a generator function for 'applySetting'.                   *)
 makeApply[pattern_, function:_Symbol] :=
-(  Off@RuleDelayed::rhs;
+(
+   Off@RuleDelayed::rhs;
    applySetting[tree:_?IsTree, pattern] :=
-      Module[{once},
-         once[arg_] := once@arg =
-            If[# =!= {}, Print@@#]&@
-               Cases[pattern, _String, Infinity, Heads -> True];
+   Module[{once},
+      once[arg_] := once@arg =
+         If[# =!= {}, Print@@#] &@ Cases[pattern, _String, Infinity, Heads -> True];
 
-         tree /. node[t:_?IsTopology /; tQ@t, rest__] :>
-            (once@_; node[t, rest] /. node[g_?IsGeneric, __] :>
-               function[fun, g, t, head@tree])];
+      tree /. node[t:_?IsTopology /; tQ@t, rest__] :>
+         (
+            once@_;
+            node[t, rest] /. node[g_?IsGeneric, __] :> function[fun, g, t, head@tree]
+         )
+   ];
    On@RuleDelayed::rhs;
 );
 
@@ -110,16 +111,15 @@ restrict[{int_, fun_}, __, head_] :=
    {int -> Or[fun[_, _, head], -fun[_, _, head]]};
 
 applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Append, _}}] :=
-tree /. node[t:_?IsTopology/; tQ@t, rest__] :> (
-   Print@str;
-   node[t, rest] /. node[g_?IsGeneric, __] :>
-   append[fun]
-);
+tree /. node[t:_?IsTopology/; tQ@t, rest__] :>
+   (
+      Print@str;
+      node[t, rest] /. node[g_?IsGeneric, __] :>
+      append[fun]
+   );
 
-(* --v Append the result to the list of all mass rules [mass.m].             *)
-(*                   v-----------v Head of expanded InternalMass.            *)
 append[{Append, mass_FeynArts`Mass :> ExternalMass[i_Integer]}, ___] :=
-With[{rhs = mass`rules[][[i, 1, 1]]}, Append[#, mass :> rhs]&];
+With[{rhs = MassRules[][[i, 1, 1]]}, Append[#, mass :> rhs]&];
 append // secure;
 
 applySetting[tree:_?IsTree, tQ_ -> {str_String, fun:{Hold, _}}] :=
@@ -129,16 +129,12 @@ tree /. node[t:_?IsTopology/; tQ@t, rest__] :> (
    hold[fun]
 );
 
-(*          v---------v Number of ext. particle.                             *)
 (*          v---------v TODO(uukhas): replace.                               *)
 hold[{Hold, {i_Integer}}, ___] :=
 With[{pos = i}, ReplacePart[#, pos -> {}]&];
-(*              ^---------^ First positions are for ext. particles [mass.m]. *)
 hold // secure;
 
 applySetting // secure;
-
-(* Functions below are supposed to be used in [OBSERVABLE/settings.m].       *)
 
 LoopFields[node[id_, ___], info__] :=
    FeynArts`LoopFields[First@id, info];

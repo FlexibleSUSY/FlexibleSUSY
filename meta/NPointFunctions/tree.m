@@ -81,23 +81,30 @@ diagrams[tree:_?IsTree] :=
          First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
       node[e_?IsClasses] :> First@e;
 
-amplitudes[tree:_?IsTree] :=
+GetAmplitudes[tree:_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> Part[e, 2]@rest /.
       node[e_?IsTopology, rest__] :> rest /.
       node[e_?IsClasses] :> Last@e /.
       node[e_?IsGeneric, rest__] :> Append[Part[e, 2], wrap@rest];
 
-fields[tree:_?IsTree, Flatten] :=
-   Flatten[fields@tree, 1];
-fields[tree:_?IsTree] :=
+wrap[data:{Rule[_, _]..}..] :=
+   Module[{lhs, rhs},
+      lhs = First/@First@{data};
+      rhs = FeynArts`Insertions[FeynArts`Classes]@@(Last/@#&/@{data});
+      lhs -> rhs];
+wrap // secure;
+
+GetFields[tree:_?IsTree, Flatten] :=
+   Flatten[GetFields@tree, 1];
+GetFields[tree:_?IsTree] :=
    tree /. node[e:type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
-fields // secure;
+GetFields // secure;
 
 ExportFeynArtsPaint[tree:_?IsTree] :=
 Module[{out = {}, directory, name},
    name = StringJoin[ToString /@ (
-      `rules`fields@Join[fields[tree, Flatten],
+      FieldRules@Join[GetFields[tree, Flatten],
          $expressionsToDerive] /. e_@{_} :> e)
    ];
    directory = DirectoryName[FeynArts`$Model<>".mod"];
@@ -112,13 +119,6 @@ Module[{out = {}, directory, name},
    Put[out, FileNameJoin@{directory, name<>".m"}]
 ];
 ExportFeynArtsPaint // secure;
-
-wrap[data:{Rule[_, _]..}..] :=
-   Module[{lhs, rhs},
-      lhs = First/@First@{data};
-      rhs = FeynArts`Insertions[FeynArts`Classes]@@(Last/@#&/@{data});
-      lhs -> rhs];
-wrap // secure;
 
 RemoveNode::usage = "Removes class or generic nodes from the deepest to the highest level if
 both tQ[id] is True and fun[node, info] is True.";
@@ -145,7 +145,7 @@ combinatoricalFactors::usage = "
 @param tree A ``tree`` object.
 @returns ``List`` of combinatorical factors for a given ``tree``.";
 combinatoricalFactors[tree:_?IsTree] :=
-   combinatoricalFactors /@ List@@amplitudes@tree;
+   combinatoricalFactors /@ List@@GetAmplitudes@tree;
 combinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=
    {classes}[[All, #[[1, 1]]]] /.
       {FeynArts`IndexDelta[___] -> 1, FeynArts`SumOver[__] -> 1} &@
@@ -162,7 +162,7 @@ colorFactors::usage = "
          (for generic fields) of colour factors: ``{{__}..}``.
 @note External fields always come at first places in adjacency matrix.";
 colorFactors[tree:_?IsTree] :=
-   `rules`fields@Flatten[colorFactors /@ List@@diagrams@tree, 1];
+   FieldRules@Flatten[colorFactors /@ List@@diagrams@tree, 1];
 colorFactors[diagram:Rule[_[_][props__], _[_][_[__][rules__]->_,___]]] :=
 Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram},
    propPatt[i_, j_, f_] := _[_][_[_][i], _[_][j], f];

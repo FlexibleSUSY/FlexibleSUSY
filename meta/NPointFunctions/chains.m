@@ -23,7 +23,7 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-proceedChains[tree:_?IsTree, g:_] :=
+ProceedChains[tree:_?IsTree, g:_] :=
 Module[{abbr, subs, chains, generic},
    abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
    {chains, abbr} = {#, Complement[abbr, #]}&@ getChainRules@abbr;
@@ -33,7 +33,7 @@ Module[{abbr, subs, chains, generic},
    {generic, chains} = makeChainsUnique@{g /. abbr, chains};
    chains = identifySpinors[tree, chains];
    {generic, chains, subs}];
-proceedChains // secure;
+ProceedChains // secure;
 
 modifyChains::usage = "
 @brief Transforms chains[LOOPLEVEL] into replacements rules.
@@ -85,7 +85,7 @@ Module[{i = 0, rules, sp, L, reveal},
       L[a_, {e___}, b_] := ch[sp@a, e, sp@b];
       reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
-      chainRules = reveal@settings@order;
+      chainRules = reveal@GetObservableSetting@order;
       rules = $zeroExternalMomenta /. Utils`UnzipRules@chains@$loopNumber /. chainRules;
    ];
    Expand@expression //. rules
@@ -156,8 +156,6 @@ Module[{chains, chain, name, old, zero, rest, unique, erules},
       Join[unique, rest]} /. FormCalc`Mat -> Mat];
 makeChainsUnique // secure;
 
-Mat::usage = "
-@todo Sometimes this is needed, sometimes not. Why?";
 Mat[0] = 0;
 Mat[HoldPattern@Times[e__]] := Times@@Mat/@{e};
 Mat[mass:_FeynArts`Mass] := mass;
@@ -170,20 +168,16 @@ identifySpinors::usage = "
 @returns Modified rules with inserted fermion names.";
 identifySpinors[tree:_?IsTree, rules:{Rule[_Symbol, _]...}] :=
 Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
-   id = `rules`fields@MapIndexed[#2[[1]]->#1&, fields[tree, Flatten]];
+   id = FieldRules@MapIndexed[#2[[1]]->#1&, GetFields[tree, Flatten]];
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
       ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
    rules /. ch:DiracChain[__] :> idf@ch
 ];
 identifySpinors // secure;
 
-zeroMomenta::usage = "
-@brief Sets ``FormCalc`k[i]`` to zero inside fermionic chains.
-@param expression Any expression.
-@returns An expression with modified fermionic chains.";
-zeroMomenta[expression_] :=
+ZeroMomentaInChains[expression_] :=
    expression /. e:DiracChain[__] :> (e /. FormCalc`k[_] :> 0);
-zeroMomenta // secure;
+ZeroMomentaInChains // secure;
 
 End[];
 EndPackage[];

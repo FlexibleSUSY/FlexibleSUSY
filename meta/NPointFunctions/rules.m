@@ -37,8 +37,8 @@ Module[{once},
 fieldData // secure;
 
 Module[{once},
-   `rules`fields[expression_] := expression //. `rules`fields[];
-   `rules`fields[] := once@_;
+   FieldRules[expression_] := expression //. FieldRules[];
+   FieldRules[] := once@_;
    once[arg_] := once@arg =
       Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F,
             data},
@@ -72,7 +72,7 @@ Module[{once},
                   Susyno`LieGroups`conj@field,
                Times[-1,field:_GenericF|_GenericU] :>
                   SARAH`bar@field}]];];
-`rules`fields // secure;
+FieldRules // secure;
 
 Module[{once},
    `rules`mass[] := once@_;
@@ -128,7 +128,7 @@ Module[{PL, PR, MT, FV, g, md, v, i, p},
 With[{lt = Unique@"SARAH`lt"},
    `rules`subexpressions[expression_] :=
       expression //. Join[
-         `rules`fields[],
+         FieldRules[],
          `rules`mass[],
          `rules`couplings[],
          {  FormCalc`Finite -> 1,
@@ -162,7 +162,7 @@ Module[{fsFields},
       True,
          {SARAH`Mom[_Integer,_] :> 0},
       False|OperatorsOnly|ExceptLoops,
-         fsFields = `rules`fields@fields[tree, Flatten];
+         fsFields = FieldRules@GetFields[tree, Flatten];
          {SARAH`Mom[i_Integer, lorIndex_] :>
             SARAH`Mom[fsFields[[i]], lorIndex]}]];
 `rules`externalMomenta // secure;

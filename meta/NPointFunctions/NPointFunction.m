@@ -63,7 +63,7 @@ Utils`DynamicInclude/@{
    "chains.m",
    "topologies.m",
    "tree.m",
-   "mass.m"
+   "ModifyMasses.m"
 };
 
 NPointFunction[
@@ -117,7 +117,7 @@ Module[{tree},
    tree = GenerateColorlessAmplitudes[tree];
    tree = ApplyObservableSetting[tree, amplitudes];
    ExportFeynArtsPaint@tree;
-   {`rules`fields@fields@tree, calculateAmplitudes@tree}
+   {FieldRules@GetFields@tree, CalculateAmplitudes@tree}
 ];
 NPointFunction // secure;
 
@@ -184,72 +184,67 @@ removeParticleIndices[Times[-1, field_]] := -removeParticleIndices@field;
 removeParticleIndices[name_[class_, ___]] := name@class;
 removeParticleIndices // secure;
 
-calculateAmplitudes::usage = "
-@brief Applies ``FormCalc`` routines to amplitude set, simplifies the result.
-@param tree A set of data in the form of a ``tree`` object.
-@returns The main part of n-point function object, containing:
-
-         * generic amplitudes,
-         * class specific insertions,
-         * subexpressions.";
-calculateAmplitudes[tree:_?IsTree] :=
-Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
-   proc = process@amplitudes@tree;
-   ampsGen = FeynArts`PickLevel[Generic][amplitudes@tree];
+CalculateAmplitudes[tree_?IsTree] :=
+Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
+   ampsGen = FeynArts`PickLevel[Generic][GetAmplitudes@tree];
    If[$zeroExternalMomenta,
-      ampsGen = FormCalc`OffShell[ampsGen,
-         Sequence@@Array[#->0&, Plus@@Length/@proc]
-      ]
+      ampsGen = FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&, Tr@$externalFieldNumbers]]
    ];
-   feynAmps = mapThread[
-      FormCalc`CalcFeynAmp[Head[ampsGen][#1],
+   feynAmps = MapThreadWithBar[
+      FormCalc`CalcFeynAmp[
+         Head[ampsGen][#1],
          FormCalc`Dimension -> #2,
          FormCalc`OnShell -> $onShell,
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> settings@order,
+         FormCalc`FermionOrder -> GetObservableSetting@order,
          FormCalc`Invariants -> False,
-         FormCalc`MomElim -> #3]&,
-      {ampsGen, settings[tree, regularization], settings[tree, momenta]},
+         FormCalc`MomElim -> #3
+      ]&,
+      {
+         ampsGen,
+         ApplyObservableSetting[tree, regularization],
+         ApplyObservableSetting[tree, momenta]
+      },
       "Amplitude calculation"
    ] //. FormCalc`GenericList[];
+   generic = MapThread[getGenericSum, {feynAmps, ApplyObservableSetting[tree, sum]}];
+   {generic, chains, subs} = ProceedChains[tree, generic];
 
-   generic = MapThread[getGenericSum, {feynAmps, settings[tree, sum]}];
-
-   {generic, chains, subs} = proceedChains[tree, generic];
-
-   mass`rules[tree, feynAmps];
-   {generic, chains, subs} = mass`modify[{generic, chains, subs},
+   MassRules[tree, feynAmps];
+   {generic, chains, subs} = ModifyMasses[
+      {generic, chains, subs},
       tree,
       $zeroExternalMomenta
    ];
 
    convertToFS[
-      {  generic,
+      {
+         generic,
          fieldInsertions@tree,
          combinatoricalFactors@tree,
-         colorFactors@tree},
+         colorFactors@tree
+      },
       chains,
-      subs] /. `rules`externalMomenta[tree, $zeroExternalMomenta]];
-calculatedAmplitudes // secure;
+      subs
+   ] /. `rules`externalMomenta[tree, $zeroExternalMomenta]
+];
+CalculateAmplitudes // secure;
 
-mapThread::usage = "
-@brief Behaves like ``MapThread``, but also prints a progress bar.
-@param func A function to apply to set of data.
-@param exprs A ``List`` of listable sets with data.
-@param text A string to be printed.
-@todo Add check for equality of length for exprs.";
-mapThread[func_, exprs:{__}, text_String] :=
-   Module[{printed = 0, delta, out, tot, print, def = 70},
-      tot = Length@First@exprs;
-      print[i_] :=
-      (  delta = Floor[(def-StringLength[text]-4)*i/tot] - printed;
-         subWrite[StringJoin@@Array["."&, delta]];
-         printed += delta;);
-      subWrite[text<>": ["];
-      out = Table[print@i; func@@exprs[[All, i]], {i, tot}];
-      subWrite@"]\n";
-      out];
-mapThread // secure;
+MapThreadWithBar[func_, exprs:{__}, text_String] :=
+Module[{printed = 0, delta, out, tot, print, def = 70},
+   tot = Length@First@exprs;
+   print[i_] :=
+   (
+      delta = Floor[(def-StringLength[text]-4)*i/tot] - printed;
+      subWrite[StringJoin@@Array["."&, delta]];
+      printed += delta;
+   );
+   subWrite[text<>": ["];
+   out = Table[print@i; func@@exprs[[All, i]], {i, tot}];
+   subWrite@"]\n";
+   out
+];
+MapThreadWithBar // secure;
 
 getGenericFields::usage = "
 @brief Generates a list of unique sorted generic fields in expression.
