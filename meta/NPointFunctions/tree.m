@@ -184,7 +184,7 @@ Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram},
             genericDiagram /. externalRules /. #,
             adjacencyMatrix],
          adjacencyMatrix]&,
-      fieldInsertions[diagram, True],
+      GetFieldInsertions[diagram, True],
       {2}]];
 colorFactors // secure;
 

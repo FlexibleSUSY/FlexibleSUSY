@@ -121,69 +121,6 @@ Module[{tree},
 ];
 NPointFunction // secure;
 
-genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
-genericIndex // secure;
-
-process[set:_?IsDiagramSet|_?IsAmplitudeSet] :=
-   FirstCase[Head@set, (FeynArts`Process -> e_) :> e];
-
-process[set_?IsFormCalcSet] :=
-   Part[Head@Part[set, 1], 1];
-
-process // secure;
-
-getField[set:_?IsDiagramSet, i:_Integer] :=
-   Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
-getField // secure;
-
-fieldInsertions::usage = "
-@brief Finds insertions, related to fields.
-@param tree A ``tree`` object.
-@param diag A single diagram.
-@param graph A ``FeynmanGraph[__][__]`` object.
-@param insert A ``Insertions[Classes][__]`` object.
-@param keepNumQ Responsible for the type of output field names.
-       ``FeynmanGraph`` on a generic level contains
-       ``Field[num] -> <generic particle>``.
-       ``FeynmanGraph`` on a classes level contains
-       ``Field[num] -> <classes particle>``.
-
-       * ``True``: then ``Field[_] -> <classes particle>`` is created
-         for a diagram.
-       * ``False``: ``<generic particle> -> <classes particle>`` is created
-         for a diagram.
-@returns * For a single diagram returns 1) ``List`` for topology level of
-           2) ``List`` for generic level of 3) ``List`` for classes level of
-           field insertion rules::
-
-              1) 2) 3)
-              {  {  {Rule[<expr>, <class field>]..}..}..}
-
-         * For a set of diagrams only <class field> is taken instead of the
-           whole ``Rule``.
-@note All indices in rhs. of rules are removed.";
-fieldInsertions[tree:_?IsTree] :=
-   Map[Last, #, {3}] &@ Flatten[ fieldInsertions /@ List@@diagrams@tree, 1];
-fieldInsertions[diag_?IsDiagram, keepNumQ:True|False:False] :=
-   fieldInsertions[#, keepNumQ] &/@ Apply[List, Last@diag, {0, 1}];
-fieldInsertions[{graph_, insert_}, keepNumQ_] :=
-Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
-   toGenericIndexConventionRules = Cases[graph,
-      Rule[FeynArts`Field[index_Integer],type_Symbol] :>
-      Rule[FeynArts`Field@index, type[FeynArts`Index[Generic,index]]]];
-   fieldsGen = toGenericIndexConventionRules[[All,1]];
-   genericInsertions = Cases[#,
-      Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
-      Rule[genericField, removeParticleIndices@classesField]] &/@ insert;
-   SortBy[#,First]&/@ If[keepNumQ,
-      List @@ genericInsertions,
-      List @@ genericInsertions /. toGenericIndexConventionRules]];
-fieldInsertions // secure;
-
-removeParticleIndices[Times[-1, field_]] := -removeParticleIndices@field;
-removeParticleIndices[name_[class_, ___]] := name@class;
-removeParticleIndices // secure;
-
 CalculateAmplitudes[tree_?IsTree] :=
 Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    ampsGen = FeynArts`PickLevel[Generic][GetAmplitudes@tree];
@@ -211,16 +148,12 @@ Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    {generic, chains, subs} = ProceedChains[tree, generic];
 
    MassRules[tree, feynAmps];
-   {generic, chains, subs} = ModifyMasses[
-      {generic, chains, subs},
-      tree,
-      $zeroExternalMomenta
-   ];
+   {generic, chains, subs} = ModifyMasses[{generic, chains, subs}, tree, $zeroExternalMomenta];
 
    convertToFS[
       {
          generic,
-         fieldInsertions@tree,
+         GetFieldInsertions@tree,
          combinatoricalFactors@tree,
          colorFactors@tree
       },
@@ -229,6 +162,54 @@ Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    ] /. `rules`externalMomenta[tree, $zeroExternalMomenta]
 ];
 CalculateAmplitudes // secure;
+
+genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
+genericIndex // secure;
+
+process[set:_?IsDiagramSet|_?IsAmplitudeSet] :=
+   FirstCase[Head@set, (FeynArts`Process -> e_) :> e];
+
+process[set_?IsFormCalcSet] :=
+   Part[Head@Part[set, 1], 1];
+
+process // secure;
+
+getField[set:_?IsDiagramSet, i:_Integer] :=
+   Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
+getField // secure;
+
+GetFieldInsertions[tree_?IsTree] := GetFieldInsertions[diagrams@tree, False];
+GetFieldInsertions[diagrams_, withRules_:False] :=
+Module[{genericFields = {}, classesFields = {}, genericRules, finalRule, removeIndices, res},
+   removeIndices = f_[n_, {_}] :> f@n;
+   Cases[
+      diagrams,
+      Rule[_[_, Generic == _]@g__, _@c__] :> (
+         AppendTo[genericFields, {g}];
+         AppendTo[classesFields, {c} /. _[_, FeynArts`Classes == _] -> List]
+      ),
+      Infinity
+   ];
+   genericRules = Switch[withRules,
+      True,  Rule[f_[n_], t_Symbol] :> (n -> f[n]),
+      False, Rule[f_[n_], t_Symbol] :> (t[FeynArts`Index[Generic, n]] -> f[n])
+   ];
+   finalRule = Switch[withRules,
+      True,  Rule[n_, rhs_] :> Rule[FeynArts`Field@n, rhs],
+      False, Rule[_, rhs_] :> rhs
+   ];
+   Table[
+      res = Cases[genericFields[[i]], genericRules] /. classesFields[[i]];
+      res = SortBy[#, First] &/@ res;
+      res = res /. removeIndices /. finalRule,
+      {i, Length@genericFields}
+   ]
+];
+GetFieldInsertions // secure;
+
+removeParticleIndices[Times[-1, field_]] := -removeParticleIndices@field;
+removeParticleIndices[name_[class_, ___]] := name@class;
+removeParticleIndices // secure;
 
 MapThreadWithBar[func_, exprs:{__}, text_String] :=
 Module[{printed = 0, delta, out, tot, print, def = 70},
