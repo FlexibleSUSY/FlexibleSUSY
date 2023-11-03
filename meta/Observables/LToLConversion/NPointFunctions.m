@@ -9,50 +9,47 @@ topologies[1] = {
 
 diagrams[0, Absent] = {
    Vectors -> {
-      treeAll -> {"remove vector bosons",
-         FreeQ[TreeFields@##, FeynArts`V]&}},
+      treeAll -> {"remove vector bosons", FreeQ[TreeFields@##, FeynArts`V]&}
+   },
    Scalars -> {
-      treeAll -> {"remove scalar bosons",
-         FreeQ[TreeFields@##, FeynArts`S]&}}
+      treeAll -> {"remove scalar bosons", FreeQ[TreeFields@##, FeynArts`S]&}
+   }
 };
 
 diagrams[1, Present] = {
    Vectors -> {
-      penguinT -> {"penguins: remove external leptons",
-         FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
-      penguinT -> {"penguins: remove loop vectors",
-         FreeQ[LoopFields@##, FeynArts`V]&}},
+      penguinT -> {"remove external leptons", FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
+      penguinT -> {"remove loop vectors", FreeQ[LoopFields@##, FeynArts`V]&}
+   },
    Scalars -> {
-      penguinT -> {"penguins: remove external leptons",
-         FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
-      penguinT -> {"penguins: remove loop vectors",
-         FreeQ[LoopFields@##, FeynArts`V]&}},
+      penguinT -> {"remove external leptons", FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
+      penguinT -> {"remove loop vectors", FreeQ[LoopFields@##, FeynArts`V]&}
+   },
    Boxes -> {
-      boxAll -> {"boxes: remove external leptons",
-         FreeQ[LoopFields@##, FieldPattern[#3, 1|2|3|4]]&},
-      boxAll -> {"boxes: remove vector bosons from loops",
-         FreeQ[LoopFields@##, FeynArts`V]&}}
+      boxAll -> {"remove external leptons", FreeQ[LoopFields@##, FieldPattern[#3, 1|2|3|4]]&},
+      boxAll -> {"remove vector bosons from loops", FreeQ[LoopFields@##, FeynArts`V]&}
+   }
 };
 
 diagrams[1, Absent] = {
    Vectors -> {
-      penguinT -> {"penguins: remove tree vectors",
-         FreeQ[TreeFields@##, FeynArts`V]&}},
+      penguinT -> {"remove tree vectors", FreeQ[TreeFields@##, FeynArts`V]&}
+   },
    Scalars -> {
-      penguinT -> {"penguins: remove tree scalars",
-         FreeQ[TreeFields@##, FeynArts`S]&}}
+      penguinT -> {"remove tree scalars", FreeQ[TreeFields@##, FeynArts`S]&}
+   }
 };
 
 amplitudes[0, Present] = {
    Vectors -> {
-      treeAll -> {"remove photons",
-         FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}}
+      treeAll -> {"remove photons", FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}
+   }
 };
 
 amplitudes[1, Present] = {
    Vectors -> {
-      penguinT -> {"penguins: remove tree photons",
-         FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}}
+      penguinT -> {"remove tree photons", FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}
+   }
 };
 
 order[] = {3, 1, 4, 2};
@@ -69,10 +66,8 @@ momenta[1] = {
 };
 
 sum[1] = {
-   inSelfT -> {"in-sed: skip initial lepton",
-      {6, Field[#3, 1]&}},
-   outSelfT -> {"out-sed: skip final lepton",
-      {6, Field[#3, 3]&}}
+   inSelfT  -> {"skip initial lepton", {6, Field[#, 1]&}},
+   outSelfT -> {"skip final lepton",   {6, Field[#, 3]&}}
 };
 
 chains[1] = {
@@ -80,8 +75,6 @@ chains[1] = {
 };
 
 mass[1] = {
-   inSelfT -> {"in-sed: use explicit final lepton mass",
-      {Append, InternalMass[FeynArts`F, 6] :> ExternalMass[3]}},
-   inSelfT -> {"in-sed: keep initial lepton mass untouched",
-      {Hold, ExternalMass[1]}}
+   inSelfT -> {"explicit final lepton mass", InternalMass[FeynArts`F, 6] :> ExternalMass[3]},
+   inSelfT -> {"keep initial lepton mass untouched", Hold :> ExternalMass[1]}
 };

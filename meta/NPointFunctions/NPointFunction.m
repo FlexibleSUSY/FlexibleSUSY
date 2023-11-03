@@ -30,8 +30,6 @@ Block[{Format},
 
 BeginPackage@"NPointFunctions`";
 
-(* Start reserving names *)
-
 Off[General::shdw];
    DiracChain;
    Mat;
@@ -46,8 +44,6 @@ SetAttributes[
    Protected
 ];
 
-(* End reserving names *)
-
 Begin@"`Private`";
 
 secure[sym_Symbol] :=
@@ -59,29 +55,29 @@ subWrite // Protect;
 Utils`DynamicInclude/@{
    "PatternChecks.m",
    "Rules.m",
-   "settings.m",
+   "Settings.m",
    "chains.m",
-   "topologies.m",
-   "tree.m",
+   "Topologies.m",
+   "TreeWrapper.m",
    "ModifyMasses.m"
 };
 
 NPointFunction[
    {
-      FCOutputDir:_String,
-      FAModelName:_String,
+      FCOutputDir_String,
+      FAModelName_String,
       particleNamesFile_?FileExistsQ,
       particleNamespaceFile_?FileExistsQ,
       FAIncomingFields:{__String},
       FAOutgoingFields:{__String}
    },
    {
-      observable:None | _?(Context@Evaluate@Head[#] == "FlexibleSUSYObservable`"&),
+      observable:None | _?(Context@Evaluate@Head@# == "FlexibleSUSYObservable`"&),
       loops_,
       processes:{___String},
-      momenta:_Symbol,
-      onShell:_Symbol,
-      mainRegularization:_Symbol
+      momenta_Symbol,
+      onShell_Symbol,
+      mainRegularization_Symbol
    }
 ] :=
 Module[{tree},
@@ -144,7 +140,7 @@ Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
       },
       "Amplitude calculation"
    ] //. FormCalc`GenericList[];
-   generic = MapThread[getGenericSum, {feynAmps, ApplyObservableSetting[tree, sum]}];
+   generic = MapThread[GetGenericSum, {feynAmps, ApplyObservableSetting[tree, sum]}];
    {generic, chains, subs} = ProceedChains[tree, generic];
 
    MassRules[tree, feynAmps];
@@ -163,20 +159,11 @@ Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
 ];
 CalculateAmplitudes // secure;
 
-genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
-genericIndex // secure;
-
-process[set:_?IsDiagramSet|_?IsAmplitudeSet] :=
+GetProcess[set:_?IsDiagramSet|_?IsAmplitudeSet] :=
    FirstCase[Head@set, (FeynArts`Process -> e_) :> e];
-
-process[set_?IsFormCalcSet] :=
+GetProcess[set_?IsFormCalcSet] :=
    Part[Head@Part[set, 1], 1];
-
-process // secure;
-
-getField[set:_?IsDiagramSet, i:_Integer] :=
-   Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
-getField // secure;
+GetProcess // secure;
 
 GetFieldInsertions[tree_?IsTree] := GetFieldInsertions[ExtractDiagrams@tree, False];
 GetFieldInsertions[diagrams_, withRules_:False] :=
@@ -207,10 +194,6 @@ Module[{genericFields = {}, classesFields = {}, genericRules, finalRule, removeI
 ];
 GetFieldInsertions // secure;
 
-removeParticleIndices[Times[-1, field_]] := -removeParticleIndices@field;
-removeParticleIndices[name_[class_, ___]] := name@class;
-removeParticleIndices // secure;
-
 MapThreadWithBar[func_, exprs:{__}, text_String] :=
 Module[{printed = 0, delta, out, tot, print, def = 70},
    tot = Length@First@exprs;
@@ -227,27 +210,17 @@ Module[{printed = 0, delta, out, tot, print, def = 70},
 ];
 MapThreadWithBar // secure;
 
-getGenericFields::usage = "
-@brief Generates a list of unique sorted generic fields in expression.
-@param expr An expression, where to search.
-@returns A list of unique sorted generic fields.";
-getGenericFields[expr:_] := Sort@DeleteDuplicates[Cases[expr, _?IsGenericField, Infinity]];
-getGenericFields // secure;
+GetGenericFields[expr_] := Sort@DeleteDuplicates[Cases[expr, _?IsGenericField, Infinity]];
+GetGenericFields // secure;
 
-getGenericSum::usage= "
-@brief Converts ``FormCalc`Amp`` into ``NPointFunctions`GenericSum`` object
-       using restriction rules for generic fields.
-@param amplitude ``FormCalc`Amp`` expression.
-@param sumRules A set of rules, restricting the summation.
-@returns A ``NPointFunctions`GenericSum`` object.";
-getGenericSum[amplitude_?IsFormCalcAmplitude, sumRules:{Rule[_Integer, _]...}] :=
+GetGenericSum[amplitude_?IsFormCalcAmplitude, sumRules:{Rule[_Integer, _]...}] :=
 Module[{sort, rules},
-   sort = getGenericFields@amplitude;
+   sort = GetGenericFields@amplitude;
    rules = Append[sumRules, _Integer -> False];
    GenericSum[
       List@@amplitude,
       sort /. f_[_[_,i_]] :> {f@GenericIndex@i, i /. rules}]];
-getGenericSum // secure;
+GetGenericSum // secure;
 
 ConvertToFS[amplitudes_, abbreviations_, subexpressions_] :=
 {

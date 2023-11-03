@@ -63,29 +63,21 @@ Module[{amps, generic, classes, i = 1, j = 1},
 ];
 GenerateColorlessAmplitudes // secure;
 
-info[tree:_?IsTree, str_String] :=
-   (  Print@str;
-      Print[" in total: ",
-         Length@Cases[tree, _?IsGeneric, Infinity], " Generic, ",
-         Length@Cases[tree, _?IsClasses, Infinity], " Classes insertions"];
-      tree);
-info // secure;
-
 ExtractDiagrams[tree_?IsTree] :=
-   tree /.
-      node[e_?IsTreeHead, rest__] :> First[e]@rest /.
-      node[e_?IsTopology, rest__] :>
-         Rule[e, FeynArts`Insertions[Generic][rest]]  /.
-      node[e_?IsGeneric, rest__] :>
-         First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
-      node[e_?IsClasses] :> First@e;
+tree /.
+   node[e_?IsTreeHead, rest__] :> First[e]@rest /.
+   node[e_?IsTopology, rest__] :>
+      Rule[e, FeynArts`Insertions[Generic][rest]]  /.
+   node[e_?IsGeneric, rest__] :>
+      First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
+   node[e_?IsClasses] :> First@e;
 
 ExtractAmplitudes[tree_?IsTree] :=
-   tree /.
-      node[e_?IsTreeHead, rest__] :> Part[e, 2]@rest /.
-      node[e_?IsTopology, rest__] :> rest /.
-      node[e_?IsClasses] :> Last@e /.
-      node[e_?IsGeneric, rest__] :> Append[Part[e, 2], wrap@rest];
+tree /.
+   node[e_?IsTreeHead, rest__] :> Part[e, 2]@rest /.
+   node[e_?IsTopology, rest__] :> rest /.
+   node[e_?IsClasses] :> Last@e /.
+   node[e_?IsGeneric, rest__] :> Append[Part[e, 2], wrap@rest];
 
 wrap[data:{Rule[_, _]..}..] :=
    Module[{lhs, rhs},
@@ -119,26 +111,18 @@ Module[{out = {}, directory, name},
 ];
 ExportFeynArtsPaint // secure;
 
-RemoveNode::usage = "Removes class or generic nodes from the deepest to the highest level if
-both tQ[id] is True and fun[node, info] is True.";
-RemoveNode[tree:_?IsTree, tQ_, fun_] :=
-   tree /.
-      e:node[t:_?IsTopology /; tQ@t, __] :> RemoveNode[e, fun, t, head@tree];
-
+RemoveNode::usage = "Removes node if both tQ[id] is True and fun[node, info] is True.";
 RemoveNode[n:node[_?IsTopology, __], fun_, info__] :=
    n /. e:node[_?IsGeneric, __] :> RemoveNode[e, fun, info] /.
       node@_?IsTopology :> Sequence[];
-
 RemoveNode[n:node[_?IsGeneric, __], fun_, info__] :=
-   If[fun[#, info], # /. node[_?IsGeneric] :> Sequence[], ##&[]]&[
-      n /. e:node[_?IsClasses] :> RemoveNode[e, fun, info]];
-
-RemoveNode[n:node[_?IsClasses], fun_, info__] := If[fun[n, info], n, ##&[]];
-
+   If[fun[#, info], # /. node[_?IsGeneric] :> Sequence[], ##&[]]&[n /. e:node[_?IsClasses] :> RemoveNode[e, fun, info]];
+RemoveNode[n:node[_?IsClasses], fun_, info__] :=
+   If[fun[n, info], n, ##&[]];
 RemoveNode // secure;
 
-head[tree_?IsTree] := tree[[1, 1]];
-head // secure;
+TreeHead[tree_?IsTree] := tree[[1, 1]];
+TreeHead // secure;
 
 CombinatoricalFactors[tree_?IsTree] := CombinatoricalFactors /@ List@@ExtractAmplitudes@tree;
 CombinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=

@@ -26,22 +26,20 @@ BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
 ExternalMasses[tree_?IsTree] := FeynArts`Mass[# /. -1 -> 1]&/@ GetFields[tree, Flatten];
-
-ExternalMasses[set_?IsFormCalcSet] := Flatten[List@@process@set, 1][[All, 3]];
-
+ExternalMasses[set_?IsFormCalcSet] := Flatten[List@@GetProcess@set, 1][[All, 3]];
 ExternalMasses // secure;
 
 
 Module[{data},
 MassRules[tree_?IsTree, fc_?IsFormCalcSet] :=
-   data = Partition[
-      RuleDelayed[#, 0]&/@ Riffle[ExternalMasses@tree, ExternalMasses@fc],
-      2
-   ];
-
+data = Partition[
+   RuleDelayed[#, 0]&/@ Riffle[ExternalMasses@tree, ExternalMasses@fc],
+   2
+];
 MassRules[] := (
    Utils`AssertOrQuit[Head@data =!= Symbol, MassRules::errNotSet];
-   data);
+   data
+);
 ];
 MassRules // secure;
 MassRules::errNotSet = "Call MassRules[...] first.";

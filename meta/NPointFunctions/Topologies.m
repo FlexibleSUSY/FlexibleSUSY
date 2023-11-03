@@ -23,7 +23,7 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-topologies[{2, 2}] =
+AllTopologies[{2, 2}] =
 {
    treeS -> {1,0,1,0,0,1,0,1,0,1,0},
    treeT -> {1,0,0,1,1,0,0,1,0,1,0},
@@ -39,12 +39,12 @@ topologies[{2, 2}] =
    boxAll -> {boxS, boxT, boxU}
 };
 
-adjace::usage = "Archivates the adjacency matrix of a given topology:
+AdjaceTopology::usage = "Archivates the adjacency matrix of a given topology:
 In[1]:= << FeynArts`;
         topologies = CreateTopologies[0, 1 -> 2];
-        adjace[topologies[[1]]]
+        AdjaceTopology[topologies[[1]]]
 Out[1]= {1, 1, 1, 0}";
-adjace[topology:_?IsTopology] :=
+AdjaceTopology[topology:_?IsTopology] :=
 Module[{external, simple, graph, ordering, matrix},
    external = Tr@$externalFieldNumbers;
    simple = (#/. h_[i_, j_, _] :> h[i, j])&/@ topology;
@@ -54,39 +54,30 @@ Module[{external, simple, graph, ordering, matrix},
    matrix = Normal[AdjacencyMatrix[graph]][[ordering, ordering]];
    Flatten@MapIndexed[Drop[#1, Max[external, #2-1]]&, matrix]
 ];
-adjace // secure;
+AdjaceTopology // secure;
 
 DefineAllowedTopologies[] :=
 Module[{allTopologies, single, combined},
-   allTopologies = topologies@$externalFieldNumbers;
+   allTopologies = AllTopologies@$externalFieldNumbers;
    If[Head@allTopologies =!= List, Return[]];
    combined = Select[allTopologies, FreeQ[#, _Integer]&];
    single = Complement[allTopologies, combined];
-   If[single =!= {}, defineSingle/@ single];
-   If[combined =!= {}, defineCombined/@ combined];
+   If[single =!= {}, DefineSingle/@ single];
+   If[combined =!= {}, DefineCombined/@ combined];
 ];
 
-defineSingle[name_Symbol -> adjacencyVector:{__Integer}] :=
+DefineSingle[name_Symbol -> adjacencyVector:{__Integer}] :=
 With[{function = name, vector = adjacencyVector},
-   function[t:_?IsTopology] := adjace@t === vector;
+   function[t:_?IsTopology] := AdjaceTopology@t === vector;
    function // secure;
 ];
-defineSingle // secure;
 
-defineCombined[name_Symbol -> singleTopologies:{__Symbol}] :=
+DefineCombined[name_Symbol -> singleTopologies:{__Symbol}] :=
 With[{function = name, list = singleTopologies},
    function[t:_?IsTopology] := Or@@ Through@list@t;
    function // secure;
 ];
-defineCombined // secure;
 
-getTopology[d_?IsDiagram] := First@d;
-getTopology // secure;
-
-GetExcludeTopologies::usage = "
-@brief Registers a function, whose outcome (``True`` or everything else)
-       determines whether the topology is kept or not.
-@returns A name of generated function.";
 GetExcludeTopologies[] :=
 Once@Module[{all, name, default, loaded},
    default = {
