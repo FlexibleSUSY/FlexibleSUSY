@@ -57,7 +57,7 @@ Module[{amps, generic, classes, i = 1, j = 1},
    generic = Most/@List@@amps;
    classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :> Sequence@@(Thread[lhs -> #]&/@{rhs});
    RemoveColors@tree /.
-      node[e:type`head, r__] :> node[Append[e, Head@amps], r] /.
+      node[e_?IsTreeHead, r__] :> node[Append[e, Head@amps], r] /.
       node[e_?IsGeneric, r__] :> node[Append[e, generic[[i++]]], r] /.
       node[e_?IsClasses] :> node@Append[e, classes[[j++]]]
 ];
@@ -73,7 +73,7 @@ info // secure;
 
 ExtractDiagrams[tree_?IsTree] :=
    tree /.
-      node[e:type`head, rest__] :> First[e]@rest /.
+      node[e_?IsTreeHead, rest__] :> First[e]@rest /.
       node[e_?IsTopology, rest__] :>
          Rule[e, FeynArts`Insertions[Generic][rest]]  /.
       node[e_?IsGeneric, rest__] :>
@@ -82,7 +82,7 @@ ExtractDiagrams[tree_?IsTree] :=
 
 ExtractAmplitudes[tree_?IsTree] :=
    tree /.
-      node[e:type`head, rest__] :> Part[e, 2]@rest /.
+      node[e_?IsTreeHead, rest__] :> Part[e, 2]@rest /.
       node[e_?IsTopology, rest__] :> rest /.
       node[e_?IsClasses] :> Last@e /.
       node[e_?IsGeneric, rest__] :> Append[Part[e, 2], wrap@rest];
@@ -97,7 +97,7 @@ wrap // secure;
 GetFields[tree_?IsTree, Flatten] :=
    Flatten[GetFields@tree, 1];
 GetFields[tree_?IsTree] :=
-   tree /. node[e:type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
+   tree /. node[e_?IsTreeHead, __] :> List@@(FeynArts`Process /. List@@First@e);
 GetFields // secure;
 
 ExportFeynArtsPaint[tree_?IsTree] :=

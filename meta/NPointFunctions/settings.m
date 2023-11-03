@@ -79,7 +79,7 @@ Module[{res = {tree}, default, head},
    res = res /.
       node[_?IsGeneric, __] -> default /.
          node[_?IsTopology, rest__] :> rest /.
-            node[type`head, rest__] :> {rest};
+            node[_?IsTreeHead, rest__] :> {rest};
    DeleteDuplicates/@Transpose@res /.
       {default, rest__} :> head@{rest} /. {default} -> default
 ];
@@ -151,7 +151,7 @@ FieldPattern[d_?IsTopologyListHead, a:HoldPattern@Alternatives@__] :=
    FieldPattern[d, #] &/@ a;
 
 InternalMass[f_?IsFeynArtsField, index:_Integer] :=
-   FeynArts`Mass[f@genericIndex@index, type`mass];
+   FeynArts`Mass[f@genericIndex@index, _?IsMass];
 
 ExternalMass[index:_Integer] := {index};
 (*                              ^-----^ TODO(uukhas): replace.               *)

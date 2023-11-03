@@ -20,40 +20,37 @@
 
 *)
 
-BeginPackage@"type`";
+BeginPackage@"NPointFunctions`";
+Begin@"`Private`";
 
-vertex = FeynArts`Vertex[_Integer][_Integer];
-
-propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|
+IsVertex[e_] := MatchQ[e, FeynArts`Vertex[_Integer][_Integer]];
+IsMass[e_] := MatchQ[e, Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}]];
+IsPropagator[e_] := MatchQ[e, FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|
    FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][
-      vertex, vertex, Repeated[FeynArts`Field[_Integer],{0,1}]];
+      _?IsVertex, _?IsVertex, Repeated[FeynArts`Field[_Integer],{0,1}]]
+];
+IsAmplitude[e_] := MatchQ[e,
+   FeynArts`FeynAmp[
+      FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
+      (* For 1loop. *)Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]]|
+      (* For 0loop. *)Integral[],
+      _,
+      {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]
+   ]
+];
 
-amplitude = FeynArts`FeynAmp[
-   FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
-   (* For 1loop. *)Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]]|
-   (* For 0loop. *)Integral[],
-   _,
-   {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]];
-
-mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
-
-head = {_FeynArts`TopologyList, ___};
-EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "type`"];
-
-Begin@"NPointFunctions`Private`";
-
-IsTopology[e_] := MatchQ[e, FeynArts`Topology[_Integer][type`propagator..]];
+IsTopology[e_] := MatchQ[e, FeynArts`Topology[_Integer][__?IsPropagator]];
 IsDiagram[e_] := MatchQ[e, Rule[_?IsTopology, FeynArts`Insertions[Generic][__]]];
 IsGeneric[e_] := MatchQ[e, FeynArts`Insertions[Generic][__]];
 IsClasses[e_] := MatchQ[e, FeynArts`Insertions[FeynArts`Classes][__]];
+IsTreeHead[e_] := MatchQ[e, {_FeynArts`TopologyList, ___}];
 IsTree[e_] := MatchQ[e,
-   node[type`head, node[_?IsTopology, node[_?IsGeneric, node[_?IsClasses]..]..]..]
+   node[_?IsTreeHead, node[_?IsTopology, node[_?IsGeneric, node[_?IsClasses]..]..]..]
 ];
 
 IsTopologyListHead[e_] := MatchQ[e, FeynArts`TopologyList[_]];
 IsDiagramSet[e_] := MatchQ[e, FeynArts`TopologyList[_][__?IsDiagram]];
-IsAmplitudeSet[e_] := MatchQ[e, FeynArts`FeynAmpList[__][type`amplitude..]];
+IsAmplitudeSet[e_] := MatchQ[e, FeynArts`FeynAmpList[__][__?IsAmplitude]];
 
 IsColorIndex[e_] := MatchQ[e, FeynArts`Index[Global`Colour, _Integer]];
 IsGluonIndex[e_] := MatchQ[e, FeynArts`Index[Global`Gluon, _Integer]];
@@ -70,4 +67,4 @@ IsFormCalcAmplitude[e_] := MatchQ[e, FormCalc`Amp[_?IsFormCalcProcess][_]];
 IsFormCalcSet[e_] := MatchQ[e, {__?IsFormCalcAmplitude}];
 
 End[];
-
+EndPackage[];
