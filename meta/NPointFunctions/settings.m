@@ -146,12 +146,11 @@ Field[d_?IsTopologyListHead, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
 
 FieldPattern[d_?IsTopologyListHead, i_Integer] :=
-   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
-      type`generationIndex :> Blank[];
+   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /. _?IsGenerationIndex :> Blank[];
 FieldPattern[d_?IsTopologyListHead, a:HoldPattern@Alternatives@__] :=
    FieldPattern[d, #] &/@ a;
 
-InternalMass[f:type`field, index:_Integer] :=
+InternalMass[f_?IsFeynArtsField, index:_Integer] :=
    FeynArts`Mass[f@genericIndex@index, type`mass];
 
 ExternalMass[index:_Integer] := {index};

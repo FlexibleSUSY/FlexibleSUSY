@@ -58,7 +58,7 @@ subWrite // Protect;
 
 Utils`DynamicInclude/@{
    "PatternChecks.m",
-   "rules.m",
+   "Rules.m",
    "settings.m",
    "chains.m",
    "topologies.m",
@@ -123,7 +123,7 @@ NPointFunction // secure;
 
 CalculateAmplitudes[tree_?IsTree] :=
 Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
-   ampsGen = FeynArts`PickLevel[Generic][GetAmplitudes@tree];
+   ampsGen = FeynArts`PickLevel[Generic][ExtractAmplitudes@tree];
    If[$zeroExternalMomenta,
       ampsGen = FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&, Tr@$externalFieldNumbers]]
    ];
@@ -150,16 +150,16 @@ Module[{ampsGen, feynAmps, generic, chains, subs, zeroedRules},
    MassRules[tree, feynAmps];
    {generic, chains, subs} = ModifyMasses[{generic, chains, subs}, tree, $zeroExternalMomenta];
 
-   convertToFS[
+   ConvertToFS[
       {
          generic,
          GetFieldInsertions@tree,
-         combinatoricalFactors@tree,
-         colorFactors@tree
+         CombinatoricalFactors@tree,
+         ColorFactors@tree
       },
       chains,
       subs
-   ] /. `rules`externalMomenta[tree, $zeroExternalMomenta]
+   ] /. ExternalMomentaRules[tree, $zeroExternalMomenta]
 ];
 CalculateAmplitudes // secure;
 
@@ -178,7 +178,7 @@ getField[set:_?IsDiagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
 getField // secure;
 
-GetFieldInsertions[tree_?IsTree] := GetFieldInsertions[diagrams@tree, False];
+GetFieldInsertions[tree_?IsTree] := GetFieldInsertions[ExtractDiagrams@tree, False];
 GetFieldInsertions[diagrams_, withRules_:False] :=
 Module[{genericFields = {}, classesFields = {}, genericRules, finalRule, removeIndices, res},
    removeIndices = f_[n_, {_}] :> f@n;
@@ -231,8 +231,7 @@ getGenericFields::usage = "
 @brief Generates a list of unique sorted generic fields in expression.
 @param expr An expression, where to search.
 @returns A list of unique sorted generic fields.";
-getGenericFields[expr:_] :=
-   Sort@DeleteDuplicates[Cases[expr, type`genericField, Infinity]];
+getGenericFields[expr:_] := Sort@DeleteDuplicates[Cases[expr, _?IsGenericField, Infinity]];
 getGenericFields // secure;
 
 getGenericSum::usage= "
@@ -241,7 +240,7 @@ getGenericSum::usage= "
 @param amplitude ``FormCalc`Amp`` expression.
 @param sumRules A set of rules, restricting the summation.
 @returns A ``NPointFunctions`GenericSum`` object.";
-getGenericSum[amplitude:type`fc`amplitude, sumRules:{Rule[_Integer, _]...}] :=
+getGenericSum[amplitude_?IsFormCalcAmplitude, sumRules:{Rule[_Integer, _]...}] :=
 Module[{sort, rules},
    sort = getGenericFields@amplitude;
    rules = Append[sumRules, _Integer -> False];
@@ -250,17 +249,12 @@ Module[{sort, rules},
       sort /. f_[_[_,i_]] :> {f@GenericIndex@i, i /. rules}]];
 getGenericSum // secure;
 
-convertToFS::usage = "
-@brief Translate a list of ``FormCalc`` amplitudes, abbreviations and
-       subexpressions into ``FlexibleSUSY`` language.
-@param amplitudes A ``List`` of amplitudes.
-@param abbreviations A ``List`` of abbreviations.
-@param subexpressions A ``List`` of subexpressions.
-@returns A list of amplitudes and joined abbreviations and subexpressions.";
-convertToFS[amplitudes_, abbreviations_, subexpressions_] :=
-   {  `rules`amplitude@amplitudes,
-      `rules`subexpressions/@Join[abbreviations, subexpressions]};
-convertToFS // secure;
+ConvertToFS[amplitudes_, abbreviations_, subexpressions_] :=
+{
+   AmplitudeRules@amplitudes,
+   SubexpressionRules /@ Join[abbreviations, subexpressions]
+};
+ConvertToFS // secure;
 
 End[];
 Block[{$ContextPath}, EndPackage[]];

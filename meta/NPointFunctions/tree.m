@@ -23,12 +23,9 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-RemoveColors[expr_] :=
-   Delete[expr, Position[expr, type`colorIndex]];
+RemoveColors[expr_] := Delete[expr, Position[expr, _?IsColorIndex]];
 RemoveColors // secure;
 
-GenerateDiagrams::topologies = "Zero topologies generated or selected.";
-GenerateDiagrams::diagrams = "No diagrams generated after field insertions.";
 GenerateDiagrams[in_, out_] :=
 Module[{topologies, diagrams},
    topologies = FeynArts`CreateTopologies[
@@ -51,10 +48,12 @@ Module[{topologies, diagrams},
       (h:_@FeynArts`Classes)[a__] :> Sequence@@(node@*h/@{a})
 ];
 GenerateDiagrams // secure;
+GenerateDiagrams::topologies = "CreateTopologies generated zero topologies.";
+GenerateDiagrams::diagrams = "InsertFields generated zero field insertions.";
 
 GenerateColorlessAmplitudes[tree_?IsTree] :=
 Module[{amps, generic, classes, i = 1, j = 1},
-   amps = RemoveColors@FeynArts`CreateFeynAmp@diagrams@tree;
+   amps = RemoveColors@FeynArts`CreateFeynAmp@ExtractDiagrams@tree;
    generic = Most/@List@@amps;
    classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :> Sequence@@(Thread[lhs -> #]&/@{rhs});
    RemoveColors@tree /.
@@ -72,7 +71,7 @@ info[tree:_?IsTree, str_String] :=
       tree);
 info // secure;
 
-diagrams[tree:_?IsTree] :=
+ExtractDiagrams[tree_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> First[e]@rest /.
       node[e_?IsTopology, rest__] :>
@@ -81,7 +80,7 @@ diagrams[tree:_?IsTree] :=
          First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
       node[e_?IsClasses] :> First@e;
 
-GetAmplitudes[tree:_?IsTree] :=
+ExtractAmplitudes[tree_?IsTree] :=
    tree /.
       node[e:type`head, rest__] :> Part[e, 2]@rest /.
       node[e_?IsTopology, rest__] :> rest /.
@@ -95,20 +94,20 @@ wrap[data:{Rule[_, _]..}..] :=
       lhs -> rhs];
 wrap // secure;
 
-GetFields[tree:_?IsTree, Flatten] :=
+GetFields[tree_?IsTree, Flatten] :=
    Flatten[GetFields@tree, 1];
-GetFields[tree:_?IsTree] :=
+GetFields[tree_?IsTree] :=
    tree /. node[e:type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
 GetFields // secure;
 
-ExportFeynArtsPaint[tree:_?IsTree] :=
+ExportFeynArtsPaint[tree_?IsTree] :=
 Module[{out = {}, directory, name},
    name = StringJoin[ToString /@ (
       FieldRules@Join[GetFields[tree, Flatten],
          $expressionsToDerive] /. e_@{_} :> e)
    ];
    directory = DirectoryName[FeynArts`$Model<>".mod"];
-   FeynArts`Paint[diagrams@tree,
+   FeynArts`Paint[ExtractDiagrams@tree,
       FeynArts`PaintLevel -> {Generic},
       FeynArts`ColumnsXRows -> 1,
       FeynArts`FieldNumbers -> True,
@@ -138,55 +137,45 @@ RemoveNode[n:node[_?IsClasses], fun_, info__] := If[fun[n, info], n, ##&[]];
 
 RemoveNode // secure;
 
-head[tree:_?IsTree] := tree[[1, 1]];
+head[tree_?IsTree] := tree[[1, 1]];
 head // secure;
 
-combinatoricalFactors::usage = "
-@param tree A ``tree`` object.
-@returns ``List`` of combinatorical factors for a given ``tree``.";
-combinatoricalFactors[tree:_?IsTree] :=
-   combinatoricalFactors /@ List@@GetAmplitudes@tree;
-combinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=
-   {classes}[[All, #[[1, 1]]]] /.
-      {FeynArts`IndexDelta[___] -> 1, FeynArts`SumOver[__] -> 1} &@
-         Position[generic, FeynArts`RelativeCF];
-combinatoricalFactors // secure;
+CombinatoricalFactors[tree_?IsTree] := CombinatoricalFactors /@ List@@ExtractAmplitudes@tree;
+CombinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=
+{classes}[[All, #[[1, 1]]]] /.
+   {FeynArts`IndexDelta[___] -> 1, FeynArts`SumOver[__] -> 1} &@
+      Position[generic, FeynArts`RelativeCF];
+CombinatoricalFactors // secure;
 
-colorFactors::usage = "
-@param tree A ``tree`` object.
-@param diagram A diagram to work with.
-@param props A ``Sequence`` of propagators. First numbers of vertices inside
-       propagators are sorted by ``FeynArts``.
-@param rules A ``Sequence`` of field replacement rules on generic level.
-@returns ``List`` (for a given topology) of several ``List``
-         (for generic fields) of colour factors: ``{{__}..}``.
-@note External fields always come at first places in adjacency matrix.";
-colorFactors[tree:_?IsTree] :=
-   FieldRules@Flatten[colorFactors /@ List@@diagrams@tree, 1];
-colorFactors[diagram:Rule[_[_][props__], _[_][_[__][rules__]->_,___]]] :=
+ColorFactors[tree:_?IsTree] := FieldRules@Flatten[ColorFactors /@ List@@ExtractDiagrams@tree, 1];
+ColorFactors[diagram:Rule[_[_][props__], _[_][_[__][rules__]->_,___]]] :=
 Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram},
    propPatt[i_, j_, f_] := _[_][_[_][i], _[_][j], f];
-   adjacencyMatrix =
-      Module[{adjs},
-         adjs = Tally[{props} /. propPatt[i_, j_, _] :> {{i, j}, {j, i}}];
-         Normal@SparseArray@Flatten[
-            {#[[1,1]] -> #[[2]], #[[1,2]] -> #[[2]]} &/@ adjs]];
+   adjacencyMatrix = Module[{adjs},
+      adjs = Tally[{props} /. propPatt[i_, j_, _] :> {{i, j}, {j, i}}];
+      Normal@SparseArray@Flatten[
+         {#[[1,1]] -> #[[2]], #[[1,2]] -> #[[2]]} &/@ adjs]
+   ];
    externalRules = Cases[{rules}, HoldPattern[_ -> _@__]];
-   genericDiagram =
-      Module[{fld},
-         fld = Flatten[{props} /. propPatt[i_, j_, f_] :>
-            {{j, i, -f},{i, j, f}}, 1];
-         GatherBy[SortBy[fld, First], First] /. {_Integer, _Integer, f_} :>
-            f] /. Join[ {#} -> #&/@ First/@externalRules];
+   genericDiagram = Module[{fld},
+      fld = Flatten[{props} /. propPatt[i_, j_, f_] :>
+         {{j, i, -f},{i, j, f}}, 1];
+      GatherBy[SortBy[fld, First], First] /. {_Integer, _Integer, f_} :>
+         f
+   ] /. Join[ {#} -> #&/@ First/@externalRules];
    Map[
       CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
          CXXDiagrams`IndexDiagramFromGraph[
             genericDiagram /. externalRules /. #,
-            adjacencyMatrix],
-         adjacencyMatrix]&,
+            adjacencyMatrix
+         ],
+         adjacencyMatrix
+      ]&,
       GetFieldInsertions[diagram, True],
-      {2}]];
-colorFactors // secure;
+      {2}
+   ]
+];
+ColorFactors // secure;
 
 End[];
 EndPackage[];

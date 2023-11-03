@@ -28,8 +28,6 @@ propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|
    FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][
       vertex, vertex, Repeated[FeynArts`Field[_Integer],{0,1}]];
 
-
-
 amplitude = FeynArts`FeynAmp[
    FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
    (* For 1loop. *)Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]]|
@@ -37,24 +35,7 @@ amplitude = FeynArts`FeynAmp[
    _,
    {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]];
 
-colorIndex = FeynArts`Index[Global`Colour, _Integer];
-gluonIndex = FeynArts`Index[Global`Gluon, _Integer];
-generationIndex =
-   FeynArts`Index[
-      `Private`s_Symbol /; !MatchQ[`Private`s, Global`Gluon|Global`Colour],
-      _Integer];
-genericIndex = FeynArts`Index[Generic, _Integer];
-
-field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
-genericField = field@genericIndex;
 mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
-
-`fc`particle = field[_Integer, Repeated[{_Symbol}, {0, 1}]];
-`fc`mass = 0|_Symbol|_Symbol@_Symbol;
-`fc`external = {`fc`particle|-`fc`particle,
-   FormCalc`k@_Integer, `fc`mass, {}};
-`fc`process = {`fc`external..} -> {`fc`external..};
-`fc`amplitude = FormCalc`Amp[`fc`process][_];
 
 head = {_FeynArts`TopologyList, ___};
 EndPackage[];
@@ -73,7 +54,20 @@ IsTree[e_] := MatchQ[e,
 IsTopologyListHead[e_] := MatchQ[e, FeynArts`TopologyList[_]];
 IsDiagramSet[e_] := MatchQ[e, FeynArts`TopologyList[_][__?IsDiagram]];
 IsAmplitudeSet[e_] := MatchQ[e, FeynArts`FeynAmpList[__][type`amplitude..]];
-IsFormCalcSet[e_] := MatchQ[e, {type`fc`amplitude..}];
+
+IsColorIndex[e_] := MatchQ[e, FeynArts`Index[Global`Colour, _Integer]];
+IsGluonIndex[e_] := MatchQ[e, FeynArts`Index[Global`Gluon, _Integer]];
+IsGenerationIndex[e_] := !IsColorIndex[e] && !IsGluonIndex[e] && MatchQ[e, FeynArts`Index[_Symbol, _Integer]];
+
+IsFeynArtsField[e_] := MatchQ[e, FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U];
+IsGenericField[e_] := MatchQ[e, (_?IsFeynArtsField)[FeynArts`Index[Generic, _Integer]]];
+
+IsFormCalcField[e_] := MatchQ[e, (_?IsFeynArtsField)[_Integer, Repeated[{_Symbol}, {0, 1}]]];
+IsFormCalcMass[e_] := MatchQ[e, 0|_Symbol|_Symbol@_Symbol];
+IsFormCalcExternal[e_] := MatchQ[e, {_?IsFormCalcField|(-1*_?IsFormCalcField), FormCalc`k@_Integer, _?IsFormCalcMass, {}}];
+IsFormCalcProcess[e_] := MatchQ[e, {__?IsFormCalcExternal} -> {__?IsFormCalcExternal}];
+IsFormCalcAmplitude[e_] := MatchQ[e, FormCalc`Amp[_?IsFormCalcProcess][_]];
+IsFormCalcSet[e_] := MatchQ[e, {__?IsFormCalcAmplitude}];
 
 End[];
 
