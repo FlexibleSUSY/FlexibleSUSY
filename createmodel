@@ -529,7 +529,7 @@ sed -e "s|@DIR@|$targetdir|g"               \
     -e "s|@CLASSNAME@|$name|g"              \
     -e "s|FSModelName\([[:blank:]]*=[[:blank:]]*\)[^;][^;]*|FSModelName\1\"$name\"|g" \
     < $model_file_dir/FlexibleSUSY.m.in > $targetdir/FlexibleSUSY.m
-touch -d "1 min ago" "${targetdir}/FlexibleSUSY.m"
+touch "${targetdir}/FlexibleSUSY.m"
 message "done"
 
 for slha_in in $SLHA_input_files; do
