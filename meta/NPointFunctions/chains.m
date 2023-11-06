@@ -26,125 +26,83 @@ Begin@"`Private`";
 ProceedChains[tree:_?IsTree, g:_] :=
 Module[{abbr, subs, chains, generic},
    abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
-   {chains, abbr} = {#, Complement[abbr, #]}&@ getChainRules@abbr;
+   {chains, abbr} = {#, Complement[abbr, #]}&@ ExtractDiracChains@abbr;
    subs = FormCalc`Subexpr[] //. FormCalc`GenericList[] //. abbr;
-   chains = simplifyChains@chains;
-   chains = modifyChains@chains;
-   {generic, chains} = makeChainsUnique@{g /. abbr, chains};
-   chains = identifySpinors[tree, chains];
-   {generic, chains, subs}];
+   chains = SimplifyOnShellChains@chains;
+   chains = ModifyDiracChains@chains;
+   {generic, chains} = MakeChainsUnique@{g /. abbr, chains};
+   chains = InsertFermionNames[tree, chains];
+   {generic, chains, subs}
+];
 ProceedChains // secure;
 
-modifyChains::usage = "
-@brief Transforms chains[LOOPLEVEL] into replacements rules.
-       Applies them onto expression.
-       chains[LOOPLEVEL] should have the following syntax::
-
-          {  {  <symbol>..} ->  {  <rule>..}
-             ..}
-
-       <symbol>
-          A symbol, which chooses (based on ``$zeroExternalMomenta``) the set
-          of rules.
-          Put different <symbol> in the same list, if you want to use the
-          same rules for them.
-       <rule>
-          A rule with the following syntax::
-
-             <chain>[<something1>, <something2>...] -> 0
-
-          <chain>
-             A number of chain. Number is defined by order[] settings,
-             i.e. for ``{3, 1, 4, 2}`` the chain 1 is ``{3, 1}`` and
-             chain 2 is ``{4, 2}``.
-          <something1>
-             ``6, -6, 7, -7, k@<integer>, l@<integer>``. In the case of last
-             two, alternatives of first four is prepended.
-          <something2>
-             ``k@<integer>, l@<integer>, _, __, ___``.
-          <integer>
-             Any integer number.
-@param expression Any expression to modify.
-@param set A set of diagrams.
-@returns A modified expression.
-@todo Currently a very specific set of rules is supported. In order to have
-      chains on RHS of rules one needs to separate left and right parts and
-      make different reveal functions.
-@todo Write explanations about anticommutation rules in chains and other
-      conventions.";
-modifyChains[expression_] :=
+ModifyDiracChains[expression_] :=
 Module[{i = 0, rules, sp, L, reveal},
-   If[Head@chains@$loopNumber =!= List, Return@expression];
+   If[Not@MatchQ[chains@$loopNumber, {__Rule}],
+      Return@expression
+   ];
 
    Block[{k = FormCalc`k, l = FormCalc`Lor, ch = DiracChain},
       sp[mom_] := FormCalc`Spinor[k@mom, _, _];
-      L[a_, e___ , b_] := L[ a,
-         Switch[{e},
-            {}, {}, {_Integer, ___}, {e}, {__}, {6|7|-6|-7, e}],
-         b];
+      L[a_, e___ , b_] :=
+         L[a,
+            Switch[{e},
+               {}, {},
+               {_Integer, ___}, {e},
+               {__}, {6|7|-6|-7, e}
+            ],
+         b
+         ];
       L[a_, {e___}, b_] := ch[sp@a, e, sp@b];
-      reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
+      reveal@{a_, b_, c___} := Flatten@{i++; i[e___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
       chainRules = reveal@GetObservableSetting@order;
       rules = $zeroExternalMomenta /. Utils`UnzipRules@chains@$loopNumber /. chainRules;
    ];
    Expand@expression //. rules
 ];
-modifyChains // secure;
+ModifyDiracChains // secure;
 
-simplifyChains::usage = "
-@brief Simplifies some chains applying Dirac equation if
-       ``$onShell`` is ``True``.
-@param chain A chain to simplify.
-@param expr An expression to be modified.
-@returns A simplified chain.";
-simplifyChains[expr:_] :=
-   If[$onShell,
-      expr /. ch:DiracChain[__] :> simplifyChains@ch,
-      expr];
-simplifyChains[chain:_DiracChain] :=
-   If[$onShell,
-      Module[{s = 6|7, a = -6|-7, ch = DiracChain, k = FormCalc`k,
-            m, pair, sp, flip},
-         m[FormCalc`Spinor[_, mass:_, type:_]] = type*mass;
-         pair = FormCalc`Pair[k@#1,k@#2]&;
-         sp[mom:_:_] = FormCalc`Spinor[k@mom, _, _];
-         flip[7|-7] = 6;
-         flip[6|-6] = 7;
+SimplifyOnShellChains[expr_] :=
+If[$onShell,
+   expr /. ch:DiracChain[__] :> SimplifyOnShellChains@ch,
+   expr
+];
 
-         chain //. {
-            ch[l:sp[j_],p:a,k[n_],k[i_],r:sp[n_]] :>
-               pair[i,n]*ch[l,-p,r]-m[r]*ch[l,-p,k[i],r],
-            ch[l:sp[n_],p:a,k[i_],k[n_],r:sp[j_]] :>
-               pair[i,n]*ch[l,-p,r]-m[l]*ch[l,flip@p,k[i],r],
-            ch[l:sp[],p:s,k[n_],r:sp[n_]] :> m[r]*ch[l,p,r],
-            ch[l:sp[n_],p:s,k[n_],r:sp[]] :> m[l]*ch[l,flip@p,r]}],
-      chain];
-simplifyChains // secure;
+SimplifyOnShellChains[chain_DiracChain] :=
+If[$onShell,
+   Module[{s = 6|7, a = -6|-7, ch = DiracChain, k = FormCalc`k, m, pair, sp, flip},
+      m[FormCalc`Spinor[_, mass_, type_]] = type*mass;
+      pair = FormCalc`Pair[k@#1, k@#2]&;
+      sp[mom:_:_] = FormCalc`Spinor[k@mom, _, _];
+      flip[7|-7] = 6;
+      flip[6|-6] = 7;
 
-getChainRules::usage = "
-@brief Finds a subset of rules inside a ``List``, which represents Dirac
-       chains.
-@note It is possible, because the naming convention for this abbreviation
-      is fixed and it is given by encoded regular expression.";
-getChainRules[rules:{Rule[_Symbol, _]...}] :=
-   Module[{regex},
-      regex = RegularExpression@"[F][1-9][\\d]*";
-      Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]];
-getChainRules // secure;
+      chain //.
+      {
+         ch[l:sp[j_],p:a,k[n_],k[i_],r:sp[n_]] :> pair[i,n]*ch[l,-p,r]-m[r]*ch[l,-p,k[i],r],
+         ch[l:sp[n_],p:a,k[i_],k[n_],r:sp[j_]] :> pair[i,n]*ch[l,-p,r]-m[l]*ch[l,flip@p,k[i],r],
+         ch[l:sp[],p:s,k[n_],r:sp[n_]] :>         m[r]*ch[l,p,r],
+         ch[l:sp[n_],p:s,k[n_],r:sp[]] :>         m[l]*ch[l,flip@p,r]
+      }
+   ],
+   chain
+];
+SimplifyOnShellChains // secure;
 
-makeChainsUnique::usage = "
-@brief After manual simplification of dirac chains one can get duplicates. They
-       have to be removed. Then chains acquire unique names.
-@param list A list of expression to modify and a list of rules, containing
-       chains.
-@returns A list of expression and rules.";
-makeChainsUnique[list:{expression_, rules:{Rule[_Symbol, _]...}}] :=
+ExtractDiracChains[rules:{Rule[_Symbol, _]...}] :=
+Module[{regex},
+   regex = RegularExpression@"[F][1-9][\\d]*";
+   Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]
+];
+ExtractDiracChains // secure;
+
+MakeChainsUnique[list:{expression_, rules:{Rule[_Symbol, _]...}}] :=
 Module[{chains, chain, name, old, zero, rest, unique, erules},
    chains = Longest@HoldPattern@Times[DiracChain[__]..];
    chain = DiracChain[__];
    name = Rule[Symbol["NPointFunctions`DiracChain"<>ToString@#2[[1]]], #1]&;
-   old = getChainRules@rules;
+   old = ExtractDiracChains@rules;
    zero = Cases[old, e:Rule[_, 0] :> e];
    rest = Complement[rules, old];
    old = Complement[old, zero];
@@ -152,28 +110,25 @@ Module[{chains, chain, name, old, zero, rest, unique, erules},
    If[unique == {},
       unique = MapIndexed[name, DeleteDuplicates@Cases[old, chain, Infinity]];];
    erules = (old /. (unique /. Rule[x_, y_] :> Rule[y, x]));
-   {  expression /. zero /. erules,
-      Join[unique, rest]} /. FormCalc`Mat -> Mat];
-makeChainsUnique // secure;
+   {
+      expression /. zero /. erules,
+      Join[unique, rest]
+   } /. FormCalc`Mat -> Mat
+];
+MakeChainsUnique // secure;
 
 Mat[0] = 0;
 Mat[HoldPattern@Times[e__]] := Times@@Mat/@{e};
 Mat[mass:_FeynArts`Mass] := mass;
 
-identifySpinors::usage = "
-@brief Inserts names of fermionic fields inside ``FormCalc`DicaChain``
-       structures.
-@param rules List of rules to modify.
-@param tree A ``tree`` object.
-@returns Modified rules with inserted fermion names.";
-identifySpinors[tree:_?IsTree, rules:{Rule[_Symbol, _]...}] :=
+InsertFermionNames[tree:_?IsTree, rules:{Rule[_Symbol, _]...}] :=
 Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
    id = FieldRules@MapIndexed[#2[[1]]->#1&, GetFields[tree, Flatten]];
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
       ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
    rules /. ch:DiracChain[__] :> idf@ch
 ];
-identifySpinors // secure;
+InsertFermionNames // secure;
 
 ZeroMomentaInChains[expression_] :=
    expression /. e:DiracChain[__] :> (e /. FormCalc`k[_] :> 0);
