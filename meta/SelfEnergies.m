@@ -417,7 +417,7 @@ CreateVertexExpressions[vertexRules_List, inModelClass_:True] :=
               ];
            Utils`StopProgressBar[Length[vertexRules]];
            {prototypes, defs, Flatten[rules]}
-      ];
+          ];
 
 ReplaceGhosts[states_:FlexibleSUSY`FSEigenstates] :=
     Module[{vectorBosons = {}, ghostStr, ghostSym, ghostCSym, ghosts = {}, k},
