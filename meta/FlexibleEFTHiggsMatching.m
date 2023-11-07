@@ -89,7 +89,7 @@ return mh2_shift_2l;"
 CalculateMHiggs3LoopShift[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=
    Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
 	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]]},
-"double mh2_shift_3l = 0;
+"double mh2_shift_3l = std::numeric_limits<double>::quiet_NaN();
 
 try {
    // 3-loop self-energy, calculated using tree-level parameters
@@ -275,7 +275,7 @@ const double mh2_3l_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
 const double mh2_3l_bsm_shift = calculate_Mh2_3l_shift(sm, model_gl, idx);
 
 // Eq.(4.28d) [arxiv:2003.04639], Delta lambda^(3l)
-const double delta_lambda_3l = (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2;
+const double delta_lambda_3l = std::isfinite(mh2_3l_bsm_shift) ? (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2 : 0.0;
 
 // Eq.(4.28a) [arxiv:2003.04639] up to (including) 3-loop terms
 const double lambda_3l = lambda_2l + delta_lambda_3l;
