@@ -361,6 +361,7 @@ CreateCouplingFunction[coupling_, expr_, inModelClass_] :=
                   "const " <> typeStr <> " result = " <>
                   Parameters`ExpressionToString[expr] <> ";\n\n" <>
                   "return result;\n";
+
            body = IndentText[WrapLines[body]];
            definition = definition <> body <> "}\n";
            {prototype, definition,
@@ -399,24 +400,24 @@ ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
     ReplaceUnrotatedFields[Cp[p]][lorentz];
 
 CreateVertexExpressions[vertexRules_List, inModelClass_:True] :=
-Module[{k, prototypes = "", defs = "", rules, coupling, expr,
-      p, d, r, MakeIndex},
-     MakeIndex[i_Integer] := MakeUniqueIdx[];
-     MakeIndex[i_] := i;
-     rules = Table[0, {Length[vertexRules]}];
-     Utils`StartProgressBar[Dynamic[k], Length[vertexRules]];
-     For[k = 1, k <= Length[vertexRules], k++,
-         coupling = Vertices`ToCp[vertexRules[[k,1]]] /. p_[{idx__}] :> p[MakeIndex /@ {idx}];
-         expr = vertexRules[[k,2]];
-         Utils`UpdateProgressBar[k, Length[vertexRules]];
-         {p,d,r} = CreateCouplingFunction[coupling, expr, inModelClass];
-         prototypes = prototypes <> p;
-         defs = defs <> d <> "\n";
-         rules[[k]] = r;
-        ];
-     Utils`StopProgressBar[Length[vertexRules]];
-     {prototypes, defs, Flatten[rules]}
-];
+    Module[{k, prototypes = "", defs = "", rules, coupling, expr,
+            p, d, r, MakeIndex},
+           MakeIndex[i_Integer] := MakeUniqueIdx[];
+           MakeIndex[i_] := i;
+           rules = Table[0, {Length[vertexRules]}];
+           Utils`StartProgressBar[Dynamic[k], Length[vertexRules]];
+           For[k = 1, k <= Length[vertexRules], k++,
+               coupling = Vertices`ToCp[vertexRules[[k,1]]] /. p_[{idx__}] :> p[MakeIndex /@ {idx}];
+               expr = vertexRules[[k,2]];
+               Utils`UpdateProgressBar[k, Length[vertexRules]];
+               {p,d,r} = CreateCouplingFunction[coupling, expr, inModelClass];
+               prototypes = prototypes <> p;
+               defs = defs <> d <> "\n";
+               rules[[k]] = r;
+              ];
+           Utils`StopProgressBar[Length[vertexRules]];
+           {prototypes, defs, Flatten[rules]}
+      ];
 
 ReplaceGhosts[states_:FlexibleSUSY`FSEigenstates] :=
     Module[{vectorBosons = {}, ghostStr, ghostSym, ghostCSym, ghosts = {}, k},
