@@ -43,7 +43,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
 		$(DIR)/model.cpp \
-		$(wildcard $(DIR)/npointfunctions/*/*.cpp) \
+		$(wildcard $(DIR)/observables/*/*.cpp) \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/observables.cpp \
@@ -135,7 +135,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/mixings.hpp \
 		$(DIR)/model.hpp \
 		$(DIR)/multiindex.hpp \
-		$(wildcard $(DIR)/npointfunctions/*/*.hpp) \
+		$(wildcard $(DIR)/observables/*/*.hpp) \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
