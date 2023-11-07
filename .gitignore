@@ -6,18 +6,10 @@
 *.pc
 *.x
 *.json
-**/.*.swp
 
 src/loop_libraries/libcollier_wrapper.mod
 src/loop_libraries/libcollier_wrapper.f90
 src/libfortran_utils.mod
-
-meta/NPointFunctions.rst
-meta/NPointFunctions/*.rst
-meta/NPointFunctions/*/*.rst
-meta/NPointFunctions.html
-meta/NPointFunctions/*.html
-meta/NPointFunctions/*/*.html
 
 config/config.h
 config/flexiblesusy-version
