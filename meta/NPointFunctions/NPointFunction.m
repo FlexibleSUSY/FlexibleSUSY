@@ -56,7 +56,7 @@ Utils`DynamicInclude/@{
    "PatternChecks.m",
    "Rules.m",
    "Settings.m",
-   "chains.m",
+   "DiracChains.m",
    "Topologies.m",
    "TreeWrapper.m",
    "ModifyMasses.m"
