@@ -3551,6 +3551,10 @@ add_metaflags() {
    tcol_='FSEnableColors = '
    col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
+   local tcol_ col_
+   tcol_='FSEnableCompile = '
+   col_="${tcol_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
+
    local c_=''
    local fs_=''
    for m in ${MODELS}; do
