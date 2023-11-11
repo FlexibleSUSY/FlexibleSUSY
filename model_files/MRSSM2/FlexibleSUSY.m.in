@@ -99,13 +99,23 @@ ExtraSLHAOutputBlocks = {
          {27, FlexibleSUSYObservable`AMMUncertainty[Fe[2]]}
       }
    },
-   {HMIX , {
-         {5, (vd ZH[1,1] + vu ZH[1,2])/Sqrt[vu^2 + vd^2]},
-         {6, (vd Pole[ZH[1,1]] + vu Pole[ZH[1,2]])/Sqrt[vu^2 + vd^2]}
+   {HMIX, {
+         {1,   \[Mu]},
+         {10,  ArcTan[vu/vd]},
+         {101, B[\[Mu]]},
+         {102, vd},
+         {103, vu},
+         {310, vT},
+         {201, MuD},
+         {202, MuU},
+         {203, B[MuD]},
+         {204, B[MuU]},
+         {301, LamSD},
+         {302, LamSU},
+         {303, LamTD},
+         {304, LamTU}
       }
-   },
-   {runningZH, Flatten[Table[{i, j, ZH[i,j]}, {i,1,4}, {j,1,4}],1]},
-   {runningZA, Flatten[Table[{i, j, ZA[i,j]}, {i,1,4}, {j,1,4}],1]}
+   }
 };
 
 FSCalculateDecays = True;

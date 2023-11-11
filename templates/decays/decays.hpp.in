@@ -74,6 +74,9 @@ public:
 #ifdef ENABLE_HIGGSTOOLS
    EffectiveCoupling_list get_higgstools_input() const {return higgstools_input;};
 #endif
+   std::vector<std::tuple<int, int, int, double, std::string>> get_effhiggscouplings_block_input() const {
+      return effhiggscouplings_block_input;
+   }
 
 @decaysGetters@
 @decaysCalculationPrototypes@
@@ -115,6 +118,7 @@ private:
 
    double get_alphas(@ModelName@_cxx_diagrams::context_base const&) const;
    double get_alpha(@ModelName@_cxx_diagrams::context_base const&) const;
+   std::vector<std::tuple<int, int, int, double, std::string>> effhiggscouplings_block_input {};
 };
 
 @calcAmplitudeSpecializationDecls@

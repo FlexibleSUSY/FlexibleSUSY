@@ -38,13 +38,17 @@
 
 namespace flexiblesusy {
 
-std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_HiggsTools(
+EffectiveCoupling_list get_normalized_effective_couplings(
+  EffectiveCoupling_list const& bsm_input,
+  Physical_input const& physical_input,
+  softsusy::QedQcd const& qedqcd,
+  Spectrum_generator_settings const& spectrum_generator_settings,
+  FlexibleDecay_settings const& flexibledecay_settings);
+
+std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const&,
    std::vector<SingleChargedHiggsInput> const&,
    Physical_input const&,
-   softsusy::QedQcd const&,
-   Spectrum_generator_settings const&,
-   FlexibleDecay_settings const&,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);
 
 } // flexiblesusy

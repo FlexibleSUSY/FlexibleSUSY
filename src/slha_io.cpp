@@ -986,7 +986,9 @@ void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double c
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
    boost::math::chi_squared dist(2);
-   ss << FORMAT_ELEMENT(4, 1-boost::math::cdf(dist, std::abs(chi2-chi2SMmin)), "p-value");
+   const double pval = chi2<chi2SMmin ? 1 : boost::math::cdf(complement(dist, chi2-chi2SMmin));
+   // SLHA doesn't print nicelly numbers with 3 digit exponent
+   ss << FORMAT_ELEMENT(4, pval > 1e-100 ? pval : 0., "p-value");
 
    set_block(ss);
 }
@@ -1004,27 +1006,39 @@ void SLHA_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::s
    set_block(ss);
 }
 
-void SLHA_io::set_effectivecouplings_block(const EffectiveCoupling_list& list)
+void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings)
 {
    std::ostringstream decay;
    decay << "Block EFFHIGGSCOUPLINGS\n";
 
-   for (auto const& effC : list) {
-      // gauge bosons
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  21, 21, effC.gg, "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  22, 22, effC.gamgam, "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid,  22, 23, effC.Zgam, "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -24, 24, effC.WW, "");
-      // fermions
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1, 1, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2, 2, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -3, 3, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -4, 4, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -5, 5, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
-      decay << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -6, 6, effC.CP == 1 ? effC.dd.real() : (effC.CP == -1 ? effC.dd.imag() : std::numeric_limits<double>::quiet_NaN()), "");
+   for (auto const& effC : effCouplings) {
+      decay << FORMAT_EFFECTIVECOUPLINGS(std::get<0>(effC),  std::get<1>(effC), std::get<2>(effC), std::get<3>(effC), std::get<4>(effC));
    }
 
    set_block(decay);
 }
 
+void SLHA_io::set_normalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   std::ostringstream ss;
+   ss << "Block NORMALIZEDEFFHIGGSCOUPLINGS\n";
+   for (auto const& effC : effCouplings) {
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1,  1, std::real(effC.dd), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2,  2, std::real(effC.uu), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -3,  3, std::real(effC.ss), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -4,  4, std::real(effC.cc), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -5,  5, std::real(effC.bb), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -6,  6, std::real(effC.tt), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -11,  11, std::real(effC.ee), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -13,  13, std::real(effC.mumu), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -15,  15, std::real(effC.tautau), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -24,  24, effC.WW, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 23,  23, effC.ZZ, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 21,  21, effC.gg, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 22,  22, effC.gamgam, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 23,  22, effC.Zgam, "");
+   }
+
+   set_block(ss);
+}
 } // namespace flexiblesusy

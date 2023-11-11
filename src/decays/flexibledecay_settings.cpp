@@ -33,6 +33,8 @@ const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descrip
    "include higher order corrections in decays",
    "use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ",
    "off-shell decays into VV pair",
+   "print EFFHIGGSCOUPLINGS block"
+   "use pole Higgs mixings in vertices",
    "call HiggsTools"
 };
 
@@ -126,7 +128,12 @@ void FlexibleDecay_settings::set(Settings o, double value)
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 2, descriptions.at(o).c_str());
       break;
-   case call_higgstools: // 5 [bool]
+   case print_effc_block: // 5 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+   case use_pole_higgs_mixings: // 6 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case call_higgstools: // 7 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
    default:
@@ -144,20 +151,29 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
 /**
  * Resets all spectrum generator settings to their defaults.
  *
- * | enum                             | possible values                                 | default value   |
- * |----------------------------------|-------------------------------------------------|-----------------|
- * | calculate_decays                 | 0 (no) or 1 (yes)                               | 1 (= enabled)   |
- * | include_higher_order_corrections | 0 (no) or 1 (yes)                               | 1 (= enabled)   |
+ * | enum                                       | possible values                                      | default value         |
+ * |--------------------------------------------|------------------------------------------------------|-----------------------|
+ * | calculate_decays                           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
+ * | min_br_to_print                            |                                                      | 1e-5                  |
+ * | include_higher_order_corrections           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
+ * | use_Thomson_alpha_in_Phigamgam_and_PhigamZ | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
+ * | offshell_VV_decays                         | 0 (no) or 1 (single offshell) or 2 (double offshell) | 2 (= double offshell) |
+ * | print_effc_block                           | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
+ * | use_pole_higgs_mixings                     | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
+ * | call_higgstools                            | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  */
 void FlexibleDecay_settings::reset()
 {
-   values[calculate_decays]                 = 1.0;
-   values[min_br_to_print]                  = 1e-5;
-   values[include_higher_order_corrections] = 4.0;
+   values[calculate_decays]                           = 1.0;
+   values[min_br_to_print]                            = 1e-5;
+   values[include_higher_order_corrections]           = 4.0;
    values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
-   values[offshell_VV_decays]               = 2.0;
-   values[call_higgstools]                  = 1.0;
+   values[offshell_VV_decays]                         = 2.0;
+   values[print_effc_block]                           = 0.0;
+   values[use_pole_higgs_mixings]                     = 0.0;
+   values[call_higgstools]                            = 1.0;
 }
+
 bool is_integer(double value)
 {
    double intpart;

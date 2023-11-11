@@ -49,7 +49,7 @@ jobs:
           brew install gsl
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install conan
         run: |
@@ -124,7 +124,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.16.1
+      image: navir/opensuseleap-for-flexiblesusy:0.17.1
 
     strategy:
       fail-fast: false
@@ -134,14 +134,14 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.10'
-      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic MSSMNoFVEFTHiggs'
       MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3'
 
     steps:
 
       # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Activate Wolfram Engine
         env:

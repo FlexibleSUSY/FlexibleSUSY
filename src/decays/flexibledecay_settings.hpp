@@ -28,13 +28,15 @@ class FlexibleDecay_settings {
 public:
    /// FlexibleDecay settings
    enum Settings : int {
-      calculate_decays,      ///< [0] calculate particle decays
-      min_br_to_print,       ///< [1]
-      include_higher_order_corrections, ///< [2] include higher order corrections in decays
+      calculate_decays,                           ///< [0] calculate particle decays
+      min_br_to_print,                            ///< [1]
+      include_higher_order_corrections,           ///< [2] include higher order corrections in decays
       use_Thomson_alpha_in_Phigamgam_and_PhigamZ, ///< [3]
-      offshell_VV_decays,    ///< [4]
-      call_higgstools,       ///< [5]
-      NUMBER_OF_OPTIONS      ///< number of possible options
+      offshell_VV_decays,                         ///< [4]
+      print_effc_block,                           ///< [5]
+      use_pole_higgs_mixings,                     ///< [6]
+      call_higgstools,                            ///< [7]
+      NUMBER_OF_OPTIONS                           ///< number of possible options
    };
 
    using Settings_t = Eigen::Array<double,NUMBER_OF_OPTIONS,1>;

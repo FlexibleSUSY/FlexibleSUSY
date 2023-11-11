@@ -74,6 +74,9 @@ public:
 #ifdef ENABLE_HIGGSTOOLS
    EffectiveCoupling_list const& get_higgstools_input() const {return higgstools_input;};
 #endif
+   std::vector<std::tuple<int, int, int, double, std::string>> get_effhiggscouplings_block_input() const {
+      return effhiggscouplings_block_input;
+   }
 
    const Decays_list& get_hh_decays() const { return decay_table.get_hh_decays();
       }
@@ -94,7 +97,7 @@ private:
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};
-   bool run_to_decay_particle_scale {true};
+   static constexpr bool run_to_decay_particle_scale {true};
    standard_model_decay_table decay_table{};
    FlexibleDecay_problems problems{};
 #ifdef ENABLE_HIGGSTOOLS
@@ -123,6 +126,7 @@ private:
       typename cxx_diagrams::field_indices<FieldOut2>::type const&);
    double get_alphas(standard_model_cxx_diagrams::context_base const&) const;
    double get_alpha(standard_model_cxx_diagrams::context_base const&) const;
+   std::vector<std::tuple<int, int, int, double, std::string>> effhiggscouplings_block_input {};
 };
 
 template<>

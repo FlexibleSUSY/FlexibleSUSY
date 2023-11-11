@@ -88,7 +88,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
             default:
                throw std::runtime_error(
                   create_process_string<PseudoscalarHiggs,bar<DownTypeQuark>::type, DownTypeQuark>(indexIn, indexOut1, indexOut2)
-                     + ": Cannot determine the number of active quark flavours."
+                     + ": Cannot determine the number of active quark flavours"
                );
          }
 

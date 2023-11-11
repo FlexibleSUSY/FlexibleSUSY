@@ -68,7 +68,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                     2*std::norm(HQQbarVertexDR_P) * Sqr(muqOS / muqDR);
       }
 
-
       const int Nf = number_of_active_flavours(qedqcd, mHOS);
       if (Nf < 5) {
          problems.add_warning(
@@ -94,7 +93,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                default:
                   throw std::runtime_error(
                      create_process_string<Higgs,bar<UpTypeQuark>::type, UpTypeQuark>(indexIn, indexOut1, indexOut2)
-                        + ": Cannot determine the number of active quark flavours."
+                        + ": Cannot determine the number of active quark flavours"
                   );
             }
             double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf, flexibledecay_settings);

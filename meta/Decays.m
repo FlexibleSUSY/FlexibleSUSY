@@ -928,6 +928,14 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "case 1: {\n" <>
                  TextFormatting`IndentText[
                     "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(model.get_input());\n" <>
+                    If[
+                       MemberQ[
+                          DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[] /. Susyno`LieGroups`conj->Identity}, Null],
+                          particle /. Susyno`LieGroups`conj->Identity
+                       ],
+                       "dm->set_use_pole_higgs_mixings(static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::use_pole_higgs_mixings)));\n",
+                       ""
+                    ] <>
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
                     "dm->fill_from(model);\n" <>
@@ -985,6 +993,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
                   "found->width = decays.get_total_width();\n" <>
                   "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n" <>
+                  (* 1 == even, -1 == odd, 0 == undefined - see test/test_HiggsTools_CP.cpp *)
                   "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, 1], -1] <> ";\n" <>
                   "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n"] <>
                   "}\n"] <>
