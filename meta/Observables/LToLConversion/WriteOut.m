@@ -1,6 +1,6 @@
 WriteOut`WriteObservable[
    blockName_,
-   obs:FlexibleSUSYObservable`LToLConversion[_@iI_ -> _@iO_, _, contr_, loopN_]
+   obs:FlexibleSUSYObservable`LToLConversion[_, iI_ -> iO_, _, contr_, loopN_]
 ] :=
 Switch[blockName,
    "FlexibleSUSYLowEnergy",

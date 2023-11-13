@@ -12,8 +12,8 @@ Module[
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
       Print["Creating ", SymbolName@obs, " class ..."];
 
-      exportFields = Cases[observables, {f_@_, __} :> {f, f}, Infinity];
-      fermions =     Cases[observables, {f_@_, __} :> {SARAH`bar@f, f}, Infinity];
+      exportFields = {#, #} &/@ observables[[All, 1]];
+      fermions =     {SARAH`bar@#, #} &/@ observables[[All, 1]];
       ffvV = Flatten/@Tuples@{fermions, {TreeMasses`GetPhoton[]}};
 
       {npfV, npfDefinitions, obsPrototypes, obsDefinitions} = create@observables;
@@ -43,9 +43,9 @@ create[manyObservables:{__FlexibleSUSYObservable`BrLTo3L}] := {
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
-}&[create/@DeleteDuplicates[manyObservables /. f_@_Integer -> f@_]];
+}&[create/@DeleteDuplicates[manyObservables /. Rule[_, {_, _}] -> Rule[_, {_, _}]]];
 
-create[obs:_[lep_, __, loopN_]] :=
+create[obs:FlexibleSUSYObservable`BrLTo3L[lep_, __, loopN_]] :=
 Module[{npfVertices = {}, npfCode = "", prototype, definition, scalars, vectors, boxes},
    {{npfVertices, npfCode}, {scalars, vectors, boxes}} = generate@obs;
 
@@ -77,7 +77,7 @@ Module[{npfVertices = {}, npfCode = "", prototype, definition, scalars, vectors,
 ];
 
 Module[{unevaluatedContributions = Tuples@{{0, 1}, {Scalars, Vectors, Boxes}}},
-generate[obs:_[lep_, _, con_, loopN_]] :=
+generate[obs:FlexibleSUSYObservable`BrLTo3L[lep_, _, con_, loopN_]] :=
 Module[{
       parsed, keep, npfVertices = {}, npfCode = "",
       extraVertices, extraCode, forge, funName, npf, operatorRules

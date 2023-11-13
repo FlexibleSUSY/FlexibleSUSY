@@ -26,9 +26,9 @@ Module[{
    ];
 
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Print["\nCreating LToLConversion class ..."];
-      fieldsFFV = Head/@#&/@observables[[All,1]]/.Rule->List;
+      Print["Creating ", SymbolName@obs, " class ..."];
 
+      fieldsFFV = {#, #} &/@ observables[[All, 1]];
       verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
 
       {additionalVertices, npfDefinitions, prototypes, definitions} = create@observables;
@@ -60,9 +60,9 @@ create[manyObservables:{__FlexibleSUSYObservable`LToLConversion}] := {
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
-}&[create/@DeleteDuplicates[manyObservables /. {f_@_Integer -> f@_, o_[r_, _, rest__] :> o[r, _, rest]}]];
+}&[create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
 
-create[obs:_[in_@_ -> _, _, con_, loopN_]] :=
+create[obs:FlexibleSUSYObservable`LToLConversion[in_, __, con_, loopN_]] :=
 Module[{npfVertices, npfDefinition, calculateDefinition, prototype},
    {npfVertices, npfDefinition} = generate@obs;
 
@@ -98,7 +98,7 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype},
    {npfVertices, npfDefinition, prototype <> ";", calculateDefinition}
 ];
 
-generate[obs:_[in_@_ -> _, _, con_, loopN_]] :=
+generate[obs:FlexibleSUSYObservable`LToLConversion[in_, __, con_, loopN_]] :=
 Module[{npfU, npfD, fields, keep, dim6, codeU, codeD, parsed},
    Utils`FSFancyLine[];
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
