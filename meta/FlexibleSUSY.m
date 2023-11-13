@@ -214,6 +214,7 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
+FSEnableCompile;
 
 (* Standard Model input parameters (SLHA input parameters) *)
 (* {parameter, {"block", entry}, type}                     *)
@@ -488,7 +489,7 @@ ReplaceSymbolsInUserInput[rules_] :=
               {Unevaluated@FlexibleSUSY`HighPoleMassPrecision, Unevaluated@FlexibleSUSY`MediumPoleMassPrecision, Unevaluated@FlexibleSUSY`LowPoleMassPrecision};
 
            (* decay calculation require 3- and 4-point loop functions *)
-           If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}],
+           If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}] && FSEnableCompile,
               Utils`FSFancyWarning[
                  "Decay calculation requires a dedicated loop library.",
                  " Currently it's either LoopTools or Collier but",
