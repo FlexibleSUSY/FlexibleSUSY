@@ -214,6 +214,7 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
+FSEnableCompile;
 
 (* Standard Model input parameters (SLHA input parameters) *)
 (* {parameter, {"block", entry}, type}                     *)
