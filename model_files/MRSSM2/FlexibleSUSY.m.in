@@ -96,7 +96,7 @@ ExtraSLHAOutputBlocks = {
          {24, FlexibleSUSYObservable`EDM[Fe[2]]},
          {25, FlexibleSUSYObservable`EDM[Fe[3]]},
          {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
-         {31, FlexibleSUSYObservable`BrLTo3L[Fe[2] -> {Fe[1], Fe[1], SARAH`bar[Fe[1]]}, All, 1]},
+         {31, FlexibleSUSYObservable`BrLTo3L[Fe, 2 -> {1, 1}, All, 1]},
          {41, FlexibleSUSYObservable`LToLConversion[Fe[2] -> Fe[1], Al, All, 1]},
          {27, FlexibleSUSYObservable`AMMUncertainty[Fe[2]]}
       }

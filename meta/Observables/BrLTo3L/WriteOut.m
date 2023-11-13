@@ -1,6 +1,6 @@
 WriteOut`WriteObservable[
    blockName_,
-   obs:FlexibleSUSYObservable`BrLTo3L[_@iI_ -> {_@iO_, _@iA_, _}, contr_, loopN_]
+   obs:FlexibleSUSYObservable`BrLTo3L[_, iI_ -> {iO_, iA_}, contr_, loopN_]
 ] :=
 Switch[blockName,
    "FlexibleSUSYLowEnergy",

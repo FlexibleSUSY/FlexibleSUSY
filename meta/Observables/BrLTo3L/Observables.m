@@ -1,14 +1,14 @@
 DefineObservable[
-   FlexibleSUSYObservable`BrLTo3L[pI_@iI_ -> {_@iO_, _@iA_, _}, contr_, loopN_],
+   FlexibleSUSYObservable`BrLTo3L[lep_, iI_ -> {iJ_, iK_}, contr_, loopN_],
    GetObservableName ->
-      "pIiItoiOiAbariA_contr_loopNloop",
+      "lepiItoiJiKbariK_contr_loopNloop",
    GetObservableDescription ->
-      "pI(iI->iOiAbariA) for contr at loopN loop",
+      "lep(iI->iJiKbariK) for contr at loopN loop",
    GetObservableType ->
       CConversion`ArrayType[CConversion`complexScalarCType, 13],
    CalculateObservable ->
-      "calculate_pI_to_pIpIbarpI_for_contr_loopNloop(iI, iO, iA, MODEL, qedqcd)",
+      "calculate_lep_to_leplepbarlep_for_contr_loopNloop(iI, iJ, iK, MODEL, qedqcd)",
    GetObservablePrototype ->
-      "calculate_pI_to_pIpIbarpI_for_contr_loopNloop(int nI, int nO, int nA, const eigenstates& model, const softsusy::QedQcd& qedqcd)",
+      "calculate_lep_to_leplepbarlep_for_contr_loopNloop(int nI, int nO, int nA, const eigenstates& model, const softsusy::QedQcd& qedqcd)",
    GetObservableNamespace -> "lto3l"
 ];

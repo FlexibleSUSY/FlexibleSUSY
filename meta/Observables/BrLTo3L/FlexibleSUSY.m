@@ -45,7 +45,7 @@ create[manyObservables:{__FlexibleSUSYObservable`BrLTo3L}] := {
    StringRiffle[#[[All, 4]], "\n\n"]
 }&[create/@DeleteDuplicates[manyObservables /. f_@_Integer -> f@_]];
 
-create[obs:_[lep_@_ -> _, _, loopN_]] :=
+create[obs:_[lep_, __, loopN_]] :=
 Module[{npfVertices = {}, npfCode = "", prototype, definition, scalars, vectors, boxes},
    {{npfVertices, npfCode}, {scalars, vectors, boxes}} = generate@obs;
 
@@ -77,7 +77,7 @@ Module[{npfVertices = {}, npfCode = "", prototype, definition, scalars, vectors,
 ];
 
 Module[{unevaluatedContributions = Tuples@{{0, 1}, {Scalars, Vectors, Boxes}}},
-generate[obs:_[lep_@_ -> _, con_, loopN_]] :=
+generate[obs:_[lep_, _, con_, loopN_]] :=
 Module[{
       parsed, keep, npfVertices = {}, npfCode = "",
       extraVertices, extraCode, forge, funName, npf, operatorRules
