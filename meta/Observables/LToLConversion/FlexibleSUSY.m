@@ -120,7 +120,9 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD, parsed},
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> keep,
       NPointFunctions`LoopLevel -> loopN,
-      NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark, SARAH`DownQuark};
+      NPointFunctions`Observable -> obs,
+      NPointFunctions`Regularize -> FlexibleSUSY`FSRenormalizationScheme
+   ] &/@ {SARAH`UpQuark, SARAH`DownQuark};
    {npfU, npfD} = {npfU, npfD} /. {
       SARAH`sum[__] -> 0,
       LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],

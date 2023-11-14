@@ -107,7 +107,8 @@ Module[{
             NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
             NPointFunctions`KeepProcesses -> {#},
             NPointFunctions`LoopLevel -> loopN,
-            NPointFunctions`Observable -> obs
+            NPointFunctions`Observable -> obs,
+            NPointFunctions`Regularize -> FlexibleSUSY`FSRenormalizationScheme
          ];
          npf = npf /. {
             SARAH`sum[__] -> 0,

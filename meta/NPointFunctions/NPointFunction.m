@@ -165,31 +165,26 @@ GetProcess[set_?IsFormCalcSet] :=
    Part[Head@Part[set, 1], 1];
 GetProcess // secure;
 
-GetFieldInsertions[tree_?IsTree] := GetFieldInsertions[ExtractDiagrams@tree, False];
-GetFieldInsertions[diagrams_, withRules_:False] :=
-Module[{genericFields = {}, classesFields = {}, genericRules, finalRule, removeIndices, res},
-   removeIndices = f_[n_, {_}] :> f@n;
-   Cases[
-      diagrams,
-      Rule[_[_, Generic == _]@g__, _@c__] :> (
-         AppendTo[genericFields, {g}];
-         AppendTo[classesFields, {c} /. _[_, FeynArts`Classes == _] -> List]
-      ),
-      Infinity
+GetFieldInsertions[tree_?IsTree] :=
+   Map[Last, #, {3}]&@Flatten[GetFieldInsertions/@ List@@ExtractDiagrams@tree, 1];
+GetFieldInsertions[diag_?IsDiagram, keepNumQ:True|False:False] :=
+   GetFieldInsertions[#, keepNumQ]&/@ Apply[List, Last@diag, {0, 1}];
+GetFieldInsertions[{graph_, insert_}, keepNumQ_] :=
+Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions, stripIndices},
+   stripIndices[Times[-1, field_]] := -stripIndices@field;
+   stripIndices[name_[class_, ___]] := name@class;
+   toGenericIndexConventionRules = Cases[graph,
+      Rule[FeynArts`Field[index_Integer],type_Symbol] :>
+      Rule[FeynArts`Field@index, type[FeynArts`Index[Generic,index]]]
    ];
-   genericRules = Switch[withRules,
-      True,  Rule[f_[n_], t_Symbol] :> (n -> f[n]),
-      False, Rule[f_[n_], t_Symbol] :> (t[FeynArts`Index[Generic, n]] -> f[n])
-   ];
-   finalRule = Switch[withRules,
-      True,  Rule[n_, rhs_] :> Rule[FeynArts`Field@n, rhs],
-      False, Rule[_, rhs_] :> rhs
-   ];
-   Table[
-      res = Cases[genericFields[[i]], genericRules] /. classesFields[[i]];
-      res = SortBy[#, First] &/@ res;
-      res = res /. removeIndices /. finalRule,
-      {i, Length@genericFields}
+   fieldsGen = toGenericIndexConventionRules[[All,1]];
+   genericInsertions = Cases[#,
+      Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
+      Rule[genericField, stripIndices@classesField]
+   ] &/@ insert;
+   SortBy[#,First]&/@ If[keepNumQ,
+      List @@ genericInsertions,
+      List @@ genericInsertions /. toGenericIndexConventionRules
    ]
 ];
 GetFieldInsertions // secure;

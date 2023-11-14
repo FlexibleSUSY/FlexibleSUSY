@@ -65,12 +65,10 @@ GenerateColorlessAmplitudes // secure;
 
 ExtractDiagrams[tree_?IsTree] :=
 tree /.
-   node[e_?IsTreeHead, rest__] :> First[e]@rest /.
-   node[e_?IsTopology, rest__] :>
-      Rule[e, FeynArts`Insertions[Generic][rest]]  /.
-   node[e_?IsGeneric, rest__] :>
-      First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
-   node[e_?IsClasses] :> First@e;
+   node[e_?IsTreeHead, rest__] :> First[e][rest] /.
+   node[e_?IsTopology, rest__] :> Rule[e, FeynArts`Insertions[Generic][rest]]  /.
+   node[e_?IsGeneric, rest__]  :> First[e] -> FeynArts`Insertions[FeynArts`Classes][rest] /.
+   node[e_?IsClasses]          :> First[e];
 
 ExtractAmplitudes[tree_?IsTree] :=
 tree /.

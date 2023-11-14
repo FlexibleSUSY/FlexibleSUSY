@@ -88,6 +88,8 @@ Needs@"WilsonCoeffs`";
 
    Print["Analytical calculation for Fe->Fe started ..."];
    {uNPF, dNPF} = NPointFunctions`NPointFunction[{Fe,#},{Fe,#},
+      NPointFunctions`LoopLevel -> 1,
+      NPointFunctions`Regularize -> FlexibleSUSY`FSRenormalizationScheme,
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,

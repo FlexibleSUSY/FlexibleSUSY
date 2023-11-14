@@ -184,19 +184,21 @@ Options@NPointFunction =
 CheckOptionValues[opts___] := (
    Cases[{opts},
       Rule[First@#, v_] :>
-         Utils`AssertOrQuit[MemberQ[Last@#, v], NPointFunction::errOption, v, First@#, Last@#]
+         Utils`AssertOrQuit[MatchQ[v, Alternatives@@Last@#], NPointFunction::errOption, v, First@#, Last@#]
    ] &/@
    {
-      LoopLevel -> {0, 1},
-      Regularize -> {FlexibleSUSY`MSbar, FlexibleSUSY`DRbar},
+      OnShellFlag -> {True, False},
       UseCache -> {True, False},
       ZeroExternalMomenta -> {True, False, OperatorsOnly, ExceptLoops},
-      OnShellFlag -> {True, False}
+      KeepProcesses -> {{__}},
+      LoopLevel -> {0, 1},
+      Observable -> {None, _[__]},
+      Regularize -> {FlexibleSUSY`MSbar, FlexibleSUSY`DRbar}
    };
    True
 );
 
-NPointFunction::errOption = "Value `1` for `2` option must be from `3`.";
+NPointFunction::errOption = "Value `1` for `2` option must match any from `3`.";
 NPointFunction[
    inFields: {__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
    outFields:{__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
