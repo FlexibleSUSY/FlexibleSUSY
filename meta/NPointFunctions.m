@@ -37,7 +37,7 @@ SetAttributes[
       LoopLevel, Regularize, UseCache, ZeroExternalMomenta, OnShellFlag,
       OperatorsOnly, ExceptLoops, KeepProcesses, Irreducible, Triangles,
       GenericS, GenericF, GenericV, GenericU, GenericSum, GenericIndex,
-      LorentzIndex, Mat, DiracChain
+      LorentzIndex, Mat, DiracChain, Observable
    },
    {Protected}
 ];
@@ -170,17 +170,6 @@ OutputPaths[] := Module[{outputPath, eigenstates = ToString@FlexibleSUSY`FSEigen
    }
 ];
 
-Options@NPointFunction =
-{
-   LoopLevel -> 1,
-   Regularize -> FlexibleSUSY`FSRenormalizationScheme,
-   UseCache -> True,
-   ZeroExternalMomenta -> True,
-   OnShellFlag -> True,
-   KeepProcesses -> {},
-   Observable -> None
-};
-
 CheckOptionValues[opts___] := (
    Cases[{opts},
       Rule[First@#, v_] :>
@@ -192,7 +181,7 @@ CheckOptionValues[opts___] := (
       ZeroExternalMomenta -> {True, False, OperatorsOnly, ExceptLoops},
       KeepProcesses -> {{__}},
       LoopLevel -> {0, 1},
-      Observable -> {None, _[__]},
+      Observable -> {None, _[___]},
       Regularize -> {FlexibleSUSY`MSbar, FlexibleSUSY`DRbar}
    };
    True
@@ -202,16 +191,16 @@ NPointFunction::errOption = "Value `1` for `2` option must match any from `3`.";
 NPointFunction[
    inFields: {__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
    outFields:{__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
-   opts:OptionsPattern[] /; CheckOptionValues@opts
+   opts:___ /; CheckOptionValues@opts
 ] :=
 Module[{
       npfDir, fcDir, faModel, particleNamesFile,
       particleNamespaceFile, kernel, currentDirectory,
-      npf, metaInfo = {Join[inFields, outFields], OptionValue@KeepProcesses}
+      npf, metaInfo = {Join[inFields, outFields], Utils`FSGetOption[{opts}, KeepProcesses]}
    },
    {npfDir, fcDir, faModel, particleNamesFile, particleNamespaceFile} = OutputPaths[];
    If[DirectoryQ@npfDir === False, CreateDirectory@npfDir];
-   If[OptionValue@UseCache,
+   If[Utils`FSGetOption[{opts}, UseCache],
       npf = GetCache[inFields, outFields, npfDir, metaInfo];
       If[npf =!= Null, Return@npf];
    ];
@@ -229,12 +218,12 @@ Module[{
             ToFeynArtsFields[inFields, particleNamesFile],
             ToFeynArtsFields[outFields, particleNamesFile]
          },
-         options = {OptionValue@Observable,
-            OptionValue@LoopLevel,
-            SymbolName/@If[List=!=Head@#, {#}, #]&@OptionValue@KeepProcesses,
-            OptionValue@ZeroExternalMomenta,
-            OptionValue@OnShellFlag,
-            OptionValue@Regularize
+         options = {Utils`FSGetOption[{opts}, Observable],
+            Utils`FSGetOption[{opts}, LoopLevel],
+            SymbolName/@If[List=!=Head@#, {#}, #]&@Utils`FSGetOption[{opts}, KeepProcesses],
+            Utils`FSGetOption[{opts}, ZeroExternalMomenta],
+            Utils`FSGetOption[{opts}, OnShellFlag],
+            Utils`FSGetOption[{opts}, Regularize]
          },
          meta = FlexibleSUSY`$flexiblesusyMetaDir
       },
