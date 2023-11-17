@@ -102,7 +102,7 @@ Module[{
          Print["Loop level: ", loopN];
          npf = NPointFunctions`NPointFunction[{lep, lep}, {lep, lep},
             NPointFunctions`OnShellFlag -> True,
-            NPointFunctions`UseCache -> False,
+            NPointFunctions`UseCache -> True,
             NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
             NPointFunctions`KeepProcesses -> {#},
             NPointFunctions`LoopLevel -> loopN,

@@ -196,7 +196,7 @@ NPointFunction[
 Module[{
       npfDir, fcDir, faModel, particleNamesFile,
       particleNamespaceFile, kernel, currentDirectory,
-      npf, metaInfo = {Join[inFields, outFields], Utils`FSGetOption[{opts}, KeepProcesses]}
+      npf, metaInfo = {{inFields, outFields}, {opts}}
    },
    {npfDir, fcDir, faModel, particleNamesFile, particleNamespaceFile} = OutputPaths[];
    If[DirectoryQ@npfDir === False, CreateDirectory@npfDir];
@@ -255,10 +255,29 @@ Module[{v, getVertex},
 ];
 VerticesForNPointFunction // secure;
 
-CacheNameForMeta[meta:{__}] := Utils`StringJoinWithSeparator[Flatten@meta, "", SymbolName]<>".m";
+With[{dir = DirectoryName@$InputFileName},
+CacheNameForMeta[meta:{__}] :=
+Module[{inFields, outFields, dirMod = "", obsDir},
+   inFields  = meta[[1, 1]];
+   outFields = meta[[1, 2]];
+   opts = SortBy[Cases[meta[[2]], _Rule], First];
+   obsDir = FileNameJoin@{dir, "Observables", SymbolName@Head@Utils`FSGetOption[opts, Observable]};
+   If[DirectoryQ@obsDir,
+      dirMod = "modtime" <> DateString@FileDate[obsDir, "Modification"];
+   ];
+   StringReplace[
+      Utils`StringJoinWithSeparator[
+         Flatten@{inFields, "to", outFields, (#/.x_Symbol :> SymbolName@x)&/@Last/@opts , dirMod},
+         "_",
+         ToString
+      ] <> ".m",
+      {" " -> "", ":" -> "-", "Blank[]" -> "_"}
+   ]
+];
 CacheNameForMeta // secure;
+];
 
-WriteCache[new_, dir_, meta:{__}] :=
+WriteCache[new_, dir_, meta_] :=
 Module[{path, file, npfs, iosition},
    path = FileNameJoin@{dir, CacheNameForMeta@meta};
    If[FileExistsQ@path,
@@ -276,7 +295,7 @@ Module[{path, file, npfs, iosition},
 ];
 WriteCache // secure;
 
-GetCache[inFields_, outFields_, cacheDir_, meta:{__}] :=
+GetCache[inFields_, outFields_, cacheDir_, meta_] :=
 Module[{nPointFunctionsFile, nPointFunctions, position},
    nPointFunctionsFile = FileNameJoin@{cacheDir, CacheNameForMeta@meta};
    If[FileExistsQ@nPointFunctionsFile === False,

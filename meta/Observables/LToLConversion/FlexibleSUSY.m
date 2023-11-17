@@ -115,7 +115,7 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD, parsed},
    {npfU, npfD} = NPointFunctions`NPointFunction[
       {in, #}, {in, #},
       NPointFunctions`OnShellFlag -> True,
-      NPointFunctions`UseCache -> False,
+      NPointFunctions`UseCache -> True,
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> keep,
       NPointFunctions`LoopLevel -> loopN,
