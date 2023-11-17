@@ -291,7 +291,7 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
    warn := Utils`FSFancyWarning[#," for ", ToString@obs, " might not be specified."]&;
 
    stringPattern = ToString@FullForm@{pattern};
-   patternNames = StringCases[stringPattern, "Pattern[" ~~ Shortest@x__ ~~ "," :> x];
+   patternNames = DeleteDuplicates@StringCases[stringPattern, "Pattern[" ~~ Shortest@x__ ~~ "," :> x];
    uniqueNames = Unique[#<>"$"]&/@patternNames;
 
    lhsRepl = MapThread[Rule, {patternNames, ToString/@uniqueNames}];

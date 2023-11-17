@@ -1,5 +1,5 @@
 DefineObservable[
-   FlexibleSUSYObservable`BrLTo3L[lep_, iI_ -> {iJ_, iK_}, contr_, loopN_],
+   FlexibleSUSYObservable`BrLTo3L[lep_, iI_ -> {iJ_, iK_, iK_}, contr_, loopN_],
    GetObservableName ->
       "lepiItoiJiKbariK_contr_loopNloop",
    GetObservableDescription ->

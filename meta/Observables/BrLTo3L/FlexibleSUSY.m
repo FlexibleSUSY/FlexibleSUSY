@@ -43,7 +43,7 @@ create[manyObservables:{__FlexibleSUSYObservable`BrLTo3L}] := {
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
-}&[create/@DeleteDuplicates[manyObservables /. Rule[_, {_, _}] -> Rule[_, {_, _}]]];
+}&[create/@DeleteDuplicates[manyObservables /. Rule[_, {_, _, _}] -> Rule[_, {_, _, _}]]];
 
 create[obs:FlexibleSUSYObservable`BrLTo3L[lep_, __, loopN_]] :=
 Module[{npfVertices = {}, npfCode = "", prototype, definition, scalars, vectors, boxes},

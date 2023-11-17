@@ -67,7 +67,7 @@ ExtraSLHAOutputBlocks = {
            {{20, FlexibleSUSYObservable`AMM[Fe[1]]},
             {21, FlexibleSUSYObservable`AMM[Fe[2]]},
             {22, FlexibleSUSYObservable`AMM[Fe[3]]},
-            {31, FlexibleSUSYObservable`BrLTo3L[Fe, 2 -> {1, 1}, All, 1]},
+            {31, FlexibleSUSYObservable`BrLTo3L[Fe, 2 -> {1, 1, 1}, All, 1]},
             {41, FlexibleSUSYObservable`LToLConversion[Fe, 2 -> 1, Al, All, 1]}
             } }
 };
