@@ -53,7 +53,6 @@ BeginPackage["FlexibleSUSY`",
               "Decays`",
               "EDM`",
               "FFVFormFactors`",
-              "BrLToLGamma`",
               "BtoSGamma`",
               "FlexibleEFTHiggsMatching`",
               "FSMathLink`",
@@ -2442,26 +2441,6 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
       vertices
    ];
 
-WriteLToLGammaClass[decays_List, files_List] :=
-   Module[{interfacePrototypes, interfaceDefinitions},
-
-      {interfacePrototypes, interfaceDefinitions} =
-         If[decays === {},
-            {"",""},
-            StringJoin @@@
-               (Riffle[#, "\n\n"]& /@ Transpose[BrLToLGamma`CreateInterfaceFunctionForBrLToLGamma /@ decays])
-         ];
-
-      WriteOut`ReplaceInFiles[files, {
-            "@LToLGamma_InterfacePrototypes@"  -> interfacePrototypes,
-            "@LToLGamma_InterfaceDefinitions@" -> interfaceDefinitions,
-            "@get_MSUSY@" -> TextFormatting`IndentText@
-               TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
-            Sequence @@ GeneralReplacementRules[]
-         }
-      ];
-   ];
-
 WriteBToSGammaClass[decays_List, files_List] :=
    Module[{createInterface = False,
           btosgammaInterfaceDefinitions},
@@ -4228,7 +4207,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, initialGuesserInputFile,
             aMMVertices, edmFields, ammFields,
             QToQGammaFields = {},
-            LToLGammaFields = {},
             FFMasslessVVertices = {},
             ObservablesExtraOutput, observablesExtraVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -5075,36 +5053,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "edm.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_edm.cpp"}]}}];
 
-           (* OBSERVABLE: l -> l gamma *)
-
-           LToLGammaFields =
-              DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
-                     FlexibleSUSYObservable`BrLToLGamma[
-                        pIn_[_Integer]|pIn_?AtomQ -> {pOut_[_Integer]|pOut_?AtomQ, spectator_}
-                     ] :> (pIn -> {pOut, spectator})
-                  ];
-           Block[{properStates, wrongFields},
-              properStates = Cases[LToLGammaFields,
-                 Rule[a_?IsLepton, {b_?IsLepton, c_ /; c === GetPhoton[]}] -> (a -> {b, c})
-              ];
-              wrongFields = Complement[LToLGammaFields, properStates];
-              If[wrongFields =!= {},
-                 Utils`FSFancyWarning[
-                    "BrLToLGamma function works only for leptons and a photon.",
-                    " Removing requested process(es): "
-                    Riffle[ToString/@ wrongFields, ", "]
-                 ];
-                 LToLGammaFields = properStates;
-              ];
-           ];
-
-           Print["Creating l->l'A class ..."];
-           WriteLToLGammaClass[LToLGammaFields,
-                           {{FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.hpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.hpp"}]},
-                            {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
-
            (* b -> s gamma *)
            If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
              Print["Creating b->s'A class ..."];
@@ -5191,7 +5139,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      (# -> {#, TreeMasses`GetPhoton[]})& /@ edmFields,
 
                      (* Br(L -> L Gamma) *)
-                     LToLGammaFields,
+                     Module[{fields = Cases[ObservablesExtraOutput@"BrLToLGamma", ("FFV fields" -> x_) :> x]},
+                        Switch[fields, {{}}, {}, _, First/@fields]
+                     ],
 
                      (* b -> s gamma *)
                      QToQGammaFields,

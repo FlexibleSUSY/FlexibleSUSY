@@ -76,7 +76,6 @@ META_SRC     := \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
-		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \

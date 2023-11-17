@@ -18,8 +18,6 @@ BASE_TEMPLATES := \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
 		$(DIR)/FFV_form_factors.cpp.in \
-		$(DIR)/l_to_lgamma.hpp.in \
-		$(DIR)/l_to_lgamma.cpp.in \
 		$(wildcard $(DIR)/observables/*.hpp.in) \
 		$(wildcard $(DIR)/observables/*.cpp.in) \
 		$(DIR)/b_to_s_gamma.cpp.in \

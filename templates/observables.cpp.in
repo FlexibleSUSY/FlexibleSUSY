@@ -21,7 +21,6 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_amm.hpp"
 #include "@ModelName@_edm.hpp"
-#include "@ModelName@_l_to_lgamma.hpp"
 #include "@ModelName@_b_to_s_gamma.hpp"
 #include "observables/ltolconversion/settings.hpp"
 @observablesHeaders@
@@ -54,8 +53,6 @@
 #define Pole(p) model.get_physical().p
 #define EDM0(p) edm_ ## p
 #define EDM1(p,idx) edm_ ## p ## _ ## idx
-#define LToLGamma0(pIn, pOut, spec) pIn ## _to_ ## pOut ## _ ## spec
-#define LToLGamma1(pIn,idxIn,pOut,idxOut,spec) pIn ## idxIn ## _to_ ## pOut ## idxOut ## _ ## spec
 #define BSGAMMA b_to_s_gamma
 
 #define ALPHA_EM_MZ qedqcd.displayAlpha(softsusy::ALPHA)

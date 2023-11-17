@@ -204,18 +204,6 @@ HeadToStr[sym_]    := "\"" <> ToString[sym] <> "\"";
 HeadsToStr[{}]     := "";
 HeadsToStr[l_List] := ", {" <> StringRiffle[HeadToStr /@ l, ", "] <> "}";
 
-PutObservable[FlexibleSUSYObservable`BrLToLGamma[p1_[idx1_Integer]->{p2_[idx2_Integer], V_}], type_, link_String, heads_:{}] /; V === TreeMasses`GetPhoton[] := "
-MLPutFunction(link, \"Rule\", 2);
-MLPutFunction(link, \"FlexibleSUSYObservable`BrLToLGamma\", 1);
-MLPutFunction(link, \"Rule\", 2);
-MLPutFunction(link, " <> ObsToStr[p1] <> ", 1);
-MLPutInteger(link, " <> ObsToStr[idx1] <> ");
-MLPutFunction(link, \"List\", 2);
-MLPutFunction(link, " <> ObsToStr[p2] <> ", 1);
-MLPutInteger(link, " <> ObsToStr[idx2] <> ");
-MLPutSymbol(link, " <> ObsToStr[V] <> ");
-MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToString[p2] <> ToString[idx2] <> "_" <> ToString[V] <> "));"
-
 PutObservable[obs_[sub_], type_, link_String, heads_:{}] :=
     PutObservable[sub, type, link, Join[heads, {obs}]];
 
@@ -223,18 +211,6 @@ PutObservable[obs_, type_, link_String, heads_:{}] :=
     "MLPutRuleTo(" <> link <> ", OBSERVABLE(" <>
     Observables`GetObservableName[Composition[Sequence @@ heads][obs]] <>
     "), " <> ObsToStr[obs] <> HeadsToStr[heads] <> ");\n";
-
-PutObservable[FlexibleSUSYObservable`BrLToLGamma[p1_[idx1_Integer]->{p2_[idx2_Integer], V_}], type_, link_String, heads_:{}] /; V === TreeMasses`GetPhoton[] := "
-MLPutFunction(link, \"Rule\", 2);
-MLPutFunction(link, \"FlexibleSUSYObservable`BrLToLGamma\", 1);
-MLPutFunction(link, \"Rule\", 2);
-MLPutFunction(link, " <> ObsToStr[p1] <> ", 1);
-MLPutInteger(link, " <> ObsToStr[idx1] <> ");
-MLPutFunction(link, \"List\", 2);
-MLPutFunction(link, " <> ObsToStr[p2] <> ", 1);
-MLPutInteger(link, " <> ObsToStr[idx2] <> ");
-MLPutSymbol(link, " <> ObsToStr[V] <> ");
-MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToString[p2] <> ToString[idx2] <> "_" <> ToString[V] <> "));"
 
 PutObservables[obs_List, link_String] := (
    If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,

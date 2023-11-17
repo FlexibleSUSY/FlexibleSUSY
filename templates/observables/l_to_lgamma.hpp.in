@@ -18,13 +18,13 @@
 
 
 /**
- * @file @ModelName@_l_to_lgamma.hpp
+ * @file @ModelName@_@filename@.hpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_MuToEGamma_H
-#define @ModelName@_MuToEGamma_H
+#ifndef @ModelName@_@include_guard@
+#define @ModelName@_@include_guard@
 
 namespace softsusy {
 class QedQcd;
@@ -34,12 +34,12 @@ namespace flexiblesusy {
 class Physical_input;
 class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_l_to_lgamma {
+namespace @namespace@ {
 template <typename FIn, typename FOut, typename T1, typename T2>
 double lepton_total_decay_width(
-      T1 const&, T2 const&, 
+      T1 const&, T2 const&,
       const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&);
-@LToLGamma_InterfacePrototypes@
+@calculate_prototypes@
 }
 } // namespace flexiblesusy
 

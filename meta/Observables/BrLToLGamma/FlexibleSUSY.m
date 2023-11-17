@@ -1,36 +1,59 @@
-(* ::Package:: *)
+Begin@"FlexibleSUSY`Private`";
 
-(* :Copyright:
+WriteClass[obs:FlexibleSUSYObservable`BrLToLGamma, slha_, files_] :=
+Module[{
+      observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
+      LToLGammaFields, properStates, wrongFields,
+      prototypes = "", definitions = ""
+   },
 
-   ====================================================================
-   This file is part of FlexibleSUSY.
+   LToLGammaFields = DeleteDuplicates[observables /.
+      {
+         Rule[i_[_], {o_[_], v_}] :> Rule[i, {o, v}],
+         obs -> Sequence
+      }
+   ];
 
-   FlexibleSUSY is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published
-   by the Free Software Foundation, either version 3 of the License,
-   or (at your option) any later version.
+   properStates = Cases[
+      LToLGammaFields,
+      Rule[a_?IsLepton, {b_?IsLepton, c_ /; c === GetPhoton[]}] -> (a -> {b, c})
+   ];
+   wrongFields = Complement[LToLGammaFields, properStates];
+   If[wrongFields =!= {},
+      Utils`FSFancyWarning[
+         "BrLToLGamma works only for leptons and a photon.",
+         " Removing requested process(es): ",
+         Riffle[ToString/@wrongFields, ", "]
+      ];
+      LToLGammaFields = properStates;
+   ];
 
-   FlexibleSUSY is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
+   If[LToLGammaFields =!= {},
+      Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
 
-   You should have received a copy of the GNU General Public License
-   along with FlexibleSUSY.  If not, see
-   <http://www.gnu.org/licenses/>.
-   ====================================================================
+      {prototypes, definitions} =
+         StringJoin@@@(Riffle[#, "\n\n"] &/@ Transpose[createBrLToLGamma/@ LToLGammaFields]);
+   ];
 
-*)
+   WriteOut`ReplaceInFiles[
+      files,
+      {
+         "@calculate_prototypes@" -> prototypes,
+         "@calculate_definitions@" -> definitions,
+         "@include_guard@" -> SymbolName@obs,
+         "@namespace@" -> Observables`GetObservableNamespace@obs,
+         "@filename@" -> Observables`GetObservableFileName@obs,
+         "@get_MSUSY@" -> TextFormatting`IndentText@TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
+         Sequence@@GeneralReplacementRules[]
+      }
+   ];
 
-BeginPackage["BrLToLGamma`",
-   {"SARAH`", "TextFormatting`", "TreeMasses`", "CXXDiagrams`", "CConversion`"}
+   {
+      "FFV fields" -> DeleteDuplicates@LToLGammaFields
+   }
 ];
 
-CreateInterfaceFunctionForBrLToLGamma::usage = "";
-
-Begin["`Private`"];
-
-CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :=
+createBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :=
     Module[{prototype, definition,
             numberOfIndices1 = CXXDiagrams`NumberOfFieldIndices[inFermion],
             numberOfIndices2 = CXXDiagrams`NumberOfFieldIndices[outFermion],
@@ -132,4 +155,3 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
     ];
 
 End[];
-EndPackage[];

@@ -18,7 +18,7 @@
 
 
 /**
- * @file @ModelName@_l_to_lgamma.cpp
+ * @file @ModelName@_@filename@.cpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
@@ -26,7 +26,7 @@
 #include <valarray>
 #include <complex>
 
-#include "@ModelName@_l_to_lgamma.hpp"
+#include "@ModelName@_@filename@.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
@@ -103,7 +103,7 @@ using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace @ModelName@_l_to_lgamma {
+namespace @namespace@ {
 
 template <typename FIn, typename FOut, typename T1, typename T2>
 double lepton_total_decay_width(
@@ -112,7 +112,7 @@ double lepton_total_decay_width(
    return  get_total_width(indices1[0]);
 }
 
-@LToLGamma_InterfaceDefinitions@
+@calculate_definitions@
 
 }
 } // namespace flexiblesusy
