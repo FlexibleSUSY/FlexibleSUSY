@@ -26,7 +26,7 @@ Module[{
    ];
 
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Print["Creating ", SymbolName@obs, " class ..."];
+      Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
 
       fieldsFFV = {#, #} &/@ observables[[All, 1]];
       verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
@@ -100,7 +100,6 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype},
 
 generate[obs:FlexibleSUSYObservable`LToLConversion[in_, __, con_, loopN_]] :=
 Module[{npfU, npfD, fields, keep, dim6, codeU, codeD, parsed},
-   Utils`FSFancyLine[];
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
    keep = Switch[{loopN, parsed},
       {0, {"All"}},       {Vectors, Scalars},
@@ -153,7 +152,6 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD, parsed},
 
    codeU = NPointFunctions`CreateCXXFunctions[npfU, "@classU@", SARAH`Delta, dim6@SARAH`UpQuark][[2]];
    codeD = NPointFunctions`CreateCXXFunctions[npfD, "@classD@", SARAH`Delta, dim6@SARAH`DownQuark][[2]];
-   Utils`FSFancyLine[];
 
    {
       DeleteDuplicates@Join[

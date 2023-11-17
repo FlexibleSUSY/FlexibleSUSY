@@ -10,7 +10,7 @@ Module[
    },
 
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Print["Creating ", SymbolName@obs, " class ..."];
+   Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
 
       exportFields = {#, #} &/@ observables[[All, 1]];
       fermions =     {SARAH`bar@#, #} &/@ observables[[All, 1]];
@@ -92,7 +92,6 @@ Module[{
       _, Symbol/@parsed
    ];
 
-   Utils`FSFancyLine[];
    If[Not@MemberQ[keep, #],
       forge@# = "zero",
       funName = ToLowerCase@SymbolName@# <>ToString@loopN<>"loop";
@@ -125,7 +124,6 @@ Module[{
          npfCode = npfCode <> "\n" <> extraCode;
       ];
    ] &/@ {Scalars, Vectors, Boxes};
-   Utils`FSFancyLine[];
 
    {{npfVertices, npfCode}, Last/@DownValues@forge}
 ];

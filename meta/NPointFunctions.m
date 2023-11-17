@@ -179,7 +179,7 @@ CheckOptionValues[opts___] := (
       OnShellFlag -> {True, False},
       UseCache -> {True, False},
       ZeroExternalMomenta -> {True, False, OperatorsOnly, ExceptLoops},
-      KeepProcesses -> {{__}},
+      KeepProcesses -> {{__Symbol}},
       LoopLevel -> {0, 1},
       Observable -> {None, _[___]},
       Regularize -> {FlexibleSUSY`MSbar, FlexibleSUSY`DRbar}
