@@ -151,10 +151,10 @@ Module[{set, top, inf, n},
 
 PrintInfo // secure;
 
-LoopFields[node[id_, ___], info__] := FeynArts`LoopFields[First@id, info];
+LoopFields[tH_, t_, node[id_, ___]] := FeynArts`LoopFields[First@id, t, tH];
 LoopFields // secure;
 
-TreeFields[node[id_, ___], info__] := FeynArts`TreeFields[First@id, info];
+TreeFields[tH_, t_, node[id_, ___]] := FeynArts`TreeFields[First@id, t, tH];
 TreeFields // secure;
 
 Field[d_?IsTopologyListHead, i_Integer] := Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];

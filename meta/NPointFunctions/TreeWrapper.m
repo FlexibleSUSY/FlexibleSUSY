@@ -110,13 +110,12 @@ Module[{out = {}, directory, name},
 ExportFeynArtsPaint // secure;
 
 RemoveNode::usage = "Removes node if both tQ[id] is True and fun[node, info] is True.";
-RemoveNode[n:node[_?IsTopology, __], fun_, info__] :=
-   n /. e:node[_?IsGeneric, __] :> RemoveNode[e, fun, info] /.
+RemoveNode[n:node[_?IsTopology, __], fun_, t_, tH_] :=
+   n /. e:node[_?IsGeneric, __] :> RemoveNode[e, fun, t, tH] /.
       node@_?IsTopology :> Sequence[];
-RemoveNode[n:node[_?IsGeneric, __], fun_, info__] :=
-   If[fun[#, info], # /. node[_?IsGeneric] :> Sequence[], ##&[]]&[n /. e:node[_?IsClasses] :> RemoveNode[e, fun, info]];
-RemoveNode[n:node[_?IsClasses], fun_, info__] :=
-   If[fun[n, info], n, ##&[]];
+RemoveNode[n:node[_?IsGeneric, __], fun_, t_, tH_] :=
+   If[fun[tH, t, #], # /. node[_?IsGeneric] :> Sequence[], ##&[]]&[n /. e:node[_?IsClasses] :> RemoveNode[e, fun, t, tH]];
+RemoveNode[n:node[_?IsClasses], fun_, t_, tH_] := If[fun[tH, t, n], n, ##&[]];
 RemoveNode // secure;
 
 TreeHead[tree_?IsTree] := tree[[1, 1]];
