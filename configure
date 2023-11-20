@@ -877,6 +877,7 @@ exists_in_path () {
     fi
 
     cmd=$(command -v -- "$1")
+    logmsg "(command -v -- $1 gave: $cmd)"
     case "$cmd" in
 	/*) return 0 ;;
 	alias\ *) return 1 ;; # alias
@@ -2841,7 +2842,8 @@ check_math_cmd() {
             return
         fi
 
-        message "Error: Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
+        message "Error: Mathematica kernel ${MATH} was not found or is not executable or is an alias."
+        message "   Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
         message "   You can use the --with-math-cmd= option to specify the location of"
         message "   the math kernel.  It is usually installed in "
         case "$operating_system" in
