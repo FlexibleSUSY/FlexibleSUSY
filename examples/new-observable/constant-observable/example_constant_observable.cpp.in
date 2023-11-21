@@ -23,35 +23,9 @@
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
  */
 
-#include <valarray>
-#include <complex>
-
-#include "@ModelName@_mass_eigenstates.hpp"
-#include "cxx_qft/@ModelName@_qft.hpp"
-
-#include "@ModelName@_mynewobservable.hpp"
-#include "@ModelName@_FFV_form_factors.hpp"
-
-#include "wrappers.hpp"
-
-@npointfunctions_headers@
+#include "@ModelName@_@filename@.hpp"
 
 namespace flexiblesusy {
-
-namespace @ModelName@_cxx_diagrams {
-namespace npointfunctions {
-
-@npointfunctions_definitions@
-
-} // namespace npointfunctions
-} // namespace @ModelName@_cxx_diagrams
-
-namespace {
-
-} // anonymous namespace
-
-using namespace @ModelName@_cxx_diagrams;
-
 namespace @namespace@ {
 
 @calculate_definitions@

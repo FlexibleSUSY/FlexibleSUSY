@@ -29,14 +29,11 @@
 #include "lowe.h"
 
 namespace flexiblesusy {
-class @ModelName@_mass_eigenstates;
-
 namespace @namespace@ {
 
 @calculate_prototypes@
 
 } // namespace @namespace@
-
 } // namespace flexiblesusy
 
 #endif

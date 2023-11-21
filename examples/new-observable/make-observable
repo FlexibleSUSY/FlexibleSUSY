@@ -3,10 +3,11 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-cp ${BASEDIR}/mynewobservable.* ${BASEDIR}/../../templates/observables
+# absolute path to this script
+DIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
-META=${BASEDIR}/../../meta/Observables/MyNewObservable
+cp ${DIR}/constant-observable/ex* ${DIR}/../../templates/observables
+
+META=${DIR}/../../meta/Observables/ExampleConstantObservable
 mkdir ${META}
-cp ${BASEDIR}/FlexibleSUSY.m ${META}
-cp ${BASEDIR}/Observables.m ${META}
-cp ${BASEDIR}/WriteOut.m ${META}
+cp ${DIR}/constant-observable/*.m ${META}
