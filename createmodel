@@ -348,7 +348,8 @@ search_default_model() {
 
     message -n "Searching for default SARAH model in $_file ... "
 
-    _sarah_model=$(sed -n 's/FSDefaultSARAHModel *= *\([^;][^;]*\)/\1/p' < ${_file} | tr -d '')
+    _sarah_model=$(sed -n 's/FSDefaultSARAHModel *= *\([^;][^;]*\)/\1/p' < ${_file} | tr -d '
+')
 
     if [ -z $_sarah_model ]; then
         message "not found"
