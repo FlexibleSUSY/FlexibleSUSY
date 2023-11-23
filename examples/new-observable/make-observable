@@ -6,8 +6,28 @@ BASEDIR=$(dirname $0)
 # absolute path to this script
 DIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
-cp ${DIR}/constant-observable/ex* ${DIR}/../../templates/observables
+constantObservable() {
+   cp ${DIR}/constant-observable/ex* ${DIR}/../../templates/observables
+   META=${DIR}/../../meta/Observables/ExampleConstantObservable
+   mkdir ${META}
+   cp ${DIR}/constant-observable/*.m ${META}
+}
 
-META=${DIR}/../../meta/Observables/ExampleConstantObservable
-mkdir ${META}
-cp ${DIR}/constant-observable/*.m ${META}
+fermionMassObservable() {
+   cp ${DIR}/fermion-mass-observable/ex* ${DIR}/../../templates/observables
+   META=${DIR}/../../meta/Observables/ExampleFermionMass
+   mkdir ${META}
+   cp ${DIR}/fermion-mass-observable/*.m ${META}
+}
+
+# MAIN begin
+case $1
+in
+   example-1) constantObservable ;; # constant-observable
+   example-2) fermionMassObservable ;; # fermion-mass-observable
+   *) exit 0;
+esac
+# MAIN end
+
+
+
