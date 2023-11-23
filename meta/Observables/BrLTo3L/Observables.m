@@ -7,7 +7,7 @@ DefineObservable[
    GetObservableType ->
       CConversion`ArrayType[CConversion`complexScalarCType, 13],
    CalculateObservable ->
-      "calculate_lep_to_leplepbarlep_for_contr_loopNloop(iI, iJ, iK, MODEL, qedqcd)",
+      "calculate_lep_to_leplepbarlep_for_contr_loopNloop(iI-1, iJ-1, iK-1, MODEL, qedqcd)",
    GetObservablePrototype ->
       "calculate_lep_to_leplepbarlep_for_contr_loopNloop(int nI, int nO, int nA, const eigenstates& model, const softsusy::QedQcd& qedqcd)",
    GetObservableNamespace -> "lto3l"
