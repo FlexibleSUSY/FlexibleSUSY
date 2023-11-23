@@ -2,28 +2,36 @@ FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`ExampleConstantObservable, sl
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      prototypes = "", definitions = ""
+      prototype = "", definition = ""
    },
 
    If[observables =!= {},
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
 
-      prototypes =
-         CConversion`CreateCType@Observables`GetObservableType@# <> " " <>
-         Observables`GetObservablePrototype@# <> ";"&/@observables;
+      prototype = TextFormatting`ReplaceCXXTokens["@type@ @prototype@;",
+         {
+            "@type@" -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
+            "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
+         }
+      ];
 
-      definitions =
-         CConversion`CreateCType@Observables`GetObservableType@# <> " " <>
-         Observables`GetObservablePrototype@# <> " {\n" <>
-         "   " <> CConversion`CreateCType@Observables`GetObservableType@# <> " res {"<> ToString@#[[1]]<> "};\n" <>
-         "   return res;\n}"&/@observables;
+      definition = TextFormatting`ReplaceCXXTokens["
+         @type@ @prototype@ {
+            @type@ res {con};
+            return res;
+         }",
+         {
+            "@type@" -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
+            "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
+         }
+      ];
    ];
 
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@calculate_prototypes@"  -> StringRiffle[DeleteDuplicates@prototypes, "\n\n"],
-         "@calculate_definitions@" -> StringRiffle[DeleteDuplicates@definitions, "\n\n"],
+         "@calculate_prototypes@"  -> prototype,
+         "@calculate_definitions@" -> definition,
          "@include_guard@"         -> SymbolName@obs,
          "@namespace@"             -> Observables`GetObservableNamespace@obs,
          "@filename@"              -> Observables`GetObservableFileName@obs,
