@@ -25,13 +25,10 @@
 
 #ifndef @ModelName@_@include_guard@_H
 #define @ModelName@_@include_guard@_H
-
 #include "lowe.h"
 
 namespace flexiblesusy {
-class @ModelName@_mass_eigenstates;
 class LToLConversion_settings;
-
 namespace @namespace@ {
 
 enum class Nucleus { Au, Al, Ti };
@@ -39,7 +36,6 @@ enum class Nucleus { Au, Al, Ti };
 @calculate_prototypes@
 
 } // namespace @namespace@
-
 } // namespace flexiblesusy
 
 #endif

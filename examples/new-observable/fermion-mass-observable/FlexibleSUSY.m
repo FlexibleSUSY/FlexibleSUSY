@@ -25,13 +25,16 @@ Module[
             "@prototype@" -> Observables`GetObservablePrototype@#
          }
       ]&/@observables;
+
+      prototypes = StringRiffle[DeleteDuplicates@prototypes, "\n\n"];
+      definitions = StringRiffle[DeleteDuplicates@definitions, "\n\n"];
    ];
 
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@calculate_prototypes@"  -> StringRiffle[DeleteDuplicates@prototypes, "\n\n"],
-         "@calculate_definitions@" -> StringRiffle[DeleteDuplicates@definitions, "\n\n"],
+         "@calculate_prototypes@"  -> prototypes,
+         "@calculate_definitions@" -> definitions,
          "@include_guard@"         -> SymbolName@obs,
          "@namespace@"             -> Observables`GetObservableNamespace@obs,
          "@filename@"              -> Observables`GetObservableFileName@obs,
