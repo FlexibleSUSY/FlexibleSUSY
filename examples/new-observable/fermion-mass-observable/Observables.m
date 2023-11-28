@@ -1,4 +1,4 @@
-DefineObservable[
+Observables`DefineObservable[
    FlexibleSUSYObservable`ExampleFermionMass[fermion_@gen_],
    GetObservableType        -> CConversion`ArrayType[CConversion`complexScalarCType, 2],
    GetObservableName        -> "example_fermion_gen_mass",

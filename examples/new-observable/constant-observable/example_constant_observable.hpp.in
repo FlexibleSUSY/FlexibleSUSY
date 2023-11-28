@@ -25,7 +25,6 @@
 
 #ifndef @ModelName@_@include_guard@_H
 #define @ModelName@_@include_guard@_H
-
 #include "lowe.h"
 
 namespace flexiblesusy {

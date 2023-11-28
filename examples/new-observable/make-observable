@@ -7,15 +7,39 @@ BASEDIR=$(dirname $0)
 DIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
 constantObservable() {
+   CXXFILE=${DIR}/../../templates/observables/example_constant_observable.hpp.in
+   if [ -f ${CXXFILE} ]; then
+      rm ${CXXFILE}
+   fi
+   CXXFILE=${DIR}/../../templates/observables/example_constant_observable.cpp.in
+   if [ -f ${CXXFILE} ]; then
+      rm ${CXXFILE}
+   fi
    cp ${DIR}/constant-observable/ex* ${DIR}/../../templates/observables
+
    META=${DIR}/../../meta/Observables/ExampleConstantObservable
+   if [ -d ${META} ]; then
+      rm -rf ${META}
+   fi
    mkdir ${META}
    cp ${DIR}/constant-observable/*.m ${META}
 }
 
 fermionMassObservable() {
+   CXXFILE=${DIR}/../../templates/observables/example_fermion_mass.hpp.in
+   if [ -f ${CXXFILE} ]; then
+      rm ${CXXFILE}
+   fi
+   CXXFILE=${DIR}/../../templates/observables/example_fermion_mass.cpp.in
+   if [ -f ${CXXFILE} ]; then
+      rm ${CXXFILE}
+   fi
    cp ${DIR}/fermion-mass-observable/ex* ${DIR}/../../templates/observables
+
    META=${DIR}/../../meta/Observables/ExampleFermionMass
+   if [ -d ${META} ]; then
+      rm -rf ${META}
+   fi
    mkdir ${META}
    cp ${DIR}/fermion-mass-observable/*.m ${META}
 }
