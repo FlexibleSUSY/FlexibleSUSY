@@ -33,8 +33,6 @@
 #include "observables/ltolconversion/settings.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
-#include "wrappers.hpp"
-
 #define F4F(quark, g) embed_photon<quark, Photon>(model, form_factors, g)
 #define NPF(name, g) fix_tensors_sign<name>(model, in, out, g)
 #define GS(N,Q) parameters.get(LToLConversion_settings::scalar_##N##Q)*m.N/m.Q

@@ -23,8 +23,7 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-AllTopologies[{2, 2}] =
-{
+AllTopologies[{2, 2}] = {
    treeS -> {1,0,1,0,0,1,0,1,0,1,0},
    treeT -> {1,0,0,1,1,0,0,1,0,1,0},
    treeU -> {1,0,0,1,0,1,1,0,0,1,0},

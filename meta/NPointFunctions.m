@@ -358,7 +358,7 @@ Module[{unique, faNames},
 ];
 
 DeleteZeroGenericSum[npf_?IsNPointFunction] := npf;
-DeleteZeroGenericSum[{fields_, {{sums_, rules_, comb_, col}, subs_}}]:=
+DeleteZeroGenericSum[{fields_, {{sums_, rules_, comb_, col_}, subs_}}]:=
 Module[{pos = Position[sums, GenericSum[{0}, {}]]},
    Print["Removing zero GenericSum"];
    {fields, {Delete[#,pos]&/@{sums,rules,comb,col}, subs}}
@@ -393,7 +393,9 @@ TextFormatting`ReplaceCXXTokens["
    #include \"concatenate.hpp\"
    #include <limits>
    #include <boost/fusion/include/at_key.hpp>
-   #include <boost/core/is_same.hpp>",
+   #include <boost/core/is_same.hpp>
+   #include \"wrappers.hpp\"
+   ",
    {"@ModelName@" -> FlexibleSUSY`FSModelName}
 ];
 CreateCXXHeaders // secure;
@@ -744,6 +746,7 @@ Module[{modifiedExpr = expr,
    {couplingDefine, codeCoupling, couplingRules} = NameCouplings@couplings;
    modifiedExpr = modifiedExpr /. couplingRules;
 
+   modifiedExpr = modifiedExpr /. LoopTools`A0[args__] :> LoopTools`A0i[LoopTools`aa0, args];
    {loopRules, loopArrayDefine, loopArraySet, loopIdentifiers} = CreateLoopFunctions@modifiedExpr;
    modifiedExpr = modifiedExpr /. loopRules;
 

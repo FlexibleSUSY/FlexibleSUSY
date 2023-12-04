@@ -32,8 +32,6 @@
 #include "@ModelName@_@filename@.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
-#include "wrappers.hpp"
-
 #define NPF(name) fix_tensors_sign<name>(model, nI, nO, nA);
 #define F4F(lepton, g) embed_photon<lepton, Photon>(model, form_factors, g);
 

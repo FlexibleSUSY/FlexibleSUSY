@@ -28,7 +28,7 @@ Module[
       ];
    ];
 
-   (* Task 2: filling templates and moving them into models/Ma /observables/. *)
+   (* Task 2: filling templates and moving them into models/Ma/observables/. *)
    WriteOut`ReplaceInFiles[
       files,
       {

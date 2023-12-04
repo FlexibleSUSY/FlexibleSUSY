@@ -44,14 +44,47 @@ fermionMassObservable() {
    cp ${DIR}/fermion-mass-observable/*.m ${META}
 }
 
+leptonSelfEnergy() {
+   CXXFILE=${DIR}/../../templates/observables/example_lepton_se.hpp.in
+   if [ -f ${CXXFILE} ]; then
+      rm ${CXXFILE}
+   fi
+   CXXFILE=${DIR}/../../templates/observables/example_lepton_se.cpp.in
+   if [ -f ${CXXFILE} ]; then
+      rm ${CXXFILE}
+   fi
+   cp ${DIR}/lepton-se/ex* ${DIR}/../../templates/observables
+
+   META=${DIR}/../../meta/Observables/ExampleLeptonSE
+   if [ -d ${META} ]; then
+      rm -rf ${META}
+   fi
+   mkdir ${META}
+   cp ${DIR}/lepton-se/*.m ${META}
+
+   cd ${DIR}/../../meta/NPointFunctions
+   _anchor='Begin@"`Private`";'
+   _topo='AllTopologies\[{1, 1}\] = {'
+   _sun='   sunset  -> {1,0,0,1,0,2,0},'
+   if [ -z "$(grep "${_topo}" Topologies.m)" ]; then
+      sed -i "s/${_anchor}/${_anchor}\n\
+\n\
+${_topo}\n\
+   tadpole -> {1,0,1,0,0,1,1},\n\
+${_sun}\n\
+   fermi   -> {tadpole, sunset}\n\
+};/g" Topologies.m
+   elif [ -z "$(grep "${_sun}" Topologies.m)" ]; then
+      sed -i "s/${_topo}/${_topo}\n${_sun}/g" Topologies.m
+   fi
+}
+
 # MAIN begin
 case $1
 in
    example-1) constantObservable ;; # constant-observable
    example-2) fermionMassObservable ;; # fermion-mass-observable
+   example-3) leptonSelfEnergy ;; # lepton-se
    *) exit 0;
 esac
 # MAIN end
-
-
-

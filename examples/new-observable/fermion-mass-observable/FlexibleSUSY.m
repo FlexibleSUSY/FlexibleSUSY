@@ -31,7 +31,7 @@ Module[
       definitions = StringRiffle[DeleteDuplicates@definitions, "\n\n"];
    ];
 
-   (* Task 2: filling templates and moving them into models/Ma /observables/. *)
+   (* Task 2: filling templates and moving them into models/Ma/observables/. *)
    WriteOut`ReplaceInFiles[
       files,
       {
