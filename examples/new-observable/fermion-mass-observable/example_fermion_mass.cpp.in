@@ -31,7 +31,7 @@ namespace flexiblesusy {
 using namespace @ModelName@_cxx_diagrams;
 namespace @namespace@ {
 
-template <typename RTYPE, typename FIELD>
+template <class RTYPE, class FIELD>
 auto forge(int idx, const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
    context_base context {model};
    auto context_mass = context.mass<FIELD>({idx});

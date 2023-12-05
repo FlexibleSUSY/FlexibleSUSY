@@ -3,7 +3,7 @@ Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
       prototypes = "", definitions = "", npfHeaders = "", npfDefinitions = "",
-      npfOutput, npfVertices
+      npfOutput, npfVertices = {}
    },
 
    If[observables =!= {},
