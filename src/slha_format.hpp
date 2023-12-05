@@ -170,15 +170,15 @@ std::string format_decay(double br, const Container& pids, const std::string& na
 #define FORMAT_WILSON_COEFFICIENTS(f, m, x, y, ph, entry, name)                \
    [&] {                                                                       \
       char buf[SLHA_MAX_LINE_LENGTH];                                          \
-      const int f_ = (f);                                                      \
-      const int m_ = (m);                                                      \
+      const std::string f_ = (f);                                              \
+      const std::string m_ = (m);                                              \
       const int x_ = (x);                                                      \
       const int y_ = (y);                                                      \
       const int ph_ = (ph);                                                    \
       const double entry_ = (entry);                                           \
       const std::string name_ = (name);                                        \
-      std::snprintf(buf, SLHA_MAX_LINE_LENGTH, wilson_formatter, f_, m_, x_,   \
-                    y_, ph_, entry_, name_.c_str());                           \
+      std::snprintf(buf, SLHA_MAX_LINE_LENGTH, wilson_formatter, f_.c_str(),   \
+                    m_.c_str(), x_, y_, ph_, entry_, name_.c_str());           \
       return std::string(buf);                                                 \
    }()
 

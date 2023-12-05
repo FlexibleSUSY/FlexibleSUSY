@@ -494,10 +494,20 @@ Module[{},
    ]
 ];];
 
-WriteSLHABlockEntry["FWCOEF"|"IMFWCOEF", {flha_List, _}, _] := MapIndexed[
-   StringReplace["      << FORMAT_WILSON_COEFFICIENTS(" <> #1 <> ")\n",
+WriteSLHABlockEntry["FWCOEF"|"IMFWCOEF", {flha_List, _}, _] :=
+Module[{numbered},
+   numbered = MapIndexed[
+      StringReplace["      << FORMAT_WILSON_COEFFICIENTS(" <> #1 <> ")\n",
       ")," -> "(" <> ToString@First@#2 <> ")),"]&,
-   flha
+      flha
+   ];
+   numbered = StringReplace[numbered,
+      "COEFFICIENTS(" ~~ Shortest[x__] ~~ "," :> "COEFFICIENTS(\"" <> StringTrim@x <> "\","
+   ];
+   numbered = StringReplace[numbered,
+      "\"," ~~ Shortest[x__] ~~ "," :> "\", \"" <> StringTrim@x <> "\","
+   ];
+   numbered
 ];
 
 WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment_String:""] :=

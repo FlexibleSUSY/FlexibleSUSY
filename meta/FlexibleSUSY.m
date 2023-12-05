@@ -5143,6 +5143,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                         Switch[fields, {{}}, {}, _, First/@fields]
                      ],
 
+                     Module[{fields = Flatten@Cases[ObservablesExtraOutput@"BrDLDL", ("FFV fields" -> x_) :> x]},
+                        Switch[fields,
+                           {__Symbol}, (# -> {#, TreeMasses`GetPhoton[]})& /@ fields,
+                           _, {}
+                        ]
+                     ],
+
                      (* b -> s gamma *)
                      QToQGammaFields,
 
