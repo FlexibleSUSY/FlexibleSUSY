@@ -25,12 +25,14 @@ BeginPackage@"NPointFunctions`";
 VerticesForNPointFunction;
 CreateCXXHeaders;
 CreateCXXFunctions;
+NPFDefinitions;
 GetProcess;
 GetSubexpressions;
 GetGenericSums;
 GetParticleName;
 NPointFunction;
 IsNPointFunction;
+ApplySubexpressions;
 
 SetAttributes[
    {
@@ -176,21 +178,21 @@ CheckOptionValues[opts___] := (
          Utils`AssertOrQuit[MatchQ[v, Alternatives@@Last@#], NPointFunction::errOption, v, First@#, Last@#]
    ] &/@
    {
-      OnShellFlag -> {True, False},
-      UseCache -> {True, False},
+      OnShellFlag         -> {True, False},
+      UseCache            -> {True, False},
       ZeroExternalMomenta -> {True, False, OperatorsOnly, ExceptLoops},
-      KeepProcesses -> {{__Symbol}},
-      LoopLevel -> {0, 1},
-      Observable -> {None, _[___]},
-      Regularize -> {FlexibleSUSY`MSbar, FlexibleSUSY`DRbar}
+      KeepProcesses       -> {{__Symbol}},
+      LoopLevel           -> {0, 1},
+      Observable          -> {None, _[___]},
+      Regularize          -> {FlexibleSUSY`MSbar, FlexibleSUSY`DRbar}
    };
    True
 );
 
 NPointFunction::errOption = "Value `1` for `2` option must match any from `3`.";
 NPointFunction[
-   inFields: {__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
-   outFields:{__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &)},
+   inFields: {__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# || TreeMasses`IsVector@# &)},
+   outFields:{__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# || TreeMasses`IsVector@# &)},
    opts:___ /; CheckOptionValues@opts
 ] :=
 Module[{
@@ -429,7 +431,12 @@ Module[{GetFunctionPrototype, prototype, definition},
    ];
    {prototype, definition}
 ];
+
 CreateCXXFunctions // secure;
+
+NPFDefinitions[first__, basis:{__String}] :=
+   CreateCXXFunctions[first, Rule[#, "dummy"]&/@basis][[2]];
+NPFDefinitions // secure;
 
 GetCXXArguments[npf_?IsNPointFunction, control_:Null] :=
 TextFormatting`ReplaceCXXTokens["

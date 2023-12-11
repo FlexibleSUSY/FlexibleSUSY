@@ -57,8 +57,9 @@ Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F, data},
       },
       {
          ind_?IsGenerationIndex :> Symbol["SARAH`gt" <> ToString@Last@ind],
-         ind_?IsColorIndex      :> Symbol["SARAH`ct" <> ToString@Last@ind],
-         ind_?IsGluonIndex      :> Symbol["SARAH`ct" <> ToString@Last@ind]
+         (* Color structures are handled separately *)
+         (h_)[{_?IsColorIndex}] :> h(*Symbol["SARAH`ct" <> ToString@Last@ind]*),
+         (h_)[{_?IsGluonIndex}] :> h(*Symbol["SARAH`ct" <> ToString@Last@ind]*)
       },
       {
          FeynArts`S -> GenericS,
@@ -172,9 +173,11 @@ Module[{fsFields},
    Switch[option,
       True,
          {SARAH`Mom[_Integer,_] :> 0},
-      False|OperatorsOnly|ExceptLoops,
-         fsFields = FieldRules@GetFields[tree, Flatten];
-         {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]}
+      OperatorsOnly|ExceptLoops,
+         fsFields = FieldRules@GetFields[tree, Flatten];A
+         {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]},
+      False,
+         {}
    ]
 ];
 ExternalMomentaRules // secure;

@@ -38,6 +38,11 @@ AllTopologies[{2, 2}] = {
    boxAll -> {boxS, boxT, boxU}
 };
 
+AllTopologies[{1, 2}] = {
+   triangle -> {1,0,0,0,1,0,0,0,1,0,1,1,0,1,0},
+   quartic -> {1,0,0,1,0,1,0,2,0}
+};
+
 AdjaceTopology::usage = "Archivates the adjacency matrix of a given topology:
 In[1]:= << FeynArts`;
         topologies = CreateTopologies[0, 1 -> 2];

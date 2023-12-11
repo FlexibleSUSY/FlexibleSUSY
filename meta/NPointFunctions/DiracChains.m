@@ -32,7 +32,10 @@ Module[{abbr, subs, chains, generic},
    chains = ModifyDiracChains@chains;
    {generic, chains} = MakeChainsUnique@{g /. abbr, chains};
    chains = InsertFermionNames[tree, chains];
-   {generic, chains, subs}
+   If[chains =!= {},
+      {generic, chains, subs},
+      {generic, chains, Join[subs, abbr]}
+   ]
 ];
 ProceedChains // secure;
 

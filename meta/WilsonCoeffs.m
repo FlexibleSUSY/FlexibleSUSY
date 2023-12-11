@@ -46,18 +46,29 @@ Module[
 ];
 SetAttributes[neglectBasisElements,{Locked,Protected}];
 
-InterfaceToMatching::usage = "
-@brief Transforms GenericSum accordig to a given basis.
-@param obj np-function object.
-@param operatorBasis list with pairs of string and dirac chain.
-@returns Corresponding GenericSum which matches to a given basis.";
 InterfaceToMatching[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]}] := obj;
 InterfaceToMatching[obj_?NPointFunctions`IsNPointFunction, operatorBasis:{Rule[_String,_]..}] :=
 Module[{basis},
    basis = findFermionChains[NPointFunctions`GetSubexpressions@obj, operatorBasis];
    removeFermionChains[createNewNPF[obj, basis]]];
+
+InterfaceToMatching[npf_?NPointFunctions`IsNPointFunction, basis:{__}] :=
+npf /. NPointFunctions`GenericSum[{x_}, rest__] :>
+       NPointFunctions`GenericSum[FindCoefficients[x, basis], rest];
+
 InterfaceToMatching // Utils`MakeUnknownInputDefinition;
-InterfaceToMatching // Protect;
+
+FindCoefficients[expr_, basis:{__}] :=
+Module[{res = {}, check},
+   AppendTo[res, Coefficient[expr, #]] &/@ basis;
+
+   check = Expand[expr - res.basis];
+   If[check =!= 0,
+      Utils`FSFancyWarning[ToString@FullForm@check, " remains."];
+   ];
+   res
+];
+FindCoefficients // Utils`MakeUnknownInputDefinition;
 
 findFermionChains::usage = "
 @brief Searches the FermionChains in the abbreviations rules.
