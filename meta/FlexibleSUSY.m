@@ -204,18 +204,7 @@ UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
 PotentialLSPParticles = {};
-ExtraSLHAOutputBlocks::usage = "@note
-this List is rewritten during the runnig of start.m script
-in the directory FlexibleSUSY/models/@CLASSNAME@ by
-the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
-ExtraSLHAOutputBlocks = {
-    {
-    	FlexibleSUSYLowEnergy,
-        {
-        	{1, FlexibleSUSYObservable`aMuon}
-        }
-    }
-};
+ExtraSLHAOutputBlocks;
 FWCOEF ~ SetAttributes ~ {Protected, Locked}; (*reserved for a Block name*)
 IMFWCOEF ~ SetAttributes ~ {Protected, Locked}; (*reserved for a Block name*)
 
