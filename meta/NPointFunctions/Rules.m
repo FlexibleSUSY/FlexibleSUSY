@@ -174,7 +174,7 @@ Module[{fsFields},
       True,
          {SARAH`Mom[_Integer,_] :> 0},
       OperatorsOnly|ExceptLoops,
-         fsFields = FieldRules@GetFields[tree, Flatten];A
+         fsFields = FieldRules@GetFields[tree, Flatten];
          {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]},
       False,
          {}
