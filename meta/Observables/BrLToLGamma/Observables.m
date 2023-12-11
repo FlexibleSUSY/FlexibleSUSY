@@ -3,7 +3,7 @@ DefineObservable[
    GetObservableName ->
       "pInidxIn_to_pOutidxOut_V",
    GetObservableDescription ->
-      "BR(pInidxIn -> pOutidxOut V)",
+      "BR(pIn$(idxIn+1) -> pOut$(idxOut+1) V)",
    GetObservableType ->
       CConversion`ScalarType[CConversion`realScalarCType],
    CalculateObservable ->

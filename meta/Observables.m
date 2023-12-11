@@ -247,8 +247,9 @@ Options@DefineObservable = {
 
 DefineObservable[obs_@pattern___, OptionsPattern[]] :=
 Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
-      obsStr = SymbolName@obs},
+      obsStr = SymbolName@obs, extraCalc},
    warn := Utils`FSFancyWarning[#," for ", ToString@obs, " might not be specified."]&;
+   extraCalc := StringReplace[#, "$(" ~~ Shortest[x__] ~~ ")" :> ToString@ToExpression[x]]&;
 
    stringPattern = ToString@FullForm@{pattern};
    patternNames = DeleteDuplicates@StringCases[stringPattern, "Pattern[" ~~ Shortest@x__ ~~ "," :> x];
@@ -293,12 +294,12 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
 
       If[name === Unset,
          warn@"GetObservableName";,
-         GetObservableName@obs@args := StringReplace[name, repl];
+         GetObservableName@obs@args := extraCalc@StringReplace[name, repl];
       ];
 
       If[description === Unset,
          warn@"GetObservableDescription";,
-         GetObservableDescription@obs@args := StringReplace[description, repl];
+         GetObservableDescription@obs@args := extraCalc@StringReplace[description, repl];
       ];
 
       If[type === Unset,
@@ -310,12 +311,12 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
          warn@"CalculateObservable";,
          CalculateObservable[obs@args, structName:_String] :=
             structName <> "." <> StringReplace[name, repl] <>
-            StringReplace[" = context::"<>calculate<>";", repl];
+            extraCalc@StringReplace[" = context::"<>calculate<>";", repl];
       ];
 
       If[prototype === Unset,
          warn@"GetObservablePrototype";,
-         GetObservablePrototype@obs@args := StringReplace[prototype, repl];
+         GetObservablePrototype@obs@args := extraCalc@StringReplace[prototype, repl];
       ];
    ];
 ];
