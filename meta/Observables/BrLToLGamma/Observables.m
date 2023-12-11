@@ -8,7 +8,8 @@ DefineObservable[
       CConversion`ScalarType[CConversion`realScalarCType],
    CalculateObservable ->
       "calculate_pIn_to_pOut_V(idxIn, idxOut, MODEL, qedqcd, physical_input)",
-   GetObservableNamespace -> "l_to_lgamma"
+   GetObservableNamespace -> "l_to_lgamma",
+   GetObservableFileName -> "l_to_lgamma"
 ];
 
 DefineObservable[
@@ -21,5 +22,6 @@ DefineObservable[
       CConversion`ScalarType[CConversion`realScalarCType],
    CalculateObservable ->
       "calculate_pIn_to_pOut_V(MODEL, qedqcd, physical_input)",
-   GetObservableNamespace -> "l_to_lgamma"
+   GetObservableNamespace -> "l_to_lgamma",
+   GetObservableFileName -> "l_to_lgamma"
 ];

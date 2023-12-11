@@ -10,5 +10,6 @@ DefineObservable[
       "calculate_leplep_forcontr_loopNloop(iI-1, iO-1, context::Nucleus::nucl, MODEL, ltolconversion_settings, qedqcd)",
    GetObservablePrototype ->
       "calculate_leplep_forcontr_loopNloop(int in, int out, const context::Nucleus n, const eigenstates& model, const LToLConversion_settings& parameters, const softsusy::QedQcd& qedqcd)",
-   GetObservableNamespace -> "ltolconversion"
+   GetObservableNamespace -> "ltolconversion",
+   GetObservableFileName -> "ltolconversion"
 ];
