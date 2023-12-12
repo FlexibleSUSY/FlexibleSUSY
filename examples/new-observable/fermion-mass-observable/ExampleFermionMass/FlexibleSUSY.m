@@ -7,7 +7,6 @@ Module[
 
    If[observables =!= {},
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
-      (* Task 1: combining prototypes and filling definitions. *)
       prototypes = TextFormatting`ReplaceCXXTokens[
          "@type@ @prototype@;",
          {
@@ -16,6 +15,7 @@ Module[
          }
       ]&/@observables;
 
+      (* Task 1: filling definitions. *)
       definitions = TextFormatting`ReplaceCXXTokens["
          @type@ @prototype@ {
             return forge<@type@, fields::@fermion@>(idx, model, qedqcd);

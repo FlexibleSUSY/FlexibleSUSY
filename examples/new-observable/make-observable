@@ -17,6 +17,12 @@ clean() {
       fi
    done
 
+   for FILE in ${DIR}/../../models/SM/observables/${TEMPLATES}.*; do
+      if [ -f ${FILE} ]; then
+         rm ${FILE}
+      fi
+   done
+
    META=$(echo ${DIR}/${EXAMPLEDIR}/*/)
    META=${META#"${DIR}/${EXAMPLEDIR}/"}
    META=${META%/}
@@ -61,20 +67,25 @@ cleanall() {
 }
 
 # MAIN begin
+FSMODELDIR=${DIR}/../../models/SM/FlexibleSUSY.m
+cleanall
 case $1
 in
    example-1) EXAMPLEDIR=constant-observable
               clean
               copythings
+              echo 'ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleConstantObservable[1]},{2, FlexibleSUSYObservable`ExampleConstantObservable[2]}}}};' >> ${FSMODELDIR}
               ;;
    example-2) EXAMPLEDIR=fermion-mass-observable
               clean
               copythings
+              echo 'ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}},{ExampleLeptonMass,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}}};' >> ${FSMODELDIR}
               ;;
    example-3) EXAMPLEDIR=lepton-se
               clean
               copythings
               leptonSelfEnergy
+              echo 'ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`ExampleLeptonSE[Fe@1, {Sunsets}]}}}};' >> ${FSMODELDIR}
               ;;
    example-4) EXAMPLEDIR=post-processing
               clean

@@ -7,28 +7,25 @@ Module[
 
    If[observables =!= {},
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
-      (* Task 1: combining prototypes and filling definitions. *)
-      AppendTo[prototypes,
-         TextFormatting`ReplaceCXXTokens[
-            "@type@ @prototype@;",
-            {
-               "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
-               "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
-            }
-         ]
-      ];
+      prototypes = TextFormatting`ReplaceCXXTokens[
+         "@type@ @prototype@;",
+         {
+            "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
+            "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
+         }
+      ] &/@ observables;
 
-      AppendTo[definitions, TextFormatting`ReplaceCXXTokens["
-            @type@ @prototype@ {
-               @type@ res {con};
-               return res;
-            }",
-            {
-               "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
-               "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
-            }
-         ]
-      ];
+      (* Task 1: filling definitions. *)
+      definitions = TextFormatting`ReplaceCXXTokens["
+         @type@ @prototype@ {
+            @type@ res {con};
+            return res;
+         }",
+         {
+            "@type@" -> CConversion`CreateCType@Observables`GetObservableType[#],
+            "@prototype@" -> Observables`GetObservablePrototype[#]
+         }
+      ] &/@ observables;
    ];
 
    (* Task 2: filling templates and moving them into models/Ma/observables/. *)

@@ -7,9 +7,6 @@ Module[
 
    If[observables =!= {},
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
-      (* Task 1: combining prototypes and filling definitions. *)
-      observables = DeleteDuplicates[observables /. f_@_Integer -> f@_];
-
       prototypes = TextFormatting`ReplaceCXXTokens[
          "@type@ @prototype@;",
          {
@@ -17,6 +14,9 @@ Module[
             "@prototype@" -> Observables`GetObservablePrototype@#
          }
       ] &/@ observables;
+
+      (* Task 1: filling definitions. *)
+      observables = DeleteDuplicates[observables /. f_@_Integer -> f@_];
 
       Module[{field, contr, npf, basis, name},
          field = Head@First@#;
