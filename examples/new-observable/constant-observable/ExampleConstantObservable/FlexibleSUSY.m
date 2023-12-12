@@ -2,29 +2,32 @@ FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`ExampleConstantObservable, sl
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      prototypes = "", definitions = "", npfHeaders = "", npfDefinitions = ""
+      prototypes = {}, definitions = {}, npfDefinitions = {}, cxxVertices = {}, npfHeaders = ""
    },
 
    If[observables =!= {},
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
       (* Task 1: combining prototypes and filling definitions. *)
-      prototypes = TextFormatting`ReplaceCXXTokens[
-         "@type@ @prototype@;",
-         {
-            "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
-            "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
-         }
+      AppendTo[prototypes,
+         TextFormatting`ReplaceCXXTokens[
+            "@type@ @prototype@;",
+            {
+               "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
+               "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
+            }
+         ]
       ];
 
-      definitions = TextFormatting`ReplaceCXXTokens["
-         @type@ @prototype@ {
-            @type@ res {con};
-            return res;
-         }",
-         {
-            "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
-            "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
-         }
+      AppendTo[definitions, TextFormatting`ReplaceCXXTokens["
+            @type@ @prototype@ {
+               @type@ res {con};
+               return res;
+            }",
+            {
+               "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@observables[[1]],
+               "@prototype@" -> Observables`GetObservablePrototype@observables[[1]]
+            }
+         ]
       ];
    ];
 
@@ -32,13 +35,13 @@ Module[
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@calculate_prototypes@"        -> prototypes,
-         "@calculate_definitions@"       -> definitions,
-         "@npointfunctions_headers@"     -> npfHeaders,
-         "@npointfunctions_definitions@" -> npfDefinitions,
-         "@include_guard@"               -> SymbolName@obs,
-         "@namespace@"                   -> Observables`GetObservableNamespace@obs,
-         "@filename@"                    -> Observables`GetObservableFileName@obs,
+         "@npf_headers@"           -> npfHeaders,
+         "@npf_definitions@"       -> StringRiffle[DeleteDuplicates[npfDefinitions], "\n\n"],
+         "@calculate_prototypes@"  -> StringRiffle[DeleteDuplicates[prototypes],     "\n\n"],
+         "@calculate_definitions@" -> StringRiffle[DeleteDuplicates[definitions],    "\n\n"],
+         "@include_guard@"         -> SymbolName@obs,
+         "@namespace@"             -> Observables`GetObservableNamespace@obs,
+         "@filename@"              -> Observables`GetObservableFileName@obs,
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];

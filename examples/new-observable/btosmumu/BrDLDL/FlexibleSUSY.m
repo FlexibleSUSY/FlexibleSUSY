@@ -18,13 +18,13 @@ Module[
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@calculate_prototypes@"        -> prototypes,
-         "@calculate_definitions@"       -> definitions,
-         "@npointfunctions_headers@"     -> npfHeaders,
-         "@npointfunctions_definitions@" -> npfDefinitions,
-         "@include_guard@"               -> SymbolName@obs,
-         "@namespace@"                   -> Observables`GetObservableNamespace@obs,
-         "@filename@"                    -> Observables`GetObservableFileName@obs,
+         "@calculate_prototypes@"  -> prototypes,
+         "@calculate_definitions@" -> definitions,
+         "@npf_headers@"           -> npfHeaders,
+         "@npf_definitions@"       -> npfDefinitions,
+         "@include_guard@"         -> SymbolName@obs,
+         "@namespace@"             -> Observables`GetObservableNamespace@obs,
+         "@filename@"              -> Observables`GetObservableFileName@obs,
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];

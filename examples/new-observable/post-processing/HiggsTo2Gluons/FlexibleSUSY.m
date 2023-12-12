@@ -82,13 +82,13 @@ Module[
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@npointfunctions_headers@"     -> npfHeaders,
-         "@npointfunctions_definitions@" -> StringRiffle[DeleteDuplicates[npfDefinitions], "\n\n"],
-         "@calculate_prototypes@"        -> StringRiffle[DeleteDuplicates[prototypes],     "\n\n"],
-         "@calculate_definitions@"       -> StringRiffle[DeleteDuplicates[definitions],    "\n\n"],
-         "@include_guard@"               -> SymbolName[obs],
-         "@namespace@"                   -> Observables`GetObservableNamespace[obs],
-         "@filename@"                    -> Observables`GetObservableFileName[obs],
+         "@npf_headers@"           -> npfHeaders,
+         "@npf_definitions@"       -> StringRiffle[DeleteDuplicates[npfDefinitions], "\n\n"],
+         "@calculate_prototypes@"  -> StringRiffle[DeleteDuplicates[prototypes],     "\n\n"],
+         "@calculate_definitions@" -> StringRiffle[DeleteDuplicates[definitions],    "\n\n"],
+         "@include_guard@"         -> SymbolName[obs],
+         "@namespace@"             -> Observables`GetObservableNamespace[obs],
+         "@filename@"              -> Observables`GetObservableFileName[obs],
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];

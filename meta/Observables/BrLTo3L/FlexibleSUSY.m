@@ -21,8 +21,8 @@ Module[
 
    WriteOut`ReplaceInFiles[files,
       {
-         "@npointfunctions_headers@" -> NPointFunctions`CreateCXXHeaders[],
-         "@npointfunctions_definitions@" -> npfDefinitions,
+         "@npf_headers@" -> NPointFunctions`CreateCXXHeaders[],
+         "@npf_definitions@" -> npfDefinitions,
          "@calculate_prototypes@" -> obsPrototypes,
          "@calculate_definitions@" -> obsDefinitions,
          "@include_guard@" -> SymbolName@obs,

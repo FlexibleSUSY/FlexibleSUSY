@@ -37,8 +37,8 @@ Module[{
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@npointfunctions_headers@" -> NPointFunctions`CreateCXXHeaders[],
-         "@npointfunctions_definitions@" -> npfDefinitions,
+         "@npf_headers@" -> NPointFunctions`CreateCXXHeaders[],
+         "@npf_definitions@" -> npfDefinitions,
          "@calculate_prototypes@" -> prototypes,
          "@calculate_definitions@" -> definitions,
          "@include_guard@" -> SymbolName@obs,

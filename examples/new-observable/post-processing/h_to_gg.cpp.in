@@ -26,14 +26,14 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_@filename@.hpp"
-@npointfunctions_headers@
+@npf_headers@
 /* Auxiliary #include directives. */
 
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
 namespace npointfunctions {
 
-@npointfunctions_definitions@
+@npf_definitions@
 
 } // namespace npointfunctions
 } // namespace @ModelName@_cxx_diagrams

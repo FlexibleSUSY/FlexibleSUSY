@@ -2,7 +2,7 @@ FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`ExampleFermionMass, slha_, fi
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      prototypes = "", definitions = "", npfHeaders = "", npfDefinitions = ""
+      prototypes = {}, definitions = {}, npfDefinitions = {}, cxxVertices = {}, npfHeaders = ""
    },
 
    If[observables =!= {},
@@ -26,22 +26,19 @@ Module[
             "@prototype@" -> Observables`GetObservablePrototype@#
          }
       ]&/@observables;
-
-      prototypes  = StringRiffle[DeleteDuplicates@prototypes,  "\n\n"];
-      definitions = StringRiffle[DeleteDuplicates@definitions, "\n\n"];
    ];
 
    (* Task 2: filling templates and moving them into models/Ma/observables/. *)
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@calculate_prototypes@"        -> prototypes,
-         "@calculate_definitions@"       -> definitions,
-         "@npointfunctions_headers@"     -> npfHeaders,
-         "@npointfunctions_definitions@" -> npfDefinitions,
-         "@include_guard@"               -> SymbolName@obs,
-         "@namespace@"                   -> Observables`GetObservableNamespace@obs,
-         "@filename@"                    -> Observables`GetObservableFileName@obs,
+         "@npf_headers@"           -> npfHeaders,
+         "@npf_definitions@"       -> StringRiffle[DeleteDuplicates[npfDefinitions], "\n\n"],
+         "@calculate_prototypes@"  -> StringRiffle[DeleteDuplicates[prototypes],     "\n\n"],
+         "@calculate_definitions@" -> StringRiffle[DeleteDuplicates[definitions],    "\n\n"],
+         "@include_guard@"         -> SymbolName@obs,
+         "@namespace@"             -> Observables`GetObservableNamespace@obs,
+         "@filename@"              -> Observables`GetObservableFileName@obs,
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];

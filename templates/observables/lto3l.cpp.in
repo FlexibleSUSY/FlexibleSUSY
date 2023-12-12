@@ -35,14 +35,14 @@
 #define NPF(name) fix_tensors_sign<name>(model, nI, nO, nA);
 #define F4F(lepton, g) embed_photon<lepton, Photon>(model, form_factors, g);
 
-@npointfunctions_headers@
+@npf_headers@
 
 namespace flexiblesusy {
 
 namespace @ModelName@_cxx_diagrams {
 namespace npointfunctions {
 
-@npointfunctions_definitions@
+@npf_definitions@
 
 } // namespace npointfunctions
 } // namespace @ModelName@_cxx_diagrams

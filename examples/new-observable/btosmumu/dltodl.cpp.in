@@ -36,14 +36,14 @@
 #include "json.hpp"
 #include "wrappers.hpp"
 
-@npointfunctions_headers@
+@npf_headers@
 
 namespace flexiblesusy {
 
 namespace @ModelName@_cxx_diagrams {
 namespace npointfunctions {
 
-@npointfunctions_definitions@
+@npf_definitions@
 
 } // namespace npointfunctions
 } // namespace @ModelName@_cxx_diagrams

@@ -2,8 +2,7 @@ FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`ExampleLeptonSE, slha_, files
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
-      prototypes = "", definitions = "", npfHeaders = "", npfDefinitions = "",
-      npfOutput, npfVertices = {}
+      prototypes = {}, definitions = {}, npfDefinitions = {}, cxxVertices = {}, npfHeaders = ""
    },
 
    If[observables =!= {},
@@ -17,9 +16,9 @@ Module[
             "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@#,
             "@prototype@" -> Observables`GetObservablePrototype@#
          }
-      ]&/@observables;
+      ] &/@ observables;
 
-      npfOutput = Module[{field, contr, npf, basis, code, vertices},
+      Module[{field, contr, npf, basis, name},
          field = Head@First@#;
          contr = Last@#;
          npf = NPointFunctions`NPointFunction[
@@ -41,48 +40,45 @@ Module[
          };
 
          npf = WilsonCoeffs`InterfaceToMatching[npf, basis];
-         code = NPointFunctions`CreateCXXFunctions[npf, "se_"<>CConversion`ToValidCSymbolString[contr], Identity, basis][[2]];
-         vertices = NPointFunctions`VerticesForNPointFunction@npf;
-         {vertices, code}
-      ]&/@observables;
+         name = "se_"<>CConversion`ToValidCSymbolString[contr];
 
-      {npfVertices, npfDefinitions} = Transpose[npfOutput];
+         AppendTo[cxxVertices, NPointFunctions`VerticesForNPointFunction@npf];
+         AppendTo[npfDefinitions, NPointFunctions`CreateCXXFunctions[npf, name, Identity, basis][[2]]];
+         AppendTo[definitions,
+            TextFormatting`ReplaceCXXTokens["
+               @type@ @prototype@ {
+                  const auto npf = npointfunctions::@name@(model, {idx, idx}, {});
+                  return {0, npf[0], npf[1]};
+               }",
+               {
+                  "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@#,
+                  "@prototype@" -> Observables`GetObservablePrototype@#,
+                  "@name@"      -> name
+               }
+            ]
+         ];
+      ] &/@ observables;
 
-      definitions = TextFormatting`ReplaceCXXTokens["
-         @type@ @prototype@ {
-            const auto npf = npointfunctions::se_@npf_name@(model, {idx, idx}, {});
-            return {0, npf[0], npf[1]};
-         }",
-         {
-            "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@#,
-            "@prototype@" -> Observables`GetObservablePrototype@#,
-            "@npf_name@"  -> CConversion`ToValidCSymbolString[contr]
-         }
-      ]&/@observables;
-
-      prototypes     = StringRiffle[DeleteDuplicates@prototypes,     "\n\n"];
-      definitions    = StringRiffle[DeleteDuplicates@definitions,    "\n\n"];
       npfHeaders     = NPointFunctions`CreateCXXHeaders[];
-      npfDefinitions = StringRiffle[DeleteDuplicates@npfDefinitions, "\n\n"];
    ];
 
    (* Task 2: filling templates and moving them into models/Ma/observables/. *)
    WriteOut`ReplaceInFiles[
       files,
       {
-         "@calculate_prototypes@"        -> prototypes,
-         "@calculate_definitions@"       -> definitions,
-         "@npointfunctions_headers@"     -> npfHeaders,
-         "@npointfunctions_definitions@" -> npfDefinitions,
-         "@include_guard@"               -> SymbolName@obs,
-         "@namespace@"                   -> Observables`GetObservableNamespace@obs,
-         "@filename@"                    -> Observables`GetObservableFileName@obs,
+         "@npf_headers@"           -> npfHeaders,
+         "@npf_definitions@"       -> StringRiffle[DeleteDuplicates[npfDefinitions], "\n\n"],
+         "@calculate_prototypes@"  -> StringRiffle[DeleteDuplicates[prototypes],     "\n\n"],
+         "@calculate_definitions@" -> StringRiffle[DeleteDuplicates[definitions],    "\n\n"],
+         "@include_guard@"         -> SymbolName@obs,
+         "@namespace@"             -> Observables`GetObservableNamespace@obs,
+         "@filename@"              -> Observables`GetObservableFileName@obs,
          Sequence@@FlexibleSUSY`Private`GeneralReplacementRules[]
       }
    ];
 
    (* Task 3: returning something to the outside world. *)
    {
-      "C++ vertices" -> Flatten[npfVertices, 1]
+      "C++ vertices" -> Flatten[cxxVertices, 1]
    }
 ];
