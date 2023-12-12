@@ -70,10 +70,6 @@ models/**/
 
 model_files/*/LesHouches.out.*
 
-meta/Observables/Example*
-templates/observables/example*.hpp.in
-templates/observables/example*.cpp.in
-
 Output/
 
 release/*.tar.gz

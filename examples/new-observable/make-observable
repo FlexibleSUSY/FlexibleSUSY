@@ -6,62 +6,34 @@ BASEDIR=$(dirname $0)
 # absolute path to this script
 DIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
-constantObservable() {
-   CXXFILE=${DIR}/../../templates/observables/example_constant_observable.hpp.in
-   if [ -f ${CXXFILE} ]; then
-      rm ${CXXFILE}
-   fi
-   CXXFILE=${DIR}/../../templates/observables/example_constant_observable.cpp.in
-   if [ -f ${CXXFILE} ]; then
-      rm ${CXXFILE}
-   fi
-   cp ${DIR}/constant-observable/ex* ${DIR}/../../templates/observables
+clean() {
+   TEMPLATES=$(echo ${DIR}/${EXAMPLEDIR}/*hpp.in)
+   TEMPLATES=${TEMPLATES#"${DIR}/${EXAMPLEDIR}/"}
+   TEMPLATES=${TEMPLATES%.hpp.in}
 
-   META=${DIR}/../../meta/Observables/ExampleConstantObservable
-   if [ -d ${META} ]; then
-      rm -rf ${META}
+   for FILE in ${DIR}/../../templates/observables/${TEMPLATES}.*.in; do
+      if [ -f ${FILE} ]; then
+         rm ${FILE}
+      fi
+   done
+
+   META=$(echo ${DIR}/${EXAMPLEDIR}/*/)
+   META=${META#"${DIR}/${EXAMPLEDIR}/"}
+   META=${META%/}
+
+   FSMETA=${DIR}/../../meta/Observables/${META}
+   if [ -d ${FSMETA} ]; then
+      rm -rf ${FSMETA}
    fi
-   mkdir ${META}
-   cp ${DIR}/constant-observable/*.m ${META}
 }
 
-fermionMassObservable() {
-   CXXFILE=${DIR}/../../templates/observables/example_fermion_mass.hpp.in
-   if [ -f ${CXXFILE} ]; then
-      rm ${CXXFILE}
-   fi
-   CXXFILE=${DIR}/../../templates/observables/example_fermion_mass.cpp.in
-   if [ -f ${CXXFILE} ]; then
-      rm ${CXXFILE}
-   fi
-   cp ${DIR}/fermion-mass-observable/ex* ${DIR}/../../templates/observables
-
-   META=${DIR}/../../meta/Observables/ExampleFermionMass
-   if [ -d ${META} ]; then
-      rm -rf ${META}
-   fi
-   mkdir ${META}
-   cp ${DIR}/fermion-mass-observable/*.m ${META}
+copythings(){
+   cp ${DIR}/${EXAMPLEDIR}/${TEMPLATES}* ${DIR}/../../templates/observables
+   mkdir ${FSMETA}
+   cp ${DIR}/${EXAMPLEDIR}/${META}/*.m ${FSMETA}
 }
 
 leptonSelfEnergy() {
-   CXXFILE=${DIR}/../../templates/observables/example_lepton_se.hpp.in
-   if [ -f ${CXXFILE} ]; then
-      rm ${CXXFILE}
-   fi
-   CXXFILE=${DIR}/../../templates/observables/example_lepton_se.cpp.in
-   if [ -f ${CXXFILE} ]; then
-      rm ${CXXFILE}
-   fi
-   cp ${DIR}/lepton-se/ex* ${DIR}/../../templates/observables
-
-   META=${DIR}/../../meta/Observables/ExampleLeptonSE
-   if [ -d ${META} ]; then
-      rm -rf ${META}
-   fi
-   mkdir ${META}
-   cp ${DIR}/lepton-se/*.m ${META}
-
    cd ${DIR}/../../meta/NPointFunctions
    _anchor='Begin@"`Private`";'
    _topo='AllTopologies\[{1, 1}\] = {'
@@ -79,12 +51,37 @@ ${_sun}\n\
    fi
 }
 
+cleanall() {
+   for _dir in ${DIR}/*; do
+      if [ -d ${_dir} ]; then
+         EXAMPLEDIR=$(echo ${_dir#"${DIR}/"})
+         clean
+      fi
+   done
+}
+
 # MAIN begin
 case $1
 in
-   example-1) constantObservable ;; # constant-observable
-   example-2) fermionMassObservable ;; # fermion-mass-observable
-   example-3) leptonSelfEnergy ;; # lepton-se
+   example-1) EXAMPLEDIR=constant-observable
+              clean
+              copythings
+              ;;
+   example-2) EXAMPLEDIR=fermion-mass-observable
+              clean
+              copythings
+              ;;
+   example-3) EXAMPLEDIR=lepton-se
+              clean
+              copythings
+              leptonSelfEnergy
+              ;;
+   example-4) EXAMPLEDIR=post-processing
+              clean
+              copythings
+              ;;
+   clean-all) cleanall
+              ;;
    *) exit 0;
 esac
 # MAIN end
