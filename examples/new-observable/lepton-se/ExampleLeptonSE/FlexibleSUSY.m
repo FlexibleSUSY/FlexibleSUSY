@@ -56,7 +56,7 @@ Module[
          {
             "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@#,
             "@prototype@" -> Observables`GetObservablePrototype@#,
-            "@npf_name@"  -> CConversion`ToValidCSymbolString[Last[#]]
+            "@npf_name@"  -> CConversion`ToValidCSymbolString[contr]
          }
       ]&/@observables;
 

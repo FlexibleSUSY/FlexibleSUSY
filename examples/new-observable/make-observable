@@ -80,6 +80,10 @@ in
               clean
               copythings
               ;;
+   example-5) EXAMPLEDIR=btosmumu
+              clean
+              copythings
+              ;;
    clean-all) cleanall
               ;;
    *) exit 0;

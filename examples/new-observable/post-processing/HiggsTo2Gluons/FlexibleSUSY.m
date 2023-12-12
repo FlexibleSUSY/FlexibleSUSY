@@ -19,7 +19,7 @@ Module[
          }
       ] &/@ observables;
 
-      Module[{higgs, gluon, contr, npf, basis, npfName},
+      Module[{higgs, gluon, contr, npf, npfName},
          higgs  = #[[1, 1]];
          gluon  = #[[1, 2, 1]];
          contr  = #[[2]];
@@ -43,8 +43,7 @@ Module[
             SARAH`sum[__, SARAH`Mom[2, l_] SARAH`Mom[3, l_] SARAH`g[__]] :> SARAH`Mass[higgs]^2/2
          };
 
-         basis = {"eps", "e2e3", "e2m3" "e3m2"};
-         npf = WilsonCoeffs`InterfaceToMatching[npf, basis];
+         npf = WilsonCoeffs`InterfaceToMatching[npf, {"eps", "e2e3", "e2m3" "e3m2"}];
 
          npfName = TextFormatting`ReplaceCXXTokens[
             "@higgs@to2@gluon@@contr@",
