@@ -16,6 +16,7 @@ on:
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
+      - '.github/ISSUE_TEMPLATE/*'
 
   pull_request:
     branches:
@@ -29,6 +30,7 @@ on:
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
+      - '.github/ISSUE_TEMPLATE/*'
 
 jobs:
   no-meta:
