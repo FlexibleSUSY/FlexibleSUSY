@@ -279,8 +279,10 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
       GetObservableFileName[obs | obsStr] := OptionValue@GetObservableFileName;
    ];
 
-   AppendTo[rhsRepl, "eigenstates" -> OptionValue[InsertionFunction][
-         FlexibleSUSY`FSModelName <> "_mass_eigenstates"]];
+   AppendTo[rhsRepl, "auto model" -> OptionValue[InsertionFunction][
+         "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model"]];
+   AppendTo[rhsRepl, "auto qedqcd" -> OptionValue[InsertionFunction][
+         "const softsusy::QedQcd& qedqcd"]];
 
    With[{args = Sequence@@ToExpression@StringReplace[stringPattern, lhsRepl],
          repl = rhsRepl,
@@ -302,9 +304,14 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
          GetObservableDescription@obs@args := extraCalc@StringReplace[description, repl];
       ];
 
-      If[type === Unset,
-         warn@"GetObservableType";,
-         GetObservableType@obs@args := type;
+      Switch[type,
+         Unset,
+            warn@"GetObservableType",
+         {_Integer},
+            GetObservableType@obs@args :=
+               CConversion`ArrayType[CConversion`complexScalarCType, First@type],
+         _,
+            GetObservableType@obs@args := type
       ];
 
       If[calculate === Unset,

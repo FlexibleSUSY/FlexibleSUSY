@@ -1,6 +1,6 @@
 Observables`DefineObservable[
    FlexibleSUSYObservable`ExampleConstantObservable[num_],
-   GetObservableType        -> CConversion`ArrayType[CConversion`complexScalarCType, 1],
+   GetObservableType        -> {1},
    GetObservableName        -> "example_constant_observable_num",
    GetObservableDescription -> "example observable returns num",
    CalculateObservable      -> "calculate_example_constant_observable(num)",

@@ -8,7 +8,7 @@ StringReplace[
       "leptons, 32, 0, 0, 2, num_value, \"right\"" (* P_R *)
    },
    {
-      "num_value" -> "Re(OBSERVABLES." <> Observables`GetObservableName@obs <> ")",
+      "num_value" -> "Re(observables." <> Observables`GetObservableName@obs <> ")",
       "leptons"   -> Switch[gen, 0, "1111", 1, "1313", 2, "1515"]
    }
 ];

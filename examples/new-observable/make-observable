@@ -6,10 +6,20 @@ BASEDIR=$(dirname $0)
 # absolute path to this script
 DIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
-clean() {
+setvariables() {
    TEMPLATES=$(echo ${DIR}/${EXAMPLEDIR}/*hpp.in)
    TEMPLATES=${TEMPLATES#"${DIR}/${EXAMPLEDIR}/"}
    TEMPLATES=${TEMPLATES%.hpp.in}
+
+   META=$(echo ${DIR}/${EXAMPLEDIR}/*/)
+   META=${META#"${DIR}/${EXAMPLEDIR}/"}
+   META=${META%/}
+
+   FSMETA=${DIR}/../../meta/Observables/${META}
+}
+
+clean() {
+   setvariables
 
    for FILE in ${DIR}/../../templates/observables/${TEMPLATES}.*.in; do
       if [ -f ${FILE} ]; then
@@ -17,44 +27,22 @@ clean() {
       fi
    done
 
-   for FILE in ${DIR}/../../models/SM/observables/${TEMPLATES}.*; do
+   for FILE in ${DIR}/../../models/SM/observables/SM_${TEMPLATES}.*; do
       if [ -f ${FILE} ]; then
          rm ${FILE}
       fi
    done
 
-   META=$(echo ${DIR}/${EXAMPLEDIR}/*/)
-   META=${META#"${DIR}/${EXAMPLEDIR}/"}
-   META=${META%/}
-
-   FSMETA=${DIR}/../../meta/Observables/${META}
    if [ -d ${FSMETA} ]; then
       rm -rf ${FSMETA}
    fi
 }
 
 copythings(){
+   setvariables
    cp ${DIR}/${EXAMPLEDIR}/${TEMPLATES}* ${DIR}/../../templates/observables
    mkdir ${FSMETA}
    cp ${DIR}/${EXAMPLEDIR}/${META}/*.m ${FSMETA}
-}
-
-leptonSelfEnergy() {
-   cd ${DIR}/../../meta/NPointFunctions
-   _anchor='Begin@"`Private`";'
-   _topo='AllTopologies\[{1, 1}\] = {'
-   _sun='   sunset  -> {1,0,0,1,0,2,0},'
-   if [ -z "$(grep "${_topo}" Topologies.m)" ]; then
-      sed -i "s/${_anchor}/${_anchor}\n\
-\n\
-${_topo}\n\
-   tadpole -> {1,0,1,0,0,1,1},\n\
-${_sun}\n\
-   fermi   -> {tadpole, sunset}\n\
-};/g" Topologies.m
-   elif [ -z "$(grep "${_sun}" Topologies.m)" ]; then
-      sed -i "s/${_topo}/${_topo}\n${_sun}/g" Topologies.m
-   fi
 }
 
 cleanall() {
@@ -64,6 +52,10 @@ cleanall() {
          clean
       fi
    done
+
+   sed -i "s/(\*RESTORE \(.*\)\*)/\1/g" ${DIR}/../../meta/NPointFunctions/Topologies.m
+   sed -i '/(\*REMOVE\*)/d' ${DIR}/../../meta/NPointFunctions/Topologies.m
+   sed -i '/(\*REMOVE\*)/d' ${DIR}/../../models/SM/FlexibleSUSY.m
 }
 
 # MAIN begin
@@ -72,28 +64,28 @@ cleanall
 case $1
 in
    example-1) EXAMPLEDIR=constant-observable
-              clean
               copythings
-              echo 'ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleConstantObservable[1]},{2, FlexibleSUSYObservable`ExampleConstantObservable[2]}}}};' >> ${FSMODELDIR}
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleConstantObservable[1]},{2, FlexibleSUSYObservable`ExampleConstantObservable[2]}}}};' >> ${FSMODELDIR}
               ;;
    example-2) EXAMPLEDIR=fermion-mass-observable
-              clean
               copythings
-              echo 'ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}},{ExampleLeptonMass,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}}};' >> ${FSMODELDIR}
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}},{ExampleLeptonMass,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}}};' >> ${FSMODELDIR}
               ;;
    example-3) EXAMPLEDIR=lepton-se
-              clean
               copythings
-              leptonSelfEnergy
-              echo 'ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`ExampleLeptonSE[Fe@1, {Sunsets}]}}}};' >> ${FSMODELDIR}
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`ExampleLeptonSE[Fe@1, {Sunsets}]}}}};' >> ${FSMODELDIR}
+              cd ${DIR}/../../meta/NPointFunctions
+              sed -i 's/End\[\];/(*RESTORE End\[\];*)/g' Topologies.m
+              sed -i 's/EndPackage\[\];/(*RESTORE EndPackage\[\];*)/g' Topologies.m
+              echo '(*REMOVE*)AllTopologies[{1, 1}] = {sunset->{1,0,0,1,0,2,0},tadpole->{1,0,1,0,0,1,1},fermi->{tadpole,sunset}};End[];EndPackage[];' >> Topologies.m
               ;;
    example-4) EXAMPLEDIR=post-processing
-              clean
               copythings
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`HiggsTo2Gluons[hh -> {VG, VG}, All]}}}};' >> ${FSMODELDIR}
               ;;
    example-5) EXAMPLEDIR=btosmumu
-              clean
               copythings
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`BrDLDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Boxes}, 1]}}}};' >> ${FSMODELDIR}
               ;;
    clean-all) cleanall
               ;;

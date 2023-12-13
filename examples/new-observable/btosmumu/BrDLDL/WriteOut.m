@@ -18,7 +18,7 @@ StringReplace[
       "qdlep, 4444, exp, num_value, \"T_RR\""
    },
    {
-      "num_value" -> "Re(OBSERVABLES." <> Observables`GetObservableName@obs <> ")",
+      "num_value" -> "Re(observables." <> Observables`GetObservableName@obs <> ")",
       "exp"       -> "9, 9, 2",
       "qd"        -> StringJoin[{qO, qI} /. {0 -> "01", 1 -> "03", 2 -> "05"}],
       "lep"       -> StringJoin[{lI, lI} /. {0 -> "11", 1 -> "13", 2 -> "15"}]

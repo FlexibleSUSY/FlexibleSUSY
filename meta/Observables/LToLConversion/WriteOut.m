@@ -4,7 +4,7 @@ WriteOut`WriteObservable[
 ] :=
 Switch[blockName,
    "FlexibleSUSYLowEnergy",
-      "Re(OBSERVABLES." <> Observables`GetObservableName@obs <> "(0))",
+      "Re(observables." <> Observables`GetObservableName@obs <> "(0))",
    "FWCOEF"|"IMFWCOEF",
       Module[{lep, type},
          lep = StringJoin[{iO, iI} /. {0 -> "11", 1 -> "13", 2 -> "15"}];
@@ -27,7 +27,7 @@ Switch[blockName,
             {
                "lep" -> lep, "qu" -> "0202", "qd" -> "0101",
                "contr" -> SymbolName@contr, "loopN" -> ToString@loopN,
-               "obs" -> type<>"(OBSERVABLES."<>Observables`GetObservableName@obs<>")"
+               "obs" -> type<>"(observables."<>Observables`GetObservableName@obs<>")"
             }
          ]
       ]
