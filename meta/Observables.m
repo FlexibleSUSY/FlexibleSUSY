@@ -299,9 +299,11 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
          GetObservableName@obs@args := extraCalc@StringReplace[name, repl];
       ];
 
-      If[description === Unset,
-         warn@"GetObservableDescription";,
-         GetObservableDescription@obs@args := extraCalc@StringReplace[description, repl];
+      Switch[description,
+         Unset,
+            GetObservableDescription@obs@args := StringReplace[extraCalc@StringReplace[name, repl], "_" -> " "];,
+         _String,
+            GetObservableDescription@obs@args := extraCalc@StringReplace[description, repl];
       ];
 
       Switch[type,
