@@ -8,7 +8,7 @@ DefineObservable[
       CConversion`ScalarType[CConversion`realScalarCType],
    CalculateObservable ->
       "calculate_pIn_to_pOut_V(idxIn, idxOut, model, qedqcd, physical_input)",
-   GetObservablePrototype -> "dummy"
+   GetObservablePrototype -> "dummy()"
 ];
 
 DefineObservable[
@@ -21,5 +21,5 @@ DefineObservable[
       CConversion`ScalarType[CConversion`realScalarCType],
    CalculateObservable ->
       "calculate_pIn_to_pOut_V(model, qedqcd, physical_input)",
-   GetObservablePrototype -> "dummy"
+   GetObservablePrototype -> "dummy()"
 ];

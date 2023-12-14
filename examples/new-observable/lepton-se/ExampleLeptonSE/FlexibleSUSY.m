@@ -47,7 +47,7 @@ Module[
          AppendTo[definitions,
             TextFormatting`ReplaceCXXTokens["
                @type@ @prototype@ {
-                  const auto npf = npointfunctions::@name@(model, {idx, idx}, {});
+                  const auto npf = npointfunctions::@name@(model, {gen, gen}, {});
                   return {0, npf[0], npf[1]};
                }",
                {

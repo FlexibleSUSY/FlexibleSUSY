@@ -236,18 +236,18 @@ CalculateObservables[something_, structName_String] :=
 
 Options@DefineObservable = {
    InsertionFunction -> CConversion`ToValidCSymbolString,
-   GetObservableName -> Unset,
-   GetObservableDescription -> Unset,
    GetObservableType -> Unset,
+   GetObservableName -> Unset,
+   GetObservablePrototype -> Unset,
+   GetObservableDescription -> Unset,
    CalculateObservable -> Unset,
    GetObservableFileName -> Unset,
-   GetObservablePrototype -> Unset,
    GetObservableNamespace -> Unset
 };
 
 DefineObservable[obs_@pattern___, OptionsPattern[]] :=
 Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
-      obsStr = SymbolName@obs, extraCalc, nameAux},
+      obsStr = SymbolName@obs, extraCalc, nameAux, specialWords},
    warn := Utils`FSFancyWarning[#," for ", ToString@obs, " might not be specified."]&;
    extraCalc := StringReplace[#, "$(" ~~ Shortest[x__] ~~ ")" :> ToString@ToExpression[x]]&;
 
@@ -275,14 +275,12 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
          GetObservableNamespace[obs | obsStr] = OptionValue[InsertionFunction][FlexibleSUSY`FSModelName <> "_" <> OptionValue@GetObservableNamespace];
    ];
 
-   rhsRepl = Join[
-      rhsRepl,
-      {
-         "auto model" -> OptionValue[InsertionFunction]["const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model"],
-         "auto qedqcd" -> OptionValue[InsertionFunction]["const softsusy::QedQcd& qedqcd"],
-         "context" -> GetObservableNamespace[obs]
-      }
-   ];
+   specialWords = {
+      "auto model" -> OptionValue[InsertionFunction]["const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model"],
+      "auto qedqcd" -> OptionValue[InsertionFunction]["const softsusy::QedQcd& qedqcd"],
+      "context" -> GetObservableNamespace[obs]
+   };
+   rhsRepl = Join[rhsRepl, specialWords];
 
    With[{args = Sequence@@ToExpression@StringReplace[stringPattern, lhsRepl],
          repl = rhsRepl,
@@ -293,6 +291,16 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
          prototype = OptionValue@GetObservablePrototype
       },
       AppendTo[FlexibleSUSYObservable`FSObservables, obs];
+
+      Switch[type,
+         Unset,
+            warn@"GetObservableType",
+         {_Integer},
+            GetObservableType@obs@args :=
+               CConversion`ArrayType[CConversion`complexScalarCType, First@type],
+         _,
+            GetObservableType@obs@args := type
+      ];
 
       If[name === Unset,
          warn@"GetObservableName";,
@@ -306,26 +314,33 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
             GetObservableDescription@obs@args := extraCalc@StringReplace[description, repl];
       ];
 
-      Switch[type,
-         Unset,
-            warn@"GetObservableType",
-         {_Integer},
-            GetObservableType@obs@args :=
-               CConversion`ArrayType[CConversion`complexScalarCType, First@type],
-         _,
-            GetObservableType@obs@args := type
-      ];
-
-      If[calculate === Unset,
-         warn@"CalculateObservable";,
-         CalculateObservable[obs@args, structName:_String] :=
-            structName <> "." <> StringReplace[name, repl] <>
-            extraCalc@StringReplace[" = context::"<>calculate<>";", repl];
-      ];
-
       If[prototype === Unset,
          warn@"GetObservablePrototype";,
-         GetObservablePrototype@obs@args := extraCalc@StringReplace[prototype, repl];
+         Module[{nameStr, argStr},
+            nameStr = StringReplace[prototype, Longest["(" ~~ s___ ~~ ")"]  :> (argStr = s; "")];
+            argStr = StringReplace[argStr, specialWords];
+            GetObservablePrototype@obs@args := extraCalc@StringReplace[nameStr, repl] <> "(" <> argStr <> ")";
+         ];
+      ];
+
+      Switch[calculate,
+         Unset,
+            Module[{nameStr, argStr, removeSub, newCalculate, niceStr = {}},
+               nameStr = StringReplace[prototype, Longest["(" ~~ s___ ~~ ")"]  :> (argStr = s; "")];
+               removeSub[pair_] := StringReplace[#, Shortest[ StringTake[pair, 1] ~~ ___ ~~ StringTake[pair, -1]] :> ""]&;
+               (argStr = FixedPoint[removeSub@#, argStr]) &/@ {"()" , "[]", "{}", "<>"};
+               argStr = StringReverse@StringReplace[argStr <> ",", {"&" -> " ", Whitespace ~~ "," :> ","}];
+               StringReplace[argStr, Shortest["," ~~ x__ ~~ Whitespace] :> (AppendTo[niceStr, StringReverse[x]]; "")];
+               newCalculate = nameStr <> "(" <> StringRiffle[Reverse@niceStr, ", "] <> ")";
+
+               CalculateObservable[obs@args, structName:_String] :=
+                  structName <> "." <> StringReplace[name, repl] <>
+                  extraCalc@StringReplace[" = context::"<>newCalculate<>";", repl];
+            ];,
+         _String,
+            CalculateObservable[obs@args, structName:_String] :=
+               structName <> "." <> StringReplace[name, repl] <>
+               extraCalc@StringReplace[" = context::"<>calculate<>";", repl];
       ];
    ];
 ];

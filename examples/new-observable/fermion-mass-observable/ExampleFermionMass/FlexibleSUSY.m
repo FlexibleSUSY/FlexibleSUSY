@@ -18,7 +18,7 @@ Module[
       (* Task 1: filling definitions. *)
       definitions = TextFormatting`ReplaceCXXTokens["
          @type@ @prototype@ {
-            return forge<@type@, fields::@fermion@>(idx, model, qedqcd);
+            return forge<@type@, fields::@fermion@>(gen, model, qedqcd);
          }",
          {
             "@fermion@"   -> SymbolName@Head@#[[1]],

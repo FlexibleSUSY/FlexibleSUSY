@@ -18,7 +18,7 @@ Module[
       (* Task 1: filling definitions. *)
       definitions = TextFormatting`ReplaceCXXTokens["
          @type@ @prototype@ {
-            @type@ res {con};
+            @type@ res {num};
             return res;
          }",
          {
