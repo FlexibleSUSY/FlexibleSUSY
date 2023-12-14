@@ -5132,7 +5132,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                         Switch[fields, {{}}, {}, _, First/@fields]
                      ],
 
-                     Module[{fields = Flatten@Cases[ObservablesExtraOutput@"BrDLDL", ("FFV fields" -> x_) :> x]},
+                     Module[{fields = Flatten@Cases[ObservablesExtraOutput@"BrDLToDL", ("FFV fields" -> x_) :> x]},
                         Switch[fields,
                            {__Symbol}, (# -> {#, TreeMasses`GetPhoton[]})& /@ fields,
                            _, {}

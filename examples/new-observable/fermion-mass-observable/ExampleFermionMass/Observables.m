@@ -4,6 +4,5 @@ Observables`DefineObservable[
    GetObservableName        -> "example_fermion_gen_mass",
    GetObservableDescription -> "example mass of fermion_gen",
    CalculateObservable      -> "ex_fermion_mass(gen, model, qedqcd)",
-   GetObservablePrototype   -> "ex_fermion_mass(int idx, auto model, auto qedqcd)",
-   GetObservableNamespace   -> "example_fermion_mass"
+   GetObservablePrototype   -> "ex_fermion_mass(int idx, auto model, auto qedqcd)"
 ];

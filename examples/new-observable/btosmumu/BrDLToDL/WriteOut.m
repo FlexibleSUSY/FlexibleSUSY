@@ -1,6 +1,6 @@
 WriteOut`WriteObservable[
    "FWCOEF",
-   obs:FlexibleSUSYObservable`BrDLDL[{qd_[qI_], lep_[lI_]} -> {_[qO_], _}, __]
+   obs:FlexibleSUSYObservable`BrDLToDL[{qd_[qI_], lep_[lI_]} -> {_[qO_], _}, __]
 ] :=
 StringReplace[
    {

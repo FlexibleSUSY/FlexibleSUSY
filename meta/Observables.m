@@ -247,7 +247,7 @@ Options@DefineObservable = {
 
 DefineObservable[obs_@pattern___, OptionsPattern[]] :=
 Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
-      obsStr = SymbolName@obs, extraCalc},
+      obsStr = SymbolName@obs, extraCalc, nameAux},
    warn := Utils`FSFancyWarning[#," for ", ToString@obs, " might not be specified."]&;
    extraCalc := StringReplace[#, "$(" ~~ Shortest[x__] ~~ ")" :> ToString@ToExpression[x]]&;
 
@@ -261,28 +261,28 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
       {patternNames, uniqueNames}
    ];
 
-   If[OptionValue@GetObservableNamespace === Unset,
-      warn@"GetObservableNamespace";,
-      GetObservableNamespace[obs | obsStr] =
-      OptionValue[InsertionFunction][
-         FlexibleSUSY`FSModelName <> "_" <> OptionValue@GetObservableNamespace
-      ];
-      AppendTo[rhsRepl, "context" -> GetObservableNamespace@obs];
+   nameAux = StringReplace[obsStr, nums___?DigitQ ~~ x_?UpperCaseQ :> "_" <> nums <> ToLowerCase[x]];
+   Switch[OptionValue[GetObservableFileName],
+      Unset,
+         GetObservableFileName[obs | obsStr]  = StringDrop[nameAux, 1];,
+      _String,
+         GetObservableFileName[obs | obsStr]  = OptionValue@GetObservableFileName;
+   ];
+   Switch[OptionValue[GetObservableNamespace],
+      Unset,
+         GetObservableNamespace[obs | obsStr] = OptionValue[InsertionFunction][FlexibleSUSY`FSModelName <> nameAux];,
+      _String,
+         GetObservableNamespace[obs | obsStr] = OptionValue[InsertionFunction][FlexibleSUSY`FSModelName <> "_" <> OptionValue@GetObservableNamespace];
    ];
 
-   If[OptionValue@GetObservableFileName === Unset,
-      Utils`FSFancyWarning["GetObservableFileName for ", SymbolName@obs, " is not specified explicitly. Trying to use GetObservableNamespace."];
-      If[OptionValue@GetObservableNamespace === Unset,
-         warn@"GetObservableFileName";,
-         GetObservableFileName[obs | obsStr] := OptionValue@GetObservableNamespace;
-      ];,
-      GetObservableFileName[obs | obsStr] := OptionValue@GetObservableFileName;
+   rhsRepl = Join[
+      rhsRepl,
+      {
+         "auto model" -> OptionValue[InsertionFunction]["const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model"],
+         "auto qedqcd" -> OptionValue[InsertionFunction]["const softsusy::QedQcd& qedqcd"],
+         "context" -> GetObservableNamespace[obs]
+      }
    ];
-
-   AppendTo[rhsRepl, "auto model" -> OptionValue[InsertionFunction][
-         "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model"]];
-   AppendTo[rhsRepl, "auto qedqcd" -> OptionValue[InsertionFunction][
-         "const softsusy::QedQcd& qedqcd"]];
 
    With[{args = Sequence@@ToExpression@StringReplace[stringPattern, lhsRepl],
          repl = rhsRepl,

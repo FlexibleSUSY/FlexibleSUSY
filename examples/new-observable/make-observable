@@ -85,7 +85,7 @@ in
               ;;
    example-5) EXAMPLEDIR=btosmumu
               copythings
-              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`BrDLDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Boxes}, 1]}}}};' >> ${FSMODELDIR}
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Boxes}, 1]}}}};' >> ${FSMODELDIR}
               ;;
    clean-all) cleanall
               ;;

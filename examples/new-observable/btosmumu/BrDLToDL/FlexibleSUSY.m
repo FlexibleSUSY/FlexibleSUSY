@@ -1,4 +1,4 @@
-FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`BrDLDL, slha_, files_] :=
+FlexibleSUSY`WriteClass[obs:FlexibleSUSYObservable`BrDLToDL, slha_, files_] :=
 Module[
    {
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
@@ -35,14 +35,14 @@ Module[
    }
 ];
 
-create[manyObservables:{__FlexibleSUSYObservable`BrDLDL}] := {
+create[manyObservables:{__FlexibleSUSYObservable`BrDLToDL}] := {
    DeleteDuplicates[Join@@#[[All,1]]],
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
 }&[create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
 
-create[obs:FlexibleSUSYObservable`BrDLDL[{qd_[_], lep_[_]} -> _, contr_, loopN_]] :=
+create[obs:FlexibleSUSYObservable`BrDLToDL[{qd_[_], lep_[_]} -> _, contr_, loopN_]] :=
 Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
    keep, npf, fields, sp, dc, basis},
    keep = If[Head@contr === List, contr, {contr}];
