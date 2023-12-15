@@ -327,7 +327,7 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
          Unset,
             Module[{nameStr, argStr, removeSub, newCalculate, niceStr = {}},
                nameStr = StringReplace[prototype, Longest["(" ~~ s___ ~~ ")"]  :> (argStr = s; "")];
-               removeSub[pair_] := StringReplace[#, Shortest[ StringTake[pair, 1] ~~ ___ ~~ StringTake[pair, -1]] :> ""]&;
+               removeSub[pair_] := StringReplace[#, Longest[StringTake[pair, 1] ~~ ___ ~~ StringTake[pair, -1]] :> ""]&;
                (argStr = FixedPoint[removeSub@#, argStr]) &/@ {"()" , "[]", "{}", "<>"};
                argStr = StringReverse@StringReplace[argStr <> ",", {"&" -> " ", Whitespace ~~ "," :> ","}];
                StringReplace[argStr, Shortest["," ~~ x__ ~~ Whitespace] :> (AppendTo[niceStr, StringReverse[x]]; "")];
