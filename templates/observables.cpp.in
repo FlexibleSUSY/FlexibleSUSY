@@ -22,7 +22,7 @@
 #include "@ModelName@_amm.hpp"
 #include "@ModelName@_edm.hpp"
 #include "@ModelName@_b_to_s_gamma.hpp"
-#include "observables/ltolconversion/settings.hpp"
+#include "observables/l_to_l_conversion/settings.hpp"
 @observablesHeaders@
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "config.h"
