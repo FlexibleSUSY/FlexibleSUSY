@@ -8,21 +8,18 @@ BASE_TEMPLATES := \
 		$(DIR)/cxx_qft/vertices_.cpp.in \
 		$(DIR)/cxx_qft/context_base.hpp.in \
 		$(DIR)/cxx_qft/npointfunctions_wilsoncoeffs.hpp.in \
-		$(DIR)/a_muon.hpp.in \
-		$(DIR)/a_muon.cpp.in \
+		$(DIR)/amm.hpp.in \
+		$(DIR)/amm.cpp.in \
 		$(DIR)/decays/decay_table.hpp.in \
 		$(DIR)/decays/decay_table.cpp.in \
 		$(DIR)/decays/decays.hpp.in \
 		$(DIR)/decays/decays.cpp.in \
-		$(DIR)/decays/decay_amplitudes.hpp.in \
 		$(DIR)/edm.hpp.in \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
 		$(DIR)/FFV_form_factors.cpp.in \
-		$(DIR)/l_to_lgamma.hpp.in \
-		$(DIR)/l_to_lgamma.cpp.in \
-		$(DIR)/f_to_f_conversion.hpp.in \
-		$(DIR)/f_to_f_conversion.cpp.in \
+		$(wildcard $(DIR)/observables/*.hpp.in) \
+		$(wildcard $(DIR)/observables/*.cpp.in) \
 		$(DIR)/b_to_s_gamma.cpp.in \
 		$(DIR)/b_to_s_gamma.hpp.in \
 		$(DIR)/convergence_tester.hpp.in \
@@ -44,6 +41,8 @@ BASE_TEMPLATES := \
 		$(DIR)/mass_eigenstates_decoupling_scheme.cpp.in \
 		$(DIR)/model.hpp.in \
 		$(DIR)/model_slha.hpp.in \
+		$(DIR)/lepton_amm_wrapper.hpp.in \
+		$(DIR)/lepton_amm_wrapper.cpp.in \
 		$(DIR)/observables.hpp.in \
 		$(DIR)/observables.cpp.in \
 		$(DIR)/physical.hpp.in \

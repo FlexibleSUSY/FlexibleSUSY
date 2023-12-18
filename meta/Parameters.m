@@ -1607,40 +1607,26 @@ GetEffectiveMASqr[] :=
 
 GetParameterFromDescription[description_String] :=
     Module[{parameter},
-           parameter =Cases[SARAH`ParameterDefinitions,
-                            {parameter_,
-                             {___, SARAH`Description -> description, ___}} :>
-                            parameter];
-           If[Length[parameter] == 0,
-              Print["Error: Parameter with description \"", description,
-                    "\" not found."];
-              Return[Null];
-             ];
-           If[Length[parameter] > 1,
-              Utils`FSFancyWarning[
-                 "Parameter with description \"", description, "\" not unique."
-              ];
-           ];
-           parameter[[1]]
+           parameter = Cases[SARAH`ParameterDefinitions,
+                             {parameter_, {___, SARAH`Description -> description, ___}} :> parameter];
+           Switch[parameter,
+                  {}, DebugPrint["Note: Parameter with description \"", description, "\" not found."]; Null,
+                  {_}, First[parameter],
+                  {_, __}, Utils`FSFancyWarning["Parameter with description \"", description, "\" not unique: ", parameter]; First[parameter],
+                  _, Print["Error: Cases did not return a list in GetParameterFromDescription[", parameter, "]."]; Quit[1]
+           ]
           ];
 
 GetParticleFromDescription[description_String, eigenstates_:FlexibleSUSY`FSEigenstates] :=
     Module[{particle},
-           particle =Cases[SARAH`ParticleDefinitions[eigenstates],
-                            {particle_,
-                             {___, SARAH`Description -> description, ___}} :>
-                            particle];
-           If[Length[particle] == 0,
-              DebugPrint["Note: Particle with description \"", description,
-                         "\" not found."];
-              Return[Null];
-             ];
-           If[Length[particle] > 1,
-              Utils`FSFancyWarning[
-                 "Particle with description \"", description, "\" not unique."
-              ];
-           ];
-           particle[[1]]
+           particle = Cases[SARAH`ParticleDefinitions[eigenstates],
+                            {particle_, {___, SARAH`Description -> description, ___}} :> particle];
+           Switch[particle,
+                  {}, DebugPrint["Note: Particle with description \"", description, "\" not found."]; Null,
+                  {_}, First[particle],
+                  {_, __}, Utils`FSFancyWarning["Particle with description \"", description, "\" not unique: ", particle]; First[particle],
+                  _, Print["Error: Cases did not return a list in GetParticleFromDescription[", particle, "]."]; Quit[1]
+           ]
           ];
 
 GetParticleFromDescription[multipletName_String, splitNames_List] :=

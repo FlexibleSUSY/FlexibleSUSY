@@ -1,0 +1,100 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = "THDM-I";
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+(* input parameters *)
+
+MINPAR = {
+    {1, Lambda1IN},
+    {2, Lambda2IN},
+    {3, Lambda3IN},
+    {4, Lambda4IN},
+    {5, Lambda5IN},
+    {6, Lambda6IN},
+    {7, Lambda7IN},
+    {8, M122IN},
+    {10, TanBeta}
+};
+
+EXTPAR = {
+    {0, Qin}
+};
+
+EWSBOutputParameters = { M112, M222 };
+
+SUSYScale = Qin;
+
+SUSYScaleFirstGuess = Qin;
+
+SUSYScaleInput = {
+    {Lambda1, Lambda1IN},
+    {Lambda2, Lambda2IN},
+    {Lambda3, Lambda3IN},
+    {Lambda4, Lambda4IN},
+    {Lambda5, Lambda5IN},
+    {Lambda6, Lambda6IN},
+    {Lambda7, Lambda7IN},
+    {M122   , M122IN}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v1, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+   {v2, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtLowScale = {
+   {v1, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+   {v2, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh, Ah, Hm};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+         {22, FlexibleSUSYObservable`AMMUncertainty[Fe[2]]},
+         {26, FlexibleSUSYObservable`aMuonGM2Calc},
+         {27, FlexibleSUSYObservable`aMuonGM2CalcUncertainty}
+      }
+   }
+};
+
+(* input parameters for GM2Calc, see [arxiv:2110.13238] *)
+FSGM2CalcInput = {
+    yukawaType -> 1,
+    lambda1 -> 2 Lambda1,
+    lambda2 -> 2 Lambda2,
+    lambda3 -> Lambda3,
+    lambda4 -> Lambda4,
+    lambda5 -> Lambda5,
+    lambda6 -> Lambda6,
+    lambda7 -> Lambda7,
+    tanBeta -> v2 / v1,
+    m122 -> M122,
+    zetau -> 0,
+    zetad -> 0,
+    zetal -> 0,
+    deltau -> ZEROMATRIX[3,3],
+    deltad -> ZEROMATRIX[3,3],
+    deltal -> ZEROMATRIX[3,3],
+    piu -> ZEROMATRIX[3,3],
+    pid -> ZEROMATRIX[3,3],
+    pil -> ZEROMATRIX[3,3]
+};
+
+FSCalculateDecays = True;

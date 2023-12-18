@@ -78,7 +78,6 @@ jobs:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |
           ./configure \
-            --with-cxxflags="-std=c++14 -fPIC" \
             --with-cxx=$CXXCOMPILER \
             --with-optional-modules=test \
             --with-loop-libraries=collier,looptools \
@@ -127,7 +126,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.12.0
+      image: navir/opensuseleap-for-flexiblesusy:0.17.2
 
     strategy:
       fail-fast: false
@@ -137,8 +136,8 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.10'
-      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya'
-      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic MSSMNoFVEFTHiggs'
+      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3'
 
     steps:
 
@@ -204,6 +203,9 @@ jobs:
             --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
             --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
             --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --enable-higgstools \
+            --with-higgstools-incdir=$FS_DEPENDENCIES_DIR/HiggsTools/include \
+            --with-higgstools-libdir=$FS_DEPENDENCIES_DIR/HiggsTools/lib64 \
             --enable-himalaya \
             --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
             --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
@@ -213,8 +215,7 @@ jobs:
             --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
-            --enable-librarylink \
-            --with-cxxflags="-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"
+            --enable-librarylink
           make showbuild
 
       - name: Make
@@ -282,7 +283,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
+          name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
           path: |
             config.*
             test/test_*.log

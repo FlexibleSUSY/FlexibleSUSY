@@ -165,6 +165,12 @@ is_executable () {
 
     # shellcheck disable=SC2034
     cmd=$(command -v -- "$1")
+    logmsg "(command -v -- $1 gave: $cmd)"
+    case "$cmd" in
+	/*) return 0 ;;
+	alias\ *) return 1 ;; # alias
+	*) return 1 ;; # built-in or function
+    esac
 }
 
 #_____________________________________________________________________
@@ -236,7 +242,7 @@ check_sarah_model() {
 
     if ! is_executable "$mathematica_kernel" ; then
         message "error"
-        message "Error: could not find Mathematica kernel \"${mathematica_kernel}\""
+        message "Error: Mathematica kernel ${mathematica_kernel} was not found or is not executable or is an alias."
         message "    Please specify the Mathematica kernel via --with-math-cmd="
         exit 1
     fi
@@ -448,6 +454,9 @@ message -n "Searching for ${model_file} model file ... "
 
 if test -r "$model_file_dir/FlexibleSUSY.m.in"; then
     message "found ${model_file_dir}/FlexibleSUSY.m.in"
+elif test -r "test/$model_file_dir/FlexibleSUSY.m.in"; then
+    message "found test/${model_file_dir}/FlexibleSUSY.m.in"
+    model_file_dir="test/${model_file_dir}"
 else
     message "no found in ${model_file_dir}"
     echo "Error: No FlexibleSUSY model file found in ${model_file_dir}/"

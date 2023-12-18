@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-
 /**
  * @file @ModelName@_edm.hpp
  *
@@ -26,12 +25,19 @@
 #ifndef @ModelName@_EDM_H
 #define @ModelName@_EDM_H
 
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "lowe.h"
+
 namespace flexiblesusy {
+
 class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_edm {
-@EDM_InterfacePrototypes@
-}
+
+template <typename Lepton>
+double calculate_edm(const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&@extraIdxDecl@);
+
+} // namespace @ModelName@_edm
 } // namespace flexiblesusy
 
 #endif

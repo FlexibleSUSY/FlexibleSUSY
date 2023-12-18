@@ -135,7 +135,8 @@ FSFancyPrint::usage = "Print text in fancy headline style";
 
 FSFancyLine::usage = "Print separator line in command line mode";
 
-FSFancyWarning::usage = "Print a warning with a style."
+FSFancyWarning::usage = "Print a warning with a style. Note, if <> used in
+argument, might be printed twice.";
 
 PrintHeadline::usage = "Print fancy head line";
 
@@ -161,6 +162,10 @@ MakeUnknownInputDefinition::usage = "
 @param sym A name of a function.
 @note UpValues for symbol[args___] are not cleared.";
 
+DynamicInclude::usage = "
+@brief Once gets a file(s), specified by the input string.
+@param file A name of a file to load.";
+
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
@@ -168,6 +173,15 @@ Warning: This function may ignore empty lines.";
 
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
+
+DecomposeVersionString::usage = "Return a list for string containing a version number";
+VersionOrderGtEqThan::usage = "Checks if version is >= than a given one";
+FSRound::usage = "FSRound[x, n] rounds number x to n digits after dot.";
+
+UnzipRules::usage = "Expands a set of compact rules into the full one:
+In[1]:= rules = {a -> b, {c, d} -> e};
+        Utils`UnzipRules[rules]
+Out[1]= {a -> b, c -> e, d -> e}";
 
 Begin["`Private`"];
 
@@ -306,6 +320,24 @@ PrintHeadline[text__] :=
           FSFancyLine[];
          ];
 
+FSFancyWarning[string_String, len_Integer:70] :=
+Module[{warning, chopped},
+   warning = If[$Notebooks,
+      Style["Warning: ", Cyan],
+      If[TrueQ@FlexibleSUSY`FSEnableColors,
+         "\033[1;36mWarning\033[1;0m: ",
+         "Warning: "
+      ]
+   ];
+   chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
+   chopped = StringReplace[chopped, "\n"-> "\n         "];
+   WriteString[$Output, warning <> chopped <> "\n"]
+   If[$Notebooks,
+      Print[warning, chopped];,
+      WriteString[$Output, warning <> chopped <> "\n"];
+   ];
+];
+
 PrintAndReturn[e___] := (Print[e]; e)
 
 AssertWithMessage[assertion_, message_String] :=
@@ -397,7 +429,54 @@ Module[{up, down, all, usageString, infoString, simplify},
    ];
 ];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
-SetAttributes[MakeUnknownInputDefinition,{Locked,Protected}];
+MakeUnknownInputDefinition // Protect;
+
+DynamicInclude[path_String] :=
+Module[{separatedQ, wildQ, files},
+   separatedQ = StringContainsQ[path, $PathnameSeparator];
+   wildQ = StringContainsQ[path, "*"];
+
+   Switch[{wildQ, separatedQ},
+      {False, False},
+         Return@singleInclude@FileNameJoin@{DirectoryName@$Input, path};,
+      {False, True},
+         Return@singleInclude@path;,
+      {True, False},
+         files = FileNames@FileNameJoin@{DirectoryName@$Input, path};
+         Return[singleInclude/@files];,
+      {True, True},
+         Return[singleInclude/@FileNames@path];
+   ];
+];
+DynamicInclude // MakeUnknownInputDefinition;
+DynamicInclude // Protect;
+
+singleInclude[path_String] :=
+With[{inserted = path},
+   AssertOrQuit[And[FileExistsQ@path, Not@DirectoryQ@path],
+      DynamicInclude::errNoFile,
+      path
+   ];
+   Once@Get@inserted;
+   Return@inserted;
+];
+singleInclude // MakeUnknownInputDefinition;
+singleInclude // Protect;
+
+DynamicInclude::errNoFile = "\nFile\n`1`\ndoes not exist and can't be loaded!";
+
+UnzipRules[rules:{Rule[_|{__}, _]...}] :=
+   rules /. Rule[lhs:{__}, rhs_] :> Sequence@@ (Rule[#, rhs]&/@ lhs);
+UnzipRules // MakeUnknownInputDefinition;
+UnzipRules // Protect;
+
+abbreviateLongString[expr_] :=
+Module[{str, b},
+   b[s_] := If[!$Notebooks,"\033[1;36m"<>s<>"\033[0m", s];
+   str = ToString@expr;
+   If[StringLength@str > 1000, b["<"]<>StringTake[str, 1000]<>b[">"], str]];
+abbreviateLongString // MakeUnknownInputDefinition;
+abbreviateLongString // Protect;
 
 StringJoinWithReplacement[
    list_List,
@@ -443,6 +522,21 @@ FSPermutationSign[perm_?PermutationCyclesQ] :=
     Apply[Times, (-1)^(Length /@ First[perm] - 1)];
 FSPermutationSign[perm___] :=
     (Print[perm, " is not a permutation in disjoint cyclic form."];Quit[1]);
+
+DecomposeVersionString[version_String] :=
+    ToExpression /@ StringSplit[version, "."];
+
+VersionOrderGtEqThan[version_List, minimRequired_List] /;
+   Length[version] ===3 && Length[minimRequired] ===3 && And@@(IntegerQ /@ Join[version, minimRequired]) :=
+      !(version[[1]] < minimRequired[[1]] ||
+           (version[[1]] == minimRequired[[1]] &&
+            version[[2]] < minimRequired[[2]]) ||
+              (version[[1]] == minimRequired[[1]] &&
+               version[[2]] == minimRequired[[2]] &&
+               version[[3]] < minimRequired[[3]]));
+
+FSRound[num_, prec_] :=
+   PaddedForm[num, {IntegerPart[Log[10, Abs[num]]] + prec + 1, prec}];
 
 End[];
 

@@ -1,3 +1,68 @@
+FlexibleSUSY 2.8.0 [X, X X]
+==================================
+
+New features
+------------
+
+* Moved to C++17. This increased the minimal supported version of compilers to
+  g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
+
+* Allow user to calculate the anomalous magnetic moment of the muon
+  :math:`$a_\mu$` in 2HDM-like models with `GM2Calc 2`_
+  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_].  See the
+  FlexibleSUSY model `THDMII` (`model_files/THDMII/FlexibleSUSY.m.in`)
+  for an example.
+
+* Allow user to calculate anomalous magnetic moment of electron and tau.
+
+  The old syntax for requesting calculation of muon g-2::
+
+     ExtraSLHAOutputBlock s = {
+        {FlexibleSUSYLowEnergy, {
+           {21, FlexibleSUSYObservable`aMuon}}
+        }
+     };
+
+  has been replaced with syntax analogues to requesting calculation of electric
+  dipole moments::
+
+     ExtraSLHAOutputBlocks = {
+        {FlexibleSUSYLowEnergy, {
+           {20, FlexibleSUSYObservable`AMM[Fe[1]]},
+           {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+           {22, FlexibleSUSYObservable`AMM[Fe[3]]}
+        }
+     };
+
+* Added 1-loop vector diagram contributions to leptons
+  :math:`$(g-2)/2$`, EDMs and to :math:`$b \to s \gamma$`.
+
+  Thanks to Douglas Jacob.
+
+* Added 2-loop Barr-Zee contributions to leptons :math:`$(g-2)/2$`.
+
+  Thanks to Felix Reichenbach and Alexander Voigt.
+
+* SLHA output now includes the `EFFHIGGSCOUPLINGS` block containing
+  loop-induced couplings of neutral Higgses. This block can be used by a SARAH
+  generated UFO and CalcHEP models (the latter one being also used by
+  micrOMEGAs).
+
+Fixed bugs
+----------
+
+* [commit 1ffb4f7]: Fixed incorrect quark charge in some higher order QED
+  corrections to up-type quark decays of :math:`$H$` and :math:`$A$`.
+
+* [commit c90028444]: Fixed wrong vertex in 2-loop corrections to :math:`$A\to d\bar{d}$`
+  (see Eq. 20 of `2106.05038 <https://arxiv.org/abs/2106.05038>`_). Numerical
+  impact negligible.
+
+* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` where not applied.
+
+* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses where computed
+  incorectly for Higgses lighter than respective Goldstone bosons.
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
@@ -46,12 +111,12 @@ Changes
 -------
 
 * [commit ae1eae8e4d]: Mathematica-style indexing (starting from 1) of
-  leptons in :math:`$L' \to L \gamma$` via the mathlink interface.
+  leptons in :math:`$l' \to l \gamma$` via the mathlink interface.
 
 Fixed bugs
 ----------
 
-* [commit 26f5262ad3]: Branching ratio of :math:`$L' \to L \gamma$`
+* [commit 26f5262ad3]: Branching ratio of :math:`$l' \to l \gamma$`
   was breaking printing of observables via the mathlink interface.
 
 * [commit fd8d59dda8]: Fixed wrong calculation of :math:`$A \to Z \gamma$`.
@@ -76,7 +141,7 @@ Changes
 
 * Removed code computing Higgs effective couplings. This code has been
   superseded by FlexibleDecay.
-* FlexibleDecay: 2-loop QCD corrections to :math:`$\Phi \to \Gamma Z$` applied
+* FlexibleDecay: 2-loop QCD corrections to :math:`$\Phi \to \gamma Z$` applied
   only if :math:`$m_Z/m_\Phi < 0.75$`.
 
 Fixed bugs
@@ -2352,6 +2417,7 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _Conan: https://conan.io/
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _GM2Calc: https://arxiv.org/abs/1510.08071
+.. _GM2Calc 2: https://arxiv.org/abs/2110.13238
 .. _MhEFT: https://gabrlee.com/code/
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc

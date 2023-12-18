@@ -152,7 +152,11 @@ public:
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
-   virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) = 0;
+   virtual void calculate_model_observables(
+      const softsusy::QedQcd&,
+      @LToLConversion_named_argument@
+      const Physical_input&,
+      const Spectrum_generator_settings&) = 0;
 @calculateDecaysVirtualFunc@
 };
 
@@ -161,7 +165,6 @@ class @ModelName@_spectrum_impl : public @ModelName@_spectrum
 {
 public:
    virtual ~@ModelName@_spectrum_impl() = default;
-   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    virtual void put_model_spectra(MLINK link) const override;
 
@@ -173,7 +176,11 @@ public:
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
-   virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) override;
+   virtual void calculate_model_observables(
+      const softsusy::QedQcd&,
+      @LToLConversion_named_argument@
+      const Physical_input&,
+      const Spectrum_generator_settings&) override;
 @calculateSpectrumDecaysPrototype@
 private:
    std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
@@ -196,6 +203,7 @@ public:
    void set_physical_input(const Physical_input& p) { physical_input = p; }
    void set_sm_input_parameters(const softsusy::QedQcd& qedqcd_) { qedqcd = qedqcd_; }
    void set_settings(const Spectrum_generator_settings& s) { settings = s; }
+   @LToLConversion_setter@
    void set_fd_settings(const FlexibleDecay_settings& s) { flexibledecay_settings = s; }
    void set_modsel(const SLHA_io::Modsel& m) { modsel = m; }
 
@@ -226,6 +234,7 @@ private:
    Spectrum_generator_settings settings{};   ///< spectrum generator settings
    FlexibleDecay_settings flexibledecay_settings {}; ///< FlexibleDecay settings
    SLHA_io::Modsel modsel{};                 ///< MODSEL input
+   @LToLConversion_private@
    std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr};  ///< spectrum information
 
    @ModelName@_slha_io get_slha_io() const;
@@ -389,6 +398,7 @@ void Model_data::put_settings(MLINK link) const
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::higgs_3loop_correction_at3)), "higgs3loopCorrectionAtAtAt");
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::higgs_4loop_correction_at_as3)), "higgs4loopCorrectionAtAsAsAs");
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::loop_library)), "loopLibrary");
+   MLPutRuleTo(link, settings.get(Spectrum_generator_settings::calculate_amm), "calculateAMM");
    MLPutRuleTo(link, modsel.parameter_output_scale, "parameterOutputScale");
 
    MLEndPacket(link);
@@ -518,6 +528,7 @@ void Model_data::put_warnings(MLINK link) const
    slha_io.set_physical_input(physical_input);
    slha_io.set_modsel(modsel);
    slha_io.set_input(input);
+   @LToLConversion_set_slha@
    slha_io.set_print_imaginary_parts_of_majorana_mixings(
       settings.get(Spectrum_generator_settings::force_positive_masses));
 
@@ -661,9 +672,18 @@ void @ModelName@_spectrum_impl<Solver_type>::calculate_spectrum(
 
 template <typename Solver_type>
 void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
-   const softsusy::QedQcd& qedqcd, const Physical_input& physical_input)
+   const softsusy::QedQcd& qedqcd,
+   @LToLConversion_named_argument@
+   const Physical_input& physical_input,
+   const Spectrum_generator_settings& settings)
 {
-   observables = calculate_observables(std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
+   observables = calculate_observables(
+      std::get<0>(models),
+      qedqcd,
+      @LToLConversion_class_name@
+      physical_input,
+      settings,
+      scales.pole_mass_scale);
 }
 @calculateSpectrumDecaysFunction@
 /******************************************************************/
@@ -739,7 +759,10 @@ void Model_data::calculate_spectrum()
 void Model_data::calculate_model_observables()
 {
    check_spectrum_pointer();
-   spectrum->calculate_model_observables(qedqcd, physical_input);
+   spectrum->calculate_model_observables(qedqcd,
+      @LToLConversion_class_name@
+      physical_input,
+      settings);
 }
 @calculateModelDecaysFunction@
 /******************************************************************/
@@ -793,6 +816,7 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    settings.set(Spectrum_generator_settings::higgs_3loop_correction_at3, pars[c++]);
    settings.set(Spectrum_generator_settings::higgs_4loop_correction_at_as3, pars[c++]);
    settings.set(Spectrum_generator_settings::loop_library, pars[c++]);
+   settings.set(Spectrum_generator_settings::calculate_amm, pars[c++]);
 
    SLHA_io::Modsel modsel;
    modsel.parameter_output_scale = pars[c++];
@@ -847,6 +871,9 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
       qedqcd.setPMNS(pmns);
    }
 
+   @LToLConversion_init@
+   @LToLConversion_reset@
+
    Physical_input physical_input;
    physical_input.set(Physical_input::alpha_em_0, pars[c++]);
    physical_input.set(Physical_input::mh_pole, pars[c++]);
@@ -860,6 +887,7 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    data.set_sm_input_parameters(qedqcd);
    data.set_physical_input(physical_input);
    data.set_input_parameters(input);
+   @LToLConversion_set_data@
    @fillFDSettings@
    return data;
 }

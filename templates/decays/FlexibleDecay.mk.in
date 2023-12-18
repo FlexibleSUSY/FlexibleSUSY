@@ -22,8 +22,7 @@ LIB@ModelName@_SRC += \
 
 LIB@ModelName@_HDR += \
 		$(DIR)/decays/@ModelName@_decay_table.hpp \
-		$(DIR)/decays/@ModelName@_decays.hpp \
-		$(DIR)/decays/@ModelName@_decay_amplitudes.hpp
+		$(DIR)/decays/@ModelName@_decays.hpp
 
 EXE@ModelName@_SRC += \
 		$(DIR)/run_decays_@ModelName@.cpp

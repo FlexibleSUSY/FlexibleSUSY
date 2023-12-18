@@ -6,17 +6,17 @@ List of observables computed by ``FlexibleSUSY``
 
 - `lepton physics <observables/lepton_physics.rst>`_:
 
-  - muon anomalous magnetic moment :math:`a_\mu`
-  - leptons electric dipole moments
+  - leptons anomalous magnetic moments :math:`$a_l$`
+  - leptons electric dipole moments :math:`$d_l$`
 
 - `lepton flavour violation <observables/LFV.rst>`_:
 
-  - :math:`\mu \to e \gamma` *(in preparation)*
-  - :math:`\mu \to e` conversion in nucleus *(in preparation)*
+  - LFV decays of leptons :math:`$l \to l' \gamma$`
+  - :math:`$\mu \to e$` conversion in nucleus *(in preparation)*
 
 - `b-physics <observables/b_physics.rst>`_:
 
-  - :math:`b \to s \gamma`
+  - :math:`$b \to s \gamma$`
 
 - `FlexibleDecay <observables/FlexibleDecay.rst>`_
 

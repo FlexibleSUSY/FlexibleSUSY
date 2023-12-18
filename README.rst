@@ -4,9 +4,11 @@
 FlexibleSUSY
 ============
 
-|release| |static-analysis| |tests|
+|release| |commits-since| |static-analysis| |tests|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |commits-since| image:: https://img.shields.io/github/commits-since/FlexibleSUSY/FlexibleSUSY/latest/development
+   :alt: GitHub commits since latest release (by SemVer including pre-releases)
 .. |static-analysis| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/static%20analysis/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/static-analysis.yml
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
@@ -40,7 +42,7 @@ modification, extension and reuse.
   [1510.08071]_ and (if appropriate) [2110.13238]_.
 
   If you use **FlexibleDecay** in your work, please cite
-  [2106.05038]_.
+  [2106.05038]_ and [1211.2099]_.
 
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
   (or later), please cite [2204.05285]_.
@@ -93,7 +95,7 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
+* C++17 compiler (g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
@@ -105,7 +107,7 @@ Optional:
 
 * FeynArts_ (version 3.9 or higher)
 * FormCalc_ (version 9.5 or higher)
-* GM2Calc_ (version 1.7.0 or higher)
+* GM2Calc_ (version 2.1.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * COLLIER_
 * Himalaya_
@@ -114,8 +116,16 @@ Optional:
 Installation of required/optional libraries
 -------------------------------------------
 
+The required libraries Boost_, `Eigen 3`_ and `GNU scientific library`_
+can usually be installed via the package manager of the operating system.
+On Debian/Ubuntu one may run for example
+
+.. code-block:: shell
+
+    sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev
+
 The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
-LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
+LoopTools_, Himalaya_ and TSIL_ can be also installed using the Conan_
 package manager.  If not already installed, Conan can be installed
 with pip
 
@@ -130,12 +140,7 @@ To install the libraries required by FlexibleSUSY, run
     conan install . --build=missing
 
 The `GNU scientific library`_ can currently not be installed via
-Conan_.  One may use the package manager of the operating system to
-install it.  On Debian/Ubuntu one may run for example
-
-.. code-block:: shell
-
-    sudo apt-get install libgsl-dev
+Conan_.
 
 If the required libraries are installed via Conan or the operating
 system's package manager, they will be found automatically by
@@ -150,7 +155,7 @@ the following setup
 
 .. code-block:: shell
 
-    SARAH_VERSION=4.14.5
+    SARAH_VERSION=4.15.0
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
@@ -769,7 +774,7 @@ This is achieved by setting the ``FFLAGS`` variable during LoopTools configurati
 
 .. code-block:: shell
 
-    FFLAGS=-fPIC ./configure
+    FFLAGS="-O3 -fPIC" ./configure
 
 COLLIER support
 ```````````````
@@ -1029,8 +1034,9 @@ References
 .. [hep-ph:0104145] `CPC 143 (2002) 305-331 <https://inspirehep.net/record/555481>`_ [`arxiv:hep-ph/0104145 <http://arxiv.org/abs/hep-ph/0104145>`_]
 .. [0909.2863] `CPC 181 (2010) 1077-1086 <https://inspirehep.net/record/831371>`_ [`arxiv:0909.2863 <http://arxiv.org/abs/0909.2863>`_]
 .. [1002.0840] `CPC 182 (2011) 808-833 <https://inspirehep.net/record/845241>`_   [`arxiv:1002.0840 <http://arxiv.org/abs/1002.0840>`_]
-.. [1005.5709]  `JHEP 1008 (2010) 104 <https://inspirehep.net/record/856612>`_  [`arxiv:1005.5709 <https://arxiv.org/abs/1005.5709>`_]
+.. [1005.5709] `JHEP 1008 (2010) 104 <https://inspirehep.net/record/856612>`_  [`arxiv:1005.5709 <https://arxiv.org/abs/1005.5709>`_]
 .. [1207.0906] `CPC 184 (2013) 1792-1809 <https://inspirehep.net/record/1121136>`_ [`arxiv:1207.0906 <http://arxiv.org/abs/1207.0906>`_]
+.. [1211.2099] `Eur. Phys. J. C73 (2013) no. 2, 2310 <https://inspirehep.net/literature/1201957>`_ [`arxiv:1211.2099 <https://arxiv.org/abs/1211.2099>`_]
 .. [1309.7223] `CPC 185 (2014) 1773-1790 <https://inspirehep.net/record/1255845>`_ [`arxiv:1309.7223 <http://arxiv.org/abs/1309.7223>`_]
 .. [1311.7659] `CPC 185 (2014) 2322 <https://inspirehep.net/record/1266808>`_  [`arxiv:1311.7659 <http://arxiv.org/abs/1311.7659>`_]
 .. [1406.2319] `CPC 190 (2015) 139-172 <https://inspirehep.net/record/1299998>`_ [`arxiv:1406.2319 <https://arxiv.org/abs/1406.2319>`_]
@@ -1041,6 +1047,6 @@ References
 .. [1804.09410] `Eur. Phys. J. C78 (2018) no. 7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
 .. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
-.. [2106.05038] [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
+.. [2106.05038] `CPC 283 (2023) 108584 <https://inspirehep.net/literature/1867840>`_ [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
 .. [2110.13238] `Eur. Phys. J. C82 (2022) no. 3, 229 <https://inspirehep.net/literature/1952331>`_ [`arxiv:2110.13238 <https://arxiv.org/abs/2110.13238>`_]
-.. [2204.05285] [`arxiv:2204.05285 <https://arxiv.org/abs/2204.05285>`_]
+.. [2204.05285] `Phys. Rev. D 106 (2022) 9, 095023 <https://inspirehep.net/literature/2065408>`_ [`arxiv:2204.05285 <https://arxiv.org/abs/2204.05285>`_]

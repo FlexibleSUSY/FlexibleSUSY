@@ -50,6 +50,15 @@
 
 #include <boost/functional/value_factory.hpp>
 
+#define NPF_S(args...) context.vertex<args>(lorentz_scalar{},
+#define NPF_L(args...) context.vertex<args>(lorentz_left{},
+#define NPF_R(args...) context.vertex<args>(lorentz_right{},
+#define NPF_G(args...) context.vertex<args>(lorentz_inverse_metric{},
+#define NPF_T(args...) context.vertex<args>(triple_vector{},
+#define NPF_SSV(args...) context.vertex<args>(lorentz_momentum_diff{
+#define NPF_D(i1, i2) i1, i2},
+#define NPF_I(args...) concatenate(args))
+
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
 namespace npointfunctions {
@@ -191,7 +200,7 @@ struct context_with_vertices : context_base {
    std::complex<double> vertex(triple_vector,
       const typename Vertex<Fields...>::indices_type &indices ) const {
       // FIXME: hardcoded odd permutation to agree with SPheno
-      return Vertex<Fields...>::evaluate( indices, model ).value( TripleVectorVertex::odd_permutation{} );
+      return Vertex<Fields...>::evaluate( indices, model ).value( cxx_diagrams::TripleVectorVertex::odd_permutation{} );
    }
 
    double scale( void ) const {

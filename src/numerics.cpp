@@ -115,15 +115,38 @@ double fB(const std::complex<double>& xp, const std::complex<double>& xm) noexce
 
 } // anonymous namespace
 
+/*
+ * Real part of A0 1-loop function.
+ *
+ * @param m mass
+ * @param q renormalization scale, q > 0
+ * @return Re[A0(m, q)]
+ */
 double a0(double m, double q) noexcept
 {
-   constexpr double TOL = 1e-4;
+   return rea0(m*m, q*q);
+}
 
-   if (std::abs(m) < TOL) {
-      return 0.0;
+/*
+ * Real part of A0 1-loop function.
+ *
+ * Note: Returns correct result even for x < 0.
+ *
+ * @param x squared mass
+ * @param q squared renormalization scale, q > 0
+ * @return Re[A0(x, q)]
+ */
+double rea0(double x, double q) noexcept
+{
+   if (q <= 0) {
+      return std::numeric_limits<double>::quiet_NaN();
    }
 
-   return sqr(m) * (1.0 - 2. * std::log(std::abs(m / q)));
+   if (x == 0) {
+      return 0;
+   }
+
+   return x * (1 - std::log(std::abs(x)/q));
 }
 
 double ffn(double p, double m1, double m2, double q) noexcept {

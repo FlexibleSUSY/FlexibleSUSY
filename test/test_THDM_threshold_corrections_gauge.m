@@ -90,7 +90,7 @@ result = Simplify[Plus @@ Select[List @@ Expand[#],
 
 Print["testing THDM threshold corrections[] ..."];
 
-Get["model_files/THDMIIMSSMBC/FlexibleSUSY.m.in"];
+Get["test/model_files/THDMIIMSSMBC/FlexibleSUSY.m.in"];
 
 renameRules = {
     AtauInput -> Atau,

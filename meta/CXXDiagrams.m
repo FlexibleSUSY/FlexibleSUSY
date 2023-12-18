@@ -231,9 +231,8 @@ ParticleTypeAsString[part_] := Module[
 ];
 
 (** \brief Creates c++ code that makes all fields and their properties
- * available as c++ types. Also creates two using declarations for
- * the following fields:
- * - Photon
+ * available as c++ types. Also creates one using declaration for
+ * the following field:
  * - Electron
  * Furthermore create the necessary boilerplate code to conjugate any
  * given c++ field as well as convenience `boost::mpl::vector<>`
@@ -264,11 +263,12 @@ CreateFields[] :=
        vectors = Select[fields, TreeMasses`IsVector];
        ghosts = Select[fields, TreeMasses`IsGhost];
 
+       {
        StringRiffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
-              "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
-              "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
+              "static constexpr auto particleType = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
+              "static constexpr auto colorRep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
               "static constexpr auto massless = " <> CConversion`CreateCBoolValue @ TreeMasses`IsMassless[#] <> ";\n" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
@@ -289,22 +289,14 @@ CreateFields[] :=
                    ] <> ">;\n" <>
               "static constexpr int numberOfFieldIndices = " <>
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
-              "static constexpr double electric_charge = " <>
+              "static constexpr double electricCharge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
               "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
               "};" &) /@ fields, "\n\n"] <> "\n\n" <>
 
        "// Named fields\n" <>
-       "using Photon = " <> CXXNameOfField[SARAH`Photon] <> ";\n" <>
        "using Electron = " <> CXXNameOfField[AtomHead @ TreeMasses`GetSMElectronLepton[]] <> ";\n\n" <>
-
-       "// Fields that are their own Lorentz conjugates.\n" <>
-       StringRiffle[
-         ("template<> struct " <> LorentzConjugateOperation[#] <> "<" <> CXXNameOfField[#] <> ">" <>
-            " { using type = " <> CXXNameOfField[#] <> "; };"
-            &) /@ Select[fields, (# == LorentzConjugate[#] &)],
-          "\n"] <> "\n\n" <>
 
        "using scalars = boost::mpl::vector<" <>
          StringRiffle[CXXNameOfField /@ scalars, ", "] <> ">;\n" <>
@@ -313,7 +305,14 @@ CreateFields[] :=
        "using vectors = boost::mpl::vector<" <>
          StringRiffle[CXXNameOfField /@ vectors, ", "] <> ">;\n" <>
        "using ghosts = boost::mpl::vector<" <>
-         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;"
+         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;",
+       "// Fields that are their own Lorentz conjugates.\n" <>
+       StringRiffle[
+         ("template<> struct " <> LorentzConjugateOperation[#] <> "<" <> CXXNameOfField[#, prefixNamespace -> "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">" <>
+            " { using type = " <> CXXNameOfField[#, prefixNamespace -> "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> "; };"
+            &) /@ Select[fields, (# == LorentzConjugate[#] &)],
+          "\n"] <> "\n\n"
+       }
   ]
 
 (** \brief Get the lorentz index of a given indexed field
@@ -1253,7 +1252,7 @@ Module[{cxxVertices, vertexPartition,
       Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
    ];
    Print[""];
-   Print["The creation of C++ vertices took ", Round[First@cxxVertices, 0.1], "s"];
+   Print["The creation of C++ vertices took", FSRound[First@cxxVertices, 1], "s"];
    cxxVertices = Last@cxxVertices;
 
    (* Mathematica 7 does not support the `UpTo[n]` notation *)
@@ -1277,18 +1276,18 @@ Utils`MakeUnknownInputDefinition@CreateVertices;
 CreateVertex[fields_List] :=
   Module[{fieldSequence},
 		fieldSequence = StringRiffle[
-			CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields, ", "];
+			CXXNameOfField[#, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] & /@ fields, ", "];
 
 		{
 		"template<> struct VertexImpl<" <> fieldSequence <> ">" <> "\n" <>
 		"{\n" <> TextFormatting`IndentText[
-			"static " <> SymbolName[VertexTypeForFields[fields]] <>
+			"static cxx_diagrams::" <> SymbolName[VertexTypeForFields[fields]] <>
 				" evaluate(const std::array<int, " <>
 				ToString[Total[NumberOfFieldIndices /@ fields]] <>
 			">& indices, const context_base& context);"] <> "\n" <>
 		"};"
 		,
-		SymbolName[VertexTypeForFields[fields]] <>
+		"cxx_diagrams::" <> SymbolName[VertexTypeForFields[fields]] <>
 			" VertexImpl<" <> fieldSequence <> ">::evaluate(\n" <>
 				TextFormatting`IndentText["const std::array<int, " <>
 					ToString[Total[NumberOfFieldIndices /@ fields]] <> ">& indices, " <>
@@ -1397,8 +1396,8 @@ VertexFunctionBodyForFields[fields_List] :=
 						(RotateLeft[{lIndex1, lIndex2, lIndex3}, #] ===
 							LorentzIndexOfField /@ gaugeStructure[[3]])) & /@
 						{0, 1, 2}),
-					"TripleVectorVertex::even_permutation{}",
-					"TripleVectorVertex::odd_permutation{}"] <>
+					"cxx_diagrams::TripleVectorVertex::even_permutation{}",
+					"cxx_diagrams::TripleVectorVertex::odd_permutation{}"] <>
 			"};",
 
 			_QuadrupleVectorVertex,
@@ -1565,7 +1564,7 @@ CreateUnitCharge[] :=
          numberOfElectronIndices = NumberOfFieldIndices[electron];
          numberOfPhotonIndices = NumberOfFieldIndices[photon];
 
-         "ChiralVertex unit_charge(const context_base& context)\n" <>
+         "cxx_diagrams::ChiralVertex unit_charge(const context_base& context)\n" <>
          "{\n" <>
          TextFormatting`IndentText @
            ("std::array<int, " <> ToString @ numberOfElectronIndices <> "> electron_indices = {" <>

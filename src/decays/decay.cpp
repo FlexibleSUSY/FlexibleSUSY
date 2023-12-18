@@ -18,6 +18,7 @@
 
 #include "decay.hpp"
 #include "error.hpp"
+#include "wrappers.hpp"
 
 #include <boost/functional/hash.hpp>
 
@@ -52,16 +53,6 @@ std::size_t hash_decay(const Decay& decay)
    return hash_pid_list(pid_in, pids_out);
 }
 
-Decay::Decay(
-   int pid_in_, std::initializer_list<int> pids_out_, double width_, std::string const& proc_string_)
-   : pid_in(pid_in_)
-   , pids_out(pids_out_)
-   , width(width_)
-   , proc_string(proc_string_)
-{
-   std::sort(pids_out.begin(), pids_out.end());
-}
-
 Decays_list::Decays_list(int initial_pdg_)
    : initial_pdg(initial_pdg_)
 {
@@ -71,27 +62,6 @@ void Decays_list::clear()
 {
    decays.clear();
    total_width = 0.;
-}
-
-void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, std::string const& proc_string)
-{
-   const Decay decay(initial_pdg, pids_out, width, proc_string);
-   const auto decay_hash = hash_decay(decay);
-
-   const auto pos = decays.find(decay_hash);
-   if (pos != std::end(decays)) {
-      total_width -= pos->second.get_width();
-      pos->second.set_width(width);
-   } else {
-      decays.insert(pos, std::make_pair(decay_hash, decay));
-   }
-
-   // some channels give small negative withs
-   // we later check if for channels with width < 0
-   // |width/total_width| < threshold
-   // for that it makes more sense to calculate total_width
-   // form sum of |width|
-   total_width += std::abs(width);
 }
 
 const Decay& Decays_list::get_decay(
@@ -115,6 +85,27 @@ const Decay& Decays_list::get_decay(
    return pos->second;
 }
 
+/**
+ * Sort decays of every particle according to their width
+ */
+std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
+   std::vector<Decay> decays_list_as_vector;
+   decays_list_as_vector.reserve(decays_list.size());
+   for (const auto& el : decays_list) {
+      decays_list_as_vector.push_back(el.second);
+   }
+
+   std::sort(
+      decays_list_as_vector.begin(),
+      decays_list_as_vector.end(),
+      [](const auto& d1, const auto& d2) {
+         return d1.get_width() > d2.get_width();
+      }
+   );
+
+   return decays_list_as_vector;
+}
+
 std::string strip_field_namespace(std::string const& s) {
    std::string result = s.substr(s.find_last_of(':')+1);
    if (s.find("bar") != std::string::npos) {
@@ -126,6 +117,20 @@ std::string strip_field_namespace(std::string const& s) {
    } else {
       return result;
    }
+}
+
+double hVV_4body(double *q2, size_t /* dim */, void *params)
+{
+  struct hVV_4body_params * fp = static_cast<struct hVV_4body_params*>(params);
+  const double mHOS = fp->mHOS;
+  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
+  const double mVOS = fp->mVOS;
+  const double GammaV = fp->GammaV;
+  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
+  return
+     mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
 }
 
 } // namespace flexiblesusy
