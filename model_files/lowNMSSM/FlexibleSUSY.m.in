@@ -122,6 +122,7 @@ ExtraSLHAOutputBlocks = {
             {2, vu / vd},
             {3, Sqrt[vu^2 + vd^2]},
             {4, M[Ah[2]]^2},
+            {10,  ArcTan[vu/vd]},
             {102, vd},
             {103, vu} } },
    {Au,    {{1, 1, T[Yu][1,1] / Yu[1,1]},
