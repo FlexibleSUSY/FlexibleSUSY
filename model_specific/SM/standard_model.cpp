@@ -724,7 +724,6 @@ void Standard_model::calculate_pole_masses()
    calculate_MFe_pole();
 
 #endif
-   calculate_MVWp_pole_fit(this->get_physical().Mhh);
 }
 
 void Standard_model::copy_DRbar_masses_to_pole_masses()
@@ -1045,7 +1044,6 @@ double Standard_model::calculate_theta_w()
    };
 
    calculate_MVWp_pole_fit(get_mh_pole());
-   qedqcd.setPoleMW(this->get_physical().MVWp);
 
    weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
    sm_pars.fermi_constant = qedqcd.displayFermiConstant();
