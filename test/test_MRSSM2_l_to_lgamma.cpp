@@ -25,7 +25,7 @@
 
 #include "wrappers.hpp"
 #include "cxx_qft/MRSSM2_qft.hpp"
-#include "observables/MRSSM2_l_to_lgamma.hpp"
+#include "observables/br_l_to_l_gamma.hpp"
 #include "physical_input.hpp"
 
 using namespace flexiblesusy;
