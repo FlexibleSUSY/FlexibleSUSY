@@ -96,7 +96,7 @@ namespace detail {
          using namespace boost::mpl;
 
          using field_insertions = typename at_c<InsertionData, 0>::type;
-         static constexpr int combinatorial_factor = at_c<InsertionData, 1>::type::value;
+         static constexpr double combinatorial_factor = at_c<InsertionData, 1>::type::value;
          static constexpr auto colour_factor = at_c<InsertionData, 2>::type::value;
 
          using pairs = typename transform<GenericKeys,
