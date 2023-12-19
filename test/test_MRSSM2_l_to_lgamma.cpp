@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( test_l_to_lgamma )
 
    Physical_input physical_inputs;
 
-   auto brMuEGamma = MRSSM2_l_to_lgamma::calculate_Fe_to_Fe_VP(1, 0, m, qedqcd, physical_inputs);
+   auto brMuEGamma = MRSSM2_br_l_to_l_gamma::calculate_Fe_to_Fe_VP(1, 0, m, qedqcd, physical_inputs);
 
    BOOST_CHECK_CLOSE_FRACTION(brMuEGamma, 1.3147385103144814e-15, 1e-4);
 }
