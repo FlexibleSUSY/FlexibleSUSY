@@ -394,8 +394,8 @@ TextFormatting`ReplaceCXXTokens["
    #include \"cxx_qft/@ModelName@_npointfunctions_wilsoncoeffs.hpp\"
    #include \"concatenate.hpp\"
    #include <limits>
+   #include <type_traits>
    #include <boost/fusion/include/at_key.hpp>
-   #include <boost/core/is_same.hpp>
    #include \"wrappers.hpp\"
    ",
    {"@ModelName@" -> FlexibleSUSY`FSModelName}
@@ -968,9 +968,9 @@ Module[{f1,f2,GetIndexOfExternalField,OrTwoDifferent},
          ind = GetIndexOfExternalField@First@rule,
          typeGen = CXXFullFieldName@genericField,
          indGen = CXXIndex@genericField},
-      "\nif( (boost::core::is_same<"<>typeGen<>","<>type1<>
-         ">::value || boost::core::is_same<"<>typeGen<>","<>type2<>
-         ">::value) && "<>indGen<>" == "<>ind<>" ) continue;"];
+      "\nif( (std::is_same_v<"<>typeGen<>","<>type1<>
+         "> || std::is_same_v<"<>typeGen<>","<>type2<>
+         ">) && "<>indGen<>" == "<>ind<>" ) continue;"];
    Switch[rule,
       Or[f1_,f2_],
          OrTwoDifferent[],
