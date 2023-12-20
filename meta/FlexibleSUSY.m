@@ -4172,7 +4172,7 @@ SetupMassMatrices[allParameters_] :=
 		       massMatrices = massMatrices /. allIntermediateOutputParameterIndexReplacementRules;
 
 		       {massMatrices, Lat$massMatrices}
-		]
+		];
 
 SetupOutputParameters[massMatrices_] :=
 		Module[{allParticles, allOutputParameters},
@@ -4183,8 +4183,40 @@ SetupOutputParameters[massMatrices_] :=
 
            Parameters`SetOutputParameters[allOutputParameters];
            DebugPrint["output parameters = ", allOutputParameters];
-    ]
+    ];
 
+CheckObsDependencies[requested_List] :=
+Module[{allObs, dir, filtered = requested},
+   If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+      Needs@"NPointFunctions`";
+      Needs@"WilsonCoeffs`";
+      Return[filtered];
+   ];
+
+   allObs = Cases[
+      requested,
+      x_/; Context@Evaluate@Head@x === "FlexibleSUSYObservable`" :> x,
+      Infinity,
+      Heads -> True
+   ];
+   allObs = DeleteDuplicates[SymbolName@*Head/@allObs];
+
+   Do[
+      dir = FileNameJoin@{$flexiblesusyMetaDir, "Observables", obs};
+      If[DirectoryQ@dir,
+         If[TextSearch[dir, "NPointFunctions" | "WilsonCoeffs", "Count"] > 0,
+            Utils`FSFancyWarning[obs,
+               " is requested but FeynArts or FormCalc are disabled. ",
+               "Removing ", obs, " from calculated observables."
+            ];
+            filtered = filtered /. Symbol["FlexibleSUSYObservable`"<>obs][___] :> Null;
+         ];
+      ];,
+      {obs, allObs}
+   ];
+
+   filtered /. {_Integer, Null} :> Sequence[] /. {_Symbol, {}} :> Sequence[]
+];
 
 Options[MakeFlexibleSUSY] :=
     {
@@ -4267,13 +4299,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
 
            Needs@"Observables`";
-
-           (* load additional packages if prerequisites are met *)
-           If[FSFeynArtsAvailable && FSFormCalcAvailable,
-               Needs@"NPointFunctions`";
-               Needs@"WilsonCoeffs`";
-           ];
-
+           FlexibleSUSY`ExtraSLHAOutputBlocks = CheckObsDependencies[FlexibleSUSY`ExtraSLHAOutputBlocks];
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
 	       ConvertBetaFunctions[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
