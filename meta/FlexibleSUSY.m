@@ -4088,7 +4088,7 @@ ReadSARAHBetaFunctions[] :=
            susyBreakingBetaFunctions = DeleteBuggyBetaFunctions @ (Join @@ susyBreakingBetaFunctions);
 
            {susyBetaFunctions, susyBreakingBetaFunctions}
-    ]
+    ];
 
 (* disable tensor couplings *)
 FSDisableTensorCouplings[parameters_] :=
@@ -4122,7 +4122,7 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
            FSDisableTensorCouplings[allParameters];
 
            allParameters
-    ]
+    ];
 
 ConvertBetaFunctions[susyBetaFunctionsSARAH_, susyBreakingBetaFunctionsSARAH_] :=
     Module[{susyBetaFunctions, susyBreakingBetaFunctions,
@@ -4300,6 +4300,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            Needs@"Observables`";
            FlexibleSUSY`ExtraSLHAOutputBlocks = CheckObsDependencies[FlexibleSUSY`ExtraSLHAOutputBlocks];
+
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
 	       ConvertBetaFunctions[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];

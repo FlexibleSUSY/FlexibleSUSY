@@ -891,7 +891,7 @@ Module[{massesToOne = Rule[#,1] & /@ massRules[[All,2]],
 ];
 CXXSkipZeroAmplitude // secure;
 
-CXXMassAbbreviation[SARAH`Mass[obj_?IsGenericParticle]] :=
+CXXMassAbbreviation[(m_/; m === SARAH`Mass)[obj_?IsGenericParticle]] :=
 Switch[GetParticleName@obj,
    GenericS, "mS",
    GenericF, "mF",
@@ -899,7 +899,7 @@ Switch[GetParticleName@obj,
    GenericU, "mU"
 ]<>ToString@GetIndex@obj;
 
-CXXMassAbbreviation[SARAH`Mass[obj:_?IsParticle]] := "m"<>ToString@GetParticleName@obj<>CXXIndex@obj;
+CXXMassAbbreviation[(m_/; m === SARAH`Mass)[obj_?IsParticle]] := "m"<>ToString@GetParticleName@obj<>CXXIndex@obj;
 
 CXXMassAbbreviation // secure;
 
