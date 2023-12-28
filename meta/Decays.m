@@ -1043,7 +1043,7 @@ CreateFieldIndices[particle_, fieldsNamespace_] :=
 
 CreateTotalAmplitudeFunctionName[] := "calculate_amplitude";
 
-CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_] :=
+CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_, oneLoop_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             returnType = "", fieldsNamespace, fieldsList, templatePars = "", args = ""},
            returnType = GetDecayAmplitudeType[initialParticle, finalState];
@@ -1054,7 +1054,7 @@ CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_] :=
            args = "const " <> modelName <> "_cxx_diagrams::context_base&, " <>
                   Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[#, fieldsNamespace] <> "&")& /@ fieldsList, ", "];
            "template<>\n" <> returnType <> " " <> modelName <> "_decays::" <>
-           CreateTotalAmplitudeFunctionName[] <> templatePars <> "(" <> args <> ") const;\n"
+           CreateTotalAmplitudeFunctionName[] <> If[oneLoop, "_1l", "_tree"] <> templatePars <> "(" <> args <> ") const;\n"
           ];
 
 FillSSSDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
@@ -1918,6 +1918,11 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
 
        (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
+       (* if this is a 1l correction to a tree-level decay, discard diagrams without BSM fields *)
+       If[IsPossibleTreeLevelDecay[decay, True],
+          Map[Print[{#, (IsSMParticle/@Flatten@Drop[#[[2]], 3])}]&, oneLoopTopAndInsertion];
+          oneLoopTopAndInsertion = DeleteCases[oneLoopTopAndInsertion, And@@(IsSMParticle/@Flatten@Drop[#[[2]], 3]) && !And@@(ColorChargedQ/@Flatten@Drop[#[[2]], 3])&]
+       ];
 
        With[{ret = WrapCodeInLoopOverInternalVertices[decay, Sequence @@ #]},
          FinitePart = (ret[[1]] || FinitePart);
@@ -1932,7 +1937,7 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
 
 (* creates `calculate_amplitude` function
    that returns a total (sumed over internal insertions) 1-loop amplitude for a given external particles *)
-CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
+CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_, oneLoop_:True] :=
    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             fieldsNamespace = "fields",
             returnVar = "result", paramsStruct = "context", returnType = "",
@@ -1957,23 +1962,23 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            (* function body *)
 
-           body = "\n// amplitude type\n";
+           body = "// amplitude type\n";
            body = body <> returnType <> " " <> returnVar <> ";\n";
 
            body = body <> "\n// external particles' masses\n";
            body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct];
 
-           If[IsPossibleTreeLevelDecay[decay, True],
+           If[!oneLoop,
               body = body <> "\n// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
 
-           If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
+           If[oneLoop,
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
                 If[res[[1]],
                   body = body <> "\n// FormCalc's Finite variable\n";
-                  body = body <>"static constexpr double Finite {1.};\n"
+                  body = body <> "static constexpr double Finite {1.};\n"
                 ];
-                body = body <>"\nconst double ren_scale {result.m_decay};\n";
+                body = body <> "\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
              ]
            ];
@@ -1982,9 +1987,9 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
              "// " <> ToString@initialParticle <> " -> " <> ToString@finalState <> "\n" <>
                  "template<>\n" <>
-                 returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <>
+                 returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <> If[oneLoop, "_1l", "_tree"] <>
                  templatePars <>
-                 "(\n" <> TextFormatting`IndentText[args <> ") const{\n"] <>
+                 "(\n" <> TextFormatting`IndentText[args <> ") const {\n\n"] <>
                  TextFormatting`IndentText[body] <>
                  "}\n"
    ];
@@ -2178,10 +2183,16 @@ CreateHiggsToPhotonZTotalAmplitude[particleDecays_List, modelName_] :=
 
 CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
     Module[{decl = "", def = ""},
-           decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName];
-           def = CreateTotalAmplitudeSpecializationDef[decay, modelName];
-           {decl, def}
-          ];
+       If[IsPossibleTreeLevelDecay[decay, True],
+          decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName, False];
+          def = CreateTotalAmplitudeSpecializationDef[decay, modelName, False];
+       ];
+       If[IsPossibleOneLoopDecay[decay] && (!IsPossibleTreeLevelDecay[decay, True] || And@@(IsSMParticle /@ GetFinalState[decay])),
+          decl = decl <> CreateTotalAmplitudeSpecializationDecl[decay, modelName, True];
+          def = def <> "\n" <> CreateTotalAmplitudeSpecializationDef[decay, modelName, True];
+       ];
+       {decl, def}
+    ];
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations, vertices = {}, listing = {},

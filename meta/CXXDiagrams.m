@@ -598,7 +598,7 @@ ConvertColourStructureToColorMathConvention[fields_List,
 
 ConvertColourStructureToColorMathConvention[fields_List,
    UnsupportedColouredVertex] :=
-   (Print["Error! Cannot convert a colour structure to ColorMath convention for fiedls: ", fields]; Quit[1]);
+   (Print["Error! Cannot convert a colour structure to ColorMath convention for fields: ", fields]; Quit[1]);
 
 (* FIXME: Are these correct? *)
 ColorMathToSARAHConvention[expr_] :=

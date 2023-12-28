@@ -92,7 +92,14 @@ private:
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
-   calculate_amplitude(
+   calculate_amplitude_1l(
+      const @ModelName@_cxx_diagrams::context_base&,
+      const typename cxx_diagrams::field_indices<FieldIn>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut1>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut2>::type&) const;
+   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
+   calculate_amplitude_tree(
       const @ModelName@_cxx_diagrams::context_base&,
       const typename cxx_diagrams::field_indices<FieldIn>::type&,
       const typename cxx_diagrams::field_indices<FieldOut1>::type&,
@@ -107,19 +114,6 @@ private:
 };
 
 @calcAmplitudeSpecializationDecls@
-
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-double
-@ModelName@_decays::amplitude_squared(@ModelName@_cxx_diagrams::context_base const& context,
-                  typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
-                  typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
-                  typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const
-{
-
-   const auto mat_elem = calculate_amplitude<FieldIn, FieldOut1, FieldOut2>(
-      context, indexIn, indexOut1, indexOut2);
-   return mat_elem.square();
-}
 
 // generic decay of FieldIn -> FieldOut1 FieldOut2
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
@@ -155,11 +149,11 @@ double @ModelName@_decays::get_partial_width(
    constexpr double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
 
    // matrix element squared
-   const auto mat_elem_sq = amplitude_squared<FieldIn, FieldOut1, FieldOut2>(
+   const auto amp = calculate_amplitude_tree<FieldIn, FieldOut1, FieldOut2>(
       context, indexIn, indexOut1, indexOut2);
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
-   const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * mat_elem_sq;
+   const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * amp.square();
 
    return result;
 }

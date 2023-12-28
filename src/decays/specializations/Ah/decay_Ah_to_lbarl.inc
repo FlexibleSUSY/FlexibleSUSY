@@ -20,7 +20,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type,
 
    // matrix element squared
    const auto amp =
-      calculate_amplitude<PseudoscalarHiggs, typename bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
+      calculate_amplitude_tree<PseudoscalarHiggs, typename bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
    const auto amp2 = amp.square();
 
    // flux * phase space factor * symmetry factor * |matrix element|^2

@@ -87,7 +87,7 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
       const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., x, x));
 
       // matrix element squared
-      const auto mat_elem = calculate_amplitude<Higgs, WpBoson, WmBoson>(
+      const auto mat_elem = calculate_amplitude_tree<Higgs, WpBoson, WmBoson>(
          context, indexIn, indexOut1, indexOut2);
       const auto mat_elem_sq = mat_elem.square();
 
