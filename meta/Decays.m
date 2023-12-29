@@ -997,12 +997,12 @@ CreateAmpLoopTag[particleDecays_List] := Module[{listOfFSParticleDecayObjects, h
       If[IsPossibleTreeLevelDecay[#, True],
          hasTreeAmp = hasTreeAmp <>
             "template<>
-struct has_tree_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
+struct " <> FlexibleSUSY`FSModelName <> "_has_tree_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
       ];
       If[IsPossibleOneLoopDecay[#],
          hasOneLoopAmp = hasOneLoopAmp <>
             "template<>
-struct has_oneloop_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
+struct " <> FlexibleSUSY`FSModelName <> "_has_oneloop_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
       ];
    )& /@ listOfFSParticleDecayObjects;
   {hasTreeAmp, hasOneLoopAmp}
@@ -2209,6 +2209,10 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
           decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName, False];
           def = CreateTotalAmplitudeSpecializationDef[decay, modelName, False];
        ];
+       (* generated 1L amplitude if:
+          1. it exists and
+            2a. tree level doesn't exist
+            2b. or it's a decay of a Higgs into SM particles *)
        If[IsPossibleOneLoopDecay[decay] && (!IsPossibleTreeLevelDecay[decay, True] || (TreeMasses`GetHiggsBoson[] === GetInitialState[decay] && And@@(IsSMParticle /@ GetFinalState[decay]))),
           decl = decl <> CreateTotalAmplitudeSpecializationDecl[decay, modelName, True];
           def = def <> "\n" <> CreateTotalAmplitudeSpecializationDef[decay, modelName, True];
