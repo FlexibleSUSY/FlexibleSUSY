@@ -42,6 +42,15 @@
 
 namespace flexiblesusy {
 
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+struct has_oneloop_amp : public std::false_type {};
+
+@hasOneLoopAmp@
+
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+struct has_tree_amp : public std::false_type {};
+
+@hasTreeAmp@
 class @ModelName@_decays {
 public:
    @ModelName@_decays() = default;
@@ -148,9 +157,17 @@ double @ModelName@_decays::get_partial_width(
    // color factor
    constexpr double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
 
+   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type amp;
+
    // matrix element squared
-   const auto amp = calculate_amplitude_tree<FieldIn, FieldOut1, FieldOut2>(
-      context, indexIn, indexOut1, indexOut2);
+   if constexpr (has_tree_amp<FieldIn, FieldOut1, FieldOut2>::value) {
+      amp = calculate_amplitude_tree<FieldIn, FieldOut1, FieldOut2>(
+         context, indexIn, indexOut1, indexOut2);
+   }
+   else if constexpr (has_oneloop_amp<FieldIn, FieldOut1, FieldOut2>::value) {
+      amp = calculate_amplitude_1l<FieldIn, FieldOut1, FieldOut2>(
+         context, indexIn, indexOut1, indexOut2);
+   }
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
    const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * amp.square();

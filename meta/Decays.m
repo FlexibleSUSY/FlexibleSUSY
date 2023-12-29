@@ -55,6 +55,7 @@ CreateDecayTableGetterFunctions::usage="create getter definitions for C++ decay 
 CreateDecayTableInitialization::usage="create C++ initializer for decay table.";
 CreateTotalAmplitudeSpecializations::usage="creates specialized functions for higher-order decays.";
 CreatePartialWidthSpecializations::usage="creates specialized functions for particular decays.";
+CreateAmpLoopTag::usage = "";
 
 Begin["`Private`"];
 
@@ -984,6 +985,28 @@ CreateDecaysCalculationFunction[decaysList_] :=
            "()\n{\n"
            <> TextFormatting`IndentText[body] <> "\n}\n"
           ];
+
+CreateAmpLoopTag[particleDecays_List] := Module[{listOfFSParticleDecayObjects, hasOneLoopAmp = "", hasTreeAmp = ""},
+   listOfFSParticleDecayObjects = Flatten[Drop[#, 1]& /@ particleDecays];
+   (
+      finalStates =
+         StringRiffle[
+            CXXNameOfField[#, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] & /@ GetFinalState[#],
+            ", "
+         ];
+      If[IsPossibleTreeLevelDecay[#, True],
+         hasTreeAmp = hasTreeAmp <>
+            "template<>
+struct has_tree_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
+      ];
+      If[IsPossibleOneLoopDecay[#],
+         hasOneLoopAmp = hasOneLoopAmp <>
+            "template<>
+struct has_oneloop_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
+      ];
+   )& /@ listOfFSParticleDecayObjects;
+  {hasTreeAmp, hasOneLoopAmp}
+];
 
 CreateDecaysCalculationFunctions[particleDecays_List] :=
     Utils`StringJoinWithSeparator[CreateDecaysCalculationFunction /@ particleDecays, "\n"];
@@ -1920,7 +1943,6 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
        (* if this is a 1l correction to a tree-level decay, discard diagrams without BSM fields *)
        If[IsPossibleTreeLevelDecay[decay, True],
-          Map[Print[{#, (IsSMParticle/@Flatten@Drop[#[[2]], 3])}]&, oneLoopTopAndInsertion];
           oneLoopTopAndInsertion = DeleteCases[oneLoopTopAndInsertion, And@@(IsSMParticle/@Flatten@Drop[#[[2]], 3]) && !And@@(ColorChargedQ/@Flatten@Drop[#[[2]], 3])&]
        ];
 
@@ -2187,7 +2209,7 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
           decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName, False];
           def = CreateTotalAmplitudeSpecializationDef[decay, modelName, False];
        ];
-       If[IsPossibleOneLoopDecay[decay] && (!IsPossibleTreeLevelDecay[decay, True] || And@@(IsSMParticle /@ GetFinalState[decay])),
+       If[IsPossibleOneLoopDecay[decay] && (!IsPossibleTreeLevelDecay[decay, True] || (TreeMasses`GetHiggsBoson[] === GetInitialState[decay] && And@@(IsSMParticle /@ GetFinalState[decay]))),
           decl = decl <> CreateTotalAmplitudeSpecializationDecl[decay, modelName, True];
           def = def <> "\n" <> CreateTotalAmplitudeSpecializationDef[decay, modelName, True];
        ];

@@ -2124,6 +2124,8 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
 
            {calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
                = Decays`CreateTotalAmplitudeSpecializations[decaysLists, FlexibleSUSY`FSModelName];
+           {treeAmpTag, loopAmpTag}
+               = Decays`CreateAmpLoopTag[decaysLists];
            With[{temp = Decays`CreatePartialWidthSpecializations[decaysLists, FlexibleSUSY`FSModelName]},
               If[temp =!= {},
                  {partialWidthSpecializationDecls, partialWidthSpecializationDefs}
@@ -2157,6 +2159,8 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@numberOfDecayParticles@" -> ToString[numberOfDecayParticles],
                             "@create_BSM_particle_list@" -> Last@bsmParticleAliasList,
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
+                            "@hasTreeAmp@" -> treeAmpTag,
+                            "@hasOneLoopAmp@" -> loopAmpTag,
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
                             Sequence @@ GeneralReplacementRules[]
