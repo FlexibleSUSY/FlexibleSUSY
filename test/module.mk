@@ -189,7 +189,7 @@ endif
 
 ifeq ($(WITH_SM) $(WITH_SOFTSUSY),yes yes)
 TEST_SRC += \
-		$(DIR)/test_SM_weinberg_angle.cpp \
+		$(DIR)/test_standard_model_weinberg_angle.cpp \
 		$(DIR)/test_SM_weinberg_angle_meta.cpp
 endif
 
