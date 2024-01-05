@@ -189,7 +189,6 @@ endif
 
 ifeq ($(WITH_SM) $(WITH_SOFTSUSY),yes yes)
 TEST_SRC += \
-		$(DIR)/test_standard_model_weinberg_angle.cpp \
 		$(DIR)/test_SM_weinberg_angle_meta.cpp
 endif
 
@@ -554,7 +553,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp \
-		$(DIR)/test_standard_model_cxxvertices.cpp
+		$(DIR)/test_standard_model_cxxvertices.cpp \
+		$(DIR)/test_standard_model_weinberg_angle.cpp
 TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
@@ -1214,6 +1214,8 @@ $(DIR)/test_SM_two_loop_spectrum.x: $(LIBSM)
 $(DIR)/test_SM_mw_calculation.x: $(LIBSM)
 
 $(DIR)/test_standard_model_cxxvertices.x: $(LIBSM)
+
+$(DIR)/test_standard_model_weinberg_angle.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
 
