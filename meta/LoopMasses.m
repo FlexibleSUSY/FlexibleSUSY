@@ -1036,7 +1036,11 @@ CallAllPoleMassFunctions[states_, enablePoleMassThreads_] :=
                        IndentText[callSusy] <>
                        "}\n\n" <>
                        "if (calculate_sm_pole_masses) {\n" <>
-                       IndentText[callSM] <>
+                       IndentText[callSM <>
+                          "if (!(PHYSICAL(M" <> ToString@GetWBoson[] <> ") > 0.)) {\n" <>
+                             IndentText["calculate_M" <> ToString@GetWBoson[] <> "_pole();\n"] <>
+                          "}\n"
+                       ] <>
                        "}\n";
               ,
               callSusy = StringJoin[CallThreadedPoleMassFunction /@ susyParticles];
@@ -1046,7 +1050,14 @@ CallAllPoleMassFunctions[states_, enablePoleMassThreads_] :=
                        IndentText[callSusy] <>
                        "}\n\n" <>
                        "if (calculate_sm_pole_masses) {\n" <>
-                       IndentText[callSM] <>
+                       IndentText[callSM <>
+                          "tp.run_task([this] () {\n" <>
+                          IndentText[
+                             "if (!(PHYSICAL(M" <> ToString@GetWBoson[] <> ") > 0.)) {\n" <>
+                                IndentText["calculate_M" <> ToString@GetWBoson[] <> "_pole();\n"] <>
+                             "}\n"
+                          ] <> "}\n"
+                       ] <>
                        "}\n";
              ];
            result

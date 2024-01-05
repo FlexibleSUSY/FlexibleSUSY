@@ -91,9 +91,9 @@ BOOST_AUTO_TEST_CASE( test_delta_rho_hat )
 
    static constexpr double sinw = 0.48;
 
-   // internally calculate_delta_rho_hat uses pizzt_MZ and piwwt_MW
-   // which are initialized by calculate
-   wein.calculate(sinw);
+   wein.pizzt_MZ = wein.calculate_self_energy_VZ(Electroweak_constants::MZ);
+   wein.piwwt_MW = wein.calculate_self_energy_VWp(Electroweak_constants::MW);
+   wein.piwwt_0  = wein.calculate_self_energy_VWp(0.);
 
    wein.set_number_of_loops(0);
    const double fs_delta_r_0l =

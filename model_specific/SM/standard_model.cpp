@@ -614,9 +614,12 @@ void Standard_model::calculate_pole_masses()
    tp.run_task([this] () { calculate_MFd_pole(); });
    tp.run_task([this] () { calculate_MFu_pole(); });
    tp.run_task([this] () { calculate_MFe_pole(); });
-
+   tp.run_task([this] () {
+      if (!(PHYSICAL(MVWp) > 0.)) {
+         calculate_MVWp_pole();
+      }
+   }
 #else
-
    calculate_MVG_pole();
    calculate_MFv_pole();
    calculate_Mhh_pole();
@@ -625,7 +628,9 @@ void Standard_model::calculate_pole_masses()
    calculate_MFd_pole();
    calculate_MFu_pole();
    calculate_MFe_pole();
-
+   if (!(PHYSICAL(MVWp) > 0.)) {
+      calculate_MVWp_pole();
+   }
 #endif
 }
 
