@@ -16,6 +16,7 @@ on:
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
+      - '.github/ISSUE_TEMPLATE/*'
 
   pull_request:
     branches:
@@ -29,6 +30,7 @@ on:
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
+      - '.github/ISSUE_TEMPLATE/*'
 
 jobs:
   no-meta:
@@ -124,7 +126,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.17.1
+      image: navir/opensuseleap-for-flexiblesusy:0.17.3
 
     strategy:
       fail-fast: false
