@@ -23,11 +23,20 @@
  * @brief contains interface to HiggsTools
  */
 
+#include "HiggsTools_interface.hpp"
+
+#ifdef ENABLE_HIGGSTOOLS
 #include "Higgs/Predictions.hpp"
 #include "Higgs/Bounds.hpp"
 #include "Higgs/Signals.hpp"
+#endif
 
-#include "HiggsTools_interface.hpp"
+#ifdef ENABLE_LILITH
+#include <Python.h>
+#include "lilith.h"
+#include "lilith.c"
+#endif
+
 #include "decays/standard_model_decays.hpp"
 
 #include <algorithm>
@@ -129,6 +138,18 @@ EffectiveCoupling_list get_normalized_effective_couplings(
       sm.set_threshold_corrections(spectrum_generator_settings.get_threshold_corrections());
       sm.set_loop_corrections(spectrum_generator_settings.get_loop_corrections());
       sm.set_loops(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::beta_loop_order)));
+      Loop_corrections loop_corrections_;
+      loop_corrections_.higgs_at_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_at_as);
+      loop_corrections_.higgs_ab_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_ab_as);
+      loop_corrections_.higgs_at_at = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_at_at);
+      loop_corrections_.higgs_atau_atau = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_atau_atau);
+      loop_corrections_.top_qcd = spectrum_generator_settings.get(Spectrum_generator_settings::top_pole_qcd_corrections);
+      loop_corrections_.higgs_at_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at_as2);
+      loop_corrections_.higgs_ab_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_ab_as2);
+      loop_corrections_.higgs_at_at_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at2_as);
+      loop_corrections_.higgs_at_at_at = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at3);
+      loop_corrections_.higgs_at_as_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_4loop_correction_at_as3);
+      sm.set_loop_corrections(loop_corrections_);
 
       // set SM λ such that mhSM == mass
       auto match_Higgs_mass = [&sm, mass](double x) {
@@ -223,18 +244,20 @@ EffectiveCoupling_list get_normalized_effective_couplings(
          _coups.ss = std::abs(sm_input[0].ss) > 0 ? el.ss/sm_input[0].ss.real() : 0.;
          _coups.cc = std::abs(sm_input[0].cc) > 0 ? el.cc/sm_input[0].cc.real() : 0.;
          _coups.bb = std::abs(sm_input[0].bb) > 0 ? el.bb/sm_input[0].bb.real() : 0.;
-         _coups.tt = std::abs(sm_input[0].tt) > 0 ? el.tt/sm_input[0].tt.real() : 0.;
+         using namespace std::complex_literals;
+         _coups.tt = std::abs(sm_input[0].tt) > 0 ? (std::abs(el.tt.real()) + 1i*std::abs(el.tt.imag()))/std::abs(sm_input[0].tt.real()) : 0.;
          // leptons
          _coups.ee = std::abs(sm_input[0].ee)         > 0 ? el.ee/sm_input[0].ee.real()         : 0.;
          _coups.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
          _coups.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
 
          // gauge bosons
-         _coups.WW = std::abs(sm_input[0].WW) > 0         ? el.WW/sm_input[0].WW         : 0.;
-         _coups.ZZ = std::abs(sm_input[0].ZZ) > 0         ? el.ZZ/sm_input[0].ZZ         : 0.;
+         _coups.WW = std::abs(sm_input[0].WW)         > 0 ? el.WW/sm_input[0].WW         : 0.;
+         _coups.ZZ = std::abs(sm_input[0].ZZ)         > 0 ? el.ZZ/sm_input[0].ZZ         : 0.;
          _coups.gamgam = std::abs(sm_input[0].gamgam) > 0 ? el.gamgam/sm_input[0].gamgam : 0.;
-         _coups.Zgam = std::abs(sm_input[0].Zgam) > 0     ? el.Zgam/sm_input[0].Zgam     : 0.;
-         _coups.gg = std::abs(sm_input[0].gg) > 0         ? el.gg/sm_input[0].gg         : 0.;
+         _coups.Zgam = std::abs(sm_input[0].Zgam)     > 0 ? el.Zgam/sm_input[0].Zgam     : 0.;
+         _coups.gg = std::abs(sm_input[0].gg)         > 0 ? el.gg/sm_input[0].gg         : 0.;
+
          _bsm_input.push_back(std::move(_coups));
       }
    }
@@ -242,6 +265,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
    return _bsm_input;
 }
 
+#ifdef ENABLE_HIGGSTOOLS
 std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const& bsm_input,
    std::vector<SingleChargedHiggsInput> const& bsm_input2,
@@ -292,13 +316,11 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
       effc.gamgam = el.gamgam;
       effc.Zgam = el.Zgam;
       effc.gg = el.gg;
-      effectiveCouplingInput(
-         s, effc,
-         refModel,
-         calcggH, calcHgamgam
-      );
 
-      // effective coupligs are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
+      effectiveCouplingInput(s, effc, refModel, calcggH, calcHgamgam);
+
+      // Effective coupligs below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
+      // (note that this is different than couplings like gg, WW etc)
       // so taking a norm gives a total partial width
       s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu));
       s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau));
@@ -354,5 +376,102 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
    auto smChi2 = minChi2SM(physical_input.get(Physical_input::mh_pole), higgssignals_dataset);
    return {signals.observableCount(), hs_chisq, smChi2, std::to_string(physical_input.get(Physical_input::mh_pole)), hb_return};
 }
+#endif
+
+#ifdef ENABLE_LILITH
+std::pair<double, int> call_lilith(
+   EffectiveCoupling_list const& bsm_input) {
+
+   // Lilith requires mass to be within [123, 128]
+   bool higgs_in_range = false;
+   for (auto const& el : bsm_input) {
+      const double mh = el.mass;
+      if (mh > 123.0 && mh < 128.0) {
+         higgs_in_range = true || higgs_in_range;
+      }
+   }
+   if (!higgs_in_range) {
+      return {-1., -1};
+   }
+
+   Py_Initialize();
+   char experimental_input[] = "";
+   // Creating an object of the class Lilith: lilithcalc
+   PyObject* lilithcalc = initialize_lilith(experimental_input);
+
+   char XMLinputstring[6000]="";
+   char buffer[100];
+
+   char precision[] = "BEST-QCD";
+
+   sprintf(buffer,"<?xml version=\"1.0\"?>\n");
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<lilithinput>\n");
+   strcat(XMLinputstring, buffer);
+
+   for (auto const& el : bsm_input) {
+      double mh = el.mass;
+      if (mh < 123.0 || mh > 128.0) continue;
+      double BRinv = 0.;
+      double BRund = 0.;
+
+      sprintf(buffer,"<reducedcouplings>\n");
+      strcat(XMLinputstring, buffer);
+
+      sprintf(buffer,"<mass>%f</mass>\n", mh);
+      strcat(XMLinputstring, buffer);
+
+      sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", el.gamgam);
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", el.Zgam);
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"gg\">%f</C>\n", el.gg);
+      strcat(XMLinputstring, buffer);
+
+      sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", el.ZZ);
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"WW\">%f</C>\n", el.WW);
+      strcat(XMLinputstring, buffer);
+
+      sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", std::real(el.tt));
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", std::real(el.cc));
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", std::real(el.bb));
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", std::real(el.tautau));
+      strcat(XMLinputstring, buffer);
+
+      sprintf(buffer,"<extraBR>\n");
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", BRinv);
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", BRund);
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"</extraBR>\n");
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<precision>%s</precision>\n",precision);
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"</reducedcouplings>\n");
+      strcat(XMLinputstring, buffer);
+    }
+    sprintf(buffer,"</lilithinput>\n");
+    strcat(XMLinputstring, buffer);
+
+    // Reading user input XML string
+    lilith_readuserinput(lilithcalc, XMLinputstring);
+
+    // Getting -2LogL
+    const double my_likelihood = lilith_computelikelihood(lilithcalc);
+    std::cout << my_likelihood << std::endl;
+
+    // Getting exp_ndf
+    const int exp_ndf = lilith_exp_ndf(lilithcalc);
+    printf("exp_ndf = %i\n", exp_ndf);
+
+    Py_Finalize();
+    return {my_likelihood, exp_ndf};
+}
+#endif
 
 } // flexiblesusy

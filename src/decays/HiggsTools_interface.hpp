@@ -26,6 +26,8 @@
 #ifndef HIGGSTOOLS_INTERFACE_H
 #define HIGGSTOOLS_INTERFACE_H
 
+#include "config.h"
+
 #include "decays/decay.hpp"
 #include "physical_input.hpp"
 #include "lowe.h"
@@ -45,11 +47,17 @@ EffectiveCoupling_list get_normalized_effective_couplings(
   Spectrum_generator_settings const& spectrum_generator_settings,
   FlexibleDecay_settings const& flexibledecay_settings);
 
+#ifdef ENABLE_HIGGSTOOLS
 std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const&,
    std::vector<SingleChargedHiggsInput> const&,
    Physical_input const&,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);
+#endif
+
+#ifdef ENABLE_LILITH
+std::pair<double, int> call_lilith(EffectiveCoupling_list const&);
+#endif
 
 } // flexiblesusy
 

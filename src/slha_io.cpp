@@ -993,6 +993,17 @@ void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double c
    set_block(ss);
 }
 
+void SLHA_io::set_lilith(const int ndof, const double likelihood)
+{
+   std::ostringstream ss;
+
+   ss << block_head("LilithResults", 0.0);
+   ss << FORMAT_ELEMENT(0, likelihood, "-2*LogL");
+   ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
+
+   set_block(ss);
+}
+
 void SLHA_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& v)
 {
    std::ostringstream ss;

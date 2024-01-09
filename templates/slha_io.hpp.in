@@ -82,6 +82,7 @@ public:
 @setDecaysPrototypes@
    void set_extra(const @ModelName@_slha&, const @ModelName@_scales&, const @ModelName@_observables&, const flexiblesusy::Spectrum_generator_settings&);
    void set_higgssignals(int /* n.d.o.f. */, double /* chi2 */, double /* min SM chi2 */, std::string const&);
+   void set_lilith(const int /* ndof */, const double /* likelihood */);
    void set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const&);
    void set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings);
    void set_normalized_effectivecouplings_block(const EffectiveCoupling_list&);

@@ -36,6 +36,7 @@ public:
       print_effc_block,                           ///< [5]
       use_pole_higgs_mixings,                     ///< [6]
       call_higgstools,                            ///< [7]
+      call_lilith,                                ///< [8]
       NUMBER_OF_OPTIONS                           ///< number of possible options
    };
 

@@ -2741,7 +2741,6 @@ IndentText[
    if (loop_library_for_decays) {
       decays.calculate_decays();\n"
 ] <>
-"#ifdef ENABLE_HIGGSTOOLS\n" <>
 IndentText@IndentText@IndentText[
 "if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
 IndentText[
@@ -2756,8 +2755,13 @@ IndentText[
       "// structured bindings creates new variables - need to use std::tie
       effc =
          get_normalized_effective_couplings(decays.get_higgstools_input(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
-      std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
-         call_higgstools(effc, higgstools_charged_input, physical_input, higgsbounds_dataset, higgssignals_dataset);\n"
+#ifdef ENABLE_HIGGSTOOLS
+         std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
+            call_higgstools(effc, higgstools_charged_input, physical_input, higgsbounds_dataset, higgssignals_dataset);
+#endif
+#ifdef ENABLE_LILITH
+         std::tie(lilith_likelihood, lilith_ndof) = call_lilith(effc);
+#endif\n"
    ] <>
    "}\n" <>
    "catch (const std::exception& error) {\n" <>
@@ -2766,7 +2770,6 @@ IndentText[
 ] <>
 "}\n"
 ] <>
-"#endif\n" <>
 IndentText[IndentText[
 "}
 else if (!loop_library_for_decays) {
@@ -2790,6 +2793,11 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) && higgssignals_ndof > 0) {
       slha_io.set_higgssignals(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag);
       slha_io.set_higgsbounds(higgsbounds_v);
+   }
+#endif
+#ifdef ENABLE_LILITH
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith_ndof > 0) {
+      slha_io.set_lilith(lilith_ndof, lilith_likelihood);
    }
 #endif
 }";

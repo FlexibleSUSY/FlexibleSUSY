@@ -476,6 +476,11 @@ void @ModelName@_slha_io::set_higgssignals(const int ndof, const double chi2, co
    slha_io.set_higgssignals(ndof, chi2, chi2SMmin, tag);
 }
 
+void @ModelName@_slha_io::set_lilith(const int ndof, const double likelihood)
+{
+   slha_io.set_lilith(ndof, likelihood);
+}
+
 void @ModelName@_slha_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& hb)
 {
    slha_io.set_higgsbounds(hb);

@@ -35,7 +35,8 @@ const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descrip
    "off-shell decays into VV pair",
    "print EFFHIGGSCOUPLINGS block"
    "use pole Higgs mixings in vertices",
-   "call HiggsTools"
+   "call HiggsTools",
+   "call Lilith"
 };
 
 bool is_integer(double value)
@@ -136,6 +137,9 @@ void FlexibleDecay_settings::set(Settings o, double value)
    case call_higgstools: // 7 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
+   case call_lilith: // 8 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
    default:
       break;
    }
@@ -161,6 +165,7 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
  * | print_effc_block                           | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
  * | use_pole_higgs_mixings                     | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
  * | call_higgstools                            | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
+ * | call_lilith                                | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  */
 void FlexibleDecay_settings::reset()
 {
@@ -172,6 +177,7 @@ void FlexibleDecay_settings::reset()
    values[print_effc_block]                           = 0.0;
    values[use_pole_higgs_mixings]                     = 0.0;
    values[call_higgstools]                            = 1.0;
+   values[call_lilith]                                = 1.0;
 }
 
 bool is_integer(double value)
