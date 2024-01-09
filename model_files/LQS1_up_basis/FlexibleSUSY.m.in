@@ -1,0 +1,47 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = LQS1_up_basis;
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+MINPAR = {
+   {1, LambdaIN}
+};
+
+EWSBOutputParameters = { mu2 };
+FSSolveEWSBTreeLevelFor = EWSBOutputParameters;
+
+LowScale = LowEnergyConstant[MZ];
+LowScaleFirstGuess = LowScale;
+LowScaleInput = {
+   {Yu, Sqrt[2] upQuarksDRbar / v},
+   {Yd, Sqrt[2] MatMul[downQuarksDRbar, Conjugate@CKM] / v},
+   {Ye, Sqrt[2] downLeptonsDRbar / v},
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]}
+};
+InitialGuessAtLowScale = {
+   {v, LowEnergyConstant[vev]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+SUSYScale = LowScale;
+SUSYScaleFirstGuess = LowScale;
+InitialGuessAtSUSYScale = {
+   {\[Lambda], LambdaIN},
+   {MS12,  LHInput@MS12},
+   {gHS1,  LHInput@gHS1},
+   {lamS1, LHInput@lamS1},
+   {lamQL, LHInput@lamQL},
+   {lamql, LHInput@lamql}
+};
+SUSYScaleInput = InitialGuessAtSUSYScale;
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh};
+
+ExtraSLHAOutputBlocks = {
+};
+
+FSCalculateDecays = !False;
