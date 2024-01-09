@@ -284,13 +284,15 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
 
    With[{args = Sequence@@ToExpression@StringReplace[stringPattern, lhsRepl],
          repl = rhsRepl,
-         name = OptionValue@GetObservableName,
+         name = If[# === Unset, ToLowerCase@SymbolName@obs <> "_" <> StringRiffle[patternNames, "_"], #] &@ OptionValue@GetObservableName,
          description = OptionValue@GetObservableDescription,
          type = OptionValue@GetObservableType,
          calculate = OptionValue@CalculateObservable,
          prototype = OptionValue@GetObservablePrototype
       },
       AppendTo[FlexibleSUSYObservable`FSObservables, obs];
+
+      GetObservableName@obs@args := extraCalc@StringReplace[name, repl];
 
       Switch[type,
          Unset,
@@ -300,11 +302,6 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
                CConversion`ArrayType[CConversion`complexScalarCType, First@type],
          _,
             GetObservableType@obs@args := type
-      ];
-
-      If[name === Unset,
-         warn@"GetObservableName";,
-         GetObservableName@obs@args := extraCalc@StringReplace[name, repl];
       ];
 
       Switch[description,
