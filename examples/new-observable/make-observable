@@ -63,15 +63,15 @@ FSMODELDIR=${DIR}/../../models/SM/FlexibleSUSY.m
 cleanall
 case $1
 in
-   example-1) EXAMPLEDIR=constant-observable
+   SM-example-1) EXAMPLEDIR=constant-observable
               copythings
               echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleConstantObservable[1]},{2, FlexibleSUSYObservable`ExampleConstantObservable[2]}}}};' >> ${FSMODELDIR}
               ;;
-   example-2) EXAMPLEDIR=fermion-mass-observable
+   SM-example-2) EXAMPLEDIR=fermion-mass-observable
               copythings
               echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}},{ExampleLeptonMass,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}}};' >> ${FSMODELDIR}
               ;;
-   example-3) EXAMPLEDIR=lepton-se
+   SM-example-3) EXAMPLEDIR=lepton-se
               copythings
               echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`ExampleLeptonSE[Fe@1, {Sunsets}]}}}};' >> ${FSMODELDIR}
               cd ${DIR}/../../meta/NPointFunctions
