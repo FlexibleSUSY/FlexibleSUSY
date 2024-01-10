@@ -65,7 +65,7 @@ case $1
 in
    SM-example-1) EXAMPLEDIR=constant-observable
               copythings
-              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleConstantObservable[1]},{2, FlexibleSUSYObservable`ExampleConstantObservable[2]}}}};' >> ${FSMODELDIR}
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleConstantObservable[3]},{2, FlexibleSUSYObservable`ExampleConstantObservable[4]}}}};' >> ${FSMODELDIR}
               ;;
    SM-example-2) EXAMPLEDIR=fermion-mass-observable
               copythings
