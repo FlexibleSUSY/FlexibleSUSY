@@ -2238,17 +2238,17 @@ check_higgstools() {
 
 check_python() {
     checking_msg "python C/C++ extensions"
-    if test "$(command -v python3-configg)" = "x" ; then
+    if test "$(command -v python3-config)" = "x" ; then
+        result "no"
+        message "Warning! Cannot find python3-config. Some features (like the Lilith interface)"
+        message "         will be disabled."
+        enable_lilith=no
+    else
         # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
         # remove duplicates
         PYTHONFLAGS=$(echo "$(python3-config --includes)" | xargs -n1 | sort -u)
         PYTHONLIBS="$(python3-config --libs --embed)"
         result "yes"
-    else
-        result "no"
-        message "Warning! Cannot find python3-config. Some features (like the Lilith interface)"
-        message "         will be disabled."
-        enable_lilith=no
     fi
 }
 
