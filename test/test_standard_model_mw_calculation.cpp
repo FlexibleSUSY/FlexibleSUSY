@@ -35,5 +35,5 @@ BOOST_AUTO_TEST_CASE( test_consistency )
    const double mw = sm.get_physical().MVWp;
    const double mh = sm.get_physical().Mhh;
    const double mwSM = calc_mw_SM(qedqcd, mh);
-   BOOST_CHECK_CLOSE_FRACTION(mw, mwSM, 6.0e-6);
+   BOOST_CHECK_CLOSE_FRACTION(mw, mwSM, 1e-16);
 }
