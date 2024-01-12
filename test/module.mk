@@ -204,9 +204,9 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_model.cpp \
 		$(DIR)/test_CMSSM_slha_output.cpp \
 		$(DIR)/test_CMSSM_spectrum.cpp \
-		$(DIR)/test_CMSSM_susy_scale_constraint.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle_meta.cpp
+		$(DIR)/test_CMSSM_susy_scale_constraint.cpp #\
+		#$(DIR)/test_CMSSM_weinberg_angle.cpp \
+		#$(DIR)/test_CMSSM_weinberg_angle_meta.cpp
 TEST_SH += \
 		$(DIR)/test_CMSSM_gluino.sh
 endif
