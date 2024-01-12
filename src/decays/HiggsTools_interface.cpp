@@ -402,8 +402,6 @@ std::pair<double, int> call_lilith(
    char XMLinputstring[6000]="";
    char buffer[100];
 
-   char precision[] = "BEST-QCD";
-
    sprintf(buffer,"<?xml version=\"1.0\"?>\n");
    strcat(XMLinputstring, buffer);
    sprintf(buffer,"<lilithinput>\n");
@@ -450,7 +448,8 @@ std::pair<double, int> call_lilith(
       strcat(XMLinputstring, buffer);
       sprintf(buffer,"</extraBR>\n");
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<precision>%s</precision>\n",precision);
+      // In the BEST-QCD mode, only the real part of the coupling is taken into account (see 1502.04138)
+      sprintf(buffer,"<precision>%s</precision>\n", el.CP == 1 ? "BEST-QCD" : "LO");
       strcat(XMLinputstring, buffer);
       sprintf(buffer,"</reducedcouplings>\n");
       strcat(XMLinputstring, buffer);
