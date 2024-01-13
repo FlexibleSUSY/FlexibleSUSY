@@ -617,7 +617,7 @@ void Standard_model::calculate_pole_masses()
    tp.run_task([this] () {
       // if mW=0 it means that the SM was not initialized via matching to the SM
       // compute mW using ordinary 1-loop calculation
-      if (!(PHYSICAL(MVWp) > 0.)) {
+      if (PHYSICAL(MVWp) == 0.) {
          calculate_MVWp_pole();
       }
       // if mW > 0 it means it was computed as part of the matching to the SM
@@ -635,7 +635,7 @@ void Standard_model::calculate_pole_masses()
    calculate_MFd_pole();
    calculate_MFu_pole();
    calculate_MFe_pole();
-   if (!(PHYSICAL(MVWp) > 0.)) {
+   if (PHYSICAL(MVWp) == 0.) {
       calculate_MVWp_pole();
    }
    else {

@@ -1037,7 +1037,7 @@ CallAllPoleMassFunctions[states_, enablePoleMassThreads_] :=
                        "}\n\n" <>
                        "if (calculate_sm_pole_masses) {\n" <>
                        IndentText[callSM <>
-                          "if (!(PHYSICAL(M" <> ToString@GetWBoson[] <> ") > 0.)) {\n" <>
+                          "if (PHYSICAL(M" <> ToString@GetWBoson[] <> ") == 0.) {\n" <>
                              IndentText[LoopMasses`CreateLoopMassFunctionName[GetWBoson[]] <> "();\n"] <>
                           "}\n"
                        ] <>
@@ -1053,7 +1053,7 @@ CallAllPoleMassFunctions[states_, enablePoleMassThreads_] :=
                        IndentText[callSM <>
                           "tp.run_task([this] () {\n" <>
                           IndentText[
-                             "if (!(PHYSICAL(M" <> ToString@GetWBoson[] <> ") > 0.)) {\n" <>
+                             "if (PHYSICAL(M" <> ToString@GetWBoson[] <> ") == 0.) {\n" <>
                                 IndentText[LoopMasses`CreateLoopMassFunctionName[GetWBoson[]] <> "();\n"] <>
                              "}\n"
                           ] <> "}\n"
