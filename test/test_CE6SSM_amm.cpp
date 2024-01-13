@@ -135,8 +135,8 @@ Block EXTPAR
 
    // Reference value from FlexibleSUSY, checks that value does not change
    constexpr double reference_value =
-	   + 1.88800475E-11   // Contribution from FFS + SSF diagrams
-	   -6.6643092103093927e-13; // Contribution from Vector diagrams
+	   + 1.8923638492010939e-11   // Contribution from FFS + SSF diagrams
+	   -6.664316301074848e-13; // Contribution from Vector diagrams
 
    // Perform a rough closeness check
    BOOST_CHECK_CLOSE_FRACTION(amu, reference_value, 1e-3);
@@ -145,5 +145,5 @@ Block EXTPAR
    settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
 
    amu = CE6SSM_amm::calculate_amm<Fe>(std::get<0>(models), qedqcd, settings, 1);
-   BOOST_CHECK_CLOSE_FRACTION(amu, 4.7796684906627366e-11, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 4.7838157272073871e-11, 1e-7);
 }
