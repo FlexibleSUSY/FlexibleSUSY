@@ -614,7 +614,18 @@ void Standard_model::calculate_pole_masses()
    tp.run_task([this] () { calculate_MFd_pole(); });
    tp.run_task([this] () { calculate_MFu_pole(); });
    tp.run_task([this] () { calculate_MFe_pole(); });
-   tp.run_task([this] () { calculate_MVWp_pole_fit(this->get_physical().Mhh); });
+   tp.run_task([this] () {
+      // if mW=0 it means that the SM was not initialized via matching to the SM
+      // compute mW using ordinary 1-loop calculation
+      if (!(PHYSICAL(MVWp) > 0.)) {
+         calculate_MVWp_pole();
+      }
+      // if mW > 0 it means it was computed as part of the matching to the SM
+      // recomputed it with the final value of mh
+      else {
+         calculate_MVWp_pole_fit(this->get_physical().Mhh);
+      }
+   });
 #else
    calculate_MVG_pole();
    calculate_MFv_pole();
@@ -624,7 +635,12 @@ void Standard_model::calculate_pole_masses()
    calculate_MFd_pole();
    calculate_MFu_pole();
    calculate_MFe_pole();
-   calculate_MVWp_pole_fit(this->get_physical().Mhh);
+   if (!(PHYSICAL(MVWp) > 0.)) {
+      calculate_MVWp_pole();
+   }
+   else {
+      calculate_MVWp_pole_fit(this->get_physical().Mhh);
+   }
 #endif
 }
 
