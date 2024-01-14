@@ -711,9 +711,19 @@ void Standard_model::calculate_pole_masses()
    tp.run_task([this] () { calculate_MFd_pole(); });
    tp.run_task([this] () { calculate_MFu_pole(); });
    tp.run_task([this] () { calculate_MFe_pole(); });
-
+   tp.run_task([this] () {
+      // if mW=0 it means that the SM was not initialized via matching to the SM
+      // compute mW using ordinary 1-loop calculation
+      if (PHYSICAL(MVWp) == 0.) {
+         calculate_MVWp_pole();
+      }
+      // if mW > 0 it means it was computed as part of the matching to the SM
+      // recomputed it with the final value of mh
+      else {
+         calculate_MVWp_pole_fit(this->get_physical().Mhh);
+      }
+   });
 #else
-
    calculate_MVG_pole();
    calculate_MFv_pole();
    calculate_Mhh_pole();
@@ -722,7 +732,12 @@ void Standard_model::calculate_pole_masses()
    calculate_MFd_pole();
    calculate_MFu_pole();
    calculate_MFe_pole();
-
+   if (PHYSICAL(MVWp) == 0.) {
+      calculate_MVWp_pole();
+   }
+   else {
+      calculate_MVWp_pole_fit(this->get_physical().Mhh);
+   }
 #endif
 }
 
@@ -2325,6 +2340,9 @@ void Standard_model::calculate_MVPVZ()
 
 
    MVPVZ = AbsSqrt(MVPVZ);
+
+   MVP = 0.;
+   MVZ = MVPVZ(1);
 }
 
 
@@ -4594,7 +4612,7 @@ void Standard_model::calculate_MVZ_pole()
       return;
 
    // diagonalization with medium precision
-   const double M_tree(get_mass_matrix_VZ());
+   const double M_tree(Sqr(MVZ));
    const double p = MVZ;
    const double self_energy = Re(self_energy_VZ_1loop(p));
    const double mass_sqr = M_tree - self_energy;

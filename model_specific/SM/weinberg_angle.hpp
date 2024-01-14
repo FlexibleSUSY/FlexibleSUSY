@@ -56,7 +56,6 @@ public:
    void set_number_of_loops(int);    ///< set number of loops
    void set_precision_goal(double);  ///< set precision goal
    double get_rho_hat() const;       ///< returns the rho parameter
-   double get_sin_theta() const;     ///< returns sin(theta_w)
 
    /// calculates and returns the sine of the Weinberg angle
    double calculate(double sinThetaW_start = 0.48);
@@ -65,7 +64,6 @@ private:
    int number_of_loops = 2;      ///< number of loops
    double precision_goal = 1e-8;         ///< precision goal
    double rho_hat = 0.;                ///< output rho-hat parameter
-   double sin_theta = 0.;              ///< output sin(theta)
 
    const standard_model::Standard_model* model{nullptr}; ///< pointer to investigated model
    Sm_parameters sm_parameters{};     ///< SM parameters

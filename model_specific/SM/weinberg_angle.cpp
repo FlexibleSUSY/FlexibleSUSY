@@ -83,11 +83,6 @@ double Weinberg_angle::get_rho_hat() const
    return rho_hat;
 }
 
-double Weinberg_angle::get_sin_theta() const
-{
-   return sin_theta;
-}
-
 /**
  * Calculates the DR-bar weak mixing angle \f$\sin\hat{\theta}_W\f$ as
  * defined in Eq. (C.3) from hep-ph/9606211 given the Fermi constant,
