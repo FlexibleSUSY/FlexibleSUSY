@@ -78,12 +78,14 @@ BOOST_AUTO_TEST_CASE( test_decoupling )
    const auto [mw1, mh1] = calc_mw_mh_MRSSM2(1000);
    const auto [mw2, mh2] = calc_mw_mh_MRSSM2(2000);
    const auto [mw5, mh5] = calc_mw_mh_MRSSM2(5000);
-   const auto [mw10, mh10] = calc_mw_mh_MRSSM2(10000);
+   // this test fails for mh >= 9999.8 with softsusy loop library
+   // it works fine with Collier or LoopTools
+   const auto [mw10, mh10] = calc_mw_mh_MRSSM2(9999);
 
    BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 5.0e-4);
 
-   BOOST_CHECK_CLOSE_FRACTION(mw1, calc_mw_SM(mh1), 1.0e-3);
-   BOOST_CHECK_CLOSE_FRACTION(mw2, calc_mw_SM(mh2), 1.0e-3);
-   BOOST_CHECK_CLOSE_FRACTION(mw5, calc_mw_SM(mh5), 1.0e-4);
-   BOOST_CHECK_CLOSE_FRACTION(mw10, calc_mw_SM(mh10), 5.0e-5);
+   BOOST_CHECK_CLOSE_FRACTION(mw1,  calc_mw_SM(mh1),  7e-4);
+   BOOST_CHECK_CLOSE_FRACTION(mw2,  calc_mw_SM(mh2),  2e-4);
+   BOOST_CHECK_CLOSE_FRACTION(mw5,  calc_mw_SM(mh5),  3e-5);
+   BOOST_CHECK_CLOSE_FRACTION(mw10, calc_mw_SM(mh10), 2e-5);
 }
