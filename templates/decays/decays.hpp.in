@@ -65,6 +65,9 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
+   std::vector<std::tuple<int, int, int, double, std::string>> get_effhiggscouplings_block_input() const {
+      return effhiggscouplings_block_input;
+   }
 
 @decaysGetters@
 @decaysCalculationPrototypes@
@@ -100,6 +103,7 @@ private:
                   typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
                   typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
                   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const;
+   std::vector<std::tuple<int, int, int, double, std::string>> effhiggscouplings_block_input {};
 };
 
 @calcAmplitudeSpecializationDecls@

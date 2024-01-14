@@ -98,6 +98,7 @@ options="                    \
    enable_higgstools         \
    enable_himalaya           \
    enable_librarylink        \
+   enable_lilith             \
    enable_looptools          \
    enable_mass_error_check   \
    enable_shared_libs        \
@@ -127,6 +128,7 @@ enable_gm2calc="automatic"
 enable_higgstools="automatic"
 enable_himalaya="automatic"
 enable_librarylink="automatic"
+enable_lilith="automatic"
 enable_looptools="no"
 enable_collier="no"
 enable_meta="no"
@@ -216,6 +218,7 @@ LLFLAGS=""
 LLLIBS=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
+lilith_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
 sqlite_lib_dir=""
@@ -877,6 +880,7 @@ exists_in_path () {
     fi
 
     cmd=$(command -v -- "$1")
+    logmsg "(command -v -- $1 gave: $cmd)"
     case "$cmd" in
 	/*) return 0 ;;
 	alias\ *) return 1 ;; # alias
@@ -2232,6 +2236,36 @@ check_higgstools() {
     fi
 }
 
+check_python() {
+    checking_msg "python C/C++ extensions"
+    if test "$(command -v python3-config)" = "x" ; then
+        result "no"
+        message "Warning! Cannot find python3-config. Some features (like the Lilith interface)"
+        message "         will be disabled."
+        enable_lilith=no
+    else
+        # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
+        # remove duplicates
+        PYTHONFLAGS=$(echo "$(python3-config --includes)" | xargs -n1 | sort -u)
+        PYTHONLIBS="$(python3-config --libs --embed)"
+        result "yes"
+    fi
+}
+
+check_lilith() {
+   if test -n "$lilith_dir" && test ! "x$enable_lilith" = "xno" ; then
+       check_header "lilith/c-api/lilith.h" "$lilith_dir"
+       if test "x$found_dir" = "x" ; then
+           enable_lilith=no
+       else
+           LILITHFLAGS="-I$lilith_dir/lilith/c-api"
+           enable_lilith=yes
+       fi
+   else
+       enable_lilith=no
+   fi
+}
+
 #_____________________________________________________________________
 check_himalaya_incl() {
     check_header "himalaya/version.hpp" "$himalaya_inc_dir"
@@ -2841,7 +2875,8 @@ check_math_cmd() {
             return
         fi
 
-        message "Error: Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
+        message "Error: Mathematica kernel ${MATH} was not found or is not executable or is an alias."
+        message "   Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
         message "   You can use the --with-math-cmd= option to specify the location of"
         message "   the math kernel.  It is usually installed in "
         case "$operating_system" in
@@ -3400,6 +3435,13 @@ enable_defines() {
     fi
     logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
 
+    if test "x$enable_lilith" = "xyes" ; then
+        DEFINE_ENABLE_LILITH="#define ENABLE_LILITH 1"
+    else
+        DEFINE_ENABLE_LILITH="#undef ENABLE_LILITH"
+    fi
+    logmsg "   ${DEFINE_ENABLE_LILITH}"
+
     if test "x$enable_librarylink" = "xyes" ; then
         DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
         logmsg "Enabling LibraryLink"
@@ -3549,6 +3591,10 @@ add_metaflags() {
    tcol_='FSEnableColors = '
    col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
+   local tcol_ col_
+   tcol_='FSEnableCompile = '
+   col_="${tcol_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
+
    local c_=''
    local fs_=''
    for m in ${MODELS}; do
@@ -3637,22 +3683,26 @@ replace_markers() {
 	-e "s|@ENABLE_THREADS@|$enable_threads|"  \
 	-e "s|@ENABLE_TSIL@|$enable_tsil|"        \
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
-        -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
-        -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
-        -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
-        -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
-        -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
-        -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
+	-e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
+	-e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
+	-e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
+	-e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
+	-e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
+	-e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
 	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
+	-e "s|@LILITHFLAGS@|$LILITHFLAGS|"    \
+	-e "s|@PYTHONFLAGS@|$PYTHONFLAGS|"    \
+	-e "s|@PYTHONLIBS@|$PYTHONLIBS|"    \
+	-e "s|@ENABLE_LILITH@|$enable_lilith|" \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
 	-e "s|@LOOPTOOLSFLAGS@|$LOOPTOOLSFLAGS|"  \
 	-e "s|@OPTIONAL_MODULES@|$OPTIONAL_MODULES|" \
 	-e "s|@SARAH_DEP_GEN@|$SARAH_DEP_GEN|"    \
 	-e "s|@SARAH_MODEL_DIR@|$SARAH_MODEL_DIR|" \
-        -e "s|@SHARED_LIB_CMD@|$SHARED_LIB_CMD|"  \
-        -e "s|@STATIC_LIB_CMD@|$STATIC_LIB_CMD|"  \
+	-e "s|@SHARED_LIB_CMD@|$SHARED_LIB_CMD|"  \
+	-e "s|@STATIC_LIB_CMD@|$STATIC_LIB_CMD|"  \
 	-e "s|@SQLITELIBS@|$SQLITELIBS|"          \
 	-e "s|@SQLITEFLAGS@|$SQLITEFLAGS|"        \
 	-e "s|@TSILLIBS@|$TSILLIBS|"              \
@@ -3686,6 +3736,7 @@ enable/disable options, prefix with either --enable- or --disable-
   gm2calc           Enable GM2Calc (default: $enable_gm2calc)
   higgstools        Enable HiggsTools (default: $enable_higgstools)
   himalaya          Enable Himalaya (default: $enable_himalaya)
+  lilith            Enable Lilith (default: $enable_lilith)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
@@ -3728,6 +3779,7 @@ Package directories, compilation settings and model selection
   --with-higgstools-libdir= Path to search for HiggsTools library
   --with-higgstools-incdir= Path to search for HiggsTools header
   --with-install-dir=       Path to source code installation directory
+  --with-lilith=            Path to Lilith
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
   --with-loop-libraries=    Comma separated list of loop libraries to be enabled
@@ -3858,6 +3910,7 @@ if test $# -gt 0 ; then
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
+            --with-lilith=*)         lilith_dir=$optarg ;;
             --with-llflags=*)        LLFLAGS=$optarg ;;
             --with-lllibs=*)         LLLIBS=$optarg ;;
             --with-loop-libraries=*) LOOP_LIBRARIES=$optarg ;;
@@ -3948,6 +4001,8 @@ if test "x${enable_compile}" = "xyes"; then
         check_boost_thread_incl
         check_boost_thread_libs
     fi
+    check_python
+    check_lilith
     check_looplibrary
     check_odeint
     check_sqlite
@@ -4041,6 +4096,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
     -e "s|@DEFINE_ENABLE_HIGGSTOOLS@|$DEFINE_ENABLE_HIGGSTOOLS|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
+    -e "s|@DEFINE_ENABLE_LILITH@|$DEFINE_ENABLE_LILITH|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \

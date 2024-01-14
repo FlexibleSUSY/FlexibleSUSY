@@ -13,9 +13,11 @@ on:
       - '.clang-tidy'
       - '.clang-format'
       - 'AUTHORS'
+      - 'CITATION.cff'
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
+      - '.github/ISSUE_TEMPLATE/*'
 
   pull_request:
     branches:
@@ -26,9 +28,11 @@ on:
       - '.clang-tidy'
       - '.clang-format'
       - 'AUTHORS'
+      - 'CITATION.cff'
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
+      - '.github/ISSUE_TEMPLATE/*'
 
 jobs:
   no-meta:
@@ -49,7 +53,7 @@ jobs:
           brew install gsl
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install conan
         run: |
@@ -124,7 +128,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.17.0
+      image: navir/opensuseleap-for-flexiblesusy:0.17.4
 
     strategy:
       fail-fast: false
@@ -141,7 +145,7 @@ jobs:
 
       # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Activate Wolfram Engine
         env:
@@ -204,6 +208,8 @@ jobs:
             --enable-higgstools \
             --with-higgstools-incdir=$FS_DEPENDENCIES_DIR/HiggsTools/include \
             --with-higgstools-libdir=$FS_DEPENDENCIES_DIR/HiggsTools/lib64 \
+            --enable-lilith \
+            --with-lilith=/fs_dependencies/Lilith \
             --enable-himalaya \
             --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
             --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \

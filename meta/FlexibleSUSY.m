@@ -75,7 +75,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "W. Kotlarski",
               "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2023";
+FS`Years   = "2013-2024";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -214,6 +214,7 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
+FSEnableCompile;
 
 (* Standard Model input parameters (SLHA input parameters) *)
 (* {parameter, {"block", entry}, type}                     *)
@@ -488,7 +489,7 @@ ReplaceSymbolsInUserInput[rules_] :=
               {Unevaluated@FlexibleSUSY`HighPoleMassPrecision, Unevaluated@FlexibleSUSY`MediumPoleMassPrecision, Unevaluated@FlexibleSUSY`LowPoleMassPrecision};
 
            (* decay calculation require 3- and 4-point loop functions *)
-           If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}],
+           If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}] && FSEnableCompile,
               Utils`FSFancyWarning[
                  "Decay calculation requires a dedicated loop library.",
                  " Currently it's either LoopTools or Collier but",
@@ -2573,7 +2574,7 @@ TextFormatting`IndentText[
       GetParticleFromDescription["Tau"],      "return qedqcd.displayPoleMtau()"
    ] <> ";\n"
 ] <>
-"}")& /@ fields,
+"}")& /@ If[fields =!= {}, fields, {GetParticleFromDescription["Electron"], GetParticleFromDescription["Muon"], GetParticleFromDescription["Tau"]}],
 "\n\n"
 ]
          ];
@@ -2725,11 +2726,14 @@ const bool show_decays = !decays.get_problems().have_problem() ||
 if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
+      slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());
+   }
 }";
 
 ExampleCalculateCmdLineDecays[] :=
-FlexibleSUSY`FSModelName <> "_decays decays;" <>
-"decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
+FlexibleSUSY`FSModelName <> "_decays decays " <>
+"= " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
 const bool loop_library_for_decays =
    (Loop_library::get_type() == Loop_library::Library::Collier) ||
    (Loop_library::get_type() == Loop_library::Library::Looptools);
@@ -2794,6 +2798,10 @@ WriteUserExample[inputParameters_List, files_List] :=
       WARNING(\"Decay module requires BSM pole masses. Setting FlexibleSUSY[23] = 1.\");
       spectrum_generator_settings.set(
          Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+   }
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block) && " <> FlexibleSUSY`FSModelName <> "_info::is_CP_violating_Higgs_sector) {
+      WARNING(\"Printing of EFFHIGGSCOUPLINGS block is disabled in models with CP-violating Higgs sector\");
+      flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, 0.);
    }
 }",
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, flexibledecay_settings);"
