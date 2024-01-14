@@ -34,6 +34,7 @@
 #include "names.hpp"
 #include "problems.hpp"
 #include "physical_input.hpp"
+#include "lowe.h"
 
 #include <array>
 #include <iosfwd>
@@ -41,10 +42,6 @@
 #include <utility>
 
 #include <Eigen/Core>
-
-namespace softsusy {
-   class QedQcd;
-} // namespace softsusy
 
 namespace flexiblesusy {
 
@@ -533,7 +530,7 @@ public:
    double calculate_delta_alpha_em(double alphaEm) const;
    double calculate_delta_alpha_s(double alphaS) const;
    void calculate_Lambdax_DRbar();
-   std::pair<double,double> calculate_theta_w(const softsusy::QedQcd&, double alpha_em_drbar);
+   double calculate_theta_w();
    void calculate_Yu_DRbar(const softsusy::QedQcd&);
    void calculate_Yd_DRbar(const softsusy::QedQcd&);
    void calculate_Ye_DRbar(const softsusy::QedQcd&);
@@ -661,7 +658,9 @@ private:
    Eigen::Array<double,3,1> MFd{Eigen::Array<double,3,1>::Zero()};
    Eigen::Array<double,3,1> MFu{Eigen::Array<double,3,1>::Zero()};
    Eigen::Array<double,3,1> MFe{Eigen::Array<double,3,1>::Zero()};
-   double MVWp{};
+   double MVWp{}; ///< running W boson mass
+   double MVWp_pole{}; ///< W boson pole mass (determined from fit formula)
+
    Eigen::Array<double,2,1> MVPVZ{Eigen::Array<double,2,1>::Zero()};
 
    // DR-bar mixing matrices
@@ -673,7 +672,9 @@ private:
    Eigen::Matrix<std::complex<double>,3,3> Ue{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
    Eigen::Matrix<double,2,2> ZZ{Eigen::Matrix<double,2,2>::Zero()};
 
-
+   double calculate_alpha_s_SM5_at(softsusy::QedQcd, double) const;
+   void calculate_MVWp_pole_fit(double);
+   softsusy::QedQcd qedqcd;
 };
 
 std::ostream& operator<<(std::ostream&, const Standard_model&);
