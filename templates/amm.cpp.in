@@ -171,6 +171,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 
       model.run_to(MSUSY_new);
       model.calculate_DRbar_masses();
+      model.reorder_DRbar_masses();
 
       precision = MaxRelDiff(MSUSY_old, MSUSY_new);
       MSUSY_old = MSUSY_new;

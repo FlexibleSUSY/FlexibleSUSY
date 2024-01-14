@@ -43,6 +43,11 @@ New features
 
   Thanks to Felix Reichenbach and Alexander Voigt.
 
+* SLHA output now includes the `EFFHIGGSCOUPLINGS` block containing
+  loop-induced couplings of neutral Higgses. This block can be used by a SARAH
+  generated UFO and CalcHEP models (the latter one being also used by
+  micrOMEGAs).
+
 Fixed bugs
 ----------
 
