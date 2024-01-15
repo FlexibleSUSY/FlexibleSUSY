@@ -117,6 +117,7 @@ private:
       typename cxx_diagrams::field_indices<FieldOut2>::type const&);
    double get_alphas(standard_model_cxx_diagrams::context_base const&) const;
    double get_alpha(standard_model_cxx_diagrams::context_base const&) const;
+   std::vector<std::tuple<int, int, int, double, std::string>> effhiggscouplings_block_input {};
 };
 
 template<>
