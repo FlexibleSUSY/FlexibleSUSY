@@ -158,14 +158,12 @@ endif
 
 ifeq ($(ENABLE_LOOPTOOLS), yes)
 TEST_SRC += \
-		$(DIR)/test_looplibrary_looptools.cpp \
-		$(DIR)/test_standard_model_FlexibleDecay.cpp
+		$(DIR)/test_looplibrary_looptools.cpp
 endif
 
 ifeq ($(ENABLE_COLLIER), yes)
 TEST_SRC += \
-		$(DIR)/test_looplibrary_collier.cpp \
-		$(DIR)/test_standard_model_FlexibleDecay.cpp
+		$(DIR)/test_looplibrary_collier.cpp
 endif
 
 ifeq ($(ENABLE_FFLITE), yes)
@@ -1202,8 +1200,6 @@ $(DIR)/test_SM_mass_eigenstates_decoupling_scheme.x: $(LIBSM)
 $(DIR)/test_SM_tree_level_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_FlexibleDecay.x: $(LIBSM)
-
-$(DIR)/test_standard_model_FlexibleDecay.x: $(LIBSM)
 
 $(DIR)/test_SM_one_loop_spectrum.x: $(LIBSM)
 
