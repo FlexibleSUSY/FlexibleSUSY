@@ -111,9 +111,9 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
 
    SM_input_parameters input;
    input.LambdaIN = 0.285;
+
    SM<Two_scale> m;
    setup_SM_const(m, input);
-
    m.calculate_DRbar_masses();
    m.set_pole_mass_loop_order(1);
    m.do_calculate_sm_pole_masses(true);
@@ -126,19 +126,22 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
       BOOST_FAIL(ostr.str());
    }
 
+   standard_model::Standard_model sm{};
+   setup_SM_const(sm, input);
+   sm.calculate_DRbar_masses();
+   sm.set_pole_mass_loop_order(1);
+   sm.solve_ewsb_one_loop();
+   sm.calculate_pole_masses();
+
+   if (sm.get_problems().have_problem()) {
+      std::ostringstream ostr;
+      sm.get_problems().print_problems(ostr);
+      BOOST_FAIL(ostr.str());
+   }
+
    softsusy::QedQcd qedqcd;
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings;
-
-   Physical_input sm_phys;
-   sm_phys.set(Physical_input::alpha_em_0, physical_input.get(Physical_input::alpha_em_0));
-   sm_phys.set(Physical_input::mh_pole, m.get_physical().Mhh);
-
-   standard_model::Standard_model sm{};
-   sm.set_physical_input(sm_phys);
-   sm.initialise_from_input(qedqcd);
-   sm.set_pole_mass_loop_order(1);
-   sm.calculate_pole_masses();
 
    SM_decays decays_SM_HO = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
    Standard_model_decays decays_sm_HO = Standard_model_decays(sm, qedqcd, physical_input, flexibledecay_settings);
@@ -147,28 +150,28 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
-                              decays_sm_HO.partial_width_hh_to_barFdFd(sm, 2, 2), 2e-15);
+                              decays_sm_HO.partial_width_hh_to_barFdFd(sm, 2, 2), 1e-16);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
-                              decays_sm_HO.partial_width_hh_to_barFuFu(sm, 1, 1), 2e-16);
+                              decays_sm_HO.partial_width_hh_to_barFuFu(sm, 1, 1), 1e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
-                              decays_sm_HO.partial_width_hh_to_barFeFe(sm, 2, 2), 1e-15);
+                              decays_sm_HO.partial_width_hh_to_barFeFe(sm, 2, 2), 1e-16);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VWpconjVWp(&m),
-                              decays_sm_HO.partial_width_hh_to_conjVWpVWp(sm), 1e-3);
+                              decays_sm_HO.partial_width_hh_to_conjVWpVWp(sm), 1e-16);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VZVZ(&m),
-                              decays_sm_HO.partial_width_hh_to_VZVZ(sm), 1e-3);
+                              decays_sm_HO.partial_width_hh_to_VZVZ(sm), 1e-16);
 
    // ------------ loop-induces decays_HO ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VGVG(&m), decays_sm_HO.partial_width_hh_to_VGVG(sm), 5e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VGVG(&m), decays_sm_HO.partial_width_hh_to_VGVG(sm), 1e-16);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VPVP(&m), decays_sm_HO.partial_width_hh_to_VPVP(sm), 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VPVP(&m), decays_sm_HO.partial_width_hh_to_VPVP(sm), 1e-16);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VPVZ(&m), decays_sm_HO.partial_width_hh_to_VPVZ(sm), 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VPVZ(&m), decays_sm_HO.partial_width_hh_to_VPVZ(sm), 1e-16);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -181,20 +184,20 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
-                              decays_sm_no_HO.partial_width_hh_to_barFdFd(sm, 2, 2), 2e-15);
+                              decays_sm_no_HO.partial_width_hh_to_barFdFd(sm, 2, 2), 1e-16);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
                               decays_sm_no_HO.partial_width_hh_to_barFuFu(sm, 1, 1), 1e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
-                              decays_sm_no_HO.partial_width_hh_to_barFeFe(sm, 2, 2), 1e-15);
+                              decays_sm_no_HO.partial_width_hh_to_barFeFe(sm, 2, 2), 1e-16);
 
    // ------------ loop-induces decays_no_HO ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VGVG(&m), decays_sm_no_HO.partial_width_hh_to_VGVG(sm), 5e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VGVG(&m), decays_sm_no_HO.partial_width_hh_to_VGVG(sm), 1e-16);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VPVP(&m), decays_sm_no_HO.partial_width_hh_to_VPVP(sm), 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VPVP(&m), decays_sm_no_HO.partial_width_hh_to_VPVP(sm), 1e-16);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VPVZ(&m), decays_sm_no_HO.partial_width_hh_to_VPVZ(sm), 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VPVZ(&m), decays_sm_no_HO.partial_width_hh_to_VPVZ(sm), 1e-16);
 }
