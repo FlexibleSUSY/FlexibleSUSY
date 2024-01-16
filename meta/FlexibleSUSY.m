@@ -563,10 +563,6 @@ CheckDecaysOptions[] :=
             ]
          ]
       ];
-      (* if present, replace H- with H+ since specializations are only for H+ *)
-      If[MemberQ[FlexibleSUSY`FSDecayParticles, TreeMasses`GetChargedHiggsBoson[]] && GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0,
-         FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. TreeMasses`GetChargedHiggsBoson[] -> Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]];
-      ]
    ];
 
 (* sets model file variables to default values, after SARAH`Start[] has been called *)
@@ -2038,7 +2034,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             partialWidthCalculationPrototypes = "", partialWidthCalculationFunctions = "",
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
-            solverIncludes = "", solver = "", contentOfPath = $Path, modelName, bsmParticleAliasList, higgstoolsChargedInputDecl},
+            solverIncludes = "", solver = "", contentOfPath = $Path, modelName, bsmParticleAliasList},
 
             modelName =
                If[SARAH`submodeldir =!= False,
@@ -2151,15 +2147,6 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  SemiAnalyticSolver, "Semi_analytic"
               ];
 
-           higgstoolsChargedInputDecl = If[
-              TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] <= TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] &&
-              MemberQ[FlexibleSUSY`FSDecayParticles, If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]],
-              "std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <>
-              FlexibleSUSY`FSModelName <> "_mass_eigenstates const&, " <>
-              FlexibleSUSY`FSModelName <> "_decays const&);",
-              ""
-           ];
-
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
                             "@callAllDecaysFunctionsInThreads@" -> IndentText[callAllDecaysFunctionsInThreads],
@@ -2180,8 +2167,6 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
-                            "@higgstoolsChargedInputDef@" -> CreateHiggsToolsChargedInput[],
-                            "@higgstoolsChargedInputDecl@" -> higgstoolsChargedInputDecl,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
@@ -2730,7 +2715,7 @@ ExampleDecaysIncludes[] :=
        "\n"
     ] <>
 "\n#ifdef ENABLE_HIGGSTOOLS
-#include \"decays/HiggsTools_interface.hpp\"
+#include \"decays/experimental_constraints.hpp\"
 #endif";
 
 ExampleCalculateDecaysForModel[] :=
@@ -2744,12 +2729,6 @@ IndentText[
 IndentText@IndentText@IndentText[
 "if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
 IndentText[
-   "std::vector<SingleChargedHiggsInput> higgstools_charged_input = " <>
-   If[TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] >= TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] &&
-      MemberQ[FlexibleSUSY`FSDecayParticles, If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]],
-      "get_charged_higgstools_input(std::get<0>(models), decays)",
-      "{}"
-   ] <> ";\n" <>
    "try {\n" <>
    IndentText[
       "// structured bindings creates new variables - need to use std::tie
@@ -2757,7 +2736,7 @@ IndentText[
          get_normalized_effective_couplings(decays.get_higgstools_input(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
 #ifdef ENABLE_HIGGSTOOLS
          std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
-            call_higgstools(effc, higgstools_charged_input, physical_input, higgsbounds_dataset, higgssignals_dataset);
+            call_higgstools(effc, physical_input, higgsbounds_dataset, higgssignals_dataset);
 #endif
 #ifdef ENABLE_LILITH
          std::tie(lilith_likelihood, lilith_ndof) = call_lilith(effc);

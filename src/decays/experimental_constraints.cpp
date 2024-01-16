@@ -23,7 +23,7 @@
  * @brief contains interface to HiggsTools
  */
 
-#include "HiggsTools_interface.hpp"
+#include "experimental_constraints.hpp"
 
 #ifdef ENABLE_HIGGSTOOLS
 #include "Higgs/Predictions.hpp"
@@ -161,7 +161,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
       };
 
       int status, iter = 0;
-      static constexpr int max_iter = 100;
+      static constexpr int max_iter = 1000000;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
@@ -199,11 +199,11 @@ EffectiveCoupling_list get_normalized_effective_couplings(
             m = dis(gen);
             status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
             iterCount++;
-         } while (status == GSL_EINVAL && iterCount < 100);
+         } while (status == GSL_EINVAL && iterCount < 10000);
       }
       gsl_set_error_handler (_error_handler);
 
-      static constexpr double mass_precision = 1e-4;
+      static constexpr double mass_precision = 1e-8;
 
       do
       {
@@ -268,7 +268,6 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 #ifdef ENABLE_HIGGSTOOLS
 std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const& bsm_input,
-   std::vector<SingleChargedHiggsInput> const& bsm_input2,
    Physical_input const& physical_input,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
 
@@ -332,30 +331,6 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
       }
    }
 
-   /*
-   for (auto const& el : bsm_input2) {
-      auto& Hpm = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::single));
-      // set mass
-      Hpm.setMass(el.mass);
-
-      // set H± decays
-      if (el.width > 0) {
-         Hpm.setTotalWidth(el.width);
-         Hpm.setBr(HP::Decay::enu, el.brenu);
-         Hpm.setBr(HP::Decay::munu, el.brmunu);
-         Hpm.setBr(HP::Decay::taunu, el.brtaunu);
-         Hpm.setBr(HP::Decay::tb, el.brtb);
-         Hpm.setBr(HP::Decay::cs, el.brcs);
-         Hpm.setBr(HP::Decay::WZ, el.brWZ);
-         Hpm.setBr(HP::Decay::Wgam, el.brWgam);
-      }
-
-      // production
-      // pp->ttbar, t(tbar)->Hp b
-      double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, el.brtHpb);
-      Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
-   }
-   */
    auto bounds = Higgs::Bounds {higgsbounds_dataset};
    auto hbResult = bounds(pred);
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};

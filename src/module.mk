@@ -195,10 +195,10 @@ endif
 
 ifeq ($(ENABLE_HIGGSTOOLS),yes)
 LIBFLEXI_SRC += \
-		$(DIR)/decays/HiggsTools_interface.cpp
+		$(DIR)/decays/experimental_constraints.cpp
 
 LIBFLEXI_HDR += \
-		$(DIR)/decays/HiggsTools_interface.hpp
+		$(DIR)/decays/experimental_constraints.hpp
 endif
 
 # remove duplicates in case multiple solvers are used

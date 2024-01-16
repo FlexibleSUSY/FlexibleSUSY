@@ -97,7 +97,6 @@ catch (std::exception& e) {
 }
 }
 
-@higgstoolsChargedInputDef@
 double CLASSNAME::get_alphas(@ModelName@_cxx_diagrams::context_base const&  context) const
 {
    return Sqr(context.model.get_@gs_name@())/(4.*Pi);

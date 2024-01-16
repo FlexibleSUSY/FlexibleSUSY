@@ -997,7 +997,7 @@ void SLHA_io::set_lilith(const int ndof, const double likelihood)
 {
    std::ostringstream ss;
 
-   ss << block_head("LilithResults", 0.0);
+   ss << block_head("LILITHRESULTS", 0.0);
    ss << FORMAT_ELEMENT(0, likelihood, "-2*LogL");
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
 

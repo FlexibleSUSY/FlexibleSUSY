@@ -50,7 +50,6 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 #ifdef ENABLE_HIGGSTOOLS
 std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const&,
-   std::vector<SingleChargedHiggsInput> const&,
    Physical_input const&,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);
 #endif

@@ -112,6 +112,7 @@ Optional:
 * COLLIER_
 * HiggsTools_
 * Himalaya_
+* Lilith_
 * TSIL_
 
 Installation of required/optional libraries
@@ -1020,6 +1021,7 @@ References
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _GNU scientific library: http://www.gnu.org/software/gsl
 .. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
+.. _Lilith: https://github.com/sabinekraml/Lilith-2
 .. _`Mathematica/Wolfram Engine`: https://www.wolfram.com
 .. _LoopTools: http://www.feynarts.de/looptools
 .. _COLLIER: https://collier.hepforge.org

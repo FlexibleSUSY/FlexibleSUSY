@@ -4,13 +4,8 @@ New features
 ------------
 
 * Option to validate a neutral Higgs sector of the model by linking
-  FlexibleSUSY with HiggsTools_. Enabling the interface reguires a C++17
-  compliant compiler (g++>=8.0.0 or clang++>=5.0.0 or icpc>=18.0.0).
-
-* Added SM one-loop QCD corrections to :math:`$H^+ \to t \bar{b}$`
-
-* Possibility to compute in selected models 2-body top quark decays,
-  including one-loop SM QCD corrections to :math:`$t \to b W^+$` and :math:`$t \to b W^+`.
+  FlexibleSUSY with HiggsTools_ or Lilith_. Enabling the interface reguires a
+  C++17 compliant compiler (g++>=8.0.0 or clang++>=5.0.0 or icpc>=18.0.0).
 
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
@@ -2432,3 +2427,4 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _LoopTools: http://www.feynarts.de/looptools/
 .. _TSIL: https://www.niu.edu/spmartin/tsil/
 .. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
+.. _Lilith: https://github.com/sabinekraml/Lilith-2
