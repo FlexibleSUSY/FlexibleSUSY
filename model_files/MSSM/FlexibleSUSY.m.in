@@ -151,5 +151,5 @@ ExtraSLHAOutputBlocks = {
 };
 
 FSCalculateDecays = True;
-FSDecayParticles = {hh, Ah, Hpm, Su, Sd, Se, Sv, Fu};
+FSDecayParticles = {hh, Ah, Hpm, Su, Sd, Se, Sv};
 

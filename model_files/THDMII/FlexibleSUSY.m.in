@@ -99,4 +99,4 @@ FSGM2CalcInput = {
 };
 
 FSCalculateDecays = True;
-FSDecayParticles = {hh, Ah, Hm, Fu};
+

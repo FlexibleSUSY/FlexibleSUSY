@@ -7,10 +7,8 @@ import Higgs.signals as HS
 bounds = HB.Bounds("/run/media/scratch/Pobrane/hbdataset-master") # load HB dataset
 signals = HS.Signals("/run/media/scratch/Pobrane/hsdataset-main") # load HS dataset
 
-
 pred = HP.Predictions() # create the model predictions
 cpls = HP.smLikeEffCouplings
-
 
 h = pred.addParticle(HP.NeutralScalar("h", "even"))
 
