@@ -2234,7 +2234,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
    // external particles' masses
    result.m_decay = context.physical_mass<hh>(idx_1);
    result.m_vector_1 = 0.;
-   result.m_vector_2 = context.physical_mass<VZ>(idx_3);
+   result.m_vector_2 = qedqcd.displayPoleMZ();
 
    // set the initial value of an amplitude to 0
    result.form_factor_g = std::complex<double>(0., 0.);
@@ -4675,8 +4675,8 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VZ, VZ>(
 
    // external particles' masses
    result.m_decay = context.physical_mass<hh>(idx_1);
-   result.m_vector_1 = context.physical_mass<VZ>(idx_2);
-   result.m_vector_2 = context.physical_mass<VZ>(idx_3);
+   result.m_vector_1 = qedqcd.displayPoleMZ();
+   result.m_vector_2 = qedqcd.displayPoleMZ();
 
    // set the initial value of an amplitude to 0
    result.form_factor_g = std::complex<double>(0., 0.);

@@ -1136,12 +1136,18 @@ FillSVVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments = assignments <> structName <> ".m_vector_1 = " <>
                          If[IsMassless[First[GetFinalState[decay]]],
                             "0.",
-                             paramsStruct <> ".physical_mass<" <> CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <> ">(idx_2)"
+                            If[IsZBoson[First[GetFinalState[decay]]],
+                               "qedqcd.displayPoleMZ()",
+                               paramsStruct <> ".physical_mass<" <> CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <> ">(idx_2)"
+                            ]
                          ] <> ";\n";
            assignments = assignments <> structName <> ".m_vector_2 = " <>
                          If[IsMassless[Last[GetFinalState[decay]]],
                             "0.",
-                            paramsStruct <> ".physical_mass<" <> CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <> ">(idx_3)"
+                            If[IsZBoson[Last[GetFinalState[decay]]],
+                               "qedqcd.displayPoleMZ()",
+                               paramsStruct <> ".physical_mass<" <> CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <> ">(idx_3)"
+                            ]
                          ] <> ";\n";
            assignments
           ];
