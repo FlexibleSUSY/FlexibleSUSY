@@ -165,11 +165,9 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       );
    }
 
-#ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      higgstools_input.add_coupling(field_as_string<Higgs>(in_idx), {21, 21}, std::sqrt(result));
+      neutral_higgs_effc.add_coupling(field_as_string<Higgs>(in_idx), {21, 21}, std::sqrt(result));
    }
-#endif
 
    return result;
 }

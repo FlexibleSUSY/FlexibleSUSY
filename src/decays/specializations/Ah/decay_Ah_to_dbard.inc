@@ -140,9 +140,8 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
 
    const double result = (1-4.*xOS)*result_DR + 4*xOS*result_OS;
 
-#ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      higgstools_input.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
+      neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
          {
             boost::hana::unpack(bar<DownTypeQuark>::pdgids, _to_array<bar<DownTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
             boost::hana::unpack(DownTypeQuark::pdgids, _to_array<DownTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
@@ -150,7 +149,6 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
          1i*std::sqrt(result)
       );
    }
-#endif
 
    return result;
 }

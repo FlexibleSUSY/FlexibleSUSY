@@ -989,7 +989,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   "\n#ifdef ENABLE_HIGGSTOOLS\n" <>
                   TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
                   TextFormatting`IndentText[
-                  "auto found = std::find_if(std::begin(higgstools_input), std::end(higgstools_input), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
+                  "auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(neutral_higgs_effc), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
                   "found->width = decays.get_total_width();\n" <>
                   "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n" <>

@@ -179,16 +179,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
       result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
    }
 
-#ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      higgstools_input.add_coupling(field_as_string<Higgs>(indexIn),
+      neutral_higgs_effc.add_coupling(field_as_string<Higgs>(indexIn),
          {
             boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
             boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
          },
          4.*std::max(xDR, xOS) > 1. ? std::real(HQQbarVertexDR_S) + std::imag(HQQbarVertexDR_P)*1i : std::sqrt(result_S) + std::sqrt(result_P)*1i);
    }
-#endif
 
    return result_S + result_P;
 }

@@ -232,7 +232,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
          // calculate decays in the SM equivalent
          flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings_);
          sm_decays.calculate_decays();
-         const auto sm_input = sm_decays.get_higgstools_input();
+         const auto sm_input = sm_decays.get_neutral_higgs_effc();
 
          // fermion channels are given as complex numbers
          // we normalize to real part of SM coupling

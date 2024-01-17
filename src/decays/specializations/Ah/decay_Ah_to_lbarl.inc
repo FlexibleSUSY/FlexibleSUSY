@@ -33,9 +33,8 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type,
       res *= 1. + get_alpha(context)/Pi*17./4.;
    }
 
-#ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      higgstools_input.add_coupling(
+      neutral_higgs_effc.add_coupling(
             field_as_string<PseudoscalarHiggs>(indexIn),
             {
                boost::hana::unpack(bar<ChargedLepton>::pdgids, _to_array<bar<ChargedLepton>::numberOfGenerations>).at(indexOut1.at(0)),
@@ -44,7 +43,6 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type,
             1i*std::sqrt(res)
       );
    }
-#endif
 
    return res;
 }

@@ -2733,7 +2733,7 @@ IndentText[
    IndentText[
       "// structured bindings creates new variables - need to use std::tie
       effc =
-         get_normalized_effective_couplings(decays.get_higgstools_input(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
+         get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
 #ifdef ENABLE_HIGGSTOOLS
          std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
             call_higgstools(effc, physical_input, higgsbounds_dataset, higgssignals_dataset);
