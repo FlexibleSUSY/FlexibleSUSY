@@ -131,6 +131,7 @@ void FlexibleDecay_settings::set(Settings o, double value)
       break;
    case print_effc_block: // 5 [bool]
       assert_bool(value, descriptions.at(o).c_str());
+      break;
    case use_pole_higgs_mixings: // 6 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
