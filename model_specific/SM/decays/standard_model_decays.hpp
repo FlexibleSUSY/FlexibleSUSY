@@ -80,22 +80,22 @@ public:
       }
    void calculate_hh_decays();
 
-double partial_width_hh_to_VGVG(standard_model::Standard_model);
-double partial_width_hh_to_VPVP(standard_model::Standard_model);
-double partial_width_hh_to_VPVZ(standard_model::Standard_model);
-double partial_width_hh_to_VZVZ(standard_model::Standard_model);
-double partial_width_hh_to_conjVWpVWp(standard_model::Standard_model);
-double partial_width_hh_to_barFvFv(standard_model::Standard_model, int, int);
-double partial_width_hh_to_barFdFd(standard_model::Standard_model, int, int);
-double partial_width_hh_to_barFuFu(standard_model::Standard_model, int, int);
-double partial_width_hh_to_barFeFe(standard_model::Standard_model, int, int);
+double partial_width_hh_to_VGVG(standard_model::Standard_model const&);
+double partial_width_hh_to_VPVP(standard_model::Standard_model const&);
+double partial_width_hh_to_VPVZ(standard_model::Standard_model const&);
+double partial_width_hh_to_VZVZ(standard_model::Standard_model const&);
+double partial_width_hh_to_conjVWpVWp(standard_model::Standard_model const&);
+double partial_width_hh_to_barFvFv(standard_model::Standard_model const&, int, int);
+double partial_width_hh_to_barFdFd(standard_model::Standard_model const&, int, int);
+double partial_width_hh_to_barFuFu(standard_model::Standard_model const&, int, int);
+double partial_width_hh_to_barFeFe(standard_model::Standard_model const&, int, int);
 
 private:
    standard_model::Standard_model model{};
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};
-   static constexpr bool run_to_decay_particle_scale {true};
+   bool run_to_decay_particle_scale {true};
    standard_model_decay_table decay_table{};
    FlexibleDecay_problems problems{};
    EffectiveCoupling_list neutral_higgs_effc {};
