@@ -172,6 +172,8 @@ boost_lib_dir=""
 boost_inc_dir=""
 eigen_inc_dir=""
 BOOSTFLAGS=""
+HIGGSTOOLSFLAGS="-Imodel_specific/SM"
+HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a"
 gsl_config="gsl-config"
 looptools_lib_dir=""
 looptools_inc_dir=""
@@ -2175,7 +2177,7 @@ check_higgstools_incl() {
             return 1
         fi
     else
-        HIGGSTOOLSFLAGS="-Imodel_specific/SM -I$higgstools_inc_dir"
+        HIGGSTOOLSFLAGS="$HIGGSTOOLSFLAGS -I$higgstools_inc_dir"
         return 0
     fi
     return 0

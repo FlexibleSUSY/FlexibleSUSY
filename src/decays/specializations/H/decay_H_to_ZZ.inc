@@ -102,7 +102,10 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
       res = flux * ps * ps_symmetry * mat_elem_sq;
    }
 
-   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) ||
+       static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
+       static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
+   ) {
       neutral_higgs_effc.add_coupling(field_as_string<Higgs>(indexIn), {23, 23}, std::sqrt(res));
    }
 

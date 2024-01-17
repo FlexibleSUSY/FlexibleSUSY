@@ -2725,27 +2725,29 @@ IndentText[
       decays.calculate_decays();\n"
 ] <>
 IndentText@IndentText@IndentText[
-"if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
+"effc =
+   get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);\n" <>
 IndentText[
    "try {\n" <>
    IndentText[
       "// structured bindings creates new variables - need to use std::tie
-      effc =
-         get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
 #ifdef ENABLE_HIGGSTOOLS
+if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
          std::tie(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag, higgsbounds_v) =
             call_higgstools(effc, physical_input, higgsbounds_dataset, higgssignals_dataset);
+}
 #endif
 #ifdef ENABLE_LILITH
+if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {
          std::tie(lilith_likelihood, lilith_ndof) = call_lilith(effc);
+}
 #endif\n"
    ] <>
    "}\n" <>
    "catch (const std::exception& error) {\n" <>
       IndentText["ERROR(error.what());\n"] <>
    "}\n"
-] <>
-"}\n"
+]
 ] <>
 IndentText[IndentText[
 "}

@@ -986,8 +986,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
            body = IndentText["\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body ]<>
                   If[MemberQ[Join[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}], particle],
-                  "\n#ifdef ENABLE_HIGGSTOOLS\n" <>
-                  TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
+                  TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) || flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) || flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {\n" <>
                   TextFormatting`IndentText[
                   "auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(neutral_higgs_effc), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
@@ -996,8 +995,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   (* 1 == even, -1 == odd, 0 == undefined - see test/test_HiggsTools_CP.cpp *)
                   "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, 1], -1] <> ";\n" <>
                   "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n"] <>
-                  "}\n"] <>
-                  "\r#endif",
+                  "}\n"],
                   ""
                   ];
            If[particleDim > 1,

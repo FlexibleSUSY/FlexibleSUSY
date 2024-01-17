@@ -5887,11 +5887,16 @@ void CLASSNAME::calculate_hh_decays()
       }
    }
 
-   auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(
-      neutral_higgs_effc), [](NeutralHiggsEffectiveCouplings const& effC) {
-      return effC.particle == field_as_string<hh>({});});
-   found->width = decays.get_total_width();
-   found->mass = context.physical_mass<hh>({});
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) ||
+      flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) ||
+      flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
+   {
+      auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(
+         neutral_higgs_effc), [](NeutralHiggsEffectiveCouplings const& effC) {
+         return effC.particle == field_as_string<hh>({});});
+      found->width = decays.get_total_width();
+      found->mass = context.physical_mass<hh>({});
+   }
 }
 
 double CLASSNAME::partial_width_hh_to_VGVG(Standard_model const& model)

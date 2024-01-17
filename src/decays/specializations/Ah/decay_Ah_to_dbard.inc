@@ -140,7 +140,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
 
    const double result = (1-4.*xOS)*result_DR + 4*xOS*result_OS;
 
-   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) ||
+       static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
+       static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
+   ) {
       neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
          {
             boost::hana::unpack(bar<DownTypeQuark>::pdgids, _to_array<bar<DownTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),

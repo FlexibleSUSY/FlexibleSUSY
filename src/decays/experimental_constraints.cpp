@@ -29,6 +29,7 @@
 #include "Higgs/Predictions.hpp"
 #include "Higgs/Bounds.hpp"
 #include "Higgs/Signals.hpp"
+namespace HP = Higgs::predictions;
 #endif
 
 #ifdef ENABLE_LILITH
@@ -49,8 +50,6 @@
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
 
-namespace HP = Higgs::predictions;
-
 namespace flexiblesusy {
 
 namespace {
@@ -66,10 +65,11 @@ constexpr bool calcHgamgam = false;
 // relative BSM Higgs-like state mass uncertainty
 // example: 0.03 means 3% uncertainty
 constexpr double relMassError = 0.03;
+
+#ifdef ENABLE_HIGGSTOOLS
 // Ref. model for computing brs and xsections on the HiggsTools side
 constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
-#ifdef ENABLE_HIGGSTOOLS
 double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
    const auto signals = Higgs::Signals {higgssignals_dataset};
 
@@ -85,7 +85,6 @@ double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
    );
    return signals(pred);
 }
-#endif
 
 void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
    std::cout << "Effective couplings for particle of mass " << mass << '\n';
@@ -105,6 +104,7 @@ void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
    std::cout << "Zgam   " << effC.Zgam << std::endl;
    std::cout << "gg     " << effC.gg << std::endl;
 }
+#endif
 
 } // anonymous
 
