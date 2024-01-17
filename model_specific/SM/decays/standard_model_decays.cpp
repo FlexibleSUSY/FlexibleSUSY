@@ -128,7 +128,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<fields::VG >::type const& idx_2,
    typename cxx_diagrams::field_indices<fields::VG >::type const& idx_3) const{
-   
+
    // amplitude type
    Decay_amplitude_SVV result;
 
@@ -195,7 +195,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -252,7 +252,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -309,7 +309,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -366,7 +366,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -387,7 +387,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<fields::VP >::type const& idx_2,
    typename cxx_diagrams::field_indices<fields::VP >::type const& idx_3) const{
-   
+
    // amplitude type
    Decay_amplitude_SVV result;
 
@@ -457,7 +457,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -528,7 +528,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -585,7 +585,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -656,7 +656,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -712,7 +712,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -768,7 +768,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g2n2_SSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(0, 1), 1.0i*vertexId3Val.
                         value(1, 0),
                      ren_scale);
@@ -824,7 +824,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g4n4_SSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -880,7 +880,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g5n5_SVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(1, 0), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -936,7 +936,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g7n7_SVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::odd_permutation {}),
                      ren_scale);
@@ -992,7 +992,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g6n6_VSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(0, 1), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -1048,7 +1048,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g8n8_VSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::even_permutation {}),
                      ren_scale);
@@ -1104,7 +1104,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g9n9_VVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -1160,7 +1160,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g10n10_VVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(cxx_diagrams::
                         TripleVectorVertex::odd_permutation {}), 1.0i*vertexId3Val.value(
                         cxx_diagrams::TripleVectorVertex::even_permutation {}),
@@ -1218,7 +1218,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -1289,7 +1289,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -1346,7 +1346,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -1417,7 +1417,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -1473,7 +1473,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -1529,7 +1529,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g2n2_SSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(1, 0), 1.0i*vertexId3Val.
                         value(0, 1),
                      ren_scale);
@@ -1585,7 +1585,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g4n4_SSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -1641,7 +1641,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g5n5_SVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(0, 1), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -1697,7 +1697,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g7n7_SVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::even_permutation {}),
                      ren_scale);
@@ -1753,7 +1753,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g6n6_VSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(1, 0), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -1809,7 +1809,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g8n8_VSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::odd_permutation {}),
                      ren_scale);
@@ -1865,7 +1865,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g9n9_VVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -1921,7 +1921,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g10n10_VVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(cxx_diagrams::
                         TripleVectorVertex::even_permutation {}), 1.0i*vertexId3Val.value(
                         cxx_diagrams::TripleVectorVertex::odd_permutation {}),
@@ -1972,7 +1972,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t4g1n15_SS(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -2019,7 +2019,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t4g2n16_VV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value3(), 1.0i*vertexId2Val.value1
                      (), 1.0i*vertexId2Val.value2(),
                   ren_scale,
@@ -2068,7 +2068,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t6g1n19_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -2115,7 +2115,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t6g1n19_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -2162,7 +2162,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t7g1n20_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -2209,7 +2209,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t7g1n20_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -2227,7 +2227,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<fields::VP >::type const& idx_2,
    typename cxx_diagrams::field_indices<fields::VZ >::type const& idx_3) const{
-   
+
    // amplitude type
    Decay_amplitude_SVV result;
 
@@ -2297,7 +2297,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -2368,7 +2368,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -2425,7 +2425,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -2496,7 +2496,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -2552,7 +2552,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -2608,7 +2608,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g2n2_SSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(0, 1), 1.0i*vertexId3Val.
                         value(1, 0),
                      ren_scale);
@@ -2664,7 +2664,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g4n4_SSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -2720,7 +2720,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g5n5_SVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(1, 0), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -2776,7 +2776,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g7n7_SVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::even_permutation {}),
                      ren_scale);
@@ -2832,7 +2832,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g6n6_VSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(0, 1), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -2888,7 +2888,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g8n8_VSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::even_permutation {}),
                      ren_scale);
@@ -2944,7 +2944,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g9n9_VVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -3000,7 +3000,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g10n10_VVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(cxx_diagrams::
                         TripleVectorVertex::odd_permutation {}), 1.0i*vertexId3Val.value(
                         cxx_diagrams::TripleVectorVertex::odd_permutation {}),
@@ -3058,7 +3058,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -3129,7 +3129,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -3186,7 +3186,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   auto temp_result = symmetryFac * colorFac * calculate_diagram_SVV_t1g1n1_FFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -3257,7 +3257,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -3313,7 +3313,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g3n3_UUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -3369,7 +3369,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g2n2_SSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(1, 0), 1.0i*vertexId3Val.
                         value(0, 1),
                      ren_scale);
@@ -3425,7 +3425,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g4n4_SSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -3481,7 +3481,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g5n5_SVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(0, 1), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -3537,7 +3537,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g7n7_SVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::odd_permutation {}),
                      ren_scale);
@@ -3593,7 +3593,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g6n6_VSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(1, 0), 1.0i*vertexId3Val
                         .value(),
                      ren_scale);
@@ -3649,7 +3649,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g8n8_VSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(0, 1), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.
                         value(cxx_diagrams::TripleVectorVertex::odd_permutation {}),
                      ren_scale);
@@ -3705,7 +3705,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g9n9_VVS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -3761,7 +3761,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t1g10n10_VVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(cxx_diagrams::
                         TripleVectorVertex::even_permutation {}), 1.0i*vertexId3Val.value(
                         cxx_diagrams::TripleVectorVertex::even_permutation {}),
@@ -3812,7 +3812,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t3g1n13_VS(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -3859,7 +3859,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t3g2n14_VV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value2(), 1.0i*vertexId2Val.value3
                      (), 1.0i*vertexId2Val.value1(),
                   ren_scale,
@@ -3908,7 +3908,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t4g1n15_SS(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -3955,7 +3955,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t4g2n16_VV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value2(), 1.0i*vertexId2Val.value1
                      (), 1.0i*vertexId2Val.value3(),
                   ren_scale,
@@ -4004,7 +4004,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t6g1n19_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -4051,7 +4051,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t6g1n19_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -4098,7 +4098,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t7g1n20_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -4145,7 +4145,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                result += symmetryFac * colorFac * calculate_diagram_SVV_t7g1n20_SV(
                   result.m_decay, result.m_vector_1, result.m_vector_2,
-                  mInternal1, mInternal2, 
+                  mInternal1, mInternal2,
                   1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(),
                   ren_scale);
             }
@@ -4199,7 +4199,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g6n36_VFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.right
                         (), -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -4255,7 +4255,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g6n36_VFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.right
                         (), -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -4311,7 +4311,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g6n36_VFF(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.right
                         (), -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -4367,7 +4367,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g8n38_VUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -4423,7 +4423,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g8n38_VUU(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), -1.0i*vertexId2Val.value(1), -1.0i*vertexId3Val.
                         value(1),
                      ren_scale);
@@ -4479,7 +4479,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g7n37_VSS(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(1, 0), 1.0i*vertexId3Val.
                         value(0, 1),
                      ren_scale);
@@ -4535,7 +4535,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g9n39_VSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -4591,7 +4591,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g9n39_VSV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(), 1.0i*vertexId3Val.value()
                         ,
                      ren_scale);
@@ -4647,7 +4647,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
                   result += symmetryFac * colorFac * calculate_diagram_SVV_t9g10n40_VVV(
                      result.m_decay, result.m_vector_1, result.m_vector_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.value(), 1.0i*vertexId2Val.value(cxx_diagrams::
                         TripleVectorVertex::even_permutation {}), 1.0i*vertexId3Val.value(
                         cxx_diagrams::TripleVectorVertex::even_permutation {}),
@@ -4669,7 +4669,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VZ, VZ>(
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<fields::VZ >::type const& idx_2,
    typename cxx_diagrams::field_indices<fields::VZ >::type const& idx_3) const{
-   
+
    // amplitude type
    Decay_amplitude_SVV result;
 
@@ -4703,7 +4703,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VWp, typename conj<VWp>::
    typename cxx_diagrams::field_indices<fields::VWp >::type const& idx_2,
    typename cxx_diagrams::field_indices<typename fields::conj<fields::VWp>::type >::type const& idx_3
 ) const{
-   
+
    // amplitude type
    Decay_amplitude_SVV result;
 
@@ -4736,7 +4736,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<typename fields::bar<fields::Fv>::type >::type const& idx_2,
    typename cxx_diagrams::field_indices<fields::Fv >::type const& idx_3) const {
-   
+
    // amplitude type
    Decay_amplitude_SFF result;
 
@@ -4802,7 +4802,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t1g1n1_FFS(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
                         (),
@@ -4859,7 +4859,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t1g3n3_FFV(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.left(), -1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left()
                         , 1.0i*vertexId2Val.right(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
                         left(),
@@ -4917,7 +4917,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t1g2n2_SSF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
                         1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -4973,7 +4973,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t1g4n4_SVF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
                         , -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(0, 1),
                      ren_scale);
@@ -5029,7 +5029,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t1g5n5_VSF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.left(), -1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left()
                         , 1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.value(0, 1),
                      ren_scale);
@@ -5085,7 +5085,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t1g6n6_VVF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.right
                         (), -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -5141,7 +5141,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t1g6n6_VVF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.right
                         (), -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -5197,7 +5197,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g6n18_VFF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.left(
                         ), -1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.
                         right(),
@@ -5254,7 +5254,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g6n18_VFF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.left(
                         ), -1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.
                         right(),
@@ -5311,7 +5311,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g6n18_VFF(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.left(
                         ), -1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.
                         right(),
@@ -5368,7 +5368,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g8n20_VUU(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), 1.0i*vertexId2Val.value(
                         ), -1.0i*vertexId3Val.value(1),
                      ren_scale);
@@ -5424,7 +5424,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g8n20_VUU(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), 1.0i*vertexId2Val.value(
                         ), -1.0i*vertexId3Val.value(1),
                      ren_scale);
@@ -5480,7 +5480,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g7n19_VSS(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), 1.0i*vertexId2Val.value(
                         ), 1.0i*vertexId3Val.value(0, 1),
                      ren_scale);
@@ -5536,7 +5536,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g9n21_VSV(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), 1.0i*vertexId2Val.value(
                         0, 1), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -5592,7 +5592,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g9n21_VSV(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), 1.0i*vertexId2Val.value(
                         0, 1), 1.0i*vertexId3Val.value(),
                      ren_scale);
@@ -5648,7 +5648,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
                   result += symmetryFac * colorFac * calculate_diagram_SFF_t5g10n22_VVV(
                      result.m_decay, result.m_fermion_1, result.m_fermion_2,
-                     mInternal1, mInternal2, mInternal3, 
+                     mInternal1, mInternal2, mInternal3,
                      -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), 1.0i*vertexId2Val.value(
                         ), 1.0i*vertexId3Val.value(cxx_diagrams::TripleVectorVertex::
                         even_permutation {}),
@@ -5669,7 +5669,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fd>::type, F
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<typename fields::bar<fields::Fd>::type >::type const& idx_2,
    typename cxx_diagrams::field_indices<fields::Fd >::type const& idx_3) const{
-   
+
    // amplitude type
    Decay_amplitude_SFF result;
 
@@ -5699,7 +5699,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fu>::type, F
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<typename fields::bar<fields::Fu>::type >::type const& idx_2,
    typename cxx_diagrams::field_indices<fields::Fu >::type const& idx_3) const{
-   
+
    // amplitude type
    Decay_amplitude_SFF result;
 
