@@ -7,7 +7,7 @@
 operating_system="`(uname -s) 2>/dev/null || echo unknown`"
 
 # default SARAH version
-sarah_version="4.14.5"
+sarah_version="4.15.2"
 
 # exit codes
 exit_ok="0"
