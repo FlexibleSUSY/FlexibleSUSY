@@ -33,7 +33,6 @@ double CLASSNAME::get_partial_width<Higgs, Photon, Photon>(
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
    ) {
-      if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) || flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) || flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
       neutral_higgs_effc.add_coupling(field_as_string<Higgs>(in_idx), {22, 22}, std::sqrt(res));
    }
 
