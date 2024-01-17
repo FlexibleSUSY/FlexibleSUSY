@@ -7,7 +7,7 @@
 operating_system="`(uname -s) 2>/dev/null || echo unknown`"
 
 # default SARAH version
-sarah_version="4.14.5"
+sarah_version="4.15.2"
 
 # exit codes
 exit_ok="0"
@@ -18,7 +18,7 @@ case "$operating_system" in
     Darwin)     mathematica_dir="${HOME}/Library/Mathematica" ;;
     CYGWIN_NT*) mathematica_dir="${USERPROFILE}/AppData/Roaming/Mathematica" ;;
     # Linux, *BSD
-    *)          mathematica_dir="${HOME}/.Mathematica" ;;
+    *)          mathematica_dir="${HOME}/.WolframEngine" ;;
 esac
 
 mathematica_kernel="math"
