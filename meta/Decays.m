@@ -830,7 +830,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                     ]]&, finalState
               ] <>
               If[
-                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]], "",
+                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]], "",
 
               "if (context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
                StringRiffle[
@@ -1127,7 +1127,7 @@ FillSSVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments
           ];
 
-(* replace 'physical_mass' with 'mass' to check Ward identity *)
+(* For tests: replace 'physical_mass' with 'mass' to check Ward identity *)
 FillSVVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{assignments = ""},
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
