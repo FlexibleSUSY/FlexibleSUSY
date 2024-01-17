@@ -118,7 +118,6 @@ EffectiveCoupling_list get_normalized_effective_couplings(
    // make sure we don't compute input for the EFFHIGGSCOUPLINGS block in the
    // built in SM
    auto flexibledecay_settings_ = flexibledecay_settings;
-   flexibledecay_settings_.set(FlexibleDecay_settings::print_effc_block, 0.0);
 
    EffectiveCoupling_list _bsm_input;
    for (auto const& el : bsm_input) {
