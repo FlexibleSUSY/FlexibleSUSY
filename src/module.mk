@@ -193,13 +193,11 @@ LIBFLEXI_HDR += \
 		$(DIR)/two_scale_solver.hpp
 endif
 
-ifeq ($(ENABLE_HIGGSTOOLS),yes)
 LIBFLEXI_SRC += \
 		$(DIR)/decays/experimental_constraints.cpp
 
 LIBFLEXI_HDR += \
 		$(DIR)/decays/experimental_constraints.hpp
-endif
 
 # remove duplicates in case multiple solvers are used
 LIBFLEXI_SRC := $(sort $(LIBFLEXI_SRC))

@@ -69,6 +69,7 @@ constexpr double relMassError = 0.03;
 // Ref. model for computing brs and xsections on the HiggsTools side
 constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
+#ifdef ENABLE_HIGGSTOOLS
 double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
    const auto signals = Higgs::Signals {higgssignals_dataset};
 
@@ -84,6 +85,7 @@ double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
    );
    return signals(pred);
 }
+#endif
 
 void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
    std::cout << "Effective couplings for particle of mass " << mass << '\n';
@@ -130,8 +132,8 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 
       // create a SM equivalent to the BSM model, with mhSM == mass
       standard_model::Standard_model sm {};
-      sm.initialise_from_input(qedqcd);
       sm.set_physical_input(physical_input);
+      sm.initialise_from_input(qedqcd);
       sm.set_pole_mass_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::pole_mass_loop_order)));
       sm.set_ewsb_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::ewsb_loop_order)));
       sm.set_precision(spectrum_generator_settings.get(Spectrum_generator_settings::precision));

@@ -2714,9 +2714,7 @@ ExampleDecaysIncludes[] :=
          "loop_libraries/loop_library.hpp"},
        "\n"
     ] <>
-"\n#ifdef ENABLE_HIGGSTOOLS
-#include \"decays/experimental_constraints.hpp\"
-#endif";
+"\n#include \"decays/experimental_constraints.hpp\"";
 
 ExampleCalculateDecaysForModel[] :=
 IndentText[
