@@ -175,7 +175,7 @@ void FlexibleDecay_settings::reset()
    values[include_higher_order_corrections]           = 4.0;
    values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
    values[offshell_VV_decays]                         = 2.0;
-   values[print_effc_block]                           = 0.0;
+   values[print_effc_block]                           = 1.0;
    values[use_pole_higgs_mixings]                     = 0.0;
    values[call_higgstools]                            = 1.0;
    values[call_lilith]                                = 1.0;
