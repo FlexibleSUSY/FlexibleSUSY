@@ -83,6 +83,11 @@ namespace standard_model_info {
    extern const std::string model_name;
    constexpr bool is_low_energy_model = false;
    constexpr bool is_supersymmetric_model = false;
+   constexpr bool is_CP_violating_Higgs_sector {false};
+
+   int get_pdg_code_for_particle(Particles);
+   int get_pdg_code_for_particle(Particles, int);
+   std::string get_particle_name_from_pdg(int);
 
    class Standard_model_particle_names : public Names {
    public:
