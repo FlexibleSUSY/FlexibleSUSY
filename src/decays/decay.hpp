@@ -343,15 +343,6 @@ struct hVV_4body_params {
    double GammaV {};
 };
 
-// utility functions for H->V*V*
-double Httbar_3body(double *q2, size_t dim, void *params);
-double Attbar_3body(double *q2, size_t dim, void *params);
-struct Phittbar_3body_params {
-   double kappaW {};
-   double kappat {};
-   double gammat {};
-};
-
 } // namespace flexiblesusy
 
 #endif
