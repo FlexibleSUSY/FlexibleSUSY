@@ -36,10 +36,12 @@ fi
     exit 1;
 }
 
+# calculate amu at 1-loop with FS
 { cat "${SLHA_IN}";
   cat <<EOF
 Block FlexibleSUSY
     15  1   # calculate observables (a_muon, ...)
+    32  1   # 1-loop calculation of amu
 EOF
   } | "${CMSSMNoFV_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
 
@@ -58,10 +60,27 @@ EOF
 
 alpha_em_0=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYInput | awk '{ if ($1 == 0) print $2 }')
 
-amu_1l_2lQED_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
+amu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
+
+# calculate amu at 2-loop with FS
+{ cat "${SLHA_IN}";
+  cat <<EOF
+Block FlexibleSUSY
+    15  1   # calculate observables (a_muon, ...)
+    32  2   # 2-loop calculation of amu
+EOF
+  } | "${CMSSMNoFV_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
+
+[ $? = 0 ] || {
+    echo "Error: ${CMSSMNoFV_EXE} failed!"
+    exit 1
+}
+
+amu_2l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
 
 amu_2l_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 2) print $2 }')
 
+# calculate amu at 2-loop with GM2Calc
 amu_2l_gm2calc=$({ cat <<EOF
 Block GM2CalcConfig
      1  2  # loop order
@@ -79,6 +98,7 @@ EOF
     exit 1
 }
 
+# calculate amu at 1-loop with GM2Calc
 amu_1l_gm2calc=$({ cat <<EOF
 Block GM2CalcConfig
      1  1  # loop order
@@ -97,7 +117,8 @@ EOF
 }
 
 # convert scientific notation to bc friendly notation
-amu_1l_2lQED_fs=$(echo "${amu_1l_2lQED_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_1l_fs=$(echo "${amu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+amu_2l_fs=$(echo "${amu_2l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc=$(echo "${amu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
@@ -144,18 +165,19 @@ EOF
 
 test_close "${amu_2l_gm2calc_fs}" "${amu_2l_gm2calc}" "0.0001"
 
-### test 1L + 2L QED FlexibleSUSY vs. embedded 2L GM2Calc
+### test 1L FlexibleSUSY vs. 1L GM2Calc
 
-test_close "${amu_2l_gm2calc_fs}" "${amu_1l_2lQED_fs}" "0.04"
+test_close "${amu_1l_gm2calc}" "${amu_1l_fs}" "0.005"
 
-### test 1L + 2L QED FlexibleSUSY vs. 1L GM2Calc
+### test 2L FlexibleSUSY vs. embedded 2L GM2Calc
 
-test_close "${amu_1l_gm2calc}" "${amu_1l_2lQED_fs}" "0.1"
+test_close "${amu_2l_gm2calc_fs}" "${amu_2l_fs}" "0.05"
 
-echo "FlexibleSUSY 1L + 2L QED: amu = ${amu_1l_2lQED_fs}"
-echo "original 1L GM2Calc     : amu = ${amu_1l_gm2calc}"
-echo "original 2L GM2Calc     : amu = ${amu_2l_gm2calc}"
-echo "embedded 2L GM2Calc     : amu = ${amu_2l_gm2calc_fs}"
+echo "FlexibleSUSY 1L    : amu = ${amu_1l_fs}"
+echo "FlexibleSUSY 2L    : amu = ${amu_2l_fs}"
+echo "original 1L GM2Calc: amu = ${amu_1l_gm2calc}"
+echo "original 2L GM2Calc: amu = ${amu_2l_gm2calc}"
+echo "embedded 2L GM2Calc: amu = ${amu_2l_gm2calc_fs}"
 
 if test $errors -eq 0 ; then
     echo "Test status: OK"

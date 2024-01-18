@@ -43,6 +43,8 @@ extern const char * const spinfo_formatter;
 extern const char * const obsinfo_formatter;
 /// SLHA line formatter for the DECAY block
 extern const char * const format_total_width;
+/// SLHA line formatter for the EFFECTIVECOUPLINGS block
+extern const char * const format_effectivecouplings;
 
 namespace {
    /// maximum line length in SLHA output
@@ -171,6 +173,19 @@ std::string format_decay(double br, const Container& pids, const std::string& na
       const std::string name_ = (name);                                        \
       std::snprintf(buf, SLHA_MAX_LINE_LENGTH, format_total_width,             \
                     pdg_, width_, name_.c_str());                              \
+      return std::string(buf);                                                 \
+   }()
+
+#define FORMAT_EFFECTIVECOUPLINGS(pdg1, pdg2, pdg3, width, comment)            \
+   [&] {                                                                       \
+      char buf[SLHA_MAX_LINE_LENGTH];                                          \
+      const int pdg1_ = (pdg1);                                                \
+      const int pdg2_ = (pdg2);                                                \
+      const int pdg3_ = (pdg3);                                                \
+      const double width_ = (width);                                           \
+      const std::string comment_ = (comment);                                  \
+      std::snprintf(buf, SLHA_MAX_LINE_LENGTH, format_effectivecouplings,      \
+                    pdg1_, pdg2_, pdg3_, width_, comment_.c_str());            \
       return std::string(buf);                                                 \
    }()
 

@@ -4,9 +4,11 @@
 FlexibleSUSY
 ============
 
-|release| |static-analysis| |tests|
+|release| |commits-since| |static-analysis| |tests|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |commits-since| image:: https://img.shields.io/github/commits-since/FlexibleSUSY/FlexibleSUSY/latest/development
+   :alt: GitHub commits since latest release (by SemVer including pre-releases)
 .. |static-analysis| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/static%20analysis/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/static-analysis.yml
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
@@ -96,7 +98,7 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
+* C++17 compiler (g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
@@ -117,8 +119,16 @@ Optional:
 Installation of required/optional libraries
 -------------------------------------------
 
+The required libraries Boost_, `Eigen 3`_ and `GNU scientific library`_
+can usually be installed via the package manager of the operating system.
+On Debian/Ubuntu one may run for example
+
+.. code-block:: shell
+
+    sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev
+
 The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
-LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
+LoopTools_, Himalaya_ and TSIL_ can be also installed using the Conan_
 package manager.  If not already installed, Conan can be installed
 with pip
 
@@ -133,12 +143,7 @@ To install the libraries required by FlexibleSUSY, run
     conan install . --build=missing
 
 The `GNU scientific library`_ can currently not be installed via
-Conan_.  One may use the package manager of the operating system to
-install it.  On Debian/Ubuntu one may run for example
-
-.. code-block:: shell
-
-    sudo apt-get install libgsl-dev
+Conan_.
 
 If the required libraries are installed via Conan or the operating
 system's package manager, they will be found automatically by
@@ -772,7 +777,7 @@ This is achieved by setting the ``FFLAGS`` variable during LoopTools configurati
 
 .. code-block:: shell
 
-    FFLAGS=-fPIC ./configure
+    FFLAGS="-O3 -fPIC" ./configure
 
 COLLIER support
 ```````````````
