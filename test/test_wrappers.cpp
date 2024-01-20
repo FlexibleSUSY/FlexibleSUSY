@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( test_Constants )
    BOOST_CHECK_CLOSE_FRACTION(zeta4, std::riemann_zeta(4), 3e-16);
    BOOST_CHECK_EQUAL(zeta5         , std::riemann_zeta(5));
    BOOST_CHECK_EQUAL(ln2           , boost::math::constants::ln_two<double>());
-   BOOST_CHECK_CLOSE_FRACTION(oneOverSqrt2  , 1/sqrt(2.), 3e-16);
+   BOOST_CHECK_CLOSE_FRACTION(oneOverSqrt2, 1/std::sqrt(2.), 3e-16);
 }
 
 BOOST_AUTO_TEST_CASE( test_Abs )
