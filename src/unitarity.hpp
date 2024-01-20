@@ -31,10 +31,10 @@
 namespace flexiblesusy {
 
 struct UnitarityInfiniteS {
-   bool allowed;
-   double renScale;
-   double maxAbsReEigenval;
-   Eigen::MatrixXcd scatteringMatrix;
+   bool allowed = false;
+   double renScale = 0.;
+   double maxAbsReEigenval = 0.;
+   Eigen::MatrixXcd scatteringMatrix {};
 };
 
 } // namespace flexiblesusy
