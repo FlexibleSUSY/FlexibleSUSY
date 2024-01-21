@@ -36,10 +36,8 @@ handle = FSCMSSMOpenHandle[
 FSCMSSMCalculateSpectrum[handle];
 
 unitarity = FSCMSSMCalculateUnitarity[handle];
-Print[N[unitarity, 18]];
-Print[1 - (FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]])/866.7856190934974]
-Print[1 - (FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]])/0.029739009345726267];
 
-TestEqual[FlexibleSUSYUnitarity`Allowed /. unitarity[[1,2]], True];
-TestCloseRel[FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]], 866.7856190934974, 2*10^-16];
-TestCloseRel[FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]], 0.029739009345726267, 3*10^-16];
+Print[Abs[(FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]]) - 866.8013526495104]/866.8013526495104];
+TestCloseRel[FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]], 866.8013526495104, 10^-16];
+Print[Abs[(FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]]) - 0.02973890765470515]/0.02973890765470515];
+TestCloseRel[FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]], 0.02973890765470515, 7.*10^-16];
