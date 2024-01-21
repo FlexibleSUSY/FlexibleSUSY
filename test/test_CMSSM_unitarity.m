@@ -37,7 +37,5 @@ FSCMSSMCalculateSpectrum[handle];
 
 unitarity = FSCMSSMCalculateUnitarity[handle];
 
-Print[Abs[(FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]]) - 866.8013526495104]/866.8013526495104];
-TestCloseRel[FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]], 866.8013526495104, 10^-16];
-Print[Abs[(FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]]) - 0.02973890765470515]/0.02973890765470515];
-TestCloseRel[FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]], 0.02973890765470515, 7.*10^-16];
+TestCloseRel[FlexibleSUSYUnitarity`RenormalizationScale /. unitarity[[1,2]], 866.8013526495104, 0.];
+TestCloseRel[FlexibleSUSYUnitarity`MaxAbsReEigen /. unitarity[[1,2]], 0.02973890765470515, 3.*10^-16];
