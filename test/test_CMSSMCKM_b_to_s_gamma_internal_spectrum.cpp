@@ -194,8 +194,8 @@ Block MSOFTIN
    const auto calculated_value = CMSSMCKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
    constexpr std::complex<double> C7NP  {-0.0053094128952261635,  -9.7025869191383121e-05};
    constexpr std::complex<double> C7pNP {-0.00012366231966027145, -2.2598442848446435e-06};
-   constexpr std::complex<double> C8NP  {0.016491993833256832,     0.00030123469860007075};
-   constexpr std::complex<double> C8pNP {0.00038603929508783667,   7.0512140866869945e-06};
+   constexpr std::complex<double> C8NP  {0.016490888662826098,     0.00030121451286620036};
+   constexpr std::complex<double> C8pNP {0.00038601398040478963,   7.0507444188070971e-06};
 
    TEST_COMPLEX_CLOSE_FRACTION(C7NP , calculated_value[0], 5e-5);
    TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 5e-5);

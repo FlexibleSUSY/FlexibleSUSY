@@ -74,7 +74,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "W. Kotlarski",
               "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2023";
+FS`Years   = "2013-2024";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -5072,7 +5072,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            (* b -> s gamma *)
            If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
-             Print["Creating b->s'A class ..."];
+             Print["Creating b->sγ class ..."];
              QToQGammaFields = Join[{BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetPhoton[]}},
                {BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetGluon[]}}],
              QToQGammaFields = {}];

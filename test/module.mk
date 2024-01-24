@@ -79,6 +79,7 @@ TEST_SRC := \
 		$(DIR)/test_sm_mw.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
+		$(DIR)/test_standard_model_mw_calculation.cpp \
 		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_string_format.cpp \
 		$(DIR)/test_sum.cpp \
@@ -188,7 +189,6 @@ endif
 
 ifeq ($(WITH_SM) $(WITH_SOFTSUSY),yes yes)
 TEST_SRC += \
-		$(DIR)/test_SM_weinberg_angle.cpp \
 		$(DIR)/test_SM_weinberg_angle_meta.cpp
 endif
 
@@ -204,9 +204,7 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_model.cpp \
 		$(DIR)/test_CMSSM_slha_output.cpp \
 		$(DIR)/test_CMSSM_spectrum.cpp \
-		$(DIR)/test_CMSSM_susy_scale_constraint.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle_meta.cpp
+		$(DIR)/test_CMSSM_susy_scale_constraint.cpp
 TEST_SH += \
 		$(DIR)/test_CMSSM_gluino.sh
 endif
@@ -553,7 +551,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp \
-		$(DIR)/test_standard_model_cxxvertices.cpp
+		$(DIR)/test_standard_model_cxxvertices.cpp \
+		$(DIR)/test_standard_model_weinberg_angle.cpp
 TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
@@ -1216,6 +1215,8 @@ $(DIR)/test_SM_two_loop_spectrum.x: $(LIBSM)
 $(DIR)/test_SM_mw_calculation.x: $(LIBSM)
 
 $(DIR)/test_standard_model_cxxvertices.x: $(LIBSM)
+
+$(DIR)/test_standard_model_weinberg_angle.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
 

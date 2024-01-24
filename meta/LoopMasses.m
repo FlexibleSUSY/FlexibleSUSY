@@ -1031,22 +1031,33 @@ CallAllPoleMassFunctions[states_, enablePoleMassThreads_] :=
            susyParticles = Complement[particles, smParticles];
            If[enablePoleMassThreads =!= True,
               callSusy = StringJoin[CallPoleMassFunction /@ susyParticles];
-              callSM   = StringJoin[CallPoleMassFunction /@ smParticles];
+              callSM   = StringJoin[CallPoleMassFunction /@ Select[smParticles, #=!=GetWBoson[]&]];
               result = "if (calculate_bsm_pole_masses) {\n" <>
                        IndentText[callSusy] <>
                        "}\n\n" <>
                        "if (calculate_sm_pole_masses) {\n" <>
-                       IndentText[callSM] <>
+                       IndentText[callSM <>
+                          "if (PHYSICAL(M" <> ToString@GetWBoson[] <> ") == 0.) {\n" <>
+                             IndentText[LoopMasses`CreateLoopMassFunctionName[GetWBoson[]] <> "();\n"] <>
+                          "}\n"
+                       ] <>
                        "}\n";
               ,
               callSusy = StringJoin[CallThreadedPoleMassFunction /@ susyParticles];
-              callSM   = StringJoin[CallThreadedPoleMassFunction /@ smParticles];
+              callSM   = StringJoin[CallThreadedPoleMassFunction /@ Select[smParticles, #=!=GetWBoson[]&]];
               result = "Thread_pool tp(std::min(std::thread::hardware_concurrency(), " <> ToString[Length[susyParticles] + Length[smParticles]] <> "u));\n\n" <>
                        "if (calculate_bsm_pole_masses) {\n" <>
                        IndentText[callSusy] <>
                        "}\n\n" <>
                        "if (calculate_sm_pole_masses) {\n" <>
-                       IndentText[callSM] <>
+                       IndentText[callSM <>
+                          "tp.run_task([this] () {\n" <>
+                          IndentText[
+                             "if (PHYSICAL(M" <> ToString@GetWBoson[] <> ") == 0.) {\n" <>
+                                IndentText[LoopMasses`CreateLoopMassFunctionName[GetWBoson[]] <> "();\n"] <>
+                             "}\n"
+                          ] <> "}\n"
+                       ] <>
                        "}\n";
              ];
            result
