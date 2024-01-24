@@ -46,7 +46,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -138,7 +138,7 @@ fi
 { printf "%s\n" "${SLHA_IN}";
   cat <<EOF
 Block FlexibleSUSY
-    15  1   # calculate observables (a_muon, ...)
+    15  1   # calculate all observables
     32  1   # 1-loop calculation of amu
 EOF
   } | "${THDMII_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
@@ -154,7 +154,7 @@ amu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEn
 { printf "%s\n" "${SLHA_IN}";
   cat <<EOF
 Block FlexibleSUSY
-    15  1   # calculate observables (a_muon, ...)
+    15  1   # calculate all observables
     32  2   # 2-loop calculation of amu
 EOF
   } | "${THDMII_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"

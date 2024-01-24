@@ -54,7 +54,7 @@ public:
       force_output,          ///< [12] force output
       top_pole_qcd_corrections,         ///< [13] Top-quark pole mass QCD corrections
       beta_zero_threshold,   ///< [14] beta function zero threshold
-      calculate_observables, ///< [15] calculate observables (a_muon, ...)
+      calculate_observables, ///< [15] calculate all observables
       force_positive_masses, ///< [16] force positive masses of majoran fermions
       pole_mass_scale,       ///< [17] renormalization scale at which the pole masses are calculated
       eft_pole_mass_scale,   ///< [18] renormalization scale at which the pole masses are calculated in the EFT

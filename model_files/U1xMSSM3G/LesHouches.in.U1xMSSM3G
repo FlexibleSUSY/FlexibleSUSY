@@ -16,7 +16,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   0                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -40,11 +40,11 @@ Block FlexibleSUSYInput
 Block SMINPUTS               # Standard Model inputs
     1   1.27932567E+02       # alpha^(-1) SM MSbar(MZ)
     2   1.166378700e-05      # G_Fermi
-    3   1.187000000e-01      # alpha_s(MZ) SM MSbar 
+    3   1.187000000e-01      # alpha_s(MZ) SM MSbar
     4   9.118870000e+01      # MZ(pole)
     5   4.180000000e+00      # mb(mb) SM MSbar
     6   1.735000000e+02      # mtop(pole)
-    7   1.776690000e+00      # mtau(pole) 
+    7   1.776690000e+00      # mtau(pole)
     8   0.000000000e+00      # mnu3(pole)
    11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
@@ -79,7 +79,7 @@ Block EXTPAR  # Input parameters
    52    1.00000000E+00  # lEinput
    53    1.00000000E+03  # MVUinput
    54    4.00000000E+02  # MVEinput
-Block YEPIN    #  
+Block YEPIN    #
     1 1   0.000000E+00         # yep(1,1)
     1 2   0.000000E+00         # yep(1,2)
     1 3   0.000000E+00         # yep(1,3)
@@ -89,7 +89,7 @@ Block YEPIN    #
     3 1   0.000000E+00         # yep(3,1)
     3 2   0.000000E+00         # yep(3,2)
     3 3   0.000000E+00         # yep(3,3)
-Block YXIN    #  
+Block YXIN    #
     1 1   0.000000E+00         # Yx(1,1)
     1 2   0.000000E+00         # Yx(1,2)
     1 3   0.000000E+00         # Yx(1,3)
@@ -99,7 +99,7 @@ Block YXIN    #
     3 1   0.000000E+00         # Yx(3,1)
     3 2   0.000000E+00         # Yx(3,2)
     3 3   0.000000E+00         # Yx(3,3)
-Block YUPIN    #  
+Block YUPIN    #
     1 1   0.000000E+00         # yup(1,1)
     1 2   0.000000E+00         # yup(1,2)
     1 3   0.000000E+00         # yup(1,3)
@@ -109,7 +109,7 @@ Block YUPIN    #
     3 1   0.000000E+00         # yup(3,1)
     3 2   0.000000E+00         # yup(3,2)
     3 3   0.000000E+00         # yup(3,3)
-Block YVIN    #  
+Block YVIN    #
     1 1   0.000000E+00         # Yv(1,1)
     1 2   0.000000E+00         # Yv(1,2)
     1 3   0.000000E+00         # Yv(1,3)
@@ -119,66 +119,66 @@ Block YVIN    #
     3 1   0.000000E+00         # Yv(3,1)
     3 2   0.000000E+00         # Yv(3,2)
     3 3   0.000000E+00         # Yv(3,3)
-Block SPhenoInput    # SPheno specific input 
-    1 -1             # error level 
-    2  0             # SPA conventions 
-    7  0             # Skip 2-loop Higgs corrections 
-    8  3             # Method used for two-loop calculation 
-    9  1             # Gaugeless limit used at two-loop 
-   10  0             # safe-mode used at two-loop 
-   11  1             # calculate branching ratios 
-   13  0             # 3-Body decays: none (0), fermion (1), scalar (2), both (3) 
-   14  1             # Run couplings to scale of decaying particle 
-   12  1.000E-04     # write only branching ratios larger than this value 
-   15  1.000E-30     # write only decay if width larger than this value 
-   31  -1            # fixed GUT scale (-1: dynamical GUT scale) 
-   32  0             # Strict unification 
-   34  1.000E-04     # Precision of mass calculation 
+Block SPhenoInput    # SPheno specific input
+    1 -1             # error level
+    2  0             # SPA conventions
+    7  0             # Skip 2-loop Higgs corrections
+    8  3             # Method used for two-loop calculation
+    9  1             # Gaugeless limit used at two-loop
+   10  0             # safe-mode used at two-loop
+   11  1             # calculate branching ratios
+   13  0             # 3-Body decays: none (0), fermion (1), scalar (2), both (3)
+   14  1             # Run couplings to scale of decaying particle
+   12  1.000E-04     # write only branching ratios larger than this value
+   15  1.000E-30     # write only decay if width larger than this value
+   31  -1            # fixed GUT scale (-1: dynamical GUT scale)
+   32  0             # Strict unification
+   34  1.000E-04     # Precision of mass calculation
    35  40            # Maximal number of iterations
    36  5             # Minimal number of iterations before discarding points
-   37  1             # Set Yukawa scheme  
-   38  2             # 1- or 2-Loop RGEs 
-   50  1             # Majorana phases: use only positive masses (put 0 to use file with CalcHep/Micromegas!) 
-   51  0             # Write Output in CKM basis 
-   52  1             # Write spectrum in case of tachyonic states 
-   55  1             # Calculate loop corrected masses 
-   57  0             # Calculate low energy constraints 
-   60  1             # Include possible, kinetic mixing 
-   65  1             # Solution tadpole equation 
-   75  1             # Write WHIZARD files 
-   76  1             # Write HiggsBounds file   
-   86  0             # Maximal width to be counted as invisible in Higgs decays; -1: only LSP 
-  510  0             # Write tree level values for tadpole solutions 
-  515  0             # Write parameter values at GUT scale 
-  520  0             # Write effective Higgs couplings (HiggsBounds blocks): put 0 to use file with MadGraph! 
-  525  0             # Write loop contributions to diphoton decay of Higgs 
-  530  1             # Write Blocks for Vevacious 
- 1101  1             # Include Glu in 1-loop corrections 
- 1102  1             # Include Chi in 1-loop corrections 
- 1103  1             # Include Cha in 1-loop corrections 
- 1104  1             # Include Fv in 1-loop corrections 
- 1105  1             # Include Fe in 1-loop corrections 
- 1106  1             # Include Fd in 1-loop corrections 
- 1107  1             # Include Fu in 1-loop corrections 
- 1201  1             # Include Sd in 1-loop corrections 
- 1202  1             # Include Su in 1-loop corrections 
- 1203  1             # Include Se in 1-loop corrections 
- 1204  1             # Include SvIm in 1-loop corrections 
- 1205  1             # Include SvRe in 1-loop corrections 
- 1206  1             # Include hh in 1-loop corrections 
- 1207  1             # Include Ah in 1-loop corrections 
- 1208  1             # Include Hpm in 1-loop corrections 
- 1301  1             # Include VG in 1-loop corrections 
- 1302  1             # Include VP in 1-loop corrections 
- 1303  1             # Include VZ in 1-loop corrections 
- 1304  1             # Include VZp in 1-loop corrections 
- 1305  1             # Include VWm in 1-loop corrections 
- 1401  1             # Include gG in 1-loop corrections 
- 1402  1             # Include gA in 1-loop corrections 
- 1403  1             # Include gZ in 1-loop corrections 
- 1404  1             # Include gZp in 1-loop corrections 
- 1405  1             # Include gWm in 1-loop corrections 
- 1406  1             # Include gWpC in 1-loop corrections 
- 1500  1             # Include Wave diagrams 1-loop corrections 
- 1501  1             # Include Penguin diagrams 1-loop corrections 
- 1502  1             # Include Box diagrams 1-loop corrections 
+   37  1             # Set Yukawa scheme
+   38  2             # 1- or 2-Loop RGEs
+   50  1             # Majorana phases: use only positive masses (put 0 to use file with CalcHep/Micromegas!)
+   51  0             # Write Output in CKM basis
+   52  1             # Write spectrum in case of tachyonic states
+   55  1             # Calculate loop corrected masses
+   57  0             # Calculate low energy constraints
+   60  1             # Include possible, kinetic mixing
+   65  1             # Solution tadpole equation
+   75  1             # Write WHIZARD files
+   76  1             # Write HiggsBounds file
+   86  0             # Maximal width to be counted as invisible in Higgs decays; -1: only LSP
+  510  0             # Write tree level values for tadpole solutions
+  515  0             # Write parameter values at GUT scale
+  520  0             # Write effective Higgs couplings (HiggsBounds blocks): put 0 to use file with MadGraph!
+  525  0             # Write loop contributions to diphoton decay of Higgs
+  530  1             # Write Blocks for Vevacious
+ 1101  1             # Include Glu in 1-loop corrections
+ 1102  1             # Include Chi in 1-loop corrections
+ 1103  1             # Include Cha in 1-loop corrections
+ 1104  1             # Include Fv in 1-loop corrections
+ 1105  1             # Include Fe in 1-loop corrections
+ 1106  1             # Include Fd in 1-loop corrections
+ 1107  1             # Include Fu in 1-loop corrections
+ 1201  1             # Include Sd in 1-loop corrections
+ 1202  1             # Include Su in 1-loop corrections
+ 1203  1             # Include Se in 1-loop corrections
+ 1204  1             # Include SvIm in 1-loop corrections
+ 1205  1             # Include SvRe in 1-loop corrections
+ 1206  1             # Include hh in 1-loop corrections
+ 1207  1             # Include Ah in 1-loop corrections
+ 1208  1             # Include Hpm in 1-loop corrections
+ 1301  1             # Include VG in 1-loop corrections
+ 1302  1             # Include VP in 1-loop corrections
+ 1303  1             # Include VZ in 1-loop corrections
+ 1304  1             # Include VZp in 1-loop corrections
+ 1305  1             # Include VWm in 1-loop corrections
+ 1401  1             # Include gG in 1-loop corrections
+ 1402  1             # Include gA in 1-loop corrections
+ 1403  1             # Include gZ in 1-loop corrections
+ 1404  1             # Include gZp in 1-loop corrections
+ 1405  1             # Include gWm in 1-loop corrections
+ 1406  1             # Include gWpC in 1-loop corrections
+ 1500  1             # Include Wave diagrams 1-loop corrections
+ 1501  1             # Include Penguin diagrams 1-loop corrections
+ 1502  1             # Include Box diagrams 1-loop corrections

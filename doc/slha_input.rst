@@ -28,7 +28,7 @@ FlexibleSUSY configuration block (FlexibleSUSY)
        12   0         # force output
        13   3         # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)
        14   1.0e-11   # beta-function zero threshold
-       15   0         # calculate observables (a_muon, effective couplings)
+       15   0         # calculate all observables
        16   0         # force positive majorana masses
        17   0         # pole mass scale
        18   0         # pole mass scale in the EFT (0 = min(SUSY scale, Mt))

@@ -16,7 +16,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top quark 2-loop corrections QCD
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
 Block FlexibleSUSYInput

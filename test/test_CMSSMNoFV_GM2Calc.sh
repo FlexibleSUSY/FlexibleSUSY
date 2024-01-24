@@ -40,7 +40,7 @@ fi
 { cat "${SLHA_IN}";
   cat <<EOF
 Block FlexibleSUSY
-    15  1   # calculate observables (a_muon, ...)
+    15  1   # calculate all observables
     32  1   # 1-loop calculation of amu
 EOF
   } | "${CMSSMNoFV_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
@@ -66,7 +66,7 @@ amu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEn
 { cat "${SLHA_IN}";
   cat <<EOF
 Block FlexibleSUSY
-    15  1   # calculate observables (a_muon, ...)
+    15  1   # calculate all observables
     32  2   # 2-loop calculation of amu
 EOF
   } | "${CMSSMNoFV_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
