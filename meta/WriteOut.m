@@ -451,6 +451,8 @@ WriteSLHABlockEntry[blockName_, {Hold[par_], idx___}, comment_String:""] :=
 
 ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 
+$writeSLHACurrentObservable;
+
 Module[{npfFiles, npfObservables, npfPattern, executedAlready},
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
 Module[{},
@@ -460,6 +462,7 @@ Module[{},
       npfPattern = Alternatives@@(ToExpression["_FlexibleSUSYObservable`"<>#]&/@npfObservables);
       executedAlready = True;
    ];
+   $writeSLHACurrentObservable = par;
    Switch[par,
          FlexibleSUSYObservable`AMM[_],
              WriteSLHABlockEntry[blockName,
@@ -494,11 +497,19 @@ Module[{},
    ]
 ];];
 
+WriteSLHABlockEntry::errType = "Currently type `1` is not supported.";
 WriteSLHABlockEntry["FWCOEF"|"IMFWCOEF", {flha_List, _}, _] :=
-Module[{numbered},
+Module[{obstype, maxlength, numbered},
+   obstype = Observables`GetObservableType@$writeSLHACurrentObservable;
+   Switch[obstype,
+      _CConversion`ArrayType,
+         maxlength = obstype[[2]],
+      _,
+         Utils`AssertOrQuit[False, WriteSLHABlockEntry::errType, obstype]
+   ];
    numbered = MapIndexed[
       StringReplace["      << FORMAT_WILSON_COEFFICIENTS(" <> #1 <> ")\n",
-      ")," -> "(" <> ToString@First@#2 <> ")),"]&,
+      ")," -> "(" <> ToString[maxlength - Length@flha + First@#2 - 1] <> ")),"]&,
       flha
    ];
    numbered = StringReplace[numbered,

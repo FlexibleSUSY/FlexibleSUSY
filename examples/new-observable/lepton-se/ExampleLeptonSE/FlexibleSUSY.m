@@ -48,7 +48,7 @@ Module[
             TextFormatting`ReplaceCXXTokens["
                @type@ @prototype@ {
                   const auto npf = npointfunctions::@name@(model, {gen, gen}, {});
-                  return {0, npf[0], npf[1]};
+                  return {npf[0], npf[1]};
                }",
                {
                   "@type@"      -> CConversion`CreateCType@Observables`GetObservableType@#,
