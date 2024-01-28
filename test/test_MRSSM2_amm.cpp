@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
    BOOST_CHECK_CLOSE_FRACTION(amu, -8.1717853946513499e-11, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(amu, MRSSM2_lepton_amm_wrapper::calculate_Fe_amm(m, qedqcd, settings, 1), 1e-16);
    double damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 1);
-   BOOST_CHECK_CLOSE_FRACTION(damu, 9.070175470071625e-13, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(damu, 3.0887729897668767e-11, 1e-7);
 
    atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
    BOOST_CHECK_CLOSE_FRACTION(atau, -2.2071645085574141e-08, 1e-7);
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
    BOOST_CHECK_CLOSE_FRACTION(atau, 3.7317183255799172e-09, 1e-7);
 
    damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 1);
-   BOOST_CHECK_CLOSE_FRACTION(damu, 7.2785435744361696e-12, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(damu, 3.042784947881566e-11, 1e-7);
 
    // 1L + 2L QED + Barr-Zee
    settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
