@@ -1047,6 +1047,11 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 }
 
+double Standard_model::calculate_G_fermi(const softsusy::QedQcd&)
+{
+   return 0.0;
+}
+
 double Standard_model::calculate_theta_w()
 {
 
