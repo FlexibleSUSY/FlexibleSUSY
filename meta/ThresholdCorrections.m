@@ -513,7 +513,7 @@ try {
    THETAW = ArcSin(result.first);
 
    if (MODEL->get_thresholds() && MODEL->get_threshold_corrections().sin_theta_w > 0)
-      qedqcd.setPoleMW(result.second);
+      Pole(M" <> ToString@TreeMasses`GetWBoson[] <> ") = result.second;
 
    MODEL->get_problems().unflag_no_sinThetaW_convergence();
 } catch (const Error& e) {

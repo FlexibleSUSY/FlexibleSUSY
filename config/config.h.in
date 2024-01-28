@@ -89,6 +89,9 @@
 /* Enable HiggsTools */
 @DEFINE_ENABLE_HIGGSTOOLS@
 
+/* Enable Lilith */
+@DEFINE_ENABLE_LILITH@
+
 /* Enable Himalaya */
 @DEFINE_ENABLE_HIMALAYA@
 

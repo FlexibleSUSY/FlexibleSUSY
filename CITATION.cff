@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+title: FlexibleSUSY
+type: software
+authors:
+  - given-names: Peter
+    family-names: Athron
+    email: peter.athron@coepp.org.au
+    orcid: 'https://orcid.org/0000-0003-2966-5914'
+  - given-names: Uladzimir
+    family-names: Khasianevich
+    email: uladzimir.khasianevich@tu-dresden.de
+    orcid: 'https://orcid.org/0000-0003-0255-0674'
+    affiliation: TU Dresden
+  - given-names: Wojciech
+    family-names: Kotlarski
+    email: wojciech.kotlarski@ncbj.gov.pl
+    orcid: 'https://orcid.org/0000-0002-1191-6343'
+    affiliation: National Centre for Nuclear Research
+  - given-names: Jae-hyeon
+    family-names: Park
+    email: jhpark@kias.re.kr
+  - given-names: Dominik
+    family-names: Stöckinger
+    email: dominik.stoeckinger@tu-dresden.de
+    affiliation: TU Dresden
+  - given-names: Alexander
+    family-names: Voigt
+    email: alexander.voigt@physik.rwth-aachen.de
+    orcid: 'https://orcid.org/0000-0001-8963-6512'
+identifiers:
+  - type: doi
+    value: 10.1016/j.cpc.2014.12.020
+    description: Comput. Phys. Commun. 190 (2015) 139-172
+  - type: doi
+    value: 10.1016/j.cpc.2018.04.016
+    description: Comput. Phys. Commun. 230 (2018) 145-217
+repository-code: 'https://github.com/FlexibleSUSY/FlexibleSUSY'
+url: 'https://github.com/FlexibleSUSY/FlexibleSUSY'
+license: GPL-3.0
+commit: a8200a74dde3b9844f670f681e5e6910f68ea3da
+version: 2.7.1
+date-released: '2022-06-07'
