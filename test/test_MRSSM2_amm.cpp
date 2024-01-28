@@ -37,13 +37,12 @@ struct AMM {
    double ae{}, dae{};
    double amu{}, damu{};
    double atau{}, datau{};
-   double amu_wrapper{};
 };
 
-struct Data {
-   AMM a_1L{};
-   AMM a_1L_2LQCD{};
-   AMM a_1L_2LQCD_2LBarrZee{};
+struct Dataset {
+   AMM a_1L{};                 ///< 1L
+   AMM a_1L_2LQCD{};           ///< 1L + 2L QED
+   AMM a_1L_2LQCD_2LBarrZee{}; ///< 1L + 2L QED + 2L Barr-Zee
 };
 
 
@@ -60,17 +59,15 @@ AMM calc_amm(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectrum_gene
    result.atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
    result.datau = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 2);
 
-   result.amu_wrapper = MRSSM2_lepton_amm_wrapper::calculate_Fe_amm(m, qedqcd, settings, 1);
+   BOOST_CHECK_EQUAL(result.amu, MRSSM2_lepton_amm_wrapper::calculate_Fe_amm(m, qedqcd, settings, 1));
 
    return result;
 }
 
 
-Data calc_amm_sets(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectrum_generator_settings settings)
+Dataset calc_amm_sets(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectrum_generator_settings settings)
 {
-   using MRSSM2_cxx_diagrams::fields::Fe;
-
-   Data result;
+   Dataset result;
 
    // 1L
    settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
@@ -85,6 +82,22 @@ Data calc_amm_sets(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectru
    result.a_1L_2LQCD_2LBarrZee = calc_amm(m, qedqcd, settings);
 
    return result;
+}
+
+
+// check consistency of uncertainties at different loop levels
+void check_uncertainty(const Dataset& data)
+{
+   BOOST_CHECK_GT(data.a_1L.damu, data.a_1L_2LQCD.damu);
+   BOOST_CHECK_GT(data.a_1L_2LQCD.damu, data.a_1L_2LQCD_2LBarrZee.damu);
+
+   const double oneL = data.a_1L.amu;
+   const double twoL_QCD = data.a_1L_2LQCD.amu - data.a_1L.amu;
+   const double twoL_BarrZee = data.a_1L_2LQCD_2LBarrZee.amu - data.a_1L_2LQCD.amu;
+
+   BOOST_CHECK_GT(data.a_1L.damu, twoL_QCD + twoL_BarrZee);
+   BOOST_CHECK_GT(data.a_1L_2LQCD.damu, twoL_BarrZee);
+   BOOST_CHECK_GT(data.a_1L_2LQCD_2LBarrZee.damu, 0.0);
 }
 
 
@@ -126,13 +139,13 @@ BOOST_AUTO_TEST_CASE( test_amu_chargino_dominance )
 
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.ae, -1.8019087470353613e-15, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.amu, -8.1717853946513499e-11, 1e-7);
-   BOOST_CHECK_EQUAL(data.a_1L_2LQCD.amu, data.a_1L_2LQCD.amu_wrapper);
-   BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.damu, 3.0887729897668767e-11, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.atau, -2.2071645085574141e-08, 1e-7);
 
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD_2LBarrZee.ae, -1.1468646899659171e-15, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD_2LBarrZee.amu, -5.371267977475807e-11, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD_2LBarrZee.atau, -1.4150896272117654e-08, 1e-7);
+
+   check_uncertainty(data);
 }
 
 
@@ -174,11 +187,11 @@ BOOST_AUTO_TEST_CASE( test_amu_neutralino_dominance )
 
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.ae, 1.3740221631863563e-16, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.amu, 6.2743670477551711e-12, 1e-7);
-   BOOST_CHECK_EQUAL(data.a_1L_2LQCD.amu, data.a_1L_2LQCD.amu_wrapper);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.atau, 3.7317183255799172e-09, 1e-7);
-   BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD.damu, 3.042784947881566e-11, 1e-7);
 
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD_2LBarrZee.ae, 7.9652674799007061e-16, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD_2LBarrZee.amu, 3.4453972095834096e-11, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L_2LQCD_2LBarrZee.atau, 1.170004365157329e-08, 1e-7);
+
+   check_uncertainty(data);
 }
