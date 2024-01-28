@@ -22,7 +22,7 @@
 
 BeginPackage["AMM`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`", "LoopMasses`"}];
 
-AMMGetMSUSY::usage="";
+AMMGetMLCP::usage="";
 AMMContributingGraphs::usage="";
 AMMContributingDiagramsForGraph::usage="";
 CXXEvaluatorForDiagramFromGraph::usage="";
@@ -122,13 +122,13 @@ GetMinMass[particle_] :=
              ]
           ];
 
-AMMGetMSUSY[] :=
-    Module[{susyParticles},
-           susyParticles = Select[TreeMasses`GetSusyParticles[], IsElectricallyCharged];
-           If[susyParticles === {},
+AMMGetMLCP[] :=
+    Module[{chargedBSMParticles},
+           chargedBSMParticles = Select[TreeMasses`GetSusyParticles[], IsElectricallyCharged];
+           If[chargedBSMParticles === {},
               "return 0.;",
               "return Min(" <>
-                 StringRiffle[GetMinMass /@ susyParticles, ", "] <>
+                 StringRiffle[GetMinMass /@ chargedBSMParticles, ", "] <>
               ");"
              ]
           ];

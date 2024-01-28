@@ -2509,13 +2509,13 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
 
 (* Write the AMM c++ files *)
 WriteAMMClass[fields_List, files_List] :=
-    Module[{calculation, getMSUSY,
+    Module[{calculation, getMLCP,
             (* in models without flavour violation (no FV models) lepton does not have an index *)
             leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPoleMass,
-            BarrZeeLeptonIdx, ammWrapperDecl, ammWrapperDef, ammUncWrapperDecl, ammUncWrapperDef},
+            ammWrapperDecl, ammWrapperDef, ammUncWrapperDecl, ammUncWrapperDef},
 
       calculation =
          If[Length[fields] =!= 0,
@@ -2528,7 +2528,7 @@ WriteAMMClass[fields_List, files_List] :=
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
 
-      getMSUSY = AMM`AMMGetMSUSY[];
+      getMLCP = AMM`AMMGetMLCP[];
 
       (* only Barr-Zee graphs
          1-loop diagrams will be provided by the FFMasslessV module and are taken care of elsewhere *)
@@ -2550,7 +2550,7 @@ WriteAMMClass[fields_List, files_List] :=
                      If[Im[colFac] == 0, colFac, Print["Error: Colour prefactor of a Barr-Zee diagram should be real!"]; Quit[1]]
                   ], 16] <> " * " <>
                 ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
-                "::value({" <> leptonIndex <> "}, context, qedqcd);\n"
+                "::value({" <> leptonIndex <> "}, context, ml_pole);\n"
          ];
       ];
 
@@ -2579,8 +2579,6 @@ TextFormatting`IndentText[
 ]
          ];
 
-      BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
-
       ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammWrapperDef = StringRiffle[
@@ -2596,16 +2594,15 @@ TextFormatting`IndentText[
 
       WriteOut`ReplaceInFiles[files,
         {"@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
-         "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 2],
-         "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
+         "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 1],
+         "@AMMGetMLCP@"           -> TextFormatting`IndentText[WrapLines[getMLCP]],
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
          "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
          "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
-         "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
-         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 2],
+         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 1],
          "@ammWrapperDecl@" -> ammWrapperDecl,
          "@ammWrapperDef@" -> ammWrapperDef,
          "@ammUncWrapperDecl@" -> ammUncWrapperDecl,
