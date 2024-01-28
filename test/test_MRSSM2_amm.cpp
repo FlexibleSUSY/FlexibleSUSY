@@ -34,11 +34,10 @@ using DiagonalMatrix3 = Eigen::DiagonalMatrix<double, 3>;
 using namespace flexiblesusy;
 
 struct AMM {
-   double ae{};
-   double amu{};
+   double ae{}, dae{};
+   double amu{}, damu{};
+   double atau{}, datau{};
    double amu_wrapper{};
-   double damu{};
-   double atau{};
 };
 
 struct Data {
@@ -48,7 +47,26 @@ struct Data {
 };
 
 
-Data calc_amm(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectrum_generator_settings settings)
+AMM calc_amm(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectrum_generator_settings settings)
+{
+   using MRSSM2_cxx_diagrams::fields::Fe;
+
+   AMM result{};
+
+   result.ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
+   result.dae = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 0);
+   result.amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
+   result.damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 1);
+   result.atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
+   result.datau = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 2);
+
+   result.amu_wrapper = MRSSM2_lepton_amm_wrapper::calculate_Fe_amm(m, qedqcd, settings, 1);
+
+   return result;
+}
+
+
+Data calc_amm_sets(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectrum_generator_settings settings)
 {
    using MRSSM2_cxx_diagrams::fields::Fe;
 
@@ -56,26 +74,15 @@ Data calc_amm(const MRSSM2_slha& m, const softsusy::QedQcd& qedqcd, Spectrum_gen
 
    // 1L
    settings.set(Spectrum_generator_settings::calculate_amm, 1.0);
-
-   result.a_1L.ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
-   result.a_1L.amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
-   result.a_1L.atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
+   result.a_1L = calc_amm(m, qedqcd, settings);
 
    // 1L + 2L QED
    settings.set(Spectrum_generator_settings::calculate_amm, 1.5);
-
-   result.a_1L_2LQCD.ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
-   result.a_1L_2LQCD.amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
-   result.a_1L_2LQCD.amu_wrapper = MRSSM2_lepton_amm_wrapper::calculate_Fe_amm(m, qedqcd, settings, 1);
-   result.a_1L_2LQCD.damu = MRSSM2_amm::calculate_amm_uncertainty<Fe>(m, qedqcd, settings, 1);
-   result.a_1L_2LQCD.atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
+   result.a_1L_2LQCD = calc_amm(m, qedqcd, settings);
 
    // 1L + 2L QED + Barr-Zee
    settings.set(Spectrum_generator_settings::calculate_amm, 2.0);
-
-   result.a_1L_2LQCD_2LBarrZee.ae = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 0);
-   result.a_1L_2LQCD_2LBarrZee.amu = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 1);
-   result.a_1L_2LQCD_2LBarrZee.atau = MRSSM2_amm::calculate_amm<Fe>(m, qedqcd, settings, 2);
+   result.a_1L_2LQCD_2LBarrZee = calc_amm(m, qedqcd, settings);
 
    return result;
 }
@@ -110,8 +117,8 @@ BOOST_AUTO_TEST_CASE( test_amu_chargino_dominance )
    input.MDWBTInput = 500;
    input.MDGocInput = 1500;
 
-   const auto m = setup_MRSSM2(input, qedqcd, settings);
-   const auto data = calc_amm(m, qedqcd, settings);
+   const auto model = setup_MRSSM2(input, qedqcd, settings);
+   const auto data = calc_amm_sets(model, qedqcd, settings);
 
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L.ae, -2.082466293438991e-15, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L.amu, -8.8989415316380609e-11, 1e-7);
@@ -158,8 +165,8 @@ BOOST_AUTO_TEST_CASE( test_amu_neutralino_dominance )
    input.MDWBTInput = 500;
    input.MDGocInput = 1500;
 
-   const auto m = setup_MRSSM2(input, qedqcd, settings);
-   const auto data = calc_amm(m, qedqcd, settings);
+   const auto model = setup_MRSSM2(input, qedqcd, settings);
+   const auto data = calc_amm_sets(model, qedqcd, settings);
 
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L.ae, 1.5869774606726533e-16, 1e-7);
    BOOST_CHECK_CLOSE_FRACTION(data.a_1L.amu, 6.830270770956226e-12, 1e-7);
