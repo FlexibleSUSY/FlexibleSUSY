@@ -201,14 +201,28 @@ double Weinberg_angle::calculate_G_fermi()
    const double sin_theta = Sin(theta);
    const double sin_2_cos_2 = Sqr(sin_theta*Cos(theta));
 
+   VERBOSE_MSG("\tcalculate_G_fermi (" << number_of_loops << "-loop):"
+               << " alpha_em_drbar=" << alpha_em_drbar
+               << " mz_pole=" << mz_pole
+               << " sin_theta=" << sin_theta);
+
    if (number_of_loops <= 0) {
       return flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, 0.0);
    }
+
+   VERBOSE_MSG("\t\tG_Fermi(0-loop):"
+               << " gfermi_0l=" << flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, 0.0));
 
    const double delta_rho_hat_1l = calculate_delta_rho_hat(sin_theta); // Eq.(C.4) [arXiv:hep-ph/9606211]
    const double rho_hat_1l = 1.0/(1.0 - delta_rho_hat_1l); // Eq.(C.4)
    const double delta_r_hat_1l = calculate_delta_r_hat(rho_hat_1l, sin_theta); // Eq.(C.3)
    const double gfermi_1l = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat_1l);
+
+   VERBOSE_MSG("\t\tG_Fermi(1-loop):"
+               << " delta_rho_hat_1l=" << delta_rho_hat_1l
+               << ", rho_hat_1l=" << rho_hat_1l
+               << ", delta_r_hat_1l=" << delta_r_hat_1l
+               << ", gfermi_1l=" << gfermi_1l);
 
    if (number_of_loops <= 1) {
       return gfermi_1l;
@@ -218,25 +232,32 @@ double Weinberg_angle::calculate_G_fermi()
    bool not_converged = true;
 
    sm_parameters.fermi_constant = gfermi_1l;
-   double gfermi_old = gfermi_1l;
-   double gfermi_new = gfermi_1l;
+   double gfermi_2l_old = gfermi_1l;
+   double gfermi_2l = gfermi_1l;
 
    while (not_converged && iteration++ < number_of_iterations) {
       const double delta_rho_hat = calculate_delta_rho_hat(sin_theta);
       const double rho_hat = 1.0/(1.0 - delta_rho_hat); // Eq.(C.4)
       const double delta_r_hat = calculate_delta_r_hat(rho_hat, sin_theta);
-      gfermi_new = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat);
-      const double precision = Abs(gfermi_old/gfermi_new - 1.0);
+      gfermi_2l = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat);
+      const double precision = Abs(gfermi_2l_old/gfermi_2l - 1.0);
       not_converged = precision >= precision_goal;
-      sm_parameters.fermi_constant = gfermi_new;
-      gfermi_old = gfermi_new;
+      sm_parameters.fermi_constant = gfermi_2l;
+      gfermi_2l_old = gfermi_2l;
+
+      VERBOSE_MSG("\t\tG_Fermi(1-loop, iteration " << iteration << ","
+                  << " precision=" << precision << "):"
+                  << " delta_rho_hat=" << delta_rho_hat
+                  << ", rho_hat=" << rho_hat
+                  << ", delta_r_hat=" << delta_r_hat
+                  << ", gfermi_2l=" << gfermi_2l);
    }
 
    if (iteration >= number_of_iterations) {
-      throw NoGFermiConvergenceError(number_of_iterations, gfermi_new);
+      throw NoGFermiConvergenceError(number_of_iterations, gfermi_2l);
    }
 
-   return gfermi_new;
+   return gfermi_2l;
 }
 
 /**
