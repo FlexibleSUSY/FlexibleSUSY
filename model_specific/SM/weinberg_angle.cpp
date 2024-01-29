@@ -184,6 +184,9 @@ double Weinberg_angle::calculate(double sinThetaW_start)
    return sinThetaW_new;
 }
 
+/**
+ * Calculates Fermi constant \f$G_F\f$.
+ */
 double Weinberg_angle::calculate_G_fermi()
 {
    const double gY = model->get_g1() * standard_model_info::normalization_g1;
