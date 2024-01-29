@@ -206,8 +206,8 @@ double Weinberg_angle::calculate_G_fermi()
    }
 
    const double delta_rho_hat_1l = calculate_delta_rho_hat(sin_theta);
-   const double rho_hat_ratio_1l = 1.0/(1.0 - delta_rho_hat_1l); // Eq.(C.4) [arXiv:hep-ph/9606211]
-   const double delta_r_hat_1l = calculate_delta_r_hat(rho_hat_ratio_1l, sin_theta);
+   const double rho_hat_1l = 1.0/(1.0 - delta_rho_hat_1l); // Eq.(C.4) [arXiv:hep-ph/9606211]
+   const double delta_r_hat_1l = calculate_delta_r_hat(rho_hat_1l, sin_theta);
    const double gfermi_1l = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat_1l);
 
    if (number_of_loops <= 1) {
@@ -223,8 +223,8 @@ double Weinberg_angle::calculate_G_fermi()
 
    while (not_converged && iteration++ < number_of_iterations) {
       const double delta_rho_hat = calculate_delta_rho_hat(sin_theta);
-      const double rho_hat_ratio = 1.0/(1.0 - delta_rho_hat); // Eq.(C.4) [arXiv:hep-ph/9606211]
-      const double delta_r_hat = calculate_delta_r_hat(rho_hat_ratio, sin_theta);
+      const double rho_hat = 1.0/(1.0 - delta_rho_hat); // Eq.(C.4) [arXiv:hep-ph/9606211]
+      const double delta_r_hat = calculate_delta_r_hat(rho_hat, sin_theta);
       gfermi_new = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat);
       const double precision = Abs(gfermi_old/gfermi_new - 1.0);
       not_converged = precision >= precision_goal;
