@@ -1069,7 +1069,11 @@ double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
    sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
    sm_pars.mw_pole = this->get_physical().MVWp;
 
+   const int number_of_iterations = std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)));
+
    weinberg_angle::Weinberg_angle weinberg(this, sm_pars);
+   weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
+   weinberg.set_number_of_iterations(number_of_iterations);
 
    double g_fermi = Electroweak_constants::gfermi;
 

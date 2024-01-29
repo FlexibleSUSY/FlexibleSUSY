@@ -194,7 +194,7 @@ double Weinberg_angle::calculate_G_fermi()
    const double mw_drbar = model->get_MVWp();
    const double mz_drbar = model->get_MVZ();
    const double cos_theta = mw_drbar/mz_drbar;
-   const double theta             = ArcCos(cos_theta);
+   const double theta = ArcCos(cos_theta);
    const double mz_pole = sm_parameters.mz_pole;
    const double sin_theta = Sin(theta);
    const double sin_2_cos_2 = Sqr(sin_theta*Cos(theta));

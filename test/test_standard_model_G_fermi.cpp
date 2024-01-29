@@ -17,7 +17,7 @@ using namespace flexiblesusy;
 double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops)
 {
    Threshold_corrections tc;
-   tc.sin_theta_w = 0; // no loop corrections to sin(theta_W)
+   tc.sin_theta_w = loops;
 
    standard_model::Standard_model sm;
    sm.set_pole_mass_loop_order(0);
