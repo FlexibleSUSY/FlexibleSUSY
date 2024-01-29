@@ -1049,7 +1049,26 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 {
+   const auto get_mh_pole = [&] () {
+      double mh_pole = this->get_physical().Mhh;
+      if (mh_pole == 0) {
+         mh_pole = Electroweak_constants::MH;
+      }
+      return mh_pole;
+   };
+
+   calculate_MVWp_pole_fit(get_mh_pole());
+
    weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
+   sm_pars.fermi_constant = qedqcd.displayFermiConstant();
+   sm_pars.mz_pole = qedqcd.displayPoleMZ();
+   sm_pars.mt_pole = qedqcd.displayPoleMt();
+   sm_pars.mh_pole = get_mh_pole();
+   sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
+   sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   sm_pars.mw_pole = this->get_physical().MVWp;
+
    weinberg_angle::Weinberg_angle weinberg(this, sm_pars);
 
    double g_fermi = Electroweak_constants::gfermi;
@@ -1066,7 +1085,6 @@ double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 
 double Standard_model::calculate_theta_w()
 {
-
    const auto get_mh_pole = [&] () {
       double mh_pole = this->get_physical().Mhh;
       if (mh_pole == 0) {

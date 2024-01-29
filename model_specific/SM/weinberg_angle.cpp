@@ -49,6 +49,11 @@ namespace {
 
 double sqr(double x) noexcept { return x*x; }
 
+double calculate_G_fermi(double alpha_em, double mz_pole, double sin_2_cos_2, double delta_rhat) noexcept
+{
+   return Pi*alpha_em/(ROOT2*Sqr(mz_pole)*sin_2_cos_2*(1.0 - delta_rhat));
+}
+
 } // anonymous namespace
 
 namespace weinberg_angle {
@@ -181,6 +186,69 @@ double Weinberg_angle::calculate(double sinThetaW_start)
 
 double Weinberg_angle::calculate_G_fermi()
 {
+   // const double scale               = get_scale();
+   // const double mw_pole             = qedqcd.displayPoleMW();
+   // const double mz_pole             = qedqcd.displayPoleMZ();
+   // const double mt_pole             = qedqcd.displayPoleMt();
+   // const double mt_drbar            = MFu(2);
+   // const double mb_drbar            = MFd(2);
+   // const double mh_drbar            = Mhh;
+   const double g1 = model->get_g1();
+   const double g2 = model->get_g2();
+   const double gY = g1*standard_model_info::normalization_g1;
+   const double e = gY*g2/Sqrt(Sqr(gY) + Sqr(g2));
+   const double alpha_em_drbar = Sqr(e)/(4*Pi);
+   const double mw_drbar = model->get_MVWp();
+   const double mz_drbar = model->get_MVZ();
+   const double cos_theta = mw_drbar/mz_drbar;
+   // const double pizztMZ             = Re(self_energy_VZ_1loop(mz_pole));
+   // const double piwwt0              = Re(self_energy_VWp_1loop(0.));
+   // const double self_energy_w_at_mw = Re(self_energy_VWp_1loop(mw_pole));
+   const double theta             = ArcCos(cos_theta);
+
+   // const double alphaDRbar = sm_parameters.alpha_em_drbar;
+   const double mz_pole = sm_parameters.mz_pole;
+   // const double theta = sm_parameters.theta;
+   const double sin_theta = Sin(theta);
+   const double sin_2_cos_2 = Sqr(sin_theta*Cos(theta));
+
+   if (number_of_loops < 1) {
+      return flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, 0.0);
+   }
+
+   // if (number_of_loops < 2){
+   //    rho_hat = calculate_rho_hat(sin_theta, data, susy_contributions, number_of_loops);
+   //    delta_rhat = calculate_delta_r(rho_hat, sin_theta, data, susy_contributions, number_of_loops);
+   //    return Pi*alphaDRbar/(ROOT2*Sqr(mz_pole)*sin_2_cos_2*(1.0 - delta_rhat));
+   // }
+
+   // int iteration = 0;
+   // bool not_converged = true;
+
+   // double rhohat_1l = calculate_rho_hat(sin_theta, data, susy_contributions, 1);
+   // double delta_r_hat_1l = calculate_delta_r(rhohat_1l, sin_theta, data, susy_contributions,1);
+   // double gfermi_1l = Pi*alphaDRbar/(ROOT2*Sqr(mz_pole)*sin_2_cos_2*(1.0 - delta_r_hat_1l));
+
+   // data.fermi_contant = gfermi_1l;
+   // double gfermi_old = gfermi_1l;
+   // double gfermi_new = gfermi_1l;
+
+   // while (not_converged && iteration < number_of_iterations) {
+   //    rhohat = calculate_rho_hat(sin_theta, data, susy_contributions, number_of_loops);
+   //    delta_rhat = calculate_delta_r(rhohat, sin_theta, data, susy_contributions, number_of_loops);
+   //    gfermi_new = Pi*alphaDRbar/(ROOT2*Sqr(mz_pole)*sin_2_cos_2*(1.0 - delta_rhat));
+   //    const double precision = Abs(gfermi_old / gfermi_new - 1.0);
+   //    not_converged = precision >= precision_goal;
+   //    data.fermi_contant = gfermi_new;
+   //    gfermi_old = gfermi_new;
+   //    iteration++;
+   // }
+
+   // rho_hat = rhohat;
+   // g_fermi = gfermi_new;
+
+   // const int no_convergence_error = iteration == number_of_iterations;
+
    return 0.0;
 }
 
