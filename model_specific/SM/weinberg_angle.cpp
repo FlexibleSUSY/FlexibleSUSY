@@ -202,41 +202,38 @@ double Weinberg_angle::calculate_G_fermi()
       return flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, 0.0);
    }
 
-   if (number_of_loops <= 1){
-      const double delta_rho_hat = calculate_delta_rho_hat(sin_theta);
-      const double rhohat_ratio = 1.0/(1.0 - delta_rho_hat); // Eq.(C.4) [arXiv:hep-ph/9606211]
-      const double delta_r_hat = calculate_delta_r_hat(rhohat_ratio, sin_theta);
-      return flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat);
+   const double delta_rho_hat_1l = calculate_delta_rho_hat(sin_theta);
+   const double rho_hat_ratio_1l = 1.0/(1.0 - delta_rho_hat_1l); // Eq.(C.4) [arXiv:hep-ph/9606211]
+   const double delta_r_hat_1l = calculate_delta_r_hat(rho_hat_ratio_1l, sin_theta);
+   const double gfermi_1l = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat_1l);
+
+   if (number_of_loops <= 1) {
+      return gfermi_1l;
    }
 
-   // int iteration = 0;
-   // bool not_converged = true;
+   int iteration = 0;
+   bool not_converged = true;
 
-   // double rhohat_1l = calculate_rho_hat(sin_theta, data, susy_contributions, 1);
-   // double delta_r_hat_1l = calculate_delta_r(rhohat_1l, sin_theta, data, susy_contributions,1);
-   // double gfermi_1l = Pi*alphaDRbar/(ROOT2*Sqr(mz_pole)*sin_2_cos_2*(1.0 - delta_r_hat_1l));
+   sm_parameters.fermi_constant = gfermi_1l;
+   double gfermi_old = gfermi_1l;
+   double gfermi_new = gfermi_1l;
 
-   // data.fermi_contant = gfermi_1l;
-   // double gfermi_old = gfermi_1l;
-   // double gfermi_new = gfermi_1l;
+   while (not_converged && iteration++ < number_of_iterations) {
+      const double delta_rho_hat = calculate_delta_rho_hat(sin_theta);
+      const double rho_hat_ratio = 1.0/(1.0 - delta_rho_hat); // Eq.(C.4) [arXiv:hep-ph/9606211]
+      const double delta_r_hat = calculate_delta_r_hat(rho_hat_ratio, sin_theta);
+      gfermi_new = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat);
+      const double precision = Abs(gfermi_old/gfermi_new - 1.0);
+      not_converged = precision >= precision_goal;
+      sm_parameters.fermi_constant = gfermi_new;
+      gfermi_old = gfermi_new;
+   }
 
-   // while (not_converged && iteration < number_of_iterations) {
-   //    rhohat = calculate_rho_hat(sin_theta, data, susy_contributions, number_of_loops);
-   //    delta_rhat = calculate_delta_r(rhohat, sin_theta, data, susy_contributions, number_of_loops);
-   //    gfermi_new = Pi*alphaDRbar/(ROOT2*Sqr(mz_pole)*sin_2_cos_2*(1.0 - delta_rhat));
-   //    const double precision = Abs(gfermi_old / gfermi_new - 1.0);
-   //    not_converged = precision >= precision_goal;
-   //    data.fermi_contant = gfermi_new;
-   //    gfermi_old = gfermi_new;
-   //    iteration++;
-   // }
+   if (iteration >= number_of_iterations) {
+      throw NoGFermiConvergenceError(number_of_iterations, gfermi_new);
+   }
 
-   // rho_hat = rhohat;
-   // g_fermi = gfermi_new;
-
-   // const int no_convergence_error = iteration == number_of_iterations;
-
-   return 0.0;
+   return gfermi_new;
 }
 
 /**
