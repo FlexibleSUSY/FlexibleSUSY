@@ -1047,9 +1047,21 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 }
 
-double Standard_model::calculate_G_fermi(const softsusy::QedQcd&)
+double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 {
-   return 0.0;
+   weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
+   weinberg_angle::Weinberg_angle weinberg(this, sm_pars);
+
+   double g_fermi = Electroweak_constants::gfermi;
+
+   try {
+      g_fermi = weinberg.calculate_G_fermi();
+   } catch (const Error& e) {
+      VERBOSE_MSG(e.what_detailed());
+      this->get_problems().flag_no_GFermi_convergence();
+   }
+
+   return g_fermi;
 }
 
 double Standard_model::calculate_theta_w()

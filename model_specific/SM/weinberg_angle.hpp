@@ -59,6 +59,10 @@ public:
 
    /// calculates and returns the sine of the Weinberg angle
    double calculate(double sinThetaW_start = 0.48);
+
+   /// calculates and returns the Fermi constant G_F
+   double calculate_G_fermi();
+
 private:
    int number_of_iterations = 20; ///< maximum number of iterations
    int number_of_loops = 2;      ///< number of loops

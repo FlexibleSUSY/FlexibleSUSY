@@ -179,6 +179,11 @@ double Weinberg_angle::calculate(double sinThetaW_start)
    return sinThetaW_new;
 }
 
+double Weinberg_angle::calculate_G_fermi()
+{
+   return 0.0;
+}
+
 /**
  * Calculates the vertex, box and external wave-function renormalization
  * corrections \f$\delta_{\text{VB}}\f$ for the specific model as e.g.
