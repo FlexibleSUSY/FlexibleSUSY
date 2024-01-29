@@ -20,12 +20,14 @@ double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops)
    tc.sin_theta_w = loops;
 
    standard_model::Standard_model sm;
-   sm.set_pole_mass_loop_order(0);
-   sm.set_ewsb_loop_order(0);
+   sm.set_pole_mass_loop_order(loops);
+   sm.set_ewsb_loop_order(loops);
    sm.set_threshold_corrections(tc);
 
    sm.initialise_from_input(qedqcd);
    sm.calculate_DRbar_masses();
+   sm.solve_ewsb();
+   sm.calculate_pole_masses();
 
    return sm.calculate_G_fermi(qedqcd);
 }
