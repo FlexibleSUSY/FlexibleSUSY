@@ -993,13 +993,18 @@ void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double c
    set_block(ss);
 }
 
-void SLHA_io::set_lilith(const int ndof, const double likelihood)
+void SLHA_io::set_lilith(const int ndof, const double likelihood, const double sm_likelihood, std::string const& tag)
 {
    std::ostringstream ss;
 
    ss << block_head("LILITHRESULTS", 0.0);
-   ss << FORMAT_ELEMENT(0, likelihood, "-2*LogL");
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
+   ss << FORMAT_ELEMENT(2, likelihood, "𝜒²");
+   ss << FORMAT_ELEMENT(3, sm_likelihood, "SM 𝜒² for mh = " + tag + " GeV");
+   boost::math::chi_squared dist(2);
+   const double pval = likelihood<sm_likelihood ? 1 : boost::math::cdf(complement(dist, likelihood-sm_likelihood));
+   // SLHA doesn't print nicelly numbers with 3 digit exponent
+   ss << FORMAT_ELEMENT(4, pval > 1e-100 ? pval : 0., "p-value");
 
    set_block(ss);
 }

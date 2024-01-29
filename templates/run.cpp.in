@@ -106,7 +106,9 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
 #endif
 #ifdef ENABLE_LILITH
    double lilith_likelihood;
+   double lilith_sm_likelihood;
    double lilith_ndof = -1;
+   std::string lilith_tag;
 #endif
 @calculateDecaysForModel@
 

@@ -106,6 +106,76 @@ void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
 }
 #endif
 
+#ifdef ENABLE_LILITH
+double minChi2SM_Lilith(const double mhSM) {
+
+   Py_Initialize();
+   char experimental_input[] = "";
+   // Creating an object of the class Lilith: lilithcalc
+   PyObject* lilithcalc2 = initialize_lilith(experimental_input);
+
+   char XMLinputstring[6000]="";
+   char buffer[100];
+
+   sprintf(buffer,"<?xml version=\"1.0\"?>\n");
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<lilithinput>\n");
+   strcat(XMLinputstring, buffer);
+
+   double BRinv = 0.;
+   double BRund = 0.;
+
+   sprintf(buffer,"<reducedcouplings>\n");
+   strcat(XMLinputstring, buffer);
+
+   sprintf(buffer,"<mass>%f</mass>\n", mhSM);
+   strcat(XMLinputstring, buffer);
+
+   sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"gg\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+
+   sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"WW\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+
+   sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", 1.);
+   strcat(XMLinputstring, buffer);
+
+   sprintf(buffer,"<extraBR>\n");
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", 0.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", 0.);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"</extraBR>\n");
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"</reducedcouplings>\n");
+   strcat(XMLinputstring, buffer);
+
+   sprintf(buffer,"</lilithinput>\n");
+   strcat(XMLinputstring, buffer);
+
+   // Reading user input XML string
+   lilith_readuserinput(lilithcalc2, XMLinputstring);
+
+   // Getting -2LogL
+   const double my_likelihood = lilith_computelikelihood(lilithcalc2);
+
+   Py_Finalize();
+   return my_likelihood;
+}
+#endif
 } // anonymous
 
 EffectiveCoupling_list get_normalized_effective_couplings(
@@ -131,7 +201,9 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 
       // create a SM equivalent to the BSM model, with mhSM == mass
       standard_model::Standard_model sm {};
-      sm.set_physical_input(physical_input);
+      Physical_input _physical_input = physical_input;
+      _physical_input.set(Physical_input::mh_pole, mass);
+      sm.set_physical_input(_physical_input);
       sm.initialise_from_input(qedqcd);
       sm.set_pole_mass_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::pole_mass_loop_order)));
       sm.set_ewsb_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::ewsb_loop_order)));
@@ -162,7 +234,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
       };
 
       int status, iter = 0;
-      static constexpr int max_iter = 1000000;
+      static constexpr int max_iter = 100;
       const gsl_min_fminimizer_type *T;
       gsl_min_fminimizer *sGSL;
       // find λ in range [0, 5]
@@ -200,11 +272,11 @@ EffectiveCoupling_list get_normalized_effective_couplings(
             m = dis(gen);
             status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
             iterCount++;
-         } while (status == GSL_EINVAL && iterCount < 10000);
+         } while (status == GSL_EINVAL && iterCount < 100);
       }
       gsl_set_error_handler (_error_handler);
 
-      static constexpr double mass_precision = 1e-8;
+      static constexpr double mass_precision = 1e-4;
 
       do
       {
@@ -355,8 +427,9 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
 #endif
 
 #ifdef ENABLE_LILITH
-std::pair<double, int> call_lilith(
-   EffectiveCoupling_list const& bsm_input) {
+std::tuple<double, double, int, std::string> call_lilith(
+   EffectiveCoupling_list const& bsm_input,
+   Physical_input const& physical_input) {
 
    // Lilith requires mass to be within [123, 128]
    bool higgs_in_range = false;
@@ -367,7 +440,7 @@ std::pair<double, int> call_lilith(
       }
    }
    if (!higgs_in_range) {
-      return {-1., -1};
+      return {-1., 0., -1, ""};
    }
 
    Py_Initialize();
@@ -384,7 +457,7 @@ std::pair<double, int> call_lilith(
    strcat(XMLinputstring, buffer);
 
    for (auto const& el : bsm_input) {
-      double mh = el.mass;
+      const double mh = el.mass;
       if (mh < 123.0 || mh > 128.0) continue;
       double BRinv = 0.;
       double BRund = 0.;
@@ -438,14 +511,13 @@ std::pair<double, int> call_lilith(
 
     // Getting -2LogL
     const double my_likelihood = lilith_computelikelihood(lilithcalc);
-    std::cout << my_likelihood << std::endl;
 
     // Getting exp_ndf
     const int exp_ndf = lilith_exp_ndf(lilithcalc);
-    printf("exp_ndf = %i\n", exp_ndf);
 
+    const double sm_likelihood = minChi2SM_Lilith(physical_input.get(Physical_input::mh_pole));
     Py_Finalize();
-    return {my_likelihood, exp_ndf};
+    return {my_likelihood, sm_likelihood, exp_ndf, std::to_string(physical_input.get(Physical_input::mh_pole))};
 }
 #endif
 

@@ -18,9 +18,10 @@
 
 
 /**
- * @file HiggsTools_interface.hpp
+ * @file experimental_constraints.hpp
  *
- * @brief contains interface to HiggsTools
+ * @brief contains Higgs effective coupling calculation and interfaces to
+ * HiggsTools and Lilith
  */
 
 #ifndef HIGGSTOOLS_INTERFACE_H
@@ -54,8 +55,11 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);
 #endif
 
+/**
+ *  @return pair containit -2 log likelihood and number of degrees of freedom
+ */
 #ifdef ENABLE_LILITH
-std::pair<double, int> call_lilith(EffectiveCoupling_list const&);
+std::tuple<double, double, int, std::string> call_lilith(EffectiveCoupling_list const&, Physical_input const&);
 #endif
 
 } // flexiblesusy

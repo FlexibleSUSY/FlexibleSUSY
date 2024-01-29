@@ -2739,7 +2739,7 @@ if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
 #endif
 #ifdef ENABLE_LILITH
 if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {
-         std::tie(lilith_likelihood, lilith_ndof) = call_lilith(effc);
+         std::tie(lilith_likelihood, lilith_sm_likelihood, lilith_ndof, lilith_tag) = call_lilith(effc, physical_input);
 }
 #endif\n"
    ] <>
@@ -2776,7 +2776,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 #endif
 #ifdef ENABLE_LILITH
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith_ndof > 0) {
-      slha_io.set_lilith(lilith_ndof, lilith_likelihood);
+      slha_io.set_lilith(lilith_ndof, lilith_likelihood, lilith_sm_likelihood, lilith_tag);
    }
 #endif
 }";
