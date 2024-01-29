@@ -186,9 +186,8 @@ double Weinberg_angle::calculate(double sinThetaW_start)
 
 double Weinberg_angle::calculate_G_fermi()
 {
-   const double g1 = model->get_g1();
-   const double g2 = model->get_g2();
-   const double gY = g1*standard_model_info::normalization_g1;
+   const double gY = model->get_g1() * standard_model_info::normalization_g1;
+   const double g2 = model->get_g2() * standard_model_info::normalization_g2;
    const double e = gY*g2/Sqrt(Sqr(gY) + Sqr(g2));
    const double alpha_em_drbar = Sqr(e)/(4*Pi); // @todo(alex): may use input sm_parameters.alpha_em_drbar from qedqcd here
    const double mw_drbar = model->get_MVWp();
