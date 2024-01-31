@@ -12,22 +12,25 @@
 using namespace flexiblesusy;
 
 
-double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops)
+double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops, double precision)
 {
    Threshold_corrections tc;
    tc.sin_theta_w = loops;
 
    BOOST_TEST_MESSAGE("initialize SM ...");
    standard_model::Standard_model sm;
+   sm.set_precision(precision);
    sm.set_pole_mass_loop_order(loops);
    sm.set_ewsb_loop_order(loops);
    sm.set_threshold_corrections(tc);
 
+   // determines sin(theta_w) from input value of G_Fermi
    sm.initialise_from_input(qedqcd);
    sm.calculate_DRbar_masses();
    sm.solve_ewsb();
    sm.calculate_pole_masses();
 
+   // determines G_Fermi from value of sin(theta_w)
    BOOST_TEST_MESSAGE("calculate G_Fermi ...");
    return sm.calculate_G_fermi(qedqcd);
 }
@@ -36,17 +39,18 @@ double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops)
 BOOST_AUTO_TEST_CASE( test_G_fermi )
 {
    softsusy::QedQcd qedqcd;
+   const double precision = 1e-5;
    const double G_fermi_input = qedqcd.displayFermiConstant();
-   const double G_fermi_0l = calculate_G_fermi(qedqcd, 0);
-   const double G_fermi_1l = calculate_G_fermi(qedqcd, 1);
-   const double G_fermi_2l = calculate_G_fermi(qedqcd, 2);
+   const double G_fermi_0l = calculate_G_fermi(qedqcd, 0, precision);
+   const double G_fermi_1l = calculate_G_fermi(qedqcd, 1, precision);
+   const double G_fermi_2l = calculate_G_fermi(qedqcd, 2, precision);
 
    BOOST_TEST_MESSAGE("G_fermi_input = " << G_fermi_input);
    BOOST_TEST_MESSAGE("G_fermi_0l = " << G_fermi_0l);
    BOOST_TEST_MESSAGE("G_fermi_1l = " << G_fermi_1l);
    BOOST_TEST_MESSAGE("G_fermi_2l = " << G_fermi_2l);
 
-   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_0l, 1.0e-6);
-   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_1l, 1.0e-6);
-   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_2l, 1.0e-6);
+   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_0l, precision);
+   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_1l, precision);
+   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_2l, precision);
 }
