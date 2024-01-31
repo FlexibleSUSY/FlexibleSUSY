@@ -1064,6 +1064,11 @@ $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfener
 endif
 endif
 
+ifeq ($(ENABLE_HIGGSTOOLS), yes)
+$(DIR)/test_HiggsTools_CP.o: CPPFLAGS += $(MODtest_INC) $(HIGGSTOOLSFLAGS)
+$(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
+endif
+
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
