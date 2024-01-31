@@ -195,9 +195,10 @@ double Weinberg_angle::calculate_G_fermi()
    const double alpha_em_drbar = Sqr(e)/(4*Pi); // @todo(alex): may use input sm_parameters.alpha_em_drbar from qedqcd here
    const double mw_drbar = model->get_MVWp();
    const double mz_drbar = model->get_MVZ();
+   const double mw_pole = sm_parameters.mw_pole;
+   const double mz_pole = sm_parameters.mz_pole;
    const double cos_theta = mw_drbar/mz_drbar;
    const double theta = ArcCos(cos_theta);
-   const double mz_pole = sm_parameters.mz_pole;
    const double sin_theta = Sin(theta);
    const double sin_2_cos_2 = Sqr(sin_theta*Cos(theta));
 
@@ -212,6 +213,10 @@ double Weinberg_angle::calculate_G_fermi()
    if (number_of_loops <= 0) {
       return gfermi_0l;
    }
+
+   pizzt_MZ = calculate_self_energy_VZ(mz_pole);
+   piwwt_MW = calculate_self_energy_VWp(mw_pole);
+   piwwt_0  = calculate_self_energy_VWp(0.);
 
    const double delta_rho_hat_1l = calculate_delta_rho_hat(sin_theta); // Eq.(C.4) [arXiv:hep-ph/9606211]
    const double rho_hat_1l = 1.0/(1.0 - delta_rho_hat_1l); // Eq.(C.4)
