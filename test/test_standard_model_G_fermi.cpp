@@ -3,8 +3,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#define private public
-
 #include "config.h"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
