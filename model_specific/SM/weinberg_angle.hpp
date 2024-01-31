@@ -58,7 +58,7 @@ public:
    double get_rho_hat() const;       ///< returns the rho parameter
 
    /// calculates and returns the sine of the Weinberg angle
-   double calculate(double sinThetaW_start = 0.48);
+   double calculate_sin_theta_w(double sinThetaW_start = 0.48);
 
    /// calculates and returns the Fermi constant G_F
    double calculate_G_fermi();

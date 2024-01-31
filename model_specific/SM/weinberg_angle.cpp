@@ -102,7 +102,7 @@ double Weinberg_angle::get_rho_hat() const
  *
  * @return sine of the DR-bar weak mixing angle (#1) and W pole mass (#2)
  */
-double Weinberg_angle::calculate(double sinThetaW_start)
+double Weinberg_angle::calculate_sin_theta_w(double sinThetaW_start)
 {
    const auto gY = model->get_g1() * standard_model_info::normalization_g1;
    const auto g2 = model->get_g2() * standard_model_info::normalization_g2;

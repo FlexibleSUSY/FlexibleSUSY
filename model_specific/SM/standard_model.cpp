@@ -1120,7 +1120,7 @@ double Standard_model::calculate_theta_w()
 
    double theta_w = std::asin(Electroweak_constants::sinThetaW);
    try {
-      theta_w = ArcSin(weinberg.calculate());
+      theta_w = ArcSin(weinberg.calculate_sin_theta_w());
    } catch (const Error& e) {
       VERBOSE_MSG(e.what_detailed());
       this->get_problems().flag_no_sinThetaW_convergence();
