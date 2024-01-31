@@ -12,6 +12,9 @@
 using namespace flexiblesusy;
 
 
+// Initializes the SM at the given `loops' level with G_Fermi as input.
+// Then re-calculates G_Fermi at the given `loops' level.
+// The resulting G_Fermi should be equal to the input value of G_Fermi in qedqcd.
 double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops, double precision)
 {
    Threshold_corrections tc;
