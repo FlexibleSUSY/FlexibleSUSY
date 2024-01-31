@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( test_G_fermi )
    BOOST_TEST_MESSAGE("G_fermi_1l = " << G_fermi_1l);
    BOOST_TEST_MESSAGE("G_fermi_2l = " << G_fermi_2l);
 
-   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_0l, 1.0e-2);
+   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_0l, 1.0e-5);
    BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_1l, 1.0e-5);
    BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_2l, 1.0e-5);
 }
