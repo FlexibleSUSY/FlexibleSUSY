@@ -108,12 +108,12 @@ double Weinberg_angle::calculate(double sinThetaW_start)
    const auto g2 = model->get_g2() * standard_model_info::normalization_g2;
    const double eDRbar     = gY * g2 / Sqrt(Sqr(gY) + Sqr(g2));
    const double alphaDRbar = Sqr(eDRbar) / (4.0 * Pi);
-   const double mw         = sm_parameters.mw_pole;
-   const double mz         = sm_parameters.mz_pole;
+   const double mw_pole    = sm_parameters.mw_pole;
+   const double mz_pole    = sm_parameters.mz_pole;
    const double gfermi     = sm_parameters.fermi_constant;
 
-   pizzt_MZ = calculate_self_energy_VZ(mz);
-   piwwt_MW = calculate_self_energy_VWp(mw);
+   pizzt_MZ = calculate_self_energy_VZ(mz_pole);
+   piwwt_MW = calculate_self_energy_VWp(mw_pole);
    piwwt_0  = calculate_self_energy_VWp(0.);
 
    int iteration = 0;
@@ -142,7 +142,7 @@ double Weinberg_angle::calculate(double sinThetaW_start)
       }
 
       double sin2thetasqO4 = Pi * alphaDRbar /
-         (ROOT2 * Sqr(mz) * gfermi * (1.0 - deltaRHat));
+         (ROOT2 * Sqr(mz_pole) * gfermi * (1.0 - deltaRHat));
 
       if (sin2thetasqO4 >= 0.25) {
          fudged = true;
