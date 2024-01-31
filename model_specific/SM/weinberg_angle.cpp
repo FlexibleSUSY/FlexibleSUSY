@@ -388,16 +388,16 @@ double Weinberg_angle::calculate_self_energy_VZ_top(double p, double mt) const
  */
 double Weinberg_angle::calculate_self_energy_VWp(double p) const
 {
-   const double mt      = sm_parameters.mt_pole;
-   const double mtDRbar = model->get_MFu(2);
-   const auto piwwt   = Re(model->self_energy_VWp_1loop(p));
+   const double mt_pole  = sm_parameters.mt_pole;
+   const double mt_drbar = model->get_MFu(2);
+   const double piwwt    = Re(model->self_energy_VWp_1loop(p));
 
    double piwwt_corrected = piwwt;
 
    if (model->get_thresholds() > 1) {
       piwwt_corrected =
-         piwwt - calculate_self_energy_VWp_top(p, mtDRbar)
-               + calculate_self_energy_VWp_top(p, mt);
+         piwwt - calculate_self_energy_VWp_top(p, mt_drbar)
+               + calculate_self_energy_VWp_top(p, mt_pole);
    }
 
    return piwwt_corrected;
