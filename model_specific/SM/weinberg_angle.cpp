@@ -201,17 +201,17 @@ double Weinberg_angle::calculate_G_fermi()
    const double sin_theta = Sin(theta);
    const double sin_2_cos_2 = Sqr(sin_theta*Cos(theta));
 
+   const double gfermi_0l = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, 0.0);
+
    VERBOSE_MSG("\tcalculate_G_fermi (" << number_of_loops << "-loop):"
                << " alpha_em_drbar=" << alpha_em_drbar
-               << " mz_pole=" << mz_pole
-               << " sin_theta=" << sin_theta);
+               << ", mz_pole=" << mz_pole
+               << ", sin_theta=" << sin_theta
+               << ", gfermi_0l=" << gfermi_0l);
 
    if (number_of_loops <= 0) {
-      return flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, 0.0);
+      return gfermi_0l;
    }
-
-   VERBOSE_MSG("\t\tG_Fermi(0-loop):"
-               << " gfermi_0l=" << flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, 0.0));
 
    const double delta_rho_hat_1l = calculate_delta_rho_hat(sin_theta); // Eq.(C.4) [arXiv:hep-ph/9606211]
    const double rho_hat_1l = 1.0/(1.0 - delta_rho_hat_1l); // Eq.(C.4)
