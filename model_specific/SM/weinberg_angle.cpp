@@ -334,16 +334,16 @@ double Weinberg_angle::rho_2(double r)
  */
 double Weinberg_angle::calculate_self_energy_VZ(double p) const
 {
-   const double mt      = sm_parameters.mt_pole;
-   const double mtDRbar = model->get_MFu(2);
-   const auto pizzt   = Re(model->self_energy_VZ_1loop(p));
+   const double mt_pole  = sm_parameters.mt_pole;
+   const double mt_drbar = model->get_MFu(2);
+   const double pizzt    = Re(model->self_energy_VZ_1loop(p));
 
    double pizzt_corrected = pizzt;
 
    if (model->get_thresholds() > 1) {
       pizzt_corrected =
-         pizzt - calculate_self_energy_VZ_top(p, mtDRbar)
-               + calculate_self_energy_VZ_top(p, mt);
+         pizzt - calculate_self_energy_VZ_top(p, mt_drbar)
+               + calculate_self_energy_VZ_top(p, mt_pole);
    }
 
    return pizzt_corrected;
