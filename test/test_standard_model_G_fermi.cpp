@@ -19,6 +19,7 @@ double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops)
    Threshold_corrections tc;
    tc.sin_theta_w = loops;
 
+   BOOST_TEST_MESSAGE("initialize SM ...");
    standard_model::Standard_model sm;
    sm.set_pole_mass_loop_order(loops);
    sm.set_ewsb_loop_order(loops);
@@ -29,6 +30,7 @@ double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops)
    sm.solve_ewsb();
    sm.calculate_pole_masses();
 
+   BOOST_TEST_MESSAGE("calculate G_Fermi ...");
    return sm.calculate_G_fermi(qedqcd);
 }
 
