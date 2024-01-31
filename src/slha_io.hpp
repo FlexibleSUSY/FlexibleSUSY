@@ -145,8 +145,7 @@ public:
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block_imag(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
-   void set_higgssignals(int /* n.d.o.f. */, double /* chi2 */, double /* min chi2 in the SM */, std::string const&);
-   void set_lilith(const int /* ndof */, const double /* likelihood */, const double /* sm likelihood */, std::string const&);
+   void set_hs_or_lilith(std::string const& /* block name */, int /* n.d.o.f. */, double /* chi2 */, double /* min chi2 in the SM */, std::string const&);
    void set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const&);
    void set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>&);
    void set_normalized_effectivecouplings_block(EffectiveCoupling_list const&);

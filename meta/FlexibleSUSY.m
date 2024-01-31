@@ -2739,7 +2739,9 @@ if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
 #endif
 #ifdef ENABLE_LILITH
 if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {
-         std::tie(lilith_likelihood, lilith_sm_likelihood, lilith_ndof, lilith_tag) = call_lilith(effc, physical_input);
+   if (const auto lilith_res = call_lilith(effc, physical_input); lilith_res) {
+      std::tie(lilith_likelihood, lilith_sm_likelihood, lilith_ndof, lilith_tag) = lilith_res.value();
+   }
 }
 #endif\n"
    ] <>
@@ -2770,13 +2772,13 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    }
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) && higgssignals_ndof > 0) {
-      slha_io.set_higgssignals(higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag);
+      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", higgssignals_ndof, higgssignals_chi2, higgssignals_chi2min, tag);
       slha_io.set_higgsbounds(higgsbounds_v);
    }
 #endif
 #ifdef ENABLE_LILITH
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith_ndof > 0) {
-      slha_io.set_lilith(lilith_ndof, lilith_likelihood, lilith_sm_likelihood, lilith_tag);
+      slha_io.set_hs_or_lilith(\"LILITH\", lilith_ndof, lilith_likelihood, lilith_sm_likelihood, lilith_tag);
    }
 #endif
 }";

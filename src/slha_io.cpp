@@ -977,32 +977,16 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
-void SLHA_io::set_higgssignals(const int ndof, const double chi2, const double chi2SMmin, std::string const& tag)
+void SLHA_io::set_hs_or_lilith(std::string const& block_name, const int ndof, const double chi2, const double chi2SMmin, std::string const& tag)
 {
    std::ostringstream ss;
 
-   ss << block_head("HIGGSSIGNALS", 0.0);
+   ss << block_head(block_name, 0.0);
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
    boost::math::chi_squared dist(2);
    const double pval = chi2<chi2SMmin ? 1 : boost::math::cdf(complement(dist, chi2-chi2SMmin));
-   // SLHA doesn't print nicelly numbers with 3 digit exponent
-   ss << FORMAT_ELEMENT(4, pval > 1e-100 ? pval : 0., "p-value");
-
-   set_block(ss);
-}
-
-void SLHA_io::set_lilith(const int ndof, const double likelihood, const double sm_likelihood, std::string const& tag)
-{
-   std::ostringstream ss;
-
-   ss << block_head("LILITHRESULTS", 0.0);
-   ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
-   ss << FORMAT_ELEMENT(2, likelihood, "𝜒²");
-   ss << FORMAT_ELEMENT(3, sm_likelihood, "SM 𝜒² for mh = " + tag + " GeV");
-   boost::math::chi_squared dist(2);
-   const double pval = likelihood<sm_likelihood ? 1 : boost::math::cdf(complement(dist, likelihood-sm_likelihood));
    // SLHA doesn't print nicelly numbers with 3 digit exponent
    ss << FORMAT_ELEMENT(4, pval > 1e-100 ? pval : 0., "p-value");
 

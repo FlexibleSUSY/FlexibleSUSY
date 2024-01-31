@@ -427,7 +427,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
 #endif
 
 #ifdef ENABLE_LILITH
-std::tuple<double, double, int, std::string> call_lilith(
+std::optional<std::tuple<double, double, int, std::string>> call_lilith(
    EffectiveCoupling_list const& bsm_input,
    Physical_input const& physical_input) {
 
@@ -440,7 +440,7 @@ std::tuple<double, double, int, std::string> call_lilith(
       }
    }
    if (!higgs_in_range) {
-      return {-1., 0., -1, ""};
+      return {};
    }
 
    Py_Initialize();
@@ -517,7 +517,7 @@ std::tuple<double, double, int, std::string> call_lilith(
 
     const double sm_likelihood = minChi2SM_Lilith(physical_input.get(Physical_input::mh_pole));
     Py_Finalize();
-    return {my_likelihood, sm_likelihood, exp_ndf, std::to_string(physical_input.get(Physical_input::mh_pole))};
+    return {{my_likelihood, sm_likelihood, exp_ndf, std::to_string(physical_input.get(Physical_input::mh_pole))}};
 }
 #endif
 

@@ -37,6 +37,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 #include <utility>
 
 namespace flexiblesusy {
@@ -59,7 +60,8 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
  *  @return pair containit -2 log likelihood and number of degrees of freedom
  */
 #ifdef ENABLE_LILITH
-std::tuple<double, double, int, std::string> call_lilith(EffectiveCoupling_list const&, Physical_input const&);
+std::optional<std::tuple<double, double, int, std::string>>
+call_lilith(EffectiveCoupling_list const&, Physical_input const&);
 #endif
 
 } // flexiblesusy
