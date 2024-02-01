@@ -1047,24 +1047,63 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 }
 
-double Standard_model::calculate_theta_w()
+double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 {
-
-   const auto get_mh_pole = [&] () {
+   const double mh_pole = [&] () {
       double mh_pole = this->get_physical().Mhh;
       if (mh_pole == 0) {
          mh_pole = Electroweak_constants::MH;
       }
       return mh_pole;
-   };
+   }();
 
-   calculate_MVWp_pole_fit(get_mh_pole());
+   calculate_MVWp_pole_fit(mh_pole);
 
    weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
    sm_pars.fermi_constant = qedqcd.displayFermiConstant();
    sm_pars.mz_pole = qedqcd.displayPoleMZ();
    sm_pars.mt_pole = qedqcd.displayPoleMt();
-   sm_pars.mh_pole = get_mh_pole();
+   sm_pars.mh_pole = mh_pole;
+   sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
+   sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   sm_pars.mw_pole = this->get_physical().MVWp;
+
+   const int number_of_iterations = std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)));
+
+   weinberg_angle::Weinberg_angle weinberg(this, sm_pars);
+   weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
+   weinberg.set_number_of_iterations(number_of_iterations);
+
+   double g_fermi = qedqcd.displayFermiConstant();
+
+   try {
+      g_fermi = weinberg.calculate_G_fermi();
+   } catch (const Error& e) {
+      VERBOSE_MSG(e.what_detailed());
+      this->get_problems().flag_no_GFermi_convergence();
+   }
+
+   return g_fermi;
+}
+
+double Standard_model::calculate_theta_w()
+{
+   const double mh_pole = [&] () {
+      double mh_pole = this->get_physical().Mhh;
+      if (mh_pole == 0) {
+         mh_pole = Electroweak_constants::MH;
+      }
+      return mh_pole;
+   }();
+
+   calculate_MVWp_pole_fit(mh_pole);
+
+   weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
+   sm_pars.fermi_constant = qedqcd.displayFermiConstant();
+   sm_pars.mz_pole = qedqcd.displayPoleMZ();
+   sm_pars.mt_pole = qedqcd.displayPoleMt();
+   sm_pars.mh_pole = mh_pole;
    sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
    sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
    sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
@@ -1081,7 +1120,7 @@ double Standard_model::calculate_theta_w()
 
    double theta_w = std::asin(Electroweak_constants::sinThetaW);
    try {
-      theta_w = ArcSin(weinberg.calculate());
+      theta_w = ArcSin(weinberg.calculate_sin_theta_w());
    } catch (const Error& e) {
       VERBOSE_MSG(e.what_detailed());
       this->get_problems().flag_no_sinThetaW_convergence();
