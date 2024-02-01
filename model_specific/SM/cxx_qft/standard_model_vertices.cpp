@@ -376,22 +376,6 @@ cxx_diagrams::ChiralVertex VertexImpl<standard_model_cxx_diagrams::fields::hh, t
    return {left, right};
 }
 
-cxx_diagrams::ChiralVertex VertexImpl<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type, standard_model_cxx_diagrams::fields::Fu>::evaluate(
-   const std::array<int, 2>& indices, const context_base& context)
-{
-   const int gt1 = indices[0];
-   const int gt2 = indices[1];
-   const auto Yu = -MODELPARAMETER(Yu);
-   const auto Vu = MODELPARAMETER(Vu);
-   const auto Uu = MODELPARAMETER(Uu);
-
-   const std::complex<double> left = -0.7071067811865475*SUM(j2,0,2,Conj(Vu(gt2,j2))*SUM(j1,0,2,Conj(Uu(gt1,j1))*Yu(j1,j2)));
-
-   const std::complex<double> right = -0.7071067811865475*SUM(j2,0,2,SUM(j1,0,2,Conj(Yu(j1,j2))*Uu(gt2,j1))*Vu(gt1,j2));
-
-   return {left, right};
-}
-
 cxx_diagrams::ScalarVertex VertexImpl<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::Hp>::type, standard_model_cxx_diagrams::fields::Hp>::evaluate(
    const std::array<int, 0>& indices, const context_base& context)
 {
@@ -675,22 +659,6 @@ cxx_diagrams::ChiralVertex VertexImpl<standard_model_cxx_diagrams::fields::VZ, s
    return {left, right};
 }
 
-cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fd>::type, standard_model_cxx_diagrams::fields::Fd, standard_model_cxx_diagrams::fields::Ah>::evaluate(
-   const std::array<int, 2>& indices, const context_base& context)
-{
-   const int gt1 = indices[0];
-   const int gt2 = indices[1];
-   const auto Yd = MODELPARAMETER(Yd);
-   const auto Vd = MODELPARAMETER(Vd);
-   const auto Ud = MODELPARAMETER(Ud);
-
-   const std::complex<double> left = std::complex<double>(0.,0.7071067811865475)*SUM(j2,0,2,Conj(Vd(gt2,j2))*SUM(j1,0,2,Conj(Ud(gt1,j1))*Yd(j1,j2)));
-
-   const std::complex<double> right = std::complex<double>(0.,-0.7071067811865475)*SUM(j2,0,2,SUM(j1,0,2,Conj(Yd(j1,j2))*Ud(gt2,j1))*Vd(gt1,j2));
-
-   return {left, right};
-}
-
 cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fd>::type, standard_model_cxx_diagrams::fields::Fd, standard_model_cxx_diagrams::fields::hh>::evaluate(
    const std::array<int, 2>& indices, const context_base& context)
 {
@@ -784,22 +752,6 @@ cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fiel
    const std::complex<double> left = -0.7071067811865475*g2*SUM(j1,0,2,Conj(Vu(gt2,j1))*Vd(gt1,j1));
 
    const std::complex<double> right = 0;
-
-   return {left, right};
-}
-
-cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fe>::type, standard_model_cxx_diagrams::fields::Fe, standard_model_cxx_diagrams::fields::Ah>::evaluate(
-   const std::array<int, 2>& indices, const context_base& context)
-{
-   const int gt1 = indices[0];
-   const int gt2 = indices[1];
-   const auto Ye = MODELPARAMETER(Ye);
-   const auto Ve = MODELPARAMETER(Ve);
-   const auto Ue = MODELPARAMETER(Ue);
-
-   const std::complex<double> left = std::complex<double>(0.,0.7071067811865475)*SUM(j2,0,2,Conj(Ve(gt2,j2))*SUM(j1,0,2,Conj(Ue(gt1,j1))*Ye(j1,j2)));
-
-   const std::complex<double> right = std::complex<double>(0.,-0.7071067811865475)*SUM(j2,0,2,SUM(j1,0,2,Conj(Ye(j1,j2))*Ue(gt2,j1))*Ve(gt1,j2));
 
    return {left, right};
 }
@@ -928,22 +880,6 @@ cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fiel
    const std::complex<double> left = -0.7071067811865475*g2*SUM(j1,0,2,Conj(Vd(gt2,j1))*Vu(gt1,j1));
 
    const std::complex<double> right = 0;
-
-   return {left, right};
-}
-
-cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type, standard_model_cxx_diagrams::fields::Fu, standard_model_cxx_diagrams::fields::Ah>::evaluate(
-   const std::array<int, 2>& indices, const context_base& context)
-{
-   const int gt1 = indices[0];
-   const int gt2 = indices[1];
-   const auto Yu = -MODELPARAMETER(Yu);
-   const auto Vu = MODELPARAMETER(Vu);
-   const auto Uu = MODELPARAMETER(Uu);
-
-   const std::complex<double> left = std::complex<double>(0.,-0.7071067811865475)*SUM(j2,0,2,Conj(Vu(gt2,j2))*SUM(j1,0,2,Conj(Uu(gt1,j1))*Yu(j1,j2)));
-
-   const std::complex<double> right = std::complex<double>(0.,0.7071067811865475)*SUM(j2,0,2,SUM(j1,0,2,Conj(Yu(j1,j2))*Uu(gt2,j1))*Vu(gt1,j2));
 
    return {left, right};
 }
@@ -1115,17 +1051,6 @@ cxx_diagrams::MomentumVertex VertexImpl<typename standard_model_cxx_diagrams::fi
    const std::complex<double> result = g2*Sin(ThetaW);
 
    return {result, 1};
-}
-
-cxx_diagrams::ScalarVertex VertexImpl<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::gWpC>::type, standard_model_cxx_diagrams::fields::gWpC, standard_model_cxx_diagrams::fields::Ah>::evaluate(
-   const std::array<int, 0>& indices, const context_base& context)
-{
-   const auto g2 = MODELPARAMETER(g2);
-   const auto v = MODELPARAMETER(v);
-
-   const std::complex<double> result = std::complex<double>(0,0.25)*v*Sqr(g2);
-
-   return {result};
 }
 
 cxx_diagrams::ScalarVertex VertexImpl<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::gWpC>::type, standard_model_cxx_diagrams::fields::gWpC, standard_model_cxx_diagrams::fields::hh>::evaluate(

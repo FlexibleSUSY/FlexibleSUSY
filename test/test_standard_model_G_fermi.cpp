@@ -3,8 +3,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#define private public
-
 #include "config.h"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
@@ -13,41 +11,49 @@
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_G_fermi )
+
+// Initializes the SM at the given `loops' level with G_Fermi as input.
+// Then re-calculates G_Fermi at the given `loops' level.
+// The resulting G_Fermi should be equal to the input value of G_Fermi in qedqcd.
+double calculate_G_fermi(const softsusy::QedQcd& qedqcd, int loops, double precision)
 {
    Threshold_corrections tc;
-   tc.sin_theta_w = 0; // no loop corrections to sin(theta_W)
+   tc.sin_theta_w = loops;
 
+   BOOST_TEST_MESSAGE("initialize SM ...");
    standard_model::Standard_model sm;
-   sm.set_pole_mass_loop_order(0);
-   sm.set_ewsb_loop_order(0);
+   sm.set_precision(precision);
+   sm.set_pole_mass_loop_order(loops);
+   sm.set_ewsb_loop_order(loops);
    sm.set_threshold_corrections(tc);
 
-   softsusy::QedQcd qedqcd;
+   // determines sin(theta_w) from input value of G_Fermi
    sm.initialise_from_input(qedqcd);
    sm.calculate_DRbar_masses();
+   sm.solve_ewsb();
+   sm.calculate_pole_masses();
 
+   // determines G_Fermi from value of sin(theta_w)
+   BOOST_TEST_MESSAGE("calculate G_Fermi ...");
+   return sm.calculate_G_fermi(qedqcd);
+}
+
+
+BOOST_AUTO_TEST_CASE( test_G_fermi )
+{
+   softsusy::QedQcd qedqcd;
+   const double precision = 1e-5;
    const double G_fermi_input = qedqcd.displayFermiConstant();
-   const double G_fermi_pred  = sm.calculate_G_fermi(qedqcd);
-
-   const double gY                  = sm.get_g1() * 0.7745966692414834;
-   const double g2                  = sm.get_g2();
-   const double e                   = gY*g2 / Sqrt(Sqr(gY) + Sqr(g2));
-   const double alpha_em_drbar      = Sqr(e) / (4*Pi);
-   const double cos_theta           = sm.get_MVWp()/sm.get_MVZ();
-   const double theta_w             = ArcCos(cos_theta);
-   const double sin_theta           = Sin(theta_w);
-   const double MZ2pole             = Sqr(qedqcd.displayPoleMZ());
-   const double sqrt2               = 1.4142135623730950;
-   const double Pi                  = 3.1415926535897932;
-
-   const double G_fermi_0l = Pi * alpha_em_drbar / (AbsSqr(sin_theta*cos_theta) * sqrt2 * MZ2pole);
+   const double G_fermi_0l = calculate_G_fermi(qedqcd, 0, precision);
+   const double G_fermi_1l = calculate_G_fermi(qedqcd, 1, precision);
+   const double G_fermi_2l = calculate_G_fermi(qedqcd, 2, precision);
 
    BOOST_TEST_MESSAGE("G_fermi_input = " << G_fermi_input);
    BOOST_TEST_MESSAGE("G_fermi_0l = " << G_fermi_0l);
-   BOOST_TEST_MESSAGE("G_fermi_pred = " << G_fermi_pred);
+   BOOST_TEST_MESSAGE("G_fermi_1l = " << G_fermi_1l);
+   BOOST_TEST_MESSAGE("G_fermi_2l = " << G_fermi_2l);
 
-   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_0l, 1.0e-2);
-
-   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_pred, 1.0e-5);
+   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_0l, precision);
+   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_1l, precision);
+   BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_2l, precision);
 }

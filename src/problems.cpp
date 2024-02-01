@@ -74,6 +74,7 @@ void Problems::clear()
    exception_msg = "";
    failed_ewsb = false;
    failed_ewsb_tree_level = false;
+   failed_GFermi_convergence = false;
    non_perturbative = false;
    failed_sinThetaW_convergence = false;
    failed_GF_convergence = false;
@@ -97,6 +98,7 @@ void Problems::add(const Problems& other)
 
    failed_ewsb = failed_ewsb || other.failed_ewsb;
    failed_ewsb_tree_level = failed_ewsb_tree_level || other.failed_ewsb_tree_level;
+   failed_GFermi_convergence = failed_GFermi_convergence || other.failed_GFermi_convergence;
    non_perturbative = non_perturbative || other.non_perturbative;
    failed_sinThetaW_convergence = failed_sinThetaW_convergence || other.failed_sinThetaW_convergence;
    failed_GF_convergence = failed_GF_convergence || other.failed_GF_convergence;
@@ -113,6 +115,7 @@ unsigned Problems::number_of_problems() const
    if (have_tachyon()) count++;
    if (failed_ewsb) count++;
    if (failed_ewsb_tree_level) count++;
+   if (failed_GFermi_convergence) count++;
    if (non_perturbative || have_non_perturbative_parameter()) count++;
    if (failed_sinThetaW_convergence) count++;
    if (failed_GF_convergence) count++;
@@ -165,6 +168,8 @@ std::vector<std::string> Problems::get_problem_strings() const
       strings.emplace_back("no ewsb");
    if (failed_ewsb_tree_level)
       strings.emplace_back("no ewsb at tree-level");
+   if (failed_GFermi_convergence)
+      strings.emplace_back("no GFermi convergence");
    if (non_perturbative)
       strings.emplace_back("non-perturbative");
    if (failed_sinThetaW_convergence)
@@ -299,6 +304,11 @@ void Problems::flag_no_ewsb_tree_level()
    failed_ewsb_tree_level = true;
 }
 
+void Problems::flag_no_GFermi_convergence()
+{
+   failed_GFermi_convergence = true;
+}
+
 void Problems::flag_no_perturbative()
 {
    non_perturbative = true;
@@ -384,6 +394,11 @@ void Problems::unflag_no_ewsb()
 void Problems::unflag_no_ewsb_tree_level()
 {
    failed_ewsb_tree_level = false;
+}
+
+void Problems::unflag_no_GFermi_convergence()
+{
+   failed_GFermi_convergence = false;
 }
 
 void Problems::unflag_no_perturbative()
@@ -489,6 +504,11 @@ bool Problems::no_ewsb() const
 bool Problems::no_ewsb_tree_level() const
 {
    return failed_ewsb_tree_level;
+}
+
+bool Problems::no_GFermi_convergence() const
+{
+   return failed_GFermi_convergence;
 }
 
 bool Problems::no_perturbative() const
