@@ -639,8 +639,6 @@ Block UURMIX
 
    using CMSSMCPV_cxx_diagrams::fields::Fe;
 
-   const double eps = 1e-11;
-
    auto de = CMSSMCPV_edm::calculate_edm<Fe>(m, qedqcd, 0);
    BOOST_CHECK_CLOSE_FRACTION(de, -3.2103089248010137e-13, 9e-13);
 
