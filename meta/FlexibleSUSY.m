@@ -221,6 +221,35 @@ FSGaugeLessLimit = {
    {SARAH`leftCoupling, FSGaugeLess/Parameters`GetGUTNormalization[SARAH`leftCoupling]}
 };
 FSGaugeLessLimit::usage = "List of 2-component lists {parameter, value} to set parameter to obtain the gauge-less limit.";
+FSYukawaLessLimit = {
+    {SARAH`UpYukawa[1, 1], 0},
+    {SARAH`UpYukawa[1, 2], 0},
+    {SARAH`UpYukawa[1, 3], 0},
+    {SARAH`UpYukawa[2, 1], 0},
+    {SARAH`UpYukawa[2, 2], 0},
+    {SARAH`UpYukawa[2, 3], 0},
+    {SARAH`UpYukawa[3, 1], 0},
+    {SARAH`UpYukawa[3, 2], 0},
+    (* *)
+    {SARAH`DownYukawa[1, 1], 0},
+    {SARAH`DownYukawa[1, 2], 0},
+    {SARAH`DownYukawa[1, 3], 0},
+    {SARAH`DownYukawa[2, 1], 0},
+    {SARAH`DownYukawa[2, 2], 0},
+    {SARAH`DownYukawa[2, 3], 0},
+    {SARAH`DownYukawa[3, 1], 0},
+    {SARAH`DownYukawa[3, 2], 0},
+    (* *)
+    {SARAH`ElectronYukawa[1, 1], 0},
+    {SARAH`ElectronYukawa[1, 2], 0},
+    {SARAH`ElectronYukawa[1, 3], 0},
+    {SARAH`ElectronYukawa[2, 1], 0},
+    {SARAH`ElectronYukawa[2, 2], 0},
+    {SARAH`ElectronYukawa[2, 3], 0},
+    {SARAH`ElectronYukawa[3, 1], 0},
+    {SARAH`ElectronYukawa[3, 2], 0}
+};
+FSYukawaLessLimit::usage = "List of 2-component lists {parameter, value} to set parameter to obtain the yukawa-less limit (leaving only the 3rd generation Yukawa couplings non-zero).";
 FSMSSMLimit = {};
 FSMSSMLimit::usage = "List of 2-component lists {parameter, value} to set parameter to obtain the MSSM-limit.";
 
@@ -1460,6 +1489,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             threeLoopLambdaMatching = "throw SetupError(\"3-loop matching not enabled.\");",
             twoLoopLambdaMatching = "throw SetupError(\"2-loop matching not enabled.\");",
             setGaugeLessLimit = "",
+            setYukawaLessLimit = "",
             setMSSMLimit = "",
             includeMSSMTwoLoopTopMassHeader = "",
             createSMMt2LoopFunction = ""},
@@ -1483,8 +1513,9 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setRunningDownQuarkMasses         = FlexibleEFTHiggsMatching`CalculateRunningDownQuarkMasses[];
               setRunningDownLeptonMasses        = FlexibleEFTHiggsMatching`CalculateRunningDownLeptonMasses[];
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
-              setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetLimit["model.", FlexibleSUSY`FSGaugeLessLimit];
-	      setMSSMLimit                      = FlexibleEFTHiggsMatching`SetLimit["model.", FlexibleSUSY`FSMSSMLimit];
+              setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSGaugeLessLimit];
+              setYukawaLessLimit                = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSYukawaLessLimit];
+	      setMSSMLimit                      = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSMSSMLimit];
               If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True, 
  		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs2LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs2LoopShift["model", SARAH`HiggsBoson, "idx"];
@@ -1519,6 +1550,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@twoLoopLambdaMatching@" -> IndentText[twoLoopLambdaMatching],
                          "@createSMMt2LoopFunction@" -> createSMMt2LoopFunction,
                          "@setGaugeLessLimit@" -> IndentText[setGaugeLessLimit],
+                         "@setYukawaLessLimit@" -> IndentText[setYukawaLessLimit],
                          "@setMSSMLimit@" -> IndentText[setMSSMLimit],
                          "@includeMSSMTwoLoopTopMassHeader@" -> includeMSSMTwoLoopTopMassHeader,
                          Sequence @@ GeneralReplacementRules[]
