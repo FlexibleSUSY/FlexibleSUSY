@@ -1455,7 +1455,6 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
             setRunningDownLeptonMasses = "", setYukawas = "",
             calculateMUpQuarkPole1L = "", calculateMDownQuarkPole1L = "",
             calculateMDownLeptonPole1L = "",
-            calculateMHiggsPoleNoMomentumIteration = "",
             calculateMHiggs2LoopShift = "throw SetupError(\"2-loop Higgs self-energy not enabled.\");",
             calculateMHiggs3LoopShift = "throw SetupError(\"3-loop Higgs self-energy not enabled.\");",
             threeLoopLambdaMatching = "throw SetupError(\"3-loop matching not enabled.\");",
@@ -1486,7 +1485,6 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setYukawas                        = ThresholdCorrections`SetDRbarYukawaCouplings[];
               setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetLimit["model.", FlexibleSUSY`FSGaugeLessLimit];
 	      setMSSMLimit                      = FlexibleEFTHiggsMatching`SetLimit["model.", FlexibleSUSY`FSMSSMLimit];
-              calculateMHiggsPoleNoMomentumIteration = FlexibleEFTHiggsMatching`CalculateMHiggsPoleNoMomentumIteration[SARAH`HiggsBoson, "Mh2_pole"];
               If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True, 
  		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs2LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs2LoopShift["model", SARAH`HiggsBoson, "idx"];
@@ -1514,7 +1512,6 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
                          "@calculateMDownLeptonPole1L@" -> IndentText[calculateMDownLeptonPole1L],
                          "@setYukawas@"              -> IndentText[WrapLines[setYukawas]],
                          "@applyUserMatching@"       -> IndentText[WrapLines[userMatching]],
-                         "@calculateMHiggsPoleNoMomentumIteration@" -> IndentText[calculateMHiggsPoleNoMomentumIteration],
 			 "@calculateMHiggs2LoopShift@" -> IndentText[calculateMHiggs2LoopShift],
 			 "@calculateMHiggs3LoopShift@" -> IndentText[calculateMHiggs3LoopShift],
                          "@numberOfEWSBEquations@" -> ToString[TreeMasses`GetDimension[SARAH`HiggsBoson]],

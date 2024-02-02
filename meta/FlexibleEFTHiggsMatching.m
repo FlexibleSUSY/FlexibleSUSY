@@ -22,7 +22,6 @@
 
 BeginPackage["FlexibleEFTHiggsMatching`", {"CConversion`", "TreeMasses`", "LoopMasses`", "Constraint`", "ThresholdCorrections`", "Parameters`", "Utils`"}];
 
-CalculateMHiggsPoleNoMomentumIteration::usage = "Calculates BSM Higgs boson pole mass w/o momentum iteration";
 CalculateMHiggs2LoopShift::usage = "Calculates 2-loop shift to the Higgs pole mass in the BSM model.";
 CalculateMHiggs3LoopShift::usage = "Calculates 3-loop shift to the Higgs pole mass in the BSM model.";
 Create2LoopMatching::usage = "Creates function body to calculate SM parameters from BSM parameters at 2-loop level.";
@@ -41,15 +40,6 @@ SetBSMParameters::usage = "";
 SetLimit::usage = "applies a given limit to given model";
 
 Begin["`Private`"];
-
-CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] /; (TreeMasses`GetDimension[particle] == 1) :=
-    outVar <> " = mh2_tree - self_energy - tadpole(0);"
-
-CalculateMHiggsPoleNoMomentumIteration[particle_, outVar_String] :=
-"const auto mass_matrix = (mh2_tree - self_energy - " <> CreateCType[TreeMasses`GetMassMatrixType[particle]] <> "(tadpole.asDiagonal())).eval();
-" <> CreateCType[CConversion`ArrayType[CConversion`realScalarCType, GetDimension[particle]]] <> " eigenvalues;
-fs_diagonalize_hermitian(mass_matrix, eigenvalues);
-" <> outVar <> " = eigenvalues(idx);"
 
 CalculateMHiggs2LoopShift[inputModel_String, higgsBoson_, higgsIndex_String] :=
    Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
@@ -75,10 +65,9 @@ if (mh2_1l_bsm_shift != 0.) {
 
 const auto self_energy = (self_energy_2l + self_energy_2l_mom).eval();
 const auto tadpole = calculate_tadpole_over_vevs(model, 2);
+const auto mass_matrix = compose_loop_corrections(mh2_tree, self_energy, tadpole);
 
-double Mh2_pole = 0.;
-
-" <> CalculateMHiggsPoleNoMomentumIteration[higgsBoson, "Mh2_pole"] <> "
+const double Mh2_pole = calculate_eigenvalue(mass_matrix, idx);
 
 const double mh2_shift_2l = Mh2_pole - mh2_0l;
 
@@ -94,14 +83,12 @@ CalculateMHiggs3LoopShift[inputModel_String, outputModel_String, higgsBoson_, hi
 try {
    // 3-loop self-energy, calculated using tree-level parameters
    const auto self_energy_3l = Re(model." <> SelfEnergies`CreateSelfEnergyFunctionName[higgsBoson, 3] <> "());
-   const auto higgs_mass_matrix = (calculate_mh2_0l(model) - self_energy_3l).eval();
-
-   // calculate 3-loop Higgs pole mass in the gauge-less limit
-   decltype(model.get_physical()." <> higgsMassStr <> ") Mh2_pole;
-   fs_diagonalize_hermitian(higgs_mass_matrix, Mh2_pole);
+   const auto mass_matrix = (calculate_mh2_0l(model) - self_energy_3l).eval();
+   const double Mh2_pole = calculate_eigenvalue(mass_matrix, idx);
+   const double mh2_tree = Sqr(model.get_" <> higgsMassStr <> "(idx));
 
    // calculate 3-loop Higgs mass loop correction in the gauge-less limit
-   mh2_shift_3l = Mh2_pole(idx) - Sqr(model.get_" <> higgsMassStr <> "(idx));
+   mh2_shift_3l = Mh2_pole - mh2_tree;
 } catch (const flexiblesusy::Error& e) {
    VERBOSE_MSG(\"Error: Calculation of 3-loop Higgs pole mass in the gauge-less limit in the " <> modelNameStr <> " at the matching scale failed: \" << e.what());
    " <> outputModel <> ".get_problems().flag_bad_mass(standard_model_info::hh);

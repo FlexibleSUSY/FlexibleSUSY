@@ -75,6 +75,76 @@ void match_high_to_low_scale_sm_3l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
 
 /**
+ * Calculates eigenvalue `idx` of given `matrix`.
+ *
+ * @param matrix matrix
+ * @param idx Index of the eigenvalue
+ *
+ * @return eigenvalue `idx`
+ */
+template <class Scalar, int N>
+double calculate_eigenvalue(const Eigen::Matrix<Scalar,N,N>& matrix, int idx)
+{
+   Eigen::Array<double,N,1> eigenvalues;
+   fs_diagonalize_hermitian(matrix, eigenvalues);
+   return eigenvalues(idx);
+}
+
+/**
+ * Calculates eigenvalue.
+ * Overload for double.
+ *
+ * @param value the scalar eigenvalue
+ *
+ * @return eigenvalue
+ */
+double calculate_eigenvalue(double value, int)
+{
+   return value;
+}
+
+/**
+ * Creates loop-corrected mass matrix from tree-level part `mh2_tree`,
+ * self-energy `self_energy` and `tadpole`.
+ *
+ * @param mh2_tree tree-level mass NxN matrix
+ * @param self_energy self-energy NxN matrix
+ * @param tadpole tadpole Nx1 matrix
+ * @tparam Scalar matrix element type
+ * @tparam N matrix dimension
+ *
+ * @return NxN matrix with mh2_tree - self_energy - tadpole
+ */
+template <class Scalar, int N>
+Eigen::Matrix<Scalar,N,N> compose_loop_corrections(double mh2_tree, double self_energy, const Eigen::Matrix<Scalar,N,1>& tadpole)
+{
+   Eigen::Matrix<Scalar,N,N> matrix;
+   matrix(0, 0) = mh2_tree - self_energy - tadpole(0, 0);
+   return matrix;
+}
+
+/**
+ * Creates loop-corrected mass matrix from tree-level part `mh2_tree`,
+ * self-energy `self_energy` and `tadpole`. Overload for double.
+ *
+ * @param mh2_tree tree-level value for m_h^2
+ * @param self_energy self-energy
+ * @param tadpole tadpole Nx1 matrix
+ * @tparam ScalarTree tree-level matrix element type
+ * @tparam ScalarSE self-energy matrix element type
+ * @tparam ScalarT tadpole matrix element type
+ * @tparam N matrix dimension
+ *
+ * @return NxN matrix with mh2_tree - self_energy - tadpole
+ */
+template <class ScalarTree, class ScalarSE, class ScalarT, int N>
+Eigen::Matrix<ScalarSE,N,N> compose_loop_corrections(const Eigen::Matrix<ScalarTree,N,N>& mh2_tree, const Eigen::Matrix<ScalarSE,N,N>& self_energy, const Eigen::Matrix<ScalarT,N,1>& tadpole)
+{
+   Eigen::Matrix<ScalarSE,N,N> matrix = mh2_tree - self_energy - Eigen::Matrix<ScalarSE,N,N>(tadpole.asDiagonal());
+   return matrix;
+}
+
+/**
  * Calculates squared Higgs pole mass in the SM,
  * \f$(M_h^{\text{SM}})^2\f$.
  *
@@ -682,11 +752,11 @@ double calculate_Mh2_pole_1l(const @ModelName@_mass_eigenstates& model, int idx)
    // calculate 1-loop BSM Higgs tadpoles using tree-level parameters
    const auto tadpole = calculate_tadpole_over_vevs(model, 1);
 
-   double Mh2_pole = 0.;
+   // Higgs mass matrix with 1-loop corrections
+   const auto mass_matrix = compose_loop_corrections(mh2_tree, self_energy, tadpole);
 
    // calculate BSM Higgs mass at 1-loop level w/o momentum iteration
-   // @todo(alex) extract to separate function and re-use it in the meta code
-@calculateMHiggsPoleNoMomentumIteration@
+   const double Mh2_pole = calculate_eigenvalue(mass_matrix, idx);
 
    return Mh2_pole;
 }
