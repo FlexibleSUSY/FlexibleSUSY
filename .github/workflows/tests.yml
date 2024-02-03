@@ -128,7 +128,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.17.4
+      image: navir/opensuseleap-for-flexiblesusy:0.17.5
 
     strategy:
       fail-fast: false
