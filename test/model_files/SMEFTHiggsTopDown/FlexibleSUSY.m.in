@@ -25,22 +25,22 @@ LowScale = LowEnergyConstant[MZ];
 LowScaleFirstGuess = LowEnergyConstant[MZ];
 
 LowScaleInput = {
-    {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
-    {Yu, Automatic},
-    {Yd, Automatic},
-    {Ye, Automatic},
-    FSSolveEWSBFor[EWSBOutputParameters]
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic},
+   FSSolveEWSBFor[EWSBOutputParameters]
 };
 
 InitialGuessAtSUSYScale = {
-    {v, VEV},
-    {Yu, Automatic},
-    {Yd, Automatic},
-    {Ye, Automatic}
+   {v, VEV},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
 }
 
 MatchingScaleInput = {
-    {v, VEV}
+   {v, VEV}
 };
 
 UseSM3LoopRGEs = True;
@@ -52,6 +52,7 @@ UseHiggs4LoopSM = True;
 UseYukawa3LoopQCD = True;
 UseYukawa4LoopQCD = True;
 UseSMAlphaS3Loop = True;
+UseSMAlphaS4Loop = True;
 
 DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh};
