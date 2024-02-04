@@ -153,7 +153,9 @@ DEFINE_FUNCTION(SMEFTHiggsTopDown, flexiblesusy::Shooting, standard_model::Stand
 
 BOOST_AUTO_TEST_CASE( test_Mh )
 {
+   BOOST_TEST_MESSAGE("running the SM (bottom -> up)");
    const auto bu = calc_SM(slha_input);
+   BOOST_TEST_MESSAGE("running the SM (top -> down)");
    const auto td = calc_SMEFTHiggsTopDown(slha_input);
 
    BOOST_CHECK_CLOSE_FRACTION(bu.at(0), td.at(0), 1e-10);
