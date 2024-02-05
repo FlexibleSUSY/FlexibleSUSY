@@ -62,7 +62,8 @@ BeginPackage["FlexibleSUSY`",
               "WeinbergAngle`",
               "Wrappers`",
               "Himalaya`",
-              "GM2Calc`"
+              "GM2Calc`",
+              "Unitarity`"
 }];
 
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
@@ -2506,6 +2507,18 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
 
       DeleteDuplicates@Join[vertices,npfVertices]
    ];
+
+WriteUnitarityClass[files_List] :=
+    Module[{},
+      matrix = Unitarity`GetScatteringMatrix[];
+      WriteOut`ReplaceInFiles[files,
+        {"@scatteringPairsLength@" -> ToString@matrix[[2]],
+         "@skipZeros@" -> "if (!(" <> StringRiffle["(i==" <> ToString[First@#-1] <> " && j==" <> ToString[Last@#-1] <> ")"& /@ First@matrix, "||"] <> ")) continue;",
+         "@scatteringElements@" -> TextFormatting`IndentText[Last@matrix],
+         "@generationSizes@" -> ToString[{{#}& /@ matrix[[3]]}],
+      Sequence @@ GeneralReplacementRules[]
+        }];
+    ];
 
 (* Write the AMM c++ files *)
 WriteAMMClass[fields_List, files_List] :=
@@ -5213,6 +5226,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      {FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
                ];
+
+           Print["Creating unitarity class..."];
+           WriteUnitarityClass[{{FileNameJoin[{$flexiblesusyTemplateDir, "unitarity.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_unitarity.hpp"}]},
+                           {FileNameJoin[{$flexiblesusyTemplateDir, "unitarity.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_unitarity.cpp"}]}}
+           ];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];

@@ -1,0 +1,157 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_unitarity.cpp
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_unitarity.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_context_base.hpp"
+
+#include "minimizer.hpp"
+#include "wrappers.hpp"
+#include "sum.hpp"
+
+#include <gsl/gsl_min.h>
+#include <algorithm>
+#include <array>
+#include <functional>
+
+namespace flexiblesusy {
+namespace @ModelName@_unitarity {
+
+inline double Sqrt2(int i, int j) {
+   // 1/Sqrt[2] or 1
+   return i==j ? 0.707106781186547524 : 1;
+}
+
+double max_scattering_eigenvalue(const @ModelName@_mass_eigenstates& model) {
+   constexpr size_t size = @scatteringPairsLength@;
+   std::array<std::array<std::function<double(double, int, int, int, int)>, size>, size> matrix = {};
+   std::array<std::function<double(double)>, size> row_temp = {};
+   const double sChan = 1.;
+   const double tChan = 1.;
+   const double uChan = 1.;
+   const double qChan = 1.;
+
+   using namespace @ModelName@_cxx_diagrams::fields;
+
+@scatteringElements@
+   std::array<std::array<double, size>, size> max_eigenvalues = {};
+
+   constexpr std::array<std::array<std::array<int, 4>, size>, size> generationSizes =
+      @generationSizes@;
+
+   for (int i=0; i<size; i++) {
+      for (int j=i; j<size; j++) {
+         @skipZeros@
+         std::array<int, 4>  externalGenerationSizes = generationSizes[i][j];
+         // suply indices in mathematica counting (starting from 1)
+         for (int iIn1 = 1; iIn1 <= externalGenerationSizes[0]; ++iIn1) {
+         for (int iIn2 = 1; iIn2 <= externalGenerationSizes[1]; ++iIn2) {
+         for (int iOut1 = 1; iOut1 <= externalGenerationSizes[2]; ++iOut1) {
+         for (int iOut2 = 1; iOut2 <= externalGenerationSizes[3]; ++iOut2) {
+         std::function<double(double)> f = std::bind(matrix[i][j], std::placeholders::_1, iIn1, iIn2, iOut1, iOut2);
+
+         int status;
+         int iter = 0, max_iter = 100;
+         const gsl_min_fminimizer_type *T;
+         gsl_min_fminimizer *s;
+         double a = 100.0, b = 5000.0;
+
+         static constexpr int grid_size = 10;
+         std::array<double, grid_size> grid;
+         for (int idx = 0; idx < grid_size; ++idx) { grid[idx] = a + (idx+1)*(b-a)/(grid.size()+1); }
+         std::array<double, grid_size> f_grid;
+         for (int idx = 0; idx < grid_size; ++idx) { f_grid[idx] = -std::abs(f(grid[idx])); }
+         double m = grid[std::distance(f_grid.begin(), std::min_element(f_grid.begin(), f_grid.end()))];
+         // the minimum is between [a,b]
+         if (-std::abs(f(m)) < std::min(-std::abs(f(a)), -std::abs(f(b)))) {
+         gsl_function F = {
+            [](double d, void* vf) -> double {
+               auto& f = *static_cast<std::function<double(double)>*>(vf);
+               return -std::abs(f(d));
+            },
+            &f
+         };
+         T = gsl_min_fminimizer_brent;
+         s = gsl_min_fminimizer_alloc (T);
+         gsl_min_fminimizer_set (s, &F, m, a, b);
+
+         printf ("using %s method\n",
+            gsl_min_fminimizer_name (s));
+
+         printf ("%5s [%9s, %9s] %9s %10s %9s\n",
+            "iter", "lower", "upper", "min",
+            "err", "err(est)");
+
+         printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
+            iter, a, b,
+            m, b - a);
+
+         do
+         {
+           iter++;
+           status = gsl_min_fminimizer_iterate (s);
+
+           m = gsl_min_fminimizer_x_minimum (s);
+           a = gsl_min_fminimizer_x_lower (s);
+           b = gsl_min_fminimizer_x_upper (s);
+
+          // determine sqrt(s) with a relative error < 0.1%
+          status
+             = gsl_min_test_interval (a, b, 0.0, 1e-3);
+
+          if (status == GSL_SUCCESS)
+             printf ("Converged:\n");
+
+             printf ("%5d [%.7f, %.7f] "
+                "%.7f %.7f\n",
+                iter, a, b,
+                m, b - a);
+         }
+         while (status == GSL_CONTINUE && iter < max_iter);
+         max_eigenvalues[i][j] = std::abs(f(m));
+
+         gsl_min_fminimizer_free (s);
+         }
+         // the minimum is at a or b
+         else {
+            max_eigenvalues[i][j] = std::max(std::abs(f(m)), max_eigenvalues[i][j]);
+         }
+      }
+   }
+         }}}}
+   std::cout << "=======================================\n";
+   double max_elem = 0.;
+   for (int i=0; i<size; i++) {
+      for (int j=i; j<size; j++) {
+         std::cout << max_eigenvalues[i][j] << std::endl;
+         max_elem = std::max(max_elem, max_eigenvalues[i][j]);
+      }
+   }
+   std::cout << max_elem << std::endl;
+   return max_elem;
+}
+
+} // namespace @ModelName@_unitarity
+} // namespace flexiblesusy
