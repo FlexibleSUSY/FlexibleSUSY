@@ -113,6 +113,9 @@ RunCPPProgram[{preface_String, expr_String}, fileName_String:"tmp.cpp"] :=
 TestCloseRel[a_?NumericQ, b_?NumericQ, rel_?NumericQ] :=
     If[Abs[a] < rel,
        TestEquality[Abs[a - b] < rel, True],
+       Print[Abs[(a - b)/a]];
+       Print[rel];
+       Print[Abs[(a - b)/a] < rel];
        TestEquality[Abs[(a - b)/a] < rel, True]
       ];
 
