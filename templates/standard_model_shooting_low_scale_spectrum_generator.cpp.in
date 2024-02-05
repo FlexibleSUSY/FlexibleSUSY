@@ -201,11 +201,10 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(
 
    calculate_spectrum(Mt);
 
-   VERBOSE_MSG("\t[5] running SM and BSM model to output scale "
-               << parameter_output_scale << " GeV ...");
-
    // run to output scale (if scale > 0)
    if (!is_zero(parameter_output_scale)) {
+      VERBOSE_MSG("\t[5] running SM and BSM model to output scale "
+                  << parameter_output_scale << " GeV ...");
       model.run_to(parameter_output_scale);
       eft.run_to(parameter_output_scale);
    }
