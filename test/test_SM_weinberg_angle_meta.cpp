@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( test_sin_theta )
    wein_sm.set_number_of_iterations(maxTries);
    wein_sm.set_precision_goal(tol);
    double sin_theta_sm;
-   BOOST_REQUIRE_NO_THROW(sin_theta_sm = wein_sm.calculate(sin_start));
+   BOOST_REQUIRE_NO_THROW(sin_theta_sm = wein_sm.calculate_sin_theta_w(sin_start));
 
    SM_weinberg_angle::Sm_parameters SM_parameters;
    SM_parameters.fermi_constant = Electroweak_constants::gfermi;

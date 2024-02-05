@@ -11,7 +11,7 @@ FlexibleSUSY
    :alt: GitHub commits since latest release (by SemVer including pre-releases)
 .. |static-analysis| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/static%20analysis/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/static-analysis.yml
-.. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
+.. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/tests.yml/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/tests.yml
 
 .. image:: doc/images/FS-logo.png

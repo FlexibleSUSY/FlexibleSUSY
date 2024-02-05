@@ -79,6 +79,7 @@ TEST_SRC := \
 		$(DIR)/test_sm_mw.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
+		$(DIR)/test_standard_model_G_fermi.cpp \
 		$(DIR)/test_standard_model_mw_calculation.cpp \
 		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_string_format.cpp \
@@ -1065,6 +1066,11 @@ $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfener
 	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
+endif
+
+ifeq ($(ENABLE_HIGGSTOOLS), yes)
+$(DIR)/test_HiggsTools_CP.o: CPPFLAGS += $(MODtest_INC) $(HIGGSTOOLSFLAGS)
+$(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
 endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
