@@ -4867,6 +4867,10 @@ double Standard_model::calculate_MFv_DRbar(double, int) const
 
 double Standard_model::calculate_MFe_DRbar(double m_sm_msbar, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mtau == 0) {
+      return m_sm_msbar;
+   }
+
    const double p = m_sm_msbar;
    const double self_energy_1  = Re(self_energy_Fe_1loop_1_heavy_rotated(p, idx
       , idx));
@@ -4885,6 +4889,10 @@ double Standard_model::calculate_MFe_DRbar(double m_sm_msbar, int idx) const
 
 double Standard_model::calculate_MFu_DRbar(double m_pole, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mt == 0) {
+      return m_pole;
+   }
+
    const double p = m_pole;
    const double self_energy_1  = Re(self_energy_Fu_1loop_1_heavy_rotated(p, idx
       , idx));
@@ -4929,6 +4937,10 @@ double Standard_model::calculate_MFu_DRbar(double m_pole, int idx) const
 
 double Standard_model::calculate_MFd_DRbar(double m_sm_msbar, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mb == 0) {
+      return m_sm_msbar;
+   }
+
    const double p = m_sm_msbar;
    const double self_energy_1  = Re(self_energy_Fd_1loop_1_heavy_rotated(p, idx
       , idx));
