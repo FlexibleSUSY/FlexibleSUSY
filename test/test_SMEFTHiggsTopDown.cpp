@@ -121,7 +121,8 @@ using Output_t = std::array<double, 9>;
                                                                \
       model_name ## _spectrum_generator<solver_type> sg;       \
       sg.set_settings(settings);                               \
-      sg.set_parameter_output_scale(100.);                     \
+      sg.set_parameter_output_scale(                           \
+         slha_io.get_parameter_output_scale());                \
                                                                \
       BOOST_REQUIRE_NO_THROW(sg.run(qedqcd, input));           \
                                                                \
