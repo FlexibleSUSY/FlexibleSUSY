@@ -370,7 +370,7 @@ void @ModelName@_spectrum_generator<Shooting>::set_BSM_parameters(
    VERBOSE_MSG("\t[2] calculating pole masses ...");
 
    eft.solve_ewsb();
-   eft.calculate_pole_masses();
+   eft.calculate_spectrum();
 
    VERBOSE_MSG("\t[3] calculating observables ...");
 
