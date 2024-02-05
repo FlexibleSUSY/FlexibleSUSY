@@ -94,7 +94,7 @@ Block EXTPAR                 # Input parameters
     1   173.34               # scale QEWSB
 )";
 
-using Output_t = std::array<double, 9>;
+using Output_t = std::array<double, 10>;
 
 #define DEFINE_FUNCTION(model_name, solver_type, model_type)   \
    Output_t calc_ ## model_name(char const* const slha_input)  \
@@ -121,7 +121,8 @@ using Output_t = std::array<double, 9>;
                                                                \
       model_name ## _spectrum_generator<solver_type> sg;       \
       sg.set_settings(settings);                               \
-      sg.set_parameter_output_scale(100.);                     \
+      sg.set_parameter_output_scale(                           \
+         slha_io.get_parameter_output_scale());                \
                                                                \
       BOOST_REQUIRE_NO_THROW(sg.run(qedqcd, input));           \
                                                                \
@@ -144,7 +145,8 @@ using Output_t = std::array<double, 9>;
          sm.get_Yu(2,2),                                       \
          sm.get_Yd(2,2),                                       \
          sm.get_Ye(2,2),                                       \
-         sm.get_v()                                            \
+         sm.get_v(),                                           \
+         sm.get_scale()                                        \
       };                                                       \
    }
 
@@ -167,4 +169,5 @@ BOOST_AUTO_TEST_CASE( test_Mh )
    BOOST_CHECK_CLOSE_FRACTION(bu.at(6), td.at(6), 1e-10);
    BOOST_CHECK_CLOSE_FRACTION(bu.at(7), td.at(7), 1e-10);
    BOOST_CHECK_CLOSE_FRACTION(bu.at(8), td.at(8), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(9), td.at(9), 1e-10);
 }
