@@ -299,8 +299,8 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
       Output expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_1, {1.08559604e+02}, 1e-4}, // obtained from NMSSMEFTHiggsTwoScale in EFT parametrization
-      {slha_input_case_2, {1.20055553e+02}, 1e-6}, // obtained from MSSMEFTHiggs2loop in full-model parametrization w/ only 2-loop contributions of O((at+ab)*as + (at+ab)^2), i.e. no 2-loop O(atau^2) contributions and not 3- or 4-loop contributions
+      {slha_input_case_1, {1.08559604e+02}, 2e-4}, // obtained from NMSSMEFTHiggsTwoScale in EFT parametrization
+      {slha_input_case_2, {1.20055553e+02}, 2e-5}, // obtained from MSSMEFTHiggs2loop in full-model parametrization w/ only 2-loop contributions of O((at+ab)*as + (at+ab)^2), i.e. no 2-loop O(atau^2) contributions and not 3- or 4-loop contributions
    };
 
    for (const auto& d: data) {

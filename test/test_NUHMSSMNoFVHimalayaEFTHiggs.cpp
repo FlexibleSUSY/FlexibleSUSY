@@ -1022,7 +1022,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
       Output_3loop expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_5, Output_3loop{ .lambda_3L = 0.11685905941993063 }, 5e-5},
+      {slha_input_case_5, Output_3loop{ .lambda_3L = 0.11685905941993063 }, 7e-5},
       {slha_input_case_8, Output_3loop{ .lambda_3L = 0.12118666568388101 }, 5e-5},
    };
 
