@@ -224,8 +224,7 @@ jobs:
 
       - name: Check if SARAH has changed
         run: |
-           cd /fs_dependencies/mathematica
-           out=$(find SARAH-* -type f | xargs -d'\n' -P0 -n1 sha512sum | sort -k 2 | sha512sum | awk '{print $1}')
+           out=$(find /fs_dependencies/mathematica/SARAH-* sarah -type f | xargs -d'\n' -P0 -n1 sha512sum | sort -k 2 | sha512sum | awk '{print $1}')
            echo "SARAH_HASH=${out}" >> $GITHUB_ENV
 
       # If SARAH checksum didn't change
