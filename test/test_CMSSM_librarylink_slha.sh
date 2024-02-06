@@ -78,6 +78,7 @@ handle = FSCMSSMOpenHandle[
 
 FSCMSSMCalculateSpectrum[handle];
 FSCMSSMCalculateObservables[handle];
+FSCMSSMCalculateUnitarity[handle];
 FSCMSSMCalculateDecays[handle];
 Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];

@@ -21,6 +21,7 @@
 #define @ModelName@_SLHA_IO_H
 
 @decaysHeaderIncludes@
+@unitarityIncludes@
 
 #include "problems.hpp"
 #include "decays/flexibledecay_problems.hpp"
@@ -95,6 +96,7 @@ public:
    void set_spinfo(const Problems&);
    void set_spinfo(const std::vector<std::string>&, const std::vector<std::string>&);
    void set_print_imaginary_parts_of_majorana_mixings(bool);
+   void set_unitarity_infinite_s(Spectrum_generator_settings const&, UnitarityInfiniteS const&);
    void write_to(const std::string&) const;
    void write_to_file(const std::string&) const;
    void write_to_stream() const;
