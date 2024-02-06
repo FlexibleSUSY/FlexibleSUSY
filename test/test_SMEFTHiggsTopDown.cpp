@@ -36,7 +36,7 @@ using namespace flexiblesusy;
 
 char const * const slha_input = R"(
 Block MODSEL                 # Select model
-   12   100                  # parameter output scale (GeV)
+   12   1000                 # parameter output scale (GeV)
 Block FlexibleSUSY
 #    0   1.000000000e-05      # precision goal
     1   0                    # max. iterations (0 = automatic)
