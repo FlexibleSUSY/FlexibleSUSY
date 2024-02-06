@@ -68,6 +68,8 @@ BASE_TEMPLATES := \
 		$(DIR)/susy_parameters.hpp.in \
 		$(DIR)/susy_parameters.cpp.in \
 		$(DIR)/susy_scale_constraint.hpp.in \
+		$(DIR)/unitarity.hpp.in \
+		$(DIR)/unitarity.cpp.in \
 		$(DIR)/utilities.hpp.in \
 		$(DIR)/utilities.cpp.in
 

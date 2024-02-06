@@ -71,6 +71,7 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_slha_io.cpp \
 		$(DIR)/@CLASSNAME@_soft_parameters.cpp \
 		$(DIR)/@CLASSNAME@_susy_parameters.cpp \
+		$(DIR)/@CLASSNAME@_unitarity.cpp \
 		$(DIR)/@CLASSNAME@_utilities.cpp \
 		$(DIR)/@CLASSNAME@_weinberg_angle.cpp
 
@@ -118,6 +119,7 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_soft_parameters.hpp \
 		$(DIR)/@CLASSNAME@_susy_parameters.hpp \
 		$(DIR)/@CLASSNAME@_susy_scale_constraint.hpp \
+		$(DIR)/@CLASSNAME@_unitarity.hpp \
 		$(DIR)/@CLASSNAME@_utilities.hpp \
 		$(DIR)/@CLASSNAME@_weinberg_angle.hpp
 

@@ -168,6 +168,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/thread_pool.hpp \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
+		$(DIR)/unitarity.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp \
 		$(DIR)/zeta.hpp
