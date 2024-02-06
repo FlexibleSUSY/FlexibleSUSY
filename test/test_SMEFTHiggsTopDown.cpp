@@ -51,7 +51,7 @@ Block FlexibleSUSY
    10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
    11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
    12   0                    # force output
-   13   3                    # Top quark 2-loop corrections QCD
+   13   4                    # Top quark 2-loop corrections QCD
    14   1.000000000e-11      # beta-function zero threshold
    15   0                    # calculate observables (a_muon, ...)
    16   0                    # force positive majorana masses
