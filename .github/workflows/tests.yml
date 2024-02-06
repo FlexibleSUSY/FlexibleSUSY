@@ -222,22 +222,25 @@ jobs:
             --enable-librarylink
           make showbuild
 
-      - name: Tar SARAH
+      - name: Check if SARAH has changed
         run: |
            cd /fs_dependencies/mathematica
-           find SARAH-* -type f | xargs -d'\n' -P0 -n1 sha512sum | sort -k 2 | sha512sum > $GITHUB_WORKSPACE/sarah_checksum.txt
+           out=$(find SARAH-* -type f | xargs -d'\n' -P0 -n1 sha512sum | sort -k 2 | sha512sum | awk '{print $1}')
+           echo "SARAH_HASH=${out}" >> $GITHUB_ENV
 
-      - name: Restore cached SARAH Outputs
+      # If SARAH checksum didn't change
+      # restore content of Output directory from previous run
+      - name: Restore cached SARAH outputs
         id: cache-sarah-output-restore
         uses: actions/cache/restore@v4
         with:
           path: Output
-          key: sarah-outputs-${{ matrix.PART }}-${{ hashFiles('sarah_checksum.txt') }}
+          key: sarah-outputs-${{ matrix.PART }}-${{ env.SARAH_HASH }}
 
       - name: Make
         run: make -j2
 
-      - name: Save SARAH Outputs
+      - name: Save SARAH outputs
         id: cache-sarah-output-save
         uses: actions/cache/save@v4
         with:
