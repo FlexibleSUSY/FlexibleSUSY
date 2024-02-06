@@ -1048,7 +1048,7 @@ References
 .. [1708.05720] `Eur. Phys. J. C77 (2017) no. 12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
 .. [1710.03760] `CPC 230 (2018) 145-217 <https://inspirehep.net/record/1629978>`_ [`arXiv:1710.03760 <https://arxiv.org/abs/1710.03760>`_]
 .. [1804.09410] `Eur. Phys. J. C78 (2018) no. 7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
-.. [1805.07306] `Eur. Phys. J. C78 (2018) no. 8, 649 <https://inspirehep.net/literature/1673989`_ [`arxiv:1805.07306 <https://arxiv.org/abs/1805.07306>`_]
+.. [1805.07306] `Eur. Phys. J. C78 (2018) no. 8, 649 <https://inspirehep.net/literature/1673989>`_ [`arxiv:1805.07306 <https://arxiv.org/abs/1805.07306>`_]
 .. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
 .. [2106.05038] `CPC 283 (2023) 108584 <https://inspirehep.net/literature/1867840>`_ [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
