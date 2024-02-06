@@ -882,11 +882,13 @@ void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
       double delta_alpha_em = 0.;
       double delta_alpha_s  = 0.;
 
-      if (get_thresholds() && threshold_corrections.alpha_em > 0)
+      if (get_thresholds() > 0 && threshold_corrections.alpha_em > 0) {
          delta_alpha_em = calculate_delta_alpha_em(alpha_em);
+      }
 
-      if (get_thresholds() && threshold_corrections.alpha_s > 0)
+      if (get_thresholds() > 0 && threshold_corrections.alpha_s > 0) {
          delta_alpha_s  = calculate_delta_alpha_s(alpha_s);
+      }
 
       const double alpha_em_drbar = alpha_em / (1.0 - delta_alpha_em);
       const double alpha_s_drbar  = alpha_s / (1.0 - delta_alpha_s);
@@ -988,20 +990,31 @@ void Standard_model::initial_guess_for_parameters(const softsusy::QedQcd& qedqcd
 
 double Standard_model::calculate_delta_alpha_em(double alphaEm) const
 {
-   const double delta_alpha_em_SM = -0.28294212105225836*alphaEm*
-      FiniteLog(Abs(MFu(2) / get_scale()));
+   double delta_alpha_em_1loop = 0.;
 
-   return delta_alpha_em_SM;
+   if (get_thresholds() > 0 && threshold_corrections.alpha_em > 0) {
+      delta_alpha_em_1loop = -0.28294212105225836*alphaEm*
+         FiniteLog(Abs(MFu(2) / get_scale()));
+   }
+
+   return delta_alpha_em_1loop;
 }
 
 double Standard_model::calculate_delta_alpha_s(double alphaS) const
 {
-   const double delta_alpha_s_1loop = -0.1061032953945969*alphaS*
-      FiniteLog(Abs(MFu(2) / get_scale()));
-
+   double delta_alpha_s_1loop = 0.;
    double delta_alpha_s_2loop = 0.;
    double delta_alpha_s_3loop = 0.;
    double delta_alpha_s_4loop = 0.;
+
+   if (get_thresholds() > 0 && threshold_corrections.alpha_s > 0) {
+      sm_fourloop_as::Parameters pars;
+      pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
+      pars.mt   = MFu(2);
+      pars.Q    = get_scale();
+
+      delta_alpha_s_1loop = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+   }
 
    if (get_thresholds() > 1 && threshold_corrections.alpha_s > 1) {
       sm_fourloop_as::Parameters pars;
