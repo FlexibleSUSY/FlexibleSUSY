@@ -81,6 +81,7 @@ TEST_SRC := \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_standard_model_G_fermi.cpp \
+		$(DIR)/test_standard_model_mt_calculation.cpp \
 		$(DIR)/test_standard_model_mw_calculation.cpp \
 		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_string_format.cpp \

@@ -256,7 +256,7 @@ const int Standard_model::numberOfParameters;
 Standard_model::Standard_model()
 {
    set_number_of_parameters(numberOfParameters);
-   set_thresholds(3);
+   set_thresholds(4);
 }
 
 Standard_model::Standard_model(double scale_, double loops_, double thresholds_
