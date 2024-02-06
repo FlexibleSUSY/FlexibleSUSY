@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<ChargedLepton>::type,
    const context_base& context,
    typename field_indices<PseudoscalarHiggs>::type const& indexIn,
    typename field_indices<bar<ChargedLepton>::type>::type const& indexOut1,
-   typename field_indices<ChargedLepton>::type const& indexOut2) const
+   typename field_indices<ChargedLepton>::type const& indexOut2)
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,bar<ChargedLepton>::type, ChargedLepton>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");

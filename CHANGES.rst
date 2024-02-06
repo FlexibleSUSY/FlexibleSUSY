@@ -4,6 +4,9 @@ FlexibleSUSY 2.8.0 [X, X X]
 New features
 ------------
 
+* Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
+  over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
+
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
 
@@ -42,6 +45,11 @@ New features
 * Added 2-loop Barr-Zee contributions to leptons :math:`$(g-2)/2$`.
 
   Thanks to Felix Reichenbach and Alexander Voigt.
+
+* SLHA output now includes the `EFFHIGGSCOUPLINGS` block containing
+  loop-induced couplings of neutral Higgses. This block can be used by a SARAH
+  generated UFO and CalcHEP models (the latter one being also used by
+  micrOMEGAs).
 
 Fixed bugs
 ----------

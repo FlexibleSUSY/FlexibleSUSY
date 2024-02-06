@@ -882,6 +882,18 @@ void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd)
    set_block(ss);
 }
 
+void SLHA_io::set_unitarity_infinite_s(
+   Spectrum_generator_settings const& spectrum_generator_settings, UnitarityInfiniteS const& unitarity)
+{
+   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
+      std::ostringstream block;
+      block << "Block FlexibleSUSYUnitarity Q= " << FORMAT_SCALE(unitarity.renScale) << '\n'
+            << FORMAT_ELEMENT(0, unitarity.allowed, "Tree-level unitarity limits fulfilled or not")
+            << FORMAT_ELEMENT(1, unitarity.maxAbsReEigenval, "max(|re(eigenvalues(a0))|)");
+      set_block(block);
+   }
+}
+
 void SLHA_io::write_to_file(const std::string& file_name) const
 {
    std::ofstream ofs(file_name);
@@ -975,5 +987,15 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
+void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings)
+{
+   std::ostringstream decay;
+   decay << "Block EFFHIGGSCOUPLINGS\n";
 
+   for (auto const& effC : effCouplings) {
+      decay << FORMAT_EFFECTIVECOUPLINGS(std::get<0>(effC),  std::get<1>(effC), std::get<2>(effC), std::get<3>(effC), std::get<4>(effC));
+   }
+
+   set_block(decay);
+}
 } // namespace flexiblesusy

@@ -113,6 +113,7 @@ META_SRC     := \
 		$(DIR)/TwoLoopMSSM.m \
 		$(DIR)/TwoLoopQCD.m \
 		$(DIR)/TwoLoopSM.m \
+		$(DIR)/Unitarity.m \
 		$(DIR)/Utils.m \
 		$(DIR)/Vertices.m \
 		$(DIR)/WeinbergAngle.m \

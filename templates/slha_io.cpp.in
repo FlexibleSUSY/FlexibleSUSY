@@ -179,6 +179,15 @@ void @ModelName@_slha_io::set_FlexibleDecay_settings(const FlexibleDecay_setting
 }
 
 /**
+ * Stores the settings (FlexibleSUSYUnitarity block) in the SLHA object.
+ */
+void @ModelName@_slha_io::set_unitarity_infinite_s(
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings, UnitarityInfiniteS const& unitarity)
+{
+   slha_io.set_unitarity_infinite_s(spectrum_generator_settings, unitarity);
+}
+
+/**
  * Stores the SMINPUTS input parameters in the SLHA object.
  *
  * @param qedqcd class of Standard Model parameters
@@ -430,7 +439,7 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
          << FORMAT_TOTAL_WIDTH(pdg, width, name + " decays");
 
    if (!is_zero(width, 1e-100)) {
-      constexpr double NEGATIVE_BR_TOLERANCE = 1e-11;
+      static constexpr double NEGATIVE_BR_TOLERANCE = 1e-11;
       const double MIN_BR_TO_PRINT = flexibledecay_settings.get(FlexibleDecay_settings::min_br_to_print);
       std::vector<Decay> sorted_decays_list = sort_decays_list(decays_list);
       for (const auto& channel : sorted_decays_list) {
@@ -457,6 +466,11 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
    }
 
    slha_io.set_block(decay);
+}
+
+void @ModelName@_slha_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings)
+{
+   slha_io.set_effectivecouplings_block(effCouplings);
 }
 
 @setDecaysFunctions@

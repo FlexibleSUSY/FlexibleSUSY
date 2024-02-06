@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       const context_base& context,
       const typename field_indices<PseudoscalarHiggs>::type& in_idx,
       const typename field_indices<Gluon>::type& out1_idx,
-      const typename field_indices<Gluon>::type& out2_idx) const
+      const typename field_indices<Gluon>::type& out2_idx)
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
@@ -59,9 +59,12 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       double pseudoscalar_corr = 0.0;
       switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
          case 4:
+            [[fallthrough]];
          case 3:
+            [[fallthrough]];
          case 2:
             pseudoscalar_corr += deltaNNLO*alpha_s_red;
+            [[fallthrough]];
          case 1:
             pseudoscalar_corr += deltaNLO;
             pseudoscalar_corr *= alpha_s_red/std::norm(0.5*A12_A);
@@ -72,6 +75,16 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
             WARNING("Unknow correcion in Phi->gg");
       }
       result += pseudoscalar_corr;
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
+      effhiggscouplings_block_input.push_back(
+         {
+            36 + 10*(in_idx.size()>0 ? in_idx.at(0)-1 : 0), 21, 21,
+            std::sqrt(result/(flux * color_fact * ps * ps_symmetry)/(0.5*Power4(mAh))),
+            field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx)
+         }
+      );
    }
 
    return result;

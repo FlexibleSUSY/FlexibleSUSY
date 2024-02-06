@@ -119,7 +119,7 @@ namespace {
       return zeta4 +
          l*(zeta3 +
          l*(0.5*zeta2 +
-         l*(11.0/36 - 1.0/6*std::log(std::abs(l)) +
+         l*(11.0/36 - 1.0/6*std::log(-l) +
          l*(-1.0/48 +
          l*(-1.0/1440 +
          l2*(1.0/604800 - 1.0/91445760*l2))))));
@@ -160,7 +160,7 @@ double Li4(double x) noexcept
       x = 1/x;
       rest = 2*zeta4 + l2*(zeta2 - 1.0/24*l2);
       sgn = -1;
-   };
+   }
 
    if (x < 0) {
       app = li4_neg(x);
@@ -170,7 +170,7 @@ double Li4(double x) noexcept
       app = li4_mid(x);
    } else { // x <= 1
       app = li4_one(x);
-   };
+   }
 
    return rest + sgn*app;
 }
@@ -210,9 +210,9 @@ std::complex<double> Li4(const std::complex<double>& z_) noexcept
       }
    }
 
-   const double nz  = norm_sqr(z);
+   const double nz  = norm(z);
    const double pz  = arg(z);
-   const double lnz = 0.5*std::log(nz);
+   const double lnz = std::log(nz);
 
    if (lnz*lnz + pz*pz < 1) { // |log(z)| < 1
       const Complex<double> u(lnz, pz); // log(z)
@@ -338,9 +338,9 @@ std::complex<long double> Li4(const std::complex<long double>& z_) noexcept
       }
    }
 
-   const long double nz  = norm_sqr(z);
+   const long double nz  = norm(z);
    const long double pz  = arg(z);
-   const long double lnz = 0.5L*std::log(nz);
+   const long double lnz = std::log(nz);
 
    if (lnz*lnz + pz*pz < 1) { // |log(z)| < 1
       const Complex<long double> u(lnz, pz); // log(z)

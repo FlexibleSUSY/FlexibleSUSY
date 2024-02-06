@@ -5,7 +5,15 @@ WITH_$(MODNAME) := yes
 LIB_model_specific_SM_MK  := \
 		$(DIR)/module.mk
 
+model_specific_SM_CXXQFT_VERTICES_MK := \
+		$(DIR)/cxx_qft/vertices.mk
+
+-include $(model_specific_SM_CXXQFT_VERTICES_MK)
+LIB_model_specific_SM_CXXQFT_VERTICES_SRC ?= ''
+
 LIB_model_specific_SM_SRC := \
+		$(DIR)/decays/standard_model_decays.cpp \
+		$(DIR)/decays/standard_model_decay_table.cpp \
 		$(DIR)/sm_fourloophiggs.cpp \
 		$(DIR)/sm_fourloop_as.cpp \
 		$(DIR)/sm_mw.cpp \
@@ -18,7 +26,11 @@ LIB_model_specific_SM_SRC := \
 		$(DIR)/standard_model_two_scale_model.cpp \
 		$(DIR)/weinberg_angle.cpp
 
+LIB_model_specific_SM_SRC += $(LIB_model_specific_SM_CXXQFT_VERTICES_SRC)
+
 LIB_model_specific_SM_HDR := \
+		$(DIR)/decays/standard_model_decays.hpp \
+		$(DIR)/decays/standard_model_decay_table.hpp \
 		$(DIR)/sm_fourloophiggs.hpp \
 		$(DIR)/sm_fourloop_as.hpp \
 		$(DIR)/sm_mw.hpp \
@@ -32,6 +44,12 @@ LIB_model_specific_SM_HDR := \
 		$(DIR)/standard_model_two_scale_low_scale_constraint.hpp \
 		$(DIR)/standard_model_two_scale_model.hpp \
 		$(DIR)/weinberg_angle.hpp
+
+LIB_model_specific_SM_CXXQFT_HDR := \
+		$(DIR)/cxx_qft/standard_model_qft.hpp \
+		$(DIR)/cxx_qft/standard_model_fields.hpp \
+		$(DIR)/cxx_qft/standard_model_vertices.hpp \
+		$(DIR)/cxx_qft/standard_model_context_base.hpp
 
 LIB_model_specific_SM_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIB_model_specific_SM_SRC)))
@@ -76,7 +94,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(EIGENFLAGS) $(BOOSTFLAGS)
+$(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(EIGENFLAGS) $(BOOSTFLAGS) -Imodel_specific/SM
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)

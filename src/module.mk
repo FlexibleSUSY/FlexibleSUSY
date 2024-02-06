@@ -69,6 +69,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/zeta.cpp
 
 LIBFLEXI_HDR := \
+		$(DIR)/always_false.hpp \
 		$(DIR)/amm_loop_functions.hpp \
 		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
@@ -170,6 +171,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
 		$(DIR)/two_loop_functions.hpp \
+		$(DIR)/unitarity.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp \
 		$(DIR)/zeta.hpp
@@ -347,7 +349,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
+$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(LILITHFLAGS) $(PYTHONFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)

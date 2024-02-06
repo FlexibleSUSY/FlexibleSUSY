@@ -20,6 +20,7 @@
 #define SLHA_IO_H
 
 #include "slha_format.hpp"
+#include "unitarity.hpp"
 
 #include <complex>
 #include <functional>
@@ -144,11 +145,13 @@ public:
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block_imag(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
+   void set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>&);
    void set_modsel(const Modsel&);
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);
    void set_FlexibleDecay_settings(const FlexibleDecay_settings&);
    void set_sminputs(const softsusy::QedQcd&);
+   void set_unitarity_infinite_s(Spectrum_generator_settings const&, UnitarityInfiniteS const&);
    void write_to_file(const std::string&) const;
    void write_to_stream() const;
    void write_to_stream(std::ostream&) const;

@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const context_base& context,
    typename field_indices<Higgs>::type const& indexIn,
    typename field_indices<bar<ChargedLepton>::type>::type const& indexOut1,
-   typename field_indices<ChargedLepton>::type const& indexOut2) const
+   typename field_indices<ChargedLepton>::type const& indexOut2)
 {
 
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);

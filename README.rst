@@ -4,12 +4,14 @@
 FlexibleSUSY
 ============
 
-|release| |static-analysis| |tests|
+|release| |commits-since| |static-analysis| |tests|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |commits-since| image:: https://img.shields.io/github/commits-since/FlexibleSUSY/FlexibleSUSY/latest/development
+   :alt: GitHub commits since latest release (by SemVer including pre-releases)
 .. |static-analysis| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/static%20analysis/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/static-analysis.yml
-.. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
+.. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/tests.yml/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/tests.yml
 
 .. image:: doc/images/FS-logo.png
@@ -44,6 +46,9 @@ modification, extension and reuse.
 
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
   (or later), please cite [2204.05285]_.
+
+  If you use unitarity constraints please cite [XXXX.XXXXX]_ and necessarily
+  [1805.07306_].
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
@@ -114,8 +119,16 @@ Optional:
 Installation of required/optional libraries
 -------------------------------------------
 
+The required libraries Boost_, `Eigen 3`_ and `GNU scientific library`_
+can usually be installed via the package manager of the operating system.
+On Debian/Ubuntu one may run for example
+
+.. code-block:: shell
+
+    sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev
+
 The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
-LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
+LoopTools_, Himalaya_ and TSIL_ can be also installed using the Conan_
 package manager.  If not already installed, Conan can be installed
 with pip
 
@@ -130,12 +143,7 @@ To install the libraries required by FlexibleSUSY, run
     conan install . --build=missing
 
 The `GNU scientific library`_ can currently not be installed via
-Conan_.  One may use the package manager of the operating system to
-install it.  On Debian/Ubuntu one may run for example
-
-.. code-block:: shell
-
-    sudo apt-get install libgsl-dev
+Conan_.
 
 If the required libraries are installed via Conan or the operating
 system's package manager, they will be found automatically by
@@ -769,7 +777,7 @@ This is achieved by setting the ``FFLAGS`` variable during LoopTools configurati
 
 .. code-block:: shell
 
-    FFLAGS=-fPIC ./configure
+    FFLAGS="-O3 -fPIC" ./configure
 
 COLLIER support
 ```````````````
@@ -1040,6 +1048,7 @@ References
 .. [1708.05720] `Eur. Phys. J. C77 (2017) no. 12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
 .. [1710.03760] `CPC 230 (2018) 145-217 <https://inspirehep.net/record/1629978>`_ [`arXiv:1710.03760 <https://arxiv.org/abs/1710.03760>`_]
 .. [1804.09410] `Eur. Phys. J. C78 (2018) no. 7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
+.. [1805.07306] `Eur. Phys. J. C78 (2018) no. 8, 649 <https://inspirehep.net/literature/1673989>`_ [`arxiv:1805.07306 <https://arxiv.org/abs/1805.07306>`_]
 .. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
 .. [2106.05038] `CPC 283 (2023) 108584 <https://inspirehep.net/literature/1867840>`_ [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
