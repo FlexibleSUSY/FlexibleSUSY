@@ -2963,7 +2963,11 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
    minBRtoPrint -> 1*^-5,
    maxHigherOrderCorrections -> 4,
    alphaThomson -> 1,
-   offShellVV -> 2
+   offShellVV -> 2,
+   printEffCBlock -> 1,
+   usePoleHiggsMixings -> 1,
+   callHiggsTools -> 1,
+   callLilith -> 1
 };\n";
                addFDOptions1 = ", Sequence @@ fdDefaultSettings";
                addFDOptions2 = "| fdSettings";
@@ -2972,15 +2976,23 @@ setFDOptions =
 OptionValue[minBRtoPrint],
 OptionValue[maxHigherOrderCorrections],
 OptionValue[alphaThomson],
-OptionValue[offShellVV]";
+OptionValue[offShellVV],
+OptionValue[printEffCBlock],
+OptionValue[usePoleHiggsMixings],
+OptionValue[callHiggsTools],
+OptionValue[callLilith]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
 flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
 flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections , pars[c++]);
 flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ , pars[c++]);
 flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays , pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars[c++]);
 ";
-decayIndex = "const Index_t n_fd_settings = 4;";
+decayIndex = "const Index_t n_fd_settings = 8;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
              ];
            WriteOut`ReplaceInFiles[files,
