@@ -18,25 +18,26 @@
 
 
 /**
- * @file cxx_qft/@ModelName@_vertices.cpp
+ * @file @ModelName@_unitarity.hpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#include "@ModelName@_context_base.hpp"
-#include "@ModelName@_input_parameters.hpp"
-#include "@ModelName@_vertices.hpp"
+#ifndef UNITARITY_H
+#define UNITARITY_H
 
-#include "concatenate.hpp"
-#include "wrappers.hpp"
+#include <Eigen/Core>
 
-#define INPUTPARAMETER(p) context.model.get_input_parameters().p
-#define MODELPARAMETER(p) context.model.get_##p()
-#define DERIVEDPARAMETER(p) context.model.p()
-#define PHASE(p) context.model.get_##p()
+namespace flexiblesusy {
 
-namespace flexiblesusy::@ModelName@_cxx_diagrams::detail {
+struct UnitarityInfiniteS {
+   bool allowed = false;
+   double renScale = 0.;
+   double maxAbsReEigenval = 0.;
+   Eigen::MatrixXcd scatteringMatrix {};
+};
 
-@CXXDiagrams_VertexDefinitions@
+} // namespace flexiblesusy
 
-} // namespace flexiblesusy::@ModelName@_cxx_diagrams::detail
+#endif
+

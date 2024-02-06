@@ -179,6 +179,15 @@ void @ModelName@_slha_io::set_FlexibleDecay_settings(const FlexibleDecay_setting
 }
 
 /**
+ * Stores the settings (FlexibleSUSYUnitarity block) in the SLHA object.
+ */
+void @ModelName@_slha_io::set_unitarity_infinite_s(
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings, UnitarityInfiniteS const& unitarity)
+{
+   slha_io.set_unitarity_infinite_s(spectrum_generator_settings, unitarity);
+}
+
+/**
  * Stores the SMINPUTS input parameters in the SLHA object.
  *
  * @param qedqcd class of Standard Model parameters
