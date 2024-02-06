@@ -38,7 +38,7 @@ char const * const slha_input = R"(
 Block MODSEL                 # Select model
    12   100                  # parameter output scale (GeV)
 Block FlexibleSUSY
-    0   1.000000000e-05      # precision goal
+#    0   1.000000000e-05      # precision goal
     1   0                    # max. iterations (0 = automatic)
     2   0                    # solver (0 = all, 1 = two_scale, 2 = semi_analytic)
     3   1                    # calculate SM pole masses
@@ -96,6 +96,8 @@ Block EXTPAR                 # Input parameters
 
 using Output_t = std::array<double, 10>;
 
+const double PRECISION_GOAL = 1e-5;
+
 #define DEFINE_FUNCTION(model_name, solver_type, model_type)   \
    Output_t calc_ ## model_name(char const* const slha_input)  \
    {                                                           \
@@ -118,6 +120,7 @@ using Output_t = std::array<double, 10>;
          BOOST_TEST_MESSAGE(error.what());                     \
          BOOST_TEST(false);                                    \
       }                                                        \
+      settings.set(Spectrum_generator_settings::precision, PRECISION_GOAL); \
                                                                \
       model_name ## _spectrum_generator<solver_type> sg;       \
       sg.set_settings(settings);                               \
@@ -160,14 +163,17 @@ BOOST_AUTO_TEST_CASE( test_Mh )
    BOOST_TEST_MESSAGE("running the SM (top -> down)");
    const auto td = calc_SMEFTHiggsTopDown(slha_input);
 
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(0), td.at(0), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(1), td.at(1), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(2), td.at(2), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(3), td.at(3), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(4), td.at(4), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(5), td.at(5), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(6), td.at(6), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(7), td.at(7), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(8), td.at(8), 1e-10);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(9), td.at(9), 1e-10);
+   const double eps = 2*PRECISION_GOAL;
+
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(0), td.at(0), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(1), td.at(1), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(2), td.at(2), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(3), td.at(3), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(4), td.at(4), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(5), td.at(5), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(6), td.at(6), eps);
+   // Disagreement on y_tau due to resummation in calculate_MFe_DRbar(m_sm_msbar, 2)
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(7), td.at(7), 1e3*eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(8), td.at(8), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(9), td.at(9), eps);
 }
