@@ -163,17 +163,15 @@ BOOST_AUTO_TEST_CASE( test_Mh )
    BOOST_TEST_MESSAGE("running the SM (top -> down)");
    const auto td = calc_SMEFTHiggsTopDown(slha_input);
 
-   const double eps = 2*PRECISION_GOAL;
-
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(0), td.at(0), eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(1), td.at(1), eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(2), td.at(2), eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(3), td.at(3), eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(4), td.at(4), eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(5), td.at(5), eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(6), td.at(6), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(0), td.at(0), 2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(1), td.at(1), 2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(2), td.at(2), 2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(3), td.at(3), 2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(4), td.at(4), 2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(5), td.at(5), 2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(6), td.at(6), 2*PRECISION_GOAL);
    // Disagreement on y_tau due to resummation in calculate_MFe_DRbar(m_sm_msbar, 2)
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(7), td.at(7), 1e3*eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(8), td.at(8), eps);
-   BOOST_CHECK_CLOSE_FRACTION(bu.at(9), td.at(9), eps);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(7), td.at(7), 1e3*2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(8), td.at(8), 2*PRECISION_GOAL);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(9), td.at(9), 2*PRECISION_GOAL);
 }
