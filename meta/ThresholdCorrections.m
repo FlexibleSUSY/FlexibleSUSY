@@ -479,6 +479,7 @@ GetParameter[par_, factor_:1] :=
 CalculateThetaWFromFermiConstant[] :=
     Module[{
         mhStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[TreeMasses`GetHiggsBoson[]]],
+        mwStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[TreeMasses`GetWBoson[]]],
         callStr = If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] > 1, "(higgs_idx)", ""]
         },
     "\
@@ -490,9 +491,17 @@ const auto get_mh_pole = [&] () {
    return mh_pole;
 };
 
+const auto get_mw_pole = [&] () {
+   double mw_pole = MODEL->get_physical()." <> mwStr <> ";
+   if (mw_pole == 0) {
+      mw_pole = qedqcd.displayPoleMW();
+   }
+   return mw_pole;
+};
+
 " <> FlexibleSUSY`FSModelName <> "_weinberg_angle::Sm_parameters sm_pars;
 sm_pars.fermi_constant = qedqcd.displayFermiConstant();
-sm_pars.mw_pole = qedqcd.displayPoleMW();
+sm_pars.mw_pole = get_mw_pole();
 sm_pars.mz_pole = qedqcd.displayPoleMZ();
 sm_pars.mt_pole = qedqcd.displayPoleMt();
 sm_pars.mh_pole = get_mh_pole();
@@ -512,8 +521,9 @@ try {
    const auto result = weinberg.calculate();
    THETAW = ArcSin(result.first);
 
-   if (MODEL->get_thresholds() && MODEL->get_threshold_corrections().sin_theta_w > 0)
+   if (MODEL->get_thresholds() > 0 && MODEL->get_threshold_corrections().sin_theta_w > 0) {
       Pole(M" <> ToString@TreeMasses`GetWBoson[] <> ") = result.second;
+   }
 
    MODEL->get_problems().unflag_no_sinThetaW_convergence();
 } catch (const Error& e) {
