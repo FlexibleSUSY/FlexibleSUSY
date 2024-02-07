@@ -701,28 +701,18 @@ void Standard_model::calculate_DRbar_masses()
 void Standard_model::calculate_pole_masses()
 {
 #ifdef ENABLE_THREADS
-   Thread_pool tp(std::min(std::thread::hardware_concurrency(), 9u));
+   {
+      Thread_pool tp(std::min(std::thread::hardware_concurrency(), 9u));
 
-   tp.run_task([this] () { calculate_MVG_pole(); });
-   tp.run_task([this] () { calculate_MFv_pole(); });
-   tp.run_task([this] () { calculate_Mhh_pole(); });
-   tp.run_task([this] () { calculate_MVP_pole(); });
-   tp.run_task([this] () { calculate_MVZ_pole(); });
-   tp.run_task([this] () { calculate_MFd_pole(); });
-   tp.run_task([this] () { calculate_MFu_pole(); });
-   tp.run_task([this] () { calculate_MFe_pole(); });
-   tp.run_task([this] () {
-      // if mW=0 it means that the SM was not initialized via matching to the SM
-      // compute mW using ordinary 1-loop calculation
-      if (PHYSICAL(MVWp) == 0.) {
-         calculate_MVWp_pole();
-      }
-      // if mW > 0 it means it was computed as part of the matching to the SM
-      // recomputed it with the final value of mh
-      else {
-         calculate_MVWp_pole_fit(this->get_physical().Mhh);
-      }
-   });
+      tp.run_task([this] () { calculate_MVG_pole(); });
+      tp.run_task([this] () { calculate_MFv_pole(); });
+      tp.run_task([this] () { calculate_Mhh_pole(); });
+      tp.run_task([this] () { calculate_MVP_pole(); });
+      tp.run_task([this] () { calculate_MVZ_pole(); });
+      tp.run_task([this] () { calculate_MFd_pole(); });
+      tp.run_task([this] () { calculate_MFu_pole(); });
+      tp.run_task([this] () { calculate_MFe_pole(); });
+   }
 #else
    calculate_MVG_pole();
    calculate_MFv_pole();
@@ -732,13 +722,18 @@ void Standard_model::calculate_pole_masses()
    calculate_MFd_pole();
    calculate_MFu_pole();
    calculate_MFe_pole();
-   if (PHYSICAL(MVWp) == 0.) {
+#endif
+
+   // If mW == 0 it means that the SM was not initialized via matching to the SM.
+   // -> Compute mW using an ordinary 1-loop calculation.
+   if (PHYSICAL(MVWp) == 0. || this->get_physical().Mhh == 0.) {
       calculate_MVWp_pole();
    }
+   // If mW != 0 it means it was computed as part of the matching to the SM.
+   // -> Recompute it with the predicted value of mh_pole.
    else {
       calculate_MVWp_pole_fit(this->get_physical().Mhh);
    }
-#endif
 }
 
 void Standard_model::copy_DRbar_masses_to_pole_masses()
