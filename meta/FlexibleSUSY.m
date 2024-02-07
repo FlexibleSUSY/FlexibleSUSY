@@ -60,7 +60,8 @@ BeginPackage["FlexibleSUSY`",
               "WeinbergAngle`",
               "Wrappers`",
               "Himalaya`",
-              "GM2Calc`"
+              "GM2Calc`",
+              "Unitarity`"
 }];
 
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
@@ -214,6 +215,7 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
+FSUnitarityConstraints = True;
 FSEnableCompile;
 
 (* Standard Model input parameters (SLHA input parameters) *)
@@ -423,6 +425,7 @@ ReplaceSymbolsInUserInput[rules_] :=
            IMEXTPAR                              = IMEXTPAR                              /. rules;
            FlexibleSUSY`ExtraSLHAOutputBlocks    = FlexibleSUSY`ExtraSLHAOutputBlocks    /. rules;
            FlexibleSUSY`FSCalculateDecays        = FlexibleSUSY`FSCalculateDecays        /. rules;
+           FlexibleSUSY`FSUnitarityConstraints   = FlexibleSUSY`FSUnitarityConstraints   /. rules;
            FlexibleSUSY`FSDecayParticles         = FlexibleSUSY`FSDecayParticles         /. rules;
            FlexibleSUSY`FSExtraInputParameters   = FlexibleSUSY`FSExtraInputParameters   /. rules;
            FlexibleSUSY`FSAuxiliaryParameterInfo = FlexibleSUSY`FSAuxiliaryParameterInfo /. rules;
@@ -497,6 +500,15 @@ ReplaceSymbolsInUserInput[rules_] :=
                  " Disabling decays."
               ];
               FlexibleSUSY`FSCalculateDecays = False
+           ];
+
+           With[{sarahVersion = DecomposeVersionString[SA`Version],
+                 minimRequired = {4, 13, 0}},
+              If[!TrueQ@Utils`VersionOrderGtEqThan[sarahVersion, minimRequired],
+                 Print["Warning: using SARAH version ", SA`Version, " but unitarity calculation requires ", StringRiffle[ToString/@minimRequired, "."]];
+                 Print["         Disabling unitarity calculation."];
+                 FlexibleSUSY`FSUnitarityConstraints = False;
+              ];
            ];
           ];
 
@@ -2444,15 +2456,25 @@ WriteBToSGammaClass[decays_List, files_List] :=
             Sequence @@ GeneralReplacementRules[]}];
    ];
 
+WriteUnitarityClass[files_List] :=
+    Module[{res},
+      res = If[FSUnitarityConstraints, Unitarity`GetScatteringMatrix[], {0, ""}];
+      WriteOut`ReplaceInFiles[files,
+        {"@scatteringPairsLength@" -> ToString@res[[1]],
+         "@infiniteSMatrix@" -> res[[2]],
+         Sequence @@ GeneralReplacementRules[]
+        }];
+    ];
+
 (* Write the AMM c++ files *)
 WriteAMMClass[fields_List, files_List] :=
-    Module[{calculation, getMSUSY,
+    Module[{calculation, getMLCP,
             (* in models without flavour violation (no FV models) lepton does not have an index *)
             leptonIndex = If[Length[fields] > 0, If[TreeMasses`GetDimension[First@fields] =!= 1, "idx", ""], ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPoleMass,
-            BarrZeeLeptonIdx, ammWrapperDecl, ammWrapperDef, ammUncWrapperDecl, ammUncWrapperDef},
+            ammWrapperDecl, ammWrapperDef, ammUncWrapperDecl, ammUncWrapperDef},
 
       calculation =
          If[Length[fields] =!= 0,
@@ -2465,7 +2487,7 @@ WriteAMMClass[fields_List, files_List] :=
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
 
-      getMSUSY = AMM`AMMGetMSUSY[];
+      getMLCP = AMM`AMMGetMLCP[];
 
       (* only Barr-Zee graphs
          1-loop diagrams will be provided by the FFMasslessV module and are taken care of elsewhere *)
@@ -2487,7 +2509,7 @@ WriteAMMClass[fields_List, files_List] :=
                      If[Im[colFac] == 0, colFac, Print["Error: Colour prefactor of a Barr-Zee diagram should be real!"]; Quit[1]]
                   ], 16] <> " * " <>
                 ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
-                "::value({" <> leptonIndex <> "}, context, qedqcd);\n"
+                "::value({" <> leptonIndex <> "}, context, ml_pole);\n"
          ];
       ];
 
@@ -2516,8 +2538,6 @@ TextFormatting`IndentText[
 ]
          ];
 
-      BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
-
       ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammWrapperDef = StringRiffle[
@@ -2533,16 +2553,15 @@ TextFormatting`IndentText[
 
       WriteOut`ReplaceInFiles[files,
         {"@AMMZBosonField@"       -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
-         "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 2],
-         "@AMMGetMSUSY@"          -> TextFormatting`IndentText[WrapLines[getMSUSY]],
+         "@AMMCalculation@"       -> Nest[TextFormatting`IndentText, calculation, 1],
+         "@AMMGetMLCP@"           -> TextFormatting`IndentText[WrapLines[getMLCP]],
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
          "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
          "@extraIdxUsageNoComma@" -> If[GetParticleFromDescription["Leptons"] =!= Null, "idx", ""],
          "@leptonPoleMass@" -> leptonPoleMass,
-         "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
-         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 2],
+         "@AMMBarrZeeCalculation@" -> Nest[TextFormatting`IndentText, barZee, 1],
          "@ammWrapperDecl@" -> ammWrapperDecl,
          "@ammWrapperDef@" -> ammWrapperDef,
          "@ammUncWrapperDecl@" -> ammUncWrapperDecl,
@@ -2764,6 +2783,11 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
                             "@fillSLHAIO@" -> fillSLHAIO,
                             "@decaySetttingsOverride@" -> IndentText[decaySetttingsOverride],
+                            "@calculateUnitarity@" -> If[FSUnitarityConstraints,
+                                 "const auto unitarityStruct = " <> FSModelName <> "_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));\n" <>
+                                  "slha_io.set_unitarity_infinite_s(spectrum_generator_settings, unitarityStruct);",
+                                  ""
+                               ],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -2802,6 +2826,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
+            setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
             decayIndex = "const Index_t n_fd_settings = 0;"},
@@ -2827,6 +2852,14 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               defaultSolverType = "-1",
               defaultSolverType = GetBVPSolverSLHAOptionKey[FlexibleSUSY`FSBVPSolvers[[1]]];
              ];
+           If[FSUnitarityConstraints,
+              loadCalculateUnitarityFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CalculateUnitarity\", LinkObject, LinkObject];\n";
+              calculateUnitarityMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::error = \"`1`\";\n" <>
+                                        "FS" <> FlexibleSUSY`FSModelName <> "CalculateUnitarity::warning = \"`1`\";\n";
+              setUnitarity = "slha_io.set_unitarity_infinite_s(settings, unitarityData);";
+           ];
            If[FlexibleSUSY`FSCalculateDecays,
               decaysData = FlexibleSUSY`FSModelName <> "_decays decays{};              ///< decays";
               getDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysGetterInterface[FlexibleSUSY`FSModelName];
@@ -2909,6 +2942,9 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
                             "@fillFDSettings@" -> fillFDSettings,
                             "@decayIndex@" -> decayIndex,
+                            "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
+                            "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
+                            "@setUnitarity@" -> setUnitarity,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -2984,7 +3020,8 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             numberOfDRbarBlocks, drBarBlockNames,
             setDecaysPrototypes = "", setDecaysFunctions = "",
             fillDecaysDataPrototypes = "", fillDecaysDataFunctions = "",
-            decaysHeaderIncludes = "", useDecaysData = ""
+            decaysHeaderIncludes = "", useDecaysData = "",
+            unitarityIncludes = ""
            },
            particles = DeleteDuplicates @ Flatten[TreeMasses`GetMassEigenstate /@ massMatrices];
            susyParticles = Select[particles, (!TreeMasses`IsSMParticle[#])&];
@@ -3041,6 +3078,9 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
            drBarBlockNames      = WriteOut`GetDRbarBlockNames[lesHouchesParameters];
            gaugeCouplingNormalizationDecls = WriteOut`GetGaugeCouplingNormalizationsDecls[SARAH`Gauge];
            gaugeCouplingNormalizationDefs  = WriteOut`GetGaugeCouplingNormalizationsDefs[SARAH`Gauge];
+           If[FSUnitarityConstraints,
+              unitarityIncludes = "#include \"" <> FlexibleSUSY`FSModelName <> "_unitarity.hpp\""
+           ];
            If[FlexibleSUSY`FSCalculateDecays,
               setDecaysPrototypes = WriteOut`CreateSetDecaysPrototypes[FlexibleSUSY`FSModelName];
               setDecaysFunctions = WriteOut`CreateSetDecaysFunctions[FlexibleSUSY`FSModelName];
@@ -3104,6 +3144,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@useDecaysData@"                   -> useDecaysData,
                             "@numberOfNeutralGoldstones@"       -> IndentText["static constexpr int number_of_neutral_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]]-1] <> ";"],
                             "@numberOfChargedGoldstones@"       -> IndentText["static constexpr int number_of_charged_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]-1] <> ";"],
+                            "@unitarityIncludes@" -> unitarityIncludes,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -5190,6 +5231,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      {FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
                ];
+
+           Print["Creating unitarity class..."];
+           WriteUnitarityClass[{{FileNameJoin[{$flexiblesusyTemplateDir, "unitarity.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_unitarity.hpp"}]},
+                           {FileNameJoin[{$flexiblesusyTemplateDir, "unitarity.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_unitarity.cpp"}]}}
+           ];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];

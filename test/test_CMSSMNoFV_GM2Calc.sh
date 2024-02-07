@@ -61,6 +61,7 @@ EOF
 alpha_em_0=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYInput | awk '{ if ($1 == 0) print $2 }')
 
 amu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
+damu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 1) print $2 }')
 
 # calculate amu at 2-loop with FS
 { cat "${SLHA_IN}";
@@ -77,6 +78,7 @@ EOF
 }
 
 amu_2l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 0) print $2 }')
+damu_2l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 1) print $2 }')
 
 amu_2l_gm2calc_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 2) print $2 }')
 
@@ -118,7 +120,9 @@ EOF
 
 # convert scientific notation to bc friendly notation
 amu_1l_fs=$(echo "${amu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+damu_1l_fs=$(echo "${damu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_fs=$(echo "${amu_2l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+damu_2l_fs=$(echo "${damu_2l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc=$(echo "${amu_2l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
@@ -148,6 +152,26 @@ EOF
     fi
 }
 
+# compares two values $1 < $2
+test_lt() {
+    local val1
+    local val2
+    local diff
+
+    val1="$1"
+    val2="$2"
+    diff=$(cat <<EOF | bc
+scale=100
+${val1} < ${val2}
+EOF
+        )
+
+    if test $diff -ne 1 ; then
+        echo "Error: ${val1} !< ${val2}"
+        errors=1
+    fi
+}
+
 ### test 2L GM2Calc vs. embedded 2L GM2Calc
 
 # Note: The agreement between vanilla GM2Calc and the GM2Calc version
@@ -173,11 +197,15 @@ test_close "${amu_1l_gm2calc}" "${amu_1l_fs}" "0.005"
 
 test_close "${amu_2l_gm2calc_fs}" "${amu_2l_fs}" "0.05"
 
-echo "FlexibleSUSY 1L    : amu = ${amu_1l_fs}"
-echo "FlexibleSUSY 2L    : amu = ${amu_2l_fs}"
-echo "original 1L GM2Calc: amu = ${amu_1l_gm2calc}"
-echo "original 2L GM2Calc: amu = ${amu_2l_gm2calc}"
-echo "embedded 2L GM2Calc: amu = ${amu_2l_gm2calc_fs}"
+### test uncertainties
+
+test_lt "${damu_2l_fs}" "${damu_1l_fs}"
+
+echo "FlexibleSUSY 1L    : amu = ${amu_1l_fs} +/- ${damu_1l_fs}"
+echo "FlexibleSUSY 2L    : amu = ${amu_2l_fs} +/- ${damu_2l_fs}"
+echo "original GM2Calc 1L: amu = ${amu_1l_gm2calc}"
+echo "original GM2Calc 2L: amu = ${amu_2l_gm2calc}"
+echo "embedded GM2Calc 2L: amu = ${amu_2l_gm2calc_fs}"
 
 if test $errors -eq 0 ; then
     echo "Test status: OK"

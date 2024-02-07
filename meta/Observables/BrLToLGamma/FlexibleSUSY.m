@@ -43,7 +43,7 @@ Module[{
          "@include_guard@" -> SymbolName@obs,
          "@namespace@" -> Observables`GetObservableNamespace@obs,
          "@filename@" -> Observables`GetObservableFileName@obs,
-         "@get_MSUSY@" -> TextFormatting`IndentText@TextFormatting`WrapLines@AMM`AMMGetMSUSY[],
+         "@get_MSUSY@" -> TextFormatting`IndentText@TextFormatting`WrapLines@AMM`AMMGetMLCP[],
          Sequence@@GeneralReplacementRules[]
       }
    ];

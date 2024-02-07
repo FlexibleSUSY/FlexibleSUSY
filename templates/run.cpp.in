@@ -25,6 +25,7 @@
 #include "@ModelName@_spectrum_generator.hpp"
 #include "@ModelName@_utilities.hpp"
 @decaysIncludes@
+#include "@ModelName@_unitarity.hpp"
 
 @solverIncludes@
 #include "physical_input.hpp"
@@ -117,6 +118,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
                Spectrum_generator_settings::force_positive_masses));
          slha_io.set_spectrum(models);
          slha_io.set_extra(std::get<0>(models), scales, observables, spectrum_generator_settings);
+         @calculateUnitarity@
       }
 
 @setDecaysSLHAOutput@

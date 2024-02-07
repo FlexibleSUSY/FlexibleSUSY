@@ -128,7 +128,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.17.4
+      image: navir/opensuseleap-for-flexiblesusy:0.17.5
 
     strategy:
       fail-fast: false
@@ -222,8 +222,29 @@ jobs:
             --enable-librarylink
           make showbuild
 
+      - name: Check if SARAH has changed
+        run: |
+           out=$(find /fs_dependencies/mathematica/SARAH-* sarah -type f | xargs -d'\n' -P0 -n1 sha512sum | sort -k 2 | sha512sum | awk '{print $1}')
+           echo "SARAH_HASH=${out}" >> $GITHUB_ENV
+
+      # If SARAH checksum didn't change
+      # restore content of Output directory from previous run
+      - name: Restore cached SARAH outputs
+        id: cache-sarah-output-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: Output
+          key: sarah-outputs-${{ matrix.PART }}-${{ env.SARAH_HASH }}
+
       - name: Make
         run: make -j2
+
+      - name: Save SARAH outputs
+        id: cache-sarah-output-save
+        uses: actions/cache/save@v4
+        with:
+          path: Output
+          key: ${{ steps.cache-sarah-output-restore.outputs.cache-primary-key }}
 
       - name: Run Mathematica tests
         run: make -j2 execute-meta-tests

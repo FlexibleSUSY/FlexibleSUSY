@@ -1056,7 +1056,7 @@ CallAllPoleMassFunctions[states_, enablePoleMassThreads_] :=
                              "if (PHYSICAL(M" <> ToString@GetWBoson[] <> ") == 0.) {\n" <>
                                 IndentText[LoopMasses`CreateLoopMassFunctionName[GetWBoson[]] <> "();\n"] <>
                              "}\n"
-                          ] <> "}\n"
+                          ] <> "});\n"
                        ] <>
                        "}\n";
              ];

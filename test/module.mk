@@ -79,6 +79,7 @@ TEST_SRC := \
 		$(DIR)/test_sm_mw.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
+		$(DIR)/test_standard_model_G_fermi.cpp \
 		$(DIR)/test_standard_model_mw_calculation.cpp \
 		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_string_format.cpp \
@@ -204,7 +205,8 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_model.cpp \
 		$(DIR)/test_CMSSM_slha_output.cpp \
 		$(DIR)/test_CMSSM_spectrum.cpp \
-		$(DIR)/test_CMSSM_susy_scale_constraint.cpp
+		$(DIR)/test_CMSSM_susy_scale_constraint.cpp \
+		$(DIR)/test_CMSSM_unitarity.cpp
 TEST_SH += \
 		$(DIR)/test_CMSSM_gluino.sh
 endif
@@ -541,6 +543,7 @@ TEST_META += \
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
 		$(DIR)/test_SM_amm.cpp \
+		$(DIR)/test_SM_unitarity.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
 		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
@@ -783,7 +786,8 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m
+		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_unitarity.m
 endif
 ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -1067,6 +1071,11 @@ $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfener
 endif
 endif
 
+ifeq ($(ENABLE_HIGGSTOOLS), yes)
+$(DIR)/test_HiggsTools_CP.o: CPPFLAGS += $(MODtest_INC) $(HIGGSTOOLSFLAGS)
+$(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
+endif
+
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
@@ -1220,6 +1229,8 @@ $(DIR)/test_standard_model_weinberg_angle.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
 
+$(DIR)/test_SM_unitarity.x: $(LIBSM)
+
 $(DIR)/test_SM_weinberg_angle_meta.x: $(LIBSM)
 
 $(DIR)/test_CMSSMNoFV_weinberg_angle_meta.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
@@ -1231,6 +1242,8 @@ $(DIR)/test_SMSU3_low_scale_constraint.x: $(LIBSMSU3)
 $(DIR)/test_NSM_low_scale_constraint.x: $(LIBNSM)
 
 $(DIR)/test_VCMSSM_ewsb.x: $(LIBVCMSSM) $(LIBCMSSM)
+
+$(DIR)/test_CMSSM_unitarity.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSMSemiAnalytic_ewsb.x: $(LIBCMSSMSemiAnalytic)
 

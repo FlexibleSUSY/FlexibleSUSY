@@ -43,8 +43,13 @@ using namespace @ModelName@_cxx_diagrams;
 
 namespace {
 
+constexpr double amm_threshold_1l = 0.5;          ///< threshold for inclusion of 1-loop contributions
+constexpr double amm_threshold_2l_qed = 1.25;     ///< threshold for inclusion of 2-loop QED logarithmic contributions
+constexpr double amm_threshold_2l_barrzee = 1.75; ///< threshold for inclusion of 2-loop Barr-Zee contributions
+constexpr double amm_threshold_3l = 2.25;         ///< threshold for inclusion of 3-loop contributions
+
 template <typename Lepton>
-double get_QED_2L(context_base&, const softsusy::QedQcd&, double);
+double calculate_qed_1l_log(const context_base&, double);
 
 /**
  * @class AMMBarrZeeFermionLoop
@@ -68,7 +73,7 @@ template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarrZeeFermionLoop {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
-                       const softsusy::QedQcd& qedqcd);
+                       double ml_pole);
 };
 
 /**
@@ -93,7 +98,7 @@ template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarrZeeFermionLoopZ {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
-                       const softsusy::QedQcd& qedqcd);
+                       double ml_pole);
 };
 
 /**
@@ -118,7 +123,7 @@ template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarrZeeScalarLoop {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
-                       const softsusy::QedQcd& qedqcd);
+                       double ml_pole);
 };
 
 /**
@@ -143,12 +148,13 @@ template<typename Lepton, class PhotonEmitter, class ExchangeParticle>
 struct AMMBarrZeeVectorLoop {
    static double value(const typename field_indices<Lepton>::type& indices,
                        const context_base& context,
-                       const softsusy::QedQcd& qedqcd);
+                       double ml_pole);
 };
 
-double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
+/// returns mass of lightest electrically charged BSM particle
+double get_MLCP(const @ModelName@_mass_eigenstates_interface& model)
 {
-@AMMGetMSUSY@
+@AMMGetMLCP@
 }
 
 void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
@@ -162,7 +168,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    VERBOSE_MSG("@ModelName@_amm: iterate to run to MSUSY ...");
 
    do {
-      MSUSY_new = get_MSUSY(model);
+      MSUSY_new = get_MLCP(model);
 
       if (MSUSY_new <= 0.)
          return;
@@ -188,89 +194,94 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 
 @leptonPoleMass@
 
+/// 1-loop scalar/fermionic contributions
+template <typename Lepton>
+double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates& model, double ml_pole@extraIdxDecl@)
+{
+   using namespace @ModelName@_cxx_diagrams::fields;
+
+@AMMCalculation@
+
+   // Im[F2]/Re[F2] ~ 0
+   if (!is_zero((form_factors[2] + form_factors[3]).real())) {
+      const double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
+      if (!is_zero(ratio)) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[Fe]/Re[F2] = " + std::to_string(ratio));
+         return std::numeric_limits<double>::quiet_NaN();
+      }
+   }
+   // Im[F2] ~ 0
+   else {
+      if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[F2] = " + std::to_string((form_factors[2] + form_factors[3]).imag()));
+         return std::numeric_limits<double>::quiet_NaN();
+      }
+   }
+
+   const double result =
+      // vector form factor
+      0.5*(form_factors[2] + form_factors[3]).real()
+      // reinstate the mass that was factored out in definition of form factor
+      * context.mass<Lepton>({@extraIdxUsageNoComma@})
+      // factor out e/(2*lepton pole mass)
+      / (unit_charge(context)/(2.*ml_pole))
+      // definition of photon momentum flow for g-2 is opposite than for form factors
+      * (-1.);
+
+   return result;
+}
+
+/// 2-loop QED logarithmic contributions
+template <typename Lepton>
+double calculate_amm_impl_2l_qed(const context_base& context, double ml_pole, double amu_1l)
+{
+   return amu_1l*calculate_qed_1l_log<Lepton>(context, ml_pole);
+}
+
+/// 2-loop Barr-Zee contributions
+template <typename Lepton>
+double calculate_amm_impl_2l_barrzee(const context_base& context, double ml_pole@extraIdxDecl@)
+{
+   using namespace @ModelName@_cxx_diagrams::fields;
+
+   double val = 0.;
+
+@AMMBarrZeeCalculation@
+
+   return val;
+}
+
 template <typename Lepton>
 double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
    VERBOSE_MSG("@ModelName@_amm: calculating a_mu at Q = " << model.get_scale());
 
-   context_base context{ model };
-
    using namespace @ModelName@_cxx_diagrams::fields;
+
+   const context_base context{model};
+   const double ml_pole = lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@);
+   const double loops = settings.get(Spectrum_generator_settings::calculate_amm);
 
    double val = 0.;
 
-   // 1L
-   if (settings.get(Spectrum_generator_settings::calculate_amm) > 0.5) {
-@AMMCalculation@
+   if (loops > amm_threshold_1l) {
+      const double amu_1l = calculate_amm_impl_1l<Lepton>(context, model, ml_pole@extraIdxUsage@);
 
-      // Im[F2]/Re[F2] ~ 0
-      if (!is_zero((form_factors[2] + form_factors[3]).real())) {
-         double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
-         if (!is_zero(ratio)) {
-            ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[Fe]/Re[F2] = " + std::to_string(ratio));
-            return std::numeric_limits<double>::quiet_NaN();
-         }
-      }
-      // Im[F2] ~ 0
-      else {
-         if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
-            ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[F2] = " + std::to_string((form_factors[2] + form_factors[3]).imag()));
-            return std::numeric_limits<double>::quiet_NaN();
-         }
-      }
+      // 1L
+      val += amu_1l;
 
-      val +=
-         // vector form factor
-         0.5*(form_factors[2] + form_factors[3]).real()
-         // reinstate the mass that was factored out in definition of form factor
-         * context.mass<Lepton>({@extraIdxUsageNoComma@})
-         // factor out e/(2*lepton pole mass)
-         / (unit_charge(context_base{model})/(2.*lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@)))
-         // definition of photon momentum flow for g-2 is opposite than for form factors
-         * (-1.);
+      // 2L QED logarithms
+      if (loops > amm_threshold_2l_qed) {
+         val += calculate_amm_impl_2l_qed<Lepton>(context, ml_pole, amu_1l);
+      }
    }
 
-   // 2L QED
-   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.25) {
-      // add 2-loop QED logarithms
-      val *= 1. + get_QED_2L<Lepton>(context, qedqcd, lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@));
-   }
-
-   // Barr-Zee
-   if (settings.get(Spectrum_generator_settings::calculate_amm) > 1.75) {
-
-@AMMBarrZeeCalculation@
+   // 2L Barr-Zee contributions
+   if (loops > amm_threshold_2l_barrzee) {
+      val += calculate_amm_impl_2l_barrzee<Lepton>(context, ml_pole@extraIdxUsage@);
    }
 
    return val;
-}
-
-/// returns minimum and maximum a_mu when scale is varied by a factor 2
-template <typename Lepton>
-std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
-{
-   auto scales = subdivide_log(0.5*model.get_scale(), 2*model.get_scale(), 6);
-
-   std::transform(scales.begin(), scales.end(), scales.begin(),
-                  [&model,&qedqcd,&settings@extraIdxUsage@] (double scale) {
-                     double amu = 0.;
-                     try {
-                        auto m = model;
-                        m.run_to(scale);
-                        m.get_physical().clear();
-                        m.calculate_DRbar_masses();
-                        m.solve_ewsb();
-                        amu = calculate_amm_impl<Lepton>(m, qedqcd, settings@extraIdxUsage@);
-                     }
-                     catch(const Error& e) {
-                        ERROR("@ModelName@_amm: scale variation: " << e.what_detailed());
-                     }
-                     return amu;
-                  });
-
-   const auto minmax = std::minmax_element(scales.cbegin(), scales.cend());
-
-   return std::make_pair(*(minmax.first), *(minmax.second));
 }
 
 } // anonymous namespace
@@ -312,10 +323,38 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   const auto delta_amu_scale_minmax = vary_scale<Lepton>(model, qedqcd, settings@extraIdxUsage@);
-   const auto delta_amu_scale = std::abs(delta_amu_scale_minmax.second - delta_amu_scale_minmax.first);
+   const context_base context{model};
+   const double ml_pole = lepton_pole_mass<Lepton>(qedqcd@extraIdxUsage@);
+   const double loops = settings.get(Spectrum_generator_settings::calculate_amm);
 
-   return delta_amu_scale;
+   const double amu_1l = calculate_amm_impl_1l<Lepton>(context, model, ml_pole@extraIdxUsage@);
+   const double amu_2l_qed = calculate_amm_impl_2l_qed<Lepton>(context, ml_pole, amu_1l);
+   const double amu_2l_barrzee = calculate_amm_impl_2l_barrzee<Lepton>(context, ml_pole@extraIdxUsage@);
+   const double amu_2l = amu_2l_qed + amu_2l_barrzee;
+
+   double damu = 0.;
+
+   if (loops <= amm_threshold_1l) {
+      // add 1-loop uncertainty from missing 1-loop contributions
+      damu += Abs(amu_1l);
+   }
+
+   if (loops <= amm_threshold_2l_qed) {
+      // add 2-loop uncertainty from missing 2-loop QED contributions
+      damu += Abs(amu_2l_qed);
+   }
+
+   if (loops <= amm_threshold_2l_barrzee) {
+      // add 2-loop uncertainty from missing 2-loop Barr-Zee contributions
+      damu += Abs(amu_2l_barrzee);
+   }
+
+   if (loops <= amm_threshold_3l) {
+      // add 3-loop uncertainty from missing 3-loop QED contributions
+      damu += Abs(amu_2l*calculate_qed_1l_log<Lepton>(context, ml_pole));
+   }
+
+   return damu;
 }
 
 // spliting templated function into header and cpp
@@ -323,20 +362,22 @@ double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenst
 @calculateAUncertaintyForwardDeclaration@
 
 namespace {
-template <typename Lepton>
-double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_lepton)
-{
-   const double MSUSY = Abs(get_MSUSY(context.model));
-   const double alpha_em = Sqr(Lepton::electricCharge * unit_charge(context))/(4*Pi);
-   const double qed_2L = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
 
-   return qed_2L;
+/// returns 1-loop logarithmic term, necessary to calculate the 2-loop QED logarithmic contributions
+template <typename Lepton>
+double calculate_qed_1l_log(const context_base& context, double m_lepton)
+{
+   const double MSUSY = Abs(get_MLCP(context.model));
+   const double alpha_em = Sqr(Lepton::electricCharge * unit_charge(context))/(4*Pi);
+   const double result = alpha_em/(4*Pi) * 16 * FiniteLog(m_lepton/MSUSY);
+
+   return result;
 }
 
 template<typename Lepton, class Fermion, class Scalar>
 double AMMBarrZeeFermionLoop<
 Lepton, Fermion, Scalar
->::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, double ml_pole)
 {
    using namespace flexiblesusy::amm_loop_functions::two_loop;
 
@@ -401,7 +442,7 @@ Lepton, Fermion, Scalar
          const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFP(massRatioSquared);
 
          const double preFactor = 4 * twoLoop * Sqr(unit_charge(context) * fermionChargeCount)
-            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
+            * ml_pole / fermionMass;
 
          res += preFactor * (part1 + part2);
       }
@@ -413,7 +454,7 @@ Lepton, Fermion, Scalar
 template<typename Lepton, class Fermion, class Scalar>
 double AMMBarrZeeFermionLoopZ<
 Lepton, Fermion, Scalar
->::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, double ml_pole)
 {
    using namespace flexiblesusy::amm_loop_functions::two_loop;
 
@@ -512,7 +553,7 @@ Lepton, Fermion, Scalar
                const double part2 = coeffB == 0 ? 0 : coeffB * BarrZeeLoopFPZ(x, y);
 
                const double preFactor = 4 * twoLoop * fermionChargeCount * gvm * gvf
-                  * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
+                  * ml_pole / fermionMass;
 
                res += preFactor * (part1 + part2);
             }
@@ -526,7 +567,7 @@ Lepton, Fermion, Scalar
 template<typename Lepton, class ChargedScalar, class NeutralScalar>
 double AMMBarrZeeScalarLoop<
 Lepton, ChargedScalar, NeutralScalar
->::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, double ml_pole)
 {
    using namespace flexiblesusy::amm_loop_functions::two_loop;
 
@@ -586,7 +627,7 @@ Lepton, ChargedScalar, NeutralScalar
          const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
 
          const double preFactor = 4 * twoLoop * Sqr(unit_charge(context) * scalarChargeCount)
-            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / Sqr(neutralScalarMass);
+            * ml_pole / Sqr(neutralScalarMass);
 
          res += preFactor * coeff * BarrZeeLoopS(massRatioSquared);
       }
@@ -598,7 +639,7 @@ Lepton, ChargedScalar, NeutralScalar
 template<typename Lepton, class Vector, class Scalar>
 double AMMBarrZeeVectorLoop<
 Lepton, Vector, Scalar
->::value(const typename field_indices<Lepton>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+>::value(const typename field_indices<Lepton>::type& indices, const context_base& context, double ml_pole)
 {
    using namespace flexiblesusy::amm_loop_functions::two_loop;
 
@@ -658,7 +699,7 @@ Lepton, Vector, Scalar
          const double massRatioSquared = Sqr(vectorMass / scalarMass);
 
          const double preFactor = - 2 * twoLoop * Sqr(unit_charge(context) * vectorChargeCount)
-            * lepton_pole_mass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / Sqr(vectorMass);
+            * ml_pole / Sqr(vectorMass);
 
          res += preFactor * coeff * BarrZeeLoopV(massRatioSquared);
       }

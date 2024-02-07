@@ -150,6 +150,7 @@ EOF
 
 # amu from FS
 amu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 21) print $2 }')
+damu_1l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 22) print $2 }')
 
 { printf "%s\n" "${SLHA_IN}";
   cat <<EOF
@@ -166,6 +167,7 @@ EOF
 
 # amu from FS
 amu_2l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 21) print $2 }')
+damu_2l_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=FlexibleSUSYLowEnergy | awk '{ if ($1 == 22) print $2 }')
 
 # Mh from FS
 mh_fs=$(cat "${SLHA_OUT}" | awk -f "$print_block" -v block=MASS | awk '{ if ($1 == 25) print $2 }')
@@ -259,7 +261,9 @@ EOF
 
 # convert scientific notation to bc friendly notation
 amu_1l_fs=$(echo "${amu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+damu_1l_fs=$(echo "${damu_1l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_fs=$(echo "${amu_2l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+damu_2l_fs=$(echo "${damu_2l_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_2l_gm2calc_fs=$(echo "${amu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 damu_2l_gm2calc_fs=$(echo "${damu_2l_gm2calc_fs}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
 amu_1l_gm2calc=$(echo "${amu_1l_gm2calc}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
@@ -292,6 +296,26 @@ EOF
     fi
 }
 
+# compares two values $1 < $2
+test_lt() {
+    local val1
+    local val2
+    local diff
+
+    val1="$1"
+    val2="$2"
+    diff=$(cat <<EOF | bc
+scale=100
+${val1} < ${val2}
+EOF
+        )
+
+    if test $diff -ne 1 ; then
+        echo "Error: ${val1} !< ${val2}"
+        errors=1
+    fi
+}
+
 ### test 2L GM2Calc vs. embedded 2L GM2Calc
 test_close "${amu_2l_gm2calc_fs}" "${amu_2l_gm2calc}" "0.0000001"
 
@@ -310,8 +334,12 @@ test_close "${amu_1l_fs}" "${amu_1l_gm2calc}" "0.2"
 
 # test_close "${amu_2l_fs}" "${amu_2l_gm2calc}" "0.2"
 
-echo "FlexibleSUSY 1L         : amu = ${amu_1l_fs}"
-echo "FlexibleSUSY 2L         : amu = ${amu_2l_fs}"
+### test uncertainties
+
+test_lt "${damu_2l_fs}" "${damu_1l_fs}"
+
+echo "FlexibleSUSY 1L         : amu = ${amu_1l_fs} +/- ${damu_1l_fs}"
+echo "FlexibleSUSY 2L         : amu = ${amu_2l_fs} +/- ${damu_2l_fs}"
 echo "original GM2Calc 1L     : amu = ${amu_1l_gm2calc} +/- ${damu_1l_gm2calc}"
 echo "original GM2Calc 2L     : amu = ${amu_2l_gm2calc} +/- ${damu_2l_gm2calc}"
 echo "embedded GM2Calc 2L     : amu = ${amu_2l_gm2calc_fs} +/- ${damu_2l_gm2calc_fs}"

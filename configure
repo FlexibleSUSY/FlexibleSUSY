@@ -3322,15 +3322,6 @@ update_module_mk() {
 
     [ -e "$model_file" ] || return
 
-    local mk_date model_date date_tolerance
-    mk_date="$(date -r "${mkfile}" +%s)"
-    model_date="$(date -r "${model_file}" +%s)"
-    date_tolerance="5" # Seconds
-    if [ "0" = "$(( $mk_date + $date_tolerance < $model_date ))" ] && \
-       [ "0" = "$(( $model_date < $mk_date - $date_tolerance ))" ]; then
-       return
-    fi
-
     message -n "   Updating model-specific modules in $mkfile ... "
     local ho
     ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
