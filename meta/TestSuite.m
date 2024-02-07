@@ -39,6 +39,8 @@ numberOfPassedTests := 0;
 
 GetNumberOfFailedTests[] := numberOfFailedTests;
 
+TestEquality::wrongArgs = "Wrong arguments. Received '`1`'.";
+
 TestEquality[val_, expr_, msg_:""] := 
     If[val =!= expr,
        numberOfFailedTests++;
@@ -48,8 +50,7 @@ TestEquality[val_, expr_, msg_:""] :=
        numberOfPassedTests++;
        Return[True];
       ];
-TestEquality::wrongArgs =
-"Wrong arguments. Received '`1`'.";
+
 TestEquality[args___] :=
    Utils`AssertOrQuit[False, TestEquality::wrongArgs, StringJoin@@Riffle[ToString/@{args},", "]];
 
@@ -111,10 +112,7 @@ RunCPPProgram[{preface_String, expr_String}, fileName_String:"tmp.cpp"] :=
           ];
 
 TestCloseRel[a_?NumericQ, b_?NumericQ, rel_?NumericQ] :=
-    If[Abs[a] < rel,
-       TestEquality[Abs[a - b] < rel, True],
-       TestEquality[Abs[(a - b)/a] < rel, True]
-      ];
+    TestLowerThan[Abs[a - b], Abs[a] rel];
 
 TestCloseRel[a_List, b_List, rel_?NumericQ] :=
     MapThread[TestCloseRel[#1,#2,rel]&, {Flatten[a], Flatten[b]}];
