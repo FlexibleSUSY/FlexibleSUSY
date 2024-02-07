@@ -68,20 +68,19 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    sm.set_g3(0.);
    sm.set_Lambdax(0.);
 
-   Eigen::Matrix<double,3,3> zero_mat;
-   zero_mat.setZero();
+   const Eigen::Matrix<double,3,3> zero(Eigen::Matrix<double,3,3>::Zero());
 
    auto sm_yt = sm;
-   sm_yt.set_Yd(zero_mat);
-   sm_yt.set_Ye(zero_mat);
+   sm_yt.set_Yd(zero);
+   sm_yt.set_Ye(zero);
 
    auto sm_yb = sm;
-   sm_yb.set_Yu(zero_mat);
-   sm_yb.set_Ye(zero_mat);
+   sm_yb.set_Yu(zero);
+   sm_yb.set_Ye(zero);
 
    auto sm_ytau = sm;
-   sm_ytau.set_Yu(zero_mat);
-   sm_ytau.set_Yd(zero_mat);
+   sm_ytau.set_Yu(zero);
+   sm_ytau.set_Yd(zero);
 
    for (int i = 0; i < 3; i++) {
       for (int k = 0; k < 3; k++) {
@@ -103,12 +102,11 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    const double yt         = sm.get_Yu(2,2);
    const double yb         = sm.get_Yd(2,2);
    const double ytau       = sm.get_Ye(2,2);
-   const double p          =  0.;
+   const double p          = 0.;
    const double Q          = sm.get_scale();
 
    /*
     * Test for derivatives of the higgs 1-loop corrrection w.r.t. Yukawa couplings y_{t,b,tau}.
-    *
     */
 
    ///  O( at )
@@ -141,7 +139,6 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
 
    /*
     * Test for derivatives of the higgs 1-loop corrrection w.r.t. VEV.
-    *
     */
 
    ///  O( at )
@@ -170,29 +167,28 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
 
 
    /*
-    * Test for derivativesof the higgs 1-loop corrrection w.r.t. p^2 .
-    * To succeed the test, FS was configured with fflite library.
-    *
+    * Test for derivatives of the higgs 1-loop corrrection w.r.t. p^2 .
+    * The tests pass with slightly higher accuarcy when the fflite library is used.
     */
 
    ///  O( at )
-   auto fpt1 = [&](double p2) { return one_loop_correction(sm_yt, yt, v, Sqrt(p2), top);};
-   auto fpt2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_at_sm(Sqrt(p2), Q, yt*v*over_sqrt2, yt);};
+   auto fpt1 = [&](double p2) { return one_loop_correction(sm_yt, yt, v, AbsSqrt(p2), top);};
+   auto fpt2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_at_sm(AbsSqrt(p2), Q, yt*v*over_sqrt2, yt);};
    auto dfpt = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(AbsSqrt(p2), Q, yt*v*over_sqrt2, yt);};
-   BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt1,p, 1e-5), dfpt(p), 2e-4);
-   BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt2,p, 1e-5), dfpt(p), 1e-4);
+   BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt1,p, 1e-5), dfpt(p), 6e-4);
+   BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt2,p, 1e-5), dfpt(p), 6e-4);
 
    ///  O( ab )
-   auto fpb1 = [&](double p2) { return one_loop_correction(sm_yb, yb, v, Sqrt(p2), bottom);};
-   auto fpb2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_ab_sm(Sqrt(p2), Q, yb*v*over_sqrt2, yb);};
+   auto fpb1 = [&](double p2) { return one_loop_correction(sm_yb, yb, v, AbsSqrt(p2), bottom);};
+   auto fpb2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_ab_sm(AbsSqrt(p2), Q, yb*v*over_sqrt2, yb);};
    auto dfpb = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(AbsSqrt(p2), Q, yb*v*over_sqrt2, yb);};
 
    BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpb1,p, 1e-5), dfpb(p), 1e-4);
    BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpb2,p, 1e-5), dfpb(p), 1e-4);
 
    ///  O( atau )
-   auto fptau1 = [&](double p2) { return one_loop_correction(sm_ytau, ytau, v, Sqrt(p2), tau);};
-   auto fptau2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_atau_sm(Sqrt(p2), Q, ytau*v*over_sqrt2, ytau);};
+   auto fptau1 = [&](double p2) { return one_loop_correction(sm_ytau, ytau, v, AbsSqrt(p2), tau);};
+   auto fptau2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_atau_sm(AbsSqrt(p2), Q, ytau*v*over_sqrt2, ytau);};
    auto dfptau = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(AbsSqrt(p2), Q, ytau*v*over_sqrt2, ytau);};
 
    BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fptau1,p, 1e-5), dfptau(p), 1e-4);
