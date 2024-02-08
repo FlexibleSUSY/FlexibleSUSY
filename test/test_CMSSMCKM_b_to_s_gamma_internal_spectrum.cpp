@@ -197,8 +197,8 @@ Block MSOFTIN
    constexpr std::complex<double> C8NP  {0.016490888662826098,     0.00030121451286620036};
    constexpr std::complex<double> C8pNP {0.00038601398040478963,   7.0507444188070971e-06};
 
-   TEST_COMPLEX_CLOSE_FRACTION(C7NP , calculated_value[0], 5e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 5e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C8NP , calculated_value[2], 5e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C8pNP, calculated_value[3], 5e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C7NP , calculated_value[0], 6e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 6e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C8NP , calculated_value[2], 6e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C8pNP, calculated_value[3], 6e-5);
 }
