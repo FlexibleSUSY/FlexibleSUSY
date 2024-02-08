@@ -46,9 +46,9 @@ TestEquality[val_, expr_, msg_:""] :=
        numberOfFailedTests++;
        Print["Error: expressions are not equal: ",
              InputForm[val], " =!= ", InputForm[expr]];
-       Return[False];,
+       False,
        numberOfPassedTests++;
-       Return[True];
+       True
       ];
 
 TestEquality[args___] :=
@@ -59,9 +59,9 @@ TestNonEquality[val_, expr_, msg_:""] :=
        numberOfFailedTests++;
        Print["Error: expressions are equal: ",
              InputForm[val], " === ", InputForm[expr]];
-       Return[False];,
+       False,
        numberOfPassedTests++;
-       Return[True];
+       True
       ];
 
 TestCPPCode[{preface_String, expr_String}, value_String, type_String, expected_String] :=
@@ -112,7 +112,13 @@ RunCPPProgram[{preface_String, expr_String}, fileName_String:"tmp.cpp"] :=
           ];
 
 TestCloseRel[a_?NumericQ, b_?NumericQ, rel_?NumericQ] :=
-    TestLowerThan[Abs[a - b], Abs[a] rel];
+    If[Abs[a - b] < rel (1 + Abs[a]),
+       numberOfPassedTests++;
+       True,
+       Print["TestCloseRel: FAIL: ", InputForm[a], " < ", InputForm[b], " with relative precision ", InputForm[rel]];
+       numberOfFailedTests++;
+       False
+    ];
 
 TestCloseRel[a_List, b_List, rel_?NumericQ] :=
     MapThread[TestCloseRel[#1,#2,rel]&, {Flatten[a], Flatten[b]}];
@@ -122,7 +128,13 @@ TestCloseRel[a___] := (
     TestEquality[0,1]);
 
 TestLowerThan[a_?NumericQ, b_?NumericQ] :=
-    TestEquality[a < b, True];
+    If[a < b,
+       numberOfPassedTests++;
+       True,
+       Print["TestLowerThan: FAIL: ", InputForm[a], " < ", InputForm[b]];
+       numberOfFailedTests++;
+       False
+    ];
 
 TestLowerThan[a___] := (
     Print["TestLowerThan: FAIL: ", {a}];
