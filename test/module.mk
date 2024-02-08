@@ -555,7 +555,7 @@ TEST_SRC += \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp \
 		$(DIR)/test_SM_yukawa_convention.cpp \
-		$(DIR)/test_standard_model_weinberg_angle.cpp
+		$(DIR)/test_SM_weinberg_angle.cpp
 TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
@@ -1225,8 +1225,6 @@ $(DIR)/test_SM_mw_calculation.x: $(LIBSM)
 $(DIR)/test_SM_yukawa_convention.x: $(LIBSM)
 
 $(DIR)/test_SM_cxxvertices.x: $(LIBSM)
-
-$(DIR)/test_standard_model_weinberg_angle.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
 
