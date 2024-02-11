@@ -1,5 +1,5 @@
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_weinberg_angle
+#define BOOST_TEST_MODULE test_SM_weinberg_angle
 
 #include <boost/test/unit_test.hpp>
 

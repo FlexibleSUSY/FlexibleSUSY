@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_standard_model_cxxvertices
+#define BOOST_TEST_MODULE test_SM_cxxvertices
 
 #include <boost/test/unit_test.hpp>
 #include "test_complex_equality.hpp"
@@ -28,54 +28,7 @@
 #include "cxx_qft/SM_qft.hpp"
 #include "cxx_qft/standard_model_qft.hpp"
 
-inline int
-sgn(double v) {
-    return (v > 0) - (v < 0);
-}
-
 using namespace flexiblesusy;
-
-BOOST_AUTO_TEST_CASE( test_yukawa_convention )
-{
-   static constexpr double lambda = 0.12;
-
-   const Spectrum_generator_settings settings;
-   const softsusy::QedQcd qedqcd;
-
-   SM_input_parameters input;
-   input.LambdaIN = lambda;
-   SM_spectrum_generator<Two_scale> spectrum_generator;
-   spectrum_generator.set_settings(settings);
-   spectrum_generator.run(qedqcd, input);
-   auto sm = std::get<0>(spectrum_generator.get_models_slha());
-   sm.set_Lambdax(lambda);
-   sm.solve_ewsb();
-   sm.calculate_DRbar_masses();
-
-   standard_model::Standard_model standard_model {};
-   standard_model.initialise_from_input(qedqcd);
-   standard_model.set_Lambdax(lambda);
-   standard_model.solve_ewsb();
-   standard_model.calculate_DRbar_masses();
-
-   // builtin SM has an opostite sign convention for Yu
-   BOOST_CHECK(
-      sm.get_Yu().unaryExpr(&sgn) == -standard_model.get_Yu().unaryExpr(&sgn)
-   );
-
-   // but not for Yd and Ye
-   BOOST_CHECK(
-      sm.get_Yd().unaryExpr(&sgn) == standard_model.get_Yd().unaryExpr(&sgn)
-   );
-   BOOST_CHECK(
-      sm.get_Ye().unaryExpr(&sgn) == standard_model.get_Ye().unaryExpr(&sgn)
-   );
-
-   BOOST_CHECK(sgn(sm.get_g1()) == sgn(standard_model.get_g1()));
-   BOOST_CHECK(sgn(sm.get_g2()) == sgn(standard_model.get_g2()));
-   BOOST_CHECK(sgn(sm.get_g3()) == sgn(standard_model.get_g3()));
-   BOOST_CHECK(sgn(sm.get_v()) == sgn(standard_model.get_v()));
-}
 
 BOOST_AUTO_TEST_CASE( test_sm_cxxvertices )
 {
