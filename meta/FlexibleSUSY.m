@@ -216,6 +216,7 @@ FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
 FSUnitarityConstraints = True;
+FSUnitarityParticles = {};
 FSEnableCompile;
 
 (* Standard Model input parameters (SLHA input parameters) *)
@@ -426,6 +427,7 @@ ReplaceSymbolsInUserInput[rules_] :=
            FlexibleSUSY`ExtraSLHAOutputBlocks    = FlexibleSUSY`ExtraSLHAOutputBlocks    /. rules;
            FlexibleSUSY`FSCalculateDecays        = FlexibleSUSY`FSCalculateDecays        /. rules;
            FlexibleSUSY`FSUnitarityConstraints   = FlexibleSUSY`FSUnitarityConstraints   /. rules;
+           FlexibleSUSY`FSUnitarityParticles     = FlexibleSUSY`FSUnitarityParticles     /. rules;
            FlexibleSUSY`FSDecayParticles         = FlexibleSUSY`FSDecayParticles         /. rules;
            FlexibleSUSY`FSExtraInputParameters   = FlexibleSUSY`FSExtraInputParameters   /. rules;
            FlexibleSUSY`FSAuxiliaryParameterInfo = FlexibleSUSY`FSAuxiliaryParameterInfo /. rules;
@@ -2521,7 +2523,7 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
 
 WriteUnitarityClass[files_List] :=
     Module[{res},
-      res = If[FSUnitarityConstraints, Unitarity`GetScatteringMatrix[], {0, ""}];
+      res = If[FSUnitarityConstraints, Unitarity`GetScatteringMatrix[FSUnitarityParticles], {0, ""}];
       WriteOut`ReplaceInFiles[files,
         {"@scatteringPairsLength@" -> ToString@res[[1]],
          "@infiniteSMatrix@" -> res[[2]],

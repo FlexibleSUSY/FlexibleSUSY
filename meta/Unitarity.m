@@ -117,11 +117,14 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
    TextFormatting`IndentText[paramsCPP <> "\n" <> resultInfinite]
 ];
 
-GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs, FSScatteringPairsSizes},
+GetScatteringMatrix[particles_] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs, FSScatteringPairsSizes},
    InitUnitarity[];
 
    (* only color neutral final states *)
    FSScatteringPairs = Select[scatteringPairs, (TreeMasses`GetColorRepresentation /@ #) == {S,S}&];
+   If[particles =!= {},
+      FSScatteringPairs = Select[scatteringPairs, ContainsAll[DeleteDuplicates@Join[particles, TreeMasses`FSAntiField /@ particles], #]&];
+   ];
 
    a0 = Outer[GetScatteringDiagrams[#1 -> #2]&, FSScatteringPairs, FSScatteringPairs, 1];
    (* obviously 's' lives in Susyno`LieGroups` *)
