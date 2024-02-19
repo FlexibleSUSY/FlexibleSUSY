@@ -26,6 +26,7 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_@filename@.hpp"
+#include "error.hpp"
 
 namespace flexiblesusy {
 using namespace @ModelName@_cxx_diagrams;
@@ -38,11 +39,11 @@ auto forge(int idx, const @ModelName@_mass_eigenstates& model, const softsusy::Q
 
    std::complex<double> lepton_mass;
    switch (idx) {
-      case 0: lepton_mass = qedqcd.displayMass(softsusy::mElectron);
+      case 0: lepton_mass = qedqcd.displayPoleMel();
               break;
-      case 1: lepton_mass = qedqcd.displayMass(softsusy::mMuon);
+      case 1: lepton_mass = qedqcd.displayPoleMmuon();
               break;
-      case 2: lepton_mass = qedqcd.displayMass(softsusy::mTau);
+      case 2: lepton_mass = qedqcd.displayPoleMtau();
               break;
       default: throw OutOfBoundsError("fermion index out of bounds");
    }
