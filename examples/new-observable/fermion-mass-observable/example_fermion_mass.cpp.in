@@ -44,6 +44,7 @@ auto forge(int idx, const @ModelName@_mass_eigenstates& model, const softsusy::Q
               break;
       case 2: lepton_mass = qedqcd.displayMass(softsusy::mTau);
               break;
+      default: throw OutOfBoundsError("fermion index out of bounds");
    }
    RTYPE res {context_mass, lepton_mass};
    return res;
