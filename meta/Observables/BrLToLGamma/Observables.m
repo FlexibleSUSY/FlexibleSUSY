@@ -1,3 +1,5 @@
+FlexibleSUSYObservable`BrLToLGamma[pIn_, idxIn_ -> idxOut_] := FlexibleSUSYObservable`BrLToLGamma[pIn[idxIn] -> {pIn[idxOut], TreeMasses`GetPhoton[]}];
+
 DefineObservable[
    FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[idxOut_], V_}],
    GetObservableName ->
