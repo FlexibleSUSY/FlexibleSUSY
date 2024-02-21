@@ -4,9 +4,6 @@ FlexibleSUSY 2.8.0 [X, X X]
 New features
 ------------
 
-* Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
-  over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
-
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
 
