@@ -71,8 +71,8 @@ $observablesWildcard[file:_:""] := FileNameJoin@{$flexiblesusyMetaDir, "Observab
 
 FS`Version = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"flexiblesusy-version"}]]];
 FS`GitCommit = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"git_commit"}]]];
-FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "W. Kotlarski",
-              "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
+FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "U. Khasianevich",
+	      "W. Kotlarski", "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
 FS`Years   = "2013-2024";
