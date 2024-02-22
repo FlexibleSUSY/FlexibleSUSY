@@ -169,6 +169,16 @@ void @ModelName@_slha_io::set_settings(const Spectrum_generator_settings& settin
 }
 
 /**
+ * Stores the settings (LToLConversion block) in the SLHA object.
+ *
+ * @param settings class of settings
+ */
+void @ModelName@_slha_io::set_LToLConversion_settings(const LToLConversion_settings& settings)
+{
+   slha_io.set_LToLConversion_settings(settings);
+}
+
+/**
  * Stores the settings (FlexibleSUSY block) in the SLHA object.
  *
  * @param settings class of settings
@@ -686,6 +696,17 @@ void @ModelName@_slha_io::fill(Physical_input& input) const
  * @param settings struct of spectrum generator settings to be filled
  */
 void @ModelName@_slha_io::fill(Spectrum_generator_settings& settings) const
+{
+   slha_io.fill(settings);
+}
+
+/**
+ * Fill struct of spectrum generator settings from SLHA object
+ * (LToLConversion block)
+ *
+ * @param settings struct of spectrum generator settings to be filled
+ */
+void @ModelName@_slha_io::fill(LToLConversion_settings& settings) const
 {
    slha_io.fill(settings);
 }

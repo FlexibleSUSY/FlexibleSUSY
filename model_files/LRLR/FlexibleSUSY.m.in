@@ -200,5 +200,3 @@ ExtraSLHAOutputBlocks = {
 
 FSCalculateDecays = True;
 
-FSUnitarityConstraints = False;
-

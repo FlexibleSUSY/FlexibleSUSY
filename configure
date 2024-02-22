@@ -5,8 +5,8 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=7
-FLEXIBLESUSY_PATCH=1
+FLEXIBLESUSY_MINOR=8
+FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -3588,9 +3588,9 @@ add_metaflags() {
    tcol_='FSEnableColors = '
    col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
-   local tcol_ col_
-   tcol_='FSEnableCompile = '
-   col_="${tcol_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
+   local tcom_ com_
+   tcom_='FSEnableCompile = '
+   com_="${tcom_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
 
    local c_=''
    local fs_=''
@@ -3616,9 +3616,12 @@ add_metaflags() {
 
       c_=$(grep "$tcol_" $fs_)
       if [ "$c_" != "$col_" ]; then
-         [ "$c_" != '' ] && \
-            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
-            echo "$col_" >> $fs_
+         [ "$c_" != '' ] && sed -i "s/${tcol_}.*/${col_}/g" $fs_ || echo "$col_" >> $fs_
+      fi
+
+      c_=$(grep "$tcom_" $fs_)
+      if [ "$c_" != "$com_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tcom_}.*/${com_}/g" $fs_ || echo "$com_" >> $fs_
       fi
 
    done
