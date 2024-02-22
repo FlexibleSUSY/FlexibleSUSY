@@ -284,8 +284,19 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
          const auto LoopFunctionB = FB(x);
          const auto LoopFunctionC = FC(x);
 
-         // @todo: check the sign convention of this coupling
-         const std::complex<double> vector_boson_coupling{-vertexEmit.value(1,0)};
+         // SARAH returns this coupling as some expression and momenta difference:
+         // incoming momenta of one scalar comes with + sign,
+         // incoming momenta of the other one comes with - sign.
+         // + sign corresponds to the first argument of value(*,*).
+         // - sign corresponds to the second argument of value(*,*).
+         // Number, passed to the argument, is the position of the scalar in
+         // the coupling. Example:
+         //    Vertex<typename SB::lorentz_conjugate, SA, *>
+         // and
+         //    value(0, 1)
+         // means, that we get C if vertex (in pseudolanguage) is given as
+         // i C * (momenta(SBconj) - momenta(SA))
+         std::complex<double> vector_boson_coupling {vertexEmit.value(0, 1)};
 
          // eq. 15 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A1L =

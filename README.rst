@@ -47,6 +47,8 @@ modification, extension and reuse.
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
   (or later), please cite [2204.05285]_.
 
+  If you use **NPointFunctions** in your work, please cite [24XX.XXXXX]_.
+
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
   along with FlexibleSUSY:

@@ -575,7 +575,7 @@ Output: ``spectrum.slha``
         12     0.00000000E+00   # force output
         13     1.00000000E+00   # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
         14     1.00000000E-11   # beta-function zero threshold
-        15     0.00000000E+00   # calculate observables (a_muon, ...)
+        15     0.00000000E+00   # calculate all observables
         16     0.00000000E+00   # force positive majorana masses
         17     0.00000000E+00   # pole mass renormalization scale (0 = SUSY scale)
         18     0.00000000E+00   # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
