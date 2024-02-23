@@ -4,7 +4,9 @@ FlexibleSUSY 2.8.0 [February, 23 2024]
 New features
 ------------
 
-* NPointFunctions
+* NPointFunctions was made public in [`2402.14630 <https://arxiv.org/abs/2402.14630>`_].
+  It allows for generating tree-level and loop amplitudes.
+  A new automatic way to define observables was introduced.
 
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
