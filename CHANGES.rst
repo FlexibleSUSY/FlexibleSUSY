@@ -1,12 +1,18 @@
 FlexibleSUSY 2.8.0 [February, 23 2024]
-==================================
+======================================
 
 New features
 ------------
 
-* NPointFunctions was made public in [`2402.14630 <https://arxiv.org/abs/2402.14630>`_].
-  It allows for generating tree-level and loop amplitudes.
-  A new automatic way to define observables was introduced.
+* Added an option to calculate new, user defined observables using
+  NPointFunctions module [`2402.14630 <https://arxiv.org/abs/2402.14630>`_].
+  Example application is the calculation of leptonic processes :math:`$l \to
+  l'$` conversion in the nuclei and :math:`$l \to 3l'$` decay, which now can be
+  trivially enabled in all supported models. In general, NPointFunctions allows
+  to compute tree-level and loop amplitudes from within FlexibleSUSY and employ
+  them in the calculation of a user-requested observable. Potential further
+  applications include calculation of amplitudes relevant to :math:`$B_s \to
+  \mu^+ \mu^-$` or Higgs boson decays.
 
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
