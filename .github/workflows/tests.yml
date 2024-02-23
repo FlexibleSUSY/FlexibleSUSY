@@ -13,6 +13,7 @@ on:
       - '.clang-tidy'
       - '.clang-format'
       - 'AUTHORS'
+      - 'CITATION.cff'
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
@@ -27,6 +28,7 @@ on:
       - '.clang-tidy'
       - '.clang-format'
       - 'AUTHORS'
+      - 'CITATION.cff'
       - 'COPYING'
       - 'doc/**'
       - 'install-sarah'
@@ -78,7 +80,6 @@ jobs:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |
           ./configure \
-            --with-cxxflags="-std=c++14 -fPIC" \
             --with-cxx=$CXXCOMPILER \
             --with-optional-modules=test \
             --with-loop-libraries=collier,looptools \
@@ -127,7 +128,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.12.0
+      image: navir/opensuseleap-for-flexiblesusy:0.17.5
 
     strategy:
       fail-fast: false
@@ -137,8 +138,8 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.10'
-      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya'
-      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic MSSMNoFVEFTHiggs'
+      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3'
 
     steps:
 
@@ -204,6 +205,11 @@ jobs:
             --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
             --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
             --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --enable-higgstools \
+            --with-higgstools-incdir=$FS_DEPENDENCIES_DIR/HiggsTools/include \
+            --with-higgstools-libdir=$FS_DEPENDENCIES_DIR/HiggsTools/lib64 \
+            --enable-lilith \
+            --with-lilith=/fs_dependencies/Lilith \
             --enable-himalaya \
             --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
             --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
@@ -213,12 +219,32 @@ jobs:
             --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
-            --enable-librarylink \
-            --with-cxxflags="-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"
+            --enable-librarylink
           make showbuild
+
+      - name: Check if SARAH has changed
+        run: |
+           out=$(find /fs_dependencies/mathematica/SARAH-* sarah -type f | xargs -d'\n' -P0 -n1 sha512sum | sort -k 2 | sha512sum | awk '{print $1}')
+           echo "SARAH_HASH=${out}" >> $GITHUB_ENV
+
+      # If SARAH checksum didn't change
+      # restore content of Output directory from previous run
+      - name: Restore cached SARAH outputs
+        id: cache-sarah-output-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: Output
+          key: sarah-outputs-${{ matrix.PART }}-${{ env.SARAH_HASH }}
 
       - name: Make
         run: make -j2
+
+      - name: Save SARAH outputs
+        id: cache-sarah-output-save
+        uses: actions/cache/save@v4
+        with:
+          path: Output
+          key: ${{ steps.cache-sarah-output-restore.outputs.cache-primary-key }}
 
       - name: Run Mathematica tests
         run: make -j2 execute-meta-tests
@@ -282,7 +308,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
+          name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
           path: |
             config.*
             test/test_*.log

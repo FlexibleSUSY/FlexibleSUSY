@@ -61,7 +61,7 @@ META_THDM_SRC:= \
 		$(DIR)/THDM/Thresholds_1L_full.m
 
 META_SRC     := \
-		$(DIR)/AMuon.m \
+		$(DIR)/AMM.m \
 		$(DIR)/AnomalousDimension.m \
 		$(DIR)/BetaFunction.m \
 		$(DIR)/CConversion.m \
@@ -69,14 +69,13 @@ META_SRC     := \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
 		$(DIR)/Decays.m \
+		$(DIR)/GM2Calc.m \
 		$(DIR)/NPointFunctions.m \
-		$(DIR)/NPointFunctions/internal.m \
-		$(DIR)/NPointFunctions/createFAModelFile.m \
+		$(wildcard $(DIR)/NPointFunctions/*.m) \
+		$(wildcard $(DIR)/Observables/*/*.m) \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
-		$(DIR)/FToFConversionInNucleus.m \
-		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \
@@ -111,6 +110,7 @@ META_SRC     := \
 		$(DIR)/TwoLoopMSSM.m \
 		$(DIR)/TwoLoopQCD.m \
 		$(DIR)/TwoLoopSM.m \
+		$(DIR)/Unitarity.m \
 		$(DIR)/Utils.m \
 		$(DIR)/Vertices.m \
 		$(DIR)/WeinbergAngle.m \

@@ -38,7 +38,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   0                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -826,7 +826,7 @@ Block ImMSOFT Q= 2.00000000E+03
                               0.0021707237775801919, 6e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 1, 1, 1),
-                              0.00010604105374890464, 2e-13);
+                              0.00010607114819048992, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
                               0.00022695659608435093, 3e-13);

@@ -1379,6 +1379,10 @@ if (HIGGS_2LOOP_CORRECTION_ATAU_ATAU) {
 return self_energy_2l;"
           ];
 
+(* return a/b if b != 0, otherwise return 0 *)
+DivideOrReturnZeroStr[a_, b_] :=
+    CConversion`RValueToCFormString[b] <> " == 0 ? 0 : " <> CConversion`RValueToCFormString[a] <> "/" <> CConversion`RValueToCFormString[b];
+
 GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "MSSM", 3] :=
     Module[{g3Str, mtStr, mbStr, meStr, mTop, mBot, mTau,
@@ -1398,9 +1402,9 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            muStr   = CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
            mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
-           AtStr   = CConversion`RValueToCFormString[SARAH`TrilinearUp[2,2] / SARAH`UpYukawa[2,2]];
-           AbStr   = CConversion`RValueToCFormString[SARAH`TrilinearDown[2,2] / SARAH`DownYukawa[2,2]];
-           AeStr   = CConversion`RValueToCFormString[SARAH`TrilinearLepton[2,2] / SARAH`ElectronYukawa[2,2]];
+           AtStr   = DivideOrReturnZeroStr[SARAH`TrilinearUp[2,2], SARAH`UpYukawa[2,2]];
+           AbStr   = DivideOrReturnZeroStr[SARAH`TrilinearDown[2,2], SARAH`DownYukawa[2,2]];
+           AeStr   = DivideOrReturnZeroStr[SARAH`TrilinearLepton[2,2], SARAH`ElectronYukawa[2,2]];
            mWStr   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`VectorW]];
            mZStr   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`VectorZ]];
            mq2Str  = CConversion`RValueToCFormString[SARAH`SoftSquark];

@@ -24,6 +24,7 @@ BeginPackage["WriteOut`", {"SARAH`", "TextFormatting`", "CConversion`",
                            "Parameters`", "TreeMasses`",
                            "Utils`"}];
 
+WriteObservable::usage="Prepares SLHA or FLHA output for NPointFunctions observable";
 ReplaceInFiles::usage="Replaces tokens in files.";
 PrintParameters::usage="Creates parameter printout statements";
 PrintInputParameters::usage="Creates input parameter printout statements";
@@ -450,36 +451,75 @@ WriteSLHABlockEntry[blockName_, {Hold[par_], idx___}, comment_String:""] :=
 
 ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 
+$writeSLHACurrentObservable;
+
+Module[{npfFiles, npfObservables, npfPattern, executedAlready},
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
-    Module[{result = ""},
-           Switch[par,
-                  FlexibleSUSYObservable`aMuon,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon", idx}, "Delta(g-2)_muon/2 FlexibleSUSY"],
-                  FlexibleSUSYObservable`aMuonUncertainty,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_uncertainty", idx}, "Delta(g-2)_muon/2 FlexibleSUSY uncertainty"],
-                  FlexibleSUSYObservable`aMuonGM2Calc,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],
-                  FlexibleSUSYObservable`aMuonGM2CalcUncertainty,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc_uncertainty", idx}, "Delta(g-2)_muon/2 GM2Calc uncertainty"],
-                  FlexibleSUSYObservable`EDM[_],
-                      result = WriteSLHABlockEntry[blockName,
-                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                                   Observables`GetObservableDescription[par]],
-                  FlexibleSUSYObservable`BrLToLGamma[__],
-                      result = WriteSLHABlockEntry[blockName,
-                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                                   Observables`GetObservableDescription[par]],
-                  FlexibleSUSYObservable`FToFConversionInNucleus[__],
-                      result = WriteSLHABlockEntry[blockName,
-                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                                   Observables`GetObservableDescription[par]],
-                  FlexibleSUSYObservable`bsgamma,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
-                  _,
-                     result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
-                 ];
-           result
-          ];
+Module[{},
+   If[executedAlready =!= True,
+      npfFiles = Utils`DynamicInclude@FlexibleSUSY`$observablesWildcard@"WriteOut.m";
+      npfObservables = StringSplit[npfFiles, $PathnameSeparator][[All, -2]];
+      npfPattern = Alternatives@@(ToExpression["_FlexibleSUSYObservable`"<>#]&/@npfObservables);
+      executedAlready = True;
+   ];
+   $writeSLHACurrentObservable = par;
+   Switch[par,
+         FlexibleSUSYObservable`AMM[_],
+             WriteSLHABlockEntry[blockName,
+                                 {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                 Observables`GetObservableDescription@par],
+         FlexibleSUSYObservable`AMMUncertainty[_],
+             WriteSLHABlockEntry[blockName,
+                                 {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                 Observables`GetObservableDescription@par],
+         FlexibleSUSYObservable`aMuonGM2Calc,
+             WriteSLHABlockEntry[blockName,
+                                 {"OBSERVABLES.a_muon_gm2calc", idx},
+                                 "Delta(g-2)_muon/2 GM2Calc"],
+         FlexibleSUSYObservable`aMuonGM2CalcUncertainty,
+             WriteSLHABlockEntry[blockName,
+                                 {"OBSERVABLES.a_muon_gm2calc_uncertainty", idx},
+                                 "Delta(g-2)_muon/2 GM2Calc uncertainty"],
+         FlexibleSUSYObservable`EDM[_],
+             WriteSLHABlockEntry[blockName,
+                                 {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                 Observables`GetObservableDescription@par],
+         FlexibleSUSYObservable`bsgamma,
+             WriteSLHABlockEntry[blockName,
+                                 {"OBSERVABLES.b_to_s_gamma", idx},
+                                 "Re(C7) for b -> s gamma"],
+         npfPattern,
+             WriteSLHABlockEntry[blockName,
+                                 {WriteObservable[blockName, par], idx},
+                                 Observables`GetObservableDescription@par],
+         _,
+             WriteSLHABlockEntry[blockName, {"", idx}, ""]
+   ]
+];];
+
+WriteSLHABlockEntry::errType = "Currently type `1` is not supported.";
+WriteSLHABlockEntry["FWCOEF"|"IMFWCOEF", {flha_List, _}, _] :=
+Module[{obstype, maxlength, numbered},
+   obstype = Observables`GetObservableType@$writeSLHACurrentObservable;
+   Switch[obstype,
+      _CConversion`ArrayType,
+         maxlength = obstype[[2]],
+      _,
+         Utils`AssertOrQuit[False, WriteSLHABlockEntry::errType, obstype]
+   ];
+   numbered = MapIndexed[
+      StringReplace["      << FORMAT_WILSON_COEFFICIENTS(" <> #1 <> ")\n",
+      ")," -> "(" <> ToString[maxlength - Length@flha + First@#2 - 1] <> ")),"]&,
+      flha
+   ];
+   numbered = StringReplace[numbered,
+      "COEFFICIENTS(" ~~ Shortest[x__] ~~ "," :> "COEFFICIENTS(\"" <> StringTrim@x <> "\","
+   ];
+   numbered = StringReplace[numbered,
+      "\"," ~~ Shortest[x__] ~~ "," :> "\", \"" <> StringTrim@x <> "\","
+   ];
+   numbered
+];
 
 WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment_String:""] :=
     Module[{parStr, parVal, idx1Str, idx2Str, idx3Str, commentStr},
@@ -611,7 +651,9 @@ WriteExtraSLHAOutputBlock[outputBlocks_List] :=
            reformed = ReformeBlocks /@ outputBlocks;
            (
               result = result
-                 <> If[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                 <> If[Or[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                          First[#[[1]]] === FlexibleSUSY`FWCOEF,
+                          First[#[[1]]] === FlexibleSUSY`IMFWCOEF],
                        "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {\n"
                        <> TextFormatting`IndentText[WriteSLHABlock[#[[1]], #[[2]]]]
                        <> "}\n",

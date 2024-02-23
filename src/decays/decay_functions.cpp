@@ -70,7 +70,7 @@ double calc_DeltaH(double b) noexcept
 }
 
 // Eq.(2.6 of) hep-ph/0503173
-double calc_DeltaAH(double b) noexcept
+double calc_DeltaAh(double b) noexcept
 {
    const double b2 = b*b;
 
@@ -264,8 +264,8 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
    }
 }
 
-std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAH, double msq, double mu) noexcept {
-   const double r = Sqr(mAH/msq);
+std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAh, double msq, double mu) noexcept {
+   const double r = Sqr(mAh/msq);
    if (r < 0.7) {
       return 0.;
    }
@@ -303,26 +303,4 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
    return nf;
 }
 
-double sm_up_quark_masses(softsusy::QedQcd const& qedqcd, int n)
-{
-   switch(n) {
-      case 0: return qedqcd.displayMass(softsusy::mUp);
-      case 1: return qedqcd.displayMass(softsusy::mCharm);
-      default:
-         throw std::runtime_error("Unknown quark mass");
-   }
-}
-double sm_down_quark_masses(softsusy::QedQcd const& qedqcd, int n)
-{
-   switch(n) {
-      case 0:
-         return qedqcd.displayMass(softsusy::mDown);
-      case 1:
-         return qedqcd.displayMass(softsusy::mStrange);
-      case 2:
-         return qedqcd.displayMass(softsusy::mBottom);
-      default:
-         throw std::runtime_error("Unknown quark mass");
-   }
-}
 } // namespace flexiblesusy

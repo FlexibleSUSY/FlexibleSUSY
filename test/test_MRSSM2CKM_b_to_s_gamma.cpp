@@ -55,7 +55,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   160                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -199,8 +199,8 @@ Block MSOFTIN
    auto model = std::get<0>(spectrum_generator.get_models_slha());
 
    const auto calculated_value = MRSSM2CKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
-   constexpr std::complex<double> C7NP {-0.20234454161004062, -0.00369650084326421};
-   constexpr std::complex<double> C7pNP {-0.0043545363467531548, -7.9550192704575207e-05};
+   constexpr std::complex<double> C7NP {-0.20234697574469934, -0.003696545310887334};
+   constexpr std::complex<double> C7pNP {-0.0043545893784175324, -7.9551161505564508e-05};
    constexpr std::complex<double> C8NP {-0.17125493908345221, -0.00312854511269766};
    constexpr std::complex<double> C8pNP {-0.0037973614617843958, -6.9371527069492648e-05};
 

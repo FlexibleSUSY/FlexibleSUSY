@@ -19,17 +19,6 @@ using namespace softsusy;
 void setup(CMSSMCKM_input_parameters& input, DoubleVector& input2)
 {
    const double M12 = 100.0;
-   const double m0 = 250.0;
-   const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
-   const double vev = 246.0;
-   const double tanBeta = 10;
-   const double sinBeta = sin(atan(tanBeta));
-   const double cosBeta = cos(atan(tanBeta));
-   const double vu = vev * sinBeta;
-   const double vd = vev * cosBeta;
-   const double susyMu = 120.0;
-   const double BMu = Sqr(2.0 * susyMu);
 
    Eigen::Matrix<double,3,3> mm0;
    mm0 << Sqr(330), 200     , 100,
@@ -115,7 +104,6 @@ void setup(CMSSMCKM_mass_eigenstates& m, FlavourMssmSoftsusy& s)
    const double g1 = sqrt(4 * Pi * alpha1);
    const double g2 = sqrt(4 * Pi * alpha2);
    const double g3 = sqrt(4 * Pi * ALPHASMZ);
-   const double root2 = sqrt(2.0);
    const double vev = 246.0;
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));

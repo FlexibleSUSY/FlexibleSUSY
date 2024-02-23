@@ -20,13 +20,14 @@ Building the NUHMSSMNoFVHimalaya
 --------------------------------
 
 In order to use the 3-loop contributions to the light CP-even Higgs
-mass from the `Himalaya library`_, the NUHMSSMNoFVHimalaya must be
-configured with the ``--enable-himalaya`` flag::
+mass from the `Himalaya library`_ version 4.0.0 (or higher), the
+NUHMSSMNoFVHimalaya must be configured with the ``--enable-himalaya``
+flag::
 
     ./createmodel --name=NUHMSSMNoFVHimalaya
     ./configure --with-models=NUHMSSMNoFVHimalaya \
         --enable-himalaya \
-        --with-himalaya-incdir=${HIMALAYA_DIR}/source/include \
+        --with-himalaya-incdir=${HIMALAYA_DIR}/include \
         --with-himalaya-libdir=${HIMALAYA_DIR}/build
     make
 
@@ -102,7 +103,7 @@ configuration flags: In an SLHA input file we recommend to use::
        12   0            # force output
        13   1            # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
        14   1.0e-11      # beta-function zero threshold
-       15   0            # calculate observables (a_muon, ...)
+       15   0            # calculate all observables
        16   0            # force positive majorana masses
        17   0            # pole mass renormalization scale (0 = SUSY scale)
        18   0            # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))

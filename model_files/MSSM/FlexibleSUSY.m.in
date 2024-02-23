@@ -139,11 +139,15 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[md2[2,2]]},
             {49, SignedAbsSqrt[md2[3,3]]} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon},
+           {{20, FlexibleSUSYObservable`AMM[Fe[1]]},
+            {21, FlexibleSUSYObservable`AMM[Fe[2]]},
+            {22, FlexibleSUSYObservable`AMM[Fe[3]]},
             {23, FlexibleSUSYObservable`EDM[Fe[1]]},
             {24, FlexibleSUSYObservable`EDM[Fe[2]]},
             {25, FlexibleSUSYObservable`EDM[Fe[3]]},
-            {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+            {26, FlexibleSUSYObservable`BrLToLGamma[Fe, 2 -> 1]},
+            {31, FlexibleSUSYObservable`BrLTo3L[Fe, 2 -> {1, 1, 1}, All, 1]},
+            {41, FlexibleSUSYObservable`LToLConversion[Fe, 2 -> 1, Al, All, 1]}
            }
    }
 };

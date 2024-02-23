@@ -67,6 +67,32 @@ using Bcoeff_t = std::array<std::complex<double>, B_N>;
 using Ccoeff_t = std::array<std::complex<double>, C_N>;
 using Dcoeff_t = std::array<std::complex<double>, D_N>;
 
+constexpr int aa0  = 0;
+
+constexpr int bb0  = 0;
+constexpr int bb1  = 1;
+constexpr int bb00 = 2;
+
+constexpr int cc0  = 0;
+constexpr int cc1  = 1;
+constexpr int cc2  = 2;
+constexpr int cc00 = 3;
+constexpr int cc11 = 4;
+constexpr int cc12 = 5;
+constexpr int cc22 = 6;
+
+constexpr int dd0  = 0;
+constexpr int dd1  = 1;
+constexpr int dd2  = 2;
+constexpr int dd3  = 3;
+constexpr int dd00 = 4;
+constexpr int dd11 = 5;
+constexpr int dd12 = 6;
+constexpr int dd13 = 7;
+constexpr int dd22 = 8;
+constexpr int dd23 = 9;
+constexpr int dd33 = 10;
+
 enum Acoeffs : int {
    BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, a, A_CSEQ))
 };

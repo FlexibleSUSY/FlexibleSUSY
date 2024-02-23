@@ -6,6 +6,7 @@ LIBFLEXI_MK  := \
 		$(DIR)/module.mk
 
 LIBFLEXI_SRC := \
+		$(DIR)/amm_loop_functions.cpp \
 		$(DIR)/betafunction.cpp \
 		$(DIR)/build_info.cpp \
 		$(DIR)/bvp_solver_problems.cpp \
@@ -22,6 +23,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/eta.cpp \
 		$(DIR)/factorial.cpp \
+		$(DIR)/ffv_loop_functions.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
 		$(DIR)/gsl_multimin_fminimizer.cpp \
@@ -41,6 +43,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
 		$(DIR)/model.cpp \
+		$(wildcard $(DIR)/observables/*/*.cpp) \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/observables.cpp \
@@ -64,6 +67,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/zeta.cpp
 
 LIBFLEXI_HDR := \
+		$(DIR)/always_false.hpp \
+		$(DIR)/amm_loop_functions.hpp \
 		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
 		$(DIR)/betafunction.hpp \
@@ -82,6 +87,8 @@ LIBFLEXI_HDR := \
 		$(DIR)/convergence_tester.hpp \
 		$(DIR)/convergence_tester_drbar.hpp \
 		$(DIR)/coupling_monitor.hpp \
+		$(DIR)/cxx_qft/fields.hpp \
+		$(DIR)/cxx_qft/vertices.hpp \
 		$(DIR)/database.hpp \
 		$(DIR)/decays/decay.hpp \
 		$(DIR)/decays/decay_amplitudes.hpp \
@@ -97,6 +104,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/ew_input.hpp \
 		$(DIR)/ewsb_solver.hpp \
 		$(DIR)/factorial.hpp \
+		$(DIR)/ffv_loop_functions.hpp \
 		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/for_each.hpp \
@@ -127,6 +135,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/mixings.hpp \
 		$(DIR)/model.hpp \
 		$(DIR)/multiindex.hpp \
+		$(wildcard $(DIR)/observables/*/*.hpp) \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
@@ -160,6 +169,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/thread_pool.hpp \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
+		$(DIR)/unitarity.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp \
 		$(DIR)/zeta.hpp
@@ -336,7 +346,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
+$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(LILITHFLAGS) $(PYTHONFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)

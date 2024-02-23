@@ -54,7 +54,7 @@ public:
       force_output,          ///< [12] force output
       top_pole_qcd_corrections,         ///< [13] Top-quark pole mass QCD corrections
       beta_zero_threshold,   ///< [14] beta function zero threshold
-      calculate_observables, ///< [15] calculate observables (a_muon, ...)
+      calculate_observables, ///< [15] calculate all observables
       force_positive_masses, ///< [16] force positive masses of majoran fermions
       pole_mass_scale,       ///< [17] renormalization scale at which the pole masses are calculated
       eft_pole_mass_scale,   ///< [18] renormalization scale at which the pole masses are calculated in the EFT
@@ -71,6 +71,7 @@ public:
       higgs_3loop_correction_at3,    ///< [29] Higgs 3-loop correction O(alpha_t^3)
       higgs_4loop_correction_at_as3, ///< [30] Higgs 4-loop correction O(alpha_t alpha_s^3)
       loop_library, ///< [31] Loop library (0 = Softsusy)
+      calculate_amm, ///< [32] Calculate AMM
       NUMBER_OF_OPTIONS      ///< number of possible options
    };
 

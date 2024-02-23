@@ -204,18 +204,6 @@ HeadToStr[sym_]    := "\"" <> ToString[sym] <> "\"";
 HeadsToStr[{}]     := "";
 HeadsToStr[l_List] := ", {" <> StringRiffle[HeadToStr /@ l, ", "] <> "}";
 
-PutObservable[FlexibleSUSYObservable`BrLToLGamma[p1_[idx1_Integer]->{p2_[idx2_Integer], V_}], type_, link_String, heads_:{}] /; V === TreeMasses`GetPhoton[] := "
-MLPutFunction(link, \"Rule\", 2);
-MLPutFunction(link, \"FlexibleSUSYObservable`BrLToLGamma\", 1);
-MLPutFunction(link, \"Rule\", 2);
-MLPutFunction(link, " <> ObsToStr[p1] <> ", 1);
-MLPutInteger(link, " <> ObsToStr[idx1] <> ");
-MLPutFunction(link, \"List\", 2);
-MLPutFunction(link, " <> ObsToStr[p2] <> ", 1);
-MLPutInteger(link, " <> ObsToStr[idx2] <> ");
-MLPutSymbol(link, " <> ObsToStr[V] <> ");
-MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToString[p2] <> ToString[idx2] <> "_" <> ToString[V] <> "));"
-
 PutObservable[obs_[sub_], type_, link_String, heads_:{}] :=
     PutObservable[sub, type, link, Join[heads, {obs}]];
 
@@ -224,8 +212,12 @@ PutObservable[obs_, type_, link_String, heads_:{}] :=
     Observables`GetObservableName[Composition[Sequence @@ heads][obs]] <>
     "), " <> ObsToStr[obs] <> HeadsToStr[heads] <> ");\n";
 
-PutObservables[obs_List, link_String] :=
-    StringJoin[PutObservable[#, Observables`GetObservableType[#], link]& /@ obs];
+PutObservables[obs_List, link_String] := (
+   If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+      Utils`DynamicInclude@FlexibleSUSY`$observablesWildcard@"FSMathLink.m";
+   ];
+   StringJoin[PutObservable[#, Observables`GetObservableType@#, link]& /@ obs]
+);
 
 CreateSeparatorLine[len_:66] := Module[{i}, "/" <> StringJoin[Table["*", {i, 1, len}]] <> "/"];
 
@@ -328,7 +320,7 @@ PutDecayTableEntries[modelName_] :=
                      TextFormatting`IndentText[
                         "MLPutFunction(link, \"Rule\", 2);\n" <>
                         "MLPutFunction(link, multiplet_and_index_pair.first.c_str(), 1);\n" <>
-                        "MLPutInteger(link, multiplet_and_index_pair.second.get());\n"
+                        "MLPutInteger(link, multiplet_and_index_pair.second.value());\n"
                      ] <>
                   "}\n" <>
                   "else {\n" <>

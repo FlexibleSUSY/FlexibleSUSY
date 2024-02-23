@@ -54,22 +54,23 @@ LIB@CLASSNAME@_CXXQFT_VERTICES_SRC ?= ''
 		$(MODNAME).tar.gz
 
 LIB@CLASSNAME@_SRC := \
-		$(DIR)/@CLASSNAME@_a_muon.cpp \
+		$(DIR)/@CLASSNAME@_amm.cpp \
 		$(DIR)/@CLASSNAME@_edm.cpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
-		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp \
-		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
+		$(wildcard $(DIR)/observables/@CLASSNAME@*.cpp) \
 		$(DIR)/@CLASSNAME@_b_to_s_gamma.cpp \
 		$(DIR)/@CLASSNAME@_info.cpp \
 		$(DIR)/@CLASSNAME@_input_parameters.cpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates.cpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/@CLASSNAME@_model_slha.cpp \
+		$(DIR)/@CLASSNAME@_lepton_amm_wrapper.cpp \
 		$(DIR)/@CLASSNAME@_observables.cpp \
 		$(DIR)/@CLASSNAME@_physical.cpp \
 		$(DIR)/@CLASSNAME@_slha_io.cpp \
 		$(DIR)/@CLASSNAME@_soft_parameters.cpp \
 		$(DIR)/@CLASSNAME@_susy_parameters.cpp \
+		$(DIR)/@CLASSNAME@_unitarity.cpp \
 		$(DIR)/@CLASSNAME@_utilities.cpp \
 		$(DIR)/@CLASSNAME@_weinberg_angle.cpp
 
@@ -89,12 +90,11 @@ LL@CLASSNAME@_MMA  := \
 		$(DIR)/run_@CLASSNAME@.m
 
 LIB@CLASSNAME@_HDR := \
-		$(DIR)/@CLASSNAME@_a_muon.hpp \
+		$(DIR)/@CLASSNAME@_amm.hpp \
 		$(DIR)/@CLASSNAME@_convergence_tester.hpp \
 		$(DIR)/@CLASSNAME@_edm.hpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
-		$(DIR)/@CLASSNAME@_f_to_f_conversion.hpp \
-		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
+		$(wildcard $(DIR)/observables/@CLASSNAME@*.hpp) \
 		$(DIR)/@CLASSNAME@_b_to_s_gamma.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver_interface.hpp \
@@ -108,6 +108,7 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.hpp \
 		$(DIR)/@CLASSNAME@_model.hpp \
 		$(DIR)/@CLASSNAME@_model_slha.hpp \
+		$(DIR)/@CLASSNAME@_lepton_amm_wrapper.hpp \
 		$(DIR)/@CLASSNAME@_observables.hpp \
 		$(DIR)/@CLASSNAME@_physical.hpp \
 		$(DIR)/@CLASSNAME@_slha_io.hpp \
@@ -116,12 +117,14 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_soft_parameters.hpp \
 		$(DIR)/@CLASSNAME@_susy_parameters.hpp \
 		$(DIR)/@CLASSNAME@_susy_scale_constraint.hpp \
+		$(DIR)/@CLASSNAME@_unitarity.hpp \
 		$(DIR)/@CLASSNAME@_utilities.hpp \
 		$(DIR)/@CLASSNAME@_weinberg_angle.hpp
 
 LIB@CLASSNAME@_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/@CLASSNAME@_qft.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_fields.hpp \
+		$(DIR)/cxx_qft/@CLASSNAME@_particle_aliases.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_vertices.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_context_base.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions_wilsoncoeffs.hpp
@@ -317,7 +320,7 @@ $(METACODE_STAMP_@CLASSNAME@):
 endif
 
 $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP) $(LL@CLASSNAME@_DEP) $(LIB@CLASSNAME@_OBJ) $(EXE@CLASSNAME@_OBJ) $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
-	CPPFLAGS += $(MOD@CLASSNAME@_SUBMOD_INC) $(MOD@CLASSNAME@_INC) $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(GM2CALCFLAGS) $(HIMALAYAFLAGS)
+	CPPFLAGS += $(MOD@CLASSNAME@_SUBMOD_INC) $(MOD@CLASSNAME@_INC) $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(GM2CALCFLAGS) $(HIGGSTOOLSFLAGS) $(HIMALAYAFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP) $(LL@CLASSNAME@_DEP) $(LIB@CLASSNAME@_OBJ) $(EXE@CLASSNAME@_OBJ) $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
@@ -333,11 +336,11 @@ $(LIB@CLASSNAME@): $(LIB@CLASSNAME@_OBJ)
 
 $(DIR)/%.x: $(DIR)/%.o $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
-		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^) $(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(THREADLIBS) $(LDLIBS) $(FUTILIBS)
+		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^) $(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIGGSTOOLSLIBS) $(PYTHONLIBS) $(HIMALAYALIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(THREADLIBS) $(LDLIBS) $(FUTILIBS)
 
 $(LL@CLASSNAME@_LIB): $(LL@CLASSNAME@_OBJ) $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
-		$(Q)$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$(ADDONLIBS) $^) $(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(TSILLIBS) $(GSLLIBS) $(THREADLIBS) $(LDLIBS) $(LLLIBS) $(FUTILIBS) $(FLIBS)
+		$(Q)$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$(ADDONLIBS) $^) $(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIGGSTOOLSLIBS) $(PYTHONLIBS) $(HIMALAYALIBS) $(TSILLIBS) $(GSLLIBS) $(THREADLIBS) $(LDLIBS) $(LLLIBS) $(FUTILIBS) $(FLIBS)
 
 ALLDEP += $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP)
 ALLSRC += $(LIB@CLASSNAME@_SRC) $(EXE@CLASSNAME@_SRC)

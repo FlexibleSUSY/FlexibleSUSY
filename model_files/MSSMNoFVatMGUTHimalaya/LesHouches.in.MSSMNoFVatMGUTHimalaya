@@ -16,7 +16,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   0                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -33,6 +33,7 @@ Block FlexibleSUSY
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   0                    # loop library (0 = softsusy)
+   32   2                    # loop level to calculate AMM
 Block SMINPUTS               # Standard Model inputs
     1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
     2   1.166370000e-05      # G_Fermi
@@ -50,7 +51,7 @@ Block SMINPUTS               # Standard Model inputs
    22   2.400000000e-03      # mu(2 GeV) MS-bar
    23   1.040000000e-01      # ms(2 GeV) MS-bar
    24   1.270000000e+00      # mc(mc) MS-bar
-Block MINPAR                 # Input parameters   
+Block MINPAR                 # Input parameters
     3   10.                  # TanBeta
     4   1                    # SignMu
 Block EXTPAR
@@ -73,13 +74,13 @@ Block EXTPAR
    33   125.0
    34   125.0
    35   125.0
-   36   125.0        
-   41   125.0	     
+   36   125.0
+   41   125.0
    42   125.0
    43   125.0
    44   125.0
    45   125.0
-   46   125.0     
+   46   125.0
    47   125.0
    48   125.0
    49   125.0

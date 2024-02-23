@@ -48,6 +48,7 @@ endif
 ################################################################################
 
 TEST_SRC := \
+		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_array_view.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_ckm.cpp \
@@ -78,6 +79,8 @@ TEST_SRC := \
 		$(DIR)/test_sm_mw.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
+		$(DIR)/test_standard_model_G_fermi.cpp \
+		$(DIR)/test_standard_model_mw_calculation.cpp \
 		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_string_format.cpp \
 		$(DIR)/test_sum.cpp \
@@ -187,7 +190,6 @@ endif
 
 ifeq ($(WITH_SM) $(WITH_SOFTSUSY),yes yes)
 TEST_SRC += \
-		$(DIR)/test_SM_weinberg_angle.cpp \
 		$(DIR)/test_SM_weinberg_angle_meta.cpp
 endif
 
@@ -204,8 +206,7 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_slha_output.cpp \
 		$(DIR)/test_CMSSM_spectrum.cpp \
 		$(DIR)/test_CMSSM_susy_scale_constraint.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle_meta.cpp
+		$(DIR)/test_CMSSM_unitarity.cpp
 TEST_SH += \
 		$(DIR)/test_CMSSM_gluino.sh
 endif
@@ -265,7 +266,7 @@ endif
 
 ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_gmm2.cpp \
+		$(DIR)/test_MRSSM2_amm.cpp \
 		$(DIR)/test_MRSSM2_mw_calculation.cpp \
 		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
 endif
@@ -310,6 +311,7 @@ endif
 ifeq ($(WITH_CE6SSM), yes)
 TEST_SRC += \
 		$(DIR)/test_CE6SSM_ewsb.cpp \
+		$(DIR)/test_CE6SSM_amm.cpp \
 		$(DIR)/test_CE6SSM_semi_analytic_solutions.cpp
 endif
 
@@ -346,6 +348,11 @@ ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecay.cpp
 endif
+endif
+
+ifeq ($(ENABLE_GM2CALC) $(WITH_THDMII),yes yes)
+TEST_SH += \
+		$(DIR)/test_THDMII_GM2Calc.sh
 endif
 
 ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
@@ -398,7 +405,7 @@ TEST_META += \
 		$(DIR)/test_munuSSM_TreeMasses.m
 
 TEST_SRC += \
-		$(DIR)/test_munuSSM_gmm2.cpp
+		$(DIR)/test_munuSSM_amm.cpp
 endif
 
 ifeq ($(WITH_munuSSM) $(WITH_munuSSMSemiAnalytic), yes yes)
@@ -535,7 +542,8 @@ TEST_META += \
 		$(DIR)/test_SM_vvvv.m
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
-		$(DIR)/test_SM_gmm2.cpp \
+		$(DIR)/test_SM_amm.cpp \
+		$(DIR)/test_SM_unitarity.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
 		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
@@ -545,7 +553,9 @@ TEST_SRC += \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
-		$(DIR)/test_SM_mw_calculation.cpp
+		$(DIR)/test_SM_mw_calculation.cpp \
+		$(DIR)/test_SM_yukawa_convention.cpp \
+		$(DIR)/test_SM_weinberg_angle.cpp
 TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
@@ -555,6 +565,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
 ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+TEST_SRC += \
+		$(DIR)/test_SM_cxxvertices.cpp
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_SM_FlexibleDecay.cpp
@@ -612,7 +624,8 @@ endif
 
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMCPV_ewsb.cpp
+		$(DIR)/test_CMSSMCPV_ewsb.cpp \
+		$(DIR)/test_CMSSMCPV_edm.cpp
 endif
 ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -775,7 +788,8 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m
+		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_unitarity.m
 endif
 ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -826,6 +840,8 @@ endif
 endif
 
 $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
+
+$(DIR)/test_amm_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/amm_loop_functions\""
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
@@ -1002,20 +1018,23 @@ $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) 
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
 
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
-ifeq ($(WITH_MRSSM2),yes)
 
-$(DIR)/test_MRSSM2_f_to_f_conversion.o $(DIR)/test_MRSSM2_f_to_f_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
-$(DIR)/test_MRSSM2_f_to_f_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-$(DIR)/test_MRSSM2_f_to_f_conversion.cpp : $(DIR)/test_MRSSM2_f_to_f_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_f_to_f_conversion.cpp.in $(META_SRC)
+ifeq ($(WITH_MRSSM2),yes)
+ifeq ($(ENABLE_COLLIER),yes)
+
+$(DIR)/test_MRSSM2_l_to_l_conversion.o $(DIR)/test_MRSSM2_l_to_l_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+$(DIR)/test_MRSSM2_l_to_l_conversion.cpp : $(DIR)/test_MRSSM2_l_to_l_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_l_to_l_conversion.cpp.in $(META_SRC)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
+endif
 endif
 
 ifeq ($(WITH_SM),yes)
@@ -1025,14 +1044,14 @@ $(DIR)/test_SM_npointfunctions.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTE
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_SM_matching_selfenergy_Fd.o $(DIR)/test_SM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
 ifeq ($(WITH_MSSM),yes)
@@ -1042,16 +1061,21 @@ $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(L
 $(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_MSSM_matching_selfenergy_Fd.o $(DIR)/test_MSSM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfenergy_Fd.meta $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
+endif
+
+ifeq ($(ENABLE_HIGGSTOOLS), yes)
+$(DIR)/test_HiggsTools_CP.o: CPPFLAGS += $(MODtest_INC) $(HIGGSTOOLSFLAGS)
+$(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
 endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
@@ -1064,7 +1088,7 @@ $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
 
-$(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
+$(DIR)/test_MRSSM2_amm.x: $(LIBMRSSM2)
 
 $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
 
@@ -1122,6 +1146,8 @@ $(DIR)/test_CMSSMLowPrecision.x: $(LIBCMSSMLowPrecision)
 
 $(DIR)/test_CMSSMCPV_ewsb.x: $(LIBCMSSMCPV)
 
+$(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
+
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
 $(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.x: $(LIBMSSMEFTHiggs)
@@ -1175,7 +1201,7 @@ $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 
 $(DIR)/test_SM_beta_functions.x: $(LIBSM)
 
-$(DIR)/test_SM_gmm2.x: $(LIBSM)
+$(DIR)/test_SM_amm.x: $(LIBSM)
 
 $(DIR)/test_SM_higgs_loop_corrections.x: $(LIBSM)
 
@@ -1199,7 +1225,13 @@ $(DIR)/test_SM_two_loop_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_mw_calculation.x: $(LIBSM)
 
+$(DIR)/test_SM_yukawa_convention.x: $(LIBSM)
+
+$(DIR)/test_SM_cxxvertices.x: $(LIBSM)
+
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
+
+$(DIR)/test_SM_unitarity.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle_meta.x: $(LIBSM)
 
@@ -1212,6 +1244,8 @@ $(DIR)/test_SMSU3_low_scale_constraint.x: $(LIBSMSU3)
 $(DIR)/test_NSM_low_scale_constraint.x: $(LIBNSM)
 
 $(DIR)/test_VCMSSM_ewsb.x: $(LIBVCMSSM) $(LIBCMSSM)
+
+$(DIR)/test_CMSSM_unitarity.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSMSemiAnalytic_ewsb.x: $(LIBCMSSMSemiAnalytic)
 
@@ -1233,6 +1267,8 @@ $(DIR)/test_CNMSSM_consistent_solutions.x: $(LIBCNMSSM) $(LIBNMSSM)
 
 $(DIR)/test_CE6SSM_ewsb.x: $(LIBCE6SSM)
 
+$(DIR)/test_CE6SSM_amm.x: $(LIBCE6SSM)
+
 $(DIR)/test_CE6SSM_semi_analytic_solutions.x: $(LIBCE6SSM)
 
 $(DIR)/test_CE6SSM_consistent_solutions.x: $(LIBCE6SSM) $(LIBE6SSM)
@@ -1245,7 +1281,7 @@ $(DIR)/test_lowNUHMSSMSemiAnalytic_semi_analytic_solutions.x: $(LIBlowNUHMSSMSem
 
 $(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.x: $(LIBlowNUHMSSMSemiAnalytic) $(LIBlowNUHMSSM)
 
-$(DIR)/test_munuSSM_gmm2.x: $(LIBmunuSSM)
+$(DIR)/test_munuSSM_amm.x: $(LIBmunuSSM)
 
 $(DIR)/test_munuSSMSemiAnalytic_ewsb.x: $(LIBmunuSSMSemiAnalytic)
 
@@ -1298,7 +1334,7 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
+		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)

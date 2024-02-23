@@ -88,11 +88,11 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon},
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]},
             {23, FlexibleSUSYObservable`EDM[Fe[1]]},
             {24, FlexibleSUSYObservable`EDM[Fe[2]]},
             {25, FlexibleSUSYObservable`EDM[Fe[3]]},
-            {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+            {26, FlexibleSUSYObservable`BrLToLGamma[Fe, 2 -> 1]}
            }
    },
    {NMSSMRUN,

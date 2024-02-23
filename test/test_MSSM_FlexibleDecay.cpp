@@ -39,7 +39,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   0                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -657,7 +657,7 @@ Block MSOFT Q= 8.64566212E+02
                               0.0024454872837716721, 7e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00011318500362355447, 3e-13);
+                              0.00011321683135547809, 3e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.00026234514953420564, 3e-13);
@@ -691,13 +691,13 @@ Block MSOFT Q= 8.64566212E+02
 
    // Ah -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
-                              0.88658115467704091, 4e-13);
+                              0.88672975360452144, 4e-13);
    // Ah -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFeFe(&m, 1, 2, 2),
                               0.14370135383550148, 4e-13);
    // Ah -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 1, 1, 1),
-                              6.1486066780391835e-06, 3e-13);
+                              6.1500292100561543e-06, 3e-13);
    // Ah -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_conjVWmVWm(&m, 1),
                               3.926795985114403e-05, 2e-12);

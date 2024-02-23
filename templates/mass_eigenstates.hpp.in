@@ -64,12 +64,11 @@ public:
    virtual ~@ModelName@_mass_eigenstates() = default;
    @ModelName@_mass_eigenstates& operator=(const @ModelName@_mass_eigenstates&) = default;
    @ModelName@_mass_eigenstates& operator=(@ModelName@_mass_eigenstates&&) = default;
-   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
 
    /// number of EWSB equations
-   static const int number_of_ewsb_equations = @numberOfEWSBEquations@;
+   static constexpr int number_of_ewsb_equations = @numberOfEWSBEquations@;
 
    void calculate_DRbar_masses();
    void calculate_pole_masses();
