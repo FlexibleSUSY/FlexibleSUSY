@@ -68,9 +68,9 @@ Fixed bugs
   (see Eq. 20 of `2106.05038 <https://arxiv.org/abs/2106.05038>`_). Numerical
   impact negligible.
 
-* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` where not applied.
+* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` were not applied.
 
-* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses where computed
+* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses were computed
   incorectly for Higgses lighter than respective Goldstone bosons.
 
 FlexibleSUSY 2.7.1 [June, 07 2022]
