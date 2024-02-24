@@ -20,6 +20,7 @@ jobs:
           part: [1, 2]
 
     env:
+      FORMCALC_VERSION: '9.10'
       MODELS: 'E6SSM E6SSMEFTHiggs CE6SSM CMSSM CMSSMSemiAnalytic CMSSMNoFV MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT SplitMSSM MSSMNoFVatMGUTHimalaya MSSMEFTHiggs NUHMSSMNoFVHimalaya MSSMNoFVHimalaya lowMSSM NUHMSSM HSSUSY NMSSM CNMSSM lowNMSSM lowNMSSMTanBetaAtMZ NUTNMSSM NMSSMEFTHiggs NUTSMSSM SMSSM UMSSM MRSSM2 MRSSMEFTHiggs MSSMRHN TMSSM SM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC'
 
     steps:
@@ -50,7 +51,6 @@ jobs:
 
       - name: Generate models and SLHA output
         env:
-           FORMCALC_VERSION: '9.10'
            PART: ${{ matrix.part }}
         run: |
            models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
