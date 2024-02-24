@@ -65,9 +65,9 @@ models/SM/LesHouches.in.SM \
 models/HSSUSY/LesHouches.in.HSSUSY \
 models/SplitMSSM/LesHouches.in.SplitMSSM \
 models/THDMII/LesHouches.in.THDMII \
-models/THDMIIMSSMBC/LesHouches.in.THDMIIMSSMBC \
+models/THDMIIMSSMBC/LesHouches.in.THDMIIMSSMBCFull \
 models/HTHDMIIMSSMBC/LesHouches.in.HTHDMIIMSSMBC \
-models/HGTHDMIIMSSMBC/LesHouches.in.HGTHDMIIMSSMBC \
+models/HGTHDMIIMSSMBC/LesHouches.in.HGTHDMIIMSSMBCFull \
 models/MSSMEFTHiggs/LesHouches.in.MSSMEFTHiggs \
 models/NMSSMEFTHiggs/LesHouches.in.NMSSMEFTHiggs \
 models/E6SSMEFTHiggs/LesHouches.in.E6SSMEFTHiggs \
