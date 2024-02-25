@@ -4228,8 +4228,8 @@ SetupOutputParameters[massMatrices_] :=
 
 CheckObsDependencies[requested_List] :=
 Module[{allObs, dir, filtered = requested},
+   Needs@"NPointFunctions`";
    If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Needs@"NPointFunctions`";
       Needs@"WilsonCoeffs`";
       Return[filtered];
    ];

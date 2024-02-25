@@ -48,7 +48,7 @@ models/MSSMatMGUT/LesHouches.in.MSSMatMGUT \
 models/MSSMNoFV/LesHouches.in.MSSMNoFV \
 models/MSSMNoFVatMGUT/LesHouches.in.MSSMNoFVatMGUT \
 models/CMSSMNoFV/LesHouches.in.CMSSMNoFV \
-models/NUHMSSM/LesHouches.in.NUHMSSM \
+models/NUHMSSM/LesHouches.in.NUHMSSMalt \
 models/lowMSSM/LesHouches.in.lowMSSM \
 models/MSSMRHN/LesHouches.in.MSSMRHN \
 models/NMSSM/LesHouches.in.NMSSM \
@@ -65,9 +65,9 @@ models/SM/LesHouches.in.SM \
 models/HSSUSY/LesHouches.in.HSSUSY \
 models/SplitMSSM/LesHouches.in.SplitMSSM \
 models/THDMII/LesHouches.in.THDMII \
-models/THDMIIMSSMBC/LesHouches.in.THDMIIMSSMBC \
+models/THDMIIMSSMBC/LesHouches.in.THDMIIMSSMBCFull \
 models/HTHDMIIMSSMBC/LesHouches.in.HTHDMIIMSSMBC \
-models/HGTHDMIIMSSMBC/LesHouches.in.HGTHDMIIMSSMBC \
+models/HGTHDMIIMSSMBC/LesHouches.in.HGTHDMIIMSSMBCFull \
 models/MSSMEFTHiggs/LesHouches.in.MSSMEFTHiggs \
 models/NMSSMEFTHiggs/LesHouches.in.NMSSMEFTHiggs \
 models/E6SSMEFTHiggs/LesHouches.in.E6SSMEFTHiggs \
