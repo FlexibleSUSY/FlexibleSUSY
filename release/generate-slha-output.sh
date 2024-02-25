@@ -48,7 +48,7 @@ models/MSSMatMGUT/LesHouches.in.MSSMatMGUT \
 models/MSSMNoFV/LesHouches.in.MSSMNoFV \
 models/MSSMNoFVatMGUT/LesHouches.in.MSSMNoFVatMGUT \
 models/CMSSMNoFV/LesHouches.in.CMSSMNoFV \
-models/NUHMSSM/LesHouches.in.NUHMSSM \
+models/NUHMSSM/LesHouches.in.NUHMSSMalt \
 models/lowMSSM/LesHouches.in.lowMSSM \
 models/MSSMRHN/LesHouches.in.MSSMRHN \
 models/NMSSM/LesHouches.in.NMSSM \
