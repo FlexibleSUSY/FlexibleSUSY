@@ -107,7 +107,7 @@ Requirements
 
 Optional:
 
-* FeynArts_ (version 3.9 or higher)
+* FeynArts_ (version 3.11 or higher)
 * FormCalc_ (version 9.5 or higher)
 * GM2Calc_ (version 2.1.0 or higher)
 * LoopTools_ (version 2.8 or higher)
