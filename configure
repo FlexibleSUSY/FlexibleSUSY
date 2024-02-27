@@ -266,11 +266,11 @@ SARAH_MINOR="0"
 SARAH_PATCH="0"
 
 # required FeynArts version
-required_feynarts_version="3.9.0"
+required_feynarts_version="3.10.0"
 FEYNARTS_VERSION="unknown"
 
 # required FormCalc version
-required_formcalc_version="9.5.0"
+required_formcalc_version="9.8.0"
 FORMCALC_VERSION="unknown"
 
 # Mathematica version (0 = unknown)
