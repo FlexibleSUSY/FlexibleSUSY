@@ -1,7 +1,8 @@
-FlexibleSUSY 2.9.0
-==================
+FlexibleSUSY 2.9.0 [X, XX 2024]
+===============================
 
 New features
+------------
 
 * Option to validate a neutral Higgs sector of the model by linking
   FlexibleSUSY with HiggsTools_ or Lilith_.
