@@ -1,3 +1,11 @@
+FlexibleSUSY 2.9.0
+==================
+
+New features
+
+* Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
+  over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
+
 FlexibleSUSY 2.8.0 [February, 23 2024]
 ======================================
 
