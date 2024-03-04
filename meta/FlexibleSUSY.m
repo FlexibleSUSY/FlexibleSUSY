@@ -215,7 +215,7 @@ IMEXTPAR = {};
 FSCalculateDecays = False;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
-FSUnitarityConstraints = False;
+FSUnitarityConstraints = True;
 FSEnableCompile;
 
 (* Standard Model input parameters (SLHA input parameters) *)
@@ -4292,8 +4292,8 @@ SetupOutputParameters[massMatrices_] :=
 
 CheckObsDependencies[requested_List] :=
 Module[{allObs, dir, filtered = requested},
+   Needs@"NPointFunctions`";
    If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-      Needs@"NPointFunctions`";
       Needs@"WilsonCoeffs`";
       Return[filtered];
    ];

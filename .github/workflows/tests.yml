@@ -162,7 +162,7 @@ jobs:
       - name: Install FormCalc
         run: |
           cd /fs_dependencies/gcc
-          wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
+          wget -q -O - https://feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
           cd FormCalc-$FORMCALC_VERSION
           ./compile
           echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
