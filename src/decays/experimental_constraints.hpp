@@ -61,7 +61,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
  */
 #ifdef ENABLE_LILITH
 std::optional<std::tuple<double, double, int, std::string>>
-call_lilith(EffectiveCoupling_list const&, Physical_input const&);
+call_lilith(EffectiveCoupling_list const&, Physical_input const&, std::string const&);
 #endif
 
 } // flexiblesusy

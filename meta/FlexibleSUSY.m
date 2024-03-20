@@ -2635,7 +2635,7 @@ RunEnabledSpectrumGenerator[solver_] :=
                         "slha_io, spectrum_generator_settings, " <>
                         If[FSCalculateDecays, "flexibledecay_settings, ", ""] <>
                         "slha_output_file,\n"]
-                  <> IndentText["database_output_file, spectrum_file, rgflow_file, higgsbounds_dataset, higgssignals_dataset);\n"]
+                  <> IndentText["database_output_file, spectrum_file, rgflow_file, higgsbounds_dataset, higgssignals_dataset, lilith_db);\n"]
                   <> "if (!exit_code || solver_type != 0) break;\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
@@ -2695,7 +2695,7 @@ if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
 #endif
 #ifdef ENABLE_LILITH
 if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {
-   if (const auto lilith_res = call_lilith(effc, physical_input); lilith_res) {
+   if (const auto lilith_res = call_lilith(effc, physical_input, lilith_db); lilith_res) {
       std::tie(lilith_likelihood, lilith_sm_likelihood, lilith_ndof, lilith_tag) = lilith_res.value();
    }
 }

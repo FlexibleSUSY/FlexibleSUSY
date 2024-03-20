@@ -429,7 +429,8 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
 #ifdef ENABLE_LILITH
 std::optional<std::tuple<double, double, int, std::string>> call_lilith(
    EffectiveCoupling_list const& bsm_input,
-   Physical_input const& physical_input) {
+   Physical_input const& physical_input,
+   std::string const& lilith_db) {
 
    // Lilith requires mass to be within [123, 128]
    bool higgs_in_range = false;
@@ -444,9 +445,8 @@ std::optional<std::tuple<double, double, int, std::string>> call_lilith(
    }
 
    Py_Initialize();
-   char experimental_input[] = "";
    // Creating an object of the class Lilith: lilithcalc
-   PyObject* lilithcalc = initialize_lilith(experimental_input);
+   PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));
 
    char XMLinputstring[6000]="";
    char buffer[100];
