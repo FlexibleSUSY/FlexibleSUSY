@@ -468,41 +468,59 @@ std::optional<std::tuple<double, double, int, std::string>> call_lilith(
       sprintf(buffer,"<mass>%f</mass>\n", mh);
       strcat(XMLinputstring, buffer);
 
+      // massless gauge bosons
       sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", el.gamgam);
       strcat(XMLinputstring, buffer);
       sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", el.Zgam);
       strcat(XMLinputstring, buffer);
+      // the same reduce coupling for production and decay for gluons
       sprintf(buffer,"<C to=\"gg\">%f</C>\n", el.gg);
       strcat(XMLinputstring, buffer);
 
+      // massive gauge bosons
       sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", el.ZZ);
       strcat(XMLinputstring, buffer);
       sprintf(buffer,"<C to=\"WW\">%f</C>\n", el.WW);
       strcat(XMLinputstring, buffer);
 
+      // fermions
+      // tt
       sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", std::real(el.tt));
       strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"tt\" part=\"im\">%f</C>\n", std::imag(el.tt));
+      strcat(XMLinputstring, buffer);
+      // cc
       sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", std::real(el.cc));
       strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"cc\" part=\"im\">%f</C>\n", std::imag(el.cc));
+      strcat(XMLinputstring, buffer);
+      // bb
       sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", std::real(el.bb));
       strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"bb\" part=\"im\">%f</C>\n", std::imag(el.bb));
+      strcat(XMLinputstring, buffer);
+      // tautau
       sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", std::real(el.tautau));
+      strcat(XMLinputstring, buffer);
+      sprintf(buffer,"<C to=\"tautau\" part=\"im\">%f</C>\n", std::imag(el.tautau));
       strcat(XMLinputstring, buffer);
 
       sprintf(buffer,"<extraBR>\n");
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", BRinv);
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", BRund);
-      strcat(XMLinputstring, buffer);
+         sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", BRinv);
+         strcat(XMLinputstring, buffer);
+         sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", BRund);
+         strcat(XMLinputstring, buffer);
       sprintf(buffer,"</extraBR>\n");
       strcat(XMLinputstring, buffer);
-      // In the BEST-QCD mode, only the real part of the coupling is taken into account (see 1502.04138)
+
+      // in the BEST-QCD mode, only the real part of the coupling is taken into account (see 1502.04138)
       sprintf(buffer,"<precision>%s</precision>\n", el.CP == 1 ? "BEST-QCD" : "LO");
       strcat(XMLinputstring, buffer);
       sprintf(buffer,"</reducedcouplings>\n");
       strcat(XMLinputstring, buffer);
     }
+
     sprintf(buffer,"</lilithinput>\n");
     strcat(XMLinputstring, buffer);
 
