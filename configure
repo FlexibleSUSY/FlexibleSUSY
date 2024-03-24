@@ -2237,18 +2237,22 @@ check_higgstools() {
 }
 
 check_python() {
-    checking_msg "python C/C++ extensions"
-    if test "$(command -v python3-config)" = "x" ; then
+    checking_msg "C++ python embedding"
+    path_split=$(echo "$PATH" | sed -e 's/:/ /g')
+    python3config_cmd=$(find $path_split -name "python3*-config" 2>/dev/null)
+    if test -z "$python3config_cmd" ; then
         result "no"
-        message "Warning! Cannot find python3-config. Some features (like the Lilith interface)"
+        message "Warning! Cannot find python3*-config. Some features (like the Lilith interface)"
         message "         will be disabled."
         enable_lilith=no
     else
+        # pick 1st one that was found
+        python3config_cmd=$(echo $python3config_cmd | cut -d ' ' -f 1)
         # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
         # remove duplicates
-        PYTHONFLAGS=$(echo "$(python3-config --includes)" | xargs -n1 | sort -u)
-        PYTHONLIBS="$(python3-config --libs --embed)"
-        result "yes"
+        PYTHONFLAGS=$(echo "$(${python3config_cmd} --includes)" | xargs -n1 | sort -u)
+        PYTHONLIBS="$(${python3config_cmd} --libs --embed)"
+        result "found $python3config_cmd"
     fi
 }
 
