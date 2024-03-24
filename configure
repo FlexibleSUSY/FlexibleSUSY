@@ -2238,7 +2238,8 @@ check_higgstools() {
 
 check_python() {
     checking_msg "python C/C++ extensions"
-    python3config_cmd=$(find $(echo "$PATH" | sed -e 's/:/ /g') -name "python3*-config" 2>/dev/null)
+    path_split=$(echo "$PATH" | sed -e 's/:/ /g')
+    python3config_cmd=$(find $path_split -name "python3*-config" 2>/dev/null)
     if test -z "$python3config_cmd" ; then
         result "no"
         message "Warning! Cannot find python3*-config. Some features (like the Lilith interface)"
