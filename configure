@@ -2237,7 +2237,7 @@ check_higgstools() {
 }
 
 check_python() {
-    checking_msg "python C/C++ extensions"
+    checking_msg "python3 C/C++ extensions"
     path_split=$(echo "$PATH" | sed -e 's/:/ /g')
     python3config_cmd=$(find $path_split -name "python3*-config" 2>/dev/null)
     if test -z "$python3config_cmd" ; then
@@ -2252,7 +2252,7 @@ check_python() {
         # remove duplicates
         PYTHONFLAGS=$(echo "$(${python3config_cmd} --includes)" | xargs -n1 | sort -u)
         PYTHONLIBS="$(${python3config_cmd} --libs --embed)"
-        result "yes"
+        result "found $python3config_cmd"
     fi
 }
 
