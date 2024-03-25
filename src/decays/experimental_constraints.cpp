@@ -177,53 +177,35 @@ double minChi2SM_lilith(const double mhSM) {
    return my_likelihood;
 }
 #endif
-} // anonymous
 
-EffectiveCoupling_list get_normalized_effective_couplings(
-   EffectiveCoupling_list const& bsm_input,
-   Physical_input const& physical_input,
-   softsusy::QedQcd const& qedqcd,
-   Spectrum_generator_settings const& spectrum_generator_settings,
-   FlexibleDecay_settings const& flexibledecay_settings)
+void set_sm_settings_matching_bsm(
+   standard_model::Standard_model& sm,
+   Spectrum_generator_settings const& spectrum_generator_settings)
 {
-   // make sure we don't compute input for the EFFHIGGSCOUPLINGS block in the
-   // built in SM
-   auto flexibledecay_settings_ = flexibledecay_settings;
+  sm.set_pole_mass_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::pole_mass_loop_order)));
+  sm.set_ewsb_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::ewsb_loop_order)));
+  sm.set_precision(spectrum_generator_settings.get(Spectrum_generator_settings::precision));
+  sm.set_threshold_corrections(spectrum_generator_settings.get_threshold_corrections());
+  sm.set_loop_corrections(spectrum_generator_settings.get_loop_corrections());
+  sm.set_loops(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::beta_loop_order)));
 
-   EffectiveCoupling_list _bsm_input;
-   for (auto const& el : bsm_input) {
+  Loop_corrections loop_corrections_;
+  loop_corrections_.higgs_at_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_at_as);
+  loop_corrections_.higgs_ab_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_ab_as);
+  loop_corrections_.higgs_at_at = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_at_at);
+  loop_corrections_.higgs_atau_atau = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_atau_atau);
+  loop_corrections_.top_qcd = spectrum_generator_settings.get(Spectrum_generator_settings::top_pole_qcd_corrections);
+  loop_corrections_.higgs_at_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at_as2);
+  loop_corrections_.higgs_ab_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_ab_as2);
+  loop_corrections_.higgs_at_at_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at2_as);
+  loop_corrections_.higgs_at_at_at = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at3);
+  loop_corrections_.higgs_at_as_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_4loop_correction_at_as3);
+  sm.set_loop_corrections(loop_corrections_);
 
-      const double mass = el.mass;
-      // in the SM, λ = (mh/v)^2/2
-      // for mh > 700 GeV this gives λ > 4
-      // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
-      // On the other hand there's a problem with finding a SM equivalent of very light states
-      if (mass > 650 || mass < 1) continue;
+  sm.set_threshold_corrections(spectrum_generator_settings.get_threshold_corrections());
+}
 
-      // create a SM equivalent to the BSM model, with mhSM == mass
-      standard_model::Standard_model sm {};
-      Physical_input _physical_input = physical_input;
-      _physical_input.set(Physical_input::mh_pole, mass);
-      sm.set_physical_input(_physical_input);
-      sm.initialise_from_input(qedqcd);
-      sm.set_pole_mass_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::pole_mass_loop_order)));
-      sm.set_ewsb_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::ewsb_loop_order)));
-      sm.set_precision(spectrum_generator_settings.get(Spectrum_generator_settings::precision));
-      sm.set_threshold_corrections(spectrum_generator_settings.get_threshold_corrections());
-      sm.set_loop_corrections(spectrum_generator_settings.get_loop_corrections());
-      sm.set_loops(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::beta_loop_order)));
-      Loop_corrections loop_corrections_;
-      loop_corrections_.higgs_at_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_at_as);
-      loop_corrections_.higgs_ab_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_ab_as);
-      loop_corrections_.higgs_at_at = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_at_at);
-      loop_corrections_.higgs_atau_atau = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_2loop_correction_atau_atau);
-      loop_corrections_.top_qcd = spectrum_generator_settings.get(Spectrum_generator_settings::top_pole_qcd_corrections);
-      loop_corrections_.higgs_at_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at_as2);
-      loop_corrections_.higgs_ab_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_ab_as2);
-      loop_corrections_.higgs_at_at_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at2_as);
-      loop_corrections_.higgs_at_at_at = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_3loop_correction_at3);
-      loop_corrections_.higgs_at_as_as_as = spectrum_generator_settings.get(Spectrum_generator_settings::higgs_4loop_correction_at_as3);
-      sm.set_loop_corrections(loop_corrections_);
+void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double mass, std::string const& name) {
 
       // set SM λ such that mhSM == mass
       auto match_Higgs_mass = [&sm, mass](double x) {
@@ -293,13 +275,44 @@ EffectiveCoupling_list get_normalized_effective_couplings(
       gsl_min_fminimizer_free (sGSL);
 
       if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > mass_precision) {
-         throw std::runtime_error("Higgstools interface: Cannot find a SM equivalent of " + el.particle +
+         throw std::runtime_error("Normalized Higgs effective couplings: Cannot find a SM equivalent of " + name +
                      " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations. "
                      "Mass difference: " + std::to_string(mass) + " GeV (BSM) vs " +
                      std::to_string(sm.get_physical().Mhh) + " GeV (SM) for λSM = " + std::to_string(m) +
                      ". Difference: " + std::to_string(100*diff) + "%. ");
       }
 
+
+}
+} // anonymous
+
+EffectiveCoupling_list get_normalized_effective_couplings(
+   EffectiveCoupling_list const& bsm_input,
+   Physical_input const& physical_input,
+   softsusy::QedQcd const& qedqcd,
+   Spectrum_generator_settings const& spectrum_generator_settings,
+   FlexibleDecay_settings const& flexibledecay_settings)
+{
+   // make sure we don't compute input for the EFFHIGGSCOUPLINGS block in the
+   // built in SM
+   auto flexibledecay_settings_ = flexibledecay_settings;
+
+   EffectiveCoupling_list _bsm_input;
+   for (auto const& el : bsm_input) {
+
+      const double mass = el.mass;
+      // in the SM, λ = (mh/v)^2/2
+      // for mh > 700 GeV this gives λ > 4
+      // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
+      // On the other hand there's a problem with finding a SM equivalent of very light states
+      if (mass > 650 || mass < 1) continue;
+
+      // create a SM equivalent to the BSM model, with mhSM == mass
+      standard_model::Standard_model sm {};
+      set_sm_settings_matching_bsm(sm, spectrum_generator_settings);
+      sm.set_physical_input(physical_input);
+      sm.initialise_from_input(qedqcd);
+      set_sm_lambda_to_match_bsm_mh(sm, mass, el.particle);
       sm.calculate_pole_masses();
 
       if (sm.get_physical().Mhh > 0) {
