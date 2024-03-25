@@ -114,22 +114,23 @@ Optional:
 * FormCalc_ (version 9.8 or higher)
 * GM2Calc_ (version 2.1.0 or higher)
 * LoopTools_ (version 2.8 or higher)
+* HiggsTools_ (version 1.1.4 or higher)
+* Lilith_, requires Python3 development files
 * COLLIER_
-* HiggsTools_
 * Himalaya_
-* Lilith_
 * TSIL_
 
 Installation of required/optional libraries
 -------------------------------------------
 
-The required libraries Boost_, `Eigen 3`_ and `GNU scientific library`_
-can usually be installed via the package manager of the operating system.
+The required libraries Boost_, `Eigen 3`_ and `GNU scientific library`_ and the
+optionally required Python3 development files can usually be installed via the
+package manager of the operating system.
 On Debian/Ubuntu one may run for example
 
 .. code-block:: shell
 
-    sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev
+    sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev python3-dev
 
 The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
 LoopTools_, Himalaya_ and TSIL_ can be also installed using the Conan_
