@@ -5896,6 +5896,9 @@ void CLASSNAME::calculate_hh_decays()
          return effC.particle == field_as_string<hh>({});});
       found->width = decays.get_total_width();
       found->mass = context.physical_mass<hh>({});
+      const auto _indices = concatenate(typename cxx_diagrams::field_indices<hh>::type {}, typename cxx_diagrams::field_indices<hh>::type {}, typename cxx_diagrams::field_indices<hh>::type {}, typename cxx_diagrams::field_indices<hh>::type {});
+      const auto h4vertex = Vertex<hh, hh, hh, hh>::evaluate(_indices, context);
+      found->lam = std::real(h4vertex.value());
    }
 }
 

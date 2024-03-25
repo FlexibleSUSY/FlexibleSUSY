@@ -71,29 +71,30 @@ private:
 };
 
 struct NeutralHiggsEffectiveCouplings {
-   std::string particle;
-   int pdgid = 0;
-   double mass = 0.;
-   double width = 0.;
-   double width_sm = 0.;
-   int CP = 0;
-   std::complex<double> dd = 0.;
-   std::complex<double> uu = 0.;
-   std::complex<double> ss = 0.;
-   std::complex<double> cc = 0.;
-   std::complex<double> bb = 0.;
-   std::complex<double> tt = 0.;
-   std::complex<double> ee = 0.;
-   std::complex<double> mumu = 0.;
-   std::complex<double> tautau = 0.;
-   std::complex<double> emu = 0.;
-   std::complex<double> etau = 0.;
-   std::complex<double> mutau = 0.;
-   double WW = 0.;
-   double ZZ = 0.;
-   double Zgam = 0.;
-   double gamgam = 0.;
-   double gg = 0.;
+   std::string particle {};
+   int pdgid {};
+   double mass {};
+   double width {};
+   double width_sm {};
+   int CP {};
+   std::complex<double> dd {};
+   std::complex<double> uu {};
+   std::complex<double> ss {};
+   std::complex<double> cc {};
+   std::complex<double> bb {};
+   std::complex<double> tt {};
+   std::complex<double> ee {};
+   std::complex<double> mumu {};
+   std::complex<double> tautau {};
+   std::complex<double> emu {};
+   std::complex<double> etau {};
+   std::complex<double> mutau {};
+   double WW {};
+   double ZZ {};
+   double Zgam {};
+   double gamgam {};
+   double gg = {};
+   double lam {};
 };
 
 class EffectiveCoupling_list {

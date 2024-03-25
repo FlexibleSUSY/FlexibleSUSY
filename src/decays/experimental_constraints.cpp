@@ -332,6 +332,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
          _coups.Zgam = std::abs(sm_input[0].Zgam)     > 0 ? el.Zgam/sm_input[0].Zgam     : 0.;
          _coups.gg = std::abs(sm_input[0].gg)         > 0 ? el.gg/sm_input[0].gg         : 0.;
 
+         _coups.lam = std::abs(sm_input[0].lam)       > 0 ? el.lam/sm_input[0].lam       : 0.;
          _bsm_input.push_back(std::move(_coups));
       }
    }
@@ -389,6 +390,8 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       effc.gamgam = el.gamgam;
       effc.Zgam = el.Zgam;
       effc.gg = el.gg;
+
+      effc.lam = el.lam;
 
       effectiveCouplingInput(s, effc, refModel, calcggH, calcHgamgam);
 

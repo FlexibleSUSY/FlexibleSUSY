@@ -995,6 +995,9 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   (* 1 == even, -1 == odd, 0 == undefined - see test/test_HiggsTools_CP.cpp *)
                   "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, 1], -1] <> ";\n" <>
                   "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n"] <>
+                  "const auto _indices = concatenate(" <> StringRiffle[Table["typename cxx_diagrams::field_indices<" <> ToString@particle <> ">::type {" <> If[particleDim > 1, "gI1", ""] <> "}", {i, 4}], ", "] <> ");\n" <>
+                  "const auto h4vertex = Vertex<" <> StringRiffle[Table[ToString@particle, {i, 4}], ", "] <> ">::evaluate(_indices, context);\n" <>
+                  "found->lam = std::real(h4vertex.value());\n" <>
                   "}\n"],
                   ""
                   ];
