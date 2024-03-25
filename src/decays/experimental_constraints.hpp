@@ -49,8 +49,16 @@ EffectiveCoupling_list get_normalized_effective_couplings(
   Spectrum_generator_settings const& spectrum_generator_settings,
   FlexibleDecay_settings const& flexibledecay_settings);
 
+struct SignalResult {
+   std::size_t ndof {};
+   double mhRef {};
+   double chi2BSM {};
+   // SM chi2 for Physical_input::mh_pole
+   double chi2SM {};
+};
+
 #ifdef ENABLE_HIGGSTOOLS
-std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
+std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const&,
    Physical_input const&,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);
@@ -60,7 +68,7 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
  *  @return pair containit -2 log likelihood and number of degrees of freedom
  */
 #ifdef ENABLE_LILITH
-std::optional<std::tuple<double, double, int, std::string>>
+std::optional<SignalResult>
 call_lilith(EffectiveCoupling_list const&, Physical_input const&, std::string const&);
 #endif
 

@@ -1027,14 +1027,14 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
-void SLHA_io::set_hs_or_lilith(std::string const& block_name, const int ndof, const double chi2, const double chi2SMmin, std::string const& tag)
+void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t ndof, const double chi2, const double chi2SMmin, const double mhSM)
 {
    std::ostringstream ss;
 
    ss << block_head(block_name, 0.0);
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
-   ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + tag + " GeV");
+   ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + std::to_string(mhSM) + " GeV");
    boost::math::chi_squared dist(2);
    const double pval = chi2<chi2SMmin ? 1 : boost::math::cdf(complement(dist, chi2-chi2SMmin));
    // SLHA doesn't print nicelly numbers with 3 digit exponent

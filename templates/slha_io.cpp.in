@@ -490,9 +490,9 @@ void @ModelName@_slha_io::set_normalized_effectivecouplings_block(const Effectiv
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
 
-void @ModelName@_slha_io::set_hs_or_lilith(std::string const& block_name, const int ndof, const double chi2, const double chi2SMmin, std::string const& tag)
+void @ModelName@_slha_io::set_hs_or_lilith(std::string const& block_name, const int ndof, const double chi2, const double chi2SMmin, const double mhSM)
 {
-   slha_io.set_hs_or_lilith(block_name, ndof, chi2, chi2SMmin, tag);
+   slha_io.set_hs_or_lilith(block_name, ndof, chi2, chi2SMmin, mhSM);
 }
 
 void @ModelName@_slha_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& hb)

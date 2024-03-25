@@ -70,7 +70,7 @@ constexpr double relMassError = 0.03;
 // Ref. model for computing brs and xsections on the HiggsTools side
 constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
-double minChi2SM(const double mhSM, std::string const& higgssignals_dataset) {
+double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) {
    const auto signals = Higgs::Signals {higgssignals_dataset};
 
    auto pred = Higgs::Predictions();
@@ -103,11 +103,12 @@ void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
    std::cout << "gamgam " << effC.gamgam << std::endl;
    std::cout << "Zgam   " << effC.Zgam << std::endl;
    std::cout << "gg     " << effC.gg << std::endl;
+   std::cout << "lam     " << effC.lam << std::endl;
 }
 #endif
 
 #ifdef ENABLE_LILITH
-double minChi2SM_Lilith(const double mhSM) {
+double minChi2SM_lilith(const double mhSM) {
 
    Py_Initialize();
    char experimental_input[] = "";
@@ -339,7 +340,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 }
 
 #ifdef ENABLE_HIGGSTOOLS
-std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
+std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const& bsm_input,
    Physical_input const& physical_input,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
@@ -421,18 +422,21 @@ std::tuple<int, double, double, std::string, std::vector<std::tuple<int, double,
    //}
    const double hs_chisq = signals(pred);
 
-   auto smChi2 = minChi2SM(physical_input.get(Physical_input::mh_pole), higgssignals_dataset);
-   return {signals.observableCount(), hs_chisq, smChi2, std::to_string(physical_input.get(Physical_input::mh_pole)), hb_return};
+   const double mhSMref = physical_input.get(Physical_input::mh_pole);
+
+   auto smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
+
+   return {{signals.observableCount(), mhSMref, hs_chisq, smChi2}, hb_return};
 }
 #endif
 
 #ifdef ENABLE_LILITH
-std::optional<std::tuple<double, double, int, std::string>> call_lilith(
+std::optional<SignalResult> call_lilith(
    EffectiveCoupling_list const& bsm_input,
    Physical_input const& physical_input,
    std::string const& lilith_db) {
 
-   // Lilith requires mass to be within [123, 128]
+   // Lilith requires Higgs mass to be in range [123, 128]
    bool higgs_in_range = false;
    for (auto const& el : bsm_input) {
       const double mh = el.mass;
@@ -524,18 +528,23 @@ std::optional<std::tuple<double, double, int, std::string>> call_lilith(
     sprintf(buffer,"</lilithinput>\n");
     strcat(XMLinputstring, buffer);
 
-    // Reading user input XML string
+    // reading user input XML string
     lilith_readuserinput(lilithcalc, XMLinputstring);
 
-    // Getting -2LogL
+    // getting -2*log(L)
     const double my_likelihood = lilith_computelikelihood(lilithcalc);
 
-    // Getting exp_ndf
-    const int exp_ndf = lilith_exp_ndf(lilithcalc);
+    // getting ndf
+    const std::size_t exp_ndf = static_cast<std::size_t>(lilith_exp_ndf(lilithcalc));
 
-    const double sm_likelihood = minChi2SM_Lilith(physical_input.get(Physical_input::mh_pole));
+    const double mhSMref = physical_input.get(Physical_input::mh_pole);
+
+    const double sm_likelihood = minChi2SM_lilith(mhSMref);
+
     Py_Finalize();
-    return {{my_likelihood, sm_likelihood, exp_ndf, std::to_string(physical_input.get(Physical_input::mh_pole))}};
+
+    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood};
+    return res;
 }
 #endif
 

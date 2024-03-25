@@ -107,17 +107,11 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
 
    EffectiveCoupling_list effc {};
 #ifdef ENABLE_HIGGSTOOLS
-   int higgssignals_ndof = -1;
-   double higgssignals_chi2 = NAN;
-   double higgssignals_chi2min = NAN;
-   std::string tag;
+   SignalResult hs {};
    std::vector<std::tuple<int, double, double, std::string>> higgsbounds_v = {};
 #endif
 #ifdef ENABLE_LILITH
-   double lilith_likelihood;
-   double lilith_sm_likelihood;
-   double lilith_ndof = -1;
-   std::string lilith_tag;
+   std::optional<SignalResult> lilith;
 #endif
 @calculateDecaysForModel@
 
