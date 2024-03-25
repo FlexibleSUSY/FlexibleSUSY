@@ -2636,7 +2636,8 @@ RunEnabledSpectrumGenerator[solver_] :=
                         If[FSCalculateDecays, "flexibledecay_settings, ", ""] <>
                         "slha_output_file,\n"]
                   <> IndentText["database_output_file, spectrum_file, rgflow_file, higgsbounds_dataset, higgssignals_dataset, lilith_db);\n"]
-                  <> "if (!exit_code || solver_type != 0) break;\n";
+                  <> "if (!exit_code || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
           ];
@@ -2646,7 +2647,8 @@ ScanEnabledSpectrumGenerator[solver_] :=
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "result = run_parameter_point<" <> class <> ">(loop_library, qedqcd, input);\n"
-                  <> "if (!result.problems.have_problem() || solver_type != 0) break;\n";
+                  <> "if (!result.problems.have_problem() || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[IndentText[result]]] <> "\n"
           ];
@@ -2656,7 +2658,8 @@ RunCmdLineEnabledSpectrumGenerator[solver_] :=
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "exit_code = run_solver<" <> class <> ">(loop_library,input);\n"
-                  <> "if (!exit_code || solver_type != 0) break;\n";
+                  <> "if (!exit_code || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
           ];
@@ -2859,7 +2862,8 @@ RunEnabledModelType[solver_] :=
            body = "spectrum.reset(new " <> FlexibleSUSY`FSModelName <>
                   "_spectrum_impl<" <> class <> ">());\n"
                   <> "spectrum->calculate_spectrum(settings, modsel, qedqcd, input);\n"
-                  <> "if (!spectrum->get_problems().have_problem() || solver_type != 0) break;\n";
+                  <> "if (!spectrum->get_problems().have_problem() || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
           ];

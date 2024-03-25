@@ -176,7 +176,7 @@ public:
    virtual double get_model_scale() const override { return std::get<0>(models).get_scale(); }
    virtual const @ModelName@_observables& get_observables() const override { return observables; }
 @getSpectrumDecays@
-   virtual const UnitarityInfiniteS& get_unitarity() const { return unitarityData; };
+   virtual const UnitarityInfiniteS& get_unitarity() const override { return unitarityData; };
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
