@@ -20,23 +20,13 @@
 
 *)
 
-WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
-Global`time = AbsoluteTime[];
-Off[Susyno`LieGroups`dims];(*hide complainings from Susyno`LieGroups`dims*)
-Needs["FlexibleSUSY`"];
-
 (*INITIALIZATION***************************************************************)
-workingDirectory = Directory[];
-SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
-SARAH`SARAH[InputDirectories] =
-{
-   FileNameJoin@{workingDirectory, "sarah"},
-   ToFileName@{$sarahDir, "Models"}
-};
+Global`time = AbsoluteTime[];
+Get@"utils/load-FlexibleSUSY.m";
 
 Start@"SM";
 
-modelFile = FileNameJoin@{workingDirectory, "models", "SM", "FlexibleSUSY.m"};
+modelFile = FileNameJoin@{Directory[], "models", "SM", "FlexibleSUSY.m"};
 
 FlexibleSUSY`LoadModelFile@modelFile;
 FlexibleSUSY`Private`PrepareUnrotatedParticles@FSEigenstates;
@@ -53,14 +43,19 @@ Selfenergy = NPointFunctions`NPointFunction[
    {SARAH`DownQuark}, {SARAH`DownQuark},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
+   NPointFunctions`KeepProcesses -> {NPointFunctions`Irreducible},
+   NPointFunctions`LoopLevel -> 1,
+   NPointFunctions`Regularize -> FlexibleSUSY`FSRenormalizationScheme,
+   NPointFunctions`OnShellFlag -> True,
+   NPointFunctions`Observable -> None
+];
 
 ChiralBasis =
    {
       "value_right"->
-      NPointFunctions`internal`dc[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
+      NPointFunctions`DiracChain[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
       "value_left"->
-      NPointFunctions`internal`dc[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
+      NPointFunctions`DiracChain[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
    };
 
 (*the only purpose of the following is to replace GenericSum[_,_] to GenericSum[{__},_]*)
@@ -98,17 +93,17 @@ If[newVertices==={},
 
 (*CODE REPLACEMENTS************************************************************)
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
-   FileNameJoin@{workingDirectory, "test", "test_SM_matching_selfenergy_Fd.cpp.in"}],
+   FileNameJoin@{Directory[], "test", "test_SM_matching_selfenergy_Fd.cpp.in"}],
    "\n"];
 code = StringReplace[templateCode,
    {
       "@NPointFunctions_Selfenergy_Fd_1loop@" -> FdSelfenergyCode,
-      "@NPointFunctions_Headers@" -> CreateCXXHeaders[],
+      "@NPointFunctions_Headers@" -> NPointFunctions`CreateCXXHeaders[],
       "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
       "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
 }];
 
-fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_SM_matching_selfenergy_Fd.cpp"};
+fileHandle = OpenWrite@FileNameJoin@{Directory[], "test", "test_SM_matching_selfenergy_Fd.cpp"};
 fileHandle ~ WriteString ~ code;
 Close@fileHandle;
 WriteString[OutputStream["stdout",1],#]&@StringJoin[

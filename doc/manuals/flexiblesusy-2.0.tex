@@ -609,7 +609,7 @@ $ tar -xf FlexibleSUSY-2.0.1.tar.gz
 $ cd FlexibleSUSY-2.0.1
 \end{lstlisting}%% $
 %
-\fstwo is distributed with a huge selection of predefined ``models'', 
+\fstwo is distributed with a huge selection of predefined ``models'',
 including several MSSM and NMSSM scenarios such as the CMSSM (called
 \modelname{CMSSM}), high-scale SUSY and split-SUSY (called \HSSUSY and
 \modelname{SplitMSSM}; these  models have been created for
@@ -619,9 +619,9 @@ distribution also contains BSM models such as the
 $R$-symmetric MSSM (\modelname{MRSSM}; for a definition of the model
 see Ref.~\cite{Kribs:2007ac}), the NUHM \ESSM
 (\modelname{E6SSM}, see \cite{King:2005jy,King:2005my,Athron:2010zz,
-  Athron:2009ue,Athron:2009bs,Athron:2007en}) and the two-Higgs 
+  Athron:2009ue,Athron:2009bs,Athron:2007en}) and the two-Higgs
 doublet model type II
-(\modelname{THDMII}).  See the 
+(\modelname{THDMII}).  See the
 contents of \code{model_files/} for all predefined model files.
 
 A spectrum generator for any of these models can be built with just
@@ -1228,19 +1228,19 @@ UseHiggs3LoopSM = True;
 %
 The 2-loop and 3-loop
 contributions enter the mass of the Higgs boson as
-\begin{align} 
+\begin{align}
  \begin{split}
    M_h^2 &= m_h^2 + (\Delta m_h^2)_{1L}(p^2)
    + (\Delta m_h^2)_{2L}(p^2) +(\Delta m_h^2)_{3L} \,,
  \end{split} \label{eq:Mh_polp^2}
 \end{align}
-where $m_h^2$ and $(\Delta m_h)_{1L}(p^2)$ correspond to the tree-level 
+where $m_h^2$ and $(\Delta m_h)_{1L}(p^2)$ correspond to the tree-level
 and a 1-loop expression, respectively.
 The enabled 2-loop SM contributions of
 $O(\at^2 + \at \as)$ to the Higgs mass read
 %
 \begin{align}
-  (\Delta m_h^2)_{2L}(p^2) &= (\Delta m_h^2)_{2L}^{(\at^2)} + 
+  (\Delta m_h^2)_{2L}(p^2) &= (\Delta m_h^2)_{2L}^{(\at^2)} +
      (\Delta m_h^2)_{2L}^{(\at\as)}(p^2) \,, \\
   (\Delta m_h^2)_{2L}^{(\at^2)} &=
   \frac{2 t}{(4\pi)^4} \left[
@@ -1258,22 +1258,22 @@ $O(\at^2 + \at \as)$ to the Higgs mass read
 \end{align}
 %
 In Eqs.~\eqref{eq:2L_Mh_atat} ff.\ the abbreviations $t \equiv m_t^2$
-and $\barlog(t) \equiv \log(t/Q^2)$ have been used for brevity, 
-analogous to the notation of Ref.~\cite{Martin:2014cxa}, where $m_t$ 
-is the \MSbar top mass in the SM\@. 
-By performing a momentum iteration in the computation of the Higgs 
-pole mass, the momentum entering the 1-loop self energy in 
-Eq.~\eqref{eq:Mh_polp^2} consists of a tree-level part and a loop 
+and $\barlog(t) \equiv \log(t/Q^2)$ have been used for brevity,
+analogous to the notation of Ref.~\cite{Martin:2014cxa}, where $m_t$
+is the \MSbar top mass in the SM\@.
+By performing a momentum iteration in the computation of the Higgs
+pole mass, the momentum entering the 1-loop self energy in
+Eq.~\eqref{eq:Mh_polp^2} consists of a tree-level part and a loop
 correction.
-In combination with Eq.~\eqref{eq:2L_Mh_atat}, the latter yields the 
-complete Higgs mass contribution at $O(\at^2 t)$ which is identical 
+In combination with Eq.~\eqref{eq:2L_Mh_atat}, the latter yields the
+complete Higgs mass contribution at $O(\at^2 t)$ which is identical
 to the corresponding correction given in Ref.~\cite{Degrassi:2012ry}.
 The 2-loop self energy at $O(\at\as)$ \cite{Martin:2014cxa} together
 with the occurring integral functions from Ref.~\cite{Martin:2003qz}
 have been evaluated for a small external momentum argument. Neglecting
 higher orders, the expansion in powers of the momentum over the \MSbar
-top mass up to $O(p^4/t)$ results in the Eq.~\eqref{eq:2L_Mh_atas}. 
-Note that the momentum dependence is included in the 2-loop expression 
+top mass up to $O(p^4/t)$ results in the Eq.~\eqref{eq:2L_Mh_atas}.
+Note that the momentum dependence is included in the 2-loop expression
 in order to generate implicit 3-loop $O(\at^2\as)$ terms.
 %
 The explicit 3-loop effective potential contributions of
@@ -6042,7 +6042,7 @@ Block FlexibleSUSY
    12   0            # force output
    13   1            # Top quark 2L corrections QCD
    14   1e-11        # beta-function zero threshold
-   15   0            # calculate observables (a_muon, ...)
+   15   0            # calculate all observables
    16   0            # force positive majorana masses
    17   0            # pole mass renormalization scale (0 = SUSY scale)
    18   0            # pole mass renormalization scale in the EFT

@@ -27,6 +27,7 @@
 #include "decays/flexibledecay_problems.hpp"
 #include "slha_io.hpp"
 #include "for_each.hpp"
+#include "observables/l_to_l_conversion/settings.hpp"
 #include "decays/decay.hpp"
 #include "decays/flexibledecay_settings.hpp"
 
@@ -69,6 +70,7 @@ public:
    void fill(@ModelName@_slha&) const;
    void fill(Physical_input&) const;
    void fill(Spectrum_generator_settings&) const;
+   void fill(LToLConversion_settings&) const;
    void fill(FlexibleDecay_settings&) const;
    double get_parameter_output_scale() const;
    const SLHA_io& get_slha_io() const { return slha_io; }
@@ -87,6 +89,7 @@ public:
    void set_modsel(const SLHA_io::Modsel&);
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);
+   void set_LToLConversion_settings(const LToLConversion_settings&);
    void set_FlexibleDecay_settings(const FlexibleDecay_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    template <class... Ts> void set_spectrum(const std::tuple<Ts...>&);

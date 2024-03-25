@@ -1,11 +1,26 @@
-FlexibleSUSY 2.8.0 [X, X X]
-==================================
+FlexibleSUSY 2.9.0
+==================
+
+New features
+
+* Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
+  over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
+
+FlexibleSUSY 2.8.0 [February, 23 2024]
+======================================
 
 New features
 ------------
 
-* Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
-  over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
+* Added an option to calculate new, user defined observables using
+  NPointFunctions module [`2402.14630 <https://arxiv.org/abs/2402.14630>`_].
+  Example application is the calculation of leptonic processes :math:`$l \to
+  l'$` conversion in the nuclei and :math:`$l \to 3l'$` decay, which now can be
+  trivially enabled in all supported models. In general, NPointFunctions allows
+  to compute tree-level and loop amplitudes from within FlexibleSUSY and employ
+  them in the calculation of a user-requested observable. Potential further
+  applications include calculation of amplitudes relevant to :math:`$B_s \to
+  \mu^+ \mu^-$` or Higgs boson decays.
 
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
@@ -61,9 +76,9 @@ Fixed bugs
   (see Eq. 20 of `2106.05038 <https://arxiv.org/abs/2106.05038>`_). Numerical
   impact negligible.
 
-* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` where not applied.
+* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` were not applied.
 
-* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses where computed
+* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses were computed
   incorectly for Higgses lighter than respective Goldstone bosons.
 
 FlexibleSUSY 2.7.1 [June, 07 2022]

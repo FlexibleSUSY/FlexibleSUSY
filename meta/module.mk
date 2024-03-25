@@ -71,13 +71,11 @@ META_SRC     := \
 		$(DIR)/Decays.m \
 		$(DIR)/GM2Calc.m \
 		$(DIR)/NPointFunctions.m \
-		$(DIR)/NPointFunctions/internal.m \
-		$(DIR)/NPointFunctions/createFAModelFile.m \
+		$(wildcard $(DIR)/NPointFunctions/*.m) \
+		$(wildcard $(DIR)/Observables/*/*.m) \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
-		$(DIR)/FToFConversionInNucleus.m \
-		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \

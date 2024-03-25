@@ -25,14 +25,14 @@ BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Param
 (* observables *)
 Begin["FlexibleSUSYObservable`"];
 FSObservables = { AMM, AMMUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
-                  EDM, BrLToLGamma, bsgamma };
-
-If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-   AppendTo[FSObservables, FToFConversionInNucleus]
-];
-
+                  EDM, bsgamma};
 End[];
 
+DefineObservable::usage="Defines all C++ names for an observable";
+GetObservablesHeaders::usage="Return the names of C++ headers with #include";
+GetObservableNamespace::usage="Return the C++ context name of an observable";
+GetObservableFileName::usage="Returns the C++ file name of a given observable";
+GetObservablePrototype::usage="Returns the C++ prototype as string";
 GetRequestedObservables::usage="";
 CountNumberOfObservables::usage="";
 CreateObservablesDefinitions::usage="";
@@ -54,17 +54,6 @@ IsObservable[sym_] :=
 GetRequestedObservables[blocks_] :=
     Module[{observables, dim, test},
            observables = DeleteDuplicates[Cases[blocks, a_?IsObservable :> a, {0, Infinity}]];
-           test = Complement[
-              Cases[observables, _FlexibleSUSYObservable`BrLToLGamma],
-              Cases[observables, FlexibleSUSYObservable`BrLToLGamma[fin_?IsLepton -> {fout_?IsLepton, vout_ /; vout === GetPhoton[]}]]
-                 ];
-           If[test =!= {},
-              Utils`FSFancyWarning[
-                 "BrLToLGamma function works only for leptons and a photon.",
-                 " Removing requested process(es): ", test
-              ];
-              observables = Complement[observables, test];
-           ];
            observables
           ];
 
@@ -76,9 +65,7 @@ GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := "a_muo
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := "a_muon_gm2calc_uncertainty";
 GetObservableName[FlexibleSUSYObservable`EDM[p_[idx_]]] := GetObservableName[FlexibleSUSYObservable`EDM[p]] <> "_" <> ToString[idx];
 GetObservableName[FlexibleSUSYObservable`EDM[p_]]       := "edm_" <> CConversion`ToValidCSymbolString[p];
-GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[idxOut_], spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
-GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
-GetObservableName[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_in_" <> ToString@nucleus;
+
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "b_to_s_gamma";
 
 GetObservableDescription[FlexibleSUSYObservable`AMM[p_[idx_]]] := "Delta(g-2)/2 of " <> CConversion`ToValidCSymbolString[p] <> "(" <> ToString[idx+1] <> ") (calculated with FlexibleSUSY)";
@@ -89,22 +76,7 @@ GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] :=
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := "uncertainty of (g-2)/2 of the muon (calculated with GM2Calc)";
 GetObservableDescription[FlexibleSUSYObservable`EDM[p_[idx_]]] := "electric dipole moment of " <> CConversion`ToValidCSymbolString[p] <> "(" <> ToString[idx+1] <> ") [1/GeV]";
 GetObservableDescription[FlexibleSUSYObservable`EDM[p_]]       := "electric dipole moment of " <> CConversion`ToValidCSymbolString[p] <> " [1/GeV]";
-GetObservableDescription[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] :=
-   "BR(" <> CConversion`ToValidCSymbolString[pIn] <> " -> " <>
-   CConversion`ToValidCSymbolString[pOut] <> " " <>
-   CConversion`ToValidCSymbolString[V] <> ")"  ;
-GetObservableDescription[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[idxOut_], V_}]] :=
-   "BR(" <> CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> " -> " <>
-      CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> " " <>
-       CConversion`ToValidCSymbolString[V] <> ")"  ;
-GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nuc_]] :=
-   "CR(" <> CConversion`ToValidCSymbolString[pIn] <> " -> " <>
-      CConversion`ToValidCSymbolString[pOut] <> ", " <>
-      ToString[nuc] <> ")/capture rate";
-GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nuc_]] :=
-   "CR(" <> CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> " -> " <>
-   CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> ", " <>
-      ToString[nuc] <> ")/capture rate";
+
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "calculates the Wilson coefficients C7 and C8 for b -> s gamma";
 
 GetObservableType[FlexibleSUSYObservable`AMM[_]] := CConversion`ScalarType[CConversion`realScalarCType];
@@ -112,8 +84,7 @@ GetObservableType[FlexibleSUSYObservable`AMMUncertainty[_]] := CConversion`Scala
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[FlexibleSUSYObservable`EDM[p_]] := CConversion`ScalarType[CConversion`realScalarCType];
-GetObservableType[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] := CConversion`ScalarType[CConversion`realScalarCType];
-GetObservableType[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], _]] := CConversion`ScalarType[CConversion`realScalarCType];
+
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := CConversion`ScalarType[CConversion`realScalarCType];
 
 CountNumberOfObservables[observables_List] :=
@@ -241,42 +212,6 @@ CalculateObservable[FlexibleSUSYObservable`EDM[p_[idx_]], structName_String] :=
            FlexibleSUSY`FSModelName <> "_edm::calculate_edm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd, " <> idxStr <> ");"
           ];
 
-CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
-    spec = CConversion`ToValidCSymbolString[spectator]},
-           structName <> ".LToLGamma0(" <> pInStr <> ", " <> pOutStr <> ", " <> spec <> ") = " <>
-           FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> spec <> "(MODEL, qedqcd, physical_input);"
-          ];
-
-CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[idxOut_], spectator_}], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn],
-            pOutStr = CConversion`ToValidCSymbolString[pOut],
-            idxInStr = ToString[idxIn],
-            idxOutStr = ToString[idxOut],
-            specStr = ToString[spectator]
-    },
-           structName <> ".LToLGamma1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> specStr <> ") = " <>
-           FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> specStr <> "(" <> idxInStr <> ", " <> idxOutStr <> ", MODEL, qedqcd, physical_input);"
-          ];
-
-CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nucleai_], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
-    nuc = CConversion`ToValidCSymbolString[nucleai]},
-           structName <> ".FToFConversion0(" <> pInStr <> ") = " <>
-           FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(MODEL);"
-          ];
-
-CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn],
-            pOutStr = CConversion`ToValidCSymbolString[pOut],
-            idxInStr = ToString[idxIn],
-            idxOutStr = ToString[idxOut],
-            nucleiStr = ToString[nucleus]
-    },
-           structName <> ".FToFConversion1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> nucleiStr <> ", " <> "qedqcd) = " <>
-           FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(" <> idxInStr <> ", " <> idxOutStr <> ", "<> FlexibleSUSY`FSModelName <> "_f_to_f_conversion::Nucleus::" <> nucleiStr <> ", MODEL, qedqcd);"
-          ];
-
 (* TODO: move Wilson Coefficients to a different block *)
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`bsgamma, structName_String] :=
     structName <> ".BSGAMMA = Re(" <> FlexibleSUSY`FSModelName <> "_b_to_s_gamma::calculate_b_to_s_gamma(MODEL, qedqcd)[0]);";
@@ -299,6 +234,124 @@ CalculateObservables[something_, structName_String] :=
            Utils`StringJoinWithSeparator[CalculateObservable[#,structName]& /@ observables, "\n"]
           ];
 
-End[];
+Options@DefineObservable = {
+   InsertionFunction -> CConversion`ToValidCSymbolString,
+   GetObservableType -> Unset,
+   GetObservableName -> Unset,
+   GetObservablePrototype -> Unset,
+   GetObservableDescription -> Unset,
+   CalculateObservable -> Unset,
+   GetObservableFileName -> Unset,
+   GetObservableNamespace -> Unset
+};
 
+DefineObservable[obs_@pattern___, OptionsPattern[]] :=
+Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
+      obsStr = SymbolName@obs, extraCalc, nameAux, specialWords},
+   warn := Utils`FSFancyWarning[#," for ", ToString@obs, " might not be specified."]&;
+   extraCalc := StringReplace[#, "$(" ~~ Shortest[x__] ~~ ")" :> ToString@ToExpression[x]]&;
+
+   stringPattern = ToString@FullForm@{pattern};
+   patternNames = DeleteDuplicates@StringCases[stringPattern, "Pattern[" ~~ Shortest@x__ ~~ "," :> x];
+   uniqueNames = Unique[#<>"$"]&/@patternNames;
+
+   lhsRepl = MapThread[Rule, {patternNames, ToString/@uniqueNames}];
+   rhsRepl = MapThread[
+      RuleDelayed[#1, OptionValue[InsertionFunction]@#2]&,
+      {patternNames, uniqueNames}
+   ];
+
+   nameAux = StringReplace[obsStr, nums___?DigitQ ~~ x_?UpperCaseQ :> "_" <> nums <> ToLowerCase[x]];
+   Switch[OptionValue[GetObservableFileName],
+      Unset,
+         GetObservableFileName[obs | obsStr]  = StringDrop[nameAux, 1];,
+      _String,
+         GetObservableFileName[obs | obsStr]  = OptionValue@GetObservableFileName;
+   ];
+   Switch[OptionValue[GetObservableNamespace],
+      Unset,
+         GetObservableNamespace[obs | obsStr] = OptionValue[InsertionFunction][FlexibleSUSY`FSModelName <> nameAux];,
+      _String,
+         GetObservableNamespace[obs | obsStr] = OptionValue[InsertionFunction][FlexibleSUSY`FSModelName <> "_" <> OptionValue@GetObservableNamespace];
+   ];
+
+   specialWords = {
+      "auto model" -> OptionValue[InsertionFunction]["const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model"],
+      "auto qedqcd" -> OptionValue[InsertionFunction]["const softsusy::QedQcd& qedqcd"],
+      "context" -> GetObservableNamespace[obs]
+   };
+   rhsRepl = Join[rhsRepl, specialWords];
+
+   With[{args = Sequence@@ToExpression@StringReplace[stringPattern, lhsRepl],
+         repl = rhsRepl,
+         name = If[# === Unset, ToLowerCase@SymbolName@obs <> "_" <> StringRiffle[patternNames, "_"], #] &@ OptionValue@GetObservableName,
+         description = OptionValue@GetObservableDescription,
+         type = OptionValue@GetObservableType,
+         calculate = OptionValue@CalculateObservable,
+         prototype = OptionValue@GetObservablePrototype
+      },
+      AppendTo[FlexibleSUSYObservable`FSObservables, obs];
+
+      GetObservableName@obs@args := extraCalc@StringReplace[name, repl];
+
+      Switch[type,
+         Unset,
+            warn@"GetObservableType",
+         {_Integer},
+            GetObservableType@obs@args :=
+               CConversion`ArrayType[CConversion`complexScalarCType, First@type],
+         _,
+            GetObservableType@obs@args := type
+      ];
+
+      Switch[description,
+         Unset,
+            GetObservableDescription@obs@args := StringReplace[extraCalc@StringReplace[name, repl], "_" -> " "];,
+         _String,
+            GetObservableDescription@obs@args := extraCalc@StringReplace[description, repl];
+      ];
+
+      If[prototype === Unset,
+         warn@"GetObservablePrototype";,
+         Module[{nameStr, argStr},
+            nameStr = StringReplace[prototype, Longest["(" ~~ s___ ~~ ")"]  :> (argStr = s; "")];
+            argStr = StringReplace[argStr, specialWords];
+            GetObservablePrototype@obs@args := extraCalc@StringReplace[nameStr, repl] <> "(" <> argStr <> ")";
+         ];
+      ];
+
+      Switch[calculate,
+         Unset,
+            Module[{nameStr, argStr, removeSub, newCalculate, niceStr = {}},
+               nameStr = StringReplace[prototype, Longest["(" ~~ s___ ~~ ")"]  :> (argStr = s; "")];
+               removeSub[pair_] := StringReplace[#, Longest[StringTake[pair, 1] ~~ ___ ~~ StringTake[pair, -1]] :> " "]&;
+               (argStr = FixedPoint[removeSub@#, argStr]) &/@ {"()" , "[]", "{}", "<>"};
+               argStr = StringReverse@StringReplace[argStr <> ",", {"&" -> " ", Whitespace ~~ "," :> ","}];
+               StringReplace[argStr, Shortest["," ~~ x__ ~~ Whitespace] :> (AppendTo[niceStr, StringReverse[x]]; "")];
+               newCalculate = nameStr <> "(" <> StringRiffle[Reverse@niceStr, ", "] <> ")";
+
+               CalculateObservable[obs@args, structName:_String] :=
+                  structName <> "." <> StringReplace[name, repl] <>
+                  extraCalc@StringReplace[" = context::"<>newCalculate<>";", repl];
+            ];,
+         _String,
+            CalculateObservable[obs@args, structName:_String] :=
+               structName <> "." <> StringReplace[name, repl] <>
+               extraCalc@StringReplace[" = context::"<>calculate<>";", repl];
+      ];
+   ];
+];
+Utils`MakeUnknownInputDefinition@DefineObservable;
+
+GetObservablesHeaders[] =
+Module[{files, obs},
+   files = Utils`DynamicInclude@$observablesWildcard@"Observables.m";
+   obs = StringSplit[files, $PathnameSeparator][[All, -2]];
+   StringRiffle[
+      "#include \"observables/"<>FlexibleSUSY`FSModelName<>"_"<>Observables`GetObservableFileName@#<>".hpp\""&/@obs,
+      "\n"
+   ]
+];
+
+End[];
 EndPackage[];
