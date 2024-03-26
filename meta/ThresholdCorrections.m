@@ -499,21 +499,21 @@ const auto get_mw_pole = [&] () {
    return mw_pole;
 };
 
-" <> FlexibleSUSY`FSModelName <> "_weinberg_angle::Sm_parameters sm_pars;
-sm_pars.fermi_constant = qedqcd.displayFermiConstant();
-sm_pars.mw_pole = get_mw_pole();
-sm_pars.mz_pole = qedqcd.displayPoleMZ();
-sm_pars.mt_pole = qedqcd.displayPoleMt();
-sm_pars.mh_pole = get_mh_pole();
-sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
-sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
-sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
-sm_pars.higgs_index = higgs_idx;
+" <> FlexibleSUSY`FSModelName <> "_weinberg_angle::Parameters parameters;
+parameters.fermi_constant = qedqcd.displayFermiConstant();
+parameters.mw_pole = get_mw_pole();
+parameters.mz_pole = qedqcd.displayPoleMZ();
+parameters.mt_pole = qedqcd.displayPoleMt();
+parameters.mh_pole = get_mh_pole();
+parameters.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+parameters.alpha_s_mz = qedqcd.displayAlphaSInput();
+parameters.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+parameters.higgs_index = higgs_idx;
 
 const int number_of_iterations =
     std::max(20, static_cast<int>(std::abs(-log10(MODEL->get_precision()) * 10)));
 
-" <> FlexibleSUSY`FSModelName <> "_weinberg_angle weinberg(MODEL, sm_pars);
+" <> FlexibleSUSY`FSModelName <> "_weinberg_angle weinberg(MODEL, parameters);
 weinberg.set_number_of_loops(MODEL->get_threshold_corrections().sin_theta_w);
 weinberg.set_number_of_iterations(number_of_iterations);
 

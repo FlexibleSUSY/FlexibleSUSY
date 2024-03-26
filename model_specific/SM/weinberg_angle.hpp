@@ -35,10 +35,10 @@ namespace weinberg_angle {
 class Weinberg_angle {
 public:
    /**
-    * @class Sm_parameters
-    * @brief SM parameters necessary for calculating the weak mixing angle
+    * @class Parameters
+    * @brief Parameters necessary for calculating the weak mixing angle
     */
-   struct Sm_parameters {
+   struct Parameters {
       double fermi_constant{0.}; ///< Fermi constant
       double mw_pole{0.};        ///< W pole mass
       double mz_pole{0.};        ///< Z pole mass
@@ -50,7 +50,7 @@ public:
    };
 
    Weinberg_angle();
-   Weinberg_angle(const standard_model::Standard_model*, const Sm_parameters&);
+   Weinberg_angle(const standard_model::Standard_model*, const Parameters&);
 
    void set_number_of_iterations(int); ///< maximum number of iterations
    void set_number_of_loops(int);    ///< set number of loops
@@ -70,7 +70,7 @@ private:
    double rho_hat = 0.;                ///< output rho-hat parameter
 
    const standard_model::Standard_model* model{nullptr}; ///< pointer to investigated model
-   Sm_parameters sm_parameters{};     ///< SM parameters
+   Parameters parameters{};           ///< SM parameters
    double calculate_self_energy_VZ(double p) const;
    double calculate_self_energy_VZ_top(double p, double mt) const;
    double calculate_self_energy_VWp(double p) const;
