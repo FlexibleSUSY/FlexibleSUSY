@@ -5,8 +5,8 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=7
-FLEXIBLESUSY_PATCH=1
+FLEXIBLESUSY_MINOR=8
+FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -267,11 +267,11 @@ SARAH_MINOR="0"
 SARAH_PATCH="0"
 
 # required FeynArts version
-required_feynarts_version="3.9.0"
+required_feynarts_version="3.10.0"
 FEYNARTS_VERSION="unknown"
 
 # required FormCalc version
-required_formcalc_version="9.5.0"
+required_formcalc_version="9.8.0"
 FORMCALC_VERSION="unknown"
 
 # Mathematica version (0 = unknown)
@@ -2238,18 +2238,22 @@ check_higgstools() {
 }
 
 check_python() {
-    checking_msg "python C/C++ extensions"
-    if test "$(command -v python3-config)" = "x" ; then
+    checking_msg "C++ python embedding"
+    path_split=$(echo "$PATH" | sed -e 's/:/ /g')
+    python3config_cmd=$(find $path_split -name "python3*-config" 2>/dev/null)
+    if test -z "$python3config_cmd" ; then
         result "no"
-        message "Warning! Cannot find python3-config. Some features (like the Lilith interface)"
+        message "Warning! Cannot find python3*-config. Some features (like the Lilith interface)"
         message "         will be disabled."
         enable_lilith=no
     else
+        # pick 1st one that was found
+        python3config_cmd=$(echo $python3config_cmd | cut -d ' ' -f 1)
         # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
         # remove duplicates
-        PYTHONFLAGS=$(echo "$(python3-config --includes)" | xargs -n1 | sort -u)
-        PYTHONLIBS="$(python3-config --libs --embed)"
-        result "yes"
+        PYTHONFLAGS=$(echo "$(${python3config_cmd} --includes)" | xargs -n1 | sort -u)
+        PYTHONLIBS="$(${python3config_cmd} --libs --embed)"
+        result "found $python3config_cmd"
     fi
 }
 
@@ -3589,9 +3593,9 @@ add_metaflags() {
    tcol_='FSEnableColors = '
    col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
-   local tcol_ col_
-   tcol_='FSEnableCompile = '
-   col_="${tcol_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
+   local tcom_ com_
+   tcom_='FSEnableCompile = '
+   com_="${tcom_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
 
    local c_=''
    local fs_=''
@@ -3617,9 +3621,12 @@ add_metaflags() {
 
       c_=$(grep "$tcol_" $fs_)
       if [ "$c_" != "$col_" ]; then
-         [ "$c_" != '' ] && \
-            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
-            echo "$col_" >> $fs_
+         [ "$c_" != '' ] && sed -i "s/${tcol_}.*/${col_}/g" $fs_ || echo "$col_" >> $fs_
+      fi
+
+      c_=$(grep "$tcom_" $fs_)
+      if [ "$c_" != "$com_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tcom_}.*/${com_}/g" $fs_ || echo "$com_" >> $fs_
       fi
 
    done

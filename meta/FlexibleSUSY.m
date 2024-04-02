@@ -53,8 +53,6 @@ BeginPackage["FlexibleSUSY`",
               "Decays`",
               "EDM`",
               "FFVFormFactors`",
-              "BrLToLGamma`",
-              "FToFConversionInNucleus`",
               "BtoSGamma`",
               "FlexibleEFTHiggsMatching`",
               "FSMathLink`",
@@ -69,11 +67,12 @@ BeginPackage["FlexibleSUSY`",
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
 $flexiblesusyConfigDir   = FileNameJoin[{ParentDirectory[$flexiblesusyMetaDir], "config"}];
 $flexiblesusyTemplateDir = FileNameJoin[{ParentDirectory[$flexiblesusyMetaDir], "templates"}];
+$observablesWildcard[file:_:""] := FileNameJoin@{$flexiblesusyMetaDir, "Observables", "*", file};
 
 FS`Version = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"flexiblesusy-version"}]]];
 FS`GitCommit = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"git_commit"}]]];
-FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "W. Kotlarski",
-              "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
+FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "U. Khasianevich",
+              "W. Kotlarski", "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
 FS`Years   = "2013-2024";
@@ -101,6 +100,7 @@ ReadSARAHBetaFunctions::usage="";
 SetupModelParameters::usage="";
 SetupMassMatrices::usage="";
 SetupOutputParameters::usage="";
+WriteClass::usage="Writes a C++ class for an observable";
 
 MakeFlexibleSUSY::usage="Creates a spectrum generator given a
  FlexibleSUSY model file (FlexibleSUSY.m).
@@ -205,10 +205,10 @@ UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
 PotentialLSPParticles = {};
-ExtraSLHAOutputBlocks::usage = "@note
-this List is rewritten during the runnig of start.m script
-in the directory FlexibleSUSY/models/@CLASSNAME@ by
-the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
+ExtraSLHAOutputBlocks;
+FWCOEF ~ SetAttributes ~ {Protected, Locked}; (*reserved for a Block name*)
+IMFWCOEF ~ SetAttributes ~ {Protected, Locked}; (*reserved for a Block name*)
+
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
 IMEXTPAR = {};
@@ -983,12 +983,12 @@ WriteInputParameterClass[inputParameters_List, files_List] :=
                            "@printInputParameters@"       -> IndentText[printInputParameters],
                            "@get@"                        -> IndentText[get],
                            "@set@"                        -> IndentText[set],
-                           Sequence @@ GeneralReplacementRules[]
-                         } ];
-          ];
+                        Sequence @@ GeneralReplacementRules[]
+                      } ];
+       ];
 
 WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
-                     {minimumScale_, maximumScale_}, files_List] :=
+                  {minimumScale_, maximumScale_}, files_List] :=
    Module[{applyConstraint = "", calculateScale, scaleGuess,
            restrictScale,
            initialSetting,
@@ -2360,6 +2360,8 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
                Observables`CreateSetAndDisplayObservablesFunctions[requestedObservables];
            clearObservables = Observables`CreateClearObservablesFunction[requestedObservables];
            calculateObservables = Observables`CalculateObservables[requestedObservables, "observables"];
+
+
            WriteOut`ReplaceInFiles[files,
                                    {   "@numberOfObservables@" -> ToString[numberOfObservables],
                                        "@observablesDef@" -> IndentText[observablesDef],
@@ -2369,6 +2371,7 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
                                        "@clearObservables@" -> IndentText[clearObservables],
                                        "@setObservables@" -> IndentText[setObservables],
                                        "@calculateObservables@" -> IndentText @ IndentText[calculateObservables],
+                                       "@observablesHeaders@" -> Observables`GetObservablesHeaders[],
                                        Sequence @@ GeneralReplacementRules[]
                                    } ];
            ];
@@ -2515,24 +2518,6 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
       vertices
    ];
 
-WriteLToLGammaClass[decays_List, files_List] :=
-   Module[{interfacePrototypes, interfaceDefinitions},
-
-      {interfacePrototypes, interfaceDefinitions} =
-         If[decays === {},
-            {"",""},
-            StringJoin @@@
-               (Riffle[#, "\n\n"]& /@ Transpose[BrLToLGamma`CreateInterfaceFunctionForBrLToLGamma /@ decays])
-         ];
-
-      WriteOut`ReplaceInFiles[files, {
-            "@LToLGamma_InterfacePrototypes@"  -> interfacePrototypes,
-            "@LToLGamma_InterfaceDefinitions@" -> interfaceDefinitions,
-            Sequence @@ GeneralReplacementRules[]
-         }
-      ];
-   ];
-
 WriteBToSGammaClass[decays_List, files_List] :=
    Module[{createInterface = False,
           btosgammaInterfaceDefinitions},
@@ -2544,54 +2529,6 @@ WriteBToSGammaClass[decays_List, files_List] :=
        WriteOut`ReplaceInFiles[files, {
             "@BtoSGammaInterface@" -> btosgammaInterfaceDefinitions,
             Sequence @@ GeneralReplacementRules[]}];
-   ];
-
-(* Write c++ files for the F -> F conversion in nucleus *)
-(* leptonPairs is a list of lists, sth like {{Fe -> Fe, Au}, {Fe ->  Fe, Al}} etc *)
-WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
-   Module[{interfacePrototypes = "", interfaceDefinitions = "",
-      massiveNeutralVectorBosons, masslessNeutralVectorBosons, externalFermions,
-      vertices = {},processesUnderInterest,npfVertices = {},npfHeaders = "",npfCode = ""
-      },
-
-      If[leptonPairs =!= {},
-
-         (* additional vertices needed for the calculation *)
-         (* coupling of vector bosons to quarks *)
-         massiveNeutralVectorBosons = Select[GetVectorBosons[],
-            !(TreeMasses`IsMassless[#] || TreeMasses`IsElectricallyCharged[#])&
-         ];
-         (* @todo: should we include gluons or not? *)
-         masslessNeutralVectorBosons = Select[GetVectorBosons[],
-            (TreeMasses`IsMassless[#] && !TreeMasses`IsElectricallyCharged[#] && !TreeMasses`ColorChargedQ[#])&
-         ];
-         (* drop nucleon, convert rule to list (so {Fe -> Fe, Au} into {Fe,Fe} *)
-         externalFermions = DeleteDuplicates@Flatten[
-            {TreeMasses`GetSMQuarks[], Drop[leptonPairs, None, -1] /. Rule[a_, b_] :> Sequence[a, b]}
-         ];
-         vertices = Flatten /@ Tuples[
-            {{CXXDiagrams`LorentzConjugate[#], #}& /@ externalFermions,
-            Join[masslessNeutralVectorBosons, massiveNeutralVectorBosons]}
-         ];
-         processesUnderInterest = DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]];
-         {npfVertices,npfHeaders,npfCode} = NPointFunctions`CreateCXXFToFConversionInNucleus@processesUnderInterest;
-         {interfacePrototypes, interfaceDefinitions} =
-              StringJoin @@@
-            (Riffle[#, "\n\n"] & /@ Transpose[FToFConversionInNucleus`FToFConversionInNucleusCreateInterface @@@
-               processesUnderInterest
-            ] );
-      ];
-
-      WriteOut`ReplaceInFiles[files,
-         {
-            "@npf_headers@" -> npfHeaders,
-            "@npf_definitions@" -> npfCode,
-            "@FToFConversion_InterfacePrototypes@"     -> interfacePrototypes,
-            "@FToFConversion_InterfaceDefinitions@"    -> interfaceDefinitions,
-            Sequence @@ GeneralReplacementRules[]}
-      ];
-
-      DeleteDuplicates@Join[vertices,npfVertices]
    ];
 
 WriteUnitarityClass[files_List] :=
@@ -2770,7 +2707,8 @@ RunEnabledSpectrumGenerator[solver_] :=
                         If[FSCalculateDecays, "flexibledecay_settings, ", ""] <>
                         "slha_output_file,\n"]
                   <> IndentText["database_output_file, spectrum_file, rgflow_file);\n"]
-                  <> "if (!exit_code || solver_type != 0) break;\n";
+                  <> "if (!exit_code || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
           ];
@@ -2780,7 +2718,8 @@ ScanEnabledSpectrumGenerator[solver_] :=
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "result = run_parameter_point<" <> class <> ">(loop_library, qedqcd, input);\n"
-                  <> "if (!result.problems.have_problem() || solver_type != 0) break;\n";
+                  <> "if (!result.problems.have_problem() || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[IndentText[result]]] <> "\n"
           ];
@@ -2790,7 +2729,8 @@ RunCmdLineEnabledSpectrumGenerator[solver_] :=
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "exit_code = run_solver<" <> class <> ">(loop_library,input);\n"
-                  <> "if (!exit_code || solver_type != 0) break;\n";
+                  <> "if (!exit_code || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
           ];
@@ -2949,7 +2889,8 @@ RunEnabledModelType[solver_] :=
            body = "spectrum.reset(new " <> FlexibleSUSY`FSModelName <>
                   "_spectrum_impl<" <> class <> ">());\n"
                   <> "spectrum->calculate_spectrum(settings, modsel, qedqcd, input);\n"
-                  <> "if (!spectrum->get_problems().have_problem() || solver_type != 0) break;\n";
+                  <> "if (!spectrum->get_problems().have_problem() || solver_type != 0) break;\n"
+                  <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
           ];
@@ -4273,7 +4214,7 @@ ReadSARAHBetaFunctions[] :=
            susyBreakingBetaFunctions = DeleteBuggyBetaFunctions @ (Join @@ susyBreakingBetaFunctions);
 
            {susyBetaFunctions, susyBreakingBetaFunctions}
-    ]
+    ];
 
 (* disable tensor couplings *)
 FSDisableTensorCouplings[parameters_] :=
@@ -4307,7 +4248,7 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
            FSDisableTensorCouplings[allParameters];
 
            allParameters
-    ]
+    ];
 
 ConvertBetaFunctions[susyBetaFunctionsSARAH_, susyBreakingBetaFunctionsSARAH_] :=
     Module[{susyBetaFunctions, susyBreakingBetaFunctions,
@@ -4357,7 +4298,7 @@ SetupMassMatrices[allParameters_] :=
 		       massMatrices = massMatrices /. allIntermediateOutputParameterIndexReplacementRules;
 
 		       {massMatrices, Lat$massMatrices}
-		]
+		];
 
 SetupOutputParameters[massMatrices_] :=
 		Module[{allParticles, allOutputParameters},
@@ -4368,8 +4309,40 @@ SetupOutputParameters[massMatrices_] :=
 
            Parameters`SetOutputParameters[allOutputParameters];
            DebugPrint["output parameters = ", allOutputParameters];
-    ]
+    ];
 
+CheckObsDependencies[requested_List] :=
+Module[{allObs, dir, filtered = requested},
+   Needs@"NPointFunctions`";
+   If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+      Needs@"WilsonCoeffs`";
+      Return[filtered];
+   ];
+
+   allObs = Cases[
+      requested,
+      x_/; Context@Evaluate@Head@x === "FlexibleSUSYObservable`" :> x,
+      Infinity,
+      Heads -> True
+   ];
+   allObs = DeleteDuplicates[SymbolName@*Head/@allObs];
+
+   Do[
+      dir = FileNameJoin@{$flexiblesusyMetaDir, "Observables", obs};
+      If[DirectoryQ@dir,
+         If[TextSearch[dir, "NPointFunctions" | "WilsonCoeffs", "Count"] > 0,
+            Utils`FSFancyWarning[obs,
+               " is requested but FeynArts or FormCalc are disabled. ",
+               "Removing ", obs, " from calculated observables."
+            ];
+            filtered = filtered /. Symbol["FlexibleSUSYObservable`"<>obs][___] :> Null;
+         ];
+      ];,
+      {obs, allObs}
+   ];
+
+   filtered /. {_Integer, Null} :> Sequence[] /. {_Symbol, {}} :> Sequence[]
+];
 
 Options[MakeFlexibleSUSY] :=
     {
@@ -4382,7 +4355,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, initialGuesserInputFile,
             aMMVertices, edmFields, ammFields,
             QToQGammaFields = {},
-            LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
+            FFMasslessVVertices = {},
+            ObservablesExtraOutput, observablesExtraVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
             susyBetaFunctions, susyBreakingBetaFunctions,
@@ -4451,12 +4425,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
 
            Needs@"Observables`";
-
-           (* load additional packages if prerequisites are met *)
-           If[FSFeynArtsAvailable && FSFormCalcAvailable,
-               Needs@"NPointFunctions`";
-               Needs@"WilsonCoeffs`";
-           ];
+           FlexibleSUSY`ExtraSLHAOutputBlocks = CheckObsDependencies[FlexibleSUSY`ExtraSLHAOutputBlocks];
 
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
@@ -5322,14 +5291,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
              ]; (* If[FSCalculateDecays] *)
 
-           Utils`PrintHeadline["Creating other observables"];
-           Print["Creating class for observables ..."];
-           WriteObservables[extraSLHAOutputBlocks,
-                            {{FileNameJoin[{$flexiblesusyTemplateDir, "observables.hpp.in"}],
-                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.hpp"}]},
-                             {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
-                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
-
            Print["Creating lepton EDM class ..."];
            edmFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
                                                 FlexibleSUSYObservable`EDM[p_[__]|p_] :> p];
@@ -5339,36 +5300,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_edm.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "edm.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_edm.cpp"}]}}];
-
-           (* OBSERVABLE: l -> l gamma *)
-
-           LToLGammaFields =
-              DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
-                     FlexibleSUSYObservable`BrLToLGamma[
-                        pIn_[_Integer]|pIn_?AtomQ -> {pOut_[_Integer]|pOut_?AtomQ, spectator_}
-                     ] :> (pIn -> {pOut, spectator})
-                  ];
-           Block[{properStates, wrongFields},
-              properStates = Cases[LToLGammaFields,
-                 Rule[a_?IsLepton, {b_?IsLepton, c_ /; c === GetPhoton[]}] -> (a -> {b, c})
-              ];
-              wrongFields = Complement[LToLGammaFields, properStates];
-              If[wrongFields =!= {},
-                 Utils`FSFancyWarning[
-                    "BrLToLGamma function works only for leptons and a photon.",
-                    " Removing requested process(es): "
-                    Riffle[ToString/@ wrongFields, ", "]
-                 ];
-                 LToLGammaFields = properStates;
-              ];
-           ];
-
-           Print["Creating l->l'γ class ..."];
-           WriteLToLGammaClass[LToLGammaFields,
-                           {{FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.hpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.hpp"}]},
-                            {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
 
            (* b -> s gamma *)
            If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
@@ -5382,22 +5313,44 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
-           (* OBSERVABLE: l -> l conversion *)
+            (* Load and evaluate NPointFunctions write classes for observables *)
+            Module[{files, obs, newRules = {}, down, dir, observablesExtraEntity},
+               dir = FileNameJoin@{FSOutputDir, "observables"};
+               If[!DirectoryQ@dir, CreateDirectory@dir];
 
-           Print["Creating FToFConversionInNucleus class ..."];
-           LToLConversionFields =
-              DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
-                FlexibleSUSYObservable`FToFConversionInNucleus[
-                   pIn_[_Integer] -> pOut_[_Integer], nucleus_
-                ] :> {pIn -> pOut, nucleus}
-              ];
+               files = Utils`DynamicInclude@$observablesWildcard@"FlexibleSUSY.m";
+               obs = StringSplit[files, $PathnameSeparator][[All, -2]];
 
-           conversionVertices =
-              WriteFToFConversionInNucleusClass[LToLConversionFields,
-                           {{FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.hpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.hpp"}]},
-                            {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
+               files = {
+                     FileNameJoin@{$flexiblesusyTemplateDir, "observables", #<>".in"},
+                     FileNameJoin@{dir, FSModelName<>"_"<>#}
+                  } &/@ {#<>".hpp", #<>".cpp"} &/@ (Observables`GetObservableFileName/@obs);
+
+               Do[
+                  ObservablesExtraOutput@obs[[i]] = WriteClass[Symbol["FlexibleSUSYObservable`"<>obs[[i]]], extraSLHAOutputBlocks, files[[i]]];
+
+                  observablesExtraEntity = FilterRules[ObservablesExtraOutput@obs[[i]], "C++ vertices"];
+                  Switch[observablesExtraEntity,
+                     {_ -> _}, observablesExtraVertices = Join[observablesExtraVertices, observablesExtraEntity[[1, 2]]],
+                     _, Null
+                  ];
+
+                  observablesExtraEntity = FilterRules[ObservablesExtraOutput@obs[[i]], "C++ replacements"];
+                  Switch[observablesExtraEntity,
+                     {_ -> _}, newRules = Join[newRules, observablesExtraEntity[[1, 2]]],
+                     _, Null
+                  ];,
+                  {i, Length@obs}
+               ];
+               ObservablesExtraOutput@_ = {};
+
+               (* Inserting new rules before default ones *)
+               down = DownValues@GeneralReplacementRules;
+               down = Insert[down, newRules, {1,2,-1}];
+               DownValues@GeneralReplacementRules = down;
+
+               observablesExtraVertices = DeleteDuplicates@observablesExtraVertices;
+           ];
 
            Print["Creating lepton AMM class ..."];
            ammFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
@@ -5413,6 +5366,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                {FileNameJoin[{$flexiblesusyTemplateDir, "lepton_amm_wrapper.cpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_lepton_amm_wrapper.cpp"}]}}];
 
+           Utils`PrintHeadline["Creating other observables"];
+           Print["Creating class for observables ..."];
+           WriteObservables[extraSLHAOutputBlocks,
+                            {{FileNameJoin[{$flexiblesusyTemplateDir, "observables.hpp.in"}],
+                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.hpp"}]},
+                             {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
+                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
+
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
                WriteFFVFormFactorsClass[
@@ -5426,15 +5387,32 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      (# -> {#, TreeMasses`GetPhoton[]})& /@ edmFields,
 
                      (* Br(L -> L Gamma) *)
-                     LToLGammaFields,
+                     Module[{fields = Cases[ObservablesExtraOutput@"BrLToLGamma", ("FFV fields" -> x_) :> x]},
+                        Switch[fields, {{}}, {}, _, First/@fields]
+                     ],
+
+                     Module[{fields = Flatten@Cases[ObservablesExtraOutput@"BrDLToDL", ("FFV fields" -> x_) :> x]},
+                        Switch[fields,
+                           {__Symbol}, (# -> {#, TreeMasses`GetPhoton[]})& /@ fields,
+                           _, {}
+                        ]
+                     ],
 
                      (* b -> s gamma *)
                      QToQGammaFields,
 
-                     (* L -> L conversion in nucleus *)
-                     If[LToLConversionFields === {},
-                        {},
-                        (#[[1, 1]] -> {#[[1, 2]], TreeMasses`GetPhoton[]})& /@ Transpose[Drop[Transpose[LToLConversionFields],-1]]
+                     Module[{npfFields = FilterRules[ObservablesExtraOutput@"LToLConversion", "FFV fields"]},
+                        Switch[npfFields,
+                           {_ -> _}, (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ npfFields[[1, 2]],
+                           _, {}
+                        ]
+                     ],
+
+                     Module[{npfFields = FilterRules[ObservablesExtraOutput@"BrLTo3L", "FFV fields"]},
+                        Switch[npfFields,
+                           {_ -> _}, (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ npfFields[[1, 2]],
+                           _, {}
+                        ]
                      ]
                   ],
 
@@ -5471,8 +5449,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
+
            WriteCXXDiagramClass[
-              Join[aMMVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
+              Join[aMMVertices, FFMasslessVVertices, decaysVertices, observablesExtraVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

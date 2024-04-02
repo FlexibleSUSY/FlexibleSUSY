@@ -26,6 +26,7 @@
 #include "pmns.hpp"
 #include "slhaea.h"
 #include "spectrum_generator_settings.hpp"
+#include "observables/l_to_l_conversion/settings.hpp"
 #include "decays/flexibledecay_settings.hpp"
 #include "string_conversion.hpp"
 #include "string_format.hpp"
@@ -175,6 +176,16 @@ void process_flexiblesusy_tuple(Spectrum_generator_settings& settings,
    }
 }
 
+void process_ltolconversion_tuple(LToLConversion_settings& settings,
+                                int key, double value)
+{
+   if (0 <= key && key < static_cast<int>(LToLConversion_settings::NUMBER_OF_OPTIONS)) {
+      settings.set(static_cast<LToLConversion_settings::Settings>(key), value);
+   } else {
+      WARNING("Unrecognized entry in block LToLConversion: " << key);
+   }
+}
+
 void process_flexibledecay_tuple(FlexibleDecay_settings& settings,
                                 int key, double value)
 {
@@ -184,7 +195,6 @@ void process_flexibledecay_tuple(FlexibleDecay_settings& settings,
       WARNING("Unrecognized entry in block FlexibleDecay: " << key);
    }
 }
-
 
 void process_flexiblesusyinput_tuple(
    Physical_input& input,
@@ -622,6 +632,21 @@ void SLHA_io::fill(Physical_input& input) const
 
 /**
  * Fill struct of decay settings from SLHA object
+ * (LToLConversion block)
+ *
+ * @param settings struct of decay settings
+ */
+void SLHA_io::fill(LToLConversion_settings& settings) const
+{
+   Tuple_processor processor = [&settings] (int key, double value) {
+      return process_ltolconversion_tuple(settings, key, value);
+   };
+
+   read_block("LToLConversion", processor);
+}
+
+/**
+ * Fill struct of decay settings from SLHA object
  * (FlexibleDecay block)
  *
  * @param settings struct of decay settings
@@ -838,6 +863,19 @@ void SLHA_io::set_settings(const Spectrum_generator_settings& settings)
    for (int i = 0; i < Spectrum_generator_settings::NUMBER_OF_OPTIONS; i++) {
       ss << FORMAT_ELEMENT(i, settings.get(static_cast<Spectrum_generator_settings::Settings>(i)),
                            settings.get_description(static_cast<Spectrum_generator_settings::Settings>(i)));
+   }
+
+   set_block(ss);
+}
+
+void SLHA_io::set_LToLConversion_settings(const LToLConversion_settings& settings)
+{
+   std::ostringstream ss;
+   ss << block_head("LToLConversion", 0.0);
+
+   for (int i = 0; i < LToLConversion_settings::NUMBER_OF_OPTIONS; i++) {
+      ss << FORMAT_ELEMENT(i, settings.get(static_cast<LToLConversion_settings::Settings>(i)),
+                           settings.get_description(static_cast<LToLConversion_settings::Settings>(i)));
    }
 
    set_block(ss);

@@ -62,9 +62,9 @@ using namespace softsusy;
 
 Weinberg_angle::Weinberg_angle(
    const standard_model::Standard_model* model_,
-   const Sm_parameters& sm_parameters_)
+   const Parameters& parameters_)
    : model(model_)
-   , sm_parameters(sm_parameters_)
+   , parameters(parameters_)
 {
 }
 
@@ -108,9 +108,9 @@ double Weinberg_angle::calculate_sin_theta_w(double sinThetaW_start)
    const auto g2 = model->get_g2() * standard_model_info::normalization_g2;
    const double eDRbar     = gY * g2 / Sqrt(Sqr(gY) + Sqr(g2));
    const double alphaDRbar = Sqr(eDRbar) / (4.0 * Pi);
-   const double mw_pole    = sm_parameters.mw_pole;
-   const double mz_pole    = sm_parameters.mz_pole;
-   const double gfermi     = sm_parameters.fermi_constant;
+   const double mw_pole    = parameters.mw_pole;
+   const double mz_pole    = parameters.mz_pole;
+   const double gfermi     = parameters.fermi_constant;
 
    pizzt_MZ = calculate_self_energy_VZ(mz_pole);
    piwwt_MW = calculate_self_energy_VWp(mw_pole);
@@ -193,10 +193,11 @@ double Weinberg_angle::calculate_G_fermi()
    const double g2 = model->get_g2() * standard_model_info::normalization_g2;
    const double e = gY*g2/Sqrt(Sqr(gY) + Sqr(g2));
    const double alpha_em_drbar = Sqr(e)/(4*Pi);
+   const double alpha_em_drbar = Sqr(e)/(4*Pi); // @todo(alex): may use input parameters.alpha_em_drbar from qedqcd here
    const double mw_drbar = model->get_MVWp();
    const double mz_drbar = model->get_MVZ();
-   const double mw_pole = sm_parameters.mw_pole;
-   const double mz_pole = sm_parameters.mz_pole;
+   const double mw_pole = parameters.mw_pole;
+   const double mz_pole = parameters.mz_pole;
    const double cos_theta = mw_drbar/mz_drbar;
    const double theta = ArcCos(cos_theta);
    const double sin_theta = Sin(theta);
@@ -236,7 +237,7 @@ double Weinberg_angle::calculate_G_fermi()
    int iteration = 0;
    bool not_converged = true;
 
-   sm_parameters.fermi_constant = gfermi_1l;
+   parameters.fermi_constant = gfermi_1l;
    double gfermi_2l_old = gfermi_1l;
    double gfermi_2l = gfermi_1l;
 
@@ -247,7 +248,7 @@ double Weinberg_angle::calculate_G_fermi()
       gfermi_2l = flexiblesusy::calculate_G_fermi(alpha_em_drbar, mz_pole, sin_2_cos_2, delta_r_hat);
       const double precision = Abs(gfermi_2l_old/gfermi_2l - 1.0);
       not_converged = precision >= precision_goal;
-      sm_parameters.fermi_constant = gfermi_2l;
+      parameters.fermi_constant = gfermi_2l;
       gfermi_2l_old = gfermi_2l;
 
       VERBOSE_MSG("\t\tG_Fermi(1-loop, iteration " << iteration << ","
@@ -334,7 +335,7 @@ double Weinberg_angle::rho_2(double r)
  */
 double Weinberg_angle::calculate_self_energy_VZ(double p) const
 {
-   const double mt_pole  = sm_parameters.mt_pole;
+   const double mt_pole  = parameters.mt_pole;
    const double mt_drbar = model->get_MFu(2);
    const double pizzt    = Re(model->self_energy_VZ_1loop(p));
 
@@ -388,7 +389,7 @@ double Weinberg_angle::calculate_self_energy_VZ_top(double p, double mt) const
  */
 double Weinberg_angle::calculate_self_energy_VWp(double p) const
 {
-   const double mt_pole  = sm_parameters.mt_pole;
+   const double mt_pole  = parameters.mt_pole;
    const double mt_drbar = model->get_MFu(2);
    const double piwwt    = Re(model->self_energy_VWp_1loop(p));
 
@@ -435,11 +436,11 @@ double Weinberg_angle::calculate_self_energy_VWp_top(double p, double mt) const
  */
 double Weinberg_angle::calculate_delta_rho_hat(double sinThetaW) const
 {
-   const double gfermi = sm_parameters.fermi_constant;
-   const double mw = sm_parameters.mw_pole;
-   const double mz = sm_parameters.mz_pole;
-   const double mt = sm_parameters.mt_pole;
-   const double alphaS = sm_parameters.alpha_s;
+   const double gfermi = parameters.fermi_constant;
+   const double mw = parameters.mw_pole;
+   const double mz = parameters.mz_pole;
+   const double mt = parameters.mt_pole;
+   const double alphaS = parameters.alpha_s;
 
    const double deltaRhoHat1Loop = number_of_loops > 0 ?
       1 - (1 + piwwt_MW / Sqr(mw)) / (1 + pizzt_MZ / Sqr(mz)) : 0.;
@@ -489,11 +490,11 @@ double Weinberg_angle::calculate_delta_rho_hat(double sinThetaW) const
  */
 double Weinberg_angle::calculate_delta_r_hat(double rhohat_ratio, double sinThetaW) const
 {
-   const double gfermi = sm_parameters.fermi_constant;
-   const double mw = sm_parameters.mw_pole;
-   const double mz = sm_parameters.mz_pole;
-   const double mt = sm_parameters.mt_pole;
-   const double alphaS = sm_parameters.alpha_s;
+   const double gfermi = parameters.fermi_constant;
+   const double mw = parameters.mw_pole;
+   const double mz = parameters.mz_pole;
+   const double mt = parameters.mt_pole;
+   const double alphaS = parameters.alpha_s;
 
    const double dvb = number_of_loops > 0 ?
       calculate_delta_vb(rhohat_ratio, sinThetaW) : 0.;
@@ -547,8 +548,8 @@ double Weinberg_angle::calculate_delta_r_hat(double rhohat_ratio, double sinThet
  */
 double Weinberg_angle::calculate_delta_vb_sm(double sinThetaW) const
 {
-   const double mz  = sm_parameters.mz_pole;
-   const double mw  = sm_parameters.mw_pole;
+   const double mz  = parameters.mz_pole;
+   const double mw  = parameters.mw_pole;
    const double cw2 = Sqr(mw / mz);
    const double sw2 = 1.0 - cw2;
    const double sinThetaW2 = Sqr(sinThetaW);

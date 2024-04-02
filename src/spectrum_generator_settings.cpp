@@ -43,7 +43,7 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "force output",
    "Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)",
    "beta-function zero threshold",
-   "calculate observables (a_muon, ...)",
+   "calculate all observables",
    "force positive majorana masses",
    "pole mass renormalization scale (0 = SUSY scale)",
    "pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))",

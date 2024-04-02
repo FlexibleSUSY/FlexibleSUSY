@@ -28,7 +28,7 @@ FlexibleSUSY configuration block (FlexibleSUSY)
        12   0         # force output
        13   3         # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)
        14   1.0e-11   # beta-function zero threshold
-       15   0         # calculate observables (a_muon, effective couplings)
+       15   0         # calculate all observables
        16   0         # force positive majorana masses
        17   0         # pole mass scale
        18   0         # pole mass scale in the EFT (0 = min(SUSY scale, Mt))
@@ -574,14 +574,14 @@ loop Passarino-Veltman integrals via the following command::
 Where ``<desired libraries>`` is a list of comma separated names for desired libraries.
 Currently the following set is available for usage:
 
-======= =========== =========== ============== =================================
+======= =========== ============ ============== ============================================
  index   name        library     thread-safety   commentary
-======= =========== =========== ============== =================================
-  0      softsusy    SOFTSUSY_   yes            default value; always enabled
-  1      collier     COLLIER_    no             optional; see **specific** below
-  2      looptools   LoopTools_  no             optional; see **specific** below
-  3      fflite      FFlite      yes            optional; build in; see **specific** below
-======= =========== =========== ============== =================================
+======= =========== ============ ============== ============================================
+  0      softsusy    SOFTSUSY_    yes            default value; always enabled
+  1      collier     COLLIER_     no             optional; see **specific** below
+  2      looptools   LoopTools_   no             optional; see **specific** below
+  3      fflite      FFlite       yes            optional; build in; see **specific** below
+======= =========== ============ ============== ============================================
 
 If the entry ``FlexibleSUSY[31]`` is absent, the loop functions from
 SOFTSUSY are used.  If the entry ``FlexibleSUSY[31]`` is set to
