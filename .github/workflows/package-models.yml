@@ -20,6 +20,7 @@ jobs:
           part: [1, 2]
 
     env:
+      FORMCALC_VERSION: '9.10'
       MODELS: 'E6SSM E6SSMEFTHiggs CE6SSM CMSSM CMSSMSemiAnalytic CMSSMNoFV MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT SplitMSSM MSSMNoFVatMGUTHimalaya MSSMEFTHiggs NUHMSSMNoFVHimalaya MSSMNoFVHimalaya lowMSSM NUHMSSM HSSUSY NMSSM CNMSSM lowNMSSM lowNMSSMTanBetaAtMZ NUTNMSSM NMSSMEFTHiggs NUTSMSSM SMSSM UMSSM MRSSM2 MRSSMEFTHiggs MSSMRHN TMSSM SM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC'
 
     steps:
@@ -39,6 +40,14 @@ jobs:
           if [ $(wolframscript -code 1+2) -eq 3 ]; then echo ok; else echo fail && exit 1; fi
           printf "Checking if math command is workings... ";
           if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo ok; else echo fail && exit 1; fi
+
+      - name: Install FormCalc
+        run: |
+          cd /fs_dependencies/gcc
+          wget -q -O - https://feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
+          cd FormCalc-$FORMCALC_VERSION
+          ./compile
+          echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
 
       - name: Generate models and SLHA output
         env:

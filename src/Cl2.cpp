@@ -22,11 +22,11 @@
 namespace flexiblesusy {
 
 /**
- * @brief Clausen function \f$\mathrm{Cl}_2(\theta) = \mathrm{Im}(\mathrm{Li}_2(e^{i\theta}))\f$
+ * @brief Clausen function \f$\operatorname{Cl}_2(\theta) = \operatorname{Im}(\operatorname{Li}_2(e^{i\theta}))\f$
  * @param x real angle
- * @return \f$\mathrm{Cl}_2(\theta)\f$
+ * @return \f$\operatorname{Cl}_2(\theta)\f$
  * @author Alexander Voigt
- * @note Implemented as economized Padé approximation.
+ * @note Implemented as rational function approximation.
  */
 double Cl2(double x) noexcept
 {
@@ -50,7 +50,9 @@ double Cl2(double x) noexcept
       sgn = -sgn;
    }
 
-   if (x == 0 || x == PI) {
+   if (x == 0) {
+      return x;
+   } else if (x == PI) {
       return 0;
    }
 
@@ -98,12 +100,12 @@ double Cl2(double x) noexcept
 }
 
 /**
- * @brief Clausen function \f$\mathrm{Cl}_2(\theta) = \mathrm{Im}(\mathrm{Li}_2(e^{i\theta}))\f$ with long double precision
+ * @brief Clausen function \f$\operatorname{Cl}_2(\theta) = \operatorname{Im}(\operatorname{Li}_2(e^{i\theta}))\f$ with long double precision
  * @param x real angle
- * @return \f$\mathrm{Cl}_2(\theta)\f$
+ * @return \f$\operatorname{Cl}_2(\theta)\f$
  * @author Alexander Voigt
  *
- * Implemented as an economized Padé approximation with a maximum
+ * Implemented as an rational function approximation with a maximum
  * error of approximately 3.26e-41 (for long double and quadruple
  * precision).
  */
@@ -129,7 +131,9 @@ long double Cl2(long double x) noexcept
       sgn = -sgn;
    }
 
-   if (x == 0 || x == PI) {
+   if (x == 0) {
+      return x;
+   } else if (x == PI) {
       return 0;
    }
 
