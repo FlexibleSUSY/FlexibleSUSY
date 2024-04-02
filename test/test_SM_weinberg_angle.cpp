@@ -26,10 +26,10 @@ BOOST_AUTO_TEST_CASE( test_delta_vb )
 
    setup_SM_const(sm, input);
 
-   Weinberg_angle::Sm_parameters sm_parameters;
-   sm_parameters.mz_pole = Electroweak_constants::MZ;
-   sm_parameters.mw_pole = Electroweak_constants::MW;
-   Weinberg_angle wein(&sm, sm_parameters);
+   Weinberg_angle::Parameters parameters;
+   parameters.mz_pole = Electroweak_constants::MZ;
+   parameters.mw_pole = Electroweak_constants::MW;
+   Weinberg_angle wein(&sm, parameters);
 
    const double fs_delta_vb =
       wein.calculate_delta_vb_sm(outsin);
@@ -45,13 +45,13 @@ BOOST_AUTO_TEST_CASE( test_delta_r_hat )
 
    setup_SM_const(sm, input);
 
-   Weinberg_angle::Sm_parameters sm_parameters;
-   sm_parameters.fermi_constant = Electroweak_constants::gfermi;
-   sm_parameters.mz_pole = Electroweak_constants::MZ;
-   sm_parameters.mw_pole = Electroweak_constants::MW;
-   sm_parameters.mt_pole = 165.0;
-   sm_parameters.alpha_s = 0.1176;
-   Weinberg_angle wein(&sm, sm_parameters);
+   Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = Electroweak_constants::gfermi;
+   parameters.mz_pole = Electroweak_constants::MZ;
+   parameters.mw_pole = Electroweak_constants::MW;
+   parameters.mt_pole = 165.0;
+   parameters.alpha_s = 0.1176;
+   Weinberg_angle wein(&sm, parameters);
 
    static constexpr double rho = 1.0;
    static constexpr double sinw = 0.48;
@@ -81,13 +81,13 @@ BOOST_AUTO_TEST_CASE( test_delta_rho_hat )
 
    setup_SM_const(sm, input);
 
-   Weinberg_angle::Sm_parameters sm_parameters;
-   sm_parameters.fermi_constant = Electroweak_constants::gfermi;
-   sm_parameters.mz_pole = Electroweak_constants::MZ;
-   sm_parameters.mw_pole = Electroweak_constants::MW;
-   sm_parameters.mt_pole = 165.0;
-   sm_parameters.alpha_s = 0.1176;
-   Weinberg_angle wein(&sm, sm_parameters);
+   Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = Electroweak_constants::gfermi;
+   parameters.mz_pole = Electroweak_constants::MZ;
+   parameters.mw_pole = Electroweak_constants::MW;
+   parameters.mt_pole = 165.0;
+   parameters.alpha_s = 0.1176;
+   Weinberg_angle wein(&sm, parameters);
 
    static constexpr double sinw = 0.48;
 

@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( test_decoupling )
    const auto [mw5, mh5] = calc_mw_mh_MRSSM2(5000);
    // this test fails for mh >= 9999.8 with softsusy loop library
    // it works fine with Collier or LoopTools
-   const auto [mw10, mh10] = calc_mw_mh_MRSSM2(9999);
+   const auto [mw10, mh10] = calc_mw_mh_MRSSM2(9990);
 
    BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 5.0e-4);
 

@@ -1054,19 +1054,19 @@ double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 
    calculate_MVWp_pole_fit(mh_pole);
 
-   weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
-   sm_pars.fermi_constant = qedqcd.displayFermiConstant();
-   sm_pars.mz_pole = qedqcd.displayPoleMZ();
-   sm_pars.mt_pole = qedqcd.displayPoleMt();
-   sm_pars.mh_pole = mh_pole;
-   sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
-   sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
-   sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
-   sm_pars.mw_pole = this->get_physical().MVWp;
+   weinberg_angle::Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = qedqcd.displayFermiConstant();
+   parameters.mz_pole = qedqcd.displayPoleMZ();
+   parameters.mt_pole = qedqcd.displayPoleMt();
+   parameters.mh_pole = mh_pole;
+   parameters.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   parameters.alpha_s_mz = qedqcd.displayAlphaSInput();
+   parameters.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   parameters.mw_pole = this->get_physical().MVWp;
 
    const int number_of_iterations = std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)));
 
-   weinberg_angle::Weinberg_angle weinberg(this, sm_pars);
+   weinberg_angle::Weinberg_angle weinberg(this, parameters);
    weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
    weinberg.set_number_of_iterations(number_of_iterations);
 
@@ -1094,22 +1094,22 @@ double Standard_model::calculate_theta_w()
 
    calculate_MVWp_pole_fit(mh_pole);
 
-   weinberg_angle::Weinberg_angle::Sm_parameters sm_pars;
-   sm_pars.fermi_constant = qedqcd.displayFermiConstant();
-   sm_pars.mz_pole = qedqcd.displayPoleMZ();
-   sm_pars.mt_pole = qedqcd.displayPoleMt();
-   sm_pars.mh_pole = mh_pole;
-   sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
-   sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
-   sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
-   sm_pars.mw_pole = this->get_physical().MVWp;
+   weinberg_angle::Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = qedqcd.displayFermiConstant();
+   parameters.mz_pole = qedqcd.displayPoleMZ();
+   parameters.mt_pole = qedqcd.displayPoleMt();
+   parameters.mh_pole = mh_pole;
+   parameters.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   parameters.alpha_s_mz = qedqcd.displayAlphaSInput();
+   parameters.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   parameters.mw_pole = this->get_physical().MVWp;
 
    const int number_of_iterations =
        std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)
           ));
 
    using namespace weinberg_angle;
-   Weinberg_angle weinberg(this, sm_pars);
+   Weinberg_angle weinberg(this, parameters);
    weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
    weinberg.set_number_of_iterations(number_of_iterations);
 
