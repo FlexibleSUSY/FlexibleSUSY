@@ -143,7 +143,13 @@ TestLowerThan[a___] := (
     TestEquality[0,1]);
 
 TestGreaterThan[a_?NumericQ, b_?NumericQ] :=
-    TestEquality[a > b, True];
+    If[a > b,
+       numberOfPassedTests++;
+       True,
+       Print["TestGreaterThan: FAIL: ", InputForm[a], " > ", InputForm[b]];
+       numberOfFailedTests++;
+       False
+    ];
 
 TestGreaterThan[a___] := (
     Print["TestGreaterThan: FAIL: ", {a}];

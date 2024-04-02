@@ -48,6 +48,11 @@ AbortAssert[!TestLowerThan[0, 0]];
 AbortAssert[!TestLowerThan[1, 0]];
 AbortAssert[TestLowerThan[0, 1]];
 
+(* test TestGreaterThan *)
+AbortAssert[!TestGreaterThan[0, 0]];
+AbortAssert[TestGreaterThan[1, 0]];
+AbortAssert[!TestGreaterThan[0, 1]];
+
 (* Summary *)
 If[failedTests == 0,
    Print["All tests passed."],
