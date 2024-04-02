@@ -33,10 +33,10 @@ namespace flexiblesusy {
 class @ModelName@_weinberg_angle {
 public:
    /**
-    * @class Sm_parameters
-    * @brief SM parameters necessary for calculating the weak mixing angle
+    * @class Parameters
+    * @brief Parameters necessary for calculating the weak mixing angle
     */
-   struct Sm_parameters {
+   struct Parameters {
       double fermi_constant{0.}; ///< Fermi constant
       double mw_pole{0.};        ///< W pole mass
       double mz_pole{0.};        ///< Z pole mass
@@ -48,7 +48,7 @@ public:
       int higgs_index{0};        ///< index of SM-like Higgs
    };
 
-   @ModelName@_weinberg_angle(const @ModelName@_mass_eigenstates*, const Sm_parameters&);
+   @ModelName@_weinberg_angle(const @ModelName@_mass_eigenstates*, const Parameters&);
 
    void set_number_of_iterations(int);       ///< set maximum number of iterations
    void set_number_of_loops(int);            ///< set number of loops
@@ -56,7 +56,7 @@ public:
    void enable_dvb_bsm();                    ///< enable bsm wave, vertex and box corrections
    void disable_dvb_bsm();                   ///< disable bsm wave, vertex and box corrections
    void set_model(const @ModelName@_mass_eigenstates*);  ///< set pointer to investigated model
-   void set_sm_parameters(const Sm_parameters&);  ///< set sm_parameters member variable
+   void set_parameters(const Parameters&);   ///< set parameters member variable
 
    /// calculates and returns the sine of the Weinberg angle and the W pole mass
    std::pair<double,double> calculate(double sinThetaW_start = 0.48);
@@ -68,7 +68,7 @@ private:
    double precision_goal{1e-8};       ///< precision goal
    bool include_dvb_bsm{true};        ///< bsm wave, vertex and box corrections are included or not
    const @ModelName@_mass_eigenstates* model{nullptr}; ///< pointer to investigated model
-   Sm_parameters sm_parameters{};     ///< SM parameters
+   Parameters parameters{};           ///< parameters
    double pizzt_MZ{0.};               ///< transverse Z self-energy at p^2 = MZ^2
    double piwwt_MW{0.};               ///< transverse W self-energy at p^2 = MW^2
    double piwwt_0{0.};                ///< transverse W self-energy at p^2 = 0

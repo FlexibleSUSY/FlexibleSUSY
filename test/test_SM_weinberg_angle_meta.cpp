@@ -58,20 +58,20 @@ BOOST_AUTO_TEST_CASE( test_delta_vb )
 
    const double outrho = 1.0, outsin = 0.48;
 
-   Weinberg_angle::Sm_parameters sm_parameters;
-   sm_parameters.fermi_constant = Electroweak_constants::gfermi;
-   sm_parameters.mw_pole = Electroweak_constants::MW;
-   sm_parameters.mz_pole = Electroweak_constants::MZ;
-   sm_parameters.mt_pole = 165.0;
-   sm_parameters.alpha_s = 0.1176;
-   SM_weinberg_angle::Sm_parameters SM_parameters;
+   Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = Electroweak_constants::gfermi;
+   parameters.mw_pole = Electroweak_constants::MW;
+   parameters.mz_pole = Electroweak_constants::MZ;
+   parameters.mt_pole = 165.0;
+   parameters.alpha_s = 0.1176;
+   SM_weinberg_angle::Parameters SM_parameters;
    SM_parameters.fermi_constant = Electroweak_constants::gfermi;
    SM_parameters.mw_pole = Electroweak_constants::MW;
    SM_parameters.mz_pole = Electroweak_constants::MZ;
    SM_parameters.mt_pole = 165.0;
    SM_parameters.alpha_s = 0.1176;
 
-   Weinberg_angle wein_sm(&sm, sm_parameters);
+   Weinberg_angle wein_sm(&sm, parameters);
    SM_weinberg_angle wein_SM(&SM, SM_parameters);
 
    const double delta_vb_sm =
@@ -99,20 +99,20 @@ BOOST_AUTO_TEST_CASE( test_delta_r )
 
    const double outrho = 1.0, outsin = 0.48;
 
-   Weinberg_angle::Sm_parameters sm_parameters;
-   sm_parameters.fermi_constant = Electroweak_constants::gfermi;
-   sm_parameters.mw_pole = Electroweak_constants::MW;
-   sm_parameters.mz_pole = Electroweak_constants::MZ;
-   sm_parameters.mt_pole = 165.0;
-   sm_parameters.alpha_s = 0.1176;
-   SM_weinberg_angle::Sm_parameters SM_parameters;
+   Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = Electroweak_constants::gfermi;
+   parameters.mw_pole = Electroweak_constants::MW;
+   parameters.mz_pole = Electroweak_constants::MZ;
+   parameters.mt_pole = 165.0;
+   parameters.alpha_s = 0.1176;
+   SM_weinberg_angle::Parameters SM_parameters;
    SM_parameters.fermi_constant = Electroweak_constants::gfermi;
    SM_parameters.mw_pole = Electroweak_constants::MW;
    SM_parameters.mz_pole = Electroweak_constants::MZ;
    SM_parameters.mt_pole = 165.0;
    SM_parameters.alpha_s = 0.1176;
 
-   Weinberg_angle wein_sm(&sm, sm_parameters);
+   Weinberg_angle wein_sm(&sm, parameters);
    SM_weinberg_angle wein_SM(&SM, SM_parameters);
 
    // initialize self-energies
@@ -150,19 +150,19 @@ BOOST_AUTO_TEST_CASE( test_sin_theta )
    static constexpr double rho_start = 1.0;
    static constexpr double sin_start = 0.48;
 
-   Weinberg_angle::Sm_parameters sm_parameters;
-   sm_parameters.fermi_constant = Electroweak_constants::gfermi;
-   sm_parameters.mw_pole = Electroweak_constants::MW;
-   sm_parameters.mz_pole = Electroweak_constants::MZ;
-   sm_parameters.mt_pole = 165.0;
-   sm_parameters.alpha_s = 0.1176;
-   Weinberg_angle wein_sm(&sm, sm_parameters);
+   Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = Electroweak_constants::gfermi;
+   parameters.mw_pole = Electroweak_constants::MW;
+   parameters.mz_pole = Electroweak_constants::MZ;
+   parameters.mt_pole = 165.0;
+   parameters.alpha_s = 0.1176;
+   Weinberg_angle wein_sm(&sm, parameters);
    wein_sm.set_number_of_iterations(maxTries);
    wein_sm.set_precision_goal(tol);
    double sin_theta_sm;
    BOOST_REQUIRE_NO_THROW(sin_theta_sm = wein_sm.calculate_sin_theta_w(sin_start));
 
-   SM_weinberg_angle::Sm_parameters SM_parameters;
+   SM_weinberg_angle::Parameters SM_parameters;
    SM_parameters.fermi_constant = Electroweak_constants::gfermi;
    SM_parameters.mw_pole = Electroweak_constants::MW;
    SM_parameters.mz_pole = Electroweak_constants::MZ;
