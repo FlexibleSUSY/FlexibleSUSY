@@ -22,15 +22,14 @@
 
 BeginPackage["TestSuite`", {"Utils`"}];
 
-TestEquality::usage="tests equality of two expressions";
-TestCloseRel::usage="tests relative numerical difference."
-TestLowerThan::usage="tests whether a < b."
-TestGreaterThan::usage="tests whether a > b."
-TestNonEquality::usage="tests inequality of two expressions";
-TestCPPCode::usage="tests a C/C++ code snippet for an expected
-result";
-PrintTestSummary::usage="prints test summary";
 GetNumberOfFailedTests::usage="returns number of failed tests";
+PrintTestSummary::usage="prints test summary";
+TestCPPCode::usage="tests a C/C++ code snippet for an expected result";
+TestEquality::usage="tests equality of two expressions";
+TestCloseRel::usage="tests relative numerical equality"
+TestGreaterThan::usage="tests whether a > b"
+TestLowerThan::usage="tests whether a < b"
+TestNonEquality::usage="tests inequality of two expressions";
 
 Begin["`Private`"];
 
@@ -76,16 +75,14 @@ TestCPPCode[{preface_String, expr_String}, value_String, type_String, expected_S
              ];
           ];
 
-PrintTestSummary[] :=
-    Block[{},
-          Print["Test summary"];
-          Print["============"];
-          If[numberOfFailedTests == 0,
-             Print["All tests passed (", numberOfPassedTests, ")."];
-             ,
-             Print["*** ", numberOfFailedTests, " tests failed!"];
-            ];
-         ];
+PrintTestSummary[] := (
+    Print["Test summary"];
+    Print["============"];
+    If[numberOfFailedTests == 0,
+       Print["All tests passed (", numberOfPassedTests, ")."],
+       Print["*** ", numberOfFailedTests, " tests failed!"]
+    ];
+    );
 
 RunCPPProgram[{preface_String, expr_String}, fileName_String:"tmp.cpp"] :=
     Module[{code, output = "", errorCode},
