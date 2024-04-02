@@ -36,6 +36,12 @@ AbortAssert[!TestEquality[0, 1]];
 AbortAssert[TestEquality["ab", "ab"]];
 AbortAssert[!TestEquality["ab", "ba"]];
 
+(* test TestNonEquality *)
+AbortAssert[!TestNonEquality[0, 0]];
+AbortAssert[TestNonEquality[0, 1]];
+AbortAssert[!TestNonEquality["ab", "ab"]];
+AbortAssert[TestNonEquality["ab", "ba"]];
+
 (* test TestCloseRel *)
 AbortAssert[TestCloseRel[0, 0, 1]];
 AbortAssert[TestCloseRel[1, 1, 1]];
