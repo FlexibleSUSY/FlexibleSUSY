@@ -112,12 +112,14 @@ RunCPPProgram[{preface_String, expr_String}, fileName_String:"tmp.cpp"] :=
           ];
 
 TestCloseRel[a_?NumericQ, b_?NumericQ, rel_?NumericQ] :=
-    If[Abs[a - b] < rel (1 + Abs[a]),
-       numberOfPassedTests++;
-       True,
-       Print["TestCloseRel: FAIL: ", InputForm[a], " < ", InputForm[b], " with relative precision ", InputForm[rel]];
-       numberOfFailedTests++;
-       False
+    Which[
+        a == b,
+        numberOfPassedTests++; True,
+        Abs[a - b] < Abs[rel] Max[Abs[a], Abs[b]],
+        numberOfPassedTests++; True,
+        True,
+        Print["TestCloseRel: FAIL: ", InputForm[a], " < ", InputForm[b], " with relative precision ", InputForm[rel]];
+        numberOfFailedTests++; False
     ];
 
 TestCloseRel[a_List, b_List, rel_?NumericQ] :=

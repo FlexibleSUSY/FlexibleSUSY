@@ -40,12 +40,13 @@ AbortAssert[!TestEquality["ab", "ba"]];
 AbortAssert[TestCloseRel[0, 0, 1]];
 AbortAssert[TestCloseRel[1, 1, 1]];
 AbortAssert[TestCloseRel[1, 1 + 1*^-10, 1*^-10]];
+AbortAssert[!TestCloseRel[1, 1 + 1*^-10, 1*^-11]];
+AbortAssert[TestCloseRel[1*^-100, 1*^-100 + 1*^-200, 1*^-100]];
 
 (* test TestLowerThan *)
 AbortAssert[!TestLowerThan[0, 0]];
 AbortAssert[!TestLowerThan[1, 0]];
 AbortAssert[TestLowerThan[0, 1]];
-AbortAssert[TestCloseRel[1, 1 + 1*^-10]];
 
 (* Summary *)
 If[failedTests == 0,
