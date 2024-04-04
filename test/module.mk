@@ -124,6 +124,7 @@ TEST_META := \
 		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
 		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
+		$(DIR)/test_TestSuite.m \
 		$(DIR)/test_TextFormatting.m \
 		$(DIR)/test_THDM_threshold_corrections.m \
 		$(DIR)/test_THDM_threshold_corrections_gauge.m \
