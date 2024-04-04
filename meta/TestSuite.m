@@ -22,15 +22,14 @@
 
 BeginPackage["TestSuite`", {"Utils`"}];
 
-TestEquality::usage="tests equality of two expressions";
-TestCloseRel::usage="tests relative numerical difference."
-TestLowerThan::usage="tests whether a < b."
-TestGreaterThan::usage="tests whether a > b."
-TestNonEquality::usage="tests inequality of two expressions";
-TestCPPCode::usage="tests a C/C++ code snippet for an expected
-result";
-PrintTestSummary::usage="prints test summary";
 GetNumberOfFailedTests::usage="returns number of failed tests";
+PrintTestSummary::usage="prints test summary";
+TestCPPCode::usage="tests a C/C++ code snippet for an expected result";
+TestEquality::usage="tests equality of two expressions";
+TestCloseRel::usage="tests relative numerical equality"
+TestGreaterThan::usage="tests whether a > b"
+TestLowerThan::usage="tests whether a < b"
+TestNonEquality::usage="tests inequality of two expressions";
 
 Begin["`Private`"];
 
@@ -76,16 +75,14 @@ TestCPPCode[{preface_String, expr_String}, value_String, type_String, expected_S
              ];
           ];
 
-PrintTestSummary[] :=
-    Block[{},
-          Print["Test summary"];
-          Print["============"];
-          If[numberOfFailedTests == 0,
-             Print["All tests passed (", numberOfPassedTests, ")."];
-             ,
-             Print["*** ", numberOfFailedTests, " tests failed!"];
-            ];
-         ];
+PrintTestSummary[] := (
+    Print["Test summary"];
+    Print["============"];
+    If[numberOfFailedTests == 0,
+       Print["All tests passed (", numberOfPassedTests, ")."],
+       Print["*** ", numberOfFailedTests, " tests failed!"]
+    ];
+    );
 
 RunCPPProgram[{preface_String, expr_String}, fileName_String:"tmp.cpp"] :=
     Module[{code, output = "", errorCode},
@@ -112,12 +109,14 @@ RunCPPProgram[{preface_String, expr_String}, fileName_String:"tmp.cpp"] :=
           ];
 
 TestCloseRel[a_?NumericQ, b_?NumericQ, rel_?NumericQ] :=
-    If[Abs[a - b] < rel (1 + Abs[a]),
-       numberOfPassedTests++;
-       True,
-       Print["TestCloseRel: FAIL: ", InputForm[a], " < ", InputForm[b], " with relative precision ", InputForm[rel]];
-       numberOfFailedTests++;
-       False
+    Which[
+        a == b,
+        numberOfPassedTests++; True,
+        Abs[a - b] < Abs[rel] Max[Abs[a], Abs[b]],
+        numberOfPassedTests++; True,
+        True,
+        Print["TestCloseRel: FAIL: ", InputForm[a], " < ", InputForm[b], " with relative precision ", InputForm[rel]];
+        numberOfFailedTests++; False
     ];
 
 TestCloseRel[a_List, b_List, rel_?NumericQ] :=
@@ -141,7 +140,13 @@ TestLowerThan[a___] := (
     TestEquality[0,1]);
 
 TestGreaterThan[a_?NumericQ, b_?NumericQ] :=
-    TestEquality[a > b, True];
+    If[a > b,
+       numberOfPassedTests++;
+       True,
+       Print["TestGreaterThan: FAIL: ", InputForm[a], " > ", InputForm[b]];
+       numberOfFailedTests++;
+       False
+    ];
 
 TestGreaterThan[a___] := (
     Print["TestGreaterThan: FAIL: ", {a}];
