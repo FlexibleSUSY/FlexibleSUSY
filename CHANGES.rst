@@ -6,6 +6,12 @@ New features
 * Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
   over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
 
+Fixed bugs
+----------
+
+* Fixed wrong colour factor in decays of an SU(3) octet to triplet anti-triplet
+  and permutations of such.
+
 FlexibleSUSY 2.8.0 [February, 23 2024]
 ======================================
 
