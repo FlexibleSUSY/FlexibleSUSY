@@ -4009,7 +4009,6 @@ if test "x${enable_compile}" = "xyes"; then
     check_lilith
     check_looplibrary
     check_odeint
-    check_python
     check_sqlite
     check_tsil
     check_static_lib_cmd
