@@ -9,8 +9,9 @@ New features
 Fixed bugs
 ----------
 
-* Fixed wrong colour factor in decays of an SU(3) color octet to triplet
-  anti-triplet and permutations of such.
+* Fixed wrong colour factor in decays with an external color octet, triplet,
+  anti-triplet combination, e.g. squark to quark and gluino or sgluon to squark
+  anti-squark.
 
 FlexibleSUSY 2.8.0 [February, 23 2024]
 ======================================
