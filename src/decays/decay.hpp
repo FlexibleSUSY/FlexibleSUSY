@@ -202,7 +202,7 @@ constexpr double squared_color_generator() noexcept {
          (cxx_diagrams::fields::is_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
          || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
       ) {
-         return 4.;
+         return 16/3.;
       }
       else {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
@@ -221,7 +221,7 @@ constexpr double squared_color_generator() noexcept {
          (cxx_diagrams::fields::is_anti_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
          || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
       ) {
-         return 4.;
+         return 16/3.;
       }
       else {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
@@ -239,7 +239,7 @@ constexpr double squared_color_generator() noexcept {
          (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
          || (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
       ) {
-         return 1./2.;
+         return 2.;
       }
       // 8 -> 8, 8 with identical particles in the final state
       // because of symmetry of the final state it must be proportional to d^2
