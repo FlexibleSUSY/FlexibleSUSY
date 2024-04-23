@@ -75,17 +75,7 @@ double calc_Mh(
 
    try {
       spectrum_generator.run(qedqcd, input);
-      auto sm = spectrum_generator.get_sm();
-
-      const double Q_pole =
-         settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ?
-         settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :
-         qedqcd.displayPoleMt();
-
-      sm.run_to(Q_pole);
-      sm.solve_ewsb();
-      sm.calculate_Mhh_pole();
-      Mh = sm.get_physical().Mhh;
+      Mh = spectrum_generator.get_sm().get_physical().Mhh;
    } catch (const flexiblesusy::Error& e) {
       BOOST_TEST_MESSAGE(e.what_detailed());
    }
