@@ -17,6 +17,9 @@ Fixed bugs
   anti-triplet combination, e.g. squark to quark and gluino or sgluon to squark
   anti-squark.
 
+* Fixed problem with linking with python3 library if it was installed in
+  a non-standard location.
+
 FlexibleSUSY 2.8.0 [February, 23 2024]
 ======================================
 

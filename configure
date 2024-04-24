@@ -2253,7 +2253,7 @@ check_python() {
         # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
         # remove duplicates
         PYTHONFLAGS=$(echo "$(${python3config_cmd} --includes)" | xargs -n1 | sort -u)
-        PYTHONLIBS="$(${python3config_cmd} --libs --embed)"
+        PYTHONLIBS="$(${python3config_cmd} --ldflags --embed)"
         result "found $python3config_cmd"
     fi
 }
