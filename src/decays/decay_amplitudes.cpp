@@ -212,7 +212,7 @@ Decay_amplitude_SFF operator*(Decay_amplitude_SFF const& amp, std::complex<doubl
    return operator*(factor, amp);
 }
 
-double amplitude_interference(const Decay_amplitude_SFF& a1, const Decay_amplitude_SFF& a2) {
+std::complex<double> amplitude_interference(const Decay_amplitude_SFF& a1, const Decay_amplitude_SFF& a2) {
    assert(is_zero(a1.m_decay - a2.m_decay));
    assert(is_zero(a1.m_fermion_1 - a2.m_fermion_1));
    assert(is_zero(a1.m_fermion_2 - a2.m_fermion_2));
@@ -226,7 +226,7 @@ double amplitude_interference(const Decay_amplitude_SFF& a1, const Decay_amplitu
          (a1.form_factor_left*Conj(a2.form_factor_left) + a1.form_factor_right*Conj(a2.form_factor_right))
       - 2.*a1.m_fermion_1*a1.m_fermion_2 *
          (a1.form_factor_left*Conj(a2.form_factor_right) + a1.form_factor_right*Conj(a2.form_factor_left));
-   return std::real(amp2);
+   return amp2;
 }
 
 double Decay_amplitude_SFF::square() const
@@ -235,7 +235,7 @@ double Decay_amplitude_SFF::square() const
    const double m_1_sq = Sqr(m_fermion_1);
    const double m_2_sq = Sqr(m_fermion_2);
 
-   return amplitude_interference(*this, *this);
+   return std::real(amplitude_interference(*this, *this));
 }
 
 double Decay_amplitude_FFS::square() const
