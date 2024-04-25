@@ -354,7 +354,7 @@ ContainsOnlySupportedVertices[diagram_] :=
                  to fail on unsuported color structure.
               We generated tree and 1-loop amplitude all at once and then select the
               lowest order one. For the process we considered so far the amplitudes with
-              unsuported vertices don't contribitu in the end. *)
+              unsuported vertices don't contribute in the end. *)
            vertexTypes = CXXDiagrams`VertexTypeForFields /@ vertices;
            unsupportedVertices = Complement[vertexTypes, CXXDiagrams`VertexTypes[]];
            If[unsupportedVertices =!= {},
@@ -374,6 +374,9 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
          externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]],
          diagrams
       },
+      If[IsOneLoopDecayTopology[graph],
+         If[MemberQ[{"T2", "T3", "T5", "T8", "T9", "T10"}, FeynArtsTopologyName[graph]], Return[{}]]
+      ];
       (* vertices in diagrams are not SortCp'ed *)
       diagrams =
          CXXDiagrams`FeynmanDiagramsOfType[
@@ -382,9 +385,14 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
             (* One loop decay topologies T2, T3 & T5 contain an A0 bubble on external leg.
                   With below argument set to True, charged particles are inserted twice in
                such bubble - once as particle and once as antiparticle. *)
-            If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True]
+            If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True],
+            IsPossibleNonZeroVertex[Prepend[finalFields, initialField]] && IsOneLoopDecayTopology[graph] && !(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialField] && (Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
+                 Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
          ];
-      Select[diagrams, IsPossibleNonZeroDiagram[#, True]&]
+      If[diagrams =!= {},
+         Select[diagrams, IsPossibleNonZeroDiagram[#, True]&],
+         {}
+      ]
    ];
 
 (* returns list of {{number of loops, {{topology, list of insertions}}}, ...} *)

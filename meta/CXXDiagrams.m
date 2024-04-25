@@ -390,7 +390,7 @@ ColourIndexOfField[field_ /; TreeMasses`ColorChargedQ[field]]:=
  * a reordering of fields in internal vertices and thus any appearing
  * duplicate diagrams are removed.
  **)
-FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List, bothLoopOrientations_:False] :=
+FeynmanDiagramsOfType[adjacencyMatrix_List, externalFields_List, bothLoopOrientations_:False, discardSMIndertions_:False] :=
 	Module[{externalVertices = externalFields[[All,1]],
 			internalVertices,externalRules, internalFieldCouplings,
 			unspecifiedEdgesLess,unspecifiedEdgesEqual,
@@ -431,6 +431,10 @@ not symmetric"];
 			fieldsToInsert}][[All,2]]];
 
 	If[resolvedFields === {}, Return[{}]];
+   If[discardSMIndertions && resolvedFields =!= {{}},
+      resolvedFields = Select[resolvedFields, !And@@(IsSMParticle /@ #)&]
+   ];
+   If[resolvedFields === {}, Return[{}]];
 
 	resolvedFieldCouplings = unresolvedFieldCouplings /.
 		((Rule @@@ Transpose[{fieldsToInsert,#}]) & /@ resolvedFields);
@@ -513,6 +517,11 @@ ConvertColourStructureToColorMathConvention[fields_List,
 ConvertColourStructureToColorMathConvention[fields_List,
 	AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]] :=
 	ColorMath`CMf[cIndex1, cIndex2, cIndex3];
+
+ConvertColourStructureToColorMathConvention[indexedFields_List,
+	KroneckerDeltaColourVertex[cIndex1_, cIndex4_]*KroneckerDeltaColourVertex[cIndex2_, cIndex3_] + KroneckerDeltaColourVertex[cIndex1_, cIndex3_]*KroneckerDeltaColourVertex[cIndex2_, cIndex4_] ] :=
+   ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex1, cIndex4]]*ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex2, cIndex3]] +
+   ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex1, cIndex3]]*ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex2, cIndex4]];
 
 ConvertColourStructureToColorMathConvention[indexedFields_List,
 	KroneckerDeltaColourVertex[cIndex1_, cIndex2_]] :=
@@ -960,10 +969,22 @@ GaugeStructureOfVertexLorentzPart[
 	scalar_ SARAH`Delta[cIndex1_, cIndex4_] SARAH`Delta[cIndex2_, cIndex3_] :>
 	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex4] KroneckerDeltaColourVertex[cIndex2, cIndex3], lorentzStructure};
 
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /;
+   MatchQ[
+      Collect[fullExpr, SARAH`Delta[__]],
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_]
+         + scalar1_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]
+   ] :=
+   Collect[fullExpr, SARAH`Delta[__]] /.
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] + scalar1_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] :>
+      {scalar1, KroneckerDeltaColourVertex[c1, c4] KroneckerDeltaColourVertex[c2, c3] + KroneckerDeltaColourVertex[c1, c3] KroneckerDeltaColourVertex[c2, c4], lorentzStructure} /;
+         (And @@ Vertices`SarahColorIndexQ /@ {c1, c2, c3, c4}) &&
+         FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
 (* @todo:
       This case catches vertices with sum of products of 2 Kronecker deltas.
-      Currently, if scalar1 and scalar2 coefficients would be equal in principle
-      we could handle this vertex. The case of scalar1 != scalar2 we cannot.
+      The case when scalar1 and scalar2 we handle. The case of scalar1 != scalar2 we cannot.
       For the moment therefore we only print a warning message, similar to
       the generic catch all case *)
 GaugeStructureOfVertexLorentzPart[
