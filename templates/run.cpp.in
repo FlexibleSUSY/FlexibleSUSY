@@ -24,6 +24,7 @@
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_spectrum_generator.hpp"
 #include "@ModelName@_utilities.hpp"
+#include "decays/experimental_constraints.hpp"
 @decaysIncludes@
 #include "@ModelName@_unitarity.hpp"
 
@@ -106,13 +107,9 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
    }
 
    EffectiveCoupling_list effc {};
-#ifdef ENABLE_HIGGSTOOLS
    SignalResult hs {};
    std::vector<std::tuple<int, double, double, std::string>> higgsbounds_v = {};
-#endif
-#ifdef ENABLE_LILITH
    std::optional<SignalResult> lilith;
-#endif
 @calculateDecaysForModel@
 
    const bool show_result = !problems.have_problem() ||

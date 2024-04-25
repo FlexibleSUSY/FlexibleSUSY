@@ -2672,8 +2672,7 @@ ExampleDecaysIncludes[] :=
          FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
          "loop_libraries/loop_library.hpp"},
        "\n"
-    ] <>
-"\n#include \"decays/experimental_constraints.hpp\"";
+    ];
 
 ExampleCalculateDecaysForModel[] :=
 IndentText[
