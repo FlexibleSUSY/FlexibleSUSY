@@ -1255,21 +1255,23 @@ Module[{cxxVertices, vertexPartition,
          ,
          DistributedContexts->None
       ];
-      cxxVertices =
-         AbsoluteTiming@ParallelMap[
-            CreateVertex,
-            DeleteDuplicates[vertices]
-         ];
+      Off[Part::pkspec1];
+      cxxVertices = AbsoluteTiming@ParallelMap[
+         CreateVertex,
+         DeleteDuplicates[vertices]
+      ];
+      On[Part::pkspec1];
       Needs["Parallel`Developer`"];
       Parallel`Developer`ClearDistributedDefinitions[];
       Parallel`Developer`ClearKernels[];
       CloseKernels[]
       ,
-      cxxVertices =
-         AbsoluteTiming@Map[
-            CreateVertex,
-            DeleteDuplicates[vertices]
-         ],
+      Off[Part::pkspec1];
+      cxxVertices = AbsoluteTiming@Map[
+         CreateVertex,
+         DeleteDuplicates[vertices]
+      ];
+      On[Part::pkspec1];,
       Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
    ];
    Print[""];
@@ -1317,7 +1319,7 @@ CreateVertex[fields_List] :=
 				VertexFunctionBodyForFields[fields] <> "\n"] <>
 		"}"
 		}
-  ]
+  ];
 
 (** \brief Returns the Lorentz structure of a given vertex.
  * param fields a vertex given as a list of fields

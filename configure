@@ -5,8 +5,8 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=7
-FLEXIBLESUSY_PATCH=1
+FLEXIBLESUSY_MINOR=8
+FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -98,6 +98,7 @@ options="                    \
    enable_higgstools         \
    enable_himalaya           \
    enable_librarylink        \
+   enable_lilith             \
    enable_looptools          \
    enable_mass_error_check   \
    enable_shared_libs        \
@@ -127,6 +128,7 @@ enable_gm2calc="automatic"
 enable_higgstools="automatic"
 enable_himalaya="automatic"
 enable_librarylink="automatic"
+enable_lilith="automatic"
 enable_looptools="no"
 enable_collier="no"
 enable_meta="no"
@@ -216,6 +218,7 @@ LLFLAGS=""
 LLLIBS=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
+lilith_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
 sqlite_lib_dir=""
@@ -263,11 +266,11 @@ SARAH_MINOR="0"
 SARAH_PATCH="0"
 
 # required FeynArts version
-required_feynarts_version="3.9.0"
+required_feynarts_version="3.10.0"
 FEYNARTS_VERSION="unknown"
 
 # required FormCalc version
-required_formcalc_version="9.5.0"
+required_formcalc_version="9.8.0"
 FORMCALC_VERSION="unknown"
 
 # Mathematica version (0 = unknown)
@@ -2233,6 +2236,40 @@ check_higgstools() {
     fi
 }
 
+check_python() {
+    checking_msg "C++ python embedding"
+    path_split=$(echo "$PATH" | sed -e 's/:/ /g')
+    python3config_cmd=$(find $path_split -name "python3*-config" 2>/dev/null)
+    if test -z "$python3config_cmd" ; then
+        result "no"
+        message "Warning! Cannot find python3*-config. Some features (like the Lilith interface)"
+        message "         will be disabled."
+        enable_lilith=no
+    else
+        # pick 1st one that was found
+        python3config_cmd=$(echo $python3config_cmd | cut -d ' ' -f 1)
+        # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
+        # remove duplicates
+        PYTHONFLAGS=$(echo "$(${python3config_cmd} --includes)" | xargs -n1 | sort -u)
+        PYTHONLIBS="$(${python3config_cmd} --ldflags --embed)"
+        result "found $python3config_cmd"
+    fi
+}
+
+check_lilith() {
+   if test -n "$lilith_dir" && test ! "x$enable_lilith" = "xno" ; then
+       check_header "lilith/c-api/lilith.h" "$lilith_dir"
+       if test "x$found_dir" = "x" ; then
+           enable_lilith=no
+       else
+           LILITHFLAGS="-I$lilith_dir/lilith/c-api"
+           enable_lilith=yes
+       fi
+   else
+       enable_lilith=no
+   fi
+}
+
 #_____________________________________________________________________
 check_himalaya_incl() {
     check_header "himalaya/version.hpp" "$himalaya_inc_dir"
@@ -3289,15 +3326,6 @@ update_module_mk() {
 
     [ -e "$model_file" ] || return
 
-    local mk_date model_date date_tolerance
-    mk_date="$(date -r "${mkfile}" +%s)"
-    model_date="$(date -r "${model_file}" +%s)"
-    date_tolerance="5" # Seconds
-    if [ "0" = "$(( $mk_date + $date_tolerance < $model_date ))" ] && \
-       [ "0" = "$(( $model_date < $mk_date - $date_tolerance ))" ]; then
-       return
-    fi
-
     message -n "   Updating model-specific modules in $mkfile ... "
     local ho
     ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
@@ -3401,6 +3429,13 @@ enable_defines() {
         DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
     fi
     logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
+
+    if test "x$enable_lilith" = "xyes" ; then
+        DEFINE_ENABLE_LILITH="#define ENABLE_LILITH 1"
+    else
+        DEFINE_ENABLE_LILITH="#undef ENABLE_LILITH"
+    fi
+    logmsg "   ${DEFINE_ENABLE_LILITH}"
 
     if test "x$enable_librarylink" = "xyes" ; then
         DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
@@ -3551,9 +3586,9 @@ add_metaflags() {
    tcol_='FSEnableColors = '
    col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
-   local tcol_ col_
-   tcol_='FSEnableCompile = '
-   col_="${tcol_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
+   local tcom_ com_
+   tcom_='FSEnableCompile = '
+   com_="${tcom_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
 
    local c_=''
    local fs_=''
@@ -3579,9 +3614,12 @@ add_metaflags() {
 
       c_=$(grep "$tcol_" $fs_)
       if [ "$c_" != "$col_" ]; then
-         [ "$c_" != '' ] && \
-            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
-            echo "$col_" >> $fs_
+         [ "$c_" != '' ] && sed -i "s/${tcol_}.*/${col_}/g" $fs_ || echo "$col_" >> $fs_
+      fi
+
+      c_=$(grep "$tcom_" $fs_)
+      if [ "$c_" != "$com_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tcom_}.*/${com_}/g" $fs_ || echo "$com_" >> $fs_
       fi
 
    done
@@ -3643,22 +3681,26 @@ replace_markers() {
 	-e "s|@ENABLE_THREADS@|$enable_threads|"  \
 	-e "s|@ENABLE_TSIL@|$enable_tsil|"        \
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
-        -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
-        -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
-        -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
-        -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
-        -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
-        -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
+	-e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
+	-e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
+	-e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
+	-e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
+	-e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
+	-e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
 	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
+	-e "s|@LILITHFLAGS@|$LILITHFLAGS|"    \
+	-e "s|@PYTHONFLAGS@|$PYTHONFLAGS|"    \
+	-e "s|@PYTHONLIBS@|$PYTHONLIBS|"    \
+	-e "s|@ENABLE_LILITH@|$enable_lilith|" \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
 	-e "s|@LOOPTOOLSFLAGS@|$LOOPTOOLSFLAGS|"  \
 	-e "s|@OPTIONAL_MODULES@|$OPTIONAL_MODULES|" \
 	-e "s|@SARAH_DEP_GEN@|$SARAH_DEP_GEN|"    \
 	-e "s|@SARAH_MODEL_DIR@|$SARAH_MODEL_DIR|" \
-        -e "s|@SHARED_LIB_CMD@|$SHARED_LIB_CMD|"  \
-        -e "s|@STATIC_LIB_CMD@|$STATIC_LIB_CMD|"  \
+	-e "s|@SHARED_LIB_CMD@|$SHARED_LIB_CMD|"  \
+	-e "s|@STATIC_LIB_CMD@|$STATIC_LIB_CMD|"  \
 	-e "s|@SQLITELIBS@|$SQLITELIBS|"          \
 	-e "s|@SQLITEFLAGS@|$SQLITEFLAGS|"        \
 	-e "s|@TSILLIBS@|$TSILLIBS|"              \
@@ -3692,6 +3734,7 @@ enable/disable options, prefix with either --enable- or --disable-
   gm2calc           Enable GM2Calc (default: $enable_gm2calc)
   higgstools        Enable HiggsTools (default: $enable_higgstools)
   himalaya          Enable Himalaya (default: $enable_himalaya)
+  lilith            Enable Lilith (default: $enable_lilith)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
@@ -3734,6 +3777,7 @@ Package directories, compilation settings and model selection
   --with-higgstools-libdir= Path to search for HiggsTools library
   --with-higgstools-incdir= Path to search for HiggsTools header
   --with-install-dir=       Path to source code installation directory
+  --with-lilith=            Path to Lilith
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
   --with-loop-libraries=    Comma separated list of loop libraries to be enabled
@@ -3864,6 +3908,7 @@ if test $# -gt 0 ; then
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
+            --with-lilith=*)         lilith_dir=$optarg ;;
             --with-llflags=*)        LLFLAGS=$optarg ;;
             --with-lllibs=*)         LLLIBS=$optarg ;;
             --with-loop-libraries=*) LOOP_LIBRARIES=$optarg ;;
@@ -3954,6 +3999,8 @@ if test "x${enable_compile}" = "xyes"; then
         check_boost_thread_incl
         check_boost_thread_libs
     fi
+    check_python
+    check_lilith
     check_looplibrary
     check_odeint
     check_sqlite
@@ -4047,6 +4094,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
     -e "s|@DEFINE_ENABLE_HIGGSTOOLS@|$DEFINE_ENABLE_HIGGSTOOLS|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
+    -e "s|@DEFINE_ENABLE_LILITH@|$DEFINE_ENABLE_LILITH|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \

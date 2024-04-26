@@ -52,7 +52,7 @@ ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy, {
          {20, FlexibleSUSYObservable`AMM[Fe[1]]},
          {21, FlexibleSUSYObservable`AMM[Fe[2]]},
-         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe, 2 -> 1]},
          {27, FlexibleSUSYObservable`bsgamma}
       }
    }

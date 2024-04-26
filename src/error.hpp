@@ -76,6 +76,30 @@ private:
 };
 
 /**
+ * @class NoGFermiConvergenceError
+ * @brief No convergence while calculating G_Fermi
+ */
+class NoGFermiConvergenceError : public Error {
+public:
+   NoGFermiConvergenceError(int number_of_iterations_, double g_fermi_)
+      : Error("Calculation G_Fermi did not converge")
+      , number_of_iterations(number_of_iterations_)
+      , g_fermi(g_fermi_)
+      {}
+   virtual ~NoGFermiConvergenceError() = default;
+   std::string what_detailed() const override {
+      return "NoGFermiConvergenceError: no convergence after "
+         + std::to_string(number_of_iterations) + " iterations (G_Fermi="
+         + std::to_string(g_fermi) + ")";
+   }
+   int get_number_of_iterations() const { return number_of_iterations; }
+   double get_g_fermi() const { return g_fermi; }
+private:
+   int number_of_iterations;
+   double g_fermi;
+};
+
+/**
  * @class NoSinThetaWConvergenceError
  * @brief No convergence while calculating the sinThetaW parameter
  */

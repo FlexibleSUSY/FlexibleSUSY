@@ -7,42 +7,51 @@
 operating_system="`(uname -s) 2>/dev/null || echo unknown`"
 
 # default SARAH version
-sarah_version="4.14.5"
+sarah_version="4.15.2"
+
+# Mathematica or WolframEngine flavour
+flavour="Mathematica"
+
+# Mathematica kernel
+mathematica_kernel="math"
+
+# installation flags
+overwrite="no"
 
 # exit codes
 exit_ok="0"
 exit_syntax_error="1"
 
-# determine Mathematica user directory
-case "$operating_system" in
-    Darwin)     mathematica_dir="${HOME}/Library/Mathematica" ;;
-    CYGWIN_NT*) mathematica_dir="${USERPROFILE}/AppData/Roaming/Mathematica" ;;
-    # Linux, *BSD
-    *)          mathematica_dir="${HOME}/.Mathematica" ;;
-esac
+#_____________________________________________________________________
+initialize_dirs() {
+    # determine Mathematica user directory
+    case "$operating_system" in
+        Darwin)     mathematica_dir="${HOME}/Library/${flavour}" ;;
+        CYGWIN_NT*) mathematica_dir="${USERPROFILE}/AppData/Roaming/${flavour}" ;;
+        # Linux, *BSD
+        *)          mathematica_dir="${HOME}/.${flavour}" ;;
+    esac
 
-mathematica_kernel="math"
-mathematica_kernel_dir="${mathematica_dir}/Kernel"
-mathematica_applications_dir="${mathematica_dir}/Applications"
-mathematica_init="${mathematica_kernel_dir}/init.m"
+    mathematica_kernel_dir="${mathematica_dir}/Kernel"
+    mathematica_applications_dir="${mathematica_dir}/Applications"
+    mathematica_init="${mathematica_kernel_dir}/init.m"
 
-install_path="${mathematica_applications_dir}"
-sarah_link="${install_path}/SARAH"
-sarah_link_for_math="$sarah_link"
+    install_path="${mathematica_applications_dir}"
+    sarah_link="${install_path}/SARAH"
+    sarah_link_for_math="$sarah_link"
 
-case "$operating_system" in CYGWIN_NT*)
-    mathematica_kernel_dir=$(cygpath -u "$mathematica_kernel_dir")
-    mathematica_applications_dir=$(cygpath -u "$mathematica_applications_dir")
-    mathematica_init=$(cygpath -u "$mathematica_init")
-    install_path=$(cygpath -u "$install_path")
-    sarah_link=$(cygpath -u "$sarah_link")
-    sarah_link_for_math=$(cygpath -w "$sarah_link_for_math")
-esac
+    case "$operating_system" in
+        CYGWIN_NT*)
+            mathematica_kernel_dir=$(cygpath -u "$mathematica_kernel_dir")
+            mathematica_applications_dir=$(cygpath -u "$mathematica_applications_dir")
+            mathematica_init=$(cygpath -u "$mathematica_init")
+            install_path=$(cygpath -u "$install_path")
+            sarah_link=$(cygpath -u "$sarah_link")
+            sarah_link_for_math=$(cygpath -w "$sarah_link_for_math") ;;
+    esac
 
-escaped_sarah_link_for_math=$(echo "$sarah_link_for_math" | sed 's,\\,\\\\,g')
-
-# installation flags
-overwrite="no"
+    escaped_sarah_link_for_math=$(echo "$sarah_link_for_math" | sed 's,\\,\\\\,g')
+}
 
 #_____________________________________________________________________
 create_symlink() {
@@ -94,6 +103,8 @@ cat <<EOF
 Usage: ./`basename $0` [options]
 
 Options:
+  --flavour=         Mathematica or WolframEngine .
+
   --force,-f         Overwrite an already existing SARAH link.
 
   --version=         SARAH version (default: ${sarah_version}).
@@ -137,7 +148,7 @@ Example:
   (** User Mathematica initialization file **)
   AppendTo[\$Path, "${escaped_sarah_link_for_math}"];
   $ math
-  $ Mathematica 7.0 for Linux x86 (64-bit)
+  Mathematica 7.0 for Linux x86 (64-bit)
   Copyright 1988-2008 Wolfram Research, Inc.
 
   In[1]:= Needs["SARAH\`"]
@@ -168,15 +179,18 @@ if test $# -gt 0 ; then
             *)    optarg= ;;
         esac
         case $1 in
+            --flavour=*)             flavour="$optarg" ;;
             --force|-f)              overwrite="yes" ;;
             --with-math-cmd=*)       mathematica_kernel="$optarg" ;;
-            --help|-h)               help; exit ${exit_ok} ;;
+            --help|-h)               initialize_dirs; help; exit ${exit_ok} ;;
             --version=*)             sarah_version="$optarg" ;;
             *)  echo "Invalid option '$1'. Try $0 --help" ; exit ${exit_syntax_error} ;;
         esac
         shift
     done
 fi
+
+initialize_dirs
 
 sarah_tarball="SARAH-${sarah_version}.tar.gz"
 sarah_dir="SARAH-${sarah_version}"

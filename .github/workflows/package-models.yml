@@ -20,6 +20,7 @@ jobs:
           part: [1, 2]
 
     env:
+      FORMCALC_VERSION: '9.10'
       MODELS: 'E6SSM E6SSMEFTHiggs CE6SSM CMSSM CMSSMSemiAnalytic CMSSMNoFV MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT SplitMSSM MSSMNoFVatMGUTHimalaya MSSMEFTHiggs NUHMSSMNoFVHimalaya MSSMNoFVHimalaya lowMSSM NUHMSSM HSSUSY NMSSM CNMSSM lowNMSSM lowNMSSMTanBetaAtMZ NUTNMSSM NMSSMEFTHiggs NUTSMSSM SMSSM UMSSM MRSSM2 MRSSMEFTHiggs MSSMRHN TMSSM SM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC'
 
     steps:
@@ -39,6 +40,14 @@ jobs:
           if [ $(wolframscript -code 1+2) -eq 3 ]; then echo ok; else echo fail && exit 1; fi
           printf "Checking if math command is workings... ";
           if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo ok; else echo fail && exit 1; fi
+
+      - name: Install FormCalc
+        run: |
+          cd /fs_dependencies/gcc
+          wget -q -O - https://feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
+          cd FormCalc-$FORMCALC_VERSION
+          ./compile
+          echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
 
       - name: Generate models and SLHA output
         env:
@@ -62,13 +71,13 @@ jobs:
            ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
            name: models-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
            name: slha-output-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}-slha
@@ -85,12 +94,12 @@ jobs:
            repository:  FlexibleSUSY/FlexibleSUSY-generated
            token: ${{ secrets.PAT }}
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
            name: models-artifacts_1
            path: /tmp/models-artifacts
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
            name: models-artifacts_2
            path: /tmp/models-artifacts
@@ -119,12 +128,12 @@ jobs:
            repository:  FlexibleSUSY/FlexibleSUSY-slha
            token: ${{ secrets.PAT }}
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
            name: slha-output-artifacts_1
            path: /tmp/slha-output-artifacts
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
            name: slha-output-artifacts_2
            path: /tmp/slha-output-artifacts
@@ -150,12 +159,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
            name: models-artifacts_1
            path: /tmp/models-artifacts
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
            name: models-artifacts_2
            path: /tmp/models-artifacts

@@ -94,7 +94,7 @@ Block FlexibleSUSY
    12   1                    # force output
    13   1                    # Top quark 2-loop corrections QCD
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   0                    # calculate all observables
 ${sminputs_tmpl}
 Block MINPAR                 # Input parameters
     4   1                    # SignMu

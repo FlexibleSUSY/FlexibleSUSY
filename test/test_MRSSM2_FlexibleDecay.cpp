@@ -40,7 +40,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -759,9 +759,12 @@ Block IMVCKM Q= 1.00000000E+03
 
    // scalar sgluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_VGVG(&m), 0.057227807158571162, 3e-11);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_barFuFu(&m, 2, 2), 2.3251564031550308e-05, 2e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_barFuFu(&m, 2, 2), 9.300625612620111e-05, 2e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_SuconjSu(&m, 0, 0), 7.5178588442628946, 1e-16);
 
    // pseudoscalar sgluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_VGVG(&m), 0, 1e-16);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 2.2644028086115904e-05, 8e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 9.057611234446413e-05, 1e-16);
+
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Su_to_GluFu(&m, 3, 0), 56.21133546983561, 1e-16);
 }

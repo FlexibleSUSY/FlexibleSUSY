@@ -43,6 +43,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
 		$(DIR)/model.cpp \
+		$(wildcard $(DIR)/observables/*/*.cpp) \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/observables.cpp \
@@ -134,6 +135,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/mixings.hpp \
 		$(DIR)/model.hpp \
 		$(DIR)/multiindex.hpp \
+		$(wildcard $(DIR)/observables/*/*.hpp) \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
@@ -167,6 +169,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/thread_pool.hpp \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
+		$(DIR)/unitarity.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp \
 		$(DIR)/zeta.hpp
@@ -343,7 +346,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
+$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(LILITHFLAGS) $(PYTHONFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)

@@ -79,6 +79,8 @@ TEST_SRC := \
 		$(DIR)/test_sm_mw.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
+		$(DIR)/test_standard_model_G_fermi.cpp \
+		$(DIR)/test_standard_model_mw_calculation.cpp \
 		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_string_format.cpp \
 		$(DIR)/test_sum.cpp \
@@ -122,6 +124,7 @@ TEST_META := \
 		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
 		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
+		$(DIR)/test_TestSuite.m \
 		$(DIR)/test_TextFormatting.m \
 		$(DIR)/test_THDM_threshold_corrections.m \
 		$(DIR)/test_THDM_threshold_corrections_gauge.m \
@@ -188,7 +191,6 @@ endif
 
 ifeq ($(WITH_SM) $(WITH_SOFTSUSY),yes yes)
 TEST_SRC += \
-		$(DIR)/test_SM_weinberg_angle.cpp \
 		$(DIR)/test_SM_weinberg_angle_meta.cpp
 endif
 
@@ -205,8 +207,7 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_slha_output.cpp \
 		$(DIR)/test_CMSSM_spectrum.cpp \
 		$(DIR)/test_CMSSM_susy_scale_constraint.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle.cpp \
-		$(DIR)/test_CMSSM_weinberg_angle_meta.cpp
+		$(DIR)/test_CMSSM_unitarity.cpp
 TEST_SH += \
 		$(DIR)/test_CMSSM_gluino.sh
 endif
@@ -543,6 +544,7 @@ TEST_META += \
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
 		$(DIR)/test_SM_amm.cpp \
+		$(DIR)/test_SM_unitarity.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
 		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
@@ -553,7 +555,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp \
-		$(DIR)/test_standard_model_cxxvertices.cpp
+		$(DIR)/test_SM_yukawa_convention.cpp \
+		$(DIR)/test_SM_weinberg_angle.cpp
 TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
@@ -563,6 +566,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
 ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+TEST_SRC += \
+		$(DIR)/test_SM_cxxvertices.cpp
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_SM_FlexibleDecay.cpp
@@ -784,7 +789,8 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m
+		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_unitarity.m
 endif
 ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -1013,20 +1019,23 @@ $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) 
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
 
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
-ifeq ($(WITH_MRSSM2),yes)
 
-$(DIR)/test_MRSSM2_f_to_f_conversion.o $(DIR)/test_MRSSM2_f_to_f_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
-$(DIR)/test_MRSSM2_f_to_f_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-$(DIR)/test_MRSSM2_f_to_f_conversion.cpp : $(DIR)/test_MRSSM2_f_to_f_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_f_to_f_conversion.cpp.in $(META_SRC)
+ifeq ($(WITH_MRSSM2),yes)
+ifeq ($(ENABLE_COLLIER),yes)
+
+$(DIR)/test_MRSSM2_l_to_l_conversion.o $(DIR)/test_MRSSM2_l_to_l_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+$(DIR)/test_MRSSM2_l_to_l_conversion.cpp : $(DIR)/test_MRSSM2_l_to_l_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_l_to_l_conversion.cpp.in $(META_SRC)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
+endif
 endif
 
 ifeq ($(WITH_SM),yes)
@@ -1036,14 +1045,14 @@ $(DIR)/test_SM_npointfunctions.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTE
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_SM_matching_selfenergy_Fd.o $(DIR)/test_SM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
 ifeq ($(WITH_MSSM),yes)
@@ -1053,16 +1062,21 @@ $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(L
 $(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_MSSM_matching_selfenergy_Fd.o $(DIR)/test_MSSM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfenergy_Fd.meta $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
+endif
+
+ifeq ($(ENABLE_HIGGSTOOLS), yes)
+$(DIR)/test_HiggsTools_CP.o: CPPFLAGS += $(MODtest_INC) $(HIGGSTOOLSFLAGS)
+$(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
 endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
@@ -1212,9 +1226,13 @@ $(DIR)/test_SM_two_loop_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_mw_calculation.x: $(LIBSM)
 
-$(DIR)/test_standard_model_cxxvertices.x: $(LIBSM)
+$(DIR)/test_SM_yukawa_convention.x: $(LIBSM)
+
+$(DIR)/test_SM_cxxvertices.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
+
+$(DIR)/test_SM_unitarity.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle_meta.x: $(LIBSM)
 
@@ -1227,6 +1245,8 @@ $(DIR)/test_SMSU3_low_scale_constraint.x: $(LIBSMSU3)
 $(DIR)/test_NSM_low_scale_constraint.x: $(LIBNSM)
 
 $(DIR)/test_VCMSSM_ewsb.x: $(LIBVCMSSM) $(LIBCMSSM)
+
+$(DIR)/test_CMSSM_unitarity.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSMSemiAnalytic_ewsb.x: $(LIBCMSSMSemiAnalytic)
 

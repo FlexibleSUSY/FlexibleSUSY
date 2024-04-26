@@ -1480,7 +1480,7 @@ try {
       if (ren_scheme == 1) {
          // calculate shift DR' -> MDR'
          self_energy_3l += - hier.getDMhDRbarPrimeToMDRbarPrimeShift();
-      } else if (ren_scheme == 1) {
+      } else if (ren_scheme == 2) {
          // calculate shift DR' -> H3m
          self_energy_3l += - hier.getDMhDRbarPrimeToH3mShift();
       }
@@ -1506,7 +1506,7 @@ try {
       if (ren_scheme == 1) {
          // calculate shift DR' -> MDR'
          self_energy_3l += - hier.getDMhDRbarPrimeToMDRbarPrimeShift();
-      } else if (ren_scheme == 1) {
+      } else if (ren_scheme == 2) {
          // calculate shift DR' -> H3m
          self_energy_3l += - hier.getDMhDRbarPrimeToH3mShift();
       }
