@@ -192,7 +192,7 @@ Standard_model_decays::calculate_amplitude_1l(
 
    // external particles' masses
    result.m_decay = context.physical_mass<FieldIn>(indexIn);
-   if constexpr (cxx_diagrams::fields::is_scalar<FieldOut1>::value && cxx_diagrams::fields::is_scalar<FieldOut2>::value) {
+   if constexpr (cxx_diagrams::fields::is_fermion<FieldOut1>::value && cxx_diagrams::fields::is_fermion<FieldOut2>::value) {
       result.m_fermion_1 = context.physical_mass<FieldOut1>(indexOut1);
       result.m_fermion_2 = context.physical_mass<FieldOut2>(indexOut2);
    }
