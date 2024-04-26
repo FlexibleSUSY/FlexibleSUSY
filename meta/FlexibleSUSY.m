@@ -5269,7 +5269,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               CreateDirectory[cxxQFTOutputDir]];
 
            WriteCXXDiagramClass[
-              Join[aMMVertices, FFMasslessVVertices, decaysVertices, observablesExtraVertices],
+              Join[aMMVertices, FFMasslessVVertices, decaysVertices, observablesExtraVertices, If[FlexibleSUSY`FSModelName === "SM", {{TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[]}}, {}]],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates
