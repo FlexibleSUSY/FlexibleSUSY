@@ -26,6 +26,9 @@
 #include "NUHMSSMNoFVHimalayaEFTHiggs_shooting_spectrum_generator.hpp"
 #include "NUHMSSMNoFVHimalayaEFTHiggs_slha_io.hpp"
 #include "wrappers.hpp"
+#include <algorithm>
+#include <limits>
+#include <vector>
 
 using namespace flexiblesusy;
 
@@ -75,7 +78,12 @@ double calc_Mh(
 
    try {
       spectrum_generator.run(qedqcd, input);
-      Mh = spectrum_generator.get_sm().get_physical().Mhh;
+      const auto& sm = spectrum_generator.get_sm();
+      if (!sm.get_problems().have_problem()) {
+         Mh = sm.get_physical().Mhh;
+      } else {
+         BOOST_TEST_MESSAGE(sm.get_problems().get_problem_string());
+      }
    } catch (const flexiblesusy::Error& e) {
       BOOST_TEST_MESSAGE(e.what_detailed());
    }
@@ -1020,4 +1028,128 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
       const auto output = calc_output_3loop(d.slha_input);
       BOOST_CHECK_CLOSE_FRACTION(output.lambda_3L, d.expected_output.lambda_3L, d.eps);
    }
+}
+
+
+Spectrum_generator_settings make_settings(int loops)
+{
+   Spectrum_generator_settings settings;
+
+   settings.set(Spectrum_generator_settings::precision, 1e-5);
+   settings.set(Spectrum_generator_settings::pole_mass_loop_order, loops);
+   settings.set(Spectrum_generator_settings::ewsb_loop_order, loops);
+   settings.set(Spectrum_generator_settings::beta_loop_order, loops + 1);
+   settings.set(Spectrum_generator_settings::threshold_corrections, loops);
+   settings.set(Spectrum_generator_settings::eft_pole_mass_scale, 0);
+   settings.set(Spectrum_generator_settings::eft_matching_scale, 0);
+   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, loops);
+   settings.set(Spectrum_generator_settings::calculate_bsm_masses, 0);
+
+   return settings;
+}
+
+
+NUHMSSMNoFVHimalayaEFTHiggs_input_parameters make_point(double ms, double tb, double xt)
+{
+   const double ms2 = ms*ms;
+
+   NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input;
+   input.MSUSY = ms;
+   input.M1Input = ms;
+   input.M2Input = ms;
+   input.M3Input = ms;
+   input.MuInput = ms;
+   input.mAInput = ms;
+   input.TanBeta = tb;
+   input.mq2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.mu2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.md2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.ml2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.me2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.AuInput << 0, 0, 0, 0, 0, 0, 0, 0, ms*(xt + 1/tb);
+   input.AdInput << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+   input.AeInput << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+
+   return input;
+}
+
+
+/// calculates uncertainty of Mh
+double calc_DMh(double ms, double tb, double xt, int loops)
+{
+   softsusy::QedQcd qedqcd;
+
+   const NUHMSSMNoFVHimalayaEFTHiggs_input_parameters input = make_point(ms, tb, xt);
+
+   const double Mh = calc_Mh(input, qedqcd, make_settings(loops));
+
+   // variation of matchnig scale Qmatch within [ms/2, 2*ms], Eq.(8.1) arxiv:2003.04639
+   const double DMh_Qmatch = [&] () {
+      const double t_min = std::log(ms/2);
+      const double t_max = std::log(2*ms);
+      const int N_scales = 10;
+      double DMh_Q = 0;
+
+      for (int i = 0; i <= N_scales; ++i) {
+         const double Q = std::exp(t_min + i*(t_max - t_min)/N_scales);
+         auto settings = make_settings(loops);
+         settings.set(Spectrum_generator_settings::eft_matching_scale, Q);
+         const double Mh_at_Q = calc_Mh(input, qedqcd, settings);
+         const double diff = std::abs(Mh - Mh_at_Q); // Eq.(8.1) arxiv:2003.04639
+         if (diff > DMh_Q) {
+            DMh_Q = diff;
+         }
+      }
+
+      return DMh_Q;
+   }();
+
+   return DMh_Qmatch;
+}
+
+
+template<class T>
+void print_vector(const std::vector<T>& vec)
+{
+   std::stringstream ss;
+
+   ss << "[";
+   for (const auto& e: vec) {
+      ss << e << ", ";
+   }
+   ss << "]";
+
+   BOOST_TEST_MESSAGE(ss.str());
+}
+
+
+void test_uncertainty_MSUSY_scan(double tb, double xt, const std::vector<double>& scales)
+{
+   BOOST_TEST_MESSAGE("test_uncertainty_MSUSY_scan: tb = " << tb << ", xt = " << xt);
+
+   std::vector<double> uncertainties_1l, uncertainties_2l, uncertainties_3l;
+
+   for (const auto& ms: scales) {
+      uncertainties_1l.push_back(calc_DMh(ms, tb, xt, 1));
+      uncertainties_2l.push_back(calc_DMh(ms, tb, xt, 2));
+      uncertainties_3l.push_back(calc_DMh(ms, tb, xt, 3));
+   }
+
+   print_vector(scales);
+   print_vector(uncertainties_1l);
+   print_vector(uncertainties_2l);
+   print_vector(uncertainties_3l);
+
+   // check that uncertainties become smaller if MSUSY is increased
+   BOOST_CHECK(std::is_sorted(uncertainties_1l.begin(), uncertainties_1l.end(), std::greater<>{}));
+   BOOST_CHECK(std::is_sorted(uncertainties_2l.begin(), uncertainties_2l.end(), std::greater<>{}));
+   BOOST_CHECK(std::is_sorted(uncertainties_3l.begin(), uncertainties_3l.end(), std::greater<>{}));
+}
+
+
+BOOST_AUTO_TEST_CASE( test_uncertainty )
+{
+   test_uncertainty_MSUSY_scan(20, 0, {400, 700, 1e3, 3e3, 1e4});
+   test_uncertainty_MSUSY_scan(20, -std::sqrt(6.0), {1e3, 2e3, 5e3, 7e3, 1e4});
+   test_uncertainty_MSUSY_scan(20, std::sqrt(6.0), {1e3, 2e3, 5e3, 7e3, 1e4});
 }
