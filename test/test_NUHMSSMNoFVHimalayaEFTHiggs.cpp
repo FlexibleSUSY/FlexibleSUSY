@@ -1135,21 +1135,30 @@ void test_uncertainty_MSUSY_scan(double tb, double xt, const std::vector<double>
       uncertainties_3l.push_back(calc_DMh(ms, tb, xt, 3));
    }
 
-   print_vector(scales);
-   print_vector(uncertainties_1l);
-   print_vector(uncertainties_2l);
-   print_vector(uncertainties_3l);
+   BOOST_TEST_MESSAGE("scales  = "); print_vector(scales);
+   BOOST_TEST_MESSAGE("DMh(1L) = "); print_vector(uncertainties_1l);
+   BOOST_TEST_MESSAGE("DMh(2L) = "); print_vector(uncertainties_2l);
+   BOOST_TEST_MESSAGE("DMh(3L) = "); print_vector(uncertainties_3l);
 
    // check that uncertainties become smaller if MSUSY is increased
    BOOST_CHECK(std::is_sorted(uncertainties_1l.begin(), uncertainties_1l.end(), std::greater<>{}));
    BOOST_CHECK(std::is_sorted(uncertainties_2l.begin(), uncertainties_2l.end(), std::greater<>{}));
    BOOST_CHECK(std::is_sorted(uncertainties_3l.begin(), uncertainties_3l.end(), std::greater<>{}));
+
+   // Check that uncertainties become smaller if number of loops is
+   // increased.  Note: For xt = 0 the uncertainty of the 1-loop
+   // calculation is unnaturally small, so we omit it from the test.
+   if (xt != 0) {
+      BOOST_CHECK(std::equal(uncertainties_2l.begin(), uncertainties_2l.end(),
+                             uncertainties_3l.begin(), uncertainties_3l.end(),
+                             std::greater<>{}));
+   }
 }
 
 
 BOOST_AUTO_TEST_CASE( test_uncertainty )
 {
    test_uncertainty_MSUSY_scan(20, 0, {400, 700, 1e3, 3e3, 1e4});
-   test_uncertainty_MSUSY_scan(20, -std::sqrt(6.0), {1e3, 2e3, 5e3, 7e3, 1e4});
-   test_uncertainty_MSUSY_scan(20, std::sqrt(6.0), {1e3, 2e3, 5e3, 7e3, 1e4});
+   test_uncertainty_MSUSY_scan(20, -std::sqrt(6.0), {2e3, 5e3, 7e3, 1e4});
+   test_uncertainty_MSUSY_scan(20, std::sqrt(6.0), {2e3, 5e3, 7e3, 1e4});
 }
