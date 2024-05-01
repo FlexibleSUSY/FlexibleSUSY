@@ -28,6 +28,7 @@
  */
 
 #include <cmath>
+#include <iomanip>
 
 #include <boost/range/algorithm.hpp>
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
