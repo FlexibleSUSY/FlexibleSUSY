@@ -116,10 +116,10 @@ enum Dcoeffs : int {
  *
  * Loop_library_interface is the abstract base class for one loop functions.
  * It defines the following set of loop functions names:
- *    one-loop ones:   A, A0
- *    two-loop ones:   B, B0, B1, B00
- *    three-loop ones: C, C0, C1, C2, C00, C11, C12, C22
- *    four-loop ones:  D, D0, D1, D2, D3, D00, D11, D12, D13, D22, D23, D33.
+ *    one-point ones:   A, A0
+ *    two-point ones:   B, B0, B1, B00
+ *    three-point ones: C, C0, C1, C2, C00, C11, C12, C22
+ *    four-point ones:  D, D0, D1, D2, D3, D00, D11, D12, D13, D22, D23, D33.
  *
  * For making the notation a little bit shorter the following abbreviations for
  * input momenta and masses are used:
