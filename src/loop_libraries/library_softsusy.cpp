@@ -67,6 +67,24 @@ std::complex<double> Softsusy::B00(B_ARGS) noexcept
    return {softsusy::b22(p, m1, m2, q), 0.0};
 }
 
+std::complex<double> Softsusy::DB0(B_ARGS) noexcept
+{
+   std::complex<double> undefined = {NAN_Q, NAN_Q};
+   return undefined;
+}
+
+std::complex<double> Softsusy::DB1(B_ARGS) noexcept
+{
+   std::complex<double> undefined = {NAN_Q, NAN_Q};
+   return undefined;
+}
+
+std::complex<double> Softsusy::DB00(B_ARGS) noexcept
+{
+   std::complex<double> undefined = {NAN_Q, NAN_Q};
+   return undefined;
+}
+
 std::complex<double> Softsusy::C0(C_ARGS) noexcept
 {
    double m1 = std::sqrt(m02_in.real());
@@ -129,6 +147,12 @@ void Softsusy::B(Bcoeff_t& b, B_ARGS) noexcept
    b.at(0) = {softsusy::b0(p, m1, m2, q), 0.0};
    b.at(1) = {(-1) * softsusy::b1(p, m1, m2, q), 0.0};
    b.at(2) = {softsusy::b22(p, m1, m2, q), 0.0};
+
+   // derivatives
+   std::complex<double> undefined = {NAN_Q, NAN_Q};
+   b.at(3) = undefined;
+   b.at(4) = undefined;
+   b.at(5) = undefined;
 }
 
 void Softsusy::C(Ccoeff_t& c, C_ARGS) noexcept
