@@ -67,23 +67,7 @@ std::complex<double> Softsusy::B00(B_ARGS) noexcept
    return {softsusy::b22(p, m1, m2, q), 0.0};
 }
 
-std::complex<double> Softsusy::DB0(B_ARGS) noexcept
-{
-   std::complex<double> undefined = {NAN_Q, NAN_Q};
-   return undefined;
-}
-
-std::complex<double> Softsusy::DB1(B_ARGS) noexcept
-{
-   std::complex<double> undefined = {NAN_Q, NAN_Q};
-   return undefined;
-}
-
-std::complex<double> Softsusy::DB00(B_ARGS) noexcept
-{
-   std::complex<double> undefined = {NAN_Q, NAN_Q};
-   return undefined;
-}
+BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (B_ARGS), (DB0)(DB1)(DB00))
 
 std::complex<double> Softsusy::C0(C_ARGS) noexcept
 {
