@@ -67,7 +67,7 @@ std::complex<double> Softsusy::B00(B_ARGS) noexcept
    return {softsusy::b22(p, m1, m2, q), 0.0};
 }
 
-BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (B_ARGS), (DB0)(DB1)(DB00))
+BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (B_ARGS), DB_SEQ)
 
 std::complex<double> Softsusy::C0(C_ARGS) noexcept
 {

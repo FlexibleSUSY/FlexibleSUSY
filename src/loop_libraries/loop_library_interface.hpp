@@ -120,7 +120,7 @@ enum Dcoeffs : int {
  * Loop_library_interface is the abstract base class for one loop functions.
  * It defines the following set of loop functions names:
  *    one-point ones:   A, A0
- *    two-point ones:   B, B0, B1, B00
+ *    two-point ones:   B, B0, B1, B00, DB0, DB1, DB00
  *    three-point ones: C, C0, C1, C2, C00, C11, C12, C22
  *    four-point ones:  D, D0, D1, D2, D3, D00, D11, D12, D13, D22, D23, D33.
  *
@@ -157,7 +157,7 @@ enum Dcoeffs : int {
  *
  * A, B, C, D functions return void, their first arguments are
  * std::complex<double> arrays of fixed length (passed by a reference), which
- * equals to 1, 2, 7, 11. They fill given array with values of Passarino-Vertman
+ * equals to 1, 6, 7, 11. They fill given array with values of Passarino-Veltman
  * coefficients (inspect table 3 of [CO]). After the first argument goes T_ARGS
  * sequence, then scl2, which is described by the following example:
  *
