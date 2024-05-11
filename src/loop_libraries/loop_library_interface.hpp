@@ -38,11 +38,13 @@
 
 #define A_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , A_ARGS_SEQ) double scl2_in
 #define B_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , B_ARGS_SEQ) double scl2_in
+#define DB_ARGS B_ARGS
 #define C_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , C_ARGS_SEQ) double scl2_in
 #define D_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , D_ARGS_SEQ) double scl2_in
 
 #define A_CSEQ (0)
 #define B_CSEQ (0)(1)(00)
+#define DB_CSEQ (0)(1)(00)
 #define C_CSEQ (0)(1)(2)(00)(11)(12)(22)
 #define D_CSEQ (0)(1)(2)(3)(00)(11)(12)(13)(22)(23)(33)
 
@@ -54,6 +56,7 @@
 #define APPEND(s, data, elem) data##elem
 #define A_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, A, A_CSEQ)
 #define B_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, B, B_CSEQ)
+#define DB_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, DB, DB_CSEQ)
 #define C_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, C, C_CSEQ)
 #define D_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, D, D_CSEQ)
 
@@ -176,6 +179,7 @@ class Loop_library_interface
 public:
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (A_ARGS), A_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), DB_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (D_ARGS), D_SEQ)
    virtual void A(Acoeff_t&, A_ARGS) = 0;

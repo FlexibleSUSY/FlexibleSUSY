@@ -52,6 +52,15 @@
                               BOOST_PP_SEQ_FOR_EACH(REAL, , LT_ARGS(PAIR)));   \
    }
 
+#define LT_ONE_DERIVATIVE(_, PAIR, I, INDEX)                                              \
+   std::complex<double> Looptools::CAT(D, LIB_NAME(PAIR, INDEX))(LIB_ARGS(PAIR)) noexcept    \
+   {                                                                           \
+      set_mu2_uv(scl2_in);                                                     \
+      return LT_NAME(PAIR)(CAT(CAT(d, LT(PAIR)), INDEX)                                 \
+                              BOOST_PP_SEQ_FOR_EACH(REAL, , LT_ARGS(PAIR)));   \
+   } \
+
+
 #define LT_ALL(PAIR)                                                           \
    void Looptools::LIB(PAIR)(CAT(LIB(PAIR), coeff_t) & \
                                 arr,                                           \
@@ -93,6 +102,7 @@ void Looptools::set_mu2_uv(double scl2_in) noexcept
 
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, A_PAIR, A_CSEQ)
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, B_PAIR, B_CSEQ)
+BOOST_PP_SEQ_FOR_EACH_I(LT_ONE_DERIVATIVE, B_PAIR, DB_CSEQ)
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, C_PAIR, C_CSEQ)
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, D_PAIR, D_CSEQ)
 
