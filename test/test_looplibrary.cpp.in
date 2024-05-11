@@ -68,6 +68,8 @@ BOOST_AUTO_TEST_CASE(test_two_point_B00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 0, 3, 50).real(), 3.23505803757003, 2e-15 );
 }
 
+#if LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
+
 BOOST_AUTO_TEST_CASE(test_two_point_DB0) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 3, 7, 50).real(), 0.034480389560448771, 6e-13 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(3, 0, 7, 50).real(), 0.10192339061643978, 2e-12 );
@@ -94,6 +96,8 @@ BOOST_AUTO_TEST_CASE(test_two_point_DB00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(0, 3, 0, 50).real(), -0.30389533750778081, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(0, 0, 3, 50).real(), -0.30389533750778075, 2e-15 );
 }
+
+#endif
 
 BOOST_AUTO_TEST_CASE(test_B) {
    std::array<std::complex<double>, B_N> b{};
