@@ -36,22 +36,6 @@
 @   deallocate(Bcoeff, Bcoeffuv) \
 @end
 
-#define two_point_derivative(NAME,N1,N2) \
-@subroutine DUMMY(NAME)(res, p10, m02, m12) bind(C, name=IMPL(NAME))\
-@   complex(C_DOUBLE_COMPLEX), intent(in) :: p10 \
-@   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12 \
-@   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
-@   complex(REAL64), allocatable :: DBcoeff(:,:), DBcoeffuv(:,:) \
-@\
-@   allocate(DBcoeff(0:1, 0:2)) \
-@   allocate(DBcoeffuv(0:1, 0:2)) \
-@   call DB_cll(DBcoeff, DBcoeffuv, p10, m02, m12, 2) \
-@\
-@   res = DBcoeff(N1,N2) \
-@\
-@   deallocate(DBcoeff, DBcoeffuv) \
-@end
-
 #define three_point(NAME,N1,N2,N3) \
 @subroutine DUMMY(NAME)(res, p10, p21, p20, m02, m12, m22) bind(C, name=IMPL(NAME)) \
 @   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20 \
@@ -121,9 +105,30 @@ contains
    two_point(B1,0,1)
    two_point(B00,1,0)
 
-   two_point_derivative(DB0,0,0)
-   two_point_derivative(DB1,0,1)
-   two_point_derivative(DB00,1,0)
+   subroutine DB0_dummy(res, p10, m02, m12) bind(C, name='DB0_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
+      complex(C_DOUBLE_COMPLEX), intent(out) :: res
+
+      call DB0_cll(res, p10, m02, m12)
+   end
+
+   subroutine DB1_dummy(res, p10, m02, m12) bind(C, name='DB1_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
+      complex(C_DOUBLE_COMPLEX), intent(out) :: res
+
+      call DB1_cll(res, p10, m02, m12)
+   end
+
+   subroutine DB00_dummy(res, p10, m02, m12) bind(C, name='DB00_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
+      complex(C_DOUBLE_COMPLEX), intent(out) :: res
+      complex(C_DOUBLE_COMPLEX) :: resUV
+
+      call DB00_cll(res, resUV, p10, m02, m12)
+   end
 
    three_point(C0,0,0,0)
    three_point(C00,1,0,0)
