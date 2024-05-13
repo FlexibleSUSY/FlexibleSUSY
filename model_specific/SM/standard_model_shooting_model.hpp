@@ -17,22 +17,39 @@
 // ====================================================================
 
 
-#ifndef @ModelName@_STANDARD_MODEL_MATCHING_H
-#define @ModelName@_STANDARD_MODEL_MATCHING_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
+/**
+ * @file standard_model_two_scale_model.hpp
+ * @brief contains class for model with routines needed to solve boundary
+ *        value problem using the two_scale solver by solvingt EWSB
+ *        and determine the pole masses and mixings
+ *
+ */
+
+#ifndef STANDARD_MODEL_SHOOTING_MODEL_H
+#define STANDARD_MODEL_SHOOTING_MODEL_H
+
+#include "model.hpp"
 #include "standard_model.hpp"
+#include "standard_model_two_scale_model.hpp"
 
 namespace flexiblesusy {
-namespace @ModelName@_standard_model_matching {
 
-void match_high_to_low_scale_model_tree_level(standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
-void match_high_to_low_scale_model(standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int, int);
+class Shooting;
+class Two_scale;
 
-void match_low_to_high_scale_model_tree_level(@ModelName@_mass_eigenstates&, const standard_model::Standard_model&);
-void match_low_to_high_scale_model(@ModelName@_mass_eigenstates&, const standard_model::Standard_model&, int, int);
+/**
+ * @class StandardModel<Shooting>
+ * @brief model class with routines for determing masses and mixinga and EWSB
+ */
 
-} // namespace @ModelName@_standard_model_matching
+namespace standard_model {
+
+template<>
+class StandardModel<Shooting> : public StandardModel<Two_scale> {};
+
+} // namespace standard_model
+
 } // namespace flexiblesusy
 
 #endif

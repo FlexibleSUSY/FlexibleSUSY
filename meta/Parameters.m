@@ -1016,7 +1016,7 @@ CreateIndexReplacementRule[parameter_] :=
 CreateIndexReplacementRules[pars_List] :=
     Flatten[CreateIndexReplacementRule /@ pars];
 
-GetGUTNormalization[coupling_Symbol] :=
+GetGUTNormalization[coupling_Symbol] /; ValueQ[SARAH`Gauge] :=
     Module[{pos, norm},
            pos = Position[SARAH`Gauge, coupling];
            If[pos =!= {},

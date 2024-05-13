@@ -19,7 +19,7 @@
 
 #include "@ModelName@_two_scale_initial_guesser.hpp"
 #include "@ModelName@_two_scale_model.hpp"
-#include "@ModelName@_standard_model_two_scale_matching.hpp"
+#include "@ModelName@_standard_model_two_scale_matching_interface.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "lowe.h"
 #include "error.hpp"
