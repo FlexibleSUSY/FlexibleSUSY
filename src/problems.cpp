@@ -77,6 +77,7 @@ void Problems::clear()
    failed_GFermi_convergence = false;
    non_perturbative = false;
    failed_sinThetaW_convergence = false;
+   failed_GF_convergence = false;
 }
 
 void Problems::add(const Problems& other)
@@ -100,6 +101,7 @@ void Problems::add(const Problems& other)
    failed_GFermi_convergence = failed_GFermi_convergence || other.failed_GFermi_convergence;
    non_perturbative = non_perturbative || other.non_perturbative;
    failed_sinThetaW_convergence = failed_sinThetaW_convergence || other.failed_sinThetaW_convergence;
+   failed_GF_convergence = failed_GF_convergence || other.failed_GF_convergence;
 }
 
 bool Problems::have_problem() const
@@ -116,6 +118,7 @@ unsigned Problems::number_of_problems() const
    if (failed_GFermi_convergence) count++;
    if (non_perturbative || have_non_perturbative_parameter()) count++;
    if (failed_sinThetaW_convergence) count++;
+   if (failed_GF_convergence) count++;
    if (no_minimum()) count++;
    if (no_root()) count++;
    if (have_thrown()) count++;
@@ -171,6 +174,8 @@ std::vector<std::string> Problems::get_problem_strings() const
       strings.emplace_back("non-perturbative");
    if (failed_sinThetaW_convergence)
       strings.emplace_back("no sinThetaW convergence");
+   if (failed_GF_convergence)
+      strings.emplace_back("no GF convergence");
    if (have_thrown())
       strings.emplace_back("exception thrown(" + exception_msg + ")");
    for (int i = 0; i < n_particles; ++i) {
@@ -335,6 +340,11 @@ void Problems::flag_no_sinThetaW_convergence()
    failed_sinThetaW_convergence = true;
 }
 
+void Problems::flag_no_G_fermi_convergence()
+{
+   failed_GF_convergence = true;
+}
+
 void Problems::flag_no_minimum(const std::string& msg, int status)
 {
    failed_minimum[msg] = status;
@@ -414,6 +424,11 @@ void Problems::unflag_all_non_perturbative_parameters()
 void Problems::unflag_no_sinThetaW_convergence()
 {
    failed_sinThetaW_convergence = false;
+}
+
+void Problems::unflag_no_G_fermi_convergence()
+{
+   failed_GF_convergence = false;
 }
 
 void Problems::unflag_no_minimum(const std::string& msg)
@@ -504,6 +519,11 @@ bool Problems::no_perturbative() const
 bool Problems::no_sinThetaW_convergence() const
 {
    return failed_sinThetaW_convergence;
+}
+
+bool Problems::no_G_fermi_convergence() const
+{
+   return failed_GF_convergence;
 }
 
 bool Problems::no_minimum() const

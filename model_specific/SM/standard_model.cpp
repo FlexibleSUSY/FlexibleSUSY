@@ -256,7 +256,7 @@ const int Standard_model::numberOfParameters;
 Standard_model::Standard_model()
 {
    set_number_of_parameters(numberOfParameters);
-   set_thresholds(3);
+   set_thresholds(4);
 }
 
 Standard_model::Standard_model(double scale_, double loops_, double thresholds_
@@ -517,8 +517,9 @@ int Standard_model::solve_ewsb()
 {
    VERBOSE_MSG("\t\tSolving Standard model EWSB at " << ewsb_loop_order << "-loop order");
 
-   if (ewsb_loop_order == 0)
+   if (ewsb_loop_order == 0) {
       return solve_ewsb_tree_level();
+   }
 
    return solve_ewsb_iteratively(ewsb_loop_order);
 }
@@ -757,7 +758,6 @@ void Standard_model::copy_DRbar_masses_to_pole_masses()
    PHYSICAL(MVWp) = MVWp;
    PHYSICAL(MVPVZ) = MVPVZ;
    PHYSICAL(ZZ) = ZZ;
-
 }
 
 /**
@@ -766,7 +766,6 @@ void Standard_model::copy_DRbar_masses_to_pole_masses()
 void Standard_model::check_pole_masses_for_tachyons()
 {
    if (PHYSICAL(Mhh) < 0.) problems.flag_pole_tachyon(standard_model_info::hh);
-
 }
 
 /**
@@ -776,8 +775,10 @@ void Standard_model::check_pole_masses_for_tachyons()
 void Standard_model::calculate_spectrum()
 {
    calculate_DRbar_masses();
-   if (pole_mass_loop_order > 0)
+
+   if (pole_mass_loop_order > 0) {
       calculate_pole_masses();
+   }
 
    if (pole_mass_loop_order == 0) {
       copy_DRbar_masses_to_pole_masses();
@@ -876,11 +877,13 @@ void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
       double delta_alpha_em = 0.;
       double delta_alpha_s  = 0.;
 
-      if (get_thresholds() && threshold_corrections.alpha_em > 0)
+      if (get_thresholds() > 0 && threshold_corrections.alpha_em > 0) {
          delta_alpha_em = calculate_delta_alpha_em(alpha_em);
+      }
 
-      if (get_thresholds() && threshold_corrections.alpha_s > 0)
+      if (get_thresholds() > 0 && threshold_corrections.alpha_s > 0) {
          delta_alpha_s  = calculate_delta_alpha_s(alpha_s);
+      }
 
       const double alpha_em_drbar = alpha_em / (1.0 - delta_alpha_em);
       const double alpha_s_drbar  = alpha_s / (1.0 - delta_alpha_s);
@@ -961,19 +964,19 @@ void Standard_model::initial_guess_for_parameters(const softsusy::QedQcd& qedqcd
    upQuarksDRbar(0,0) = mu_guess;
    upQuarksDRbar(1,1) = mc_guess;
    upQuarksDRbar(2,2) = mt_guess;
-   Yu = -((1.4142135623730951*upQuarksDRbar) / v).transpose();
+   Yu = -(sqrt2*upQuarksDRbar/v).transpose();
 
    Eigen::Matrix<double,3,3> downQuarksDRbar(Eigen::Matrix<double,3,3>::Zero());
    downQuarksDRbar(0,0) = md_guess;
    downQuarksDRbar(1,1) = ms_guess;
    downQuarksDRbar(2,2) = mb_guess;
-   Yd = ((1.4142135623730951*downQuarksDRbar)/v).transpose();
+   Yd = (sqrt2*downQuarksDRbar/v).transpose();
 
    Eigen::Matrix<double,3,3> downLeptonsDRbar(Eigen::Matrix<double,3,3>::Zero());
    downLeptonsDRbar(0,0) = me_guess;
    downLeptonsDRbar(1,1) = mm_guess;
    downLeptonsDRbar(2,2) = mtau_guess;
-   Ye = ((1.4142135623730951*downLeptonsDRbar)/v).transpose();
+   Ye = (sqrt2*downLeptonsDRbar/v).transpose();
 
    Lambdax = Sqr(MH) / Sqr(v);
 
@@ -982,20 +985,31 @@ void Standard_model::initial_guess_for_parameters(const softsusy::QedQcd& qedqcd
 
 double Standard_model::calculate_delta_alpha_em(double alphaEm) const
 {
-   const double delta_alpha_em_SM = -0.28294212105225836*alphaEm*
-      FiniteLog(Abs(MFu(2) / get_scale()));
+   double delta_alpha_em_1loop = 0.;
 
-   return delta_alpha_em_SM;
+   if (get_thresholds() > 0 && threshold_corrections.alpha_em > 0) {
+      delta_alpha_em_1loop = -0.28294212105225836*alphaEm*
+         FiniteLog(Abs(MFu(2) / get_scale()));
+   }
+
+   return delta_alpha_em_1loop;
 }
 
 double Standard_model::calculate_delta_alpha_s(double alphaS) const
 {
-   const double delta_alpha_s_1loop = -0.1061032953945969*alphaS*
-      FiniteLog(Abs(MFu(2) / get_scale()));
-
+   double delta_alpha_s_1loop = 0.;
    double delta_alpha_s_2loop = 0.;
    double delta_alpha_s_3loop = 0.;
    double delta_alpha_s_4loop = 0.;
+
+   if (get_thresholds() > 0 && threshold_corrections.alpha_s > 0) {
+      sm_fourloop_as::Parameters pars;
+      pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
+      pars.mt   = MFu(2);
+      pars.Q    = get_scale();
+
+      delta_alpha_s_1loop = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+   }
 
    if (get_thresholds() > 1 && threshold_corrections.alpha_s > 1) {
       sm_fourloop_as::Parameters pars;
@@ -1134,7 +1148,7 @@ void Standard_model::calculate_Yu_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mt > 0)
       upQuarksDRbar(2,2) = calculate_MFu_DRbar(qedqcd.displayPoleMt(), 2);
 
-   Yu = -((1.4142135623730951*upQuarksDRbar)/v).transpose();
+   Yu = -(sqrt2*upQuarksDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Yd_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1147,7 +1161,7 @@ void Standard_model::calculate_Yd_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mb > 0)
       downQuarksDRbar(2,2) = calculate_MFd_DRbar(qedqcd.displayMass(softsusy::mBottom), 2);
 
-   Yd = ((1.4142135623730951*downQuarksDRbar)/v).transpose();
+   Yd = (sqrt2*downQuarksDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Ye_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1165,7 +1179,7 @@ void Standard_model::calculate_Ye_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mtau > 0)
       downLeptonsDRbar(2,2) = calculate_MFe_DRbar(qedqcd.displayMass(softsusy::mTau), 2);
 
-   Ye = ((1.4142135623730951*downLeptonsDRbar)/v).transpose();
+   Ye = (sqrt2*downLeptonsDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Lambdax_DRbar()
@@ -4861,6 +4875,10 @@ double Standard_model::calculate_MFv_DRbar(double, int) const
 
 double Standard_model::calculate_MFe_DRbar(double m_sm_msbar, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mtau == 0) {
+      return m_sm_msbar;
+   }
+
    const double p = m_sm_msbar;
    const double self_energy_1  = Re(self_energy_Fe_1loop_1_heavy_rotated(p, idx
       , idx));
@@ -4879,6 +4897,10 @@ double Standard_model::calculate_MFe_DRbar(double m_sm_msbar, int idx) const
 
 double Standard_model::calculate_MFu_DRbar(double m_pole, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mt == 0) {
+      return m_pole;
+   }
+
    const double p = m_pole;
    const double self_energy_1  = Re(self_energy_Fu_1loop_1_heavy_rotated(p, idx
       , idx));
@@ -4923,6 +4945,10 @@ double Standard_model::calculate_MFu_DRbar(double m_pole, int idx) const
 
 double Standard_model::calculate_MFd_DRbar(double m_sm_msbar, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mb == 0) {
+      return m_sm_msbar;
+   }
+
    const double p = m_sm_msbar;
    const double self_energy_1  = Re(self_energy_Fd_1loop_1_heavy_rotated(p, idx
       , idx));

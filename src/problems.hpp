@@ -47,6 +47,7 @@ public:
    void flag_no_pole_mass_convergence(int particle);
    void flag_non_perturbative_parameter(int parameter, double value, double scale, double threshold = 0.);
    void flag_no_sinThetaW_convergence();
+   void flag_no_G_fermi_convergence();
    void flag_no_minimum(const std::string& msg, int status);
    void flag_no_root(const std::string& msg, int status);
 
@@ -64,6 +65,7 @@ public:
    void unflag_non_perturbative_parameter(int parameter);
    void unflag_all_non_perturbative_parameters();
    void unflag_no_sinThetaW_convergence();
+   void unflag_no_G_fermi_convergence();
    void unflag_no_minimum(const std::string& msg);
    void unflag_no_root(const std::string& msg);
 
@@ -82,6 +84,7 @@ public:
    bool no_GFermi_convergence() const;
    bool no_perturbative() const;
    bool no_sinThetaW_convergence() const;
+   bool no_G_fermi_convergence() const;
    bool no_minimum() const;
    bool no_root() const;
 
@@ -132,6 +135,7 @@ private:
    bool failed_GFermi_convergence{false}; ///< G_Fermi not converged
    bool non_perturbative{false};       ///< non-perturbative running
    bool failed_sinThetaW_convergence{false}; ///< sinThetaW-parameter not converged
+   bool failed_GF_convergence{false};  ///< GF calculation did not converge
 };
 
 std::ostream& operator<<(std::ostream&, const Problems&);

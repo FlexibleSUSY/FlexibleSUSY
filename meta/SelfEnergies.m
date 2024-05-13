@@ -25,6 +25,12 @@
 BeginPackage["SelfEnergies`", {"SARAH`", "TextFormatting`", "CConversion`", "TreeMasses`", "Parameters`", "Vertices`", "Utils`"}];
 
 FSSelfEnergy::usage="self-energy head";
+
+FSSelfEnergyDerivative::usage="head for derivative of self-energy w.r.t. p^2";
+
+(* symbols for derivative of B0 and G0 loop functions w.r.t. p^2 *)
+{ DB0, DG0 }
+
 FSHeavySelfEnergy::usage="head for self-energy w/o BSM particles";
 FSHeavyRotatedSelfEnergy::usage="head for self-energy w/o BSM particles in mass eigenstate basis";
 Tadpole::usage="tadpole head";
@@ -95,6 +101,9 @@ Begin["`Private`"];
 GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
     selfEnergy[[2]];
 
+GetExpression[selfEnergy_SelfEnergies`FSSelfEnergyDerivative] :=
+    selfEnergy[[2]];
+
 GetExpression[selfEnergy_SelfEnergies`FSHeavySelfEnergy] :=
     selfEnergy[[2]];
 
@@ -105,6 +114,9 @@ GetExpression[tadpole_SelfEnergies`Tadpole] :=
     tadpole[[2]];
 
 GetField[selfEnergy_SelfEnergies`FSSelfEnergy] :=
+    selfEnergy[[1]];
+
+GetField[selfEnergy_SelfEnergies`FSSelfEnergyDerivative] :=
     selfEnergy[[1]];
 
 GetField[selfEnergy_SelfEnergies`FSHeavySelfEnergy] :=
@@ -462,6 +474,9 @@ ExtractFieldName[field_]              := ToValidCSymbolString[field];
 CreateSelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
 
+CreateSelfEnergyDerivativeFunctionName[field_, loops_] :=
+    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_deriv_p2";
+
 CreateHeavySelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_heavy";
 
@@ -473,6 +488,9 @@ CreateTadpoleFunctionName[field_, loops_] :=
 
 CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergy, loops_] :=
     CreateSelfEnergyFunctionName[GetField[selfEnergy], loops];
+
+CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergyDerivative, loops_] :=
+    CreateSelfEnergyDerivativeFunctionName[GetField[selfEnergy], loops];
 
 CreateFunctionName[selfEnergy_SelfEnergies`FSHeavySelfEnergy, loops_] :=
     CreateHeavySelfEnergyFunctionName[GetField[selfEnergy], loops];
@@ -589,7 +607,7 @@ CreateNPointFunctionMatrix[nPointFunction_] :=
 
 CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
     Module[{prototypes = "", defs = "", vertexFunctionNames = {}, p, d,
-            relevantVertexRules},
+            relevantVertexRules, derivatives},
            (* create coupling functions for all vertices in the list *)
            Print["Converting vertex functions ..."];
            (* extract vertex rules needed for the given nPointFunctions *)
@@ -606,7 +624,26 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
                {p,d} = CreateNPointFunctionMatrix[nPointFunctions[[k]]];
                prototypes = prototypes <> p;
                defs = defs <> d;
+           ];
+           (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
+           If[ValueQ[SARAH`HiggsBoson],
+              derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]] /. {
+                  FSSelfEnergy -> SelfEnergies`FSSelfEnergyDerivative,
+                  A0[__] -> 0,
+                  B0 -> SelfEnergies`DB0,
+                  G0 -> SelfEnergies`DG0
+              };
+              Switch[Length[derivatives],
+                     0, Print["Error: no Higgs boson self-energy found."],
+                     1, {p,d} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
+                        prototypes = prototypes <> p;
+                        defs = defs <> d;
+                        {p,d} = CreateNPointFunctionMatrix[First[derivatives]];
+                        prototypes = prototypes <> p;
+                        defs = defs <> d;,
+                     _, Print["Error: multiple Higgs boson self-energies found."]
               ];
+           ];
            Utils`StopProgressBar[Length[nPointFunctions]];
            {prototypes, defs}
           ];
