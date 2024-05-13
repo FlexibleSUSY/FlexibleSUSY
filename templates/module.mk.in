@@ -138,6 +138,9 @@ endif
 ifneq ($(findstring semi_analytic,$(SOLVERS)),)
 -include $(DIR)/semi_analytic.mk
 endif
+ifneq ($(findstring shooting,$(SOLVERS)),)
+-include $(DIR)/shooting.mk
+endif
 
 ifneq ($(MAKECMDGOALS),showbuild)
 ifneq ($(MAKECMDGOALS),tag)

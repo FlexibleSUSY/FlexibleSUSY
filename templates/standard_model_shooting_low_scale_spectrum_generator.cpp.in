@@ -1,0 +1,426 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+#include "@ModelName@_shooting_spectrum_generator.hpp"
+#include "@ModelName@_input_parameters.hpp"
+#include "@ModelName@_shooting_ewsb_solver.hpp"
+#include "@ModelName@_shooting_initial_guesser.hpp"
+#include "@ModelName@_shooting_susy_scale_constraint.hpp"
+#include "@ModelName@_standard_model_matching.hpp"
+
+#include "error.hpp"
+#include "lowe.h"
+#include "numerics2.hpp"
+#include "rkf_integrator.hpp"
+#include "shooting_solver.hpp"
+#include "wrappers.hpp"
+
+#include <limits>
+#include <tuple>
+#include <utility>
+
+namespace flexiblesusy {
+
+namespace {
+
+/**
+ * Disables unhandled loop corrections.
+ *
+ * @param model model
+ */
+template <class T>
+void disable_unhandled_loop_corrections(T& model)
+{
+   auto lc = model.get_loop_corrections();
+
+   // 2-loop
+   lc.higgs_atau_atau = false;
+   // 3-loop
+   lc.higgs_ab_as_as = false;
+   lc.higgs_at_at_as = false;
+   lc.higgs_at_at_at = false;
+   // 4-loop
+   lc.higgs_at_as_as_as = false;
+
+   model.set_loop_corrections(lc);
+}
+
+} // anonymous namespace
+
+double @ModelName@_spectrum_generator<Shooting>::get_pole_mass_scale(double susy_scale) const
+{
+   return
+      settings.get(Spectrum_generator_settings::pole_mass_scale) != 0. ?
+      settings.get(Spectrum_generator_settings::pole_mass_scale) :
+      susy_scale;
+}
+
+double @ModelName@_spectrum_generator<Shooting>::get_eft_pole_mass_scale(double susy_scale, double Mt) const
+{
+   return
+      settings.get(Spectrum_generator_settings::eft_pole_mass_scale) != 0. ?
+      settings.get(Spectrum_generator_settings::eft_pole_mass_scale) :
+      std::min(susy_scale, Mt);
+}
+
+double @ModelName@_spectrum_generator<Shooting>::get_matching_scale(
+   const Single_scale_constraint& constraint) const
+{
+   return
+      settings.get(Spectrum_generator_settings::eft_matching_scale) != 0. ?
+      settings.get(Spectrum_generator_settings::eft_matching_scale) :
+      constraint.get_scale();
+}
+
+void @ModelName@_spectrum_generator<Shooting>::init(
+   @ModelName@<Shooting>& model,
+   const @ModelName@_input_parameters& input) const
+{
+   model.set_input_parameters(input);
+   model.do_calculate_sm_pole_masses(settings.get(Spectrum_generator_settings::calculate_sm_masses));
+   model.do_calculate_bsm_pole_masses(settings.get(Spectrum_generator_settings::calculate_bsm_masses));
+   model.do_force_output(settings.get(Spectrum_generator_settings::force_output));
+   model.set_loops(settings.get(Spectrum_generator_settings::beta_loop_order));
+   model.set_thresholds(settings.get(Spectrum_generator_settings::threshold_corrections_loop_order));
+   model.set_zero_threshold(settings.get(Spectrum_generator_settings::beta_zero_threshold));
+
+   @ModelName@_ewsb_solver<Shooting> ewsb_solver;
+   model.set_ewsb_solver(std::make_shared<@ModelName@_ewsb_solver<Shooting> >(ewsb_solver));
+
+   disable_unhandled_loop_corrections(model);
+}
+
+void @ModelName@_spectrum_generator<Shooting>::init(
+   standard_model::StandardModel<Shooting>& sm) const
+{
+   sm.do_force_output(settings.get(Spectrum_generator_settings::force_output));
+   sm.set_loops(settings.get(Spectrum_generator_settings::beta_loop_order));
+   sm.set_thresholds(settings.get(Spectrum_generator_settings::threshold_corrections_loop_order));
+   sm.set_zero_threshold(settings.get(Spectrum_generator_settings::beta_zero_threshold));
+   sm.set_pole_mass_loop_order(this->model.get_pole_mass_loop_order());
+   sm.set_ewsb_loop_order(this->model.get_ewsb_loop_order());
+   sm.set_ewsb_iteration_precision(this->model.get_ewsb_iteration_precision());
+   sm.set_loop_corrections(this->model.get_loop_corrections());
+   sm.set_threshold_corrections(this->model.get_threshold_corrections());
+   sm.set_precision(this->model.get_precision());
+   sm.set_scale(this->model.get_scale());
+
+   disable_unhandled_loop_corrections(sm);
+}
+
+/**
+ * @brief Run's the RG solver with the given input parameters
+ *
+ * This function sets up the RG solver using a susy-scale
+ * and low-scale constraint.  Afterwards the solver is run until
+ * convergence is reached or an error occours.  Finally the particle
+ * spectrum (pole masses) is calculated.
+ *
+ * @param qedqcd Standard Model input parameters
+ * @param input model input parameters
+ */
+void @ModelName@_spectrum_generator<Shooting>::run_except(
+   const softsusy::QedQcd& qedqcd,
+   const @ModelName@_input_parameters& input)
+{
+   VERBOSE_MSG("Solving BVP using shooting solver");
+
+   problems.set_bvp_solver_problems({ BVP_solver_problems("ShootingSolver") });
+
+   model.clear();
+   init(model, input);
+
+   eft.clear();
+   init(eft);
+
+   // initialize scales
+   low_scale = qedqcd.get_scale();
+   susy_scale = 0.;
+
+   VERBOSE_MSG("\t[0] perform initial guess ...");
+
+   const Vec_t ig = initial_guess(qedqcd);
+
+   VERBOSE_MSG("Setting up shooting solver ...");
+
+   // sets the SM-like parameters of the BSM model at the matching scale
+   Shooting_solver<N>::Set_t setter = [&](const Vec_t& pars) {
+      VERBOSE_MSG("Running SM-like BSM parameters: " << pars.transpose());
+      set_BSM_parameters(pars);
+   };
+
+   @ModelName@_susy_scale_constraint<Shooting> susy_scale_constraint(&model, qedqcd);
+
+   // function to find root of
+   Shooting_solver<N>::Pre_t predictor = [&]() -> Vec_t {
+      match(qedqcd, susy_scale_constraint);
+      return calculate_deviation(qedqcd);
+   };
+
+   Shooting_solver<N> solver;
+
+   const int max_it = settings.get(Spectrum_generator_settings::max_iterations);
+
+   if (!is_zero(max_it)) {
+      solver.set_max_iterations(max_it);
+   }
+
+   solver.set_precision(settings.get(Spectrum_generator_settings::precision));
+   solver.add(&susy_scale_constraint, &model);
+   solver.add(setter);
+   solver.add(predictor);
+
+   VERBOSE_MSG("\t[1] starting shooting solver ...");
+
+   solver.solve(ig);
+
+   VERBOSE_MSG("\t[2] shooting solver has finished ...");
+
+   susy_scale = model.get_scale();
+
+   const double Mt = qedqcd.displayPoleMt();
+
+   VERBOSE_MSG("\t[4] calculating mass spectrum ...");
+
+   calculate_spectrum(Mt);
+
+   // run to output scale (if scale > 0)
+   if (!is_zero(parameter_output_scale)) {
+      VERBOSE_MSG("\t[5] running SM and BSM model to output scale "
+                  << parameter_output_scale << " GeV ...");
+      model.run_to(parameter_output_scale);
+      eft.run_to(parameter_output_scale);
+   }
+}
+
+/**
+ * Create a text file which contains the values of all model
+ * parameters at all scales between the low-scale and the high-scale.
+ *
+ * @param filename name of output file
+ */
+void @ModelName@_spectrum_generator<Shooting>::write_running_couplings(
+   const std::string& filename) const
+{
+   @ModelName@_spectrum_generator_interface<Shooting>::write_running_couplings(
+      filename, get_low_scale(), get_susy_scale());
+}
+
+void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
+{
+   VERBOSE_MSG("Calculating spectrum ...");
+   VERBOSE_MSG("\t[1] running BSM model to Q_pole = " << get_pole_mass_scale(susy_scale) << " GeV ...");
+
+   model.run_to(get_pole_mass_scale(susy_scale));
+
+   VERBOSE_MSG("\t[2] calculating BSM pole mass spectrum ...");
+
+   model.solve_ewsb();
+   model.calculate_spectrum();
+
+   VERBOSE_MSG("\t[3] running SM to Q_pole_eft = " << get_eft_pole_mass_scale(susy_scale, Mt) << " GeV ...");
+
+   eft.run_to(get_eft_pole_mass_scale(susy_scale, Mt));
+
+   VERBOSE_MSG("\t[4] calculating SM pole mass spectrum ...");
+
+   eft.calculate_DRbar_masses();
+   eft.solve_ewsb();
+   eft.calculate_spectrum();
+
+   const int index = settings.get(Spectrum_generator_settings::eft_higgs_index);
+
+   VERBOSE_MSG("\t[5] copy SM-like particle masses from SM to BSM model ...");
+
+   model.get_physical().M@HiggsBoson_index@ = eft.get_physical().Mhh;
+   model.get_physical().M@VectorZ_0@ = eft.get_physical().MVZ;
+   model.get_physical().M@VectorW_0@ = eft.get_physical().MVWp;
+@fillSMFermionPoleMasses@
+   if (eft.get_problems().is_running_tachyon(standard_model_info::hh))
+      model.get_problems().flag_running_tachyon(@ModelName@_info::@HiggsBoson@);
+   if (eft.get_problems().is_pole_tachyon(standard_model_info::hh))
+      model.get_problems().flag_pole_tachyon(@ModelName@_info::@HiggsBoson@);
+   if (eft.get_problems().is_running_tachyon(standard_model_info::VZ))
+      model.get_problems().flag_running_tachyon(@ModelName@_info::@VectorZ@);
+   if (eft.get_problems().is_pole_tachyon(standard_model_info::VZ))
+      model.get_problems().flag_pole_tachyon(@ModelName@_info::@VectorZ@);
+   if (eft.get_problems().is_running_tachyon(standard_model_info::VWp))
+      model.get_problems().flag_running_tachyon(@ModelName@_info::@VectorW@);
+   if (eft.get_problems().is_pole_tachyon(standard_model_info::VWp))
+      model.get_problems().flag_pole_tachyon(@ModelName@_info::@VectorW@);
+
+   VERBOSE_MSG("\t[6] spectrum calculation finished.");
+}
+
+/**
+ * @brief returns initial guess for SM-like BSM parameters
+ *
+ * @return vector of SM-like BSM parameters
+ */
+@ModelName@_spectrum_generator<Shooting>::Vec_t
+@ModelName@_spectrum_generator<Shooting>::initial_guess(
+   const softsusy::QedQcd& qedqcd)
+{
+   VERBOSE_MSG("Perform initial guess ...");
+
+   @ModelName@_standard_model_initial_guesser<Shooting> ig(&model, qedqcd);
+   ig.guess();
+
+   VERBOSE_MSG("\tinitial guess finished.");
+
+   return (Vec_t() <<
+           model.get_@hyperchargeCoupling@(),
+           model.get_@leftCoupling@(),
+           model.get_@strongCoupling@(),
+           model.get_@UpYukawa@(2,2),
+           model.get_@DownYukawa@(2,2),
+           model.get_@ElectronYukawa@(2,2),
+           model.VEV()
+           ).finished();
+}
+
+/**
+ * Runs BSM model to matching scale and matches BSM model to the SM.
+ *
+ * @param qedqcd low-energy parameters
+ * @param constraint matching constraint
+ */
+void @ModelName@_spectrum_generator<Shooting>::match(
+   const softsusy::QedQcd& qedqcd,
+   const Single_scale_constraint& constraint)
+{
+   VERBOSE_MSG("\t[1] running BSM model to matching scale Q_match = "
+               << get_matching_scale(constraint) << " GeV ...");
+
+   model.run_to(get_matching_scale(constraint));
+
+   VERBOSE_MSG("\t[2] calculate BSM tree-level mass spectrum ...");
+
+   model.calculate_DRbar_masses();
+   model.solve_ewsb();
+
+   eft.clear();
+   init(eft);
+
+   const int loops = settings.get(Spectrum_generator_settings::eft_matching_loop_order_down);
+   const int index = settings.get(Spectrum_generator_settings::eft_higgs_index);
+
+   VERBOSE_MSG("\t[3] matching BSM to SM at " << loops << "-loop level ...");
+
+   // perform matching: calculate SM parameters at matching scale
+   @ModelName@_standard_model_matching::match_high_to_low_scale_model(eft, model, loops, index);
+}
+
+/**
+ * Set SM-like parameters of the BSM model.
+ *
+ * @param vec vector of parameters
+ */
+void @ModelName@_spectrum_generator<Shooting>::set_BSM_parameters(
+   const Vec_t& vec)
+{
+   VERBOSE_MSG("Overwriting SM-like BSM parameters with " << vec.transpose());
+
+   model.set_@hyperchargeCoupling@(vec(0));
+   model.set_@leftCoupling@(vec(1));
+   model.set_@strongCoupling@(vec(2));
+   model.set_@UpYukawa@(2, 2, vec(3));
+   model.set_@DownYukawa@(2, 2, vec(4));
+   model.set_@ElectronYukawa@(2, 2, vec(5));
+
+   const double VEV = vec(6);
+
+   VERBOSE_MSG("Imposing user-defined matching condition ...");
+
+   @ModelName@_standard_model_matching::impose_user_matching(model, VEV);
+}
+
+/**
+ * Calculates deviation between the observables predicted by the
+ * BSM->EFT matching and the user-given values for the observables.
+ *
+ * @param qedqcd user-given values for the observables
+ */
+@ModelName@_spectrum_generator<Shooting>::Vec_t
+@ModelName@_spectrum_generator<Shooting>::calculate_deviation(
+   const softsusy::QedQcd& qedqcd)
+{
+   VERBOSE_MSG("Calculating deviation from SM input observables ...");
+   VERBOSE_MSG("\t[1] running SM to Q_low = " << get_low_scale() << " GeV ...");
+
+   eft.run_to(get_low_scale());
+
+   VERBOSE_MSG("\t[2] calculating pole masses ...");
+
+   eft.solve_ewsb();
+   eft.calculate_spectrum();
+
+   VERBOSE_MSG("\t[3] calculating observables ...");
+
+   // variables w/o subscript are input observables
+   // variables w/ subscript _p are predicted observables
+
+   const double Mt             = qedqcd.displayPoleMt();
+   const double Mt_p           = eft.get_physical().MFu(2); // arxiv:2003.04639 Eq.(6.5)
+   const double MZ             = qedqcd.displayPoleMZ();
+   const double MZ_p           = eft.get_physical().MVZ; // arxiv:2003.04639 Eq.(6.8d)
+   const double mb_SM5         = qedqcd.displayMass(softsusy::mBottom); // input value m_b(MS-bar,SM(5),Q)
+   const double mb             = eft.calculate_MFd_DRbar(mb_SM5, 2); // input value \hat{m}_b(Q) from arxiv:2003.04639 Eq.(6.8e) (= m_b(MS-bar,SM(6),Q)), calculated from m_b(MS-bar,SM(5),Q)
+   const double mb_p           = eft.get_MFd(2); // predicted \hat{m}_b(Q) from arxiv:2003.04639 Eq.(6.8e)
+   const double Mtau           = qedqcd.displayPoleMtau();
+   const double Mtau_p         = eft.get_physical().MFe(2); // arxiv:2003.04639 Eq.(6.8c)
+   const double gY_p           = eft.get_g1() * standard_model_info::normalization_g1;
+   const double g2_p           = eft.get_g2() * standard_model_info::normalization_g2;
+   const double g3_p           = eft.get_g3() * standard_model_info::normalization_g3;
+   const double e_p            = gY_p*g2_p/Sqrt(Sqr(gY_p) + Sqr(g2_p));
+   const double alpha_em_SM6_p = Sqr(e_p)*oneOver4Pi;
+   const double alpha_s_SM6_p  = Sqr(g3_p)*oneOver4Pi;
+   const double alpha_em_SM5   = qedqcd.displayAlpha(softsusy::ALPHA);
+   const double alpha_s_SM5    = qedqcd.displayAlpha(softsusy::ALPHAS);
+   const double delta_alpha_em = eft.calculate_delta_alpha_em(alpha_em_SM6_p); // arxiv:2003.04639 Eq.(6.9)
+   const double delta_alpha_s  = eft.calculate_delta_alpha_s(alpha_s_SM5);
+   const double alpha_em_SM5_p = alpha_em_SM6_p/(1 + delta_alpha_em); // arxiv:2003.04639 Eq.(6.8a)
+   const double alpha_s_SM5_p  = alpha_s_SM6_p*(1 - delta_alpha_s); // arxiv:2003.04639 Eq.(6.8b)
+   const double MW_p           = eft.get_physical().MVWp;
+
+   auto qedqcd_GF = qedqcd;
+   qedqcd_GF.setPoleMt(Mt_p);
+   qedqcd_GF.setPoleMW(MW_p);
+   qedqcd_GF.setPoleMZ(MZ_p);
+
+   const double GF             = qedqcd.displayFermiConstant();
+   const double GF_p           = eft.calculate_G_fermi(qedqcd_GF); // arxiv:2003.04639 Eq.(6.7)
+
+   using Arr_t = Eigen::Array<double, N, 1>;
+
+   const Arr_t input
+      = (Arr_t() << alpha_em_SM5, alpha_s_SM5, GF, Mt, MZ, mb, Mtau).finished();
+   const Arr_t predicted
+      = (Arr_t() << alpha_em_SM5_p, alpha_s_SM5_p, GF_p, Mt_p, MZ_p, mb_p, Mtau_p).finished();
+   const Arr_t rel_diff = (input - predicted)/predicted;
+
+   VERBOSE_MSG("\t[4] input observables: " <<  input.transpose());
+   VERBOSE_MSG("\t[4] predicted observables: " <<  predicted.transpose());
+   VERBOSE_MSG("\t[4] relative deviation between input and predicted observables: " <<  rel_diff.transpose());
+
+   return rel_diff.matrix();
+}
+
+} // namespace flexiblesusy

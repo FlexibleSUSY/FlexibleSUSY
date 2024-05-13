@@ -38,6 +38,7 @@
 #include "logger.hpp"
 #include "error.hpp"
 #include "loop_libraries/loop_library.hpp"
+#include "numerics.h"
 #include "raii.hpp"
 
 #ifdef ENABLE_THREADS
@@ -461,6 +462,20 @@ double CLASSNAME::G0(double p, double m1, double m2) const noexcept
    ).real();
 }
 
+/// derivative of B0(p^2, ma^2, mb^2) w.r.t. p^2
+double CLASSNAME::DB0(double p2, double m2a, double m2b) const noexcept
+{
+   return softsusy::db0(p2, m2a, m2b);
+}
+
+/// derivative of G0(p^2, m1^2, m2^2) w.r.t. p^2
+double CLASSNAME::DG0(double p2, double m2a, double m2b) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return Loop_library::get().B0(p2, m2a, m2b, scl2).real()
+      + (p2 - m2a - m2b) * DB0(p2, m2a, m2b);
+}
+
 /**
  * routine which finds the @RenScheme@ mass eigenstates and mixings.
  */
@@ -676,6 +691,8 @@ void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
 @tadpoleEqFunctions@
 
 @selfEnergyFunctions@
+
+@selfEnergyDerivFunctions@
 
 @secondGenerationHelperFunctions@
 @thirdGenerationHelperFunctions@

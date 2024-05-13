@@ -144,6 +144,7 @@ public:
 @[override]massCalculationPrototypes@
 @[override]tadpoleEqPrototypes@
 @selfEnergyPrototypes@
+@selfEnergyDerivPrototypes@
 
    /// calculates the tadpoles at current loop order
    void tadpole_equations(double[number_of_ewsb_equations]) const;
@@ -192,6 +193,8 @@ private:
    double F0(double, double, double) const noexcept;
    double G0(double, double, double) const noexcept;
 
+   double DG0(double, double, double) const noexcept;
+   double DB0(double, double, double) const noexcept;
    // DR-bar masses
 @physicalMassesDef@
    // DR-bar mixing matrices
