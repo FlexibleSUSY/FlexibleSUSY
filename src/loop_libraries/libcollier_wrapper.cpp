@@ -180,6 +180,22 @@ contains
       deallocate(Bcoeff,Bcoeffuv)
    end
 
+   subroutine get_DT2_dummy(b,p10,m02,m12) bind(C, name='get_DB_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
+      complex(C_DOUBLE_COMPLEX), intent(out), dimension(3) :: b
+      complex(REAL64), allocatable :: DBcoeff(:,:), DBcoeffuv(:,:)
+
+      allocate(DBcoeff(0:1,0:2))
+      allocate(DBcoeffuv(0:1,0:2))
+      call DB_cll(DBcoeff, DBcoeffuv, p10, m02, m12, 2)
+      b(1) = DBcoeff(0,0)
+      b(2) = DBcoeff(0,1)
+      b(3) = DBcoeff(1,0)
+
+      deallocate(DBcoeff,DBcoeffuv)
+   end
+
    subroutine get_T3_dummy(c,p10,p21,p20,m02,m12,m22) bind(C, name='get_C_impl')
       complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
       complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
