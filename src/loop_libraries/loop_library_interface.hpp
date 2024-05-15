@@ -161,9 +161,9 @@ enum Dcoeffs : int {
  *            scl2 is squared scale (squared mu of eq. (4.1) in [DE]);
  *            returns T^1_0 from eq. (4.4) in [DE] of std::complex<double> type.
  *
- * A, B, C, D functions return void, their first arguments are
+ * A, B, DB, C, D functions return void, their first arguments are
  * std::complex<double> arrays of fixed length (passed by a reference), which
- * equals to 1, 6, 7, 11. They fill given array with values of Passarino-Veltman
+ * equals to 1, 3, 3, 7, 11. They fill given array with values of Passarino-Veltman
  * coefficients (inspect table 3 of [CO]). After the first argument goes T_ARGS
  * sequence, then scl2, which is described by the following example:
  *
