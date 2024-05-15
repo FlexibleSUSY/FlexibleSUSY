@@ -78,6 +78,23 @@
       }                                                                        \
    }
 
+#define LT_ALL_DERIVATIVE(PAIR)                                                           \
+   void Looptools::CAT(D, LIB(PAIR))(CAT(LIB(PAIR), coeff_t) & \
+                                arr,                                           \
+                             CAT(LIB(PAIR), _ARGS)) noexcept                   \
+   {                                                                           \
+      const int coeffs[] = {BOOST_PP_SEQ_ENUM(                                 \
+         BOOST_PP_SEQ_TRANSFORM(APPEND, CAT(d, LT(PAIR)), CAT(LIB(PAIR), _CSEQ)))};    \
+      ComplexType res[CAT(N, LT(PAIR))];                                       \
+      set_mu2_uv(scl2_in);                                                     \
+                                                                               \
+      CAT(LIB(PAIR), put)                                                      \
+      (res BOOST_PP_SEQ_FOR_EACH(REAL, , CAT(LIB(PAIR), _ARGS_SEQ)));          \
+      for (int i = 0; i < CAT(CAT(D, LIB(PAIR)), _N); ++i) {                           \
+         arr.at(i) = res[coeffs[i]];                                           \
+      }                                                                        \
+   }
+
 namespace flexiblesusy
 {
 namespace looplibrary
@@ -108,6 +125,7 @@ BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, D_PAIR, D_CSEQ)
 
 LT_ALL(A_PAIR)
 LT_ALL(B_PAIR)
+LT_ALL_DERIVATIVE(B_PAIR)
 LT_ALL(C_PAIR)
 LT_ALL(D_PAIR)
 

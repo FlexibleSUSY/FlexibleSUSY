@@ -43,6 +43,7 @@ public:
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (D_ARGS), D_SEQ)
    void A(Acoeff_t&, A_ARGS) noexcept override;
    void B(Bcoeff_t&, B_ARGS) noexcept override;
+   void DB(DBcoeff_t&, DB_ARGS) noexcept override;
    void C(Ccoeff_t&, C_ARGS) noexcept override;
    void D(Dcoeff_t&, D_ARGS) noexcept override;
    ~Looptools() noexcept override {};
