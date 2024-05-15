@@ -67,7 +67,17 @@ std::complex<double> Softsusy::B00(B_ARGS) noexcept
    return {softsusy::b22(p, m1, m2, q), 0.0};
 }
 
-BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (B_ARGS), DB_SEQ)
+
+std::complex<double> Softsusy::DB0(DB_ARGS) noexcept
+{
+   double p = std::sqrt(p10_in.real());
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+
+   return {softsusy::db0(p, m1, m2), 0.0};
+}
+
+BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (DB_ARGS), (DB1)(DB00))
 
 std::complex<double> Softsusy::C0(C_ARGS) noexcept
 {
@@ -121,6 +131,18 @@ void Softsusy::A(Acoeff_t& a, A_ARGS) noexcept
    a.at(0) = {softsusy::a0(m, q), 0.0};
 }
 
+void Softsusy::DB(DBcoeff_t& db, DB_ARGS) noexcept
+{
+   const double p = std::sqrt(p10_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+
+   static constexpr std::complex<double> undefined = {NAN_Q, NAN_Q};
+   db.at(0) = {softsusy::db0(p, m1, m2), 0.};
+   db.at(1) = undefined;
+   db.at(2) = undefined;
+}
+
 void Softsusy::B(Bcoeff_t& b, B_ARGS) noexcept
 {
    double p = std::sqrt(p10_in.real());
@@ -131,12 +153,6 @@ void Softsusy::B(Bcoeff_t& b, B_ARGS) noexcept
    b.at(0) = {softsusy::b0(p, m1, m2, q), 0.0};
    b.at(1) = {(-1) * softsusy::b1(p, m1, m2, q), 0.0};
    b.at(2) = {softsusy::b22(p, m1, m2, q), 0.0};
-
-   // derivatives
-   std::complex<double> undefined = {NAN_Q, NAN_Q};
-   b.at(3) = undefined;
-   b.at(4) = undefined;
-   b.at(5) = undefined;
 }
 
 void Softsusy::C(Ccoeff_t& c, C_ARGS) noexcept
