@@ -462,12 +462,14 @@ double CLASSNAME::G0(double p, double m1, double m2) const noexcept
    ).real();
 }
 
+/// derivative of H0(p^2, m1^2, m2^2) w.r.t. p^2
 double CLASSNAME::DH0(double p, double m1, double m2) const noexcept
 {
    const double scl2 = Sqr(get_scale());
    return 4.0*Loop_library::get().DB00(p, m1, m2, scl2).real() + CLASSNAME::DG0(p, m1, m2);
 }
 
+/// derivative of F0(p^2, m1^2, m2^2) w.r.t. p^2
 double CLASSNAME::DF0(double p, double m1, double m2) const noexcept
 {
    const double scl2 = Sqr(get_scale());
