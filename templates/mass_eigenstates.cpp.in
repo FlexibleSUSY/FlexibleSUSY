@@ -485,12 +485,13 @@ double CLASSNAME::DG0(double p, double m1, double m2) const noexcept
       Loop_library::get().B0(p, m1, m2, scl2)
       + (p - m1 - m2) * Loop_library::get().DB0(p, m1, m2, scl2)
    ).real();
+}
 
 /// derivative of B0(p^2, ma^2, mb^2) w.r.t. p^2
 double CLASSNAME::DB0(double p2, double m2a, double m2b) const noexcept
 {
    const double scl2 = Sqr(get_scale());
-   return Loop_library::get().DB0(p2, m2a, m2b, scl2);
+   return Loop_library::get().DB0(p2, m2a, m2b, scl2).real();
 }
 
 /**

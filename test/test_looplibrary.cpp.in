@@ -97,6 +97,14 @@ BOOST_AUTO_TEST_CASE(test_two_point_DB00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(0, 0, 3, 50).real(), -0.30389533750778075, 2e-15 );
 }
 
+BOOST_AUTO_TEST_CASE(test_DB) {
+   std::array<std::complex<double>, DB_N> db {};
+   Loop_library::get().DB(db, 0, 3, 7, 50);
+   BOOST_CHECK_CLOSE_FRACTION(db[looplibrary::db0].real() ,  0.034480389560448771, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(db[looplibrary::db1].real() , -0.015806374496330072, 9e-16);
+   BOOST_CHECK_CLOSE_FRACTION(db[looplibrary::db00].real(), -0.19326407490093964,  3e-16);
+}
+
 #endif
 
 BOOST_AUTO_TEST_CASE(test_B) {
