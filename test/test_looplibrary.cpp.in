@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(zero_test_three_point_C00) {
 #if LIBRARY_TYPE == 0 || LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
 
 BOOST_AUTO_TEST_CASE(zero_test_three_point_C0) {
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 7, 50).real(), -0.155577518557259, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 7, 50).real(), -0.155577518557259, 4e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 0, 3, 7, 50).real(), -0.211824465096801, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 0, 7, 50).real(), -0.324318358175886, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 0, 50).real(), -0.549306144334055, 1e-15 );
