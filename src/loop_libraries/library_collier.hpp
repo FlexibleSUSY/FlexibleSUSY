@@ -39,7 +39,7 @@ public:
    Collier() : current_mu2_uv(1.0) { initialize(); }
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (A_ARGS), A_SEQ)
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (B_ARGS), B_SEQ)
-   BOOST_PP_SEQ_FOR_EACH(REDEFINE, (B_ARGS), DB_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(REDEFINE, (DB_ARGS), DB_SEQ)
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (D_ARGS), D_SEQ)
    void A(Acoeff_t&, A_ARGS) noexcept override;
