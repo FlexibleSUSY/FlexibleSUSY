@@ -193,8 +193,11 @@ private:
    double F0(double, double, double) const noexcept;
    double G0(double, double, double) const noexcept;
 
-   double DG0(double, double, double) const noexcept;
    double DB0(double, double, double) const noexcept;
+   double DH0(double, double, double) const noexcept;
+   double DF0(double, double, double) const noexcept;
+   double DG0(double, double, double) const noexcept;
+
    // DR-bar masses
 @physicalMassesDef@
    // DR-bar mixing matrices

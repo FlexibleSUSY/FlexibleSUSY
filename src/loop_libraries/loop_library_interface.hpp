@@ -31,6 +31,7 @@
 
 #define A_ARGS_SEQ (m02_in)
 #define B_ARGS_SEQ (p10_in)(m02_in)(m12_in)
+#define DB_ARGS_SEQ B_ARGS_SEQ
 #define C_ARGS_SEQ (p10_in)(p21_in)(p20_in)(m02_in)(m12_in)(m22_in)
 #define D_ARGS_SEQ                                                             \
    (p10_in)(p21_in)(p32_in)(p30_in)(p20_in)(p31_in)(m02_in)(m12_in)(m22_in)(   \
@@ -38,22 +39,26 @@
 
 #define A_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , A_ARGS_SEQ) double scl2_in
 #define B_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , B_ARGS_SEQ) double scl2_in
+#define DB_ARGS B_ARGS
 #define C_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , C_ARGS_SEQ) double scl2_in
 #define D_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , D_ARGS_SEQ) double scl2_in
 
 #define A_CSEQ (0)
 #define B_CSEQ (0)(1)(00)
+#define DB_CSEQ (0)(1)(00)
 #define C_CSEQ (0)(1)(2)(00)(11)(12)(22)
 #define D_CSEQ (0)(1)(2)(3)(00)(11)(12)(13)(22)(23)(33)
 
 #define A_N BOOST_PP_SEQ_SIZE(A_CSEQ)
 #define B_N BOOST_PP_SEQ_SIZE(B_CSEQ)
+#define DB_N BOOST_PP_SEQ_SIZE(DB_CSEQ)
 #define C_N BOOST_PP_SEQ_SIZE(C_CSEQ)
 #define D_N BOOST_PP_SEQ_SIZE(D_CSEQ)
 
 #define APPEND(s, data, elem) data##elem
 #define A_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, A, A_CSEQ)
 #define B_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, B, B_CSEQ)
+#define DB_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, DB, DB_CSEQ)
 #define C_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, C, C_CSEQ)
 #define D_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, D, D_CSEQ)
 
@@ -64,6 +69,7 @@ namespace looplibrary
 
 using Acoeff_t = std::array<std::complex<double>, A_N>;
 using Bcoeff_t = std::array<std::complex<double>, B_N>;
+using DBcoeff_t = std::array<std::complex<double>, DB_N>;
 using Ccoeff_t = std::array<std::complex<double>, C_N>;
 using Dcoeff_t = std::array<std::complex<double>, D_N>;
 
@@ -99,6 +105,9 @@ enum Acoeffs : int {
 enum Bcoeffs : int {
    BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, b, B_CSEQ))
 };
+enum DBcoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, db, DB_CSEQ))
+};
 enum Ccoeffs : int {
    BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, c, C_CSEQ))
 };
@@ -116,10 +125,10 @@ enum Dcoeffs : int {
  *
  * Loop_library_interface is the abstract base class for one loop functions.
  * It defines the following set of loop functions names:
- *    one-loop ones:   A, A0
- *    two-loop ones:   B, B0, B1, B00
- *    three-loop ones: C, C0, C1, C2, C00, C11, C12, C22
- *    four-loop ones:  D, D0, D1, D2, D3, D00, D11, D12, D13, D22, D23, D33.
+ *    one-point ones:   A, A0
+ *    two-point ones:   B, B0, B1, B00, DB0, DB1, DB00
+ *    three-point ones: C, C0, C1, C2, C00, C11, C12, C22
+ *    four-point ones:  D, D0, D1, D2, D3, D00, D11, D12, D13, D22, D23, D33.
  *
  * For making the notation a little bit shorter the following abbreviations for
  * input momenta and masses are used:
@@ -152,9 +161,9 @@ enum Dcoeffs : int {
  *            scl2 is squared scale (squared mu of eq. (4.1) in [DE]);
  *            returns T^1_0 from eq. (4.4) in [DE] of std::complex<double> type.
  *
- * A, B, C, D functions return void, their first arguments are
+ * A, B, DB, C, D functions return void, their first arguments are
  * std::complex<double> arrays of fixed length (passed by a reference), which
- * equals to 1, 2, 7, 11. They fill given array with values of Passarino-Vertman
+ * equals to 1, 3, 3, 7, 11. They fill given array with values of Passarino-Veltman
  * coefficients (inspect table 3 of [CO]). After the first argument goes T_ARGS
  * sequence, then scl2, which is described by the following example:
  *
@@ -176,10 +185,12 @@ class Loop_library_interface
 public:
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (A_ARGS), A_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (DB_ARGS), DB_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (D_ARGS), D_SEQ)
    virtual void A(Acoeff_t&, A_ARGS) = 0;
    virtual void B(Bcoeff_t&, B_ARGS) = 0;
+   virtual void DB(DBcoeff_t&, DB_ARGS) = 0;
    virtual void C(Ccoeff_t&, C_ARGS) = 0;
    virtual void D(Dcoeff_t&, D_ARGS) = 0;
    virtual ~Loop_library_interface() {}
