@@ -88,7 +88,7 @@ void set_mu2_uv_impl(double*);
 
 BOOST_PP_SEQ_FOR_EACH(IMPL, A_ARGS_N, A_SEQ)
 BOOST_PP_SEQ_FOR_EACH(IMPL, B_ARGS_N, B_SEQ)
-BOOST_PP_SEQ_FOR_EACH(IMPL, B_ARGS_N, DB_SEQ)
+BOOST_PP_SEQ_FOR_EACH(IMPL, DB_ARGS_N, DB_SEQ)
 BOOST_PP_SEQ_FOR_EACH(IMPL, C_ARGS_N, C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(IMPL, D_ARGS_N, D_SEQ)
 
@@ -154,14 +154,14 @@ void Collier::B(Bcoeff_t& b, B_ARGS) noexcept
    get_B_impl(b.data(), &p10, &m02, &m12);
 }
 
-void Collier::DB(DBcoeff_t& b, DB_ARGS) noexcept
+void Collier::DB(DBcoeff_t& db, DB_ARGS) noexcept
 {
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> m02 = m02_in;
    const std::complex<double> m12 = m12_in;
 
    set_mu2_uv(scl2_in);
-   get_DB_impl(b.data(), &p10, &m02, &m12);
+   get_DB_impl(db.data(), &p10, &m02, &m12);
 }
 
 void Collier::C(Ccoeff_t& c, C_ARGS) noexcept
