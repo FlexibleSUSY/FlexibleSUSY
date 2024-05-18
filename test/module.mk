@@ -52,6 +52,7 @@ TEST_SRC := \
 		$(DIR)/test_array_view.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_ckm.cpp \
+		$(DIR)/test_composite_root_finder.cpp \
 		$(DIR)/test_logger.cpp \
 		$(DIR)/test_derivative.cpp \
 		$(DIR)/test_eigen_utils.cpp \
@@ -80,6 +81,7 @@ TEST_SRC := \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_standard_model_G_fermi.cpp \
+		$(DIR)/test_standard_model_mt_calculation.cpp \
 		$(DIR)/test_standard_model_mw_calculation.cpp \
 		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_string_format.cpp \
@@ -88,6 +90,8 @@ TEST_SRC := \
 		$(DIR)/test_threshold_corrections.cpp \
 		$(DIR)/test_threshold_loop_functions.cpp \
 		$(DIR)/test_spectrum_generator_settings.cpp \
+		$(DIR)/test_standard_model_G_fermi.cpp \
+		$(DIR)/test_standard_model_hh_deriv.cpp \
 		$(DIR)/test_which.cpp \
 		$(DIR)/test_wrappers.cpp \
 		$(DIR)/test_looplibrary_softsusy.cpp \
@@ -156,6 +160,22 @@ ifeq ($(ENABLE_TSIL),yes)
 TEST_SRC += \
 		$(DIR)/test_tsil.cpp \
 		$(DIR)/test_sm_twoloop_mt.cpp
+endif
+
+ifneq ($(findstring shooting,$(SOLVERS)),)
+TEST_SRC += \
+		$(DIR)/test_shooting_solver.cpp
+
+ifeq ($(WITH_NMSSMEFTHiggs), yes)
+TEST_SRC += \
+		$(DIR)/test_NMSSMEFTHiggs.cpp
+endif
+
+ifeq ($(WITH_NUHMSSMNoFVHimalayaEFTHiggs),yes)
+TEST_SRC += \
+		$(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.cpp
+endif
+
 endif
 
 ifeq ($(ENABLE_LOOPTOOLS), yes)
@@ -722,9 +742,9 @@ TEST_SH += \
 		$(DIR)/test_MSSMNoFVEFTHiggs.sh
 endif
 
-ifeq ($(WITH_NMSSMEFTHiggs) $(WITH_lowNMSSM),yes yes)
+ifeq ($(WITH_NMSSMEFTHiggsTwoScale) $(WITH_lowNMSSM),yes yes)
 TEST_SH += \
-		$(DIR)/test_NMSSMEFTHiggs.sh
+		$(DIR)/test_NMSSMEFTHiggsTwoScale.sh
 endif
 
 ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
@@ -745,6 +765,11 @@ endif
 ifeq ($(WITH_SM) $(WITH_SMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes yes)
 TEST_META += \
 		$(DIR)/test_multiple_librarylinks.m
+endif
+
+ifeq ($(WITH_SM) $(WITH_SMEFTHiggsTopDown),yes yes)
+TEST_SRC += \
+		$(DIR)/test_SMEFTHiggsTopDown.cpp
 endif
 
 ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
@@ -1151,7 +1176,13 @@ $(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
 
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
+$(DIR)/test_NMSSMEFTHiggs.x: $(LIBNMSSMEFTHiggs)
+
+$(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.x: $(LIBNUHMSSMNoFVHimalayaEFTHiggs)
+
 $(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.x: $(LIBMSSMEFTHiggs)
+
+$(DIR)/test_SMEFTHiggsTopDown.x: $(LIBSM) $(LIBSMEFTHiggsTopDown)
 
 $(DIR)/test_NMSSMCPV_ewsb.x: $(LIBNMSSMCPV)
 

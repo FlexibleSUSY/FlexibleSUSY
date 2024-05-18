@@ -166,6 +166,7 @@ DEFINE_ENABLE_VERBOSE="#undef ENABLE_VERBOSE"
 DEFINE_ENABLE_TWO_SCALE_SOLVER="#undef ENABLE_TWO_SCALE_SOLVER"
 DEFINE_ENABLE_LATTICE_SOLVER="#undef ENABLE_LATTICE_SOLVER"
 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#undef ENABLE_SEMI_ANALYTIC_SOLVER"
+DEFINE_ENABLE_SHOOTING_SOLVER="#undef ENABLE_SHOOTING_SOLVER"
 DEFINE_ENABLE_ADDONS=""
 
 boost_lib_dir=""
@@ -228,8 +229,8 @@ sqlite_inc_dir=""
 tsil_lib_dir=""
 tsil_inc_dir=""
 # available RG solvers
-SOLVERS="two_scale semi_analytic"
-available_solvers="two_scale lattice semi_analytic"
+SOLVERS="two_scale semi_analytic shooting"
+available_solvers="two_scale lattice semi_analytic shooting"
 # models that will be compiled
 MODELS="all"
 # BEGIN: NOT EXPORTED ##########################################
@@ -979,7 +980,7 @@ check_solvers() {
         case "$a" in
             all)
                 SOLVERS="$available_solvers"; break ;;
-            two_scale|lattice|semi_analytic)
+            two_scale|lattice|semi_analytic|shooting)
                 SOLVERS="$SOLVERS $a"
                 continue ;;
             *)
@@ -3540,9 +3541,11 @@ enable_defines() {
 		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1"
 		DEFINE_ENABLE_LATTICE_SOLVER="#define ENABLE_LATTICE_SOLVER 1"
                 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1"
+                DEFINE_ENABLE_SHOOTING_SOLVER="#define ENABLE_SHOOTING_SOLVER 1"
 		logmsg "   ${DEFINE_ENABLE_TWO_SCALE_SOLVER}"
 		logmsg "   ${DEFINE_ENABLE_LATTICE_SOLVER}"
                 logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+                logmsg "   ${DEFINE_ENABLE_SHOOTING_SOLVER}"
 		break ;;
 	    two_scale)
 		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1";
@@ -3555,6 +3558,10 @@ enable_defines() {
             semi_analytic)
                 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1";
                 logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+                continue ;;
+            shooting)
+                DEFINE_ENABLE_SHOOTING_SOLVER="#define ENABLE_SHOOTING_SOLVER 1";
+                logmsg "   ${DEFINE_ENABLE_SHOOTING_SOLVER}"
                 continue ;;
 	    *)
 		message "Error: unknown solver: $a";
@@ -4113,6 +4120,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_TWO_SCALE_SOLVER@|$DEFINE_ENABLE_TWO_SCALE_SOLVER|" \
     -e "s|@DEFINE_ENABLE_LATTICE_SOLVER@|$DEFINE_ENABLE_LATTICE_SOLVER|" \
     -e "s|@DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@|$DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER|" \
+    -e "s|@DEFINE_ENABLE_SHOOTING_SOLVER@|$DEFINE_ENABLE_SHOOTING_SOLVER|" \
     -e "s|@DEFINE_ENABLE_ADDONS@|$DEFINE_ENABLE_ADDONS|"       \
     -e 's|@n@|\
 |g' \
