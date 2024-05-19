@@ -128,6 +128,9 @@
 /* Enable semi-analytic BVP solver */
 @DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@
 
+/* Enable shooting BVP solver */
+@DEFINE_ENABLE_SHOOTING_SOLVER@
+
 /* Enable statements for addons */
 @DEFINE_ENABLE_ADDONS@
 

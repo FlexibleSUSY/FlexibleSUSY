@@ -81,6 +81,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/command_line_options.hpp \
 		$(DIR)/complex.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
+		$(DIR)/composite_root_finder.hpp \
 		$(DIR)/compound_constraint.hpp \
 		$(DIR)/concatenate.hpp \
 		$(DIR)/constraint.hpp \
@@ -194,6 +195,11 @@ LIBFLEXI_HDR += \
 		$(DIR)/semi_analytic_solver.hpp \
 		$(DIR)/two_scale_running_precision.hpp \
 		$(DIR)/two_scale_solver.hpp
+endif
+
+ifneq ($(findstring shooting,$(SOLVERS)),)
+LIBFLEXI_HDR += \
+		$(DIR)/shooting_solver.hpp
 endif
 
 # remove duplicates in case multiple solvers are used

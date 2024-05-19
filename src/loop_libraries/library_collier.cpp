@@ -25,6 +25,7 @@
 
 #define A_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(A_ARGS_SEQ), 1)
 #define B_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(B_ARGS_SEQ), 1)
+#define DB_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(DB_ARGS_SEQ), 1)
 #define C_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(C_ARGS_SEQ), 1)
 #define D_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(D_ARGS_SEQ), 1)
 
@@ -87,11 +88,13 @@ void set_mu2_uv_impl(double*);
 
 BOOST_PP_SEQ_FOR_EACH(IMPL, A_ARGS_N, A_SEQ)
 BOOST_PP_SEQ_FOR_EACH(IMPL, B_ARGS_N, B_SEQ)
+BOOST_PP_SEQ_FOR_EACH(IMPL, DB_ARGS_N, DB_SEQ)
 BOOST_PP_SEQ_FOR_EACH(IMPL, C_ARGS_N, C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(IMPL, D_ARGS_N, D_SEQ)
 
 void get_A_impl(const std::complex<double>[A_N], COLLIER_ARGS(A_ARGS_N));
 void get_B_impl(const std::complex<double>[B_N], COLLIER_ARGS(B_ARGS_N));
+void get_DB_impl(const std::complex<double>[DB_N], COLLIER_ARGS(DB_ARGS_N));
 void get_C_impl(const std::complex<double>[C_N], COLLIER_ARGS(C_ARGS_N));
 void get_D_impl(const std::complex<double>[D_N], COLLIER_ARGS(D_ARGS_N));
 }
@@ -129,6 +132,7 @@ std::complex<double> Collier::A0(A_ARGS) noexcept
 }
 
 BOOST_PP_SEQ_FOR_EACH(COLLIER_B, (B_ARGS), B_SEQ)
+BOOST_PP_SEQ_FOR_EACH(COLLIER_B, (DB_ARGS), DB_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_C, (C_ARGS), C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_D, (D_ARGS), D_SEQ)
 
@@ -148,6 +152,16 @@ void Collier::B(Bcoeff_t& b, B_ARGS) noexcept
 
    set_mu2_uv(scl2_in);
    get_B_impl(b.data(), &p10, &m02, &m12);
+}
+
+void Collier::DB(DBcoeff_t& db, DB_ARGS) noexcept
+{
+   const std::complex<double> p10(p10_in.real(), 0.);
+   const std::complex<double> m02 = m02_in;
+   const std::complex<double> m12 = m12_in;
+
+   set_mu2_uv(scl2_in);
+   get_DB_impl(db.data(), &p10, &m02, &m12);
 }
 
 void Collier::C(Ccoeff_t& c, C_ARGS) noexcept

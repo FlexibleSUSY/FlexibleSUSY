@@ -2,9 +2,17 @@ FlexibleSUSY 2.9.0
 ==================
 
 New features
+------------
 
 * Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
-  over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
+  over SARAH results [`1805.07306 <https://arxiv.org/abs/1805.07306>`_].
+
+* New FlexibleEFTHiggs method using the shooting solver, as presented
+  in [`2003.04639 <https://arxiv.org/abs/2003.04639>`_]. Provides a
+  precise prediction of the SM-like Higgs boson mass in the MSSM at
+  3-loop level (``NUHMSSMNoFVHimalayaEFTHiggs``) and in the NMSSM at
+  2-loop level (``NMSSMEFTHiggs``) for both low and high SUSY scales,
+  including :math:`$x_t$` resummation.
 
 Fixed bugs
 ----------
@@ -75,6 +83,54 @@ New features
   loop-induced couplings of neutral Higgses. This block can be used by a SARAH
   generated UFO and CalcHEP models (the latter one being also used by
   micrOMEGAs).
+
+* Added shooting algorithm to solve the boundary value problem for
+  FlexibleEFTHiggs models. The shooting algorithm allows for
+  resummation of certain higher-order contributions and for the
+  inclusion of 2- and 3-loop contributions to the Higgs pole mass in
+  FlexibleEFTHiggs models, leading to an improved precision of the
+  lightest Higgs pole mass prediction in supersymmetric models such as
+  the MSSM or NMSSM [`arXiv:2003.04639
+  <https://arxiv.org/abs/2003.04639>`_].
+
+  To enable the shooting algorithm for a FlexibleEFTHiggs model, add
+  to the FlexibleSUSY model file (see
+  e.g. ``NUHMSSMNoFVHimalayaEFTHiggs``)::
+
+      FSBVPSolvers = { ShootingSolver };
+
+  To use 2-loop contributions to the Higgs boson pole mass in the
+  MSSM-limit (in non-minimal supersymmetric models such as the NMSSM),
+  add the following lines to the FlexibleSUSY model file (see
+  e.g. ``NMSSMEFThiggs``)::
+
+      FSMSSMLimit = {
+         {\[Kappa], FSGaugeLess},
+         {\[Lambda], FSGaugeLess},
+         {vS, Sqrt[2] MuInput/FSGaugeLess},
+         {T[\[Lambda]], ALambdaInput FSGaugeLess}
+      };
+
+  Suported models: ``NUHMSSMNoFVHimalayaEFTHiggs`` (3-loop precision,
+  requires Himalaya), ``NMSSMEFTHiggs`` (2-loop precision).
+
+  Example (``NUHMSSMNoFVHimalayaEFTHiggs``)::
+
+      HIMALAYA_DIR=/path/to/Himalaya-4.2.2
+
+      ./createmodel --name=NUHMSSMNoFVHimalayaEFTHiggs -f
+
+      ./configure --with-models=NUHMSSMNoFVHimalayaEFTHiggs \
+         --enable-himalaya \
+         --with-himalaya-incdir=${HIMALAYA_DIR}/include \
+         --with-himalaya-libdir=${HIMALAYA_DIR}/build
+
+      make
+
+      models/NUHMSSMNoFVHimalayaEFTHiggs/run_NUHMSSMNoFVHimalayaEFTHiggs.x \
+         --slha-input-file=models/NUHMSSMNoFVHimalayaEFTHiggs/LesHouches.in.NUHMSSMNoFVHimalayaEFTHiggs
+
+  Thanks to Thomas Kwasnitza, Dominik Stöckinger and Alexander Voigt.
 
 Fixed bugs
 ----------

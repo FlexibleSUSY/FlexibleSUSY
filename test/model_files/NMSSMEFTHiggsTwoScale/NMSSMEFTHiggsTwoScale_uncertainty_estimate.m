@@ -21,12 +21,12 @@
 *)
 
 (**
-  Functions to perform an uncertainty estimate of NMSSMEFTHiggs.
+  Functions to perform an uncertainty estimate of NMSSMEFTHiggsTwoScale.
  *)
 
-CalcNMSSMEFTHiggsDMh::usage="\
+CalcNMSSMEFTHiggsTwoScaleDMh::usage="\
 The function takes the parameter point as input (same syntax as
-FSNMSSMEFTHiggsOpenHandle[]) and returns the 2-component list { Mh, DMh }
+FSNMSSMEFTHiggsTwoScaleOpenHandle[]) and returns the 2-component list { Mh, DMh }
 where Mh is the Higgs mass and DMh is an uncertainty estimate of
 missing 2-loop corrections.
 
@@ -44,8 +44,8 @@ An EFT uncertainty does not exist in in the FlexibleEFTHiggs approach.
 Example: Peform a parameter scan over the SUSY scale in the interval
 [1000, 10^10] GeV for tan(beta) = 20 and Xt/MS = Sqrt[6].
 
-Get[\"models/NMSSMEFTHiggs/NMSSMEFTHiggs_librarylink.m\"];
-Get[\"model_files/NMSSMEFTHiggs/NMSSMEFTHiggs_uncertainty_estimate.m\"];
+Get[\"models/NMSSMEFTHiggsTwoScale/NMSSMEFTHiggsTwoScale_librarylink.m\"];
+Get[\"model_files/NMSSMEFTHiggsTwoScale/NMSSMEFTHiggsTwoScale_uncertainty_estimate.m\"];
 
 CalcTlambda[mA2_, TB_, lam_, kap_, muEff_] :=
     Module[{vS = muEff Sqrt[2] / lam},
@@ -58,7 +58,7 @@ CalcTkappa[m2_, lam_, muEff_] :=
            ];
 
 CalcMh[MS_, TB_, Xtt_] :=
-    CalcNMSSMEFTHiggsDMh[
+    CalcNMSSMEFTHiggsTwoScaleDMh[
         fsSettings -> {
             precisionGoal -> 1.*^-5,
             thresholdCorrectionsLoopOrder -> 2,
@@ -110,16 +110,16 @@ LogRange[start_, stop_, steps_] :=
     Exp /@ Range[Log[start], Log[stop], (Log[stop] - Log[start])/steps];
 
 (* calculate Higgs mass *)
-CalcNMSSMEFTHiggsMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
-    CalcNMSSMEFTHiggsMh[a, Sequence @@ s, r];
+CalcNMSSMEFTHiggsTwoScaleMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
+    CalcNMSSMEFTHiggsTwoScaleMh[a, Sequence @@ s, r];
 
-CalcNMSSMEFTHiggsMh[ytLoops_?NumericQ, Qpole_?NumericQ, Qm_?NumericQ, args__] :=
+CalcNMSSMEFTHiggsTwoScaleMh[ytLoops_?NumericQ, Qpole_?NumericQ, Qm_?NumericQ, args__] :=
     Module[{handle, spec, tc},
            tc = thresholdCorrections /. { args };
            tc = If[IntegerQ[tc], tc,
-                   thresholdCorrections /. Options[FSNMSSMEFTHiggsOpenHandle]];
-           handle = FSNMSSMEFTHiggsOpenHandle[args];
-           FSNMSSMEFTHiggsSet[handle,
+                   thresholdCorrections /. Options[FSNMSSMEFTHiggsTwoScaleOpenHandle]];
+           handle = FSNMSSMEFTHiggsTwoScaleOpenHandle[args];
+           FSNMSSMEFTHiggsTwoScaleSet[handle,
                fsSettings -> {
                    calculateStandardModelMasses -> 0,
                    calculateBSMMasses -> 0,
@@ -129,31 +129,31 @@ CalcNMSSMEFTHiggsMh[ytLoops_?NumericQ, Qpole_?NumericQ, Qm_?NumericQ, args__] :=
                    thresholdCorrections -> SetDigit[tc, 6, ytLoops]
                }
            ];
-           spec = FSNMSSMEFTHiggsCalculateSpectrum[handle];
-           FSNMSSMEFTHiggsCloseHandle[handle];
+           spec = FSNMSSMEFTHiggsTwoScaleCalculateSpectrum[handle];
+           FSNMSSMEFTHiggsTwoScaleCloseHandle[handle];
            If[spec === $Failed, $Failed,
-              (Pole[M[hh]] /. (NMSSMEFTHiggs /. spec))[[1]]]
+              (Pole[M[hh]] /. (NMSSMEFTHiggsTwoScale /. spec))[[1]]]
           ];
 
 (* calculate Higgs mass and uncertainty estimate *)
-CalcNMSSMEFTHiggsDMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
-    CalcNMSSMEFTHiggsDMh[a, Sequence @@ s, r];
+CalcNMSSMEFTHiggsTwoScaleDMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
+    CalcNMSSMEFTHiggsTwoScaleDMh[a, Sequence @@ s, r];
 
-CalcNMSSMEFTHiggsDMh[args__] :=
+CalcNMSSMEFTHiggsTwoScaleDMh[args__] :=
     Module[{Mh, MhYt3L, varyQpole, varyQmatch,
             DMhSM, DMhSUSY,
             MS = MSUSY /. { args }, Mlow = Mt /. { args }},
            If[!NumericQ[Mlow],
-              Mlow = Mt /. Options[FSNMSSMEFTHiggsOpenHandle]
+              Mlow = Mt /. Options[FSNMSSMEFTHiggsTwoScaleOpenHandle]
              ];
-           Mh         = CalcNMSSMEFTHiggsMh[2, 0, 0, args];
+           Mh         = CalcNMSSMEFTHiggsTwoScaleMh[2, 0, 0, args];
            If[Mh === $Failed, Return[{ $Failed, $Failed }]];
-           MhYt3L     = CalcNMSSMEFTHiggsMh[3, 0, 0, args];
+           MhYt3L     = CalcNMSSMEFTHiggsTwoScaleMh[3, 0, 0, args];
            If[MhYt3L === $Failed, Return[{ Mh, $Failed }]];
-           varyQpole  = CalcNMSSMEFTHiggsMh[2, #, 0, args]& /@
+           varyQpole  = CalcNMSSMEFTHiggsTwoScaleMh[2, #, 0, args]& /@
                         LogRange[Mlow/2, 2 Mlow, 10];
            If[MemberQ[varyQpole, $Failed], Return[{ Mh, $Failed }]];
-           varyQmatch = CalcNMSSMEFTHiggsMh[2, 0, #, args]& /@
+           varyQmatch = CalcNMSSMEFTHiggsTwoScaleMh[2, 0, #, args]& /@
                         LogRange[MS/2, 2 MS, 10];
            If[MemberQ[varyQmatch, $Failed], Return[{ Mh, $Failed }]];
            (* combine uncertainty estimates *)
