@@ -59,6 +59,9 @@ std::complex<double> f(double x) noexcept;
 unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexcept;
 
 static constexpr double deltaqq_QCDxQED = 691/24. - 6*zeta3 - Sqr(Pi);
+
+double Delta_tHpd(double);
+double Delta_tW(double) noexcept;
 } // namespace flexiblesusy
 
 #endif

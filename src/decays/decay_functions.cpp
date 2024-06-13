@@ -307,4 +307,36 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
    return nf;
 }
 
+/*
+ * Computes 1-loop QCD correction to t -> H^+ b + X in the limit mb -> 0
+ * as given in Eq. 2.5 of 2201.08139
+ */
+double Delta_tHpd(double z) {
+   const double lnz = std::log(z);
+   if (z < 0 || z >= 1) {
+      throw std::invalid_argument("z must belong to [0, 1)");
+   }
+   else if (is_zero(z)) {
+      return 1.25 - Sqr(Pi)/3.;
+   }
+   else if (z < 1e-10) {
+      return 1.25 - Sqr(Pi)/3.
+         + Sqr(z)    * (5.0/12.0  - 1.0/2.0*lnz)
+         + Cube(z)   * (13.0/36.0 - 2.0/3.0*lnz)
+         + Power4(z) * (3.0/10.0  - 3.0/4.0*lnz)
+         + Power5(z) * (19.0/75.0 - 4.0/5.0*lnz);
+   }
+   else {
+      const double ln1mz = std::log1p(-z);
+      return -2.*Li2(z) + z/(z-1.)*lnz + (1./z - 2.5)*ln1mz - lnz*ln1mz - 2.*zeta2 + 2.25;
+   }
+}
+
+// eq. 56 of 0906.3474
+double Delta_tW(double y) noexcept {
+   const double lny = std::log(y);
+   const double ln1my = std::log1p(-y);
+   return y/(Sqr(1.-y)*(1+2.*y))*(0.5*(1-y)*(5+9*y-6*Sqr(y))/y - 2./3.*Sqr(1-y)*(1+2*y)*Sqr(Pi)/y - Sqr(1-y)*(5+4*y)/y*ln1my - 4.*Sqr(1-y)*(1+2*y)/y*lny*ln1my - 4.*(1+y)*(1-2.*y)*lny - 4.*Sqr(1-y)*(1+2.*y)/y*Li2(y));
+}
+
 } // namespace flexiblesusy
