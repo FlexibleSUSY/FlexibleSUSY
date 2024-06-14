@@ -307,4 +307,14 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m)
    return nf;
 }
 
+/*
+ * Computes 1-loop QCD correction to H^+ -> t bbar + X in the limit mb -> 0
+ * as given in Eq. 2.6 of 2201.08139
+ */
+double Delta_Hp(double z) noexcept {
+   const double lnz = std::log(z);
+   const double ln1mz = std::log1p(-z);
+   return 2.*Li2(z) + lnz*ln1mz + (z-2.5)*(ln1mz-lnz) + 1./(z-1.)*lnz + 2.25;
+}
+
 } // namespace flexiblesusy
