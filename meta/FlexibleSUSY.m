@@ -2803,8 +2803,9 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());
-      slha_io.set_normalized_effectivecouplings_block(effc);
-   }
+      slha_io.set_renormalized_effectivecouplings_block(effc);\n" <>
+      If[SA`CPViolationHiggsSector, "slha_io.set_imnormalized_effectivecouplings_block(effc);\n", ""] <>
+   "}
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
       slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef);
