@@ -97,12 +97,6 @@ void Fflite::B(Bcoeff_t& b, B_ARGS) noexcept
    b.at(0) = B0(p10_in, m02_in, m12_in, scl2_in);
    b.at(1) = B1(p10_in, m02_in, m12_in, scl2_in);
    b.at(2) = B00(p10_in, m02_in, m12_in, scl2_in);
-
-   // derivatives
-   std::complex<double> undefined = {NAN_Q, NAN_Q};
-   b.at(3) = undefined;
-   b.at(4) = undefined;
-   b.at(5) = undefined;
 }
 
 void Fflite::DB(DBcoeff_t& db, DB_ARGS) noexcept
