@@ -606,7 +606,7 @@ CreateNPointFunctionMatrix[nPointFunction_] :=
           ];
 
 CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
-    Module[{prototypes = "", defs = "", vertexFunctionNames = {}, p, d,
+    Module[{prototypes = "", defs = "", vertexFunctionNames = {}, prototype, def,
             relevantVertexRules, derivatives},
            (* create coupling functions for all vertices in the list *)
            Print["Converting vertex functions ..."];
@@ -618,12 +618,12 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            Utils`StartProgressBar[Dynamic[k], Length[nPointFunctions]];
            For[k = 1, k <= Length[nPointFunctions], k++,
                Utils`UpdateProgressBar[k, Length[nPointFunctions]];
-               {p,d} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames];
-               prototypes = prototypes <> p;
-               defs = defs <> d;
-               {p,d} = CreateNPointFunctionMatrix[nPointFunctions[[k]]];
-               prototypes = prototypes <> p;
-               defs = defs <> d;
+               {prototype,def} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames];
+               prototypes = prototypes <> prototype;
+               defs = defs <> def;
+               {prototype,def} = CreateNPointFunctionMatrix[nPointFunctions[[k]]];
+               prototypes = prototypes <> prototype;
+               defs = defs <> def;
            ];
            (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
            If[ValueQ[SARAH`HiggsBoson],
@@ -635,12 +635,12 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
               };
               Switch[Length[derivatives],
                      0, Print["Error: no Higgs boson self-energy found."],
-                     1, {p,d} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
-                        prototypes = prototypes <> p;
-                        defs = defs <> d;
+                     1, {protopy,def} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
+                        prototypes = prototypes <> prototype;
+                        defs = defs <> def;
                         {p,d} = CreateNPointFunctionMatrix[First[derivatives]];
-                        prototypes = prototypes <> p;
-                        defs = defs <> d;,
+                        prototypes = prototypes <> prototype;
+                        defs = defs <> def;,
                      _, Print["Error: multiple Higgs boson self-energies found."]
               ];
            ];
