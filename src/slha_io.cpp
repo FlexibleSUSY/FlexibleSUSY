@@ -1096,6 +1096,7 @@ void SLHA_io::set_imnormalized_effectivecouplings_block(const EffectiveCoupling_
    std::ostringstream ss;
    ss << "Block IMNORMALIZEDEFFHIGGSCOUPLINGS\n";
    for (auto const& effC : effCouplings) {
+      if (effC.CP == 1) continue;
       ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "");
       ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1,  1, std::imag(effC.dd), "");
       ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2,  2, std::imag(effC.uu), "");
