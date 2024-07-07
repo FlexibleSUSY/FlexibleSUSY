@@ -133,6 +133,22 @@ double hVV_4body(double *q2, size_t /* dim */, void *params)
      * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
 }
 
+void EffectiveCoupling_list::set_invisible_width(std::string const& p, double c) {
+      auto found = std::find_if(
+         std::begin(effective_coupling_list), std::end(effective_coupling_list),
+         [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+      );
+      if (found == std::end(effective_coupling_list)) {
+         auto effC = NeutralHiggsEffectiveCouplings {};
+         effC.particle = p;
+         effC.invWidth = c;
+         effective_coupling_list.push_back(std::move(effC));
+      }
+      else {
+         found->invWidth = c;
+      }
+}
+
 void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, double c) {
       auto found = std::find_if(
          std::begin(effective_coupling_list), std::end(effective_coupling_list),

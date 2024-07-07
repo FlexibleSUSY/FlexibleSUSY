@@ -76,6 +76,8 @@ struct NeutralHiggsEffectiveCouplings {
    double mass {};
    double width {};
    double width_sm {};
+   double invWidth {0.};
+   double undetectedWidth {0.};
    int CP {};
    std::complex<double> dd {};
    std::complex<double> uu {};
@@ -115,6 +117,7 @@ public:
 
    void add_coupling(std::string const&, std::array<int, 2> const&, double);
    void add_coupling(std::string const&, std::array<int, 2> const&, std::complex<double>);
+   void set_invisible_width(std::string const& p, double);
    void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
 
    std::size_t size() const noexcept { return effective_coupling_list.size(); }

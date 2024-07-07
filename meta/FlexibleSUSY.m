@@ -1956,7 +1956,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            reorderPoleMasses            = TreeMasses`ReorderGoldstoneBosons["PHYSICAL"];
            checkPoleMassesForTachyons   = TreeMasses`CheckPoleMassesForTachyons["PHYSICAL"];
            WriteOut`ReplaceInFiles[files,
-                          { "@lspGetters@"           -> IndentText[lspGetters],
+                          { "@[abstract]lspGetters@"           -> IndentText[FunctionModifiers`MakeAbstract[lspGetters]],
+                            "@[override]lspGetters@"           -> IndentText[FunctionModifiers`MakeOverride[lspGetters]],
                             "@lspFunctions@"         -> lspFunctions,
                             "@[abstract]parameterGetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterGetter /@ Parameters`GetModelParameters[]]]],
                             "@[abstract]parameterSetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterSetter /@ Parameters`GetModelParameters[]]]],
@@ -2398,7 +2399,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
 
         massFunctions = CXXDiagrams`CreateMassFunctions[];
         physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
-        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[];
+        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[PotentialLSPParticles];
         defineFieldTraits =
            CXXDiagrams`CreateFieldTraitsDefinitions[
               TreeMasses`GetParticles[], "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"

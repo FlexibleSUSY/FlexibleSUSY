@@ -33,6 +33,7 @@
 #include "@ModelName@_decay_table.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
+#include "cxx_qft/@ModelName@_particle_aliases.hpp"
 
 #include "decays/flexibledecay_problems.hpp"
 #include "decays/flexibledecay_settings.hpp"
@@ -45,6 +46,8 @@
 
 #include <cmath>
 #include <vector>
+
+#include "boost/mpl/contains.hpp"
 
 namespace flexiblesusy {
 
@@ -170,9 +173,45 @@ double @ModelName@_decays::get_partial_width(
       context, indexIn, indexOut1, indexOut2);
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
-   const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * mat_elem_sq;
+   const auto partialWidth = 0.5/mIn * ps * ps_symmetry * color_factor * mat_elem_sq;
 
-   return result;
+   // if there are any potential LSPs
+   if constexpr (boost::mpl::size<@ModelName@_cxx_diagrams::fields::potentialLSPparticles>::value > 0) {
+      // if this is a decay of a CP-even or -odd Higgs to a pair of identical particles (or a particle and its antiparticle)
+      if constexpr (
+         (std::is_same_v<FieldIn, Higgs> || std::is_same_v<FieldIn, PseudoscalarHiggs>) &&
+         std::is_same_v<typename FieldOut1::lorentz_conjugate, FieldOut2>
+      ) {
+         // at this point we know that FieldOut1 == FieldOut2 (if they are real) or FieldOut1 == bar|conj[FieldOut2]
+         // and are those particles potential LSPs
+         if constexpr (boost::mpl::contains<@ModelName@_cxx_diagrams::fields::potentialLSPparticles, typename cxx_diagrams::remove_lorentz_conjugation<FieldOut1>::type>::type::value) {
+            // are final states charge and color neutral
+            if constexpr (FieldOut1::electricCharge == 0 && FieldOut1::colorRep == @ModelName@_cxx_diagrams::fields::ParticleColorRep::singlet) {
+               const double needInvWidth =
+                  static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) ||
+                  static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith));
+               if (needInvWidth) {
+                  @ModelName@_info::Particles particle_type;
+                  const double mLSP = context.model.get_lsp(particle_type);
+                  if (mLSP == context.physical_mass<FieldOut1>(indexOut1)) {
+                     if constexpr (FieldOut1::numberOfGenerations == 0) {
+                        std::cout << field_as_string<FieldIn>(indexIn) << " -> " << field_as_string<FieldOut1>(indexOut1) << " + " << field_as_string<FieldOut2>(indexOut2) <<  std::endl;
+                        neutral_higgs_effc.set_invisible_width(field_as_string<FieldIn>(indexIn), partialWidth);
+                     }
+                     else {
+                        if (indexOut1.at(0) == 0 && indexOut2.at(0) == 0) {
+                           std::cout << field_as_string<FieldIn>(indexIn) << " -> " << field_as_string<FieldOut1>(indexOut1) << " + " << field_as_string<FieldOut2>(indexOut2) <<  std::endl;
+                           neutral_higgs_effc.set_invisible_width(field_as_string<FieldIn>(indexIn), partialWidth);
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   return partialWidth;
 }
 
 @partialWidthSpecializationDecls@

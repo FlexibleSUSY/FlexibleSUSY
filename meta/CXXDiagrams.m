@@ -255,7 +255,7 @@ ParticleColorRepAsString[part_] :=
       ]
    ];
 
-CreateFields[] :=
+CreateFields[potentialLSPParticles_List] :=
   Module[{fields, scalars, fermions, vectors, ghosts},
        fields = TreeMasses`GetParticles[];
        scalars = Select[fields, TreeMasses`IsScalar];
@@ -308,7 +308,8 @@ CreateFields[] :=
        "using vectors = boost::mpl::vector<" <>
          StringRiffle[CXXNameOfField /@ vectors, ", "] <> ">;\n" <>
        "using ghosts = boost::mpl::vector<" <>
-         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;",
+         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;\n" <>
+       "using potentialLSPparticles = boost::mpl::vector<" <> StringRiffle[CXXNameOfField /@ potentialLSPParticles, ", "] <> ">;",
        "// Fields that are their own Lorentz conjugates.\n" <>
        StringRiffle[
          ("template<> struct " <> LorentzConjugateOperation[#] <> "<" <> CXXNameOfField[#, prefixNamespace -> "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">" <>

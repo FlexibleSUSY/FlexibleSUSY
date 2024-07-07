@@ -40,7 +40,6 @@
 
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
-#include "cxx_qft/@ModelName@_particle_aliases.hpp"
 #include "@ModelName@_info.hpp"
 #include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"

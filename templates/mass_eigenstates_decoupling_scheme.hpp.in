@@ -109,6 +109,7 @@ public:
    void set_physical(const @ModelName@_physical&) override;
    void clear_problems() override;
 
+@[override]lspGetters@
 @[override]delegateParameterGetters@
 @[override]delegateParameterSetters@
 @[override]massGetters@

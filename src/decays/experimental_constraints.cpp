@@ -416,6 +416,7 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau));
       // set total width to the one computed by FD as HiggsTools doesn't calculate
       // some decays of Higgs at all, e.g. H -> Ah Z
+      s.setDecayWidth("Inv", "Inv", el.invWidth);
       if (el.width > s.totalWidth()) {
          s.setDecayWidth("NP", "NP", el.width - s.totalWidth());
       }
@@ -477,10 +478,12 @@ std::optional<SignalResult> call_lilith(
    strcat(XMLinputstring, buffer);
 
    for (auto const& el : bsm_input) {
+
       const double mh = el.mass;
       if (mh < 123.0 || mh > 128.0) continue;
-      double BRinv = 0.;
-      double BRund = 0.;
+
+      const double BRinv = el.invWidth/el.width;
+      const double BRund = 0.;
 
       sprintf(buffer,"<reducedcouplings>\n");
       strcat(XMLinputstring, buffer);
