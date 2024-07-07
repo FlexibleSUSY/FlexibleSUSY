@@ -70,14 +70,14 @@ private:
    std::string proc_string;
 };
 
-struct NeutralHiggsEffectiveCouplings {
+class NeutralHiggsEffectiveCouplings {
+public:
    std::string particle {};
    int pdgid {};
    double mass {};
    double width {};
    double width_sm {};
    double invWidth {0.};
-   double undetectedWidth {0.};
    int CP {};
    std::complex<double> dd {};
    std::complex<double> uu {};
@@ -97,6 +97,13 @@ struct NeutralHiggsEffectiveCouplings {
    double gamgam {};
    double gg = {};
    double lam {};
+
+   double get_undetected_width() const { return undetectedWidth; }
+   void calculate_undetected_br() {
+      undetectedWidth = width - invWidth - std::norm(dd) - std::norm(uu) - std::norm(ss) - std::norm(cc) - std::norm(bb) - std::norm(tt) - std::norm(ee) - std::norm(mumu) - std::norm(tautau) - std::norm(emu) - std::norm(etau) - std::norm(mutau) -WW - ZZ - Zgam - gamgam - gg;
+   }
+private:
+   double undetectedWidth {0.};
 };
 
 class EffectiveCoupling_list {

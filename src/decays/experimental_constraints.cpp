@@ -418,7 +418,7 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       // some decays of Higgs at all, e.g. H -> Ah Z
       s.setDecayWidth("Inv", "Inv", el.invWidth);
       if (el.width > s.totalWidth()) {
-         s.setDecayWidth("NP", "NP", el.width - s.totalWidth());
+         s.setDecayWidth("Undetected", "Undetected", el.get_undetected_width());
       }
    }
 
@@ -483,7 +483,7 @@ std::optional<SignalResult> call_lilith(
       if (mh < 123.0 || mh > 128.0) continue;
 
       const double BRinv = el.invWidth/el.width;
-      const double BRund = 0.;
+      const double BRund = el.get_undetected_width()/el.width;
 
       sprintf(buffer,"<reducedcouplings>\n");
       strcat(XMLinputstring, buffer);
