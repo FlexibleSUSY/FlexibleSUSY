@@ -23,6 +23,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, ZBoson>(
       res *= alpha_em_0/alpha_em;
    }
 
+   std::string tag = field_as_string<Higgs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<ZBoson>(out2_idx);
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
@@ -36,7 +37,11 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, ZBoson>(
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
    ) {
-      neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(in_idx), {22, 23}, std::sqrt(res));
+      neutral_higgs_effc.add_coupling(
+         field_as_string<PseudoscalarHiggs>(in_idx),
+         {22, 23},
+         std::pair<std::string const&, double> {tag, std::sqrt(res)}
+      );
    }
 
    return res;

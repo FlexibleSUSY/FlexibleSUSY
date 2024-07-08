@@ -79,28 +79,28 @@ public:
    double width_sm {};
    double invWidth {0.};
    int CP {};
-   std::complex<double> dd {};
-   std::complex<double> uu {};
-   std::complex<double> ss {};
-   std::complex<double> cc {};
-   std::complex<double> bb {};
-   std::complex<double> tt {};
-   std::complex<double> ee {};
-   std::complex<double> mumu {};
-   std::complex<double> tautau {};
-   std::complex<double> emu {};
-   std::complex<double> etau {};
-   std::complex<double> mutau {};
-   double WW {};
-   double ZZ {};
-   double Zgam {};
-   double gamgam {};
-   double gg = {};
+   std::pair<std::string, std::complex<double>> dd {};
+   std::pair<std::string, std::complex<double>> uu {};
+   std::pair<std::string, std::complex<double>> ss {};
+   std::pair<std::string, std::complex<double>> cc {};
+   std::pair<std::string, std::complex<double>> bb {};
+   std::pair<std::string, std::complex<double>> tt {};
+   std::pair<std::string, std::complex<double>> ee {};
+   std::pair<std::string, std::complex<double>> mumu {};
+   std::pair<std::string, std::complex<double>> tautau {};
+   std::pair<std::string, std::complex<double>> emu {};
+   std::pair<std::string, std::complex<double>> etau {};
+   std::pair<std::string, std::complex<double>> mutau {};
+   std::pair<std::string, double> WW {};
+   std::pair<std::string, double> ZZ {};
+   std::pair<std::string, double> Zgam {};
+   std::pair<std::string, double> gamgam {};
+   std::pair<std::string, double> gg = {};
    double lam {};
 
    double get_undetected_width() const { return undetectedWidth; }
    void calculate_undetected_br() {
-      undetectedWidth = width - invWidth - std::norm(dd) - std::norm(uu) - std::norm(ss) - std::norm(cc) - std::norm(bb) - std::norm(tt) - std::norm(ee) - std::norm(mumu) - std::norm(tautau) - std::norm(emu) - std::norm(etau) - std::norm(mutau) -WW - ZZ - Zgam - gamgam - gg;
+      undetectedWidth = width - invWidth - std::norm(dd.second) - std::norm(uu.second) - std::norm(ss.second) - std::norm(cc.second) - std::norm(bb.second) - std::norm(tt.second) - std::norm(ee.second) - std::norm(mumu.second) - std::norm(tautau.second) - std::norm(emu.second) - std::norm(etau.second) - std::norm(mutau.second) - WW.second - ZZ.second - Zgam.second - gamgam.second - gg.second;
    }
 private:
    double undetectedWidth {0.};
@@ -122,8 +122,8 @@ public:
       return effective_coupling_list[index];
    }
 
-   void add_coupling(std::string const&, std::array<int, 2> const&, double);
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::complex<double>);
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string const&, double>);
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string const&, std::complex<double>>);
    void set_invisible_width(std::string const& p, double);
    void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
 

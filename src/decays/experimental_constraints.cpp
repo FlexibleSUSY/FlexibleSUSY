@@ -326,24 +326,24 @@ EffectiveCoupling_list get_normalized_effective_couplings(
          // quarks
          NeutralHiggsEffectiveCouplings _coups {el};
          _coups.width_sm = sm_input[0].width;
-         _coups.dd = std::abs(sm_input[0].dd) > 0 ? el.dd/sm_input[0].dd.real() : 0.;
-         _coups.uu = std::abs(sm_input[0].uu) > 0 ? el.uu/sm_input[0].uu.real() : 0.;
-         _coups.ss = std::abs(sm_input[0].ss) > 0 ? el.ss/sm_input[0].ss.real() : 0.;
-         _coups.cc = std::abs(sm_input[0].cc) > 0 ? el.cc/sm_input[0].cc.real() : 0.;
-         _coups.bb = std::abs(sm_input[0].bb) > 0 ? el.bb/sm_input[0].bb.real() : 0.;
+         _coups.dd.second = std::abs(sm_input[0].dd.second) > 0 ? el.dd.second/sm_input[0].dd.second.real() : 0.;
+         _coups.uu.second = std::abs(sm_input[0].uu.second) > 0 ? el.uu.second/sm_input[0].uu.second.real() : 0.;
+         _coups.ss.second = std::abs(sm_input[0].ss.second) > 0 ? el.ss.second/sm_input[0].ss.second.real() : 0.;
+         _coups.cc.second = std::abs(sm_input[0].cc.second) > 0 ? el.cc.second/sm_input[0].cc.second.real() : 0.;
+         _coups.bb.second = std::abs(sm_input[0].bb.second) > 0 ? el.bb.second/sm_input[0].bb.second.real() : 0.;
          using namespace std::complex_literals;
-         _coups.tt = std::abs(sm_input[0].tt) > 0 ? (std::abs(el.tt.real()) + 1i*std::abs(el.tt.imag()))/std::abs(sm_input[0].tt.real()) : 0.;
+         _coups.tt.second = std::abs(sm_input[0].tt.second) > 0 ? (std::abs(el.tt.second.real()) + 1i*std::abs(el.tt.second.imag()))/std::abs(sm_input[0].tt.second.real()) : 0.;
          // leptons
-         _coups.ee = std::abs(sm_input[0].ee)         > 0 ? el.ee/sm_input[0].ee.real()         : 0.;
-         _coups.mumu = std::abs(sm_input[0].mumu)     > 0 ? el.mumu/sm_input[0].mumu.real()     : 0.;
-         _coups.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
+         _coups.ee.second = std::abs(sm_input[0].ee.second)         > 0 ? el.ee.second/sm_input[0].ee.second.real()         : 0.;
+         _coups.mumu.second = std::abs(sm_input[0].mumu.second)     > 0 ? el.mumu.second/sm_input[0].mumu.second.real()     : 0.;
+         _coups.tautau.second = std::abs(sm_input[0].tautau.second) > 0 ? el.tautau.second/sm_input[0].tautau.second.real() : 0.;
 
          // gauge bosons
-         _coups.WW = std::abs(sm_input[0].WW)         > 0 ? el.WW/sm_input[0].WW         : 0.;
-         _coups.ZZ = std::abs(sm_input[0].ZZ)         > 0 ? el.ZZ/sm_input[0].ZZ         : 0.;
-         _coups.gamgam = std::abs(sm_input[0].gamgam) > 0 ? el.gamgam/sm_input[0].gamgam : 0.;
-         _coups.Zgam = std::abs(sm_input[0].Zgam)     > 0 ? el.Zgam/sm_input[0].Zgam     : 0.;
-         _coups.gg = std::abs(sm_input[0].gg)         > 0 ? el.gg/sm_input[0].gg         : 0.;
+         _coups.WW.second = std::abs(sm_input[0].WW.second)         > 0 ? el.WW.second/sm_input[0].WW.second         : 0.;
+         _coups.ZZ.second = std::abs(sm_input[0].ZZ.second)         > 0 ? el.ZZ.second/sm_input[0].ZZ.second         : 0.;
+         _coups.gamgam.second = std::abs(sm_input[0].gamgam.second) > 0 ? el.gamgam.second/sm_input[0].gamgam.second : 0.;
+         _coups.Zgam.second = std::abs(sm_input[0].Zgam.second)     > 0 ? el.Zgam.second/sm_input[0].Zgam.second     : 0.;
+         _coups.gg.second = std::abs(sm_input[0].gg.second)         > 0 ? el.gg.second/sm_input[0].gg.second         : 0.;
 
          _coups.lam = std::abs(sm_input[0].lam)       > 0 ? el.lam/sm_input[0].lam       : 0.;
          _bsm_input.push_back(std::move(_coups));
@@ -385,24 +385,24 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       s.setMassUnc(relMassError*el.mass); // set mass uncertainty to 3%
 
       // quarks
-      effc.dd = el.dd;
-      effc.uu = el.uu;
-      effc.ss = el.ss;
-      effc.cc = el.cc;
-      effc.bb = el.bb;
-      effc.tt = el.tt;
+      effc.dd = el.dd.second;
+      effc.uu = el.uu.second;
+      effc.ss = el.ss.second;
+      effc.cc = el.cc.second;
+      effc.bb = el.bb.second;
+      effc.tt = el.tt.second;
 
       // leptons
-      effc.ee = el.ee;
-      effc.mumu = el.mumu;
-      effc.tautau = el.tautau;
+      effc.ee = el.ee.second;
+      effc.mumu = el.mumu.second;
+      effc.tautau = el.tautau.second;
 
       // gauge bosons
-      effc.WW = el.WW;
-      effc.ZZ = el.ZZ;
-      effc.gamgam = el.gamgam;
-      effc.Zgam = el.Zgam;
-      effc.gg = el.gg;
+      effc.WW = el.WW.second;
+      effc.ZZ = el.ZZ.second;
+      effc.gamgam = el.gamgam.second;
+      effc.Zgam = el.Zgam.second;
+      effc.gg = el.gg.second;
 
       effc.lam = el.lam;
 
@@ -411,9 +411,9 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       // Effective coupligs below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
       // (note that this is different than couplings like gg, WW etc)
       // so taking a norm gives a total partial width
-      s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu));
-      s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau));
-      s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau));
+      s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu.second));
+      s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau.second));
+      s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau.second));
       // set total width to the one computed by FD as HiggsTools doesn't calculate
       // some decays of Higgs at all, e.g. H -> Ah Z
       s.setDecayWidth("Inv", "Inv", el.invWidth);
@@ -492,40 +492,40 @@ std::optional<SignalResult> call_lilith(
       strcat(XMLinputstring, buffer);
 
       // massless gauge bosons
-      sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", el.gamgam);
+      sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", el.gamgam.second);
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", el.Zgam);
+      sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", el.Zgam.second);
       strcat(XMLinputstring, buffer);
       // the same reduce coupling for production and decay for gluons
-      sprintf(buffer,"<C to=\"gg\">%f</C>\n", el.gg);
+      sprintf(buffer,"<C to=\"gg\">%f</C>\n", el.gg.second);
       strcat(XMLinputstring, buffer);
 
       // massive gauge bosons
-      sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", el.ZZ);
+      sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", el.ZZ.second);
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"WW\">%f</C>\n", el.WW);
+      sprintf(buffer,"<C to=\"WW\">%f</C>\n", el.WW.second);
       strcat(XMLinputstring, buffer);
 
       // fermions
       // tt
-      sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", std::real(el.tt));
+      sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", std::real(el.tt.second));
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"tt\" part=\"im\">%f</C>\n", std::imag(el.tt));
+      sprintf(buffer,"<C to=\"tt\" part=\"im\">%f</C>\n", std::imag(el.tt.second));
       strcat(XMLinputstring, buffer);
       // cc
-      sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", std::real(el.cc));
+      sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", std::real(el.cc.second));
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"cc\" part=\"im\">%f</C>\n", std::imag(el.cc));
+      sprintf(buffer,"<C to=\"cc\" part=\"im\">%f</C>\n", std::imag(el.cc.second));
       strcat(XMLinputstring, buffer);
       // bb
-      sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", std::real(el.bb));
+      sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", std::real(el.bb.second));
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"bb\" part=\"im\">%f</C>\n", std::imag(el.bb));
+      sprintf(buffer,"<C to=\"bb\" part=\"im\">%f</C>\n", std::imag(el.bb.second));
       strcat(XMLinputstring, buffer);
       // tautau
-      sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", std::real(el.tautau));
+      sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", std::real(el.tautau.second));
       strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"tautau\" part=\"im\">%f</C>\n", std::imag(el.tautau));
+      sprintf(buffer,"<C to=\"tautau\" part=\"im\">%f</C>\n", std::imag(el.tautau.second));
       strcat(XMLinputstring, buffer);
 
       sprintf(buffer,"<extraBR>\n");

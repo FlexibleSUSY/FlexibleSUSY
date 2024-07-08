@@ -169,7 +169,11 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
    ) {
-      neutral_higgs_effc.add_coupling(field_as_string<Higgs>(in_idx), {21, 21}, std::sqrt(result));
+      neutral_higgs_effc.add_coupling(
+         field_as_string<Higgs>(in_idx),
+         {21, 21},
+         std::pair<std::string const&, double> {field_as_string<Higgs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx), std::sqrt(result)}
+      );
    }
 
    return result;

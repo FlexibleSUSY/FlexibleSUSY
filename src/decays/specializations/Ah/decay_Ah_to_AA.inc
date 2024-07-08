@@ -37,7 +37,11 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
    ) {
-      neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(in_idx), {22, 22}, std::sqrt(res));
+      neutral_higgs_effc.add_coupling(
+         field_as_string<PseudoscalarHiggs>(in_idx),
+         {22, 22},
+         std::pair<std::string const&, double> {field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<Photon>(out2_idx), std::sqrt(res)}
+      );
    }
 
    return res;

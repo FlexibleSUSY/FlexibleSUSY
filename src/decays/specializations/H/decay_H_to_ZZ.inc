@@ -106,7 +106,11 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
        static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
    ) {
-      neutral_higgs_effc.add_coupling(field_as_string<Higgs>(indexIn), {23, 23}, std::sqrt(res));
+      neutral_higgs_effc.add_coupling(
+         field_as_string<Higgs>(indexIn),
+         {23, 23},
+         std::pair<std::string const&, double> {field_as_string<Higgs>(indexIn) + "-" + field_as_string<ZBoson>(indexOut1) + "-" + field_as_string<ZBoson>(indexOut2), std::sqrt(res)}
+      );
    }
 
    return res;

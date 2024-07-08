@@ -149,7 +149,7 @@ void EffectiveCoupling_list::set_invisible_width(std::string const& p, double c)
       }
 }
 
-void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, double c) {
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string const&, double> c) {
       auto found = std::find_if(
          std::begin(effective_coupling_list), std::end(effective_coupling_list),
          [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
@@ -194,7 +194,7 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
       }
    }
 
-void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::complex<double> c) {
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string const&, std::complex<double>> c) {
 
    auto found = std::find_if(
       std::begin(effective_coupling_list), std::end(effective_coupling_list),
@@ -236,13 +236,16 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
          effC.tautau = c;
       }
       else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
-         effC.emu += c;
+         effC.emu.first = c.first;
+         effC.emu.second += c.second;
       }
       else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
-         effC.etau += c;
+         effC.etau.first = c.first;
+         effC.etau.second += c.second;
       }
       else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
-         effC.mutau += c;
+         effC.mutau.first = c.first;
+         effC.mutau.second = c.second;
       }
       else {
          WARNING("HiggsTools interface warning: trying to add an unknown decay channel {" + std::to_string(fs[0]) + ", " + std::to_string(fs[1]) + "}");
@@ -278,13 +281,16 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
          found->tautau = c;
       }
       else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
-         found->emu += c;
+         found->emu.first = c.first;
+         found->emu.second += c.second;
       }
       else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
-         found->etau += c;
+         found->etau.first = c.first;
+         found->etau.second += c.second;
       }
       else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
-         found->mutau += c;
+         found->mutau.first = c.first;
+         found->mutau.second += c.second;
       }
       else {
          WARNING("HiggsTools interface warning: trying to add an unknown decay channel {" + std::to_string(fs[0]) + ", " + std::to_string(fs[1]) + "}");

@@ -1068,45 +1068,51 @@ void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int
    set_block(decay);
 }
 
+#define DECAY_FERMION_RE(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, std::real(effC.CHANNEL.second), effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
+#define DECAY_VBOSON(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, effC.CHANNEL.second, effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
+
 void SLHA_io::set_renormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
    std::ostringstream ss;
    ss << "Block RENORMALIZEDEFFHIGGSCOUPLINGS\n";
    for (auto const& effC : effCouplings) {
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1,  1, std::real(effC.dd), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2,  2, std::real(effC.uu), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -3,  3, std::real(effC.ss), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -4,  4, std::real(effC.cc), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -5,  5, std::real(effC.bb), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -6,  6, std::real(effC.tt), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -11,  11, std::real(effC.ee), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -13,  13, std::real(effC.mumu), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -15,  15, std::real(effC.tautau), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -24,  24, effC.WW, "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 23,  23, effC.ZZ, "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 21,  21, effC.gg, "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 22,  22, effC.gamgam, "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 23,  22, effC.Zgam, "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "SM Higgs width for mhSM = m" + effC.particle);
+      DECAY_FERMION_RE(-1, 1, uu);
+      DECAY_FERMION_RE(-2, 2, dd);
+      DECAY_FERMION_RE(-3, 3, ss);
+      DECAY_FERMION_RE(-4, 4, cc);
+      DECAY_FERMION_RE(-5, 5, bb);
+      DECAY_FERMION_RE(-6, 6, tt);
+      DECAY_FERMION_RE(-11, 11, ee);
+      DECAY_FERMION_RE(-13, 13, mumu);
+      DECAY_FERMION_RE(-15, 15, tautau);
+
+      DECAY_VBOSON(-24, 24, WW);
+      DECAY_VBOSON(23, 23, ZZ);
+      DECAY_VBOSON(21, 21, gg);
+      DECAY_VBOSON(22, 22, gamgam);
+      DECAY_VBOSON(23, 22, Zgam);
    }
 
    set_block(ss);
 }
+
+#define DECAY_FERMION_IM(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, std::imag(effC.CHANNEL.second), effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
 
 void SLHA_io::set_imnormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
    std::ostringstream ss;
    ss << "Block IMNORMALIZEDEFFHIGGSCOUPLINGS\n";
    for (auto const& effC : effCouplings) {
       if (effC.CP == 1) continue;
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -1,  1, std::imag(effC.dd), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -2,  2, std::imag(effC.uu), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -3,  3, std::imag(effC.ss), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -4,  4, std::imag(effC.cc), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -5,  5, std::imag(effC.bb), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -6,  6, std::imag(effC.tt), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -11,  11, std::imag(effC.ee), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -13,  13, std::imag(effC.mumu), "");
-      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, -15,  15, std::imag(effC.tautau), "");
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "SM Higgs width for mhSM = m" + effC.particle);
+      DECAY_FERMION_RE(-1, 1, uu);
+      DECAY_FERMION_RE(-2, 2, dd);
+      DECAY_FERMION_RE(-3, 3, ss);
+      DECAY_FERMION_RE(-4, 4, cc);
+      DECAY_FERMION_RE(-5, 5, bb);
+      DECAY_FERMION_RE(-6, 6, tt);
+      DECAY_FERMION_RE(-11, 11, ee);
+      DECAY_FERMION_RE(-13, 13, mumu);
+      DECAY_FERMION_RE(-15, 15, tautau);
    }
 
    set_block(ss);

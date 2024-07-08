@@ -51,7 +51,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
                boost::hana::unpack(bar<ChargedLepton>::pdgids, _to_array<bar<ChargedLepton>::numberOfGenerations>).at(indexOut1.at(0)),
                boost::hana::unpack(ChargedLepton::pdgids, _to_array<ChargedLepton::numberOfGenerations>).at(indexOut2.at(0))
             },
-         std::sqrt(res_S) + 1i*std::sqrt(res_P)
+         std::pair<std::string const&, std::complex<double>> {
+            field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<ChargedLepton>::type>(indexOut1) + "-" + field_as_string<ChargedLepton>(indexOut2),
+            std::sqrt(res_S) + 1i*std::sqrt(res_P)
+         }
       );
    }
 
