@@ -2248,6 +2248,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
+                            "@isCPodd@" -> If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && GetDimensionWithoutGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]] > 0, " || std::is_same_v<FieldIn, PseudoscalarHiggs>", ""],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 

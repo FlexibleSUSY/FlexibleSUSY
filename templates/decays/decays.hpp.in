@@ -48,6 +48,7 @@
 #include <vector>
 
 #include "boost/mpl/contains.hpp"
+#include <boost/mpl/for_each.hpp>
 
 namespace flexiblesusy {
 
@@ -179,7 +180,7 @@ double @ModelName@_decays::get_partial_width(
    if constexpr (boost::mpl::size<@ModelName@_cxx_diagrams::fields::potentialLSPparticles>::value > 0) {
       // if this is a decay of a CP-even or -odd Higgs to a pair of identical particles (or a particle and its antiparticle)
       if constexpr (
-         (std::is_same_v<FieldIn, Higgs> || std::is_same_v<FieldIn, PseudoscalarHiggs>) &&
+         (std::is_same_v<FieldIn, Higgs>@isCPodd@) &&
          std::is_same_v<typename FieldOut1::lorentz_conjugate, FieldOut2>
       ) {
          // at this point we know that FieldOut1 == FieldOut2 (if they are real) or FieldOut1 == bar|conj[FieldOut2]
@@ -191,8 +192,28 @@ double @ModelName@_decays::get_partial_width(
                   static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) ||
                   static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith));
                if (needInvWidth) {
-                  @ModelName@_info::Particles particle_type;
-                  const double mLSP = context.model.get_lsp(particle_type);
+                  int location = 0;
+                  int best = 0;
+                  double mLSP = std::numeric_limits<double>::infinity();
+                  boost::mpl::for_each<@ModelName@_cxx_diagrams::fields::potentialLSPparticles>(
+                     [&location,&best,context,&mLSP](auto arg) {
+                        using T = decltype(arg);
+                        double current_mass;
+                        if constexpr (T::numberOfGenerations == 0) {
+                           //std::cout << context.physical_mass<FieldIn>({}) << std::endl;
+                        }
+                        else {
+                           //std::cout << context.physical_mass<T>({typename @ModelName@_cxx_diagrams::field_indices<T>::type {0} }) << std::endl;
+                           std::cout << field_as_string<T>({}) << ' ' << context.physical_mass<T>({}) << " at " << location << std::endl;
+                           current_mass = context.physical_mass<T>({});
+                        }
+                        if (current_mass < mLSP) { mLSP = current_mass; best=location;};
+                        location++;
+                     }
+                  );
+                 // if (std::is_same_v<FieldOut1, boost::mpl::at<@ModelName@_cxx_diagrams::fields::potentialLSPparticles, boost::mpl::int_<best>>) {
+                 //    std::cout << "kurwa" << std::endl;
+                 // }
                   if (mLSP == context.physical_mass<FieldOut1>(indexOut1)) {
                      if constexpr (FieldOut1::numberOfGenerations == 0) {
                         std::cout << field_as_string<FieldIn>(indexIn) << " -> " << field_as_string<FieldOut1>(indexOut1) << " + " << field_as_string<FieldOut2>(indexOut2) <<  std::endl;
