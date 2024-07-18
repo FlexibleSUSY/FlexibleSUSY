@@ -1073,7 +1073,7 @@ void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int
 
 void SLHA_io::set_renormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
    std::ostringstream ss;
-   ss << "Block RENORMALIZEDEFFHIGGSCOUPLINGS\n";
+   ss << "Block NORMALIZEDEFFHIGGSCOUPLINGS\n";
    for (auto const& effC : effCouplings) {
       ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "SM Higgs width for mhSM = m" + effC.particle);
       DECAY_FERMION_RE(-1, 1, uu);
