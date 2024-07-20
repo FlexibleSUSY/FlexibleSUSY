@@ -414,12 +414,12 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu.second));
       s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau.second));
       s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau.second));
-      // set total width to the one computed by FD as HiggsTools doesn't calculate
-      // some decays of Higgs at all, e.g. H -> Ah Z
+
+      // Higgs to LSP decay (if model contains one)
       s.setDecayWidth("Inv", "Inv", el.invWidth);
-      if (el.width > s.totalWidth()) {
-         s.setDecayWidth("Undetected", "Undetected", el.get_undetected_width());
-      }
+
+      // all remaining partial widths
+      s.setDecayWidth("Undetected", "Undetected", el.get_undetected_width());
    }
 
    auto bounds = Higgs::Bounds {higgsbounds_dataset};
