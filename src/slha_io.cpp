@@ -1069,6 +1069,7 @@ void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int
 }
 
 #define DECAY_FERMION_RE(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, std::real(effC.CHANNEL.second), effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
+#define DECAY_FERMION_IM(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, std::imag(effC.CHANNEL.second), effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
 #define DECAY_VBOSON(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, effC.CHANNEL.second, effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
 
 void SLHA_io::set_renormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
@@ -1104,15 +1105,15 @@ void SLHA_io::set_imnormalized_effectivecouplings_block(const EffectiveCoupling_
    for (auto const& effC : effCouplings) {
       if (effC.CP == 1) continue;
       ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "SM Higgs width for mhSM = m" + effC.particle);
-      DECAY_FERMION_RE(-1, 1, uu);
-      DECAY_FERMION_RE(-2, 2, dd);
-      DECAY_FERMION_RE(-3, 3, ss);
-      DECAY_FERMION_RE(-4, 4, cc);
-      DECAY_FERMION_RE(-5, 5, bb);
-      DECAY_FERMION_RE(-6, 6, tt);
-      DECAY_FERMION_RE(-11, 11, ee);
-      DECAY_FERMION_RE(-13, 13, mumu);
-      DECAY_FERMION_RE(-15, 15, tautau);
+      DECAY_FERMION_IM(-1, 1, uu);
+      DECAY_FERMION_IM(-2, 2, dd);
+      DECAY_FERMION_IM(-3, 3, ss);
+      DECAY_FERMION_IM(-4, 4, cc);
+      DECAY_FERMION_IM(-5, 5, bb);
+      DECAY_FERMION_IM(-6, 6, tt);
+      DECAY_FERMION_IM(-11, 11, ee);
+      DECAY_FERMION_IM(-13, 13, mumu);
+      DECAY_FERMION_IM(-15, 15, tautau);
    }
 
    set_block(ss);
