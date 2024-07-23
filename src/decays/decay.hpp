@@ -99,8 +99,11 @@ public:
    double lam {};
 
    double get_undetected_width() const { return undetectedWidth; }
-   void calculate_undetected_br() {
-      undetectedWidth = width - invWidth - std::norm(dd.second) - std::norm(uu.second) - std::norm(ss.second) - std::norm(cc.second) - std::norm(bb.second) - std::norm(tt.second) - std::norm(ee.second) - std::norm(mumu.second) - std::norm(tautau.second) - std::norm(emu.second) - std::norm(etau.second) - std::norm(mutau.second) - WW.second - ZZ.second - Zgam.second - gamgam.second - gg.second;
+   void calculate_undetected_br(bool withTop) {
+      const double _undetectedWidth = width - invWidth - std::norm(dd.second) - std::norm(uu.second) - std::norm(ss.second) - std::norm(cc.second) - std::norm(bb.second) - (withTop ? std::norm(tt.second) : 0.) - std::norm(ee.second) - std::norm(mumu.second) - std::norm(tautau.second) - std::norm(emu.second) - std::norm(etau.second) - std::norm(mutau.second) - Sqr(WW.second) - Sqr(ZZ.second) - Sqr(Zgam.second) - Sqr(gamgam.second) - Sqr(gg.second);
+      if (!(_undetectedWidth < 0 && std::abs(_undetectedWidth)/width < 1e-10)) {
+         undetectedWidth = _undetectedWidth;
+      }
    }
 private:
    double undetectedWidth {0.};
