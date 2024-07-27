@@ -123,8 +123,8 @@ double minChi2SM_lilith(const double mhSM) {
    sprintf(buffer,"<lilithinput>\n");
    strcat(XMLinputstring, buffer);
 
-   double BRinv = 0.;
-   double BRund = 0.;
+   const double BRinv = 0.;
+   const double BRund = 0.;
 
    sprintf(buffer,"<reducedcouplings>\n");
    strcat(XMLinputstring, buffer);

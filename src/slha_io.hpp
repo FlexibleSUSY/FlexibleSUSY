@@ -151,7 +151,7 @@ public:
    void set_hs_or_lilith(std::string const& /* block name */, std::size_t /* n.d.o.f. */, double /* chi2 */, double /* min chi2 in the SM */, double /* SM mh for which SM chi2 was calculated */);
    void set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const&);
    void set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>&);
-   void set_renormalized_effectivecouplings_block(EffectiveCoupling_list const&);
+   void set_normalized_effectivecouplings_block(EffectiveCoupling_list const&);
    void set_imnormalized_effectivecouplings_block(EffectiveCoupling_list const&);
    void set_modsel(const Modsel&);
    void set_physical_input(const Physical_input&);

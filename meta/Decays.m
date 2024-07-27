@@ -986,7 +986,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
            body = IndentText["\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body ]<>
                   If[MemberQ[Join[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}], particle],
-                  TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) || flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) || flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {\n" <>
+                  TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) || flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) || flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
                   TextFormatting`IndentText[
                   "auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(neutral_higgs_effc), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>

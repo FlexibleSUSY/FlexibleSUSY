@@ -1072,7 +1072,7 @@ void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int
 #define DECAY_FERMION_IM(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, std::imag(effC.CHANNEL.second), effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
 #define DECAY_VBOSON(PDG1, PDG2, CHANNEL) (ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, effC.CHANNEL.second, effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle))
 
-void SLHA_io::set_renormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+void SLHA_io::set_normalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
    std::ostringstream ss;
    ss << "Block NORMALIZEDEFFHIGGSCOUPLINGS\n";
    for (auto const& effC : effCouplings) {
