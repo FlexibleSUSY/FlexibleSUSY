@@ -125,7 +125,7 @@ public:
    int get_max_steps() const { return max_steps; }
 
 private:
-   int max_steps{1000}; ///< Maximum number of steps in integration
+   int max_steps{400}; ///< Maximum number of steps in integration
    Stepper stepper{};  ///< Stepper to provide a Runge-Kutta step
 };
 

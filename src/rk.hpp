@@ -186,15 +186,12 @@ void integrateOdes(ArrayType& ystart, double from, double to, double eps,
       h = hnext;
 
       if (std::fabs(hnext) <= hmin) {
-#ifdef ENABLE_VERBOSE
-         ERROR("step size too small: |hnext| = " << hnext << " (<= " << hmin << ")");
-#endif
          break;
       }
    }
 
 #ifdef ENABLE_VERBOSE
-   ERROR("Bailed out of rk.cpp:too many steps (> " << max_steps << ") in integrateOdes\n"
+   ERROR("Bailed out of rk.cpp:too many steps in integrateOdes\n"
          "********** Q = " << std::exp(x) << " *********");
    ERROR("max step in direction of " << max_step_dir);
    for (int i = 0; i < nvar; i++)

@@ -72,16 +72,10 @@ void Beta_function::run(double x1, double x2, double eps)
    if (get_loops() > 0) {
       const double tol = get_tolerance(eps);
 
-      INFO("Beta_function::run: eps = " << eps << ", tol = " << tol);
-
-      if (std::fabs(x1) < tol) {
+      if (std::fabs(x1) < tol)
          throw NonPerturbativeRunningError(x1);
-         INFO("Beta_function: non-perturbative running, x1 = " << x1);
-      }
-      if (std::fabs(x2) < tol) {
-         INFO("Beta_function: non-perturbative running, x2 = " << x2);
+      if (std::fabs(x2) < tol)
          throw NonPerturbativeRunningError(x2);
-      }
 
       if (fabs(x1 - x2) >= min_tolerance) {
          Eigen::ArrayXd y(get());
