@@ -33,6 +33,7 @@
 
 #include "logger.hpp"
 #include "error.hpp"
+#include "config.h"
 
 namespace flexiblesusy {
 
