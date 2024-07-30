@@ -105,6 +105,7 @@ void RKF_integrator::RKF_observer::operator()(const Eigen::ArrayXd& state, doubl
             << std::exp(t) << " GeV of parameter y(" << max_step_dir
             << ") = " << state(max_step_dir));
 #endif
+      INFO("RKF_integrator: non-perturbative running");
       throw NonPerturbativeRunningError(std::exp(t), max_step_dir, state(max_step_dir));
    }
 }
