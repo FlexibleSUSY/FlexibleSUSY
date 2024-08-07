@@ -184,7 +184,7 @@ sm = sm_1l;
 sm.set_Lambdax(lambda_2l);
 
 if (yt_loop_order > 1) {
-" <> TextFormatting`IndentText[If[FlexibleSUSY`UseHiggs3LoopMSSM === True, FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[], ""]] <> "
+" <> TextFormatting`IndentText[If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True, FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[], ""]] <> "
 }
 
 sm.calculate_DRbar_masses();"

@@ -115,6 +115,7 @@ LowScaleInput = {
 };
 
 UseHiggs2LoopNMSSM = True;
+UseHiggs3LoopNMSSM = True;
 EffectiveMu = \[Lambda] vS / Sqrt[2];
 EffectiveMASqr = (T[\[Lambda]] vS / Sqrt[2] + 0.5 \[Lambda] \[Kappa] vS^2) (vu^2 + vd^2) / (vu vd);
 UseMSSMYukawa2Loop = True;
