@@ -2386,6 +2386,7 @@ check_required_libs() {
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
                 message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
+            }
 
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopNMSSM" "True" && {
                 message "   Himalaya is required to build $model_name";
