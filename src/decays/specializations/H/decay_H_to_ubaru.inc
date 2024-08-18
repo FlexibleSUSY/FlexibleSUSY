@@ -191,7 +191,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
          },
          std::pair<std::string const&, std::complex<double>> {
             field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
-            4.*std::max(xDR, xOS) > 1. ? std::real(HQQbarVertexDR_S) + std::imag(HQQbarVertexDR_P)*1i : std::sqrt(result_S) + std::sqrt(result_P)*1i
+            4.*std::max(xDR, xOS) < 1. ? std::sqrt(result_S) + std::sqrt(result_P)*1i : (indexOut1.at(0) == 2 && indexOut2.at(0) == 2 ? std::real(HQQbarVertexDR_S) + std::imag(HQQbarVertexDR_P)*1i : 0.)
          }
       );
    }
