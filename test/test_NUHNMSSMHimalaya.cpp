@@ -175,8 +175,11 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double xt = -std::sqrt(6.0);
       const auto mssm = calc_MSSM(loops, tb, ms, xt);
       const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double mh_MSSM = mssm.get_Mhh(0);
       const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double mh_NMSSM = mssm.get_Mhh(0);
       const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
+      BOOST_CHECK_CLOSE_FRACTION(mh_MSSM, mh_NMSSM, 1e-10);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
@@ -187,8 +190,11 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double xt = -std::sqrt(6.0);
       const auto mssm = calc_MSSM(loops, tb, ms, xt);
       const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double mh_MSSM = mssm.get_Mhh(0);
       const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double mh_NMSSM = mssm.get_Mhh(0);
       const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
+      BOOST_CHECK_CLOSE_FRACTION(mh_MSSM, mh_NMSSM, 1e-10);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
@@ -199,8 +205,11 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double xt = 0;
       const auto mssm = calc_MSSM(loops, tb, ms, xt);
       const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double mh_MSSM = mssm.get_Mhh(0);
       const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double mh_NMSSM = mssm.get_Mhh(0);
       const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
+      BOOST_CHECK_CLOSE_FRACTION(mh_MSSM, mh_NMSSM, 1e-10);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
@@ -211,8 +220,11 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double xt = std::sqrt(6.0);
       const auto mssm = calc_MSSM(loops, tb, ms, xt);
       const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double mh_MSSM = mssm.get_Mhh(0);
       const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double mh_NMSSM = mssm.get_Mhh(0);
       const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
+      BOOST_CHECK_CLOSE_FRACTION(mh_MSSM, mh_NMSSM, 1e-10);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 }
