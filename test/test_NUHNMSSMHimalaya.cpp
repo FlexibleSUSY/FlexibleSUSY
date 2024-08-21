@@ -7,6 +7,8 @@
 #include "threshold_corrections.hpp"
 #include "scan.hpp"
 
+#include <utility>
+
 using namespace flexiblesusy;
 
 constexpr double prec = 1e-5;
@@ -113,17 +115,17 @@ std::pair<double, double> calc_Mh_DMh(int loops, double tb, double MS, double xt
    return std::pair<double, double>(Mh, DMh);
 }
 
-/// test 3-loop NMSSM calculation for some MSSM points from
-/// arxiv:1708.05720 Fig.6 in the MSSM limit
-BOOST_AUTO_TEST_CASE( test_Mh )
+/// test renormalization scale invariance of Mh pole mass
+BOOST_AUTO_TEST_CASE( test_Mh_scale_invariance )
 {
    const double lambda = 1e-1*prec; // MSSM-limit
    const double kappa = lambda;
+   const double tb = 10;
+   const double xt = -std::sqrt(6.0);
 
-   {
-      const double tb = 5;
-      const double ms = 1e4;
-      const double xt = -std::sqrt(6.0);
+   const auto susy_scales = subdivide_log(1e3, 1e4, 10);
+
+   for (const auto ms: susy_scales) {
       const double DMh_0l = calc_Mh_DMh(0, tb, ms, xt, lambda, kappa).second;
       const double DMh_1l = calc_Mh_DMh(1, tb, ms, xt, lambda, kappa).second;
       const double DMh_2l = calc_Mh_DMh(2, tb, ms, xt, lambda, kappa).second;
