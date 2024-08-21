@@ -63,6 +63,8 @@ NUHMSSMNoFVHimalaya<Two_scale> run(int loops, const NUHMSSMNoFVHimalaya_input_pa
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
+   INFO(spectrum_generator.get_model());
+
    return spectrum_generator.get_model();
 }
 
@@ -74,6 +76,8 @@ NUHNMSSMHimalaya<Two_scale> run(int loops, const NUHNMSSMHimalaya_input_paramete
    NUHNMSSMHimalaya_spectrum_generator<Two_scale> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
+
+   INFO(spectrum_generator.get_model());
 
    return spectrum_generator.get_model();
 }
@@ -164,8 +168,35 @@ BOOST_AUTO_TEST_CASE( test_Mh )
    const double kappa = lambda;
    const double eps = 1e-2; // @todo(alex): increase test precision, try adding 3-loop beta functions
 
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(2, 5, 1e4, -std::sqrt(6.0)), calc_Mh_NMSSM(2, 5, 1e4, -std::sqrt(6.0), lambda, kappa), eps);
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(3, 5, 1e4, -std::sqrt(6.0)), calc_Mh_NMSSM(3, 5, 1e4, -std::sqrt(6.0), lambda, kappa), eps);
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(3, 5, 1e4, 0), calc_Mh_NMSSM(3, 5, 1e4, 0, lambda, kappa), eps);
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(3, 5, 1e4, std::sqrt(6.0)), calc_Mh_NMSSM(3, 5, 1e4, std::sqrt(6.0), lambda, kappa), eps);
+   {
+      const int loops = 2;
+      const double tb = 5;
+      const double ms = 1e4;
+      const double xt = -std::sqrt(6.0);
+      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+   }
+
+   {
+      const int loops = 3;
+      const double tb = 5;
+      const double ms = 1e4;
+      const double xt = -std::sqrt(6.0);
+      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+   }
+
+   {
+      const int loops = 3;
+      const double tb = 5;
+      const double ms = 1e4;
+      const double xt = 0;
+      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+   }
+
+   {
+      const int loops = 3;
+      const double tb = 5;
+      const double ms = 1e4;
+      const double xt = std::sqrt(6.0);
+      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+   }
 }
