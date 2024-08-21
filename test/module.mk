@@ -183,6 +183,11 @@ TEST_SRC += \
 		$(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.cpp
 endif
 
+ifeq ($(WITH_NUHNMSSMHimalaya),yes)
+TEST_SRC += \
+		$(DIR)/test_NUHNMSSMHimalaya.cpp
+endif
+
 ifeq ($(WITH_NUHNMSSMHimalaya) $(WITH_NUHMSSMNoFVHimalaya),yes yes)
 TEST_SRC += \
 		$(DIR)/test_NUHMSSMNoFVHimalaya_NUHNMSSMHimalaya.cpp
@@ -1190,6 +1195,8 @@ $(DIR)/test_NUHMSSMNoFVHimalaya.x: $(LIBNUHMSSMNoFVHimalaya)
 $(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.x: $(LIBNUHMSSMNoFVHimalayaEFTHiggs)
 
 $(DIR)/test_NUHMSSMNoFVHimalaya_NUHNMSSMHimalaya.x: $(LIBNUHMSSMNoFVHimalaya) $(LIBNUHNMSSMHimalaya)
+
+$(DIR)/test_NUHNMSSMHimalaya.x: $(LIBNUHNMSSMHimalaya)
 
 $(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.x: $(LIBMSSMEFTHiggs)
 
