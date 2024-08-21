@@ -83,7 +83,7 @@ NUHNMSSMHimalaya<Two_scale> run(int loops, const NUHNMSSMHimalaya_input_paramete
 }
 
 /// calculates CP-even Higgs pole mass at given loop order for degenerate SUSY parameters
-double calc_Mh_MSSM(int loops, double tb, double MS, double xt)
+NUHMSSMNoFVHimalaya<Two_scale> calc_MSSM(int loops, double tb, double MS, double xt)
 {
    NUHMSSMNoFVHimalaya_input_parameters input;
    const double mu = MS;
@@ -122,11 +122,11 @@ double calc_Mh_MSSM(int loops, double tb, double MS, double xt)
    input.md33IN = MS;
    input.Mlow = 0;
 
-   return run(loops, input).get_physical().Mhh(0);
+   return run(loops, input);
 }
 
 /// calculates CP-even Higgs pole mass at given loop order for degenerate SUSY parameters
-double calc_Mh_NMSSM(int loops, double tb, double MS, double xt, double lambda, double kappa)
+NUHNMSSMHimalaya<Two_scale> calc_NMSSM(int loops, double tb, double MS, double xt, double lambda, double kappa)
 {
    NUHNMSSMHimalaya_input_parameters input;
    const double MS2 = MS*MS;
@@ -157,7 +157,7 @@ double calc_Mh_NMSSM(int loops, double tb, double MS, double xt, double lambda, 
    input.AdInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
    input.AeInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
 
-   return run(loops, input).get_physical().Mhh(0);
+   return run(loops, input);
 }
 
 /// test 3-loop NMSSM calculation for some MSSM points from
@@ -173,8 +173,10 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = -std::sqrt(6.0);
-      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
-      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const auto mssm = calc_MSSM(loops, tb, ms, xt);
+      const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
@@ -183,8 +185,10 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = -std::sqrt(6.0);
-      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
-      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const auto mssm = calc_MSSM(loops, tb, ms, xt);
+      const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
@@ -193,8 +197,10 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = 0;
-      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
-      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const auto mssm = calc_MSSM(loops, tb, ms, xt);
+      const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
@@ -203,8 +209,10 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = std::sqrt(6.0);
-      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
-      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const auto mssm = calc_MSSM(loops, tb, ms, xt);
+      const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      const double Mh_MSSM = mssm.get_physical().Mhh(0);
+      const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 }
