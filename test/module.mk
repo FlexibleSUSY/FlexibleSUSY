@@ -171,6 +171,13 @@ TEST_SRC += \
 		$(DIR)/test_NMSSMEFTHiggs.cpp
 endif
 
+ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
+TEST_SRC += \
+		$(DIR)/test_NUHMSSMNoFVHimalaya.cpp
+TEST_META += \
+		$(DIR)/test_NUHMSSMNoFVHimalaya_uncertainty.m
+endif
+
 ifeq ($(WITH_NUHMSSMNoFVHimalayaEFTHiggs),yes)
 TEST_SRC += \
 		$(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.cpp
@@ -181,7 +188,7 @@ TEST_SRC += \
 		$(DIR)/test_NUHNMSSMHimalaya.cpp
 endif
 
-endif
+endif # shooting
 
 ifeq ($(ENABLE_LOOPTOOLS), yes)
 TEST_SRC += \
@@ -752,11 +759,6 @@ TEST_SH += \
 		$(DIR)/test_NMSSMEFTHiggsTwoScale.sh
 endif
 
-ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
-TEST_META += \
-		$(DIR)/test_NUHMSSMNoFVHimalaya_uncertainty.m
-endif
-
 ifeq ($(WITH_SMHighPrecision) $(WITH_SMEFTHiggs),yes yes)
 TEST_SH += \
 		$(DIR)/test_SMEFTHiggs.sh
@@ -1182,6 +1184,8 @@ $(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
 $(DIR)/test_NMSSMEFTHiggs.x: $(LIBNMSSMEFTHiggs)
+
+$(DIR)/test_NUHMSSMNoFVHimalaya.x: $(LIBNUHMSSMNoFVHimalaya)
 
 $(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.x: $(LIBNUHMSSMNoFVHimalayaEFTHiggs)
 
