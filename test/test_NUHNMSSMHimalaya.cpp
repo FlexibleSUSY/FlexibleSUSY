@@ -37,7 +37,7 @@ Spectrum_generator_settings make_settings(int loops, double scale)
    settings.set(Spectrum_generator_settings::max_iterations, 10000);
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, loops);
    settings.set(Spectrum_generator_settings::ewsb_loop_order, loops);
-   settings.set(Spectrum_generator_settings::beta_loop_order, 3);
+   settings.set(Spectrum_generator_settings::beta_loop_order, loops);
    settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, loops);
    settings.set(Spectrum_generator_settings::force_output, true); // must force the output, because xt = sqrt(6) leads to tachyons
    settings.set(Spectrum_generator_settings::pole_mass_scale, scale);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_Mh_scale_invariance )
       const double DMh_1l = calc_Mh_DMh(1, tb, ms, xt, lambda, kappa).second;
       const double DMh_2l = calc_Mh_DMh(2, tb, ms, xt, lambda, kappa).second;
       const double DMh_3l = calc_Mh_DMh(3, tb, ms, xt, lambda, kappa).second;
-      BOOST_TEST_MESSAGE("DMh(0l, 1l, 2l, 3l) = [" << DMh_0l << ", " << DMh_1l << ", " << DMh_2l << ", " << DMh_3l << "]");
+      BOOST_TEST_MESSAGE("MS = " << ms << ", DMh(0l, 1l, 2l, 3l) = [" << DMh_0l << ", " << DMh_1l << ", " << DMh_2l << ", " << DMh_3l << "]");
       BOOST_CHECK_GT(DMh_1l, DMh_2l);
       BOOST_CHECK_GT(DMh_2l, DMh_3l);
    }
