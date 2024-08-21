@@ -173,7 +173,9 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = -std::sqrt(6.0);
-      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
+      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
    {
@@ -181,7 +183,9 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = -std::sqrt(6.0);
-      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
+      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
    {
@@ -189,7 +193,9 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = 0;
-      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
+      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 
    {
@@ -197,6 +203,8 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const double tb = 5;
       const double ms = 1e4;
       const double xt = std::sqrt(6.0);
-      BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(loops, tb, ms, xt), calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa), eps);
+      const double Mh_MSSM = calc_Mh_MSSM(loops, tb, ms, xt);
+      const double Mh_NMSSM = calc_Mh_NMSSM(loops, tb, ms, xt, lambda, kappa);
+      BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
 }
