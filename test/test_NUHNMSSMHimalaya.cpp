@@ -4,11 +4,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include "models/NUHNMSSMHimalaya/NUHNMSSMHimalaya_two_scale_spectrum_generator.hpp"
+#include "models/NUHMSSMNoFVHimalaya/NUHMSSMNoFVHimalaya_two_scale_spectrum_generator.hpp"
 #include "src/threshold_corrections.hpp"
 
 using namespace flexiblesusy;
 
-NUHNMSSMHimalaya<Two_scale> run(int loops, const NUHNMSSMHimalaya_input_parameters& input)
+softsusy::QedQcd make_qedqcd()
 {
    // Parameter point from arxiv:1708.05720, section 4.3
    softsusy::QedQcd qedqcd;
@@ -22,11 +23,23 @@ NUHNMSSMHimalaya<Two_scale> run(int loops, const NUHNMSSMHimalaya_input_paramete
    qedqcd.setFermiConstant(1.1663787e-5);
    qedqcd.to(qedqcd.displayPoleMZ());
 
+   return qedqcd;
+}
+
+Threshold_corrections make_tc(int loops)
+{
    // flag setting used in arxiv:1708.05720 Fig.6
    Threshold_corrections tc(122111121);
    if (loops == 2) {
       tc.set(121111121); // only 1-loop yt threshold correction
    }
+
+   return tc;
+}
+
+Spectrum_generator_settings make_settings(int loops)
+{
+   const Threshold_corrections tc = make_tc(loops);
 
    Spectrum_generator_settings settings;
    settings.set(Spectrum_generator_settings::precision, 1.0e-5);
@@ -38,6 +51,26 @@ NUHNMSSMHimalaya<Two_scale> run(int loops, const NUHNMSSMHimalaya_input_paramete
    settings.set(Spectrum_generator_settings::force_output, true); // must force the output, because xt = sqrt(6) leads to tachyons
    settings.set_threshold_corrections(tc);
 
+   return settings;
+}
+
+NUHMSSMNoFVHimalaya<Two_scale> run(int loops, const NUHMSSMNoFVHimalaya_input_parameters& input)
+{
+   const softsusy::QedQcd qedqcd = make_qedqcd();
+   const Spectrum_generator_settings settings = make_settings(loops);
+
+   NUHMSSMNoFVHimalaya_spectrum_generator<Two_scale> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   return spectrum_generator.get_model();
+}
+
+NUHNMSSMHimalaya<Two_scale> run(int loops, const NUHNMSSMHimalaya_input_parameters& input)
+{
+   const softsusy::QedQcd qedqcd = make_qedqcd();
+   const Spectrum_generator_settings settings = make_settings(loops);
+
    NUHNMSSMHimalaya_spectrum_generator<Two_scale> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
@@ -46,7 +79,50 @@ NUHNMSSMHimalaya<Two_scale> run(int loops, const NUHNMSSMHimalaya_input_paramete
 }
 
 /// calculates CP-even Higgs pole mass at given loop order for degenerate SUSY parameters
-double calc_Mh(int loops, double tb, double MS, double xt, double lambda, double kappa)
+double calc_Mh_MSSM(int loops, double tb, double MS, double xt)
+{
+   NUHMSSMNoFVHimalaya_input_parameters input;
+   const double mu = MS;
+   const double Xt = xt*MS;
+
+   input.TanBeta = tb;
+   input.Qin = MS;
+   input.M1 = MS;
+   input.M2 = MS;
+   input.M3 = MS;
+   input.AtIN = Xt + mu/tb;
+   input.AbIN = mu*tb;
+   input.AtauIN = mu*tb;
+   input.AcIN = mu/tb;
+   input.AsIN = mu*tb;
+   input.AmuonIN = mu*tb;
+   input.AuIN = mu/tb;
+   input.AdIN = mu*tb;
+   input.AeIN = mu*tb;
+   input.MuIN = mu;
+   input.mA2IN = MS*MS;
+   input.ml11IN = MS;
+   input.ml22IN = MS;
+   input.ml33IN = MS;
+   input.me11IN = MS;
+   input.me22IN = MS;
+   input.me33IN = MS;
+   input.mq11IN = MS;
+   input.mq22IN = MS;
+   input.mq33IN = MS;
+   input.mu11IN = MS;
+   input.mu22IN = MS;
+   input.mu33IN = MS;
+   input.md11IN = MS;
+   input.md22IN = MS;
+   input.md33IN = MS;
+   input.Mlow = 0;
+
+   return run(loops, input).get_physical().Mhh(0);
+}
+
+/// calculates CP-even Higgs pole mass at given loop order for degenerate SUSY parameters
+double calc_Mh_NMSSM(int loops, double tb, double MS, double xt, double lambda, double kappa)
 {
    NUHNMSSMHimalaya_input_parameters input;
    const double MS2 = MS*MS;
@@ -84,12 +160,12 @@ double calc_Mh(int loops, double tb, double MS, double xt, double lambda, double
 /// arxiv:1708.05720 Fig.6 in the MSSM limit
 BOOST_AUTO_TEST_CASE( test_Mh )
 {
-   const double lambda = 1e-4;
+   const double lambda = 1e-4; // MSSM-limit
    const double kappa = lambda;
    const double eps = 1e-2; // @todo(alex): increase test precision, try adding 3-loop beta functions
 
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh(2, 5, 1e4, -std::sqrt(6.0), lambda, kappa), 127.25093812326084, eps);
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh(3, 5, 1e4, -std::sqrt(6.0), lambda, kappa), 124.66777554988728, eps);
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh(3, 5, 1e4, 0, lambda, kappa), 118.99014138640648, eps);
-   BOOST_CHECK_CLOSE_FRACTION(calc_Mh(3, 5, 1e4, std::sqrt(6.0), lambda, kappa), 126.94917275718093, eps);
+   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(2, 5, 1e4, -std::sqrt(6.0)), calc_Mh_NMSSM(2, 5, 1e4, -std::sqrt(6.0), lambda, kappa), eps);
+   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(3, 5, 1e4, -std::sqrt(6.0)), calc_Mh_NMSSM(3, 5, 1e4, -std::sqrt(6.0), lambda, kappa), eps);
+   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(3, 5, 1e4, 0), calc_Mh_NMSSM(3, 5, 1e4, 0, lambda, kappa), eps);
+   BOOST_CHECK_CLOSE_FRACTION(calc_Mh_MSSM(3, 5, 1e4, std::sqrt(6.0)), calc_Mh_NMSSM(3, 5, 1e4, std::sqrt(6.0), lambda, kappa), eps);
 }
