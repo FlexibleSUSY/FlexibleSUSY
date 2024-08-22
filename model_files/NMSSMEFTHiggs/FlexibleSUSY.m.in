@@ -137,6 +137,9 @@ PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
 UseHiggs2LoopNMSSM = True;
 EffectiveMu = \[Lambda] vS / Sqrt[2];
 EffectiveMASqr = (T[\[Lambda]] vS / Sqrt[2] + 0.5 \[Lambda] \[Kappa] vS^2) (vu^2 + vd^2) / (vu vd);
+UseHiggs3LoopNMSSM = True;
+UseMSSMYukawa2Loop = True;
+UseMSSMAlphaS2Loop = True;
 
 (* MSSM-limit for 2-loop contributions to Mhh *)
 FSMSSMLimit = {
