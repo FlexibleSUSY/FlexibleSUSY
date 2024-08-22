@@ -710,7 +710,7 @@ AssertFieldDimension[field_, dim_, model_] :=
 GetTwoLoopTadpoleCorrections[model_String /; model === "MSSM"] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, tanbStr, muStr, m3Str, mAStr},
            AssertFieldDimension[SARAH`HiggsBoson, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -723,7 +723,7 @@ GetTwoLoopTadpoleCorrections[model_String /; model === "MSSM"] :=
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
 
@@ -756,7 +756,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = Sqr(" <> mA0Str <> ");
+const double mAsq = Sqr(" <> mAStr <> ");
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -796,7 +796,7 @@ return tadpole_2l;"
 GetTwoLoopTadpoleCorrections[model_String /; model === "NMSSM"] :=
     Module[{mTop, mBot, mTau,
             g3Str, mtStr, mbStr, mtauStr, lambdaStr,
-            vev2Str, svevStr, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, svevStr, tanbStr, muStr, m3Str, mA2Str},
            AssertFieldDimension[SARAH`HiggsBoson, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -809,7 +809,7 @@ GetTwoLoopTadpoleCorrections[model_String /; model === "NMSSM"] :=
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            svevStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
 "\
@@ -845,7 +845,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = " <> mA0Str <> ";
+const double mAsq = " <> mA2Str <> ";
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -1055,7 +1055,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "MSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mAStr},
            AssertFieldDimension[particle, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -1070,7 +1070,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
 
@@ -1103,7 +1103,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = Sqr(" <> mA0Str <> ");
+const double mAsq = Sqr(" <> mAStr <> ");
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -1141,7 +1141,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
                               model_String /; model === "MSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mAStr},
            AssertFieldDimension[particle, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -1156,7 +1156,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
 
@@ -1189,7 +1189,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = Sqr(" <> mA0Str <> ");
+const double mAsq = Sqr(" <> mAStr <> ");
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -1227,7 +1227,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "NMSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA0Str,
+            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA2Str,
             lambdaStr},
            AssertFieldDimension[particle, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
@@ -1243,7 +1243,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            vsStr   = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
 "\
@@ -1281,7 +1281,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = " <> mA0Str <> ";
+const double mAsq = " <> mA2Str <> ";
 const double cotb = 1.0 / tanb;
 const double rmb = " <> mbStr <> ";
 const double rmbsq = Sqr(rmb);
@@ -1325,7 +1325,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
                               model_String /; model === "NMSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA0Str,
+            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA2Str,
             lambdaStr},
            AssertFieldDimension[particle, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
@@ -1341,7 +1341,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            vsStr   = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
 "\
@@ -1379,7 +1379,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = " <> mA0Str <> ";
+const double mAsq = " <> mA2Str <> ";
 const double cotb = 1.0 / tanb;
 const double rmb = " <> mbStr <> ";
 const double rmbsq = Sqr(rmb);
@@ -1426,7 +1426,7 @@ DivideOrReturnZeroStr[a_, b_] :=
 GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "MSSM", 3] :=
     Module[{g3Str, mtStr, mbStr, meStr, mTop, mBot, mTau,
-            vuStr, vdStr, muStr, m3Str, mA0Str,
+            vuStr, vdStr, muStr, m3Str, mAStr,
             AtStr, AbStr, AeStr, mWStr, mZStr,
             mq2Str, md2Str, mu2Str, ml2Str, me2Str},
            AssertFieldDimension[particle, 2, model];
@@ -1441,7 +1441,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            muStr   = CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
            AtStr   = DivideOrReturnZeroStr[SARAH`TrilinearUp[2,2], SARAH`UpYukawa[2,2]];
            AbStr   = DivideOrReturnZeroStr[SARAH`TrilinearDown[2,2], SARAH`DownYukawa[2,2]];
            AeStr   = DivideOrReturnZeroStr[SARAH`TrilinearLepton[2,2], SARAH`ElectronYukawa[2,2]];
@@ -1478,7 +1478,7 @@ pars.MW = " <> mWStr <> ";
 pars.MZ = " <> mZStr <> ";
 pars.Mt = " <> mtStr <> ";
 pars.Mb = " <> mbStr <> ";
-pars.MA = " <> mA0Str <> ";
+pars.MA = " <> mAStr <> ";
 pars.MSt << mst_1, mst_2;
 pars.MSb << msb_1, msb_2;
 pars.s2t = Sin(2*theta_t);
@@ -1569,7 +1569,7 @@ return self_energy_3l;"
 GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "NMSSM", 3] :=
     Module[{g3Str, mtStr, mbStr, meStr, mTop, mBot, mTau,
-            vuStr, vdStr, muStr, m3Str, mA0Str,
+            vuStr, vdStr, muStr, m3Str, mA2Str,
             AtStr, AbStr, AeStr, mWStr, mZStr,
             mq2Str, md2Str, mu2Str, ml2Str, me2Str,
             mssm2LSelfEnergyType = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, 2, 2]],
@@ -1587,7 +1587,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            muStr   = CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            AtStr   = DivideOrReturnZeroStr[SARAH`TrilinearUp[2,2], SARAH`UpYukawa[2,2]];
            AbStr   = DivideOrReturnZeroStr[SARAH`TrilinearDown[2,2], SARAH`DownYukawa[2,2]];
            AeStr   = DivideOrReturnZeroStr[SARAH`TrilinearLepton[2,2], SARAH`ElectronYukawa[2,2]];
@@ -1626,7 +1626,7 @@ pars.MW = " <> mWStr <> ";
 pars.MZ = " <> mZStr <> ";
 pars.Mt = " <> mtStr <> ";
 pars.Mb = " <> mbStr <> ";
-pars.MA = Re(" <> mA0Str <> ");
+pars.MA = Re(Sqrt(" <> mA2Str <> "));
 pars.MSt << mst_1, mst_2;
 pars.MSb << msb_1, msb_2;
 pars.s2t = Sin(2*theta_t);
