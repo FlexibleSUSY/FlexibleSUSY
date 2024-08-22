@@ -193,7 +193,8 @@ sm.calculate_DRbar_masses();"
 
 Create3LoopMatching[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=
    Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
-	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]]},
+	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]],
+           mtstr = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]]},
 "// calculate running masses of the input model
 const auto model = [] (const auto& model_input) {
    auto model = model_input;
@@ -222,10 +223,9 @@ const double yt2 = Sqr(yt);
 const double g3 = sm_0l_gl.get_g3();
 const double g32 = Sqr(g3);
 const double g34 = Sqr(g32);
-const double MS = Sqrt(model_gl.get_MSt(0) * model_gl.get_MSt(1));
 const double Q = sm_0l_gl.get_scale();
 const double Q2 = Sqr(Q);
-const double mt = model_gl.get_MFt();
+const double mt = model_gl.get_" <> mtstr <> ";
 const double mt2 = Sqr(mt);
 const double logmt = Log(mt2 / Q2);
 const double logmt2 = Sqr(logmt);
@@ -339,7 +339,7 @@ double calculate_Mt_bsm_2l(
    model_2l.set_pole_mass_loop_order(2);
    model_2l.set_loop_corrections(loop_corrections);
 
-   model_2l." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
+   model_2l." <> CreateLoopMassFunctionName[Parameters`StripIndices[TreeMasses`GetUpQuark[3,True]]] <> "();
 
    const auto Mt_bsm = model_2l.get_physical()." <> mtstr <> ";
 
