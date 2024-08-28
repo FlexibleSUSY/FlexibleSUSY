@@ -146,7 +146,8 @@ FSMSSMLimit = {
    {\[Kappa], FSGaugeLess},
    {\[Lambda], FSGaugeLess},
    {vS, Sqrt[2] MuInput/FSGaugeLess},
-   {T[\[Lambda]], ALambdaInput FSGaugeLess}
+   {T[\[Lambda]], ALambdaInput FSGaugeLess},
+   {T[\[Kappa]], AKappaInput FSGaugeLess}
 };
 
 DefaultPoleMassPrecision = HighPrecision;
