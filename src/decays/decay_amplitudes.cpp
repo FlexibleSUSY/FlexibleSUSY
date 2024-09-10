@@ -213,15 +213,17 @@ Decay_amplitude_SFF operator*(Decay_amplitude_SFF const& amp, std::complex<doubl
 }
 
 std::complex<double> amplitude_interference(const Decay_amplitude_SFF& a1, const Decay_amplitude_SFF& a2) {
+   // make sure we're computing interference for the same external states
    assert(is_zero(a1.m_decay - a2.m_decay));
    assert(is_zero(a1.m_fermion_1 - a2.m_fermion_1));
    assert(is_zero(a1.m_fermion_2 - a2.m_fermion_2));
+
    const double m_in_sq = Sqr(a1.m_decay);
    const double m_1_sq = Sqr(a1.m_fermion_1);
    const double m_2_sq = Sqr(a1.m_fermion_2);
 
    // Eq. 2.4 of 1703.09237
-   std::complex<double> amp2 =
+   const std::complex<double> amp2 =
       (m_in_sq - m_1_sq - m_2_sq) *
          (a1.form_factor_left*Conj(a2.form_factor_left) + a1.form_factor_right*Conj(a2.form_factor_right))
       - 2.*a1.m_fermion_1*a1.m_fermion_2 *
@@ -231,10 +233,6 @@ std::complex<double> amplitude_interference(const Decay_amplitude_SFF& a1, const
 
 double Decay_amplitude_SFF::square() const
 {
-   const double m_in_sq = Sqr(m_decay);
-   const double m_1_sq = Sqr(m_fermion_1);
-   const double m_2_sq = Sqr(m_fermion_2);
-
    return std::real(amplitude_interference(*this, *this));
 }
 
