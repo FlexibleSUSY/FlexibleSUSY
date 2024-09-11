@@ -208,12 +208,10 @@ double @ModelName@_decays::get_partial_width(
                   );
                   if (mLSP == context.physical_mass<FieldOut1>(indexOut1)) {
                      if constexpr (FieldOut1::numberOfGenerations == 0) {
-                        std::cout << field_as_string<FieldIn>(indexIn) << " -> " << field_as_string<FieldOut1>(indexOut1) << " + " << field_as_string<FieldOut2>(indexOut2) <<  std::endl;
                         neutral_higgs_effc.set_invisible_width(field_as_string<FieldIn>(indexIn), partialWidth);
                      }
                      else {
                         if (indexOut1.at(0) == 0 && indexOut2.at(0) == 0) {
-                           std::cout << field_as_string<FieldIn>(indexIn) << " -> " << field_as_string<FieldOut1>(indexOut1) << " + " << field_as_string<FieldOut2>(indexOut2) <<  std::endl;
                            neutral_higgs_effc.set_invisible_width(field_as_string<FieldIn>(indexIn), partialWidth);
                         }
                      }
