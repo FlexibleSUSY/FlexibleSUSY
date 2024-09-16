@@ -3768,7 +3768,7 @@ Package directories, compilation settings and model selection
                             (default: $ADDONS)
   --with-boost-libdir=      Path to search for BOOST libraries
   --with-boost-incdir=      Path to search for BOOST headers
-  --with-cppflags           C preprocessor flags (default: $CPPFLAGS)
+  --with-cppflags=          C preprocessor flags (default: $CPPFLAGS)
   --with-cxx=               C++ compiler (default: $CXX)
   --with-cxxflags=          C++ compiler flags (default: $CXXFLAGS)
   --with-eigen-incdir=      Path to search for Eigen headers
