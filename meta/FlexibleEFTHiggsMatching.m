@@ -190,11 +190,14 @@ if (yt_loop_order > 1) {
 sm.calculate_DRbar_masses();"
 ];
 
+AttachBrackets[FlexibleSUSY`M[sym_[idx_]]] := FlexibleSUSY`M[sym][idx];
+AttachBrackets[FlexibleSUSY`M[sym_]] := FlexibleSUSY`M[sym][];
+AttachBrackets[sym_] := sym;
 
 Create3LoopMatching[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=
    Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
 	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]],
-           mtstr = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]]},
+           mtstr = CConversion`RValueToCFormString[AttachBrackets[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]]]},
 "// calculate running masses of the input model
 const auto model = [] (const auto& model_input) {
    auto model = model_input;
