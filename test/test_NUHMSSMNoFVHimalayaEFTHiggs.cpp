@@ -1030,11 +1030,8 @@ Block EXTPAR
     2   2000                 # M2(MSUSY)
     3   2000                 # M3(MSUSY)
     4   2000                 # Mu(MSUSY)
+    5   2000                 # mA(MSUSY)
    25   5                    # tan(beta) at Ms
-   61   0.001                  # Lambda
-   62   0.001                  # Kappa
-   63  -1.61538462E+03       # ALambda
-   64  -1.00000000E+03       # AKappa
 Block MSQ2IN
   1  1     4.00000000E+06   # mq2(1,1)
   2  2     4.00000000E+06   # mq2(2,2)
