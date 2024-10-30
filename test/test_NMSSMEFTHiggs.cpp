@@ -191,7 +191,7 @@ Block AEIN
   3  3     0   # Ad(3,3)
 )";
 
-// scenario 2 degenrate case with non-trivial mixing At = -4000 and approx MSSM-limit
+// scenario 2 degenrate case with non-trivial mixing At = xt*ms + mu/tb = 0 + 2000/5 = 400 and approx MSSM-limit
 char const * const slha_input_case_2 = R"(
 Block MODSEL                 # Select model
 #   12    1000                # DRbar parameter output scale (GeV)
@@ -280,7 +280,7 @@ Block MSD2IN
 Block AUIN
   1  1     0   # Au(1,1)
   2  2     0   # Au(2,2)
-  3  3     -4000   # Au(3,3) xt=0
+  3  3     400   # Au(3,3) xt=0
 Block ADIN
   1  1     0   # Ad(1,1)
   2  2     0   # Ad(2,2)
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
       double eps{0.0};
    } data[] = {
       {slha_input_case_1, {1.08559604e+02}, 2e-4}, // obtained from NMSSMEFTHiggsTwoScale in EFT parametrization
-      {slha_input_case_2, {1.20055553e+02}, 2e-5}, // obtained from MSSMEFTHiggs2loop in full-model parametrization w/ only 2-loop contributions of O((at+ab)*as + (at+ab)^2), i.e. no 2-loop O(atau^2) contributions and not 3- or 4-loop contributions
+      {slha_input_case_2, {133.0357875507616}, 1e-5}, // obtained from MSSMEFTHiggs2loop in full-model parametrization w/ only 2-loop contributions of O((at+ab)*as + (at+ab)^2), i.e. no 2-loop O(atau^2) contributions and not 3- or 4-loop contributions
    };
 
    for (const auto& d: data) {
