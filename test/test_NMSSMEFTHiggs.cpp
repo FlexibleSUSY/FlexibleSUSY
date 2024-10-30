@@ -28,7 +28,10 @@
 
 using namespace flexiblesusy;
 
-using Output = std::array<double,1>;
+struct Output_2loop {
+   double Mh_2L_at_as{};
+   double Mh_2L_at_at{};
+};
 
 
 /// calculate Mh at the precision given in `settings'
@@ -77,7 +80,7 @@ extract_slha_input(char const * const slha_input)
 
 
 /// calculate output for test
-Output calc_output(char const* const slha_input)
+Output_2loop calc_output_2loop(char const* const slha_input)
 {
    Spectrum_generator_settings settings;
    softsusy::QedQcd qedqcd;
@@ -85,9 +88,15 @@ Output calc_output(char const* const slha_input)
 
    std::tie(settings, qedqcd, input) = extract_slha_input(slha_input);
 
-   Output results{};
+   Output_2loop results{};
 
-   results.at(0) = calc_Mh(input, qedqcd, settings);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 0);
+   results.Mh_2L_at_as = calc_Mh(input, qedqcd, settings);
+
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 0);
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
+   results.Mh_2L_at_at = calc_Mh(input, qedqcd, settings);
 
    return results;
 }
@@ -396,18 +405,17 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs )
 {
    const struct Data {
       char const * const slha_input = nullptr;
-      Output expected_output{};
+      Output_2loop expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_1, {1.08559604e+02}, 2e-4}, // obtained from NMSSMEFTHiggsTwoScale in EFT parametrization
-      {slha_input_case_2, {1.11217851e+02}, 1e-5}, // MS = 2000 GeV, tb = 5, xt = 0
-      {slha_input_case_3, {1.20055553e+02}, 2e-5}, // obtained from MSSMEFTHiggs2loop in full-model parametrization w/ only 2-loop contributions of O((at+ab)*as + (at+ab)^2), i.e. no 2-loop O(atau^2) contributions and not 3- or 4-loop contributions
+      {slha_input_case_1, { .Mh_2L_at_as = 108.71399186416657, .Mh_2L_at_at = 108.54840607805137 }, 2e-5}, // obtained from NMSSMEFTHiggsTwoScale in EFT parametrization
+      {slha_input_case_2, { .Mh_2L_at_as = 111.23847635109462, .Mh_2L_at_at = 111.18889782272626 }, 2e-5}, // MS = 2000 GeV, tb = 5, xt = 0, MSSM-limit
+      {slha_input_case_3, { .Mh_2L_at_as = 120.14850196112329, .Mh_2L_at_at = 119.79021153724737 }, 2e-5}, // MS = 2000 GeV, tb = 5, xt = 0, MSSM-limit, obtained from MSSMEFTHiggs2loop in full-model parametrization w/ only 2-loop contributions of O((at+ab)*as + (at+ab)^2), i.e. no 2-loop O(atau^2) contributions and not 3- or 4-loop contributions
    };
 
    for (const auto& d: data) {
-      const auto output = calc_output(d.slha_input);
-      for (int i = 0; i < d.expected_output.size(); i++) {
-         BOOST_CHECK_CLOSE_FRACTION(output[i], d.expected_output[i], d.eps);
-      }
+      const auto output = calc_output_2loop(d.slha_input);
+      BOOST_CHECK_CLOSE_FRACTION(output.Mh_2L_at_as, d.expected_output.Mh_2L_at_as, d.eps);
+      BOOST_CHECK_CLOSE_FRACTION(output.Mh_2L_at_at, d.expected_output.Mh_2L_at_at, d.eps);
    }
 }
