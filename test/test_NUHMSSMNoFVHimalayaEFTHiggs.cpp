@@ -45,6 +45,7 @@ struct Output_2loop {
 
 struct Output_3loop{
    double lambda_3L{};
+   double Mh_3L_at_as_as{};
 };
 
 
@@ -182,8 +183,10 @@ Output_3loop calc_output_3loop(char const * const slha_input)
    settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
+   settings.set(Spectrum_generator_settings::higgs_3loop_correction_at_as2, 1);
 
    results.lambda_3L = calc_lambda(input, qedqcd, settings, Qmatch);
+   results.Mh_3L_at_as_as = calc_Mh(input, qedqcd, settings);
 
    return results;
 }
@@ -1216,13 +1219,14 @@ BOOST_AUTO_TEST_CASE( test_top_down_EFTHiggs_3loop )
       Output_3loop expected_output{};
       double eps{0.0};
    } data[] = {
-      {slha_input_case_5, Output_3loop{ .lambda_3L = 0.11685905941993063 }, 7e-5},
-      {slha_input_case_8, Output_3loop{ .lambda_3L = 0.12118666568388101 }, 5e-5},
+      {slha_input_case_5, Output_3loop{ .lambda_3L = 0.11685905941993063, .Mh_3L_at_as_as = 128.06462745792598 }, 7e-5},
+      {slha_input_case_8, Output_3loop{ .lambda_3L = 0.12118666568388101, .Mh_3L_at_as_as = 128.80847592134268 }, 5e-5},
    };
 
    for (const auto& d: data) {
       const auto output = calc_output_3loop(d.slha_input);
       BOOST_CHECK_CLOSE_FRACTION(output.lambda_3L, d.expected_output.lambda_3L, d.eps);
+      BOOST_CHECK_CLOSE_FRACTION(output.Mh_3L_at_as_as, d.expected_output.Mh_3L_at_as_as, d.eps);
    }
 }
 
