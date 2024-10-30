@@ -70,9 +70,9 @@ std::complex<double> Softsusy::B00(B_ARGS) noexcept
 
 std::complex<double> Softsusy::DB0(DB_ARGS) noexcept
 {
-   const double p = std::sqrt(p10_in.real());
-   const double m1 = std::sqrt(m02_in.real());
-   const double m2 = std::sqrt(m12_in.real());
+   const double p = p10_in.real();
+   const double m1 = m02_in.real();
+   const double m2 = m12_in.real();
 
    return {softsusy::db0(p, m1, m2), 0.0};
 }
@@ -133,9 +133,9 @@ void Softsusy::A(Acoeff_t& a, A_ARGS) noexcept
 
 void Softsusy::DB(DBcoeff_t& db, DB_ARGS) noexcept
 {
-   const double p = std::sqrt(p10_in.real());
-   const double m1 = std::sqrt(m02_in.real());
-   const double m2 = std::sqrt(m12_in.real());
+   const double p = p10_in.real();
+   const double m1 = m02_in.real();
+   const double m2 = m12_in.real();
 
    static constexpr std::complex<double> undefined = {NAN_Q, NAN_Q};
    db.at(0) = {softsusy::db0(p, m1, m2), 0.};
