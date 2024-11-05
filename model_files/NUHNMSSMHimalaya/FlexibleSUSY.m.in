@@ -58,8 +58,6 @@ SUSYScale = MSUSY;
 SUSYScaleFirstGuess = MSUSY;
 
 SUSYScaleInput = {
-    {vu, Sqrt[vu^2 + vd^2] Sin[ArcTan[TanBeta]]},
-    {vd, Sqrt[vu^2 + vd^2] Cos[ArcTan[TanBeta]]},
     {MassB, M1Input},
     {MassWB, M2Input},
     {MassG, M3Input},
