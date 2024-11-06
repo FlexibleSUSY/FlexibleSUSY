@@ -1,7 +1,6 @@
 FSModelName = "@CLASSNAME@";
 FSEigenstates = SARAH`EWSB;
 FSDefaultSARAHModel = NMSSM;
-OnlyLowEnergyFlexibleSUSY = True;
 
 EXTPAR = {
     {0, MSUSY},
@@ -53,11 +52,17 @@ FSAuxiliaryParameterInfo = {
 
 EWSBOutputParameters = { mHd2, mHu2, ms2 };
 
-SUSYScale = MSUSY;
+SUSYScale = Sqrt[Product[M[Su[i]]^(Abs[ZU[i,3]]^2 + Abs[ZU[i,6]]^2), {i,6}]];
 
-SUSYScaleFirstGuess = MSUSY;
+SUSYScaleFirstGuess = LowEnergyConstant[MZ];
 
-SUSYScaleInput = {
+SUSYScaleInput = {};
+
+HighScale = MSUSY;
+
+HighScaleFirstGuess = MSUSY;
+
+HighScaleInput = {
     {MassB, M1Input},
     {MassWB, M2Input},
     {MassG, M3Input},
