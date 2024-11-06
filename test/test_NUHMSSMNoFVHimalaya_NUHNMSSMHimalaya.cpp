@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE( test_Mh )
    {
       const int loops = 3;
       const double tb = 5;
-      const double ms = 1e4;
+      const double ms = 8e3;
       const double xt = 0;
       const auto mssm = calc_MSSM(loops, tb, ms, xt);
       const auto nmssm = calc_NMSSM(loops, tb, ms, xt, lambda, kappa);

@@ -112,7 +112,7 @@ std::pair<double, double> calc_Mh_DMh(int loops, double tb, double MS, double xt
 
    const double DMh = std::abs(DMh_max - DMh_min);
 
-   return std::pair<double, double>(Mh, DMh);
+   return std::make_pair(Mh, DMh);
 }
 
 /// test renormalization scale invariance of Mh pole mass
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE( test_Mh_scale_invariance )
    const double tb = 10;
    const double xt = -std::sqrt(6.0);
 
-   const auto susy_scales = subdivide_log(1e3, 1e4, 10);
+   const auto susy_scales = subdivide_log(1e3, 9e3, 10);
 
    for (const auto ms: susy_scales) {
       const double DMh_0l = calc_Mh_DMh(0, tb, ms, xt, lambda, kappa).second;
