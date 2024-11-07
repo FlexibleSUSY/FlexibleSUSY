@@ -228,9 +228,9 @@ BOOST_AUTO_TEST_CASE( test_Mh )
       const auto mh_NMSSM = nmssm.get_Mhh();
       const auto mA_NMSSM = nmssm.get_MAh();
       const double Mh_NMSSM = nmssm.get_physical().Mhh(0);
-      BOOST_CHECK_CLOSE_FRACTION(mh_MSSM(0), mh_NMSSM(0), 10*prec);
+      BOOST_CHECK_CLOSE_FRACTION(mh_MSSM(0), mh_NMSSM(0), 5*prec);
       BOOST_CHECK_CLOSE_FRACTION(mh_MSSM(1), mh_NMSSM(1), prec);
-      BOOST_CHECK_CLOSE_FRACTION(mA_MSSM(0), mA_NMSSM(0), 10*prec);
+      BOOST_CHECK_CLOSE_FRACTION(mA_MSSM(0), mA_NMSSM(0), 5*prec);
       BOOST_CHECK_CLOSE_FRACTION(mA_MSSM(1), mA_NMSSM(1), prec);
       BOOST_CHECK_CLOSE_FRACTION(Mh_MSSM, Mh_NMSSM, eps);
    }
