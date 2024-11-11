@@ -116,7 +116,6 @@ Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
 Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
 Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
 
-
 GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
     selfEnergy[[2]];
 
