@@ -194,6 +194,8 @@ private:
    double G0(double, double, double) const noexcept;
 
    double DB0(double, double, double) const noexcept;
+   double DB00(double, double, double) const noexcept;
+   double DB1(double, double, double) const noexcept;
    double DH0(double, double, double) const noexcept;
    double DF0(double, double, double) const noexcept;
    double DG0(double, double, double) const noexcept;

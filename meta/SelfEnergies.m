@@ -28,8 +28,8 @@ FSSelfEnergy::usage="self-energy head";
 
 FSSelfEnergyDerivative::usage="head for derivative of self-energy w.r.t. p^2";
 
-(* symbols for derivative of B0 and G0 loop functions w.r.t. p^2 *)
-{ DB0, DG0 }
+(* symbols for derivative of loop functions w.r.t. p^2 *)
+{ DB0, DB1, DB00, DF0, DG0, DH0 };
 
 FSHeavySelfEnergy::usage="head for self-energy w/o BSM particles";
 FSHeavyRotatedSelfEnergy::usage="head for self-energy w/o BSM particles in mass eigenstate basis";
@@ -97,6 +97,17 @@ CreateCouplingSymbol::usage = "";
 ReplaceGhosts::usage="";
 
 Begin["`Private`"];
+
+SetSystemOptions[
+   "DifferentiationOptions" ->
+      "ExcludedFunctions"-> DeleteDuplicates[
+         Append[
+            OptionValue[SystemOptions[], "DifferentiationOptions"->"ExcludedFunctions"],
+            SARAH`sum
+         ]
+   ]
+];
+SARAH`sum /: D[SARAH`sum[idx_, i_, j_, expr_], p2_] := SARAH`sum[idx, i, j, D[expr, p2]];
 
 GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
     selfEnergy[[2]];
@@ -607,7 +618,7 @@ CreateNPointFunctionMatrix[nPointFunction_] :=
 
 CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
     Module[{prototypes = "", defs = "", vertexFunctionNames = {}, prototype, def,
-            relevantVertexRules, derivatives},
+            relevantVertexRules, derivatives, pSq},
            (* create coupling functions for all vertices in the list *)
            Print["Converting vertex functions ..."];
            (* extract vertex rules needed for the given nPointFunctions *)
@@ -627,22 +638,30 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            ];
            (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
            If[ValueQ[SARAH`HiggsBoson],
-              derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]] /. {
-                  FSSelfEnergy -> SelfEnergies`FSSelfEnergyDerivative,
-                  A0[__] -> 0,
-                  B0 -> SelfEnergies`DB0,
-                  G0 -> SelfEnergies`DG0
-              };
-              Switch[Length[derivatives],
-                     0, Print["Error: no Higgs boson self-energy found."],
-                     1, {protopy,def} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
+              derivatives = Cases[nPointFunctions, FSSelfEnergy[___]];
+	
+              D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
+              Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
+              Derivative[1, 0, 0][B1][p2_, m12_, m22_] := DB1[p2, m12, m22];
+              Derivative[1, 0, 0][B00][p2_, m12_, m22_] := DB00[p2, m12, m22];
+              Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
+              Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
+              Derivative[1, 0, 0][H0][p2_, m12_, m22_] := DH0[p2, m12, m22];
+
+              (* SARAH`sum has Attribute Constant because why not!? *)
+              ClearAttributes[SARAH`sum, Constant];
+              derivatives = (D[#, pSq]& /@ (derivatives /. p^2->pSq)) /. pSq -> p^2;
+              SetAttributes[SARAH`sum, Constant];
+
+	      Map[
+		(
+                     {prototype, def} = CreateNPointFunction[#, vertexFunctionNames];
                         prototypes = prototypes <> prototype;
                         defs = defs <> def;
-                        {p,d} = CreateNPointFunctionMatrix[First[derivatives]];
+                        {prototype, def} = CreateNPointFunctionMatrix[#];
                         prototypes = prototypes <> prototype;
-                        defs = defs <> def;,
-                     _, Print["Error: multiple Higgs boson self-energies found."]
-              ];
+                        defs = defs <> def;
+)& /@ derivatives];
            ];
            Utils`StopProgressBar[Length[nPointFunctions]];
            {prototypes, defs}
