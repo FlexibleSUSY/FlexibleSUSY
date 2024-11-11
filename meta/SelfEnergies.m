@@ -107,7 +107,17 @@ SetSystemOptions[
          ]
    ]
 ];
+
 SARAH`sum /: D[SARAH`sum[idx_, i_, j_, expr_], p2_] := SARAH`sum[idx, i, j, D[expr, p2]];
+
+D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
+
+Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
+Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
+Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
+Derivative[1, 0, 0][B1][p2_, m12_, m22_] := DB1[p2, m12, m22];
+Derivative[1, 0, 0][B00][p2_, m12_, m22_] := DB00[p2, m12, m22];
+Derivative[1, 0, 0][H0][p2_, m12_, m22_] := DH0[p2, m12, m22];
 
 GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
     selfEnergy[[2]];
@@ -639,21 +649,13 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
            If[ValueQ[SARAH`HiggsBoson],
               derivatives = Cases[nPointFunctions, FSSelfEnergy[___]];
-	
-              D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
-              Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
-              Derivative[1, 0, 0][B1][p2_, m12_, m22_] := DB1[p2, m12, m22];
-              Derivative[1, 0, 0][B00][p2_, m12_, m22_] := DB00[p2, m12, m22];
-              Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
-              Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
-              Derivative[1, 0, 0][H0][p2_, m12_, m22_] := DH0[p2, m12, m22];
 
               (* SARAH`sum has Attribute Constant because why not!? *)
               ClearAttributes[SARAH`sum, Constant];
               derivatives = (D[#, pSq]& /@ (derivatives /. p^2->pSq)) /. pSq -> p^2;
               SetAttributes[SARAH`sum, Constant];
 
-	      Map[
+Map[
 		(
                      {prototype, def} = CreateNPointFunction[#, vertexFunctionNames];
                         prototypes = prototypes <> prototype;

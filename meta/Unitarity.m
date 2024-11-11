@@ -33,7 +33,7 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
    paramsCPP =
       StringJoin[
          ("const auto " <> ToString@CConversion`ToValidCSymbol[#] <>
-            " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ Join[Parameters`FSModelParameters /. params, Parameters`FSOutputParameters /. params]
+            " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ Join[Parameters`FSModelParameters /. params, Parameters`FSPhases /. params, Parameters`FSOutputParameters /. params]
       ];
    decrementIndices = (#[i_, j_] /; Or@@(IntegerQ/@{i,j}) :> #@@(If[IntegerQ@#, #-1, #]& /@ {i, j}))& /@ Select[Join[Parameters`FSModelParameters /. params, Parameters`FSOutputParameters /. params], Length[GetParameterDimensions[#]]===2&];
 

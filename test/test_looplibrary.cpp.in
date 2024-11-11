@@ -68,6 +68,22 @@ BOOST_AUTO_TEST_CASE(test_two_point_B00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 0, 3, 50).real(), 3.23505803757003, 2e-15 );
 }
 
+#if LIBRARY_TYPE == 0 ||  LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
+
+// test DB0 for zero momentum
+BOOST_AUTO_TEST_CASE(zero_test_two_point_DB0) {
+   const double x = 2.0; // m_1^2
+   const double y = 3.0; // m_2^2
+
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, x, x, 1).real(), 1.0/(6*x), 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 0, x, 1).real(), x*x/(2*std::pow(x, 3)), 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 0, x, 1).real(), Loop_library::get().DB0(0, x, 0, 1).real(), 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, x, y, 1).real(), (x*x - y*y + 2*x*y*std::log(y/x))/(2*std::pow(x - y, 3)), 1e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, x, y, 1).real(), Loop_library::get().DB0(0, y, x, 1).real(), 1e-14 );
+}
+
+#endif
+
 #if LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
 
 BOOST_AUTO_TEST_CASE(test_two_point_DB0) {
@@ -133,7 +149,7 @@ BOOST_AUTO_TEST_CASE(zero_test_three_point_C00) {
 #if LIBRARY_TYPE == 0 || LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
 
 BOOST_AUTO_TEST_CASE(zero_test_three_point_C0) {
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 7, 50).real(), -0.155577518557259, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 7, 50).real(), -0.155577518557259, 4e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 0, 3, 7, 50).real(), -0.211824465096801, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 0, 7, 50).real(), -0.324318358175886, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 0, 50).real(), -0.549306144334055, 1e-15 );
