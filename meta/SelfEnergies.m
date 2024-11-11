@@ -107,7 +107,15 @@ SetSystemOptions[
          ]
    ]
 ];
+
 SARAH`sum /: D[SARAH`sum[idx_, i_, j_, expr_], p2_] := SARAH`sum[idx, i, j, D[expr, p2]];
+
+D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
+
+Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
+Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
+Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
+
 
 GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
     selfEnergy[[2]];
@@ -639,11 +647,6 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
            If[ValueQ[SARAH`HiggsBoson],
               derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]];
-
-              D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
-              Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
-              Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
-              Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
 
               (* SARAH`sum has Attribute Constant because why not!? *)
               ClearAttributes[SARAH`sum, Constant];
