@@ -98,6 +98,16 @@ ReplaceGhosts::usage="";
 
 Begin["`Private`"];
 
+SetSystemOptions[
+   "DifferentiationOptions" ->
+      "ExcludedFunctions"-> DeleteDuplicates[
+         Append[
+            OptionValue[SystemOptions[], "DifferentiationOptions"->"ExcludedFunctions"],
+            SARAH`sum
+         ]
+   ]
+];
+
 GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
     selfEnergy[[2]];
 
@@ -633,16 +643,6 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
 	      Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
 	      Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
 	      Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
-
-	      SetSystemOptions[
-                 "DifferentiationOptions" ->
-                    "ExcludedFunctions"-> DeleteDuplicates[
-                       Append[
-                          OptionValue[SystemOptions[], "DifferentiationOptions"->"ExcludedFunctions"],
-                          SARAH`sum
-                       ]
-                    ]
-              ];
 
               SARAH`sum /: D[SARAH`sum[idx_, i_, j_, expr_], p2_] := SARAH`sum[idx, i, j, D[expr, p2]];
 
