@@ -629,12 +629,10 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            If[ValueQ[SARAH`HiggsBoson],
               derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]];
 
-	      Unprotect[D];
-	      D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] := SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
+	      D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
 	      Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
 	      Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
 	      Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
-	      Protect[D];
 
 	      SetSystemOptions[
                  "DifferentiationOptions" ->
