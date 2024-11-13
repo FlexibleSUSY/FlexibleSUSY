@@ -171,6 +171,11 @@ TEST_SRC += \
 		$(DIR)/test_NMSSMEFTHiggs.cpp
 endif
 
+ifeq ($(WITH_NMSSMEFTHiggs) $(WITH_NUHNMSSMHimalaya), yes yes)
+TEST_SRC += \
+		$(DIR)/test_NMSSMEFTHiggs_NUHNMSSMHimalaya.cpp
+endif
+
 ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
 TEST_SRC += \
 		$(DIR)/test_NUHMSSMNoFVHimalaya.cpp
@@ -1189,6 +1194,8 @@ $(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
 $(DIR)/test_NMSSMEFTHiggs.x: $(LIBNMSSMEFTHiggs)
+
+$(DIR)/test_NMSSMEFTHiggs_NUHNMSSMHimalaya.x: $(LIBNMSSMEFTHiggs) $(LIBNUHNMSSMHimalaya)
 
 $(DIR)/test_NUHMSSMNoFVHimalaya.x: $(LIBNUHMSSMNoFVHimalaya)
 
