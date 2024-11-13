@@ -93,30 +93,30 @@ NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, 
 
 NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt, double lambda, double kappa)
 {
-   const NMSSMEFTHiggs_input_parameters point = make_point_feft(ms, tb, xt, lambda, kappa);
+   const NMSSMEFTHiggs_input_parameters input_feft = make_point_feft(ms, tb, xt, lambda, kappa);
 
-   NUHNMSSMHimalaya_input_parameters input;
+   NUHNMSSMHimalaya_input_parameters input_fo;
 
-   input.MSUSY        = point.MSUSY;
-   input.M1Input      = point.M1Input;
-   input.M2Input      = point.M2Input;
-   input.M3Input      = point.M3Input;
-   input.MuInput      = point.MuInput;
-   input.TanBeta      = point.TanBeta;
-   input.LambdaInput  = point.LambdaInput;
-   input.KappaInput   = point.KappaInput;
-   input.ALambdaInput = point.ALambdaInput;
-   input.AKappaInput  = point.AKappaInput;
-   input.mq2Input     = input.mq2Input;
-   input.mu2Input     = input.mu2Input;
-   input.md2Input     = input.md2Input;
-   input.ml2Input     = input.ml2Input;
-   input.me2Input     = input.me2Input;
-   input.AuInput      = input.AuInput;
-   input.AdInput      = input.AdInput;
-   input.AeInput      = input.AeInput;
+   input_fo.MSUSY        = input_feft.MSUSY;
+   input_fo.M1Input      = input_feft.M1Input;
+   input_fo.M2Input      = input_feft.M2Input;
+   input_fo.M3Input      = input_feft.M3Input;
+   input_fo.MuInput      = input_feft.MuInput;
+   input_fo.TanBeta      = input_feft.TanBeta;
+   input_fo.LambdaInput  = input_feft.LambdaInput;
+   input_fo.KappaInput   = input_feft.KappaInput;
+   input_fo.ALambdaInput = input_feft.ALambdaInput;
+   input_fo.AKappaInput  = input_feft.AKappaInput;
+   input_fo.mq2Input     = input_feft.mq2Input;
+   input_fo.mu2Input     = input_feft.mu2Input;
+   input_fo.md2Input     = input_feft.md2Input;
+   input_fo.ml2Input     = input_feft.ml2Input;
+   input_fo.me2Input     = input_feft.me2Input;
+   input_fo.AuInput      = input_feft.AuInput;
+   input_fo.AdInput      = input_feft.AdInput;
+   input_fo.AeInput      = input_feft.AeInput;
 
-   return input;
+   return input_fo;
 }
 
 
