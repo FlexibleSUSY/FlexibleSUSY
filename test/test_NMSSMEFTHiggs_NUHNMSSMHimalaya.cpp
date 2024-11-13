@@ -27,16 +27,14 @@
 using namespace flexiblesusy;
 
 
-/// returns T_lambda from given m_A
-// @todo(alex): return A_lambda
-const double calc_Tlambda(double mA, double mu, double tb, double lambda, double kappa)
+/// returns A_lambda from given m_A
+const double calc_Alambda(double mA, double mu, double tb, double lambda, double kappa)
 {
    const double mA2 = mA*mA;
-   const double vS = std::sqrt(2.0)*mu/lambda;
    const double sb = std::sin(std::atan(tb)); // sin(beta) = vu/v
    const double cb = std::cos(std::atan(tb)); // cos(beta) = vd/v
 
-   return std::sqrt(2.0)*mA2*sb*cb/vS - mu*kappa;
+   return mA2*sb*cb/mu - mu*kappa/lambda;
 }
 
 
@@ -94,8 +92,8 @@ NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt,
    const double ms2 = ms*ms;
    const double mu = ms;
    const double mA = ms;
-   const double TLambda = calc_Tlambda(mA, mu, tb, lambda, kappa);
-   const double TKappa = TLambda;
+   const double Alambda = calc_Alambda(mA, mu, tb, lambda, kappa);
+   const double Akappa = Alambda;
    const double Xt = xt*ms;
 
    input.MSUSY = ms;
@@ -106,8 +104,8 @@ NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt,
    input.TanBeta = tb;
    input.LambdaInput = lambda;
    input.KappaInput = kappa;
-   input.ALambdaInput = TLambda/lambda;
-   input.AKappaInput = TKappa/kappa;
+   input.ALambdaInput = Alambda;
+   input.AKappaInput = Akappa;
    input.mq2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.mu2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.md2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
