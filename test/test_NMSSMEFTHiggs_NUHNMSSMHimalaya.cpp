@@ -72,7 +72,7 @@ NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, 
    input.M1Input = ms;
    input.M2Input = ms;
    input.M3Input = ms;
-   input.MuInput = ms;
+   input.MuInput = mu;
    input.TanBeta = tb;
    input.LambdaInput = lambda;
    input.KappaInput = kappa;
@@ -93,32 +93,28 @@ NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, 
 
 NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt, double lambda, double kappa)
 {
-   NUHNMSSMHimalaya_input_parameters input;
-   const double ms2 = ms*ms;
-   const double mu = ms;
-   const double mA = ms;
-   const double Alambda = calc_Alambda(mA, mu, tb, lambda, kappa);
-   const double Akappa = Alambda;
-   const double Xt = xt*ms;
+   const NMSSMEFTHiggs_input_parameters point = make_point_feft(ms, tb, xt, lambda, kappa);
 
-   input.MSUSY = ms;
-   input.M1Input = ms;
-   input.M2Input = ms;
-   input.M3Input = ms;
-   input.MuInput = mu;
-   input.TanBeta = tb;
-   input.LambdaInput = lambda;
-   input.KappaInput = kappa;
-   input.ALambdaInput = Alambda;
-   input.AKappaInput = Akappa;
-   input.mq2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
-   input.mu2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
-   input.md2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
-   input.ml2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
-   input.me2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
-   input.AuInput << mu/tb, 0, 0, 0, mu/tb, 0, 0, 0, Xt + mu/tb;
-   input.AdInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
-   input.AeInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
+   NUHNMSSMHimalaya_input_parameters input;
+
+   input.MSUSY        = point.MSUSY;
+   input.M1Input      = point.M1Input;
+   input.M2Input      = point.M2Input;
+   input.M3Input      = point.M3Input;
+   input.MuInput      = point.MuInput;
+   input.TanBeta      = point.TanBeta;
+   input.LambdaInput  = point.LambdaInput;
+   input.KappaInput   = point.KappaInput;
+   input.ALambdaInput = point.ALambdaInput;
+   input.AKappaInput  = point.AKappaInput;
+   input.mq2Input     = input.mq2Input;
+   input.mu2Input     = input.mu2Input;
+   input.md2Input     = input.md2Input;
+   input.ml2Input     = input.ml2Input;
+   input.me2Input     = input.me2Input;
+   input.AuInput      = input.AuInput;
+   input.AdInput      = input.AdInput;
+   input.AeInput      = input.AeInput;
 
    return input;
 }
