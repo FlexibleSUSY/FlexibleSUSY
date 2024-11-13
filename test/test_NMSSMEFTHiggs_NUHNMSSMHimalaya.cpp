@@ -22,6 +22,7 @@
 #include <boost/test/unit_test.hpp>
 #include "lowe.h"
 #include "NMSSMEFTHiggs_shooting_spectrum_generator.hpp"
+#include "NUHNMSSMHimalaya_two_scale_spectrum_generator.hpp"
 
 using namespace flexiblesusy;
 
@@ -59,8 +60,8 @@ NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, 
    input.TanBeta = tb;
    input.LambdaInput = lambda;
    input.KappaInput = kappa;
-   input.ALambdaInput = 0;
-   input.AKappaInput = 0;
+   input.ALambdaInput = 0; // @todo(alex): make consistent with FO calculation
+   input.AKappaInput = 0; // @todo(alex): make consistent with FO calculation
    input.mq2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.mu2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.md2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
@@ -69,6 +70,42 @@ NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, 
    input.AuInput << 0, 0, 0, 0, 0, 0, 0, 0, ms*(xt + 1/tb);
    input.AdInput << 0, 0, 0, 0, 0, 0, 0, 0, 0;
    input.AeInput << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+
+   return input;
+}
+
+
+NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt, double lambda, double kappa)
+{
+   NUHNMSSMHimalaya_input_parameters input;
+   const double ms2 = ms*ms;
+   const double mu = ms;
+   const double mA2 = ms2;
+   const double vS = std::sqrt(2.0)*mu/lambda;
+   const double sb = std::sin(std::atan(tb)); // sin(beta) = vu/v
+   const double cb = std::cos(std::atan(tb)); // cos(beta) = vd/v
+   const double TLambda = std::sqrt(2.0)*mA2*sb*cb/vS - mu*kappa;
+   const double TKappa = TLambda;
+   const double Xt = xt*ms;
+
+   input.MSUSY = ms;
+   input.M1Input = ms;
+   input.M2Input = ms;
+   input.M3Input = ms;
+   input.MuInput = mu;
+   input.TanBeta = tb;
+   input.LambdaInput = lambda;
+   input.KappaInput = kappa;
+   input.ALambdaInput = TLambda/lambda;
+   input.AKappaInput = TKappa/kappa;
+   input.mq2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.mu2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.md2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.ml2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.me2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
+   input.AuInput << mu/tb, 0, 0, 0, mu/tb, 0, 0, 0, Xt + mu/tb;
+   input.AdInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
+   input.AeInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
 
    return input;
 }
