@@ -22,6 +22,7 @@
 #include <boost/test/unit_test.hpp>
 #include "lowe.h"
 #include "scan.hpp"
+#include "HSSUSY_two_scale_spectrum_generator.hpp"
 #include "NMSSMEFTHiggs_shooting_spectrum_generator.hpp"
 #include "NUHNMSSMHimalaya_two_scale_spectrum_generator.hpp"
 
