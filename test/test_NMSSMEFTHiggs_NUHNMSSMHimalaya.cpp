@@ -31,6 +31,7 @@ using namespace flexiblesusy;
 
 
 constexpr double prec = 1e-5;
+constexpr double Mt = 173.34;
 
 
 /// returns A_lambda from given m_A
@@ -50,7 +51,7 @@ softsusy::QedQcd make_qedqcd()
    softsusy::QedQcd qedqcd;
    qedqcd.setPoleMZ(91.1876);
    qedqcd.setPoleMW(80.384);
-   qedqcd.setPoleMt(173.34);
+   qedqcd.setPoleMt(Mt);
    qedqcd.setPoleMtau(1.777);
    qedqcd.setMbMb(4.18);
    qedqcd.setAlphaEmInput(1/127.944);
@@ -200,7 +201,7 @@ BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
    const double kappa = 0.001;
 
    {
-      const auto data = calc_Mh(100, tb, xt, lambda, kappa, 2);
+      const auto data = calc_Mh(Mt, tb, xt, lambda, kappa, 2);
       BOOST_CHECK_CLOSE_FRACTION(data.Mh_feft, data.Mh_fo, 5e-3);
    }
 
