@@ -19,20 +19,20 @@ datafile = 'test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.dat'
 
 set ylabel 'M_h^{1L}/GeV'
 
-plot datafile using ($1/1000):2  t 'FO'   with lines dt 4 lc rgb 'blue', \
-     datafile using ($1/1000):3  t 'EFT'  with lines dt 2 lc rgb 'web-green', \
+plot datafile using ($1/1000):2  t 'FO'   with lines dt 4 lc rgb 'web-green', \
+     datafile using ($1/1000):3  t 'EFT'  with lines dt 2 lc rgb 'blue', \
      datafile using ($1/1000):4  t 'FEFT' with lines dt 1 lc rgb 'red'
 
 set ylabel 'M_h^{2L}/GeV'
 
-plot datafile using ($1/1000):5  t 'FO'   with lines dt 4 lc rgb 'blue', \
-     datafile using ($1/1000):6  t 'EFT'  with lines dt 2 lc rgb 'web-green', \
+plot datafile using ($1/1000):5  t 'FO'   with lines dt 4 lc rgb 'web-green', \
+     datafile using ($1/1000):6  t 'EFT'  with lines dt 2 lc rgb 'blue', \
      datafile using ($1/1000):7  t 'FEFT' with lines dt 1 lc rgb 'red'
 
 set ylabel 'M_h^{3L}/GeV'
 
-plot datafile using ($1/1000):8  t 'FO'   with lines dt 4 lc rgb 'blue', \
-     datafile using ($1/1000):9  t 'EFT'  with lines dt 2 lc rgb 'web-green', \
+plot datafile using ($1/1000):8  t 'FO'   with lines dt 4 lc rgb 'web-green', \
+     datafile using ($1/1000):9  t 'EFT'  with lines dt 2 lc rgb 'blue', \
      datafile using ($1/1000):10 t 'FEFT' with lines dt 1 lc rgb 'red'
 
 set ylabel '[M_h(FEFT) - M_h(FO)]/GeV'
