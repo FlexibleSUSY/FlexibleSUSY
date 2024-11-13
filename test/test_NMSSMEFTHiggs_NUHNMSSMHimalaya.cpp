@@ -27,6 +27,9 @@
 using namespace flexiblesusy;
 
 
+constexpr double prec = 1e-5;
+
+
 /// returns A_lambda from given m_A
 const double calc_Alambda(double mA, double mu, double tb, double lambda, double kappa)
 {
@@ -38,23 +41,69 @@ const double calc_Alambda(double mA, double mu, double tb, double lambda, double
 }
 
 
-/// calculate Mh with FlexibleEFTHiggs for given input
-double calc_Mh(const NMSSMEFTHiggs_input_parameters& input)
+softsusy::QedQcd make_qedqcd()
+{
+   // Parameter point from arxiv:1708.05720, section 4.3
+   softsusy::QedQcd qedqcd;
+   qedqcd.setPoleMZ(91.1876);
+   qedqcd.setPoleMW(80.384);
+   qedqcd.setPoleMt(173.34);
+   qedqcd.setPoleMtau(1.777);
+   qedqcd.setMbMb(4.18);
+   qedqcd.setAlphaEmInput(1/127.944);
+   qedqcd.setAlphaSInput(0.1184);
+   qedqcd.setFermiConstant(1.1663787e-5);
+   qedqcd.to(qedqcd.displayPoleMZ());
+
+   return qedqcd;
+}
+
+
+Spectrum_generator_settings make_settings(int loops, double scale)
 {
    Spectrum_generator_settings settings;
-   softsusy::QedQcd qedqcd;
+   settings.set(Spectrum_generator_settings::precision, prec);
+   settings.set(Spectrum_generator_settings::max_iterations, 10000);
+   settings.set(Spectrum_generator_settings::pole_mass_loop_order, loops);
+   settings.set(Spectrum_generator_settings::ewsb_loop_order, loops);
+   settings.set(Spectrum_generator_settings::beta_loop_order, loops + 1);
+   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, loops);
+   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, loops); 
+   settings.set(Spectrum_generator_settings::force_output, true); // must force the output, because xt = sqrt(6) leads to tachyons
+   settings.set(Spectrum_generator_settings::pole_mass_scale, scale);
 
-   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 3); 
-   settings.set(Spectrum_generator_settings::pole_mass_loop_order, 3);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, 1);
    settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1);
    settings.set(Spectrum_generator_settings::higgs_3loop_correction_at_as2, 1);
 
+   return settings;
+}
+
+
+/// calculate Mh with FlexibleEFTHiggs for given input
+double calc_Mh(const NMSSMEFTHiggs_input_parameters& input)
+{
+   const auto settings = make_settings(3, 0);
+   const auto qedqcd = make_qedqcd();
+
    NMSSMEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
-   auto sm  = spectrum_generator.get_sm();
-   return sm.get_physical().Mhh;
+
+   return spectrum_generator.get_sm().get_physical().Mhh;
+}
+
+
+double calc_Mh(const NUHNMSSMHimalaya_input_parameters& input)
+{
+   const auto settings = make_settings(3, 0);
+   const auto qedqcd = make_qedqcd();
+
+   NUHNMSSMHimalaya_spectrum_generator<Two_scale> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   return spectrum_generator.get_model().get_physical().Mhh(0);
 }
 
 
@@ -123,10 +172,16 @@ NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt,
 // test low-energy limit of the FlexibleEFTHiggs calculation
 BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
 {
-   const double eps = 1e-5;
-   const double ms = 200;
+   const double ms = 100;
+   const double tb = 5;
+   const double xt = 0;
+   const double lambda = 0.001;
+   const double kappa = 0.001;
 
    // @todo(alex): scan over low values of ms and test against FO calculation
-   const double Mh_feft = calc_Mh(make_point_feft(ms, 5, 0, 0.001, 0.001));
-   BOOST_CHECK_CLOSE_FRACTION(Mh_feft, 88.485127104418012, eps);
+   const double Mh_fo = calc_Mh(make_point_fo(ms, tb, xt, lambda, kappa));
+   const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa));
+
+   // @todo(alex): increase test precision
+   BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 1e-2);
 }
