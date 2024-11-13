@@ -3,7 +3,7 @@
 # $ gnuplot test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya.gpl
 
 set terminal pdf enhanced size 10cm,13cm
-set title 'tan({/Symbol b}) = 5, {/Symbol l} = {/Symbol k} = 0.001, A_{/Symbol l} = A_{/Symbol k}, {/Symbol m} = M_S, m_A = M_S'
+set title 'tan({/Symbol b}) = 5, x_t = 0, {/Symbol l} = {/Symbol k} = 0.001, A_{/Symbol l} = A_{/Symbol k}, {/Symbol m} = M_S, m_A = M_S'
 set logscale x
 set grid
 set key box bottom right
