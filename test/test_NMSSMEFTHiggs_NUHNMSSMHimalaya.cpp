@@ -26,12 +26,13 @@
 #include "NUHNMSSMHimalaya_two_scale_spectrum_generator.hpp"
 
 #include <fstream>
+#include <limits>
 
 using namespace flexiblesusy;
 
 
-constexpr double prec = 1e-5;
 constexpr double Mt = 173.34;
+constexpr double prec = 1e-5;
 
 
 /// returns A_lambda from given m_A
@@ -111,7 +112,12 @@ double calc_Mh(const NUHNMSSMHimalaya_input_parameters& input, int loops)
 
    // BOOST_TEST_MESSAGE(spectrum_generator.get_model());
 
-   return spectrum_generator.get_model().get_physical().Mhh(0);
+   const double Mh =
+      spectrum_generator.get_model().get_problems().have_problem()
+      ? std::numeric_limits<double>::quiet_NaN()
+      : spectrum_generator.get_model().get_physical().Mhh(0);
+
+   return Mh;
 }
 
 
@@ -223,7 +229,7 @@ BOOST_AUTO_TEST_CASE( test_EFTHiggs_plot )
    const double lambda = 0.001;
    const double kappa = 0.001;
 
-   const auto ms_values = subdivide_log(91, 1e4, 20);
+   const auto ms_values = subdivide_log(Mt, 1e4, 20);
 
    for (const auto ms: ms_values) {
       const double Mh_fo_1l   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), 1);
