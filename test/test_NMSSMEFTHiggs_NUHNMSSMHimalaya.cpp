@@ -61,6 +61,11 @@ double calc_Mh(const NMSSMEFTHiggs_input_parameters& input)
 NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, double lambda, double kappa)
 {
    const double ms2 = ms*ms;
+   const double mu = ms;
+   const double mA = ms;
+   const double Alambda = calc_Alambda(mA, mu, tb, lambda, kappa);
+   const double Akappa = Alambda;
+   const double Xt = xt*ms;
 
    NMSSMEFTHiggs_input_parameters input;
    input.MSUSY = ms;
@@ -71,16 +76,16 @@ NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, 
    input.TanBeta = tb;
    input.LambdaInput = lambda;
    input.KappaInput = kappa;
-   input.ALambdaInput = 0; // @todo(alex): make consistent with FO calculation
-   input.AKappaInput = input.ALambdaInput;
+   input.ALambdaInput = Alambda;
+   input.AKappaInput = Akappa;
    input.mq2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.mu2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.md2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.ml2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.me2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
-   input.AuInput << 0, 0, 0, 0, 0, 0, 0, 0, ms*(xt + 1/tb);
-   input.AdInput << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-   input.AeInput << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+   input.AuInput << mu/tb, 0, 0, 0, mu/tb, 0, 0, 0, Xt + mu/tb;
+   input.AdInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
+   input.AeInput << mu*tb, 0, 0, 0, mu*tb, 0, 0, 0, mu*tb;
 
    return input;
 }
@@ -127,5 +132,5 @@ BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
 
    // @todo(alex): scan over low values of ms and test against FO calculation
    const double Mh_feft = calc_Mh(make_point_feft(ms, 5, 0, 0.001, 0.001));
-   BOOST_CHECK_CLOSE_FRACTION(Mh_feft, 90.126510374311536, eps);
+   BOOST_CHECK_CLOSE_FRACTION(Mh_feft, 88.485127104418012, eps);
 }
