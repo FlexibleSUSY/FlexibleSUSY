@@ -9,7 +9,6 @@ set grid
 set key box bottom right
 set xrange [0.1:10]
 set output 'MS-Mh.pdf'
-
 set multiplot layout 2,1
 set lmargin 10
 set origin 0,0.3
