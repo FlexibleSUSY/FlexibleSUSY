@@ -21,8 +21,11 @@
 
 #include <boost/test/unit_test.hpp>
 #include "lowe.h"
+#include "scan.hpp"
 #include "NMSSMEFTHiggs_shooting_spectrum_generator.hpp"
 #include "NUHNMSSMHimalaya_two_scale_spectrum_generator.hpp"
+
+#include <fstream>
 
 using namespace flexiblesusy;
 
@@ -81,27 +84,31 @@ Spectrum_generator_settings make_settings(int loops, double scale)
 
 
 /// calculate Mh with FlexibleEFTHiggs for given input
-double calc_Mh(const NMSSMEFTHiggs_input_parameters& input)
+double calc_Mh(const NMSSMEFTHiggs_input_parameters& input, int loops)
 {
-   const auto settings = make_settings(3, 0);
+   const auto settings = make_settings(loops, input.MSUSY);
    const auto qedqcd = make_qedqcd();
 
    NMSSMEFTHiggs_spectrum_generator<Shooting> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
+   // BOOST_TEST_MESSAGE(spectrum_generator.get_model());
+
    return spectrum_generator.get_sm().get_physical().Mhh;
 }
 
 
-double calc_Mh(const NUHNMSSMHimalaya_input_parameters& input)
+double calc_Mh(const NUHNMSSMHimalaya_input_parameters& input, int loops)
 {
-   const auto settings = make_settings(3, 0);
+   const auto settings = make_settings(loops, input.MSUSY);
    const auto qedqcd = make_qedqcd();
 
    NUHNMSSMHimalaya_spectrum_generator<Two_scale> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
+
+   // BOOST_TEST_MESSAGE(spectrum_generator.get_model());
 
    return spectrum_generator.get_model().get_physical().Mhh(0);
 }
@@ -172,16 +179,68 @@ NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt,
 // test low-energy limit of the FlexibleEFTHiggs calculation
 BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
 {
-   const double ms = 100;
    const double tb = 5;
    const double xt = 0;
    const double lambda = 0.001;
    const double kappa = 0.001;
 
-   // @todo(alex): scan over low values of ms and test against FO calculation
-   const double Mh_fo = calc_Mh(make_point_fo(ms, tb, xt, lambda, kappa));
-   const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa));
+   {
+      const int loops = 2;
+      const double ms = 91;
+      const double Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops);
+      const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops);
 
-   // @todo(alex): increase test precision
-   BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 1e-2);
+      BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 5e-3);
+      BOOST_TEST_MESSAGE(loops << "-loop: ms = " << ms << ", Mh_fo = " << Mh_fo << ", Mh_feft = " << Mh_feft);
+   }
+
+   {
+      const int loops = 2;
+      const double ms = 200;
+      const double Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops);
+      const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops);
+
+      BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 5e-3);
+      BOOST_TEST_MESSAGE(loops << "-loop: ms = " << ms << ", Mh_fo = " << Mh_fo << ", Mh_feft = " << Mh_feft);
+   }
+
+   {
+      const int loops = 2;
+      const double ms = 1e3;
+      const double Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops);
+      const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops);
+
+      BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 1e-2);
+      BOOST_TEST_MESSAGE(loops << "-loop: ms = " << ms << ", Mh_fo = " << Mh_fo << ", Mh_feft = " << Mh_feft);
+   }
+}
+
+
+// create data for plotting
+BOOST_AUTO_TEST_CASE( test_EFTHiggs_plot )
+{
+   std::ofstream fstr("test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya.dat");
+   fstr << "# [1] ms | [2] Mh_fo(1L) | [3] Mh_feft(1L) | [4] Mh_fo(2L) | [5] Mh_feft(2L) | [6] Mh_fo(3L) | [7] Mh_feft(3L)\n";
+
+   const double tb = 5;
+   const double xt = 0;
+   const double lambda = 0.001;
+   const double kappa = 0.001;
+
+   const auto ms_values = subdivide_log(91, 1e4, 20);
+
+   for (const auto ms: ms_values) {
+      const double Mh_fo_1l   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), 1);
+      const double Mh_feft_1l = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), 1);
+      const double Mh_fo_2l   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), 2);
+      const double Mh_feft_2l = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), 2);
+      const double Mh_fo_3l   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), 3);
+      const double Mh_feft_3l = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), 3);
+
+      fstr << ms << '\t'
+           << Mh_fo_1l << '\t' << Mh_feft_1l << '\t'
+           << Mh_fo_2l << '\t' << Mh_feft_2l << '\t'
+           << Mh_fo_3l << '\t' << Mh_feft_3l << '\t'
+           << '\n';
+   }
 }

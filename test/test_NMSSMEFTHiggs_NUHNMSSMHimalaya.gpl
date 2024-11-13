@@ -1,0 +1,20 @@
+set terminal pdf enhanced size 10cm,10cm
+set xlabel 'M_S/TeV'
+set ylabel 'M_h/GeV'
+set title 'tan({/Symbol b}) = 5, {/Symbol l} = {/Symbol k} = 0.001, A_{/Symbol l} = A_{/Symbol k}, {/Symbol m} = M_S, m_A = M_S'
+set logscale x
+set grid
+set key box bottom right
+set xrange [0.1:10]
+set output 'MS-Mh.pdf'
+
+datafile = 'test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya.dat'
+
+plot datafile using ($1/1000):2 t 'FO(1L)'   with lines dt 3 lc rgb 'black', \
+     datafile using ($1/1000):3 t 'FEFT(1L)' with lines dt 3 lc rgb 'red', \
+     datafile using ($1/1000):4 t 'FO(2L)'   with lines dt 2 lc rgb 'black', \
+     datafile using ($1/1000):5 t 'FEFT(2L)' with lines dt 2 lc rgb 'red', \
+     datafile using ($1/1000):6 t 'FO(3L)'   with lines dt 1 lc rgb 'black', \
+     datafile using ($1/1000):7 t 'FEFT(3L)' with lines dt 1 lc rgb 'red', \
+
+set output
