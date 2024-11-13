@@ -302,7 +302,7 @@ BOOST_AUTO_TEST_CASE( test_EFTHiggs_plot )
    const double lambda = 0.001;
    const double kappa = 0.001;
 
-   const auto ms_values = subdivide_log(Mt, 1e4, 20);
+   const auto ms_values = subdivide_log(Mt, 1e4, 50);
 
    for (const auto ms: ms_values) {
       const double Mh_eft_1l  = calc_Mh(make_point_eft (ms, tb, xt, lambda, kappa, 1), 1);
