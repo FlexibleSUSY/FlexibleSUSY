@@ -13,7 +13,7 @@ set xlabel 'M_S/TeV'
 set ylabel 'M_h/GeV'
 set encoding utf8
 set minussign
-set output 'MS-Mh.pdf'
+set output 'test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.pdf'
 
 datafile = 'test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.dat'
 
