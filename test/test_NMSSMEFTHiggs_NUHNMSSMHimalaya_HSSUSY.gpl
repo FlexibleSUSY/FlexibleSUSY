@@ -1,0 +1,57 @@
+# run:
+# $ test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.x
+# $ gnuplot test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.gpl
+
+set terminal pdf enhanced size 10cm,16cm
+set title 'tan({/Symbol b}) = 5, x_t = 0, {/Symbol l} = {/Symbol k} = 0.001, A_{/Symbol l} = A_{/Symbol k}, {/Symbol m} = M_S, m_A = M_S'
+set logscale x
+set grid
+set key box bottom right
+set xrange [0.1:10]
+set output 'MS-Mh.pdf'
+set multiplot layout 3,1
+set lmargin 10
+set origin 0,0.5
+set size 1,0.5
+
+datafile = 'test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.dat'
+
+set ylabel 'M_h/GeV'
+set format x ''
+
+plot datafile using ($1/1000):2  t 'FO(1L)'   with lines dt 4 lc rgb 'web-green', \
+     datafile using ($1/1000):3  t 'EFT(1L)'  with lines dt 2 lc rgb 'web-green', \
+     datafile using ($1/1000):4  t 'FEFT(1L)' with lines dt 1 lc rgb 'web-green', \
+     datafile using ($1/1000):5  t 'FO(2L)'   with lines dt 4 lc rgb 'blue', \
+     datafile using ($1/1000):6  t 'EFT(2L)'  with lines dt 2 lc rgb 'blue', \
+     datafile using ($1/1000):7  t 'FEFT(2L)' with lines dt 1 lc rgb 'blue', \
+     datafile using ($1/1000):8  t 'FO(3L)'   with lines dt 4 lc rgb 'red', \
+     datafile using ($1/1000):9  t 'EFT(3L)'  with lines dt 2 lc rgb 'red', \
+     datafile using ($1/1000):10 t 'FEFT(3L)' with lines dt 1 lc rgb 'red', \
+
+set origin 0,0.3
+set size 1,0.2
+unset title
+
+set yrange [-2:3]
+set ytics 1
+set ylabel '[M_h(FEFT) - M_h(FO)]/GeV'
+set key box center right
+
+plot datafile using ($1/1000):($4-$2)  t '1L' with lines dt 4 lc rgb 'web-green', \
+     datafile using ($1/1000):($7-$5)  t '2L' with lines dt 2 lc rgb 'blue', \
+     datafile using ($1/1000):($10-$8) t '3L' with lines dt 1 lc rgb 'red'
+
+set origin 0,0
+set size 1,0.3
+
+set yrange [-1:3]
+set xlabel 'M_S/TeV'
+set ylabel '[M_h(FEFT) - M_h(EFT)]/GeV'
+set format x
+set xtics
+set key box top right
+
+plot datafile using ($1/1000):($4-$3)  t '1L' with lines dt 4 lc rgb 'web-green', \
+     datafile using ($1/1000):($7-$6)  t '2L' with lines dt 2 lc rgb 'blue', \
+     datafile using ($1/1000):($10-$9) t '3L' with lines dt 1 lc rgb 'red'

@@ -86,6 +86,20 @@ Spectrum_generator_settings make_settings(int loops, double scale)
 }
 
 
+/// calculate Mh with pure EFT calculation for given input
+double calc_Mh(const HSSUSY_input_parameters& input, int loops)
+{
+   const auto settings = make_settings(loops, input.MSUSY);
+   const auto qedqcd = make_qedqcd();
+
+   HSSUSY_spectrum_generator<Two_scale> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   return spectrum_generator.get_model().get_physical().Mhh;
+}
+
+
 /// calculate Mh with FlexibleEFTHiggs for given input
 double calc_Mh(const NMSSMEFTHiggs_input_parameters& input, int loops)
 {
@@ -184,7 +198,47 @@ NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt,
 }
 
 
+HSSUSY_input_parameters make_point_eft(double ms, double tb, double xt, double lambda, double kappa, int loops)
+{
+   const NMSSMEFTHiggs_input_parameters input_feft = make_point_feft(ms, tb, xt, lambda, kappa);
+
+   HSSUSY_input_parameters input_eft;
+
+   input_eft.MSUSY           = input_feft.MSUSY;
+   input_eft.M1Input         = input_feft.M1Input;
+   input_eft.M2Input         = input_feft.M2Input;
+   input_eft.M3Input         = input_feft.M3Input;
+   input_eft.MuInput         = input_feft.MuInput;
+   input_eft.TanBeta         = input_feft.TanBeta;
+   input_eft.mAInput         = input_feft.MSUSY;
+   input_eft.AtInput         = input_feft.AuInput(2,2);
+   input_eft.AbInput         = input_feft.AdInput(2,2);
+   input_eft.AtauInput       = input_feft.AeInput(2,2);
+   input_eft.msq2            = input_feft.mq2Input;
+   input_eft.msu2            = input_feft.mu2Input;
+   input_eft.msd2            = input_feft.md2Input;
+   input_eft.msl2            = input_feft.ml2Input;
+   input_eft.mse2            = input_feft.me2Input;
+   input_eft.MEWSB           = Mt;
+   input_eft.LambdaLoopOrder = loops;
+   input_eft.TwoLoopAtAs     = 1;
+   input_eft.TwoLoopAbAs     = 1;
+   input_eft.TwoLoopAtAb     = 1;
+   input_eft.TwoLoopAtauAtau = 1;
+   input_eft.TwoLoopAtAt     = 1;
+   input_eft.DeltaEFT        = 0;
+   input_eft.DeltaYt         = 0;
+   input_eft.DeltaOS         = 0;
+   input_eft.Qmatch          = input_feft.MSUSY;
+   input_eft.DeltaLambda3L   = 0;
+   input_eft.ThreeLoopAtAsAs = 1;
+
+   return input_eft;
+}
+
+
 struct Data {
+   double Mh_eft{}; ///< pure EFT calculation
    double Mh_fo{}; ///< fixed-order calculation
    double Mh_feft{}; ///< FlexibleEFTHiggs calculation
 };
@@ -193,28 +247,43 @@ struct Data {
 Data calc_Mh(double ms, double tb, double xt, double lambda, double kappa, int loops)
 {
    return {
+      .Mh_eft  = calc_Mh(make_point_eft (ms, tb, xt, lambda, kappa, loops), loops),
       .Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops),
       .Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops),
    };
 }
 
 
-// test low-energy limit of the FlexibleEFTHiggs calculation
-BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
+// test limits of the FlexibleEFTHiggs calculation
+BOOST_AUTO_TEST_CASE( test_EFTHiggs_limits )
 {
    const double tb = 5;
    const double xt = 0;
    const double lambda = 0.001;
    const double kappa = 0.001;
 
+   // 2-loop, low MSUSY
    {
       const auto data = calc_Mh(Mt, tb, xt, lambda, kappa, 2);
       BOOST_CHECK_CLOSE_FRACTION(data.Mh_feft, data.Mh_fo, 5e-3);
    }
 
+   // 3-loop, low MSUSY
    {
       const auto data = calc_Mh(200, tb, xt, lambda, kappa, 3);
       BOOST_CHECK_CLOSE_FRACTION(data.Mh_feft, data.Mh_fo, 5e-3);
+   }
+
+   // 2-loop, large MSUSY
+   {
+      const auto data = calc_Mh(1e4, tb, xt, lambda, kappa, 2);
+      BOOST_CHECK_CLOSE_FRACTION(data.Mh_feft, data.Mh_eft, 1e-6);
+   }
+
+   // 3-loop, large MSUSY
+   {
+      const auto data = calc_Mh(1e4, tb, xt, lambda, kappa, 3);
+      BOOST_CHECK_CLOSE_FRACTION(data.Mh_feft, data.Mh_eft, 5e-4);
    }
 }
 
@@ -222,8 +291,11 @@ BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
 // create data for plotting
 BOOST_AUTO_TEST_CASE( test_EFTHiggs_plot )
 {
-   std::ofstream fstr("test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya.dat");
-   fstr << "# [1] ms | [2] Mh_fo(1L) | [3] Mh_feft(1L) | [4] Mh_fo(2L) | [5] Mh_feft(2L) | [6] Mh_fo(3L) | [7] Mh_feft(3L)\n";
+   std::ofstream fstr("test/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.dat");
+   fstr << "# [1] ms "
+      "| [2] Mh_fo(1L) | [3] Mh_eft(1L) | [4] Mh_feft(1L) "
+      "| [5] Mh_fo(2L) | [6] Mh_eft(2L) | [7] Mh_feft(2L) "
+      "| [8] Mh_fo(3L) | [9] Mh_eft(3L) | [10] Mh_feft(3L)\n";
 
    const double tb = 5;
    const double xt = 0;
@@ -233,17 +305,22 @@ BOOST_AUTO_TEST_CASE( test_EFTHiggs_plot )
    const auto ms_values = subdivide_log(Mt, 1e4, 20);
 
    for (const auto ms: ms_values) {
+      const double Mh_eft_1l  = calc_Mh(make_point_eft (ms, tb, xt, lambda, kappa, 1), 1);
       const double Mh_fo_1l   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), 1);
       const double Mh_feft_1l = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), 1);
+
+      const double Mh_eft_2l  = calc_Mh(make_point_eft (ms, tb, xt, lambda, kappa, 2), 2);
       const double Mh_fo_2l   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), 2);
       const double Mh_feft_2l = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), 2);
+
+      const double Mh_eft_3l  = calc_Mh(make_point_eft (ms, tb, xt, lambda, kappa, 3), 3);
       const double Mh_fo_3l   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), 3);
       const double Mh_feft_3l = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), 3);
 
       fstr << ms << '\t'
-           << Mh_fo_1l << '\t' << Mh_feft_1l << '\t'
-           << Mh_fo_2l << '\t' << Mh_feft_2l << '\t'
-           << Mh_fo_3l << '\t' << Mh_feft_3l << '\t'
+           << Mh_fo_1l << '\t' << Mh_eft_1l << '\t' << Mh_feft_1l << '\t'
+           << Mh_fo_2l << '\t' << Mh_eft_2l << '\t' << Mh_feft_2l << '\t'
+           << Mh_fo_3l << '\t' << Mh_eft_3l << '\t' << Mh_feft_3l << '\t'
            << '\n';
    }
 }
