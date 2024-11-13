@@ -176,6 +176,21 @@ NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt,
 }
 
 
+struct Data {
+   double Mh_fo{}; ///< fixed-order calculation
+   double Mh_feft{}; ///< FlexibleEFTHiggs calculation
+};
+
+
+Data calc_Mh(double ms, double tb, double xt, double lambda, double kappa, int loops)
+{
+   return {
+      .Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops),
+      .Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops),
+   };
+}
+
+
 // test low-energy limit of the FlexibleEFTHiggs calculation
 BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
 {
@@ -185,33 +200,13 @@ BOOST_AUTO_TEST_CASE( test_EFTHiggs_low_energy_limit )
    const double kappa = 0.001;
 
    {
-      const int loops = 2;
-      const double ms = 91;
-      const double Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops);
-      const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops);
-
-      BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 5e-3);
-      BOOST_TEST_MESSAGE(loops << "-loop: ms = " << ms << ", Mh_fo = " << Mh_fo << ", Mh_feft = " << Mh_feft);
+      const auto data = calc_Mh(100, tb, xt, lambda, kappa, 2);
+      BOOST_CHECK_CLOSE_FRACTION(data.Mh_feft, data.Mh_fo, 5e-3);
    }
 
    {
-      const int loops = 2;
-      const double ms = 200;
-      const double Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops);
-      const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops);
-
-      BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 5e-3);
-      BOOST_TEST_MESSAGE(loops << "-loop: ms = " << ms << ", Mh_fo = " << Mh_fo << ", Mh_feft = " << Mh_feft);
-   }
-
-   {
-      const int loops = 2;
-      const double ms = 1e3;
-      const double Mh_fo   = calc_Mh(make_point_fo  (ms, tb, xt, lambda, kappa), loops);
-      const double Mh_feft = calc_Mh(make_point_feft(ms, tb, xt, lambda, kappa), loops);
-
-      BOOST_CHECK_CLOSE_FRACTION(Mh_feft, Mh_fo, 1e-2);
-      BOOST_TEST_MESSAGE(loops << "-loop: ms = " << ms << ", Mh_fo = " << Mh_fo << ", Mh_feft = " << Mh_feft);
+      const auto data = calc_Mh(200, tb, xt, lambda, kappa, 3);
+      BOOST_CHECK_CLOSE_FRACTION(data.Mh_feft, data.Mh_fo, 5e-3);
    }
 }
 
