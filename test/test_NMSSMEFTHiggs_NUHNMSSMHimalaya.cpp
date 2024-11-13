@@ -27,6 +27,19 @@
 using namespace flexiblesusy;
 
 
+/// returns T_lambda from given m_A
+// @todo(alex): return A_lambda
+const double calc_Tlambda(double mA, double mu, double tb, double lambda, double kappa)
+{
+   const double mA2 = mA*mA;
+   const double vS = std::sqrt(2.0)*mu/lambda;
+   const double sb = std::sin(std::atan(tb)); // sin(beta) = vu/v
+   const double cb = std::cos(std::atan(tb)); // cos(beta) = vd/v
+
+   return std::sqrt(2.0)*mA2*sb*cb/vS - mu*kappa;
+}
+
+
 /// calculate Mh with FlexibleEFTHiggs for given input
 double calc_Mh(const NMSSMEFTHiggs_input_parameters& input)
 {
@@ -80,11 +93,8 @@ NUHNMSSMHimalaya_input_parameters make_point_fo(double ms, double tb, double xt,
    NUHNMSSMHimalaya_input_parameters input;
    const double ms2 = ms*ms;
    const double mu = ms;
-   const double mA2 = ms2;
-   const double vS = std::sqrt(2.0)*mu/lambda;
-   const double sb = std::sin(std::atan(tb)); // sin(beta) = vu/v
-   const double cb = std::cos(std::atan(tb)); // cos(beta) = vd/v
-   const double TLambda = std::sqrt(2.0)*mA2*sb*cb/vS - mu*kappa;
+   const double mA = ms;
+   const double TLambda = calc_Tlambda(mA, mu, tb, lambda, kappa);
    const double TKappa = TLambda;
    const double Xt = xt*ms;
 
