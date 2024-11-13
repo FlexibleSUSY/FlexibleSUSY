@@ -61,7 +61,7 @@ NMSSMEFTHiggs_input_parameters make_point_feft(double ms, double tb, double xt, 
    input.LambdaInput = lambda;
    input.KappaInput = kappa;
    input.ALambdaInput = 0; // @todo(alex): make consistent with FO calculation
-   input.AKappaInput = 0; // @todo(alex): make consistent with FO calculation
+   input.AKappaInput = input.ALambdaInput;
    input.mq2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.mu2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
    input.md2Input << ms2, 0, 0, 0, ms2, 0, 0, 0, ms2;
