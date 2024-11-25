@@ -11,7 +11,7 @@ Module[
       observables = DeleteDuplicates[observables /. f_@_Integer -> f@_];
       fieldsFFV   = Cases[observables, Rule[{q_[_], _}, _] :> q, Infinity];
       verticesFFV = Cases[observables, Rule[{_, l_[_]}, _] :> {SARAH`bar@l, l, TreeMasses`GetPhoton[]}, Infinity];
-      {additionalVertices, npfDefinitions, prototypes, definitions} = create@observables;
+      {additionalVertices, npfDefinitions, prototypes, definitions} = Create@observables;
       npfHeaders  = NPointFunctions`CreateCXXHeaders[];
    ];
 
@@ -35,14 +35,14 @@ Module[
    }
 ];
 
-create[manyObservables:{__FlexibleSUSYObservable`BrDLToDL}] := {
+Create[manyObservables:{__FlexibleSUSYObservable`BrDLToDL}] := {
    DeleteDuplicates[Join@@#[[All,1]]],
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
-}&[create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
+}&[Create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
 
-create[obs:FlexibleSUSYObservable`BrDLToDL[{qd_[_], lep_[_]} -> _, contr_, loopN_]] :=
+Create[obs:FlexibleSUSYObservable`BrDLToDL[{qd_[_], lep_[_]} -> _, contr_, loopN_]] :=
 Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
    keep, npf, fields, sp, dc, basis},
    keep = If[Head@contr === List, contr, {contr}];
