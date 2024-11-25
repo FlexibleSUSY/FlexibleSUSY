@@ -94,17 +94,17 @@ void write_btosmumu(
    // Here is the place for C7_bs = -1/2 A2R / normalization
    // Here is the place for C7p_bs = -1/2 A2L / normalization
 
-   const auto C9_bsmumu   = (coeffs[5] + coeffs[4])/2. / normalization;
-   const auto C9p_bsmumu  = (coeffs[7] + coeffs[6])/2. / normalization;
+   const auto C9_bsmumu   = (coeffs[5] + coeffs[4])/(2.*normalization);
+   const auto C9p_bsmumu  = (coeffs[7] + coeffs[6])/(2.*normalization);
 
-   const auto C10_bsmumu  = (coeffs[5] - coeffs[4])/2. / normalization;
-   const auto C10p_bsmumu = (coeffs[7] - coeffs[6])/2. / normalization;
+   const auto C10_bsmumu  = (coeffs[5] - coeffs[4])/(2.*normalization);
+   const auto C10p_bsmumu = (coeffs[7] - coeffs[6])/(2.*normalization);
 
-   const auto CS_bsmumu   = (coeffs[3] + coeffs[2])/2. / normalization / mb;
-   const auto CSp_bsmumu  = (coeffs[1] + coeffs[0])/2. / normalization / mb;
+   const auto CS_bsmumu   = (coeffs[3] + coeffs[2])/(2.*mb*normalization);
+   const auto CSp_bsmumu  = (coeffs[1] + coeffs[0])/(2.*mb*normalization);
 
-   const auto CP_bsmumu   = (coeffs[3] - coeffs[2])/2. / normalization / mb;
-   const auto CPp_bsmumu  = (coeffs[1] - coeffs[0])/2. / normalization / mb;
+   const auto CP_bsmumu   = (coeffs[3] - coeffs[2])/(2.*mb*normalization);
+   const auto CPp_bsmumu  = (coeffs[1] - coeffs[0])/(2.*mb*normalization);
 
    // TODO(all): Where are sigma-sigma operators?
 
