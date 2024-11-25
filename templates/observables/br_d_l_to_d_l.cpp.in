@@ -106,7 +106,7 @@ void write_btosmumu(
    const auto CP_bsmumu   = (coeffs[3] - coeffs[2])/(2.*mb*normalization);
    const auto CPp_bsmumu  = (coeffs[1] - coeffs[0])/(2.*mb*normalization);
 
-   // TODO(all): Where are sigma-sigma operators?
+   // @todo(all): The sigma-sigma operators are missing
 
    nlohmann::json j;
    j["eft"] = "WET";
@@ -247,7 +247,7 @@ Eigen::Array<std::complex<double>, 13, 1> forge(
    if (dIn == 2 && dOut == 1 && lInOut == 1) {
       write_btosmumu<Down>(CXY, context, qedqcd);
    } else {
-      // TODO(all): Implement :)
+      // @todo(all): Implement
       ERROR("dltodl: Unimplemented combination of external particles.");
       exit(EXIT_FAILURE);
    }
