@@ -84,7 +84,7 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
    ];
    npf = WilsonCoeffs`InterfaceToMatching[npf, basis];
    npfVertices = NPointFunctions`VerticesForNPointFunction@npf;
-   npfDefinition = NPointFunctions`CreateCXXFunctions[npf, "@class@", SARAH`Delta, basis][[2]];
+   npfDefinition = NPointFunctions`CreateCXXFunctions[npf, "@class@", SARAH`Delta, basis, True][[2]];
    prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
       " " <> Observables`GetObservablePrototype@obs;
 

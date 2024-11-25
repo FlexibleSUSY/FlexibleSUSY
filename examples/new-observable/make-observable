@@ -3,6 +3,12 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
+if [ -z "$2" ]; then
+   MODELNAME="SM"
+else
+   MODELNAME="$2"
+fi
+
 # absolute path to this script
 DIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
@@ -27,7 +33,7 @@ clean() {
       fi
    done
 
-   for FILE in ${DIR}/../../models/SM/observables/SM_${TEMPLATES}.*; do
+   for FILE in ${DIR}/../../models/${MODELNAME}/observables/${MODELNAME}_${TEMPLATES}.*; do
       if [ -f ${FILE} ]; then
          rm ${FILE}
       fi
@@ -55,11 +61,11 @@ cleanall() {
 
    sed -i "s/(\*RESTORE \(.*\)\*)/\1/g" ${DIR}/../../meta/NPointFunctions/Topologies.m
    sed -i '/(\*REMOVE\*)/d' ${DIR}/../../meta/NPointFunctions/Topologies.m
-   sed -i '/(\*REMOVE\*)/d' ${DIR}/../../models/SM/FlexibleSUSY.m
+   sed -i '/(\*REMOVE\*)/d' ${DIR}/../../models/${MODELNAME}/FlexibleSUSY.m
 }
 
 # MAIN begin
-FSMODELDIR=${DIR}/../../models/SM/FlexibleSUSY.m
+FSMODELDIR=${DIR}/../../models/${MODELNAME}/FlexibleSUSY.m
 cleanall
 case $1
 in
