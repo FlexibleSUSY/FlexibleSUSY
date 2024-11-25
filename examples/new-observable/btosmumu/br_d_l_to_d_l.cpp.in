@@ -73,9 +73,9 @@ void write_btosmumu(
    const auto complex_CKM = qedqcd.get_complex_ckm();
 
    const std::complex<double> Vtb (complex_CKM(2, 2));
-   const std::complex<double> Vbs (complex_CKM(2, 1));
+   const std::complex<double> Vts (complex_CKM(2, 1));
    const auto GF = qedqcd.displayFermiConstant();
-   const auto normalization = 4.*GF/Sqrt(2.) * Vtb*Conj(Vbs) *
+   const auto normalization = 4.*GF/Sqrt(2.) * Vtb*Conj(Vts) *
       Sqr(unit_charge(context))*oneOver16PiSqr;
 
    if (is_zero(std::abs(normalization))) {
@@ -85,8 +85,14 @@ void write_btosmumu(
 
    const auto mb = context.mass<Down>({2});
 
+   // Dear reader, be aware of vector bosons (in loops) for b -> s mu mu.
+   // Some scheme dependence might be important.
+
    // Compare to the basis in <DLDL/main.m>.
    // They put SL on the first positions, we put BL.
+
+   // Here is the place for C7_bs = -1/2 A2R / normalization
+   // Here is the place for C7p_bs = -1/2 A2L / normalization
 
    const auto C9_bsmumu   = (coeffs[5] + coeffs[4])/2. / normalization;
    const auto C9p_bsmumu  = (coeffs[7] + coeffs[6])/2. / normalization;
@@ -229,7 +235,7 @@ Eigen::Array<std::complex<double>, 13, 1> forge(
 
    context_base context {model};
 
-   const auto form_factors = photon(dIn, dOut, model, false);
+   const auto form_factors = photon(dIn, dOut, model, true);
    const auto photon_l = embed_photon<Lepton, Photon>(model, form_factors, lInOut);
    const auto npf_l = fix_tensors_sign<npf>(model, dIn, dOut, lInOut);
 
