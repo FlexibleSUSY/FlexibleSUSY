@@ -30,8 +30,8 @@
 
 #include "@ModelName@_info.hpp"
 #include "@ModelName@_physical.hpp"
-#include "@ModelName@_soft_parameters.hpp"
 #include "@ModelName@_mass_eigenstates_interface.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
 #include "problems.hpp"
 
 #include <iosfwd>
@@ -48,7 +48,6 @@ class Standard_model;
 }
 
 struct @ModelName@_input_parameters;
-class @ModelName@_mass_eigenstates;
 
 /**
  * @class @ModelName@_mass_eigenstates_decoupling_scheme
@@ -57,8 +56,8 @@ class @ModelName@_mass_eigenstates;
  * and EWSB in the Stöckinger/Kotlarski decoupling scheme
  */
 class @ModelName@_mass_eigenstates_decoupling_scheme
-   : private @ModelName@_soft_parameters
-   , public @ModelName@_mass_eigenstates_interface
+   : public @ModelName@_mass_eigenstates_interface
+   , public @ModelName@_mass_eigenstates
 {
 public:
    explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters());
@@ -119,6 +118,7 @@ public:
 @[override]massCalculationPrototypes@
 @[override]tadpoleEqPrototypes@
 @[override]dependencePrototypes@
+@[override]selfEnergyPrototypes@
 
 private:
    bool force_output{false};              ///< switch to force output of pole masses

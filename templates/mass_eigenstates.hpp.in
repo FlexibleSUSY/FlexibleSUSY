@@ -33,7 +33,6 @@
 #include "@ModelName@_info.hpp"
 #include "@ModelName@_physical.hpp"
 #include "@ModelName@_soft_parameters.hpp"
-#include "@ModelName@_mass_eigenstates_interface.hpp"
 #include "loop_corrections.hpp"
 #include "threshold_corrections.hpp"
 #include "problems.hpp"
@@ -55,7 +54,6 @@ class @ModelName@_ewsb_solver_interface;
  */
 class @ModelName@_mass_eigenstates
    : public @ModelName@_soft_parameters
-   , public @ModelName@_mass_eigenstates_interface
 {
 public:
    explicit @ModelName@_mass_eigenstates(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters());
@@ -64,8 +62,6 @@ public:
    virtual ~@ModelName@_mass_eigenstates() = default;
    @ModelName@_mass_eigenstates& operator=(const @ModelName@_mass_eigenstates&) = default;
    @ModelName@_mass_eigenstates& operator=(@ModelName@_mass_eigenstates&&) = default;
-
-   std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
 
    /// number of EWSB equations
    static constexpr int number_of_ewsb_equations = @numberOfEWSBEquations@;
@@ -110,41 +106,38 @@ public:
    void set_precision(double);
    double get_precision() const;
 
-   // mass_eigenstates_interface functions
-
-   void calculate_tree_level_mass_spectrum() override;
-   void calculate_pole_mass_spectrum() override;
-   void calculate_mass_spectrum() override;
-   int solve_ewsb_equations_tree_level() override;
-   int solve_ewsb_equations() override;
-   Eigen::ArrayXd get_tree_level_masses() const override;
-   Eigen::ArrayXd get_tree_level_masses_and_mixings() const override;
-   const @ModelName@_input_parameters& get_input_parameters() const override;
-   @ModelName@_input_parameters& get_input_parameters() override;
-   Eigen::ArrayXd get_extra_parameters() const override;
-   const @ModelName@_physical& get_physical() const override;
-   @ModelName@_physical& get_physical() override;
-   const Problems& get_problems() const override;
-   Problems& get_problems() override;
-   void set_tree_level_masses(const Eigen::ArrayXd&) override;
-   void set_tree_level_masses_and_mixings(const Eigen::ArrayXd&) override;
-   void set_extra_parameters(const Eigen::ArrayXd&) override;
-   void set_physical(const @ModelName@_physical&) override;
-   void clear_problems() override;
+   void calculate_tree_level_mass_spectrum();
+   void calculate_pole_mass_spectrum();
+   void calculate_mass_spectrum();
+   int solve_ewsb_equations_tree_level();
+   int solve_ewsb_equations();
+   Eigen::ArrayXd get_tree_level_masses() const;
+   Eigen::ArrayXd get_tree_level_masses_and_mixings() const;
+   const @ModelName@_input_parameters& get_input_parameters() const;
+   @ModelName@_input_parameters& get_input_parameters();
+   Eigen::ArrayXd get_extra_parameters() const;
+   const @ModelName@_physical& get_physical() const;
+   @ModelName@_physical& get_physical();
+   const Problems& get_problems() const;
+   Problems& get_problems();
+   void set_tree_level_masses(const Eigen::ArrayXd&);
+   void set_tree_level_masses_and_mixings(const Eigen::ArrayXd&);
+   void set_extra_parameters(const Eigen::ArrayXd&);
+   void set_physical(const @ModelName@_physical&);
+   void clear_problems();
 
 @lspGetters@
-@[override]delegateParameterGetters@
-@[override]delegateParameterSetters@
-@[override]massGetters@
-@[override]higgsMassGetterPrototypes@
-@[override]mixingMatrixGetters@
-@[override]phasesGetterSetters@
-@[override]extraParameterSetters@
-@[override]extraParameterGetters@
-@[override]massCalculationPrototypes@
-@[override]tadpoleEqPrototypes@
+@delegateParameterGetters@
+@delegateParameterSetters@
+@massGetters@
+@higgsMassGetterPrototypes@
+@mixingMatrixGetters@
+@phasesGetterSetters@
+@extraParameterSetters@
+@extraParameterGetters@
+@massCalculationPrototypes@
+@tadpoleEqPrototypes@
 @selfEnergyPrototypes@
-@selfEnergyDerivPrototypes@
 
    /// calculates the tadpoles at current loop order
    void tadpole_equations(double[number_of_ewsb_equations]) const;
@@ -161,9 +154,9 @@ public:
 @fourLoopSelfEnergyPrototypes@
 @loopMassesPrototypes@
 @runningDRbarMassesPrototypes@
-@[override]dependencePrototypes@
+@dependencePrototypes@
 
-private:
+protected:
    int ewsb_loop_order{4};           ///< loop order for EWSB
    int pole_mass_loop_order{4};      ///< loop order for pole masses
    bool calculate_sm_pole_masses{false};  ///< switch to calculate the pole masses of the Standard Model particles

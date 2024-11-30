@@ -87,11 +87,6 @@ CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
 {
 }
 
-std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
-{
-   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
-}
-
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
 {
    calculate_sm_pole_masses = flag;
@@ -724,8 +719,6 @@ void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
 @tadpoleEqFunctions@
 
 @selfEnergyFunctions@
-
-@selfEnergyDerivFunctions@
 
 @secondGenerationHelperFunctions@
 @thirdGenerationHelperFunctions@

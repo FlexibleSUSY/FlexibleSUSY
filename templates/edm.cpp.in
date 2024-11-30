@@ -37,7 +37,7 @@ namespace @ModelName@_edm {
 @calculateForwadDeclaration@
 
 template <typename Lepton>
-double calculate_edm(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double calculate_edm(const @ModelName@_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    context_base context{ model };
 

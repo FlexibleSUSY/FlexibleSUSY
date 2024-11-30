@@ -82,6 +82,7 @@ public:
 @[abstract]massCalculationPrototypes@
 @[abstract]tadpoleEqPrototypes@
 @[abstract]dependencePrototypes@
+@[abstract]selfEnergyPrototypes@
 };
 
 } // namespace flexiblesusy
