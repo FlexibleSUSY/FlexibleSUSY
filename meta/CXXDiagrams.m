@@ -98,6 +98,9 @@ NumberOfPropagatorsInTopology::usage = "";
 ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
 ExtractColourFactor::usage = "Drop colour generator from the colour factor";
 
+SelfEnergyWrapper::usage = "";
+SelfEnergyDerivativeWrapper::usage = "";
+
 Begin["`Private`"];
 
 LeftChiralVertex::usage="A left projector part of a vertex";
@@ -1701,6 +1704,34 @@ ExtractColourFactor[colourfactor1_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctI
 *)
 ExtractColourFactor[args___] :=
    (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
+
+SelfEnergyWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
+   "template<>
+std::complex<double> self_energy_1loop<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop(p);
+}\n";
+
+SelfEnergyWrapper[field_?TreeMasses`IsFermion] :=
+   StringJoin[Riffle[
+   ("template<>
+std::complex<double> self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_1(p);
+}\n")& /@ {"1", "PL", "PR"}, "\n"]
+   ];
+
+SelfEnergyDerivativeWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
+   "template<>
+std::complex<double> self_energy_1loop_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_deriv_p2(p);
+}\n";
+
+SelfEnergyDerivativeWrapper[field_?TreeMasses`IsFermion] :=
+   StringJoin[Riffle[
+   ("template<>
+std::complex<double> self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "_deriv_p2(p);
+}\n")& /@ {"1", "PL", "PR"}, "\n"]
+   ];
 
 End[];
 EndPackage[];
