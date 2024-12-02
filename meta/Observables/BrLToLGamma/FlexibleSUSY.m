@@ -72,7 +72,7 @@ createBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :=
                "int generationIndex2, \n",
                ""
             ] <>
-            "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Physical_input& physical_input);";
+            "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd, const Physical_input& physical_input);";
 
       definition =
             (* calculate observable using form factors *)
@@ -80,11 +80,11 @@ createBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :=
                IndentText[
                   If[TreeMasses`GetDimension[inFermion] =!= 1, "int generationIndex1, ", ""] <>
                   If[TreeMasses`GetDimension[outFermion] =!= 1, "int generationIndex2, ", ""] <> "\n" <>
-                  "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, const Physical_input& physical_input) {\n\n"
+                  "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model_, const softsusy::QedQcd& qedqcd, const Physical_input& physical_input) {\n\n"
                ] <>
                (* write routine for mu to e gamma *)
                IndentText[
-                  FlexibleSUSY`FSModelName<>"_mass_eigenstates model(model_);\n"<>
+                  FlexibleSUSY`FSModelName<>"_mass_eigenstates_running model(model_);\n"<>
                   "try {\n"<>
                   IndentText[
                      "run_to_MSUSY(model);\n"<>
