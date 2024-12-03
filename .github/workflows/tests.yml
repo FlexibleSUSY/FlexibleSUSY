@@ -164,6 +164,7 @@ jobs:
           cd /fs_dependencies/gcc
           wget -q -O - https://feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
           cd FormCalc-$FORMCALC_VERSION
+          mv bin/Linux-x86-64-kernel2.6 bin/Linux-x86-64
           ./compile
           echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
 
