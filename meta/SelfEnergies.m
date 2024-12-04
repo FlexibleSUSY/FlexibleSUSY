@@ -570,11 +570,11 @@ CreateSelfEnergyVirtualCall[nPointFunction_] :=
            prototype = type <> " CLASSNAME::" <> functionName <> " {\n";
            prototype = prototype <> IndentText["return this->" <> CreateFunctionName[nPointFunction, 1] <> If[Head[nPointFunction] =!= SelfEnergies`Tadpole, "(p", "("] <> CallFieldIndices[GetField[nPointFunction]] <> ");\n"] <> "}\n";
            dim = GetDimension[GetField[nPointFunction]];
-           If[dim > 1,
+           If[Head[nPointFunction] =!= SelfEnergies`Tadpole && dim > 1,
               functionName = CreateFunctionPrototypeMatrix[nPointFunction, 1];
               type = CConversion`CreateCType[CConversion`MatrixType[CConversion`complexScalarCType, dim, dim]];
               prototype = prototype <> type <> " CLASSNAME::" <> functionName <> " {\n";
-              prototype = prototype <> IndentText["return this->" <> CreateFunctionName[nPointFunction, 1] <> If[Head[nPointFunction] =!= SelfEnergies`Tadpole, "(p", "("] <> ");\n"] <> "}\n";
+              prototype = prototype <> IndentText["return this->" <> CreateFunctionName[nPointFunction, 1] <> "(p);\n"] <> "}\n";
            ];
            prototype
     ];

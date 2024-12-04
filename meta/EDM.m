@@ -32,7 +32,7 @@ EDMForwardDeclaration[field_Symbol, functionName_String] :=
 "template double " <> FlexibleSUSY`FSModelName <> "_edm::" <> functionName <> "<" <>
    CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
    ">(" <>
-   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
+   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
 
 End[];
 EndPackage[];

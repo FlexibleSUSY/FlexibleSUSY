@@ -28,6 +28,7 @@
 
 #include "@ModelName@_qft.hpp"
 #include "@ModelName@_vertices.hpp"
+#include "@ModelName@_mass_eigenstates_running.hpp"
 
 #include <Eigen/Core>
 
