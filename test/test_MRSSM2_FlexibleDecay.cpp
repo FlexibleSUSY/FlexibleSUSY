@@ -9,6 +9,7 @@
 #include "MRSSM2_two_scale_spectrum_generator.hpp"
 #include "decays/MRSSM2_decays.hpp"
 #include "MRSSM2_slha_io.hpp"
+#include "MRSSM2_mass_eigenstates_running.hpp"
 
 using namespace flexiblesusy;
 
@@ -677,7 +678,7 @@ Block IMVCKM Q= 1.00000000E+03
       BOOST_TEST(false);
    }
 
-   MRSSM2_slha m(input);
+   MRSSM2_mass_eigenstates_running m(input);
    slha_io.fill(m);
    m.calculate_DRbar_masses();
    m.reorder_DRbar_masses();
