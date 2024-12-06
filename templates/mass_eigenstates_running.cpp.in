@@ -183,11 +183,11 @@ Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
 }
 
 void CLASSNAME::calculate_tree_level_mass_spectrum() {
-   this->calculate_tree_level_mass_spectrum();
+   @ModelName@_mass_eigenstates::calculate_tree_level_mass_spectrum();
 }
 
 void CLASSNAME::calculate_pole_mass_spectrum() {
-   this->calculate_pole_mass_spectrum();
+   @ModelName@_mass_eigenstates::calculate_pole_mass_spectrum();
 }
 
 @higgsMassGetters@
