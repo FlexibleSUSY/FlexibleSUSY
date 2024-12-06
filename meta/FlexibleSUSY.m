@@ -2426,8 +2426,6 @@ WriteCXXDiagramClass[vertices_List, files_List,
                              "@CXXDiagrams_MassFunctions@"         -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
                              "@defineFieldTraits@"                 -> defineFieldTraits,
-                             "@selfEnergyWrapper@"                 -> StringJoin[Riffle[CXXDiagrams`SelfEnergyWrapper /@ Select[GetParticles[], (!IsGhost[#])&], "\n"]],
-                             "@selfEnergyDerivativeWrapper@"       -> StringJoin[Riffle[CXXDiagrams`SelfEnergyDerivativeWrapper /@ Select[GetParticles[], (!IsGhost[#])&], "\n"]],
                              "@CXXDiagrams_VertexPrototypes@"  ->
                                 StringRiffle[cxxVerticesParts[[All, 1]], "\n\n"],
                              Sequence @@ GeneralReplacementRules[]
