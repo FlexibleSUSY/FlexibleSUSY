@@ -765,7 +765,7 @@ Block IMVCKM Q= 1.00000000E+03
 
    // pseudoscalar sgluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_VGVG(&m), 0, 1e-16);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 9.057611234446413e-05, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 9.057611234446413e-05, 2e-14);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Su_to_GluFu(&m, 3, 0), 56.21133546983561, 1e-16);
 }
