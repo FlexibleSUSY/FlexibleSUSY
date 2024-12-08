@@ -679,26 +679,26 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
                selfEnergyDefs = selfEnergyDefs <> def;
                virtualCalls = virtualCalls <> CreateSelfEnergyVirtualCall[nPointFunctions[[k]]];
            ];
-           (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
-           If[ValueQ[SARAH`HiggsBoson],
-              derivatives = Cases[nPointFunctions, FSSelfEnergy[___]];
 
-              (* SARAH`sum has Attribute Constant because why not!? *)
-              ClearAttributes[SARAH`sum, Constant];
-              derivatives = (D[#, pSq]& /@ (derivatives /. p^2->pSq)) /. pSq -> p^2;
-              SetAttributes[SARAH`sum, Constant];
+           derivatives = Cases[nPointFunctions, FSSelfEnergy[___]];
 
-Map[
-		(
-                     {prototype, def} = CreateNPointFunction[#, vertexFunctionNames];
-                        selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
-                        selfEnergyDefs = selfEnergyDefs <> def;
-                        {prototype, def} = CreateNPointFunctionMatrix[#];
-                        selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
-                        selfEnergyDefs = selfEnergyDefs <> def;
-                        virtualCalls = virtualCalls <> CreateSelfEnergyVirtualCall[#];
-)& /@ derivatives];
+           (* SARAH`sum has Attribute Constant because why not!? *)
+           ClearAttributes[SARAH`sum, Constant];
+           derivatives = (D[#, pSq]& /@ (derivatives /. p^2->pSq)) /. pSq -> p^2;
+           SetAttributes[SARAH`sum, Constant];
+
+           Map[
+              ({prototype, def} = CreateNPointFunction[#, vertexFunctionNames];
+               selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
+               selfEnergyDefs = selfEnergyDefs <> def;
+               {prototype, def} = CreateNPointFunctionMatrix[#];
+               selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
+               selfEnergyDefs = selfEnergyDefs <> def;
+               virtualCalls = virtualCalls <> CreateSelfEnergyVirtualCall[#];
+              )&,
+              derivatives
            ];
+
            Utils`StopProgressBar[Length[nPointFunctions]];
            {{selfEnergyPrototypes, selfEnergyDefs}, {vertexPrototypes, vertexDefs}, virtualCalls}
           ];
