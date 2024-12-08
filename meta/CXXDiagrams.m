@@ -1706,30 +1706,30 @@ ExtractColourFactor[args___] :=
    (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 
 SelfEnergyWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
-   "template<>
-std::complex<double> self_energy_1loop<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop(p);
+   "template<> inline
+std::complex<double> self_energy_1loop<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ", " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <> ">(const context_base& context, double p, const std::array<unsigned int, " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <>">& idx) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop(p" <> If[TreeMasses`GetDimension[field] > 1, ", idx.at(0), idx.at(1)", ""] <> ");
 }\n";
 
 SelfEnergyWrapper[field_?TreeMasses`IsFermion] :=
    StringJoin[Riffle[
-   ("template<>
-std::complex<double> self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_1(p);
+   ("template<> inline
+std::complex<double> self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ", " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <> ">(const context_base& context, double p, const std::array<unsigned int, " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <>">& idx) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_1(p" <> If[TreeMasses`GetDimension[field] > 1, ", idx.at(0), idx.at(1)", ""] <> ");
 }\n")& /@ {"1", "PL", "PR"}, "\n"]
    ];
 
 SelfEnergyDerivativeWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
-   "template<>
-std::complex<double> self_energy_1loop_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_deriv_p2(p);
+   "template<> inline
+std::complex<double> self_energy_1loop_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ", " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <> ">(const context_base& context, double p, const std::array<unsigned int, " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <>">& idx) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_deriv_p2(p" <> If[TreeMasses`GetDimension[field] > 1, ", idx.at(0), idx.at(1)", ""] <> ");
 }\n";
 
 SelfEnergyDerivativeWrapper[field_?TreeMasses`IsFermion] :=
    StringJoin[Riffle[
-   ("template<>
-std::complex<double> self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "_deriv_p2(p);
+   ("template<> inline
+std::complex<double> self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ", " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <> ">(const context_base& context, double p, const std::array<unsigned int, " <> If[TreeMasses`GetDimension[field] > 1, "2", "0"] <>">& idx) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "_deriv_p2(p" <> If[TreeMasses`GetDimension[field] > 1, ", idx.at(0), idx.at(1)", ""] <> ");
 }\n")& /@ {"1", "PL", "PR"}, "\n"]
    ];
 
