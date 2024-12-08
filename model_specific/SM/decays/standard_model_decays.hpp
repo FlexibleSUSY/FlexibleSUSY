@@ -85,7 +85,9 @@ public:
       , qedqcd(qedqcd_)
       , physical_input(physical_input_)
       , flexibledecay_settings(flexibledecay_settings_)
-      {}
+      {
+         sm.initialise_from_input(qedqcd);
+      }
    Standard_model_decays(const Standard_model_decays&) = default;
    Standard_model_decays(Standard_model_decays&&) = default;
    ~Standard_model_decays() = default;
@@ -124,6 +126,7 @@ double partial_width_hh_to_barFeFe(standard_model::Standard_model const&, int, i
 
 private:
    standard_model::Standard_model model{};
+   standard_model::Standard_model sm {};
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};

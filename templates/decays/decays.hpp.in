@@ -39,6 +39,7 @@
 #include "physical_input.hpp"
 #include "decays/flexibledecay_settings.hpp"
 #include "decays/decay_amplitudes.hpp"
+#include "standard_model.hpp"
 
 namespace flexiblesusy {
 
@@ -61,7 +62,9 @@ public:
       , qedqcd(qedqcd_)
       , physical_input(physical_input_)
       , flexibledecay_settings(flexibledecay_settings_)
-      {}
+      {
+         sm.initialise_from_input(qedqcd);
+      }
    @ModelName@_decays(const @ModelName@_decays&) = default;
    @ModelName@_decays(@ModelName@_decays&&) = default;
    ~@ModelName@_decays() = default;
@@ -92,6 +95,7 @@ public:
 
 private:
    @ModelName@_mass_eigenstates model{};
+   standard_model::Standard_model sm {};
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};

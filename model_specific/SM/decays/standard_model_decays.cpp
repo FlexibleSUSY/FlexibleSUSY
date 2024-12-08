@@ -50,6 +50,7 @@
 #include "cxx_qft/standard_model_particle_aliases.hpp"
 #include "cxx_qft/standard_model_vertices.hpp"
 #include "error.hpp"
+#include "cxx_qft/standard_model_qft.hpp"
 
 namespace flexiblesusy {
 

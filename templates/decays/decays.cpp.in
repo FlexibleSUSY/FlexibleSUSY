@@ -50,6 +50,7 @@
 #include "wrappers.hpp"
 #include "standard_model.hpp"
 #include <gsl/gsl_monte_miser.h>
+#include "cxx_qft/standard_model_context_base.hpp"
 
 namespace flexiblesusy {
 
