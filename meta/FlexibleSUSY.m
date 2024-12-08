@@ -1731,8 +1731,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             physicalMassesDef = "", mixingMatricesDef = "",
             massCalculationPrototypes = "", massCalculationFunctions = "",
             calculateAllMasses = "",
-            selfEnergyPrototypes = "", selfEnergyFunctions = "", 
-            selfEnergyDerivPrototypes = "",   selfEnergyDerivFunctions = "",
+            selfEnergyPrototypes = "", selfEnergyFunctions = "", vertexPrototypes = "", vertexFunctions = "", selfEnergyVirtualCalls = "",
             twoLoopTadpolePrototypes = "", twoLoopTadpoleFunctions = "",
             twoLoopSelfEnergyPrototypes = "", twoLoopSelfEnergyFunctions = "",
             threeLoopSelfEnergyPrototypes = "", threeLoopSelfEnergyFunctions = "",
@@ -1858,7 +1857,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {secondGenerationHelperPrototypes, secondGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[2];
               {thirdGenerationHelperPrototypes, thirdGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[3];
              ];
-           {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];
+           {{selfEnergyPrototypes, selfEnergyFunctions}, {vertexPrototypes, vertexFunctions}, selfEnergyVirtualCalls} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];
            phasesDefinition             = Phases`CreatePhasesDefinition[phases];
            phasesGetterSetters          = Phases`CreatePhasesGetterSetters[phases];
            If[Parameters`GetExtraParameters[] =!= {},
@@ -1959,8 +1958,12 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                           { "@lspGetters@"           -> IndentText[lspGetters],
                             "@lspFunctions@"         -> lspFunctions,
                             "@[abstract]parameterGetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterGetter /@ Parameters`GetModelParameters[]]]],
+                            "@[override]parameterGetters@" -> IndentText[FunctionModifiers`MakeOverride[StringJoin[Parameters`CreateModelParameterGetter[#, True]& /@ Parameters`GetModelParameters[]]]],
                             "@[abstract]parameterSetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterSetter /@ Parameters`GetModelParameters[]]]],
+                            "@[override]parameterSetters@" -> IndentText[FunctionModifiers`MakeOverride[StringJoin[Parameters`CreateModelParameterSetter /@ Parameters`GetModelParameters[]]]],
+                            "@delegateParameterGetters@" -> IndentText[StringJoin[Parameters`CreateDelegateModelParameterGetter /@ Parameters`GetModelParameters[]]],
                             "@[override]delegateParameterGetters@" -> IndentText[FunctionModifiers`MakeOverride[StringJoin[Parameters`CreateDelegateModelParameterGetter /@ Parameters`GetModelParameters[]]]],
+                            "@delegateParameterSetters@" -> IndentText[StringJoin[Parameters`CreateModelParameterSetter /@ Parameters`GetModelParameters[]]],
                             "@[override]delegateParameterSetters@" -> IndentText[FunctionModifiers`MakeOverride[StringJoin[Parameters`CreateModelParameterSetter /@ Parameters`GetModelParameters[]]]],
                             "@massGetters@"          -> IndentText[massGetters],
                             "@[abstract]massGetters@" -> IndentText[FunctionModifiers`MakeAbstract[massGetters]],
@@ -2031,14 +2034,12 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@[override]massCalculationPrototypes@" -> IndentText[FunctionModifiers`MakeOverride[massCalculationPrototypes]],
                             "@massCalculationFunctions@"  -> WrapLines[massCalculationFunctions],
                             "@calculateAllMasses@"        -> IndentText[calculateAllMasses],
-                            "@selfEnergyPrototypes@"      -> IndentText[selfEnergyPrototypes],
+                            "@selfEnergyPrototypes@"      -> IndentText[selfEnergyPrototypes <> vertexPrototypes],
                             "@[abstract]selfEnergyPrototypes@" -> IndentText[FunctionModifiers`MakeAbstract[selfEnergyPrototypes]],
                             "@[override]selfEnergyPrototypes@" -> IndentText[FunctionModifiers`MakeOverride[selfEnergyPrototypes]],
-                            "@selfEnergyFunctions@"       -> selfEnergyFunctions,
-                            "@selfEnergyDerivPrototypes@" -> selfEnergyDerivPrototypes,
-                            "@[abstract]selfEnergyDerivPrototypes@" -> IndentText[FunctionModifiers`MakeAbstract[selfEnergyDerivPrototypes]],
-                            "@[override]selfEnergyDerivPrototypes@" -> IndentText[FunctionModifiers`MakeOverride[selfEnergyDerivPrototypes]],
-                            "@selfEnergyDerivFunctions@"  -> selfEnergyDerivFunctions,
+                            "@selfEnergyVirtualCalls@" -> selfEnergyVirtualCalls,
+                            "@selfEnergyFunctions@"       -> selfEnergyFunctions <> vertexFunctions,
+                            "@[override]selfEnergyFunctions@" -> IndentText[FunctionModifiers`MakeOverride[selfEnergyFunctions]],
                             "@twoLoopTadpolePrototypes@"  -> IndentText[twoLoopTadpolePrototypes],
                             "@twoLoopTadpoleFunctions@"   -> twoLoopTadpoleFunctions,
                             "@twoLoopSelfEnergyPrototypes@" -> IndentText[twoLoopSelfEnergyPrototypes],
@@ -2619,15 +2620,15 @@ TextFormatting`IndentText[
 ]
          ];
 
-      ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
-      ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      ammWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
+      ammUncWrapperDecl = StringRiffle[("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ");")& /@ fields, "\n"];
       ammWrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
    return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd, settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
       ammUncWrapperDef = StringRiffle[
-("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
+("double calculate_" <> CXXDiagrams`CXXNameOfField[#] <> "_amm_uncertainty(const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""] <> ") {
    return " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<fields::" <> CXXDiagrams`CXXNameOfField[#] <> ">(model, qedqcd, settings" <> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""] <> ");
 }")& /@ fields, "\n"
       ];
@@ -4767,7 +4768,11 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "physical.hpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_physical.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "physical.cpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_physical.cpp"}]}
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_physical.cpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_running.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates_running.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_running.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates_running.cpp"}]}
                            },
                            diagonalizationPrecision];
 

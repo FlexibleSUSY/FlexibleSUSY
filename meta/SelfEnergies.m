@@ -28,8 +28,8 @@ FSSelfEnergy::usage="self-energy head";
 
 FSSelfEnergyDerivative::usage="head for derivative of self-energy w.r.t. p^2";
 
-(* symbols for derivative of B0 and G0 loop functions w.r.t. p^2 *)
-{ DB0, DG0 }
+(* symbols for derivative of loop functions w.r.t. p^2 *)
+{ DB0, DB1, DB00, DF0, DG0, DH0 };
 
 FSHeavySelfEnergy::usage="head for self-energy w/o BSM particles";
 FSHeavyRotatedSelfEnergy::usage="head for self-energy w/o BSM particles in mass eigenstate basis";
@@ -97,6 +97,27 @@ CreateCouplingSymbol::usage = "";
 ReplaceGhosts::usage="";
 
 Begin["`Private`"];
+
+SetSystemOptions[
+   "DifferentiationOptions" ->
+      "ExcludedFunctions"-> DeleteDuplicates[
+         Append[
+            OptionValue[SystemOptions[], "DifferentiationOptions"->"ExcludedFunctions"],
+            SARAH`sum
+         ]
+   ]
+];
+
+SARAH`sum /: D[SARAH`sum[idx_, i_, j_, expr_], p2_] := SARAH`sum[idx, i, j, D[expr, p2]];
+
+D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
+
+Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
+Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
+Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
+Derivative[1, 0, 0][B1][p2_, m12_, m22_] := DB1[p2, m12, m22];
+Derivative[1, 0, 0][B00][p2_, m12_, m22_] := DB00[p2, m12, m22];
+Derivative[1, 0, 0][H0][p2_, m12_, m22_] := DH0[p2, m12, m22];
 
 GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
     selfEnergy[[2]];
@@ -457,6 +478,18 @@ DeclareFieldIndices[field_[1]]  := DeclareFieldIndices[field];
 DeclareFieldIndices[field_[ind_]] :=
     "int " <> ToValidCSymbolString[ind];
 
+CallFieldIndices[field_Symbol] := "";
+
+CallFieldIndices[field_[ind1_, ind2_]] :=
+    ", " <> ToValidCSymbolString[ind1] <>
+    ", " <> ToValidCSymbolString[ind2];
+
+CallFieldIndices[field_[PL]] := CallFieldIndices[field];
+CallFieldIndices[field_[PR]] := CallFieldIndices[field];
+CallFieldIndices[field_[1]]  := CallFieldIndices[field];
+CallFieldIndices[field_[ind_]] :=
+    " " <> ToValidCSymbolString[ind];
+
 ExtractChiraility[field_[idx1_,idx2_]] := ExtractChiraility[field];
 ExtractChiraility[field_[PL]]          := "_PL";
 ExtractChiraility[field_[PR]]          := "_PR";
@@ -530,6 +563,22 @@ DecreaseLiteralCouplingIndices[expr_, num_:1] :=
            }
           ];
 
+CreateSelfEnergyVirtualCall[nPointFunction_] :=
+    Module[{dim, type, functionName, prototype},
+           type = CConversion`CreateCType[CConversion`ScalarType[CConversion`complexScalarCType]];
+           functionName = CreateFunctionPrototype[nPointFunction, 1];
+           prototype = type <> " CLASSNAME::" <> functionName <> " {\n";
+           prototype = prototype <> IndentText["return this->" <> CreateFunctionName[nPointFunction, 1] <> If[Head[nPointFunction] =!= SelfEnergies`Tadpole, "(p", "("] <> CallFieldIndices[GetField[nPointFunction]] <> ");\n"] <> "}\n";
+           dim = GetDimension[GetField[nPointFunction]];
+           If[Head[nPointFunction] =!= SelfEnergies`Tadpole && dim > 1,
+              functionName = CreateFunctionPrototypeMatrix[nPointFunction, 1];
+              type = CConversion`CreateCType[CConversion`MatrixType[CConversion`complexScalarCType, dim, dim]];
+              prototype = prototype <> type <> " CLASSNAME::" <> functionName <> " {\n";
+              prototype = prototype <> IndentText["return this->" <> CreateFunctionName[nPointFunction, 1] <> "(p);\n"] <> "}\n";
+           ];
+           prototype
+    ];
+
 CreateNPointFunction[nPointFunction_, vertexRules_List] :=
     Module[{decl, expr, prototype, body, functionName},
            expr = GetExpression[nPointFunction];
@@ -558,9 +607,11 @@ FillHermitianSelfEnergyMatrix[nPointFunction_, sym_String] :=
            dim = GetDimension[field];
            name = CreateFunctionName[nPointFunction, 1];
            "\
-for (int i = 0; i < " <> ToString[dim] <> "; i++)
-   for (int k = i; k < " <> ToString[dim] <> "; k++)
+for (int i = 0; i < " <> ToString[dim] <> "; i++) {
+   for (int k = i; k < " <> ToString[dim] <> "; k++) {
       " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+   }
+}
 
 Hermitianize(" <> sym <> ");
 "
@@ -571,9 +622,11 @@ FillGeneralSelfEnergyFunction[nPointFunction_, sym_String] :=
            dim = GetDimension[field];
            name = CreateFunctionName[nPointFunction, 1];
            "\
-for (int i = 0; i < " <> ToString[dim] <> "; i++)
-   for (int k = 0; k < " <> ToString[dim] <> "; k++)
+for (int i = 0; i < " <> ToString[dim] <> "; i++) {
+   for (int k = 0; k < " <> ToString[dim] <> "; k++) {
       " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+   }
+}
 "
           ];
 
@@ -606,46 +659,48 @@ CreateNPointFunctionMatrix[nPointFunction_] :=
           ];
 
 CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
-    Module[{prototypes = "", defs = "", vertexFunctionNames = {}, p, d,
-            relevantVertexRules, derivatives},
+    Module[{selfEnergyPrototypes = "", selfEnergyDefs = "", vertexPrototypes = "", vertexDefs = "",virtualCalls = "", vertexFunctionNames = {}, prototype, def,
+            relevantVertexRules, derivatives, pSq},
            (* create coupling functions for all vertices in the list *)
            Print["Converting vertex functions ..."];
            (* extract vertex rules needed for the given nPointFunctions *)
            relevantVertexRules = Cases[vertexRules, r:(Rule[a_,b_] /; !FreeQ[nPointFunctions,a]) :> r];
-           {prototypes, defs, vertexFunctionNames} = CreateVertexExpressions[relevantVertexRules];
+           {vertexPrototypes, vertexDefs, vertexFunctionNames} = CreateVertexExpressions[relevantVertexRules];
            (* creating n-point functions *)
            Print["Converting self energies ..."];
            Utils`StartProgressBar[Dynamic[k], Length[nPointFunctions]];
            For[k = 1, k <= Length[nPointFunctions], k++,
                Utils`UpdateProgressBar[k, Length[nPointFunctions]];
-               {p,d} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames];
-               prototypes = prototypes <> p;
-               defs = defs <> d;
-               {p,d} = CreateNPointFunctionMatrix[nPointFunctions[[k]]];
-               prototypes = prototypes <> p;
-               defs = defs <> d;
+               {prototype,def} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames];
+               selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
+               selfEnergyDefs = selfEnergyDefs <> def;
+               {prototype,def} = CreateNPointFunctionMatrix[nPointFunctions[[k]]];
+               selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
+               selfEnergyDefs = selfEnergyDefs <> def;
+               virtualCalls = virtualCalls <> CreateSelfEnergyVirtualCall[nPointFunctions[[k]]];
            ];
-           (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
-           If[ValueQ[SARAH`HiggsBoson],
-              derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]] /. {
-                  FSSelfEnergy -> SelfEnergies`FSSelfEnergyDerivative,
-                  A0[__] -> 0,
-                  B0 -> SelfEnergies`DB0,
-                  G0 -> SelfEnergies`DG0
-              };
-              Switch[Length[derivatives],
-                     0, Print["Error: no Higgs boson self-energy found."],
-                     1, {p,d} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
-                        prototypes = prototypes <> p;
-                        defs = defs <> d;
-                        {p,d} = CreateNPointFunctionMatrix[First[derivatives]];
-                        prototypes = prototypes <> p;
-                        defs = defs <> d;,
-                     _, Print["Error: multiple Higgs boson self-energies found."]
-              ];
+
+           derivatives = Cases[nPointFunctions, FSSelfEnergy[___]];
+
+           (* SARAH`sum has Attribute Constant because why not!? *)
+           ClearAttributes[SARAH`sum, Constant];
+           derivatives = (D[#, pSq]& /@ (derivatives /. p^2->pSq)) /. pSq -> p^2;
+           SetAttributes[SARAH`sum, Constant];
+
+           Map[
+              ({prototype, def} = CreateNPointFunction[#, vertexFunctionNames];
+               selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
+               selfEnergyDefs = selfEnergyDefs <> def;
+               {prototype, def} = CreateNPointFunctionMatrix[#];
+               selfEnergyPrototypes = selfEnergyPrototypes <> prototype;
+               selfEnergyDefs = selfEnergyDefs <> def;
+               virtualCalls = virtualCalls <> CreateSelfEnergyVirtualCall[#];
+              )&,
+              derivatives
            ];
+
            Utils`StopProgressBar[Length[nPointFunctions]];
-           {prototypes, defs}
+           {{selfEnergyPrototypes, selfEnergyDefs}, {vertexPrototypes, vertexDefs}, virtualCalls}
           ];
 
 FillArrayWithLoopTadpoles[loopLevel_, higgsAndIdx_List, arrayName_String, sign_String:"-", struct_String:""] :=

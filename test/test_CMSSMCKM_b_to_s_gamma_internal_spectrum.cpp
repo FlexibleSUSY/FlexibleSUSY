@@ -31,6 +31,7 @@
 #include "wrappers.hpp"
 #include "CMSSMCKM_b_to_s_gamma.hpp"
 #include "CMSSMCKM_slha_io.hpp"
+#include "CMSSMCKM_mass_eigenstates_running.hpp"
 
 using namespace flexiblesusy;
 

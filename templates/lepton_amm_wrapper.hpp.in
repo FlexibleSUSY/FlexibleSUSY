@@ -32,7 +32,7 @@ namespace softsusy {
 
 namespace flexiblesusy {
 class Spectrum_generator_settings;
-class @ModelName@_mass_eigenstates;
+class @ModelName@_mass_eigenstates_running;
 
 namespace @ModelName@_lepton_amm_wrapper {
 /**

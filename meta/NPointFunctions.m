@@ -406,7 +406,8 @@ CreateCXXFunctions[
    npf_?IsNPointFunction,
    functionName_String,
    colorProjector_?IsColorProjector,
-   wilsonBasis:_?IsWilsonBasis:{"value"->"dummy string"}] :=
+   wilsonBasis:_?IsWilsonBasis:{"value"->"dummy string"},
+   skipSM:True|False:False] :=
 Module[{GetFunctionPrototype, prototype, definition},
    GetFunctionPrototype = StringReplace[
       "std::array<std::complex<double>, L> name(arg)",
@@ -415,6 +416,7 @@ Module[{GetFunctionPrototype, prototype, definition},
    SetHelperClassName@npf;
    SetBasis@wilsonBasis;
    SetColorProjector@colorProjector;
+   SetSkipSM@skipSM;
    prototype = GetFunctionPrototype@GetCXXArguments[npf, Default]<>";";
    definition = TextFormatting`ReplaceCXXTokens["
       @class_body@
@@ -445,7 +447,7 @@ TextFormatting`ReplaceCXXTokens["
    const std::array<Eigen::Vector4d, @momenta_length@> &momenta
    @default@",
    {
-      "@eigenstates@" -> FlexibleSUSY`FSModelName<>"_mass_eigenstates",
+      "@eigenstates@" -> FlexibleSUSY`FSModelName<>"_mass_eigenstates_running",
       "@indices_length@" -> ToString@Length@GetExternalIndices@npf,
       "@momenta_length@" -> ToString@Length@GetExternalMomenta@npf,
       "@default@" -> If[control === Default,
@@ -455,7 +457,7 @@ TextFormatting`ReplaceCXXTokens["
 ];
 GetCXXArguments // secure;
 
-Module[{helperClassName, basis, projector},
+Module[{helperClassName, basis, projector, skipSM},
 SetHelperClassName[obj_?IsNPointFunction] :=
 Module[{fieldNames = Vertices`StripFieldIndices/@Join@@GetProcess[obj]},
    helperClassName = "nPoint" <>
@@ -472,6 +474,10 @@ GetBasis[] := basis;
 SetColorProjector[colorProjector_?IsColorProjector] := (projector = colorProjector);
 SetColorProjector // secure;
 GetColorProjector[] := projector;
+
+SetSkipSM[b:True|False] := (skipSM = b);
+SetSkipSM // secure;
+GetSkipSM[] := skipSM;
 ];
 
 CreateClassBody[npf_?IsNPointFunction] :=
@@ -772,6 +778,8 @@ Module[{modifiedExpr = expr,
       // Start of summation over generic fields.
       @BeginSum@
 
+         @skipSMContributions@
+
          @setMasses@
          @setCouplings@
          @skipZeroAmplitude@
@@ -787,6 +795,7 @@ Module[{modifiedExpr = expr,
          "@defineCouplings@" -> couplingDefine,
          "@defineLoopFunctions@" -> loopArrayDefine,
          "@BeginSum@" -> CXXGenericSumBegin@summation,
+         "@skipSMContributions@" -> CXXSkipSM@summation,
          "@setMasses@" -> codeMass,
          "@setCouplings@" -> codeCoupling,
          "@skipZeroAmplitude@" -> CXXSkipZeroAmplitude[modifiedExpr, loopRules, massRules],
@@ -947,7 +956,7 @@ Utils`StringJoinWithSeparator[
 ];
 CXXGenericAbbreviations // secure;
 
-CXXGenericSumBegin[summation_?IsSummation]:=
+CXXGenericSumBegin[summation_?IsSummation] :=
 Module[{beginsOfFor},
    beginsOfFor = "for( const auto &"<>CXXIndex[#[[1]]]<>" : "<>
       "index_range<"<> CXXFullFieldName[#[[1]]]<>">() ) {\n"<>
@@ -956,6 +965,21 @@ Module[{beginsOfFor},
    Utils`StringJoinWithSeparator[beginsOfFor, "\n"]
 ];
 CXXGenericSumBegin // secure;
+
+CXXSkipSM[summation_?IsSummation] :=
+Module[{fields, indices, conditions},
+   If[GetSkipSM[] === False, Return@""];
+   fields = (CXXFullFieldName@First@#) &/@ summation;
+   indices = (CXXIndex@First@#) &/@ summation;
+   conditions = MapThread["cxx_diagrams::isSMField<"<>#1<>">("<>#2<>")"&,
+      {fields, indices}
+   ];
+   "if (" <>
+   Utils`StringJoinWithSeparator[conditions, " &&\n   "] <>
+   ") continue;"
+];
+CXXSkipSM // secure;
+
 
 parseRestrictionRule[{genericField_?IsGenericParticle,rule_}] :=
 Module[{f1,f2,GetIndexOfExternalField,OrTwoDifferent},
