@@ -83,44 +83,44 @@ auto self_energy_1loop(const @ModelName@_cxx_diagrams::context_base& context, do
 }
 
 template<typename Field>
-auto self_energy_1loop_1(const @ModelName@_cxx_diagrams::context_base& context, double p) {
+auto self_energy_1loop_1(const context_base& context, double p) {
    static_assert(always_false<Field>);
    return 0.;
 }
 
 template<typename Field>
-auto self_energy_1loop_PL(const @ModelName@_cxx_diagrams::context_base& context, double p) {
+auto self_energy_1loop_PL(const context_base& context, double p) {
    static_assert(always_false<Field>);
    return 0.;
 }
 
 template<typename Field>
-auto self_energy_1loop_PR(const @ModelName@_cxx_diagrams::context_base& context, double p) {
+auto self_energy_1loop_PR(const context_base& context, double p) {
    static_assert(always_false<Field>);
    return 0.;
 }
 
 // self-energy derivatives w.r.t. p2
 template<typename Field>
-auto self_energy_1loop_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p) {
+auto self_energy_1loop_deriv_p2(const context_base& context, double p) {
    static_assert(always_false<Field>);
    return 0.;
 }
 
 template<typename Field>
-auto self_energy_1loop_1_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p) {
+auto self_energy_1loop_1_deriv_p2(const context_base& context, double p) {
    static_assert(always_false<Field>);
    return 0.;
 }
 
 template<typename Field>
-auto self_energy_1loop_PL_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p) {
+auto self_energy_1loop_PL_deriv_p2(const context_base& context, double p) {
    static_assert(always_false<Field>);
    return 0.;
 }
 
 template<typename Field>
-auto self_energy_1loop_PR_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p) {
+auto self_energy_1loop_PR_deriv_p2(const context_base& context, double p) {
    static_assert(always_false<Field>);
    return 0.;
 }
