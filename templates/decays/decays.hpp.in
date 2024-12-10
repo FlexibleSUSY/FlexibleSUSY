@@ -61,10 +61,7 @@ public:
       : model(model_)
       , qedqcd(qedqcd_)
       , physical_input(physical_input_)
-      , flexibledecay_settings(flexibledecay_settings_)
-      {
-         sm.initialise_from_input(qedqcd);
-      }
+      , flexibledecay_settings(flexibledecay_settings_) {}
    @ModelName@_decays(const @ModelName@_decays&) = default;
    @ModelName@_decays(@ModelName@_decays&&) = default;
    ~@ModelName@_decays() = default;
