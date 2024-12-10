@@ -568,13 +568,13 @@ CreateSelfEnergyVirtualCall[nPointFunction_] :=
            type = CConversion`CreateCType[CConversion`ScalarType[CConversion`complexScalarCType]];
            functionName = CreateFunctionPrototype[nPointFunction, 1];
            prototype = type <> " CLASSNAME::" <> functionName <> " {\n";
-           prototype = prototype <> IndentText["return this->" <> CreateFunctionName[nPointFunction, 1] <> If[Head[nPointFunction] =!= SelfEnergies`Tadpole, "(p", "("] <> CallFieldIndices[GetField[nPointFunction]] <> ");\n"] <> "}\n";
+           prototype = prototype <> IndentText["return " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates::" <> CreateFunctionName[nPointFunction, 1] <> If[Head[nPointFunction] =!= SelfEnergies`Tadpole, "(p", "("] <> CallFieldIndices[GetField[nPointFunction]] <> ");\n"] <> "}\n";
            dim = GetDimension[GetField[nPointFunction]];
            If[Head[nPointFunction] =!= SelfEnergies`Tadpole && dim > 1,
               functionName = CreateFunctionPrototypeMatrix[nPointFunction, 1];
               type = CConversion`CreateCType[CConversion`MatrixType[CConversion`complexScalarCType, dim, dim]];
               prototype = prototype <> type <> " CLASSNAME::" <> functionName <> " {\n";
-              prototype = prototype <> IndentText["return this->" <> CreateFunctionName[nPointFunction, 1] <> "(p);\n"] <> "}\n";
+              prototype = prototype <> IndentText["return " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates::" <> CreateFunctionName[nPointFunction, 1] <> "(p);\n"] <> "}\n";
            ];
            prototype
     ];
