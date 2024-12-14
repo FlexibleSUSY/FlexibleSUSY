@@ -374,7 +374,10 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
          externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]],
          diagrams
       },
-      If[IsOneLoopDecayTopology[graph],
+      If[IsPossibleNonZeroVertex[Prepend[finalFields, initialField]] && IsOneLoopDecayTopology[graph] && !(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialField] && (Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
+                 Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}])),
+         (* disrad A and B bubles on external legs for 1l corrections to tree-level decays
+            @todo: this has to be fixed, not all such diagrams should be discarded *)
          If[MemberQ[{"T2", "T3", "T5", "T8", "T9", "T10"}, FeynArtsTopologyName[graph]], Return[{}]]
       ];
       (* vertices in diagrams are not SortCp'ed *)

@@ -63,8 +63,8 @@ Block MINPAR                 # Input parameters
     1   0.192                # Lambda(MZ)
 Block SCALARLEPTOQUARKSIN
      1     2.25e6           # MS12Input
-     2     0.0               # gHS1Input
-     3     0.0               # lamS1Input
+     2     1.0               # gHS1Input
+     3     1.0               # lamS1Input
 Block LAMLIN
   1  1     0.0               # lamQLInput(1,1)
   1  2     0.0               # lamQLInput(1,2)
@@ -73,7 +73,7 @@ Block LAMLIN
   2  2     0.0               # lamQLInput(2,2)
   2  3     0.0               # lamQLInput(2,3)
   3  1     0.0               # lamQLInput(3,1)
-  3  2     0.0               # lamQLInput(3,2)
+  3  2     1.0               # lamQLInput(3,2)
   3  3     0.0               # lamQLInput(3,3)
 Block LAMRIN
   1  1     0.0               # lamqlInput(1,1)
@@ -83,7 +83,7 @@ Block LAMRIN
   2  2     0.0               # lamqlInput(2,2)
   2  3     0.0               # lamqlInput(2,3)
   3  1     0.0               # lamqlInput(3,1)
-  3  2     0.0               # lamqlInput(3,2)
+  3  2     1.0               # lamqlInput(3,2)
   3  3     0.0               # lamqlInput(3,3)
 Block FlexibleDecay
    0   1                    # calculate decays (0 = no, 1 = yes)
