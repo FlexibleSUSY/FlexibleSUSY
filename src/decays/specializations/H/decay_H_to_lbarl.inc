@@ -112,7 +112,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const auto delta_Z_higgs = self_energy_1loop_deriv_p2<hh>(context, mHOS) - smns::self_energy_1loop_deriv_p2<smns::fields::hh>(sm_context, mHOS);
 
    // Higgs Mass renormalization constant in the decoupling scheme
-   const auto delta_Zm_higgs = self_energy_1loop<hh>(context, mHOS) / (mHOS * mHOS) - smns::self_energy_1loop<smns::fields::hh>(sm_context, mHOS) / (mHOS * mHOS);
+   const auto delta_Zm_higgs = self_energy_1loop<hh>(context, mHOS)/Sqr(mHOS) - smns::self_energy_1loop<smns::fields::hh>(sm_context, mHOS)/Sqr(mHOS);
 
    // End Higgs Renormalization constants
    //**************************************************************************
@@ -125,13 +125,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const auto delta_Z_W = -(self_energy_1loop_deriv_p2<VWp>(context, mWOS) - smns::self_energy_1loop_deriv_p2<smns::fields::VWp>(sm_context, mWOS));
 
    // W mass renormalization constant in the decoupling scheme
-   const auto delta_Zm_W = self_energy_1loop<VWp>(context, mWOS) /Sqr(mWOS) - smns::self_energy_1loop<smns::fields::VWp>(sm_context, mWOS) / Sqr(mWOS);
+   const auto delta_Zm_W = self_energy_1loop<VWp>(context, mWOS)/Sqr(mWOS) - smns::self_energy_1loop<smns::fields::VWp>(sm_context, mWOS)/Sqr(mWOS);
 
    // Z Field renormalization constant in the decoupling scheme
    const auto delta_Z_Z = -(self_energy_1loop_deriv_p2<VZ>(context, mZOS) - smns::self_energy_1loop_deriv_p2<smns::fields::VZ>(sm_context, mZOS));
 
    // Z mass renormalization constant in the decoupling scheme
-   const auto delta_Zm_Z = self_energy_1loop<VZ>(context, mZOS) /Sqr(mZOS) - smns::self_energy_1loop<smns::fields::VZ>(sm_context, mZOS) /Sqr(mZOS);
+   const auto delta_Zm_Z = self_energy_1loop<VZ>(context, mZOS)/Sqr(mZOS) - smns::self_energy_1loop<smns::fields::VZ>(sm_context, mZOS)/Sqr(mZOS);
 
    // photon field renormalization constant in the decoupling scheme
    const auto delta_Z_A = -(self_energy_1loop_deriv_p2<VP>(context, 0) - smns::self_energy_1loop<smns::fields::hh>(sm_context, 0));
