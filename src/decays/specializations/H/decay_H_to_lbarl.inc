@@ -147,7 +147,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    // Additional Renormalization constants that can be expressed through the Renormalization constants above
 
    // charge renormalization constant in the decoupling scheme
-   const auto delta_e = - 1 / 2 * delta_Z_A; //- tan(theta_W) / 2 * delta_Z_ZA
+   const auto delta_e = -0.5*delta_Z_A; //- tan(theta_W) / 2 * delta_Z_ZA
 
    // it is still necessary to decine the W-and Z-mass as well as the vev
    const double vev = 246;
@@ -161,10 +161,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    // Counter Terms for the Left-and Right Form-Factor
 
    // counter term for the left form factor in the decoupling scheme
-   const auto counter_term_FL = 1 / (2 * vev) * (mL1OS * delta_ZL_lepton + mL2OS * delta_ZR_lepton) - mL1OS / vev * delta_Zm_lepton - mL1OS * (delta_Z_higgs - delta_Z_vev);
+   const auto counter_term_FL = 0.5/vev * (mL1OS * delta_ZL_lepton + mL2OS * delta_ZR_lepton) - mL1OS / vev * delta_Zm_lepton - mL1OS * (delta_Z_higgs - delta_Z_vev);
 
    // counter term for the right form factor in the decoupling scheme
-   const auto counter_term_FR = 1 / (2 * vev) * (mL1OS * delta_ZR_lepton + mL2OS * delta_ZL_lepton) - mL1OS / vev * delta_Zm_lepton - mL1OS * (delta_Z_higgs - delta_Z_vev);
+   const auto counter_term_FR = 0.5/vev * (mL1OS * delta_ZR_lepton + mL2OS * delta_ZL_lepton) - mL1OS / vev * delta_Zm_lepton - mL1OS * (delta_Z_higgs - delta_Z_vev);
 
    //End Left-and Right Form_Factors
 
