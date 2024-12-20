@@ -34,10 +34,14 @@ CreateSpectrumDecaysGetterInterface::usage="";
 CreateSpectrumDecaysGetter::usage="";
 CreateSpectrumDecaysInterface::usage="";
 CreateSpectrumDecaysCalculation::usage="";
+CreateSpectrumDecaysEffCCalculation::usage="";
 CreateModelDecaysCalculation::usage="";
+CreateSpectrumDecaysEffCInterface::usage="";
+CreateModelDecaysEffCCalculation::usage = "";
 CreateMathLinkDecaysCalculation::usage="";
 FillDecaysSLHAData::usage="";
 PutDecays::usage="";
+CalculateNormalizedEffectiveCouplings::usage = "";
 
 Begin["`Private`"];
 
@@ -237,10 +241,13 @@ CreateModelDecaysCalculationName[] := CreateSpectrumDecaysCalculationName[];
 CreateSpectrumDecaysInterface[modelName_] :=
     "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) = 0;";
 
+CreateSpectrumDecaysEffCInterface[modelName_] :=
+    "virtual void calculate_normalized_effc(const Physical_input&, const softsusy::QedQcd&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) = 0;";
+
 CreateSpectrumDecaysCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
-                       "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) override;\n";
+                       "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) override;";
            args = "const softsusy::QedQcd& qedqcd, const Physical_input& physical_input, const FlexibleDecay_settings& flexibledecay_settings";
            body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);\n" <>
                   "decays.calculate_decays();\n";
@@ -253,9 +260,22 @@ CreateSpectrumDecaysCalculation[modelName_] :=
            {prototype, function}
           ];
 
+CreateSpectrumDecaysEffCCalculation[modelName_] :=
+    Module[{prototype = "", args = "", body = "", function = ""},
+           prototype = "virtual void calculate_normalized_effc(const Physical_input&, const softsusy::QedQcd&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) override;";
+           args = "const Physical_input& physical_input, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings, const FlexibleDecay_settings& flexibledecay_settings";
+           body = "normalized_higgs_effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, settings, flexibledecay_settings);\n";
+           function = "template <typename Solver_type>\n" <>
+                      "void " <> modelName <> "_spectrum_impl<Solver_type>::calculate_normalized_effc(\n" <>
+                      TextFormatting`IndentText[args <> ")\n"] <> "{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <> function;
+           {prototype, function}
+          ];
+
 CreateModelDecaysCalculation[modelName_] :=
     Module[{prototype = "", body = "", function = ""},
-           prototype = "void " <> CreateModelDecaysCalculationName[] <> "();\n";
+           prototype = "void " <> CreateModelDecaysCalculationName[] <> "();";
            body = "check_spectrum_pointer();\n" <>
                   "const bool loop_library_for_decays =\n" <>
                   TextFormatting`IndentText[
@@ -274,6 +294,30 @@ CreateModelDecaysCalculation[modelName_] :=
                         ] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> CreateModelDecaysCalculationName[] <> "()\n{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           {prototype, function}
+          ];
+
+CreateModelDecaysEffCCalculation[modelName_] :=
+    Module[{prototype = "", body = "", function = ""},
+           prototype = "void calculate_normalized_effc();";
+           body = "check_spectrum_pointer();\n" <>
+                  "const bool loop_library_for_decays =\n" <>
+                  TextFormatting`IndentText[
+                     "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+                     "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+                  ] <>
+                  "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {\n" <>
+                     TextFormatting`IndentText[
+                        "if (loop_library_for_decays) {\n" <>
+                  TextFormatting`IndentText["spectrum->calculate_normalized_effc(physical_input, qedqcd, settings, flexibledecay_settings);\n"] <> "}\n" <>
+                        "else if (!loop_library_for_decays) {\n" <>
+                           TextFormatting`IndentText[
+         "WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");\n"
+                           ] <> "}\n"
+                        ] <> "}\n";
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
+                      "void Model_data::calculate_normalized_effc()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
            {prototype, function}
           ];
@@ -393,14 +437,16 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
 
       {
          Redirect_output crd(link);
-         auto setting = data.get_settings();
-         if (!static_cast<bool>(setting.get(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses)) ||
-            !static_cast<bool>(setting.get(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses))) {
+         auto settings = data.get_settings();
+         auto fdSettings = data.get_fd_settings();
+         if (!static_cast<bool>(settings.get(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses)) ||
+            !static_cast<bool>(settings.get(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses))) {
             put_message(link,
                \"FSSMCalculateDecays\", \"warning\", \"Need SM and BSM masses. Setting flags FlexlibleSUSY[3] = FlexlibleSUSY[23] = 1.\");
-            setting.set(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses, 1.0);
-            setting.set(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses, 1.0);
-            data.set_settings(setting);
+            settings.set(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses, 1.0);
+            settings.set(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+            fdSettings.set(flexiblesusy::FlexibleDecay_settings::calculate_normalized_effc, 1.0);
+            data.set_settings(settings);
             data.calculate_spectrum();
          }
          data.calculate_model_decays();
@@ -413,6 +459,45 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
    }
 
    return LIBRARY_NO_ERROR;
+}\n";
+
+CalculateNormalizedEffectiveCouplings[modelName_] :=
+    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
+DLLEXPORT int FS" <> modelName <> "CalculateNormalizedEffectiveCouplings(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::" <> modelName <> "_librarylink;
+
+   if (!check_number_of_args(link, 1, \"FS" <> modelName <> "CalculateNormalizedEffectiveCouplings\"))
+      return LIBRARY_TYPE_ERROR;
+
+   const auto hid = get_handle_from(link);
+
+   try {
+      auto& data = find_data(hid);
+      data.calculate_normalized_effc();
+   } catch (const flexiblesusy::Error& e) {
+      put_message(link, \"FS" <> modelName <> "CalculateNormalizedEffectiveCouplings\", \"error\", e.what());
+      put_error_output(link);
+   }
+
+   return LIBRARY_NO_ERROR;
+}\n";
+
+CallLilith[modelName_] :=
+    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
+DLLEXPORT int FS" <> modelName <> "CallLilith(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::" <> modelName <> "_librarylink;
+}\n";
+
+CallHiggsTools[modelName_] :=
+    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
+DLLEXPORT int FS" <> modelName <> "CallHiggsTools(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::" <> modelName <> "_librarylink;
 }\n";
 
 End[];

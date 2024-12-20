@@ -37,6 +37,7 @@
 #include "slha_io.hpp"
 #include "spectrum_generator_settings.hpp"
 #include "decays/flexibledecay_settings.hpp"
+#include "decays/experimental_constraints.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "lowe.h"
 #include "@ModelName@_unitarity.hpp"
@@ -160,6 +161,7 @@ public:
       const Physical_input&,
       const Spectrum_generator_settings&) = 0;
 @calculateDecaysVirtualFunc@
+@calculateDecaysEffCVirtualFunc@
    virtual void calculate_unitarity() = 0;
 };
 
@@ -186,6 +188,7 @@ public:
       const Physical_input&,
       const Spectrum_generator_settings&) override;
 @calculateSpectrumDecaysPrototype@
+@calculateSpectrumDecaysEffCPrototype@
    virtual void calculate_unitarity() override;
 private:
    std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
@@ -193,6 +196,8 @@ private:
    @ModelName@_scales scales{};              ///< scale information
    @ModelName@_observables observables{};    ///< observables
    UnitarityInfiniteS unitarityData = {};    ///< unitarity constraints
+   EffectiveCoupling_list normalized_higgs_effc {};
+   SignalResult higgssignals {};
 @decaysData@
 };
 
@@ -230,6 +235,7 @@ public:
    void check_spectrum(MLINK link) const;
    void calculate_model_observables();
 @calculateModelDecaysPrototype@
+@calculateModelDecaysEffCPrototype@
    void calculate_unitarity();
    double get_model_scale() const {
       check_spectrum_pointer();
@@ -244,6 +250,8 @@ private:
    SLHA_io::Modsel modsel{};                                ///< MODSEL input
    @LToLConversion_private@
    std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr}; ///< spectrum information
+   EffectiveCoupling_list normalized_higgs_effc {};
+   SignalResult higgssignals {};
 
    @ModelName@_slha_io get_slha_io() const;
 
@@ -694,6 +702,7 @@ void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
       scales.pole_mass_scale);
 }
 @calculateSpectrumDecaysFunction@
+@calculateSpectrumDecaysEffCFunction@
 /******************************************************************/
 
 template <typename Solver_type>
@@ -797,6 +806,7 @@ void Model_data::calculate_model_observables()
       settings);
 }
 @calculateModelDecaysFunction@
+@calculateModelDecaysEffCFunction@
 /******************************************************************/
 
 void Model_data::calculate_unitarity()
@@ -1232,6 +1242,9 @@ DLLEXPORT int FS@ModelName@CalculateObservables(
    return LIBRARY_NO_ERROR;
 }
 @mathlinkDecaysCalculationFunction@
+@mathlinkCalcNormalizedEffC@
+@mathlinkCallLilith@
+@mathlinkCallHiggsTools@
 
 DLLEXPORT int FS@ModelName@CalculateUnitarity(
    WolframLibraryData /* libData */, MLINK link)
