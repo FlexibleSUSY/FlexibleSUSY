@@ -24,6 +24,7 @@ FS@ModelName@CalculateObservables = LibraryFunctionLoad[lib@ModelName@, "FS@Mode
 @loadCalculateEffCFunction@
 @loadCallHiggsToolsFunction@
 @loadCallLilithFunction@
+
 @loadCalculateUnitarityFunction@
 FS@ModelName@CalculateSpectrum::error = "`1`";
 FS@ModelName@CalculateSpectrum::warning = "`1`";

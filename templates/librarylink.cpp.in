@@ -223,7 +223,7 @@ public:
    const Spectrum_generator_settings& get_settings() const { return settings; }
    const FlexibleDecay_settings& get_fd_settings() const { return flexibledecay_settings; }
    const Physical_input& get_physical_input() { return physical_input; }
-   const EffectiveCoupling_list& get_normalized_higgs_effc() {
+   const EffectiveCoupling_list& get_normalized_higgs_effc() const {
       check_spectrum_pointer();
       return spectrum->get_normalized_higgs_effc();
    }
@@ -234,9 +234,11 @@ public:
    void put_observables(MLINK link) const;
    void put_slha(MLINK link) const;
 @putDecaysPrototype@
+@putEffCPrototype@
    void put_problems(MLINK link) const;
    void put_warnings(MLINK link) const;
    void put_model_spectra(MLINK link) const;
+   void put_higgssignals_results() const;
    void put_unitarity(MLINK link) const;
    void calculate_spectrum();
    void check_spectrum(MLINK link) const;
@@ -752,6 +754,7 @@ void Model_data::put_observables(MLINK link) const
    MLEndPacket(link);
 }
 @putDecaysFunction@
+@putEffCFunction@
 
 /******************************************************************/
 
@@ -1277,7 +1280,7 @@ DLLEXPORT int FS@ModelName@CallLilith(
 
 #ifdef ENABLE_HIGGSTOOLS
 DLLEXPORT int FS@ModelName@CallHiggsTools(
-   WolframLibraryData /* libData */, mint Argc, MArgument *Args, MArgument Res)
+   WolframLibraryData libData, mint Argc, MArgument *Args, MArgument Res)
 {
    using namespace flexiblesusy::@ModelName@_librarylink;
 

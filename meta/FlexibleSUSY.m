@@ -2962,7 +2962,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateSpectrumDecaysFunction = "", calculateModelDecaysPrototype = "",
             calculateSpectrumDecaysEffCFunction = "", calculateModelDecaysEffCPrototype = "",
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
-            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
+            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "", putEffCPrototype = "", putEffCFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
             mathlinkCalcNormalizedEffC = "", loadCalculateEffCFunction = "", loadCallHiggsToolsFunction = "", loadCallLilithFunction = "",
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
@@ -3015,19 +3015,20 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                   FSMathLink`CreateModelDecaysEffCCalculation[FlexibleSUSY`FSModelName];
               fillDecaysSLHA = FSMathLink`FillDecaysSLHAData[];
               {putDecaysPrototype, putDecaysFunction} = FSMathLink`PutDecays[FlexibleSUSY`FSModelName];
+              {putEffCPrototype, putEffCFunction} = FSMathLink`PutEffCouplings[FlexibleSUSY`FSModelName];
               mathlinkDecaysCalculationFunction = FSMathLink`CreateMathLinkDecaysCalculation[FlexibleSUSY`FSModelName];
               loadCalculateDecaysFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CalculateDecays\", LinkObject, LinkObject];\n";
               loadCalculateEffCFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateNormalizedEffectiveCouplings = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
-                                            "CalculateNormalizedEffectiveCouplings\", LinkObject, LinkObject];\n";
+                                            "CalculateNormalizedEffectiveCouplings\", LinkObject, LinkObject];";
               loadCallHiggsToolsFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
-                                            "CallHiggsTools\", {Integer, String, String}, Integer];\n";
+                                            "CallHiggsTools\", {Integer, String, String}, Integer];";
               loadCallLilithFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallLilith = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
-                                            "CallLilith\", LinkObject, LinkObject];\n";
+                                            "CallLilith\", LinkObject, LinkObject];";
               calculateDecaysMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
@@ -3101,6 +3102,8 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@getSpectrumDecays@" -> IndentText[getSpectrumDecays],
                             "@putDecaysPrototype@" -> IndentText[putDecaysPrototype],
                             "@putDecaysFunction@" -> putDecaysFunction,
+                            "@putEffCPrototype@" -> IndentText[putEffCPrototype],
+                            "@putEffCFunction@" -> putEffCFunction,
                             "@mathlinkDecaysCalculationFunction@" -> mathlinkDecaysCalculationFunction,
                             "@loadCalculateDecaysFunction@" -> loadCalculateDecaysFunction,
                             "@loadCalculateEffCFunction@" -> loadCalculateEffCFunction,

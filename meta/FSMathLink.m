@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["FSMathLink`", {"CConversion`", "Parameters`", "Utils`", "TreeMasses`"}];
+BeginPackage["FSMathLink`", {"CConversion`", "Parameters`", "Utils`", "TreeMasses`", "TextFormatting`"}];
 
 GetNumberOfInputParameterRules::usage = "";
 GetNumberOfSpectrumEntries::usage = "";
@@ -41,6 +41,7 @@ CreateModelDecaysEffCCalculation::usage = "";
 CreateMathLinkDecaysCalculation::usage="";
 FillDecaysSLHAData::usage="";
 PutDecays::usage="";
+PutEffCouplings::usage="";
 CalculateNormalizedEffectiveCouplings::usage = "";
 
 Begin["`Private`"];
@@ -347,6 +348,38 @@ PutDecayTableEntry[pidName_, decayName_] :=
     TextFormatting`IndentText["MLPut(link, id);\n"] <> "}\n" <>
     "MLPut(link, " <> decayName <> ".get_width());\n";
 
+PutEffCTableEntries[modelName_] :=
+    Module[{body = ""},
+       body = "for (const auto& d : effc) {\n" <>
+       IndentText[
+          "const auto multiplet_and_index_pair = " <> modelName <> "_info::get_multiplet_and_index_from_pdg(d.pdgid);\n" <>
+                  "if (multiplet_and_index_pair.second) {\n" <>
+                     TextFormatting`IndentText[
+                        "MLPutFunction(link, \"Rule\", 2);\n" <>
+                        "MLPutFunction(link, multiplet_and_index_pair.first.c_str(), 1);\n" <>
+                        "MLPutInteger(link, multiplet_and_index_pair.second.value());\n"
+                     ] <>
+                  "}\n" <>
+                  "else {\n" <>
+                     TextFormatting`IndentText["MLPutRule(link, multiplet_and_index_pair.first.c_str());\n"] <>
+                  "}\n" <>
+                  "MLPutFunction(link, \"List\", 2);\n" <>
+                  "MLPut(link, d.pdgid);\n" <>
+                  "MLPutFunction(link, \"List\", 14);\n\n" <>
+                  StringJoin[
+                  ("MLPutFunction(link, \"List\", 3);\n" <>
+                  "MLPut(link, d.pdgid);\n" <>
+                  "MLPutFunction(link, \"List\", 2);\n" <>
+                  "MLPut(link, " <> ToString[#[[1]]] <> ");\n" <>
+                  "MLPut(link, " <> ToString[#[[2]]] <> ");\n" <>
+                  "MLPut(link, d." <> #[[3]] <> ".second);\n")& /@ {{-1, 1, "dd"}, {-2, 2, "uu"}, {-3, 3, "ss"}, {-4, 4, "cc"}, {-5, 5, "bb"}, {-6, 6, "tt"}, {-11, 11, "ee"}, {-13, 13, "mumu"}, {-15, 15, "tautau"}, {-24, 24, "WW"}, {23, 23, "ZZ"}, {22, 23, "Zgam"}, {21, 21, "gg"}, {21, 22, "gamgam"}}
+                  ]
+       ] <>
+       "}\n";
+
+       body
+    ];
+
 PutDecayTableEntries[modelName_] :=
     Module[{body = ""},
            body = "const auto pid = decays_list.get_particle_id();\n" <>
@@ -391,6 +424,26 @@ PutDecayTableEntries[modelName_] :=
             "for (const auto& decays_list : decay_table) {\n" <>
                TextFormatting`IndentText[body] <>
             "}\n"
+          ];
+
+
+PutEffCouplings[modelName_] :=
+    Module[{prototype = "", body = "", function = ""},
+           prototype = "void put_eff_couplings(MLINK link) const;\n";
+
+           body = "check_spectrum_pointer();\n" <>
+                  "auto& effc = get_normalized_higgs_effc();\n\n" <>
+                  "const auto number_of_states = effc.size();\n" <>
+                  "MLPutFunction(link, \"List\", 1);\n" <>
+                  "MLPutRule(link, " <> modelName <> "_info::model_name);\n" <>
+                  "MLPutFunction(link, \"List\", number_of_states);\n\n" <>
+                  PutEffCTableEntries[modelName] <> "\n" <>
+                  "MLEndPacket(link);\n";
+
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
+                      "void Model_data::put_eff_couplings(MLINK link) const\n{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           {prototype, function}
           ];
 
 PutDecays[modelName_] :=
@@ -476,6 +529,7 @@ DLLEXPORT int FS" <> modelName <> "CalculateNormalizedEffectiveCouplings(
    try {
       auto& data = find_data(hid);
       data.calculate_normalized_effc();
+      data.put_eff_couplings(link);
    } catch (const flexiblesusy::Error& e) {
       put_message(link, \"FS" <> modelName <> "CalculateNormalizedEffectiveCouplings\", \"error\", e.what());
       put_error_output(link);
