@@ -115,7 +115,7 @@ double minChi2SM_lilith(const double mhSM) {
    // Creating an object of the class Lilith: lilithcalc
    PyObject* lilithcalc2 = initialize_lilith(experimental_input);
 
-   char XMLinputstring[6000]="";
+   char XMLinputstring[6000] = "";
    char buffer[100];
 
    sprintf(buffer,"<?xml version=\"1.0\"?>\n");
@@ -123,8 +123,9 @@ double minChi2SM_lilith(const double mhSM) {
    sprintf(buffer,"<lilithinput>\n");
    strcat(XMLinputstring, buffer);
 
-   const double BRinv = 0.;
-   const double BRund = 0.;
+   constexpr double cSM = 1.;
+   constexpr double BRinv = 0.;
+   constexpr double BRund = 0.;
 
    sprintf(buffer,"<reducedcouplings>\n");
    strcat(XMLinputstring, buffer);
@@ -132,32 +133,32 @@ double minChi2SM_lilith(const double mhSM) {
    sprintf(buffer,"<mass>%f</mass>\n", mhSM);
    strcat(XMLinputstring, buffer);
 
-   sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", 1.);
+   sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", cSM);
    strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", 1.);
+   sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", cSM);
    strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"gg\">%f</C>\n", 1.);
-   strcat(XMLinputstring, buffer);
-
-   sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", 1.);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"WW\">%f</C>\n", 1.);
+   sprintf(buffer,"<C to=\"gg\">%f</C>\n", cSM);
    strcat(XMLinputstring, buffer);
 
-   sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", 1.);
+   sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", cSM);
    strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", 1.);
+   sprintf(buffer,"<C to=\"WW\">%f</C>\n", cSM);
    strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", 1.);
+
+   sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", cSM);
    strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", 1.);
+   sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", cSM);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", cSM);
+   strcat(XMLinputstring, buffer);
+   sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", cSM);
    strcat(XMLinputstring, buffer);
 
    sprintf(buffer,"<extraBR>\n");
    strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", 0.);
+   sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", BRinv);
    strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", 0.);
+   sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", BRund);
    strcat(XMLinputstring, buffer);
    sprintf(buffer,"</extraBR>\n");
    strcat(XMLinputstring, buffer);

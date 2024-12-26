@@ -484,22 +484,6 @@ DLLEXPORT int FS" <> modelName <> "CalculateNormalizedEffectiveCouplings(
    return LIBRARY_NO_ERROR;
 }\n";
 
-CallLilith[modelName_] :=
-    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
-DLLEXPORT int FS" <> modelName <> "CallLilith(
-   WolframLibraryData /* libData */, MLINK link)
-{
-   using namespace flexiblesusy::" <> modelName <> "_librarylink;
-}\n";
-
-CallHiggsTools[modelName_] :=
-    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
-DLLEXPORT int FS" <> modelName <> "CallHiggsTools(
-   WolframLibraryData /* libData */, MLINK link)
-{
-   using namespace flexiblesusy::" <> modelName <> "_librarylink;
-}\n";
-
 End[];
 
 EndPackage[];

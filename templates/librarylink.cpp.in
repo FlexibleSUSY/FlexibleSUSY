@@ -152,6 +152,7 @@ public:
    virtual const @ModelName@_observables& get_observables() const = 0;
 @getDecaysVirtualFunc@
    virtual const UnitarityInfiniteS& get_unitarity() const = 0;
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const = 0;
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
@@ -179,6 +180,7 @@ public:
    virtual const @ModelName@_observables& get_observables() const override { return observables; }
 @getSpectrumDecays@
    virtual const UnitarityInfiniteS& get_unitarity() const override { return unitarityData; };
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const override { return normalized_higgs_effc; };
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
@@ -220,6 +222,11 @@ public:
 
    const Spectrum_generator_settings& get_settings() const { return settings; }
    const FlexibleDecay_settings& get_fd_settings() const { return flexibledecay_settings; }
+   const Physical_input& get_physical_input() { return physical_input; }
+   const EffectiveCoupling_list& get_normalized_higgs_effc() {
+      check_spectrum_pointer();
+      return spectrum->get_normalized_higgs_effc();
+   }
 
    void put_settings(MLINK link) const;
    void put_sm_input_parameters(MLINK link) const;
@@ -1243,8 +1250,56 @@ DLLEXPORT int FS@ModelName@CalculateObservables(
 }
 @mathlinkDecaysCalculationFunction@
 @mathlinkCalcNormalizedEffC@
-@mathlinkCallLilith@
-@mathlinkCallHiggsTools@
+
+#ifdef ENABLE_LILITH
+DLLEXPORT int FS@ModelName@CallLilith(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::@ModelName@_librarylink;
+
+   if (!check_number_of_args(link, 1, "FS@ModelName@CallLilith"))
+      return LIBRARY_TYPE_ERROR;
+
+   const auto hid = get_handle_from(link);
+
+   try {
+      auto& data = find_data(hid);
+      std::cout << "Ania " << data.get_normalized_higgs_effc()[0].gg.second << std::endl;
+      std::optional<flexiblesusy::SignalResult> ll = call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), "/home/wojciech/HEP-software/Lilith/data/latestRun2.list");
+      std::cout << "Ania " << data.get_normalized_higgs_effc()[0].gg.second << std::endl;
+      std::cout << "Alex " << ll.value().chi2BSM << std::endl;
+   } catch (const flexiblesusy::Error& e) {
+      put_message(link, "FS@ModelName@CallLilith", "error", e.what());
+      put_error_output(link);
+   }
+}
+#endif
+
+#ifdef ENABLE_HIGGSTOOLS
+DLLEXPORT int FS@ModelName@CallHiggsTools(
+   WolframLibraryData /* libData */, mint Argc, MArgument *Args, MArgument Res)
+{
+   using namespace flexiblesusy::@ModelName@_librarylink;
+
+   const auto hid = get_handle_from(Args[0]);
+
+   const char* const hsDatabasePath = MArgument_getUTF8String(Args[1]);
+   const char* const hbDatabasePath = MArgument_getUTF8String(Args[2]);
+
+   try {
+
+      auto [hs, higgsbounds_v] =
+         call_higgstools(find_data(hid).get_normalized_higgs_effc(), find_data(hid).get_physical_input(), hsDatabasePath, hbDatabasePath);
+      std::cout << "HT: " << hs.chi2BSM << std::endl;
+      //find_data(hid).put_higgssignals_results();
+   } catch (const flexiblesusy::Error& e) {
+      std::cerr << e.what_detailed() << std::endl;
+      return LIBRARY_FUNCTION_ERROR;
+   }
+
+   return LIBRARY_NO_ERROR;
+}
+#endif
 
 DLLEXPORT int FS@ModelName@CalculateUnitarity(
    WolframLibraryData /* libData */, MLINK link)

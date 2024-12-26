@@ -22,6 +22,8 @@ FS@ModelName@CalculateSpectrum = LibraryFunctionLoad[lib@ModelName@, "FS@ModelNa
 FS@ModelName@CalculateObservables = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@CalculateObservables", LinkObject, LinkObject];
 @loadCalculateDecaysFunction@
 @loadCalculateEffCFunction@
+@loadCallHiggsToolsFunction@
+@loadCallLilithFunction@
 @loadCalculateUnitarityFunction@
 FS@ModelName@CalculateSpectrum::error = "`1`";
 FS@ModelName@CalculateSpectrum::warning = "`1`";
