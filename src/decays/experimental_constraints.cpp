@@ -24,6 +24,17 @@
  */
 
 #include "experimental_constraints.hpp"
+#include "decays/standard_model_decays.hpp"
+
+#include <gsl/gsl_min.h>
+#include <gsl/gsl_errno.h>
+
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <functional>
+#include <random>
 
 #ifdef ENABLE_HIGGSTOOLS
 #include "Higgs/Predictions.hpp"
@@ -37,18 +48,6 @@ namespace HP = Higgs::predictions;
 #include "lilith.h"
 #include "lilith.c"
 #endif
-
-#include "decays/standard_model_decays.hpp"
-
-#include <algorithm>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <functional>
-#include <random>
-
-#include <gsl/gsl_min.h>
-#include <gsl/gsl_errno.h>
 
 namespace flexiblesusy {
 

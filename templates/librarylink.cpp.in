@@ -1267,14 +1267,14 @@ DLLEXPORT int FS@ModelName@CallLilith(
 
    try {
       auto& data = find_data(hid);
-      std::cout << "Ania " << data.get_normalized_higgs_effc()[0].gg.second << std::endl;
-      std::optional<flexiblesusy::SignalResult> ll = call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), "/home/wojciech/HEP-software/Lilith/data/latestRun2.list");
-      std::cout << "Ania " << data.get_normalized_higgs_effc()[0].gg.second << std::endl;
-      std::cout << "Alex " << ll.value().chi2BSM << std::endl;
+      std::optional<flexiblesusy::SignalResult> ll =
+         call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), "/home/wojciech/HEP-software/Lilith/data/latestRun2.list");
    } catch (const flexiblesusy::Error& e) {
       put_message(link, "FS@ModelName@CallLilith", "error", e.what());
       put_error_output(link);
    }
+
+   return LIBRARY_NO_ERROR;
 }
 #endif
 
