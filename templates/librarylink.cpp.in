@@ -56,6 +56,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <filesystem>
 
 #define INPUTPARAMETER(p) input.p
 #define MODELPARAMETER(p) model.get_##p()
@@ -1260,15 +1261,23 @@ DLLEXPORT int FS@ModelName@CallLilith(
 {
    using namespace flexiblesusy::@ModelName@_librarylink;
 
-   if (!check_number_of_args(link, 1, "FS@ModelName@CallLilith"))
+   if (!check_number_of_args(link, 2, "FS@ModelName@CallLilith"))
       return LIBRARY_TYPE_ERROR;
 
    const auto hid = get_handle_from(link);
 
+   const char* llDbFile = "";
+   !MLGetString(link, &llDbFile);
+   if (!std::filesystem::exists(llDbFile)) {
+      put_message(link, "FSSMCallLilith", "error", std::string(llDbFile) + " is not a valid path");
+      put_error_output(link);
+      return LIBRARY_NO_ERROR;
+   }
+
    try {
       auto& data = find_data(hid);
       std::optional<flexiblesusy::SignalResult> ll =
-         call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), "/home/wojciech/HEP-software/Lilith/data/latestRun2.list");
+         call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), llDbFile);
    } catch (const flexiblesusy::Error& e) {
       put_message(link, "FS@ModelName@CallLilith", "error", e.what());
       put_error_output(link);
