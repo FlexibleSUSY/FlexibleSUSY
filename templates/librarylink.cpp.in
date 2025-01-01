@@ -771,9 +771,9 @@ void Model_data::put_higgstools_results(MLINK link, SignalResult const& hs, std:
    MLPutFunction(link, "List", hb.size());
    for (const auto& el : hb) {
       MLPutFunction(link, "List", 3);
-      MLPut(link, std::get<0>(el));
-      MLPut(link, std::get<1>(el));
-      MLPut(link, std::get<2>(el));
+      MLPutRuleTo(link, std::get<0>(el), "pdgid");
+      MLPutRuleTo(link, std::get<1>(el), "obsRatio");
+      MLPutRuleTo(link, std::get<2>(el), "expRatio");
    }
    MLEndPacket(link);
 }
