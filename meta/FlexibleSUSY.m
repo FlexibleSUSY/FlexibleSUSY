@@ -2812,13 +2812,13 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    "}
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
-      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef);
+      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, chi2_to_pval(hs.chi2BSM, hs.chi2SM));
       slha_io.set_higgsbounds(higgsbounds_v);
    }
 #endif
 #ifdef ENABLE_LILITH
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith.has_value()) {
-      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef);
+      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, chi2_to_pval(lilith.value().chi2BSM, lilith.value().chi2SM));
    }
 #endif
 }";
@@ -3025,7 +3025,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                                             "CalculateNormalizedEffectiveCouplings\", LinkObject, LinkObject];";
               loadCallHiggsToolsFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
-                                            "CallHiggsTools\", {Integer, String, String}, Integer];";
+                                            "CallHiggsTools\", LinkObject, LinkObject];";
               loadCallLilithFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallLilith = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CallLilith\", LinkObject, LinkObject];";

@@ -31,8 +31,6 @@
 #include "string_conversion.hpp"
 #include "string_format.hpp"
 
-#include <boost/math/distributions/chi_squared.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -1027,7 +1025,7 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
-void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t ndof, const double chi2, const double chi2SMmin, const double mhSM)
+void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t ndof, const double chi2, const double chi2SMmin, const double mhSM, const double pval)
 {
    std::ostringstream ss;
 
@@ -1035,8 +1033,6 @@ void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t 
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + std::to_string(mhSM) + " GeV");
-   boost::math::chi_squared dist(2);
-   const double pval = chi2<chi2SMmin ? 1 : boost::math::cdf(complement(dist, chi2-chi2SMmin));
    // SLHA doesn't print nicelly numbers with 3 digit exponent
    ss << FORMAT_ELEMENT(4, pval > 1e-100 ? pval : 0., "p-value");
 

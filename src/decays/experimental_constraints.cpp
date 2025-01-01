@@ -28,6 +28,7 @@
 
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
+#include <boost/math/distributions/chi_squared.hpp>
 
 #include <algorithm>
 #include <filesystem>
@@ -285,6 +286,12 @@ void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double ma
 
 }
 } // anonymous
+
+double chi2_to_pval(double chi2BSM, double chi2SM) {
+   boost::math::chi_squared dist(2);
+   const double pval = chi2BSM<chi2SM ? 1 : boost::math::cdf(complement(dist, chi2BSM-chi2SM));
+   return pval;
+}
 
 EffectiveCoupling_list get_normalized_effective_couplings(
    EffectiveCoupling_list const& bsm_input,
