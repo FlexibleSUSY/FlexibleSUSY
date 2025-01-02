@@ -180,7 +180,7 @@ double @ModelName@_decays::get_partial_width(
    if constexpr (boost::mpl::size<@ModelName@_cxx_diagrams::fields::potentialLSPparticles>::value > 0) {
       // if this is a decay of a CP-even or -odd Higgs to a pair of identical particles (or a particle and its antiparticle)
       if constexpr (
-         (std::is_same_v<FieldIn, Higgs>@isCPodd@) &&
+         (std::is_same_v<FieldIn, @ModelName@_cxx_diagrams::fields::Higgs>@isCPodd@) &&
          std::is_same_v<typename FieldOut1::lorentz_conjugate, FieldOut2>
       ) {
          // at this point we know that FieldOut1 == FieldOut2 (if they are real) or FieldOut1 == bar|conj[FieldOut2]

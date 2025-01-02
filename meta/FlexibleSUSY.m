@@ -2248,7 +2248,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
-                            "@isCPodd@" -> If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && GetDimensionWithoutGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]] > 0, " || std::is_same_v<FieldIn, PseudoscalarHiggs>", ""],
+                            "@isCPodd@" -> If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && GetDimensionWithoutGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]] > 0, " || std::is_same_v<FieldIn, " <> FSModelName <> "_cxx_diagrams::fields::PseudoscalarHiggs>", ""],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
@@ -3366,7 +3366,7 @@ WriteSMParticlesAliases[files_List] := Module[{},
 
    CreateParticleAlias[particle_, namespace_String] :=
       "using " <> SimplifiedName[particle] <> " = " <>
-      CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
+      CXXDiagrams`CXXNameOfField[particle] <> ";";
 
    CreateParticleAliases[particles_, namespace_:""] :=
       Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
