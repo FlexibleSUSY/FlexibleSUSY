@@ -174,7 +174,7 @@ boost_inc_dir=""
 eigen_inc_dir=""
 BOOSTFLAGS=""
 HIGGSTOOLSFLAGS="-Imodel_specific/SM"
-HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM${STATIC_LIB_EXT}"
+HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a"
 gsl_config="gsl-config"
 looptools_lib_dir=""
 looptools_inc_dir=""
@@ -2204,10 +2204,10 @@ check_higgstools_libs() {
         if [ "$extension" = "a" ] ; then
             if [ -z "$higgstools_lib_dir" ]; then
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM${STATIC_LIB_EXT} -Wl,-Bdynamic"
+                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic"
             else
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM${STATIC_LIB_EXT} -Wl,-Bdynamic"
+                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic"
             fi
         elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
             if [ "x$enable_static" = xyes ] ; then
@@ -2216,10 +2216,10 @@ check_higgstools_libs() {
 	         fi
             if [ -z "$higgstools_lib_dir" ]; then
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM${STATIC_LIB_EXT} -Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
+                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
             else
                 # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM${STATIC_LIB_EXT} -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
             fi
         else
 	         message "Error: Cannot identify the type (static or shared) of"
@@ -2524,7 +2524,7 @@ check_collier_libs() {
          # assume that the linker will look in the default paths
          COLLIERLIBS=" $COLLIERLIBS_ "
       else
-         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper${STATIC_LIB_EXT} -L$collier_lib_dir -Wl,-rpath,$collier_lib_dir $COLLIERLIBS_"
+         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir -Wl,-rpath,$collier_lib_dir $COLLIERLIBS_"
       fi
    fi
 }
@@ -2566,7 +2566,7 @@ check_collier() {
    {
       message -n "Checking COLLIER using local ${collier_name}.pc ... "
       COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${collier_name} --cflags)
-      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper${STATIC_LIB_EXT} $(PKG_CONFIG_PATH=. pkg-config ${collier_name} --libs)"
+      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a $(PKG_CONFIG_PATH=. pkg-config ${collier_name} --libs)"
       enable_collier=yes
       message "ok"
       return
@@ -2639,7 +2639,7 @@ check_looplibrary() {
    if [ "$enable_collier" = "yes" ] || \
       [ "$enable_fflite" = "yes" ] || \
       [ "$enable_looptools" = "yes" ]; then
-      FUTILIBS="$ABSBASEDIR/src/libfortran_utils${STATIC_LIB_EXT}"
+      FUTILIBS="$ABSBASEDIR/src/libfortran_utils.a"
    fi
 }
 
