@@ -115,11 +115,11 @@ $(LIBSOFTSUSY): $(LIBSOFTSUSY_OBJ)
 
 $(RUN_SOFTSUSY_EXE): $(RUN_SOFTSUSY_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
-		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS) $(PYTHONLIBS) ${GSLLIBS} ${HIGGSTOOLSLIBS}
 
 $(RUN_SOFTPOINT_EXE): $(RUN_SOFTPOINT_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
-		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS) $(PYTHONLIBS) ${GSLLIBS} ${HIGGSTOOLSLIBS}
 
 ALLDEP += $(LIBSOFTSUSY_DEP) $(RUN_SOFTSUSY_DEP) $(RUN_SOFTPOINT_DEP)
 ALLLIB += $(LIBSOFTSUSY)
