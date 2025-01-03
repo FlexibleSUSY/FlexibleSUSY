@@ -333,7 +333,20 @@ FillDecaysSLHAData[] :=
     "if ((!decays_problems.have_problem() && loop_library_for_decays) || force_output) {\n" <>
     TextFormatting`IndentText[
        "slha_io.set_dcinfo(decays_problems);\n" <>
-       "slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);\n"
+       "slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);\n" <>
+       "if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {\n" <>
+          TextFormatting`IndentText["slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());\n"] <>
+       "}\n" <>
+       "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
+          TextFormatting`IndentText[
+             "slha_io.set_normalized_effectivecouplings_block(get_normalized_higgs_effc());\n" <>
+             "slha_io.set_imnormalized_effectivecouplings_block(get_normalized_higgs_effc());\n"
+          ] <>
+       "}\n" <>
+       "const SignalResult& hs = get_higgssignals_output();\n" <>
+       "slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);\n" <>
+       "const std::vector<std::tuple<int, double, double, std::string>>& hb = get_higgsbounds_output();\n" <>
+       "slha_io.set_higgsbounds(hb);\n"
     ] <>
     "}";
 

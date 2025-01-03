@@ -289,7 +289,7 @@ void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double ma
 
 double chi2_to_pval(double chi2BSM, double chi2SM) {
    boost::math::chi_squared dist(2);
-   const double pval = chi2BSM<chi2SM ? 1 : boost::math::cdf(complement(dist, chi2BSM-chi2SM));
+   const double pval = chi2BSM<=chi2SM ? 1 : boost::math::cdf(complement(dist, chi2BSM-chi2SM));
    return pval;
 }
 
@@ -450,7 +450,8 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
 
    auto smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
 
-   return {{signals.observableCount(), mhSMref, hs_chisq, smChi2}, hb_return};
+   const double pvalue = chi2_to_pval(hs_chisq, smChi2);
+   return {{signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue}, hb_return};
 }
 #endif
 
@@ -569,7 +570,8 @@ std::optional<SignalResult> call_lilith(
 
     Py_Finalize();
 
-    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood};
+    const double pvalue = chi2_to_pval(my_likelihood, sm_likelihood);
+    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue};
     return res;
 }
 #endif

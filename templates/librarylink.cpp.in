@@ -154,6 +154,8 @@ public:
 @getDecaysVirtualFunc@
    virtual const UnitarityInfiniteS& get_unitarity() const = 0;
    virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const = 0;
+   virtual const SignalResult& get_higgssignals_output() const = 0;
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const = 0;
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
@@ -182,6 +184,8 @@ public:
 @getSpectrumDecays@
    virtual const UnitarityInfiniteS& get_unitarity() const override { return unitarityData; };
    virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const override { return normalized_higgs_effc; };
+   virtual const SignalResult& get_higgssignals_output() const override { return higgssignals; };
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const override { return higgsbounds; };
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
@@ -201,6 +205,7 @@ private:
    UnitarityInfiniteS unitarityData = {};    ///< unitarity constraints
    EffectiveCoupling_list normalized_higgs_effc {};
    SignalResult higgssignals {};
+   std::vector<std::tuple<int, double, double, std::string>> higgsbounds {};
 @decaysData@
 };
 
@@ -227,6 +232,14 @@ public:
    const EffectiveCoupling_list& get_normalized_higgs_effc() const {
       check_spectrum_pointer();
       return spectrum->get_normalized_higgs_effc();
+   }
+   const SignalResult& get_higgssignals_output() const {
+      check_spectrum_pointer();
+      return spectrum->get_higgssignals_output();
+   }
+   const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const {
+      check_spectrum_pointer();
+      return spectrum->get_higgsbounds_output();
    }
 
    void put_settings(MLINK link) const;
@@ -767,7 +780,7 @@ void Model_data::put_higgstools_results(MLINK link, SignalResult const& hs, std:
    MLPutRuleTo(link, static_cast<int>(hs.ndof), "ndof");
    MLPutRuleTo(link, hs.chi2BSM, "chi2");
    MLPutRuleTo(link, hs.chi2SM, "chi2SM");
-   MLPutRuleTo(link, chi2_to_pval(hs.chi2BSM, hs.chi2SM), "pval");
+   MLPutRuleTo(link, hs.pval, "pval");
    MLPutFunction(link, "List", hb.size());
    for (const auto& el : hb) {
       MLPutFunction(link, "List", 4);

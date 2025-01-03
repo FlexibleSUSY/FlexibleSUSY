@@ -80,6 +80,7 @@ FSCMSSMCalculateSpectrum[handle];
 FSCMSSMCalculateObservables[handle];
 FSCMSSMCalculateUnitarity[handle];
 FSCMSSMCalculateDecays[handle];
+FSCMSSMCalculateNormalizedEffectiveCouplings[handle];
 Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];
 EOF

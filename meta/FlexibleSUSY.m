@@ -2812,13 +2812,13 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    "}
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
-      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, chi2_to_pval(hs.chi2BSM, hs.chi2SM));
+      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);
       slha_io.set_higgsbounds(higgsbounds_v);
    }
 #endif
 #ifdef ENABLE_LILITH
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith.has_value()) {
-      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, chi2_to_pval(lilith.value().chi2BSM, lilith.value().chi2SM));
+      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, lilith.value().pval);
    }
 #endif
 }";

@@ -55,6 +55,7 @@ struct SignalResult {
    double chi2BSM {};
    // SM chi2 for Physical_input::mh_pole
    double chi2SM {};
+   double pval {};
 };
 
 double chi2_to_pval(double /* chi2BSM */, double /* chi2SM */);
