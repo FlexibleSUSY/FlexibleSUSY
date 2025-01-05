@@ -566,6 +566,7 @@ void Model_data::put_warnings(MLINK link) const
    slha_io.set_sminputs(qedqcd);
    slha_io.set_physical_input(physical_input);
    slha_io.set_modsel(modsel);
+   slha_io.set_FlexibleDecay_settings(flexibledecay_settings);
    slha_io.set_input(input);
    @LToLConversion_set_slha@
    slha_io.set_print_imaginary_parts_of_majorana_mixings(

@@ -72,6 +72,7 @@ smInputs = {
 handle = FSCMSSMOpenHandle[
     fsSettings -> settings,
     fsSMParameters -> smInputs,
+    fdSettings -> {calcNormalizedEffC->1},
     fsModelParameters -> {
         m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 }
 ];

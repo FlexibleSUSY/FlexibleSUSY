@@ -3043,9 +3043,10 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
    alphaThomson -> 1,
    offShellVV -> 2,
    printEffCBlock -> 1,
-   usePoleHiggsMixings -> 1,
-   callHiggsTools -> 1,
-   callLilith -> 1
+   calcNormalizedEffC -> 0,
+   callHiggsTools -> 0,
+   callLilith -> 0,
+   usePoleHiggsMixings -> 1
 };\n";
                addFDOptions1 = ", Sequence @@ fdDefaultSettings";
                addFDOptions2 = "| fdSettings";
@@ -3056,21 +3057,23 @@ OptionValue[maxHigherOrderCorrections],
 OptionValue[alphaThomson],
 OptionValue[offShellVV],
 OptionValue[printEffCBlock],
-OptionValue[usePoleHiggsMixings],
+OptionValue[calcNormalizedEffC],
 OptionValue[callHiggsTools],
-OptionValue[callLilith]";
+OptionValue[callLilith],
+OptionValue[usePoleHiggsMixings]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
 flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections , pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ , pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays , pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays, pars[c++]);
 flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pars[c++]);
 flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars[c++]);
 flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars[c++]);
 ";
-decayIndex = "const Index_t n_fd_settings = 8;";
+decayIndex = "const Index_t n_fd_settings = 9;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
              ];
            WriteOut`ReplaceInFiles[files,

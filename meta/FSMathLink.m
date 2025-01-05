@@ -343,10 +343,18 @@ FillDecaysSLHAData[] :=
              "slha_io.set_imnormalized_effectivecouplings_block(get_normalized_higgs_effc());\n"
           ] <>
        "}\n" <>
-       "const SignalResult& hs = get_higgssignals_output();\n" <>
-       "slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);\n" <>
-       "const std::vector<std::tuple<int, double, double, std::string>>& hb = get_higgsbounds_output();\n" <>
-       "slha_io.set_higgsbounds(hb);\n"
+       "if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
+          TextFormatting`IndentText[
+             "const SignalResult& hs = get_higgssignals_output();\n" <>
+             "slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);\n"
+          ] <>
+       "}\n" <>
+       "if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {\n" <>
+          TextFormatting`IndentText[
+             "const std::vector<std::tuple<int, double, double, std::string>>& hb = get_higgsbounds_output();\n" <>
+             "slha_io.set_higgsbounds(hb);\n"
+          ] <>
+       "}\n"
     ] <>
     "}";
 
