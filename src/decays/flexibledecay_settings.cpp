@@ -164,13 +164,13 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
  * |--------------------------------------------|------------------------------------------------------|-----------------------|
  * | calculate_decays                           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  * | min_br_to_print                            |                                                      | 1e-5                  |
- * | include_higher_order_corrections           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
+ * | include_higher_order_corrections           | 0 - 4 (order)                                        | 4 (= enabled)         |
  * | use_Thomson_alpha_in_Phigamgam_and_PhigamZ | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  * | offshell_VV_decays                         | 0 (no) or 1 (single offshell) or 2 (double offshell) | 2 (= double offshell) |
  * | print_effc_block                           | 0 (no) or 1 (yes)                                    | 1 (= disabled)        |
  * | calculate_normalized_effc                  | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
- * | call_higgstools                            | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
- * | call_lilith                                | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
+ * | call_higgstools                            | 0 (no) or 1 (yes)                                    | 0 (= enabled)         |
+ * | call_lilith                                | 0 (no) or 1 (yes)                                    | 0 (= enabled)         |
  * | use_pole_higgs_mixings                     | 0 (no) or 1 (yes)                                    | 1 (= disabled)        |
  */
 void FlexibleDecay_settings::reset()
