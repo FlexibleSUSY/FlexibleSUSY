@@ -40,7 +40,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       neutral_higgs_effc.add_coupling(
          field_as_string<PseudoscalarHiggs>(in_idx),
          {22, 22},
-         std::pair<std::string const&, double> {field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<Photon>(out2_idx), std::sqrt(res)}
+         std::pair<std::string, double> {field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<Photon>(out2_idx), std::sqrt(res)}
       );
    }
 

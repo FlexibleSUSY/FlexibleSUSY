@@ -149,7 +149,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
             boost::hana::unpack(bar<DownTypeQuark>::pdgids, _to_array<bar<DownTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
             boost::hana::unpack(DownTypeQuark::pdgids, _to_array<DownTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
          },
-         std::pair<std::string const&, std::complex<double>> {
+         std::pair<std::string, std::complex<double>> {
             field_as_string<PseudoscalarHiggs>(indexIn) + "-" + field_as_string<bar<DownTypeQuark>::type>(indexOut1) + "-" + field_as_string<DownTypeQuark>(indexOut2),
             1i*std::sqrt(result)
          }

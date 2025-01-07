@@ -186,7 +186,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
             boost::hana::unpack(bar<DownTypeQuark>::pdgids, _to_array<bar<DownTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
             boost::hana::unpack(DownTypeQuark::pdgids, _to_array<DownTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
          },
-         std::pair<std::string const&, std::complex<double>> {
+         std::pair<std::string, std::complex<double>> {
 field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<DownTypeQuark>::type>(indexOut1) + "-" + field_as_string<DownTypeQuark>(indexOut2),
          std::sqrt(result_S) + std::sqrt(result_P)*1i});
    }

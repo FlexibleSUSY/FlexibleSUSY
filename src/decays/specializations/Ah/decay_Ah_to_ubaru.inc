@@ -152,7 +152,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
             boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
             boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
          },
-         std::pair<std::string const&, std::complex<double>> {
+         std::pair<std::string, std::complex<double>> {
             field_as_string<PseudoscalarHiggs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
             4.*std::max(xDR, xOS) > 1. ? std::imag(AhQQbarVertexDR_P)*1i : 1i*std::sqrt(result)
          }
