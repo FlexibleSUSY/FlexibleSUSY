@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
    BOOST_CHECK_CLOSE(effc[0].Zgam.second, 1, 0.3);    // 0.3%
 
    BOOST_CHECK_CLOSE(effc[0].ZZ.second, 1, 0.07);     // 0.07%
-   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 0);        // 8%
+   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 8);        // 8%
 
    BOOST_CHECK_CLOSE(std::real(effc[0].ee.second),     1, 0.04);  // 0.04%
    BOOST_CHECK_CLOSE(std::real(effc[0].mumu.second),   1, 0.04);  // 0.04%
