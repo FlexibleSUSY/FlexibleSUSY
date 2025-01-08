@@ -933,7 +933,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                           DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[] /. Susyno`LieGroups`conj->Identity}, Null],
                           particle /. Susyno`LieGroups`conj->Identity
                        ],
-                       "dm->set_use_pole_higgs_mixings(static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::use_pole_higgs_mixings)));\n",
+                       "dm->set_use_pole_higgs_mixings(flexibledecay_settings.get(FlexibleDecay_settings::use_pole_higgs_mixings) != 0.0 ? true : false);\n",
                        ""
                     ] <>
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
