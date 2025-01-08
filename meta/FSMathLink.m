@@ -370,7 +370,8 @@ PutDecayTableEntry[pidName_, decayName_] :=
     "MLPut(link, " <> decayName <> ".get_width());\n";
 
 PutEffCTableEntries[modelName_] :=
-    Module[{body = ""},
+    Module[{body = "", particleList = {}},
+       particleList = {{-1, 1, "dd"}, {-2, 2, "uu"}, {-3, 3, "ss"}, {-4, 4, "cc"}, {-5, 5, "bb"}, {-6, 6, "tt"}, {-11, 11, "ee"}, {-13, 13, "mumu"}, {-15, 15, "tautau"}, {-24, 24, "WW"}, {23, 23, "ZZ"}, {22, 23, "Zgam"}, {21, 21, "gg"}, {21, 22, "gamgam"}};
        body = "for (const auto& d : effc) {\n" <>
        IndentText[
           "const auto multiplet_and_index_pair = " <> modelName <> "_info::get_multiplet_and_index_from_pdg(d.pdgid);\n" <>
@@ -386,14 +387,14 @@ PutEffCTableEntries[modelName_] :=
                   "}\n" <>
                   "MLPutFunction(link, \"List\", 2);\n" <>
                   "MLPut(link, d.pdgid);\n" <>
-                  "MLPutFunction(link, \"List\", 14);\n\n" <>
+                  "MLPutFunction(link, \"List\", " <> ToString[Length[particleList]] <> ");\n\n" <>
                   StringJoin[
                   ("MLPutFunction(link, \"List\", 3);\n" <>
                   "MLPut(link, d.pdgid);\n" <>
                   "MLPutFunction(link, \"List\", 2);\n" <>
                   "MLPut(link, " <> ToString[#[[1]]] <> ");\n" <>
                   "MLPut(link, " <> ToString[#[[2]]] <> ");\n" <>
-                  "MLPut(link, d." <> #[[3]] <> ".second);\n")& /@ {{-1, 1, "dd"}, {-2, 2, "uu"}, {-3, 3, "ss"}, {-4, 4, "cc"}, {-5, 5, "bb"}, {-6, 6, "tt"}, {-11, 11, "ee"}, {-13, 13, "mumu"}, {-15, 15, "tautau"}, {-24, 24, "WW"}, {23, 23, "ZZ"}, {22, 23, "Zgam"}, {21, 21, "gg"}, {21, 22, "gamgam"}}
+                  "MLPut(link, d." <> #[[3]] <> ".second);\n")& /@ particleList
                   ]
        ] <>
        "}\n";
