@@ -125,8 +125,8 @@ public:
       return effective_coupling_list[index];
    }
 
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, double>);
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, std::complex<double>>);
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, double> const&);
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, std::complex<double>> const&);
    void set_invisible_width(std::string const& p, double);
    void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
 

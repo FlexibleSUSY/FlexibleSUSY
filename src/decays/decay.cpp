@@ -149,7 +149,7 @@ void EffectiveCoupling_list::set_invisible_width(std::string const& p, double c)
       }
 }
 
-void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string, double> c) {
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string, double> const& c) {
       auto found = std::find_if(
          std::begin(effective_coupling_list), std::end(effective_coupling_list),
          [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
@@ -194,7 +194,7 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
       }
    }
 
-void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string, std::complex<double>> c) {
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string, std::complex<double>> const& c) {
 
    auto found = std::find_if(
       std::begin(effective_coupling_list), std::end(effective_coupling_list),
