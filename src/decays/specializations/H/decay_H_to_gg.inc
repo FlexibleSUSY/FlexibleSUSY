@@ -15,10 +15,18 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
    // full LO (SM+BSM) result
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
+   const int Nf = number_of_active_flavours(qedqcd, mH);
+   if (Nf < 5) {
+      problems.add_warning(
+         create_process_string<Higgs,Gluon,Gluon>(in_idx, out1_idx, out2_idx)
+         + ": Scalar Higgs too light (less than 5 active quark flavours). Disabling higher-order corrections."
+      );
+   }
+
    const double mt {context.mass<UpTypeQuark>({2})};
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
-   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && Nf >= 5 && tau < 0.7) {
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mH);
       // 5-flavour SM alpha_s
@@ -45,7 +53,6 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       const double Lt = std::log(Sqr(mu/mt));
 
       // eq. 5 of 0708.0916
-      static constexpr int Nf = 5;
       const double hnlo0 =
          95./4. - 7./6.*Nf + (33 - 2*Nf)/6.*LH;
       const double hnlo1 =

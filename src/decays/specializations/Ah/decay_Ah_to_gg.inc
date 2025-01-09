@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
    if (Nf < 5) {
       problems.add_warning(
          create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx)
-         + ": Cannot determine the number of active quark flavours. Disabling higher-order corrections."
+         + ": Pseudoscalar Higgs too light (less than 5 active quark flavours). Disabling higher-order corrections."
       );
    }
 
