@@ -220,7 +220,7 @@ LLLIBS=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
 HIGGSTOOLSFLAGS="-Imodel_specific/SM"
-HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM${STATIC_LIB_EXT}"
+HIGGSTOOLSLIBS=""
 lilith_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
@@ -2201,32 +2201,21 @@ check_higgstools_libs() {
         filename=$(basename -- "$found_lib")
         local extension="${filename##*.}"
         local HIGGSTOOLSLIBS_="-lHiggsTools"
-        if [ "$extension" = "a" ] ; then
-            if [ -z "$higgstools_lib_dir" ]; then
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic"
-            else
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic"
-            fi
-        elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
-            if [ "x$enable_static" = xyes ] ; then
-               message "Warning: Requested creation of statically link executable but"
-               message "         HiggsTools was compiled as a shared library."
-	         fi
-            if [ -z "$higgstools_lib_dir" ]; then
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
-            else
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
-            fi
-        else
+        if [ ! "$extension" = "a" ] && [ ! "$extension" = "so" ] && [ ! "$extension" = "dylib" ]; then
 	         message "Error: Cannot identify the type (static or shared) of"
 	         message "       HiggsTools library."
 	         exit 1
 	     fi
-        return 0
+        if [ "x$enable_static" = xyes ]; then
+           if [ -z "$higgstools_lib_dir" ]; then
+              HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+           else
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+           fi
+        else
+           HIGGSTOOLSLIBS="-L$higgstools_lib_dir ${HIGGSTOOLSLIBS_}"
+        fi
+        HIGGSTOOLSLIBS="${HIGGSTOOLSLIBS} model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
     fi
     return 0
 }
