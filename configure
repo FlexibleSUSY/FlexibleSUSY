@@ -168,6 +168,8 @@ DEFINE_ENABLE_LATTICE_SOLVER="#undef ENABLE_LATTICE_SOLVER"
 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#undef ENABLE_SEMI_ANALYTIC_SOLVER"
 DEFINE_ENABLE_SHOOTING_SOLVER="#undef ENABLE_SHOOTING_SOLVER"
 DEFINE_ENABLE_ADDONS=""
+DEFINE_ENABLE_FEYNARTS="#undef ENABLE_FEYNARTS"
+DEFINE_ENABLE_FORMCALC="#undef ENABLE_FORMCALC"
 
 boost_lib_dir=""
 boost_inc_dir=""
@@ -3047,6 +3049,7 @@ EOF
             if version_at_least $FEYNARTS_VERSION "${required_feynarts_version}"; then
                 enable_feynarts="yes"
                 result "ok (version ${FEYNARTS_VERSION})"
+                DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"
             elif test "x$enable_feynarts" = "xautomatic"; then
                 enable_feynarts="no"
                 result "ok (version ${FEYNARTS_VERSION} too old -- support disabled)"
@@ -3123,6 +3126,7 @@ EOF
 
             if version_at_least $FORMCALC_VERSION "${required_formcalc_version}"; then
                 result "ok (version ${FORMCALC_VERSION})"
+                DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"
             elif test "x$enable_formcalc" = "xautomatic"; then
                 enable_formcalc="no"
                 result "ok (version ${FORMCALC_VERSION} too old -- support disabled)"
@@ -4116,6 +4120,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@|$DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER|" \
     -e "s|@DEFINE_ENABLE_SHOOTING_SOLVER@|$DEFINE_ENABLE_SHOOTING_SOLVER|" \
     -e "s|@DEFINE_ENABLE_ADDONS@|$DEFINE_ENABLE_ADDONS|"       \
+    -e "s|@DEFINE_ENABLE_FEYNARTS@|$DEFINE_ENABLE_FEYNARTS|"       \
+    -e "s|@DEFINE_ENABLE_FORMCALC@|$DEFINE_ENABLE_FORMCALC|"       \
     -e 's|@n@|\
 |g' \
     < $CONFIGHDR_TMPL > $CONFIGHDR
