@@ -3974,6 +3974,8 @@ if test "x${enable_meta}" = "xyes"; then
     check_feynarts
     check_formcalc
 else
+    if [ ! "${enable_feynarts}" = "no" ]; then DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"; fi
+    if [ ! "${enable_formcalc}" = "no" ]; then DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"; fi
     enable_feynarts=no
     enable_formcalc=no
 fi
