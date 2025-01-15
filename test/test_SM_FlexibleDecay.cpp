@@ -11,6 +11,7 @@
 #include "decays/SM_decays.hpp"
 #include "decays/standard_model_decays.hpp"
 #include "decays/experimental_constraints.hpp"
+#include "SM_two_scale_spectrum_generator.hpp"
 
 #include "lowe.h"
 #include "loop_libraries/loop_library.hpp"
@@ -206,16 +207,25 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
 
    Loop_library::set(-1);
 
+   static constexpr double lambda = 0.194;
+
    SM_input_parameters input;
-   input.LambdaIN = 0.285;
-   SM<Two_scale> m;
-   setup_SM_const(m, input);
+   input.LambdaIN = lambda;
+   input.Qin = 1000;
+   input.QEWSB = 173;
 
-   m.calculate_DRbar_masses();
+   Spectrum_generator_settings settings;
+   softsusy::QedQcd qedqcd;
 
-   m.set_pole_mass_loop_order(1);
+   SM_spectrum_generator<Two_scale> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+   auto m = std::get<0>(spectrum_generator.get_models_slha());
+
    m.do_calculate_sm_pole_masses(true);
-   m.solve_ewsb_one_loop();
+   m.solve_ewsb_tree_level();
+   m.calculate_DRbar_masses();
+   m.solve_ewsb();
    m.calculate_pole_masses();
 
    if (m.get_problems().have_problem()) {
@@ -224,9 +234,7 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
       BOOST_FAIL(ostr.str());
    }
 
-   softsusy::QedQcd qedqcd;
    Physical_input physical_input;
-   Spectrum_generator_settings spectrum_generator_settings;
    FlexibleDecay_settings flexibledecay_settings;
    flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, 1);
 
@@ -235,23 +243,23 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
 
    SM_decays decays = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
    decays.calculate_decays();
-   const auto effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
+   const auto effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, settings, flexibledecay_settings);
 
    // tolerance in %
-   BOOST_CHECK_CLOSE(effc[0].gg.second, 1, 0.08);     // 0.08%
-   BOOST_CHECK_CLOSE(effc[0].gamgam.second, 1, 0.4);  // 0.4%
-   BOOST_CHECK_CLOSE(effc[0].Zgam.second, 1, 0.3);    // 0.3%
+   BOOST_CHECK_CLOSE(effc[0].gg.second, 1, 0.005);
+   BOOST_CHECK_CLOSE(effc[0].gamgam.second, 1, 0.01);
+   BOOST_CHECK_CLOSE(effc[0].Zgam.second, 1, 0.02);
 
-   BOOST_CHECK_CLOSE(effc[0].ZZ.second, 1, 0.07);     // 0.07%
-   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 8);        // 8%
+   BOOST_CHECK_CLOSE(effc[0].ZZ.second, 1, 0.04);
+   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 0.007);
 
-   BOOST_CHECK_CLOSE(std::real(effc[0].ee.second),     1, 0.04);  // 0.04%
-   BOOST_CHECK_CLOSE(std::real(effc[0].mumu.second),   1, 0.04);  // 0.04%
-   BOOST_CHECK_CLOSE(std::real(effc[0].tautau.second), 1, 0.04);  // 0.04%
+   BOOST_CHECK_CLOSE(std::real(effc[0].ee.second),     1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].mumu.second),   1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].tautau.second), 1, 0.002);
 
-   BOOST_CHECK_CLOSE(std::real(effc[0].bb.second), 1, 0.03);  // 0.03%
-   BOOST_CHECK_CLOSE(std::real(effc[0].cc.second), 1, 0.03);  // 0.03%
-   BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1, 0.04);  // 0.04%
-   BOOST_CHECK_CLOSE(std::real(effc[0].dd.second), 1, 2);     // 2%
-   BOOST_CHECK_CLOSE(std::real(effc[0].uu.second), 1, 6);     // 6%
+   BOOST_CHECK_CLOSE(std::real(effc[0].bb.second), 1, 0.009);
+   BOOST_CHECK_CLOSE(std::real(effc[0].cc.second), 1, 0.0010);
+   BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1, 0.0020);
+   BOOST_CHECK_CLOSE(std::real(effc[0].dd.second), 1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].uu.second), 1, 0.002);
 }
