@@ -220,6 +220,8 @@ jobs:
             --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
+            --enable-feynarts \
+            --enable-formcalc \
             --enable-librarylink
           make showbuild
 
@@ -278,11 +280,104 @@ jobs:
           FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
+      - name: Testing without FormCalc
+        if: ${{ matrix.PART == 2 }}
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+        run: |
+          ./configure \
+            --with-cxx=$CXXCOMPILER \
+            --with-models=SM,MRSSM2 \
+            --with-loop-libraries=collier,looptools \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --enable-higgstools \
+            --with-higgstools-incdir=$FS_DEPENDENCIES_DIR/HiggsTools/include \
+            --with-higgstools-libdir=$FS_DEPENDENCIES_DIR/HiggsTools/lib64 \
+            --enable-lilith \
+            --with-lilith=/fs_dependencies/Lilith \
+            --enable-himalaya \
+            --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
+            --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
+            --enable-gm2calc \
+            --with-gm2calc-incdir=$FS_DEPENDENCIES_DIR/GM2Calc/include \
+            --with-gm2calc-libdir=$FS_DEPENDENCIES_DIR/GM2Calc/lib64 \
+            --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-optional-modules=test \
+            --enable-feynarts \
+            --disable-formcalc \
+            --enable-librarylink
+          make -j2
+          make -j2 execute-meta-tests
+          make -j2 alltest
+          for i in {0..3}
+          do
+            FLEXIBLESUSY_LOOP_LIBRARY=$i make -j2 execute-compiled-tests execute-shell-tests
+            make clean-test-log
+          done
+
+      - name: Testing without Feynarts and FormCalc
+        if: ${{ matrix.PART == 2 }}
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+        run: |
+          ./configure \
+            --with-cxx=$CXXCOMPILER \
+            --with-models=SM,MRSSM2 \
+            --with-loop-libraries=collier,looptools \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --enable-higgstools \
+            --with-higgstools-incdir=$FS_DEPENDENCIES_DIR/HiggsTools/include \
+            --with-higgstools-libdir=$FS_DEPENDENCIES_DIR/HiggsTools/lib64 \
+            --enable-lilith \
+            --with-lilith=/fs_dependencies/Lilith \
+            --enable-himalaya \
+            --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
+            --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
+            --enable-gm2calc \
+            --with-gm2calc-incdir=$FS_DEPENDENCIES_DIR/GM2Calc/include \
+            --with-gm2calc-libdir=$FS_DEPENDENCIES_DIR/GM2Calc/lib64 \
+            --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-optional-modules=test \
+            --disable-feynarts \
+            --disable-formcalc \
+            --enable-librarylink
+          make -j2
+          make -j2 execute-meta-tests
+          make -j2 alltest
+          for i in {0..3}
+          do
+            FLEXIBLESUSY_LOOP_LIBRARY=$i make -j2 execute-compiled-tests execute-shell-tests
+            make clean-test-log
+          done
+
       - name: Testing pack-SM-src
         if: ${{ matrix.PART == 2 }}
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |
+          rm -rf models/SM
+          ./createmodel --name=SM
+          ./configure \
+            --with-cxx=$CXXCOMPILER \
+            --with-models=SM \
+            --with-loop-libraries=collier,looptools \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --with-optional-modules=test \
+            --enable-feynarts \
+            --enable-formcalc \
+            --disable-compile
+          make -j2
           make pack-SM-src
           rm -rf models/SM
           tar -xf SM.tar.gz
@@ -294,8 +389,10 @@ jobs:
             --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
             --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
             --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
-            --disable-meta \
-            --with-optional-modules=test
+            --with-optional-modules=test \
+            --enable-feynarts \
+            --enable-formcalc \
+            --disable-meta
           make -j2
           make -j2 execute-meta-tests
           make -j2 alltest
