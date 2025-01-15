@@ -238,9 +238,6 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
    FlexibleDecay_settings flexibledecay_settings;
    flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, 1);
 
-   // -----------------------------------------------------
-   // decays with higher-order SM corrections
-
    SM_decays decays = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
    decays.calculate_decays();
    const auto effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, settings, flexibledecay_settings);

@@ -294,11 +294,13 @@ endif
 ifeq ($(WITH_MRSSM2) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_FlexibleDecay.cpp
+		$(DIR)/test_MRSSM2_FlexibleDecay.cpp \
+		$(DIR)/test_MRSSM2_normalized_effc.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_FlexibleDecay.cpp
+		$(DIR)/test_MRSSM2_FlexibleDecay.cpp \
+		$(DIR)/test_MRSSM2_normalized_effc.cpp
 endif
 endif
 
@@ -1113,6 +1115,8 @@ $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
+
+$(DIR)/test_MRSSM2_normalized_effc.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_amm.x: $(LIBMRSSM2)
 
