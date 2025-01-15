@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE( test_non_perturbative_running )
 
    setup_SM_const(sm, input);
 
-#if(defined ENABLE_FEYNARTS && defined ENABLE_FORMCALC)
+#if defined(ENABLE_FEYNARTS) && defined(ENABLE_FORMCALC)
    flexiblesusy::LToLConversion_settings ltolconversion_settings;
    const auto obs = flexiblesusy::calculate_observables(sm, qedqcd, ltolconversion_settings, physical_input, settings, scale);
 #else
