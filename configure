@@ -2208,14 +2208,14 @@ check_higgstools_libs() {
 	         message "       HiggsTools library."
 	         exit 1
 	     fi
-        if [ "x$enable_static" = xyes ]; then
-           if [ -z "$higgstools_lib_dir" ]; then
-              HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
-           else
-              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
-           fi
-        else
+        if [ -z "$higgstools_lib_dir" ]; then
            HIGGSTOOLSLIBS="-L$higgstools_lib_dir ${HIGGSTOOLSLIBS_}"
+        else
+           if [ "x$enable_static" = xyes ]; then
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+           else
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+           fi
         fi
         HIGGSTOOLSLIBS="${HIGGSTOOLSLIBS} model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
     fi
