@@ -255,8 +255,8 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
    BOOST_CHECK_CLOSE(std::real(effc[0].tautau.second), 1, 0.002);
 
    BOOST_CHECK_CLOSE(std::real(effc[0].bb.second), 1, 0.009);
-   BOOST_CHECK_CLOSE(std::real(effc[0].cc.second), 1, 0.0010);
-   BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1, 0.0020);
+   BOOST_CHECK_CLOSE(std::real(effc[0].cc.second), 1, 0.001);
+   BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1, 0.002);
    BOOST_CHECK_CLOSE(std::real(effc[0].dd.second), 1, 0.002);
    BOOST_CHECK_CLOSE(std::real(effc[0].uu.second), 1, 0.002);
 }
