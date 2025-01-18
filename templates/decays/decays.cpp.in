@@ -118,6 +118,11 @@ constexpr auto _to_array = [](auto&& ...x) {
    return std::array<int, N>{std::forward<decltype(x)>(x)...};
 };
 
+template <typename Field>
+int fieldPDG(const typename field_indices<Field>::type indx) {
+   return boost::hana::unpack(Field::pdgids, _to_array<boost::hana::size(Field::pdgids)>).at(indx.size() > 0 ? indx.at(0) : 0);
+}
+
 @calcAmplitudeSpecializationDefs@
 
 // -------- specializations for decays needing higher order SM corrections --------

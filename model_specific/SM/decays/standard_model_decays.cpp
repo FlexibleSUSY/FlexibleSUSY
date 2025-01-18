@@ -36,6 +36,7 @@
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/hana/size.hpp>
 #include <gsl/gsl_monte_miser.h>
 
 #include "standard_model_decays.hpp"
@@ -113,6 +114,11 @@ template <int N>
 constexpr auto _to_array = [](auto&& ...x) {
    return std::array<int, N>{std::forward<decltype(x)>(x)...};
 };
+
+template <typename Field>
+int fieldPDG(const typename field_indices<Field>::type indx) {
+   return boost::hana::unpack(Field::pdgids, _to_array<boost::hana::size(Field::pdgids)>).at(indx.size() > 0 ? indx.at(0) : 0);
+}
 
 /* 1-loop BSM amplitudes
  *

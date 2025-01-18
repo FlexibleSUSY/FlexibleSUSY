@@ -88,7 +88,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
-            36 + 10*(in_idx.size()>0 ? in_idx.at(0)-1 : 0), 21, 21,
+            fieldPDG<PseudoscalarHiggs>(in_idx), 21, 21,
             std::sqrt(result/(flux * color_fact * ps * ps_symmetry)/(0.5*Power4(mAh))),
             field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx)
          }

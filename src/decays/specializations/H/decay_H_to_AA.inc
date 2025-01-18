@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<Higgs, Photon, Photon>(
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
-            25 + 10*(in_idx.size()>0 ? in_idx.at(0) : 0), 22, 22,
+            fieldPDG<Higgs>(in_idx), 22, 22,
             std::sqrt(res/(flux * ps * ps_symmetry)/(0.5*Power4(mH))),
             field_as_string<Higgs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<Photon>(out2_idx)
          }
