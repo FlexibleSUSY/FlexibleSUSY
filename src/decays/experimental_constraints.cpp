@@ -108,73 +108,42 @@ void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
 #endif
 
 #ifdef ENABLE_LILITH
-double minChi2SM_lilith(const double mhSM) {
+double minChi2SM_lilith(const double mhSM, const std::string& lilithdb) {
+
+   const std::string XMLinputstring =
+      R"(<?xml version="1.0"?>
+<lilithinput>
+<reducedcouplings part="h">
+<mass>)" + std::to_string(mhSM) + R"(</mass>
+<C to="gammagamma">1.0</C>
+<C to="Zgamma">1.0</C>
+<C to="gg">1.0</C>
+<C to="ZZ">1.0</C>
+<C to="WW">1.0</C>
+<C to="tt" part="re">1.0</C>
+<C to="tt" part="im">0.0</C>
+<C to="cc" part="re">1.0</C>
+<C to="cc" part="im">0.0</C>
+<C to="bb" part="re">1.0</C>
+<C to="bb" part="im">0.0</C>
+<C to="tautau" part="re">1.0</C>
+<C to="tautau" part="im">0.0</C>
+<precision>BEST-QCD</precision>
+<extraBR>
+<BR to="invisible">0.0</BR>
+<BR to="undetected">0.0</BR>
+</extraBR>
+</reducedcouplings>
+</lilithinput>)";
 
    Py_Initialize();
-   char experimental_input[] = "";
-   // Creating an object of the class Lilith: lilithcalc
-   PyObject* lilithcalc2 = initialize_lilith(experimental_input);
 
-   char XMLinputstring[6000] = "";
-   char buffer[100];
-
-   sprintf(buffer,"<?xml version=\"1.0\"?>\n");
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<lilithinput>\n");
-   strcat(XMLinputstring, buffer);
-
-   constexpr double cSM = 1.;
-   constexpr double BRinv = 0.;
-   constexpr double BRund = 0.;
-
-   sprintf(buffer,"<reducedcouplings>\n");
-   strcat(XMLinputstring, buffer);
-
-   sprintf(buffer,"<mass>%f</mass>\n", mhSM);
-   strcat(XMLinputstring, buffer);
-
-   sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"gg\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-
-   sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"WW\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-
-   sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", cSM);
-   strcat(XMLinputstring, buffer);
-
-   sprintf(buffer,"<extraBR>\n");
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", BRinv);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", BRund);
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"</extraBR>\n");
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"</reducedcouplings>\n");
-   strcat(XMLinputstring, buffer);
-
-   sprintf(buffer,"</lilithinput>\n");
-   strcat(XMLinputstring, buffer);
-
-   // Reading user input XML string
-   lilith_readuserinput(lilithcalc2, XMLinputstring);
-
-   // Getting -2LogL
+   PyObject* lilithcalc2 = initialize_lilith(const_cast<char*>(lilithdb.c_str()));
+   lilith_readuserinput(lilithcalc2, const_cast<char*>(XMLinputstring.c_str()));
    const double my_likelihood = lilith_computelikelihood(lilithcalc2);
 
    Py_Finalize();
+
    return my_likelihood;
 }
 #endif
@@ -541,7 +510,7 @@ std::optional<SignalResult> call_lilith(
 
     const double mhSMref = physical_input.get(Physical_input::mh_pole);
 
-    const double sm_likelihood = minChi2SM_lilith(mhSMref);
+    const double sm_likelihood = minChi2SM_lilith(mhSMref, lilith_db);
 
     Py_Finalize();
 
