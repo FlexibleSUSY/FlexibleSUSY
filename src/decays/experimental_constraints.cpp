@@ -477,13 +477,10 @@ std::optional<SignalResult> call_lilith(
    // Creating an object of the class Lilith: lilithcalc
    PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));
 
-   char XMLinputstring[6000]="";
-   char buffer[100];
+   std::string XMLinputstring;
 
-   sprintf(buffer,"<?xml version=\"1.0\"?>\n");
-   strcat(XMLinputstring, buffer);
-   sprintf(buffer,"<lilithinput>\n");
-   strcat(XMLinputstring, buffer);
+   XMLinputstring += "<?xml version=\"1.0\"?>\n";
+   XMLinputstring += "<lilithinput>\n";
 
    for (auto const& el : bsm_input) {
 
@@ -493,70 +490,48 @@ std::optional<SignalResult> call_lilith(
       const double BRinv = el.invWidth/el.width;
       const double BRund = el.get_undetected_width()/el.width;
 
-      sprintf(buffer,"<reducedcouplings>\n");
-      strcat(XMLinputstring, buffer);
-
-      sprintf(buffer,"<mass>%f</mass>\n", mh);
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<reducedcouplings part=\"" + el.particle +  "\">\n";
+      XMLinputstring += "<mass>" + std::to_string(mh) + "</mass>\n";
 
       // massless gauge bosons
-      sprintf(buffer,"<C to=\"gammagamma\">%f</C>\n", el.gamgam.second);
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"Zgamma\">%f</C>\n", el.Zgam.second);
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<C to=\"gammagamma\">" + std::to_string(el.gamgam.second) + "</C>\n";
+      XMLinputstring += "<C to=\"Zgamma\">" + std::to_string(el.Zgam.second) + "</C>\n";
       // the same reduce coupling for production and decay for gluons
-      sprintf(buffer,"<C to=\"gg\">%f</C>\n", el.gg.second);
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<C to=\"gg\">" + std::to_string(el.gg.second) + "</C>\n";
 
       // massive gauge bosons
-      sprintf(buffer,"<C to=\"ZZ\">%f</C>\n", el.ZZ.second);
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"WW\">%f</C>\n", el.WW.second);
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<C to=\"ZZ\">" + std::to_string(el.ZZ.second) + "</C>\n";
+      XMLinputstring += "<C to=\"WW\">" + std::to_string(el.WW.second) + "</C>\n";
 
       // fermions
       // tt
-      sprintf(buffer,"<C to=\"tt\" part=\"re\">%f</C>\n", std::real(el.tt.second));
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"tt\" part=\"im\">%f</C>\n", std::imag(el.tt.second));
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<C to=\"tt\" part=\"re\">" + std::to_string(std::real(el.tt.second)) + "</C>\n";
+      XMLinputstring += "<C to=\"tt\" part=\"im\">" + std::to_string(std::imag(el.tt.second)) + "</C>\n";
       // cc
-      sprintf(buffer,"<C to=\"cc\" part=\"re\">%f</C>\n", std::real(el.cc.second));
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"cc\" part=\"im\">%f</C>\n", std::imag(el.cc.second));
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<C to=\"cc\" part=\"re\">" + std::to_string(std::real(el.cc.second)) + "</C>\n";
+      XMLinputstring += "<C to=\"cc\" part=\"im\">" + std::to_string(std::imag(el.cc.second)) + "</C>\n";
       // bb
-      sprintf(buffer,"<C to=\"bb\" part=\"re\">%f</C>\n", std::real(el.bb.second));
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"bb\" part=\"im\">%f</C>\n", std::imag(el.bb.second));
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<C to=\"bb\" part=\"re\">" + std::to_string(std::real(el.bb.second)) + "</C>\n";
+      XMLinputstring += "<C to=\"bb\" part=\"im\">" + std::to_string(std::imag(el.bb.second)) + "</C>\n";
       // tautau
-      sprintf(buffer,"<C to=\"tautau\" part=\"re\">%f</C>\n", std::real(el.tautau.second));
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"<C to=\"tautau\" part=\"im\">%f</C>\n", std::imag(el.tautau.second));
-      strcat(XMLinputstring, buffer);
-
-      sprintf(buffer,"<extraBR>\n");
-      strcat(XMLinputstring, buffer);
-         sprintf(buffer,"<BR to=\"invisible\">%f</BR>\n", BRinv);
-         strcat(XMLinputstring, buffer);
-         sprintf(buffer,"<BR to=\"undetected\">%f</BR>\n", BRund);
-         strcat(XMLinputstring, buffer);
-      sprintf(buffer,"</extraBR>\n");
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<C to=\"tautau\" part=\"re\">" + std::to_string(std::real(el.tautau.second)) + "</C>\n";
+      XMLinputstring += "<C to=\"tautau\" part=\"im\">" + std::to_string(std::imag(el.tautau.second)) + "</C>\n";
 
       // in the BEST-QCD mode, only the real part of the coupling is taken into account (see 1502.04138)
-      sprintf(buffer,"<precision>%s</precision>\n", el.CP == 1 ? "BEST-QCD" : "LO");
-      strcat(XMLinputstring, buffer);
-      sprintf(buffer,"</reducedcouplings>\n");
-      strcat(XMLinputstring, buffer);
+      XMLinputstring += "<precision>" + std::string(el.CP == 1 ? "BEST-QCD" : "LO") + "</precision>\n";
+
+      XMLinputstring += "<extraBR>\n";
+         XMLinputstring += "<BR to=\"invisible\">" + std::to_string(BRinv) + "</BR>\n";
+         XMLinputstring += "<BR to=\"undetected\">" + std::to_string(BRund) + "</BR>\n";
+      XMLinputstring += "</extraBR>\n";
+
+      XMLinputstring += "</reducedcouplings>\n";
     }
 
-    sprintf(buffer,"</lilithinput>\n");
-    strcat(XMLinputstring, buffer);
+    XMLinputstring += "</lilithinput>\n";
 
     // reading user input XML string
-    lilith_readuserinput(lilithcalc, XMLinputstring);
+    lilith_readuserinput(lilithcalc, const_cast<char*>(XMLinputstring.c_str()));
 
     // getting -2*log(L)
     const double my_likelihood = lilith_computelikelihood(lilithcalc);
