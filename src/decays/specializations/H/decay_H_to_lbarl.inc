@@ -41,9 +41,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       res_P *= 1. + get_alpha(context)/Pi*17./4.;
    }
 
-   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) ||
-       static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) ||
-       static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc))
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0. ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0. ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0.
    ) {
       neutral_higgs_effc.add_coupling(
          field_as_string<Higgs>(indexIn),
