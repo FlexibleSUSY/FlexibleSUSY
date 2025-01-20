@@ -118,16 +118,9 @@ double minChi2SM_lilith(const double mhSM, const std::string& lilithdb) {
 <C to="gammagamma">1.0</C>
 <C to="Zgamma">1.0</C>
 <C to="gg">1.0</C>
-<C to="ZZ">1.0</C>
-<C to="WW">1.0</C>
-<C to="tt" part="re">1.0</C>
-<C to="tt" part="im">0.0</C>
-<C to="cc" part="re">1.0</C>
-<C to="cc" part="im">0.0</C>
-<C to="bb" part="re">1.0</C>
-<C to="bb" part="im">0.0</C>
-<C to="tautau" part="re">1.0</C>
-<C to="tautau" part="im">0.0</C>
+<C to="VV">1.0</C>
+<C to="ff" part="re">1.0</C>
+<C to="ff" part="im">0.0</C>
 <precision>BEST-QCD</precision>
 <extraBR>
 <BR to="invisible">0.0</BR>
@@ -442,12 +435,7 @@ std::optional<SignalResult> call_lilith(
       return {};
    }
 
-   Py_Initialize();
-   // Creating an object of the class Lilith: lilithcalc
-   PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));
-
    std::string XMLinputstring;
-
    XMLinputstring += "<?xml version=\"1.0\"?>\n";
    XMLinputstring += "<lilithinput>\n";
 
@@ -455,9 +443,6 @@ std::optional<SignalResult> call_lilith(
 
       const double mh = el.mass;
       if (mh < 123.0 || mh > 128.0) continue;
-
-      const double BRinv = el.invWidth/el.width;
-      const double BRund = el.get_undetected_width()/el.width;
 
       XMLinputstring += "<reducedcouplings part=\"" + el.particle +  "\">\n";
       XMLinputstring += "<mass>" + std::to_string(mh) + "</mass>\n";
@@ -485,10 +470,16 @@ std::optional<SignalResult> call_lilith(
       // tautau
       XMLinputstring += "<C to=\"tautau\" part=\"re\">" + std::to_string(std::real(el.tautau.second)) + "</C>\n";
       XMLinputstring += "<C to=\"tautau\" part=\"im\">" + std::to_string(std::imag(el.tautau.second)) + "</C>\n";
+      // mumu
+      XMLinputstring += "<C to=\"mumu\" part=\"re\">" + std::to_string(std::real(el.mumu.second)) + "</C>\n";
+      XMLinputstring += "<C to=\"mumu\" part=\"im\">" + std::to_string(std::imag(el.mumu.second)) + "</C>\n";
 
       // in the BEST-QCD mode, only the real part of the coupling is taken into account (see 1502.04138)
-      XMLinputstring += "<precision>" + std::string(el.CP == 1 ? "BEST-QCD" : "LO") + "</precision>\n";
+      const std::string orderAsStr = (el.CP == 1 ? "BEST-QCD" : "LO");
+      XMLinputstring += "<precision>" + orderAsStr + "</precision>\n";
 
+      const double BRinv = el.invWidth/el.width;
+      const double BRund = el.get_undetected_width()/el.width;
       XMLinputstring += "<extraBR>\n";
          XMLinputstring += "<BR to=\"invisible\">" + std::to_string(BRinv) + "</BR>\n";
          XMLinputstring += "<BR to=\"undetected\">" + std::to_string(BRund) + "</BR>\n";
@@ -498,24 +489,26 @@ std::optional<SignalResult> call_lilith(
     }
 
     XMLinputstring += "</lilithinput>\n";
+    VERBOSE_MSG("Lilith input: \n" << XMLinputstring);
 
+    Py_Initialize();
+
+    // Creating an object of the class Lilith: lilithcalc
+    PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));
     // reading user input XML string
     lilith_readuserinput(lilithcalc, const_cast<char*>(XMLinputstring.c_str()));
-
     // getting -2*log(L)
     const double my_likelihood = lilith_computelikelihood(lilithcalc);
-
     // getting ndf
     const std::size_t exp_ndf = static_cast<std::size_t>(lilith_exp_ndf(lilithcalc));
-
     const double mhSMref = physical_input.get(Physical_input::mh_pole);
-
     const double sm_likelihood = minChi2SM_lilith(mhSMref, lilith_db);
 
     Py_Finalize();
 
     const double pvalue = chi2_to_pval(my_likelihood, sm_likelihood);
     const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue};
+
     return res;
 }
 #endif
