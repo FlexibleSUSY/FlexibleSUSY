@@ -154,7 +154,9 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
          },
          std::pair<std::string, std::complex<double>> {
             field_as_string<PseudoscalarHiggs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
-            4.*std::max(xDR, xOS) > 1. ? std::imag(AhQQbarVertexDR_P)*1i : 1i*std::sqrt(result)
+            // if the decay is not kinematically allowed return the tree-level coupling,
+            // otherwise a sqrt of a partial width
+            4.*std::max(xDR, xOS) > 1. ? std::imag(AhQQbarVertexDR_P)*1i : std::sqrt(result)*1i
          }
          );
    }
