@@ -162,12 +162,14 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       }
    }
 
+   const std::string tag = field_as_string<Higgs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx);
+
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
             fieldPDG<Higgs>(in_idx), 21, 21,
             std::sqrt(result/(flux * color_fact * ps * ps_symmetry)/(0.5*Power4(mH))),
-            field_as_string<Higgs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx)
+            tag
          }
       );
    }
@@ -179,7 +181,7 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       neutral_higgs_effc.add_coupling(
          field_as_string<Higgs>(in_idx),
          {21, 21},
-         std::pair<std::string, double> {field_as_string<Higgs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx), std::sqrt(result)}
+         std::pair<std::string, double> {tag, std::sqrt(result)}
       );
    }
 

@@ -19,7 +19,8 @@ double CLASSNAME::get_partial_width<Higgs, Photon, ZBoson>(
       res *= alpha_em_0/alpha_em;
    }
 
-   std::string tag = field_as_string<Higgs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<ZBoson>(out2_idx);
+   const std::string tag = field_as_string<Higgs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<ZBoson>(out2_idx);
+
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
