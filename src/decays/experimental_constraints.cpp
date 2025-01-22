@@ -403,16 +403,13 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
    }
 
    const auto signals = Higgs::Signals {higgssignals_dataset};
-   //for (const auto &m : signals.measurements()) {
-   //   std::cout << m.reference() << " " << m(pred) << std::endl;
-   //}
    const double hs_chisq = signals(pred);
 
    const double mhSMref = physical_input.get(Physical_input::mh_pole);
-
-   auto smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
+   const double smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
 
    const double pvalue = chi2_to_pval(hs_chisq, smChi2);
+
    return {{signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue}, hb_return};
 }
 #endif
