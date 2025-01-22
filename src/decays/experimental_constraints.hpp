@@ -24,8 +24,8 @@
  * HiggsTools and Lilith
  */
 
-#ifndef HIGGSTOOLS_INTERFACE_H
-#define HIGGSTOOLS_INTERFACE_H
+#ifndef DECAYS_EXPERIMENTAL_CONSTRAINTS_H
+#define DECAYS_EXPERIMENTAL_CONSTRAINTS_H
 
 #include "config.h"
 
@@ -67,9 +67,6 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);
 #endif
 
-/**
- *  @return pair containit -2 log likelihood and number of degrees of freedom
- */
 #ifdef ENABLE_LILITH
 std::optional<SignalResult>
 call_lilith(EffectiveCoupling_list const&, Physical_input const&, std::string const&);
