@@ -164,7 +164,7 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
  * |--------------------------------------------|------------------------------------------------------|-----------------------|
  * | calculate_decays                           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  * | min_br_to_print                            |                                                      | 1e-5                  |
- * | include_higher_order_corrections           | 0 - 4 (order)                                        | 4 (= enabled)         |
+ * | include_higher_order_corrections           | 0 - 4 (order)                                        | 4                     |
  * | use_Thomson_alpha_in_Phigamgam_and_PhigamZ | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
  * | offshell_VV_decays                         | 0 (no) or 1 (single offshell) or 2 (double offshell) | 2 (= double offshell) |
  * | print_effc_block                           | 0 (no) or 1 (yes)                                    | 1 (= disabled)        |
