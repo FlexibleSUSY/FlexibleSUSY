@@ -454,7 +454,7 @@ PutEffCouplings[modelName_] :=
            prototype = "void put_eff_couplings(MLINK link) const;\n";
 
            body = "check_spectrum_pointer();\n" <>
-                  "auto& effc = get_normalized_higgs_effc();\n\n" <>
+                  "auto const& effc = get_normalized_higgs_effc();\n\n" <>
                   "const auto number_of_states = effc.size();\n" <>
                   "MLPutFunction(link, \"List\", 1);\n" <>
                   "MLPutRule(link, " <> modelName <> "_info::model_name);\n" <>
@@ -520,8 +520,9 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
                \"FSSMCalculateDecays\", \"warning\", \"Need SM and BSM masses. Setting flags FlexlibleSUSY[3] = FlexlibleSUSY[23] = 1.\");
             settings.set(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses, 1.0);
             settings.set(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses, 1.0);
-            fdSettings.set(flexiblesusy::FlexibleDecay_settings::calculate_normalized_effc, 1.0);
             data.set_settings(settings);
+            fdSettings.set(flexiblesusy::FlexibleDecay_settings::calculate_normalized_effc, 1.0);
+            data.set_fd_settings(fdSettings);
             data.calculate_spectrum();
          }
          data.calculate_model_decays();
