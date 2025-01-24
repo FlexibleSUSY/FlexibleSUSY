@@ -85,26 +85,6 @@ double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) 
    );
    return signals(pred);
 }
-
-void print_effc(double mass, HP::NeutralEffectiveCouplings const& effC) {
-   std::cout << "Effective couplings for particle of mass " << mass << '\n';
-   std::cout << "dd     " << effC.dd << std::endl;
-   std::cout << "uu     " << effC.uu << std::endl;
-   std::cout << "ss     " << effC.ss << std::endl;
-   std::cout << "cc     " << effC.cc << std::endl;
-   std::cout << "bb     " << effC.bb << std::endl;
-   std::cout << "tt     " << effC.tt << std::endl;
-   std::cout << "ee     " << effC.ee << std::endl;
-   std::cout << "mumu   " << effC.mumu << std::endl;
-   std::cout << "tautau " << effC.tautau << std::endl;
-
-   std::cout << "WW     " << effC.WW << std::endl;
-   std::cout << "ZZ     " << effC.ZZ << std::endl;
-   std::cout << "gamgam " << effC.gamgam << std::endl;
-   std::cout << "Zgam   " << effC.Zgam << std::endl;
-   std::cout << "gg     " << effC.gg << std::endl;
-   std::cout << "lam     " << effC.lam << std::endl;
-}
 #endif
 
 #ifdef ENABLE_LILITH
