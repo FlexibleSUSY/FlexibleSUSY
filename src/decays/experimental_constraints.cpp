@@ -271,10 +271,13 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 
       const double mass = el.mass;
       // in the SM, λ = (mh/v)^2/2
-      // for mh > 700 GeV this gives λ > 4
+      // for mh > 650 GeV this gives λ > 4
       // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
       // On the other hand there's a problem with finding a SM equivalent of very light states
-      if (mass > 650 || mass < 1) continue;
+      if (mass > 650 || mass < 1) {
+         VERBOSE_MSG("Cannot construct normalization for effective coupling of " + el.particle + " with mass of " + std::to_string(mass) + " GeV");
+         continue;
+      }
 
       // create a SM equivalent to the BSM model, with mhSM == mass
       standard_model::Standard_model sm {};
