@@ -835,6 +835,20 @@ achieved by setting in the TSIL ``Makefile``
 
     TSIL_OPT = -O3 -funroll-loops -fPIC
 
+Linking with external libraries
+-------------------------------
+
+HiggsTools support
+``````````````````
+
+It is possible to check consistency of a BSM Higgs sector with experimental
+data using HiggsTools_. To enable HiggsTools configure FlexibleSUSY as
+
+.. code-block:: shell
+
+    HIGGSTOOLS_DIR=/path/to/higgstools
+    ./configure --with-higgstools-incdir=$HIGGSTOOLS_DIR/include \
+       --with-higgstools-libdir=$HIGGSTOOLS_DIR/lib64
 
 Creating an addon
 -----------------
