@@ -266,7 +266,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
    // built in SM
    auto flexibledecay_settings_ = flexibledecay_settings;
 
-   EffectiveCoupling_list _bsm_input;
+   EffectiveCoupling_list normalized_effc_list;
    for (auto const& el : bsm_input) {
 
       const double mass = el.mass;
@@ -296,33 +296,33 @@ EffectiveCoupling_list get_normalized_effective_couplings(
          // fermion channels are given as complex numbers
          // we normalize to real part of SM coupling
          // quarks
-         NeutralHiggsEffectiveCouplings _coups {el};
-         _coups.width_sm = sm_input[0].width;
-         _coups.dd.second = std::abs(sm_input[0].dd.second) > 0 ? el.dd.second/sm_input[0].dd.second.real() : 0.;
-         _coups.uu.second = std::abs(sm_input[0].uu.second) > 0 ? el.uu.second/sm_input[0].uu.second.real() : 0.;
-         _coups.ss.second = std::abs(sm_input[0].ss.second) > 0 ? el.ss.second/sm_input[0].ss.second.real() : 0.;
-         _coups.cc.second = std::abs(sm_input[0].cc.second) > 0 ? el.cc.second/sm_input[0].cc.second.real() : 0.;
-         _coups.bb.second = std::abs(sm_input[0].bb.second) > 0 ? el.bb.second/sm_input[0].bb.second.real() : 0.;
+         NeutralHiggsEffectiveCouplings coups {el};
+         coups.width_sm = sm_input[0].width;
+         coups.dd.second = std::abs(sm_input[0].dd.second) > 0 ? el.dd.second/sm_input[0].dd.second.real() : 0.;
+         coups.uu.second = std::abs(sm_input[0].uu.second) > 0 ? el.uu.second/sm_input[0].uu.second.real() : 0.;
+         coups.ss.second = std::abs(sm_input[0].ss.second) > 0 ? el.ss.second/sm_input[0].ss.second.real() : 0.;
+         coups.cc.second = std::abs(sm_input[0].cc.second) > 0 ? el.cc.second/sm_input[0].cc.second.real() : 0.;
+         coups.bb.second = std::abs(sm_input[0].bb.second) > 0 ? el.bb.second/sm_input[0].bb.second.real() : 0.;
          using namespace std::complex_literals;
-         _coups.tt.second = std::abs(sm_input[0].tt.second) > 0 ? (std::abs(el.tt.second.real()) + 1i*std::abs(el.tt.second.imag()))/std::abs(sm_input[0].tt.second.real()) : 0.;
+         coups.tt.second = std::abs(sm_input[0].tt.second) > 0 ? (std::abs(el.tt.second.real()) + 1i*std::abs(el.tt.second.imag()))/std::abs(sm_input[0].tt.second.real()) : 0.;
          // leptons
-         _coups.ee.second = std::abs(sm_input[0].ee.second)         > 0 ? el.ee.second/sm_input[0].ee.second.real()         : 0.;
-         _coups.mumu.second = std::abs(sm_input[0].mumu.second)     > 0 ? el.mumu.second/sm_input[0].mumu.second.real()     : 0.;
-         _coups.tautau.second = std::abs(sm_input[0].tautau.second) > 0 ? el.tautau.second/sm_input[0].tautau.second.real() : 0.;
+         coups.ee.second = std::abs(sm_input[0].ee.second)         > 0 ? el.ee.second/sm_input[0].ee.second.real()         : 0.;
+         coups.mumu.second = std::abs(sm_input[0].mumu.second)     > 0 ? el.mumu.second/sm_input[0].mumu.second.real()     : 0.;
+         coups.tautau.second = std::abs(sm_input[0].tautau.second) > 0 ? el.tautau.second/sm_input[0].tautau.second.real() : 0.;
 
          // gauge bosons
-         _coups.WW.second = std::abs(sm_input[0].WW.second)         > 0 ? el.WW.second/sm_input[0].WW.second         : 0.;
-         _coups.ZZ.second = std::abs(sm_input[0].ZZ.second)         > 0 ? el.ZZ.second/sm_input[0].ZZ.second         : 0.;
-         _coups.gamgam.second = std::abs(sm_input[0].gamgam.second) > 0 ? el.gamgam.second/sm_input[0].gamgam.second : 0.;
-         _coups.Zgam.second = std::abs(sm_input[0].Zgam.second)     > 0 ? el.Zgam.second/sm_input[0].Zgam.second     : 0.;
-         _coups.gg.second = std::abs(sm_input[0].gg.second)         > 0 ? el.gg.second/sm_input[0].gg.second         : 0.;
+         coups.WW.second = std::abs(sm_input[0].WW.second)         > 0 ? el.WW.second/sm_input[0].WW.second         : 0.;
+         coups.ZZ.second = std::abs(sm_input[0].ZZ.second)         > 0 ? el.ZZ.second/sm_input[0].ZZ.second         : 0.;
+         coups.gamgam.second = std::abs(sm_input[0].gamgam.second) > 0 ? el.gamgam.second/sm_input[0].gamgam.second : 0.;
+         coups.Zgam.second = std::abs(sm_input[0].Zgam.second)     > 0 ? el.Zgam.second/sm_input[0].Zgam.second     : 0.;
+         coups.gg.second = std::abs(sm_input[0].gg.second)         > 0 ? el.gg.second/sm_input[0].gg.second         : 0.;
 
-         _coups.lam = std::abs(sm_input[0].lam)       > 0 ? el.lam/sm_input[0].lam       : 0.;
-         _bsm_input.push_back(std::move(_coups));
+         coups.lam = std::abs(sm_input[0].lam)       > 0 ? el.lam/sm_input[0].lam       : 0.;
+         normalized_effc_list.push_back(std::move(coups));
       }
    }
 
-   return _bsm_input;
+   return normalized_effc_list;
 }
 
 #ifdef ENABLE_HIGGSTOOLS
