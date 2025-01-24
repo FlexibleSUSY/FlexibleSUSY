@@ -425,7 +425,7 @@ std::optional<SignalResult> call_lilith(
    for (auto const& el : bsm_input) {
       const double mh = el.mass;
       if (mh > 123.0 && mh < 128.0) {
-         higgs_in_range = true || higgs_in_range;
+         higgs_in_range = true;
       }
    }
    if (!higgs_in_range) {
