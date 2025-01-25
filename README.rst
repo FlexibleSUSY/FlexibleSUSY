@@ -41,8 +41,10 @@ modification, extension and reuse.
   If you use **FlexibleSUSY+GM2Calc** in your work, please cite
   [1510.08071]_ and (if appropriate) [2110.13238]_.
 
-  If you use **FlexibleDecay** in your work, please cite
-  [2106.05038]_ and [1211.2099]_.
+  If you use **FlexibleDecay** in your work, please cite [2106.05038]_ and
+  [1211.2099]_. If you compute Higgs-physics constrainst using HiggsTools or
+  Lilith please also cite [2502.XXXXX]_ and (as appropriate) [2210.09332]_ or
+  [1502.04138]_, [1908.03952]_, [2012.11408]_.
 
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
   (or later), please cite [2204.05285]_.
@@ -1076,3 +1078,8 @@ References
 .. [2110.13238] `Eur. Phys. J. C82 (2022) no. 3, 229 <https://inspirehep.net/literature/1952331>`_ [`arxiv:2110.13238 <https://arxiv.org/abs/2110.13238>`_]
 .. [2204.05285] `Phys. Rev. D 106 (2022) 9, 095023 <https://inspirehep.net/literature/2065408>`_ [`arxiv:2204.05285 <https://arxiv.org/abs/2204.05285>`_]
 .. [2402.14630] `CPC 302 (2024) 109244 <https://inspirehep.net/literature/2760779>`_ [`arxiv:2402.14630 <https://arxiv.org/pdf/2402.14630.pdf>`_]
+.. [2210.09332] `CPC 291 (2023) 108803 <https://inspirehep.net/literature/2166780>`_ [`arxiv:2210.09332 <https://arxiv.org/pdf/2210.09332.pdf>`_]
+.. [1502.04138] `Eur. Phys. J. C75 (2015) no. 9, 440 <https://inspirehep.net/literature/1345039>`_ [`arxiv:1502.04138 <https://arxiv.org/pdf/1502.04138.pdf>`_]
+.. [1908.03952] `SciPost Phys. 7 (2019) 4, 052 <https://inspirehep.net/literature/1749361>`_ [`arxiv:1908.03952 <https://arxiv.org/pdf/1908.03952.pdf>`_]
+.. [2012.11408] [`arxiv:2012.11408 <https://arxiv.org/pdf/2012.11408.pdf>`_]
+.. [2502.XXXXX] `CPC`_ [`arxiv:2502.XXXX <>`_]
