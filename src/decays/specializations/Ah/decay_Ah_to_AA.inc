@@ -35,9 +35,9 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       );
    }
 
-   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0. ||
-       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0. ||
-       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0.
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
    ) {
       neutral_higgs_effc.add_coupling(
          field_as_string<PseudoscalarHiggs>(in_idx),

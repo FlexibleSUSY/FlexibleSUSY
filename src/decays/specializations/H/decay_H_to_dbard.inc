@@ -177,9 +177,9 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
    const double result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
    const double result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
 
-   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0. ||
-       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0. ||
-       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0.
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
    ) {
       neutral_higgs_effc.add_coupling(field_as_string<Higgs>(indexIn),
          {
