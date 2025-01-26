@@ -837,20 +837,48 @@ achieved by setting in the TSIL ``Makefile``
 
     TSIL_OPT = -O3 -funroll-loops -fPIC
 
-Linking with external libraries
--------------------------------
+Linking with other external libraries
+-------------------------------------
 
 HiggsTools support
 ``````````````````
 
 It is possible to check consistency of a BSM Higgs sector with experimental
-data using HiggsTools_. To enable HiggsTools configure FlexibleSUSY as
+data using HiggsTools_. To enable HiggsTools, configure FlexibleSUSY as
 
 .. code-block:: shell
 
     HIGGSTOOLS_DIR=/path/to/higgstools
     ./configure --with-higgstools-incdir=$HIGGSTOOLS_DIR/include \
        --with-higgstools-libdir=$HIGGSTOOLS_DIR/lib64
+
+Note that depending on the system, HiggsTools library is installed either in
+`lib` or `lib64` directory. At runtime user has to provide directories
+containing HiggsSignals and HiggsBounds datasets (which are downloaded
+separatelly from HiggsTools) as
+
+.. code-block:: shell
+
+    models/<model>/run_<model>.x --higgsbounds-dataset=/path/to/HB/datasetdir \
+       --higgssignals-dataset=/path/to/HS/datasetdir
+
+Lilith support
+``````````````
+
+It is possible to check consistency of a BSM Higgs sector with experimental
+data using Lilith_. To enable Lilith, configure FlexibleSUSY as
+
+.. code-block:: shell
+
+    ./configure --with-lilith=/path/to/Lilith
+
+At runtime user can provide the Lilith database `.list` file
+
+.. code-block:: shell
+
+    models/<model>/run_<model>.x --lilith-db=/path/to/Lilith/database/file
+
+If not provided, the default file will be used.
 
 Creating an addon
 -----------------
