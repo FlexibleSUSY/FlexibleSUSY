@@ -33,11 +33,11 @@ const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descrip
    "include higher order corrections in decays",
    "use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ",
    "off-shell decays into VV pair",
-   "print EFFHIGGSCOUPLINGS block"
+   "print loop-induced Higgs couplings",
    "calculate effective couplings normalized to SM",
    "call HiggsTools",
-   "call Lilith"
-   "use pole Higgs mixings in vertices",
+   "call Lilith",
+   "use pole Higgs mixings in decays"
 };
 
 bool is_integer(double value)
