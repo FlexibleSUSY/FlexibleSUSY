@@ -88,7 +88,7 @@ double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) 
 #endif
 
 #ifdef ENABLE_LILITH
-double minChi2SM_lilith(const double mhSM, const std::string& lilithdb) {
+double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& lilithdb) {
 
    const std::string XMLinputstring =
       R"(<?xml version="1.0"?>
@@ -101,7 +101,7 @@ double minChi2SM_lilith(const double mhSM, const std::string& lilithdb) {
 <C to="VV">1.0</C>
 <C to="ff" part="re">1.0</C>
 <C to="ff" part="im">0.0</C>
-<precision>BEST-QCD</precision>
+<precision>)" + (cpEvenHiggs ? "BEST-QCD" : "LO") + R"(</precision>
 <extraBR>
 <BR to="invisible">0.0</BR>
 <BR to="undetected">0.0</BR>
@@ -332,6 +332,7 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
 
    for (auto const& el : bsm_input) {
       auto effc = HP::NeutralEffectiveCouplings {};
+      // 1 (even), -1 (odd), 0 (undefined)
       auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
       s.setMass(el.mass);
       s.setMassUnc(relMassError*el.mass); // set mass uncertainty to 3%
@@ -405,10 +406,12 @@ std::optional<SignalResult> call_lilith(
 
    // Lilith requires Higgs mass to be in range [123, 128]
    bool higgs_in_range = false;
+   bool cpEvenHiggs = false;
    for (auto const& el : bsm_input) {
       const double mh = el.mass;
       if (mh > 123.0 && mh < 128.0) {
          higgs_in_range = true;
+         cpEvenHiggs = (el.CP == 1);
       }
    }
    if (!higgs_in_range) {
@@ -482,7 +485,7 @@ std::optional<SignalResult> call_lilith(
     // getting ndf
     const std::size_t exp_ndf = static_cast<std::size_t>(lilith_exp_ndf(lilithcalc));
     const double mhSMref = physical_input.get(Physical_input::mh_pole);
-    const double sm_likelihood = minChi2SM_lilith(mhSMref, lilith_db);
+    const double sm_likelihood = minChi2SM_lilith(mhSMref, cpEvenHiggs, lilith_db);
 
     Py_Finalize();
 
