@@ -357,6 +357,27 @@ struct hVV_4body_params {
    double GammaV {};
 };
 
+enum PDG_id: int {
+   dd = 0,
+   uu = 1,
+   ss = 2,
+   cc = 3,
+   bb = 4,
+   tt = 5,
+   ee = 6,
+   mumu = 7,
+   tautau = 8,
+   WW = 9,
+   ZZ = 10,
+   gamgam = 11,
+   Zgam = 12,
+   gg = 13,
+   emu = 14,
+   etau = 15,
+   mutau = 16,
+   NUMBER_OF_PDG_IDS
+};
+
 } // namespace flexiblesusy
 
 #endif

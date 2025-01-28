@@ -46,6 +46,28 @@ std::size_t hash_pid_list(int pid_in, Container pids_out)
 
 } // anonymous namespace
 
+extern int PDG_id[PDG_id::NUMBER_OF_PDG_IDS];
+
+static std::array<int, 2> pdg_id[PDG_id::NUMBER_OF_PDG_IDS] = {
+   {-1, 1},
+   {-2, 2},
+   {-3, 3},
+   {-4, 4},
+   {-5, 5},
+   {-6, 6},
+   {-11, 11},
+   {-13, 13},
+   {-15, 15},
+   {-24, 24},
+   {23, 23},
+   {22, 22},
+   {22, 23},
+   {21, 21},
+   {-11, 13},
+   {-11, 15},
+   {-13, 15}
+};
+
 std::size_t hash_decay(const Decay& decay)
 {
    int pid_in = decay.get_initial_particle_id();
@@ -158,37 +180,37 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
       if (found == std::end(effective_coupling_list)) {
          auto effC = NeutralHiggsEffectiveCouplings {};
          effC.particle = p;
-         if (are_the_same(fs, {21, 21})) {
+         if (are_the_same(fs, pdg_id[PDG_id::gg])) {
             effC.gg = c;
          }
-         else if (are_the_same(fs, {22, 22})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::gamgam])) {
             effC.gamgam = c;
          }
-         else if (are_the_same(fs, {23, 23})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::ZZ])) {
             effC.ZZ = c;
          }
-         else if (are_the_same(fs, {-24, 24})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::WW])) {
             effC.WW = c;
          }
-         else if (are_the_same(fs, {22, 23})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::Zgam])) {
             effC.Zgam = c;
          }
          effective_coupling_list.push_back(std::move(effC));
       }
       else {
-         if (are_the_same(fs, {21, 21})) {
+         if (are_the_same(fs, pdg_id[PDG_id::gg])) {
             found->gg = c;
          }
-         else if (are_the_same(fs, {22, 22})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::gamgam])) {
             found->gamgam = c;
          }
-         else if (are_the_same(fs, {23, 23})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::ZZ])) {
             found->ZZ = c;
          }
-         else if (are_the_same(fs, {-24, 24})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::WW])) {
             found->WW = c;
          }
-         else if (are_the_same(fs, {22, 23})) {
+         else if (are_the_same(fs, pdg_id[PDG_id::Zgam])) {
             found->Zgam = c;
          }
       }
@@ -204,46 +226,51 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
    auto are_the_same = [](std::array<int, 2> const& a1, std::array<int, 2> const& a2) {
          return std::is_permutation(a1.begin(), a1.end(), a2.begin(), a2.end());
    };
+   auto negate = [](std::array<int, 2> in) {
+      std::for_each(in.begin(), in.end(), [](int& el){el *= -1; });
+      return in;
+   };
 
    if (found == std::end(effective_coupling_list)) {
       auto effC = NeutralHiggsEffectiveCouplings {};
       effC.particle = p;
-      if (are_the_same(fs, {-1, 1})) {
+      if (are_the_same(fs, pdg_id[PDG_id::dd])) {
          effC.dd = c;
       }
-      else if (are_the_same(fs, {-2, 2})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::uu])) {
          effC.uu = c;
       }
-      else if (are_the_same(fs, {-3, 3})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::ss])) {
          effC.ss = c;
       }
-      else if (are_the_same(fs, {-4, 4})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::cc])) {
          effC.cc = c;
       }
-      else if (are_the_same(fs, {-5, 5})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::bb])) {
          effC.bb = c;
       }
-      else if (are_the_same(fs, {-6, 6})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::tt])) {
          effC.tt = c;
       }
-      else if (are_the_same(fs, {-11, 11})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::ee])) {
          effC.ee = c;
       }
-      else if (are_the_same(fs, {-13, 13})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::mumu])) {
          effC.mumu = c;
       }
-      else if (are_the_same(fs, {-15, 15})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::tautau])) {
+         std::cout << fs[0] << ' ' << fs[1] << std::endl;
          effC.tautau = c;
       }
-      else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::emu]) || are_the_same(fs, negate(pdg_id[PDG_id::emu]))) {
          effC.emu.first = c.first;
          effC.emu.second += c.second;
       }
-      else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::etau]) || are_the_same(fs, negate(pdg_id[PDG_id::etau]))) {
          effC.etau.first = c.first;
          effC.etau.second += c.second;
       }
-      else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::mutau]) || are_the_same(fs, negate(pdg_id[PDG_id::mutau]))) {
          effC.mutau.first = c.first;
          effC.mutau.second = c.second;
       }
@@ -253,42 +280,42 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
       effective_coupling_list.push_back(std::move(effC));
    }
    else {
-      if (are_the_same(fs, {-1, 1})) {
+      if (are_the_same(fs, pdg_id[PDG_id::dd])) {
          found->dd = c;
       }
-      else if (are_the_same(fs, {-2, 2})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::uu])) {
          found->uu = c;
       }
-      else if (are_the_same(fs, {-3, 3})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::ss])) {
          found->ss = c;
       }
-      else if (are_the_same(fs, {-4, 4})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::cc])) {
          found->cc = c;
       }
-      else if (are_the_same(fs, {-5, 5})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::bb])) {
          found->bb = c;
       }
-      else if (are_the_same(fs, {-6, 6})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::tt])) {
          found->tt = c;
       }
-      else if (are_the_same(fs, {-11, 11})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::ee])) {
          found->ee = c;
       }
-      else if (are_the_same(fs, {-13, 13})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::mumu])) {
          found->mumu = c;
       }
-      else if (are_the_same(fs, {-15, 15})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::tautau])) {
          found->tautau = c;
       }
-      else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::emu]) || are_the_same(fs, negate(pdg_id[PDG_id::emu]))) {
          found->emu.first = c.first;
          found->emu.second += c.second;
       }
-      else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::etau]) || are_the_same(fs, negate(pdg_id[PDG_id::etau]))) {
          found->etau.first = c.first;
          found->etau.second += c.second;
       }
-      else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
+      else if (are_the_same(fs, pdg_id[PDG_id::mutau]) || are_the_same(fs, negate(pdg_id[PDG_id::mutau]))) {
          found->mutau.first = c.first;
          found->mutau.second += c.second;
       }
