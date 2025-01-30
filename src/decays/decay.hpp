@@ -357,7 +357,7 @@ struct hVV_4body_params {
    double GammaV {};
 };
 
-enum PDG_id: int {
+enum PDG_id_pairs: int {
    dd = 0,
    uu = 1,
    ss = 2,
