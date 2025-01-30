@@ -121,24 +121,8 @@ public:
 @[override]selfEnergyPrototypes@
 
 private:
-   bool force_output{false};              ///< switch to force output of pole masses
-   double precision{1.e-4};               ///< mass eigenstate precision
-   @ModelName@_physical physical{}; ///< contains the pole masses and mixings
-   Problems problems{@ModelName@_info::model_name,
-                     &@ModelName@_info::particle_names_getter,
-                     &@ModelName@_info::parameter_names_getter}; ///< problems
-
    void clear_tree_level_parameters();
    void copy_tree_level_masses_to_pole_masses();
-
-   // DR-bar masses
-@physicalMassesDef@
-   // DR-bar mixing matrices
-@mixingMatricesDef@
-   // phases
-@phasesDefinition@
-   // extra parameters
-@extraParameterDefs@
 };
 
 std::ostream& operator<<(std::ostream&, const @ModelName@_mass_eigenstates_decoupling_scheme&);
