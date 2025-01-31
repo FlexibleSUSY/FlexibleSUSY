@@ -371,7 +371,6 @@ PutDecayTableEntry[pidName_, decayName_] :=
 
 PutEffCTableEntries[modelName_] :=
     Module[{body = "", particleList = {}},
-       particleList = {{-1, 1, "dd"}, {-2, 2, "uu"}, {-3, 3, "ss"}, {-4, 4, "cc"}, {-5, 5, "bb"}, {-6, 6, "tt"}, {-11, 11, "ee"}, {-13, 13, "mumu"}, {-15, 15, "tautau"}, {-24, 24, "WW"}, {23, 23, "ZZ"}, {22, 23, "Zgam"}, {21, 21, "gg"}, {21, 22, "gamgam"}};
        body = "for (const auto& d : effc) {\n" <>
        IndentText[
           "const auto multiplet_and_index_pair = " <> modelName <> "_info::get_multiplet_and_index_from_pdg(d.pdgid);\n" <>
@@ -387,15 +386,42 @@ PutEffCTableEntries[modelName_] :=
                   "}\n" <>
                   "MLPutFunction(link, \"List\", 2);\n" <>
                   "MLPut(link, d.pdgid);\n" <>
-                  "MLPutFunction(link, \"List\", " <> ToString[Length[particleList]] <> ");\n\n" <>
-                  StringJoin[
-                  ("MLPutFunction(link, \"List\", 3);\n" <>
-                  "MLPut(link, d.pdgid);\n" <>
-                  "MLPutFunction(link, \"List\", 2);\n" <>
-                  "MLPut(link, " <> ToString[#[[1]]] <> ");\n" <>
-                  "MLPut(link, " <> ToString[#[[2]]] <> ");\n" <>
-                  "MLPut(link, d." <> #[[3]] <> ".second);\n")& /@ particleList
-                  ]
+                  "MLPutFunction(link, \"List\", 14);\n\n" <>
+                  "std::array<std::pair<std::pair<int, int>, double>, 5> bosonChannel {\n" <>
+                  IndentText[
+                     StringRiffle[
+                        ("std::pair<std::pair<int, int>, double> {" <> #[[1]] <> ", d." <> #[[2]] <> ".second}")& /@ { {"{-24, 24}", "WW"}, {"{23, 23}", "ZZ"}, {"{22, 23}", "Zgam"}, {"{21, 21}", "gg"}, {"{22, 22}", "gamgam"} },
+                        ",\n"
+                     ]
+                  ] <> "\n};\n" <>
+                  "for (const auto& el : bosonChannel) {\n" <>
+                  IndentText[
+                     "MLPutFunction(link, \"List\", 3);\n" <>
+                     "MLPut(link, d.pdgid);\n" <>
+                     "MLPutFunction(link, \"List\", 2);\n" <>
+                     "MLPut(link, el.first.first);\n" <>
+                     "MLPut(link, el.first.second);\n" <>
+                     "MLPut(link, el.second);\n"
+                  ] <> "}\n" <>
+                  "std::array<std::pair<int, std::complex<double>>, 9> fermionChannel {\n" <>
+                  IndentText[
+                     StringRiffle[
+                        ("std::pair<int, std::complex<double>> {" <> ToString[#[[1]]] <> ", d." <> #[[2]] <> ".second}")& /@ {
+                           {1, "dd"}, {2, "uu"}, {3, "ss"}, {4, "cc"}, {5, "bb"}, {6, "tt"},
+                           {11, "ee"}, {13, "mumu"}, {15, "tautau"}
+                        },
+                        ",\n"
+                     ]
+                  ] <> "\n};\n" <>
+                  "for (const auto& el : fermionChannel) {\n" <>
+                  IndentText[
+                     "MLPutFunction(link, \"List\", 3);\n" <>
+                     "MLPut(link, d.pdgid);\n" <>
+                     "MLPutFunction(link, \"List\", 2);\n" <>
+                     "MLPut(link, -el.first);\n" <>
+                     "MLPut(link, el.first);\n" <>
+                     "MLPut(link, el.second);"
+                  ] <> "\n}\n"
        ] <>
        "}\n";
 
