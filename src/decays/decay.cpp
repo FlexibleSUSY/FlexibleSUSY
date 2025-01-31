@@ -46,8 +46,6 @@ std::size_t hash_pid_list(int pid_in, Container pids_out)
 
 } // anonymous namespace
 
-extern int PDG_id_pairs[PDG_id_pairs::NUMBER_OF_PDG_IDS];
-
 static std::array<int, 2> pdg_id_pairs[PDG_id_pairs::NUMBER_OF_PDG_IDS] = {
    {-1, 1},
    {-2, 2},
