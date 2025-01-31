@@ -257,7 +257,6 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
          effC.mumu = c;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::tautau])) {
-         std::cout << fs[0] << ' ' << fs[1] << std::endl;
          effC.tautau = c;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::emu]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::emu]))) {
