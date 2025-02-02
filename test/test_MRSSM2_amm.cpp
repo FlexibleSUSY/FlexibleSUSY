@@ -28,6 +28,7 @@
 #include "MRSSM2_amm.hpp"
 #include "MRSSM2_lepton_amm_wrapper.hpp"
 #include "cxx_qft/MRSSM2_qft.hpp"
+#include "MRSSM2_mass_eigenstates_running.hpp"
 
 using DiagonalMatrix3 = Eigen::DiagonalMatrix<double, 3>;
 
