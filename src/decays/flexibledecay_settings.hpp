@@ -33,7 +33,11 @@ public:
       include_higher_order_corrections,           ///< [2] include higher order corrections in decays
       use_Thomson_alpha_in_Phigamgam_and_PhigamZ, ///< [3]
       offshell_VV_decays,                         ///< [4]
-      print_effc_block,                           ///< [1]
+      print_effc_block,                           ///< [5]
+      calculate_normalized_effc,                  ///< [6]
+      call_higgstools,                            ///< [7]
+      call_lilith,                                ///< [8]
+      use_pole_higgs_mixings,                     ///< [9]
       NUMBER_OF_OPTIONS                           ///< number of possible options
    };
 

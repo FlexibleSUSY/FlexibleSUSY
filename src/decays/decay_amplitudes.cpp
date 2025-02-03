@@ -80,9 +80,11 @@ double Decay_amplitude_SVV::square() const
             2.*fgSqr + 0.5*Power4(m_decay)*fepsSqr;
          const double WI_violation = std::abs(1. - std::abs(res1/res2));
          if (WI_violation > 0.1) {
-            std::stringstream ss;
-            ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + ss.str() + "% due to higher order effects");
+            std::stringstream ss1;
+            ss1 << std::fixed << std::setprecision(0) << 100.*WI_violation;
+            std::stringstream ss2;
+            ss2 << std::fixed << std::setprecision(1) << m_decay;
+            WARNING("Warning: Ward identity violated in decay of scalar with mass " + ss2.str() + " Gev to massless vectors by " + ss1.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined
@@ -114,9 +116,11 @@ double Decay_amplitude_SVV::square() const
          // compare two results
          const double WI_violation = std::abs(1. - std::abs(res1/res2));
          if (WI_violation > 0.1) {
-            std::stringstream ss;
-            ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless and massive vector by " + ss.str() + "% due to higher order effects");
+            std::stringstream ss1;
+            ss1 << std::fixed << std::setprecision(0) << 100.*WI_violation;
+            std::stringstream ss2;
+            ss2 << std::fixed << std::setprecision(1) << m_decay;
+            WARNING("Warning: Ward identity violated in decay of scalar with mass " + ss2.str() + " GeV to massless and massive vector by " + ss1.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined

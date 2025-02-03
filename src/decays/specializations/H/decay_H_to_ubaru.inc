@@ -17,9 +17,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    static constexpr double color_factor = squared_color_generator<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
-      if (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right())) {
-         const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
-         const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
+      const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      if (mHOS > muqOS1 + muqOS2 && (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right()))) {
          const auto xOS1 = Sqr(muqOS1/mHOS);
          const auto xOS2 = Sqr(muqOS2/mHOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
@@ -177,7 +177,24 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 
       result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
       result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
-}
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(
+         field_as_string<Higgs>(indexIn),
+         {
+            boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
+            boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
+         },
+         std::pair<std::string, std::complex<double>> {
+            field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
+            4.*std::max(xDR, xOS) < 1. ? std::sqrt(result_S) + std::sqrt(result_P)*1i : (indexOut1.at(0) == 2 && indexOut2.at(0) == 2 ? std::real(HQQbarVertexDR_S) + std::imag(HQQbarVertexDR_P)*1i : 0.)
+         }
+      );
+   }
 
    return result_S + result_P;
 }

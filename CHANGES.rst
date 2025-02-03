@@ -1,8 +1,11 @@
-FlexibleSUSY 2.9.0
-==================
+FlexibleSUSY 2.9.0 [X, XX 2024]
+===============================
 
 New features
 ------------
+
+* Option to validate a neutral Higgs sector of the model by linking
+  FlexibleSUSY with HiggsTools_ or Lilith_.
 
 * Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
   over SARAH results [`1805.07306 <https://arxiv.org/abs/1805.07306>`_].
@@ -45,7 +48,7 @@ New features
 
 * Allow user to calculate the anomalous magnetic moment of the muon
   :math:`$a_\mu$` in 2HDM-like models with `GM2Calc 2`_
-  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_].  See the
+  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_]. See the
   FlexibleSUSY model `THDMII` (`model_files/THDMII/FlexibleSUSY.m.in`)
   for an example.
 
@@ -2507,3 +2510,5 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _LoopTools: http://www.feynarts.de/looptools/
 .. _TSIL: https://www.niu.edu/spmartin/tsil/
+.. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
+.. _Lilith: https://github.com/sabinekraml/Lilith-2

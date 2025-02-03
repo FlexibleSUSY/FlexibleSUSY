@@ -33,6 +33,10 @@
 #include <boost/fusion/adapted/boost_array.hpp>
 #include <boost/fusion/adapted/mpl.hpp>
 
+#include <boost/hana/config.hpp>
+#include <boost/hana/equal.hpp>
+#include <boost/hana/fwd/transform.hpp>
+
 #if BOOST_VERSION >= 105800
 #include <boost/fusion/include/move.hpp>
 #else
@@ -200,6 +204,7 @@ namespace flexiblesusy::cxx_diagrams {
       static constexpr auto particleType = Field::particleType;
       static constexpr auto colorRep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };
 
    template<class Field>
@@ -215,6 +220,7 @@ namespace flexiblesusy::cxx_diagrams {
       static constexpr auto particleType = Field::particleType;
       static constexpr auto colorRep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };
 
    // Double Lorentz conjugation

@@ -483,8 +483,26 @@ void @ModelName@_slha_io::set_effectivecouplings_block(const std::vector<std::tu
    slha_io.set_effectivecouplings_block(effCouplings);
 }
 
+void @ModelName@_slha_io::set_normalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   slha_io.set_normalized_effectivecouplings_block(effCouplings);
+}
+
+void @ModelName@_slha_io::set_imnormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   slha_io.set_imnormalized_effectivecouplings_block(effCouplings);
+}
+
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
+
+void @ModelName@_slha_io::set_hs_or_lilith(std::string const& block_name, const int ndof, const double chi2, const double chi2SMmin, const double mhSM, const double pval)
+{
+   slha_io.set_hs_or_lilith(block_name, ndof, chi2, chi2SMmin, mhSM, pval);
+}
+
+void @ModelName@_slha_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& hb)
+{
+   slha_io.set_higgsbounds(hb);
+}
 
 /**
  * Stores the model (DR-bar) parameters, masses and mixing matrices in
