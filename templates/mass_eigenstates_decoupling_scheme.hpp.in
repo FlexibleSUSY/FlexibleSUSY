@@ -70,19 +70,10 @@ public:
 
    std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
 
-   /// number of EWSB equations
-   static constexpr int number_of_ewsb_equations = @numberOfEWSBEquations@;
-
-   void check_pole_masses_for_tachyons();
-   void do_force_output(bool);
-   bool do_force_output() const;
    void fill_from(const standard_model::Standard_model&);
    void fill_from(const @ModelName@_mass_eigenstates&);
    void reorder_tree_level_masses();
-   void reorder_pole_masses();
    void print(std::ostream&) const override;
-   void set_precision(double);
-   double get_precision() const;
    void clear() override;
 
    // mass_eigenstates_interface functions
@@ -121,24 +112,8 @@ public:
 @[override]selfEnergyPrototypes@
 
 private:
-   bool force_output{false};              ///< switch to force output of pole masses
-   double precision{1.e-4};               ///< mass eigenstate precision
-   @ModelName@_physical physical{}; ///< contains the pole masses and mixings
-   Problems problems{@ModelName@_info::model_name,
-                     &@ModelName@_info::particle_names_getter,
-                     &@ModelName@_info::parameter_names_getter}; ///< problems
-
    void clear_tree_level_parameters();
    void copy_tree_level_masses_to_pole_masses();
-
-   // DR-bar masses
-@physicalMassesDef@
-   // DR-bar mixing matrices
-@mixingMatricesDef@
-   // phases
-@phasesDefinition@
-   // extra parameters
-@extraParameterDefs@
 };
 
 std::ostream& operator<<(std::ostream&, const @ModelName@_mass_eigenstates_decoupling_scheme&);

@@ -82,26 +82,6 @@ std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
    return std::make_unique<@ModelName@_mass_eigenstates_decoupling_scheme>(*this);
 }
 
-void CLASSNAME::do_force_output(bool flag)
-{
-   force_output = flag;
-}
-
-bool CLASSNAME::do_force_output() const
-{
-   return force_output;
-}
-
-double CLASSNAME::get_precision() const
-{
-   return precision;
-}
-
-void CLASSNAME::set_precision(double precision_)
-{
-   precision = precision_;
-}
-
 void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input)
 {
    using RM33 = Eigen::Matrix<double, 3, 3>;
@@ -295,25 +275,6 @@ void CLASSNAME::copy_tree_level_masses_to_pole_masses()
 void CLASSNAME::reorder_tree_level_masses()
 {
 @reorderDRbarMasses@
-}
-
-/**
- * reorders pole masses so that golstones are placed at the index
- * specified in the model files definition of the associated
- * gauge boson (see Z-boson definition in default particles.m file
- * in the Models directory of your SARAH distribution for example)
- */
-void CLASSNAME::reorder_pole_masses()
-{
-@reorderPoleMasses@
-}
-
-/**
- * Checks the pole masses for tachyons
- */
-void CLASSNAME::check_pole_masses_for_tachyons()
-{
-@checkPoleMassesForTachyons@
 }
 
 /**
