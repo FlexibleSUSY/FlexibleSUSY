@@ -29,6 +29,7 @@
 #define @ModelName@_MASS_EIGENSTATES_INTERFACE_H
 
 #include "@ModelName@_physical.hpp"
+#include "@ModelName@_info.hpp"
 
 #include <memory>
 
@@ -71,6 +72,7 @@ public:
    virtual void set_physical(const @ModelName@_physical&) = 0;
    virtual void clear_problems() = 0;
 
+@[abstract]lspGetters@
 @[abstract]parameterGetters@
 @[abstract]parameterSetters@
 @[abstract]massGetters@

@@ -168,6 +168,8 @@ DEFINE_ENABLE_LATTICE_SOLVER="#undef ENABLE_LATTICE_SOLVER"
 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#undef ENABLE_SEMI_ANALYTIC_SOLVER"
 DEFINE_ENABLE_SHOOTING_SOLVER="#undef ENABLE_SHOOTING_SOLVER"
 DEFINE_ENABLE_ADDONS=""
+DEFINE_ENABLE_FEYNARTS="#undef ENABLE_FEYNARTS"
+DEFINE_ENABLE_FORMCALC="#undef ENABLE_FORMCALC"
 
 boost_lib_dir=""
 boost_inc_dir=""
@@ -219,6 +221,8 @@ LLFLAGS=""
 LLLIBS=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
+HIGGSTOOLSFLAGS="-Imodel_specific/SM"
+HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
 lilith_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
@@ -2176,7 +2180,7 @@ check_higgstools_incl() {
             return 1
         fi
     else
-        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
+        HIGGSTOOLSFLAGS="$HIGGSTOOLSFLAGS -I$higgstools_inc_dir"
         return 0
     fi
     return 0
@@ -2199,32 +2203,21 @@ check_higgstools_libs() {
         filename=$(basename -- "$found_lib")
         local extension="${filename##*.}"
         local HIGGSTOOLSLIBS_="-lHiggsTools"
-        if [ "$extension" = "a" ] ; then
-            if [ -z "$higgstools_lib_dir" ]; then
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
-            else
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
-            fi
-        elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
-            if [ "x$enable_static" = xyes ] ; then
-               message "Warning: Requested creation of statically link executable but"
-               message "         HiggsTools was compiled as a shared library."
-	         fi
-            if [ -z "$higgstools_lib_dir" ]; then
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
-            else
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
-            fi
-        else
+        if [ ! "$extension" = "a" ] && [ ! "$extension" = "so" ] && [ ! "$extension" = "dylib" ]; then
 	         message "Error: Cannot identify the type (static or shared) of"
 	         message "       HiggsTools library."
 	         exit 1
 	     fi
-        return 0
+        if [ -z "$higgstools_lib_dir" ]; then
+           HIGGSTOOLSLIBS="-L$higgstools_lib_dir ${HIGGSTOOLSLIBS_}"
+        else
+           if [ "x$enable_static" = xyes ]; then
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+           else
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+           fi
+        fi
+        HIGGSTOOLSLIBS="${HIGGSTOOLSLIBS} model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
     fi
     return 0
 }
@@ -3047,6 +3040,7 @@ EOF
             if version_at_least $FEYNARTS_VERSION "${required_feynarts_version}"; then
                 enable_feynarts="yes"
                 result "ok (version ${FEYNARTS_VERSION})"
+                DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"
             elif test "x$enable_feynarts" = "xautomatic"; then
                 enable_feynarts="no"
                 result "ok (version ${FEYNARTS_VERSION} too old -- support disabled)"
@@ -3123,6 +3117,7 @@ EOF
 
             if version_at_least $FORMCALC_VERSION "${required_formcalc_version}"; then
                 result "ok (version ${FORMCALC_VERSION})"
+                DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"
             elif test "x$enable_formcalc" = "xautomatic"; then
                 enable_formcalc="no"
                 result "ok (version ${FORMCALC_VERSION} too old -- support disabled)"
@@ -3426,15 +3421,19 @@ enable_defines() {
 
     if test "x$enable_higgstools" = "xyes" ; then
         DEFINE_ENABLE_HIGGSTOOLS="#define ENABLE_HIGGSTOOLS 1"
+        message "Enabling HiggsTools"
     else
         DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
+        message "Disabling HiggsTools"
     fi
     logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
 
     if test "x$enable_lilith" = "xyes" ; then
         DEFINE_ENABLE_LILITH="#define ENABLE_LILITH 1"
+        message "Enabling Lilith"
     else
         DEFINE_ENABLE_LILITH="#undef ENABLE_LILITH"
+        message "Disabling Lilith"
     fi
     logmsg "   ${DEFINE_ENABLE_LILITH}"
 
@@ -3970,6 +3969,8 @@ if test "x${enable_meta}" = "xyes"; then
     check_feynarts
     check_formcalc
 else
+    if [ ! "${enable_feynarts}" = "no" ]; then DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"; fi
+    if [ ! "${enable_formcalc}" = "no" ]; then DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"; fi
     enable_feynarts=no
     enable_formcalc=no
 fi
@@ -4116,6 +4117,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@|$DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER|" \
     -e "s|@DEFINE_ENABLE_SHOOTING_SOLVER@|$DEFINE_ENABLE_SHOOTING_SOLVER|" \
     -e "s|@DEFINE_ENABLE_ADDONS@|$DEFINE_ENABLE_ADDONS|"       \
+    -e "s|@DEFINE_ENABLE_FEYNARTS@|$DEFINE_ENABLE_FEYNARTS|"       \
+    -e "s|@DEFINE_ENABLE_FORMCALC@|$DEFINE_ENABLE_FORMCALC|"       \
     -e 's|@n@|\
 |g' \
     < $CONFIGHDR_TMPL > $CONFIGHDR

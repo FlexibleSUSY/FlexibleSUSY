@@ -73,8 +73,9 @@ ifneq ($(INSTALL_DIR),)
 install-src::
 		$(Q)install -d $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_CXXQFT_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_MK) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(model_specific_SM_CXXQFT_VERTICES_MK) $(SM_INSTALL_CXXQFT_DIR)
 endif
 
 clean-$(MODNAME)-dep:

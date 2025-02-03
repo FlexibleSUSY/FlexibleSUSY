@@ -75,6 +75,7 @@ public:
    void reorder_tree_level_masses();
    void print(std::ostream&) const override;
    void clear() override;
+   void set_use_pole_higgs_mixings(bool var) { use_pole_higgs_mixings = var; };
 
    // mass_eigenstates_interface functions
 
@@ -98,6 +99,7 @@ public:
    void set_physical(const @ModelName@_physical&) override;
    void clear_problems() override;
 
+@[override]lspGetters@
 @[override]delegateParameterGetters@
 @[override]delegateParameterSetters@
 @[override]massGetters@
@@ -112,6 +114,7 @@ public:
 @[override]selfEnergyPrototypes@
 
 private:
+   bool use_pole_higgs_mixings {false};      ///< use pole Higgs mixing matrices in vertices
    void clear_tree_level_parameters();
    void copy_tree_level_masses_to_pole_masses();
 };

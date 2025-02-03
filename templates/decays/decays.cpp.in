@@ -36,15 +36,17 @@
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/hana.hpp>
 
 #include "@ModelName@_mass_eigenstates_running.hpp"
 #include "@ModelName@_decays.hpp"
-#include "cxx_qft/@ModelName@_particle_aliases.hpp"
+#include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "@ModelName@_info.hpp"
 #include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
 #include "decays/decay_functions.hpp"
 #include "config.h"
+#include "error.hpp"
 #include "thread_pool.hpp"
 #include "wrappers.hpp"
 #include "standard_model.hpp"
@@ -95,12 +97,12 @@ catch (std::exception& e) {
 }
 }
 
-double get_alphas(context_base const&  context)
+double CLASSNAME::get_alphas(@ModelName@_cxx_diagrams::context_base const&  context) const
 {
    return Sqr(context.model.get_@gs_name@())/(4.*Pi);
 }
 
-double get_alpha(context_base const&  context)
+double CLASSNAME::get_alpha(@ModelName@_cxx_diagrams::context_base const&  context) const
 {
    return Sqr(unit_charge(context))/(4.*Pi);
 }
@@ -111,6 +113,16 @@ double get_alpha(context_base const&  context)
  *    - Since FS removes a factor of i from every vertex we reintroduce it
  *      calls to one loop amplitudes
  */
+
+template <int N>
+constexpr auto _to_array = [](auto&& ...x) {
+   return std::array<int, N>{std::forward<decltype(x)>(x)...};
+};
+
+template <typename Field>
+int fieldPDG(const typename field_indices<Field>::type indx) {
+   return boost::hana::unpack(Field::pdgids, _to_array<boost::hana::size(Field::pdgids)>).at(indx.size() > 0 ? indx.at(0) : 0);
+}
 
 @calcAmplitudeSpecializationDefs@
 

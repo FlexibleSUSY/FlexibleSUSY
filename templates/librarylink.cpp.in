@@ -37,6 +37,7 @@
 #include "slha_io.hpp"
 #include "spectrum_generator_settings.hpp"
 #include "decays/flexibledecay_settings.hpp"
+#include "decays/experimental_constraints.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "lowe.h"
 #include "@ModelName@_unitarity.hpp"
@@ -54,6 +55,8 @@
 #include <sstream>
 #include <string>
 #include <tuple>
+#include <utility>
+#include <filesystem>
 #include <utility>
 
 #define INPUTPARAMETER(p) input.p
@@ -151,6 +154,9 @@ public:
    virtual const @ModelName@_observables& get_observables() const = 0;
 @getDecaysVirtualFunc@
    virtual const UnitarityInfiniteS& get_unitarity() const = 0;
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const = 0;
+   virtual const SignalResult& get_higgssignals_output() const = 0;
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const = 0;
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
@@ -160,6 +166,7 @@ public:
       const Physical_input&,
       const Spectrum_generator_settings&) = 0;
 @calculateDecaysVirtualFunc@
+@calculateDecaysEffCVirtualFunc@
    virtual void calculate_unitarity() = 0;
 };
 
@@ -177,6 +184,9 @@ public:
    virtual const @ModelName@_observables& get_observables() const override { return observables; }
 @getSpectrumDecays@
    virtual const UnitarityInfiniteS& get_unitarity() const override { return unitarityData; };
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const override { return normalized_higgs_effc; };
+   virtual const SignalResult& get_higgssignals_output() const override { return higgssignals; };
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const override { return higgsbounds; };
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
@@ -186,6 +196,7 @@ public:
       const Physical_input&,
       const Spectrum_generator_settings&) override;
 @calculateSpectrumDecaysPrototype@
+@calculateSpectrumDecaysEffCPrototype@
    virtual void calculate_unitarity() override;
 private:
    std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
@@ -193,6 +204,9 @@ private:
    @ModelName@_scales scales{};              ///< scale information
    @ModelName@_observables observables{};    ///< observables
    UnitarityInfiniteS unitarityData = {};    ///< unitarity constraints
+   EffectiveCoupling_list normalized_higgs_effc {};
+   SignalResult higgssignals {};
+   std::vector<std::tuple<int, double, double, std::string>> higgsbounds {};
 @decaysData@
 };
 
@@ -215,6 +229,19 @@ public:
 
    const Spectrum_generator_settings& get_settings() const { return settings; }
    const FlexibleDecay_settings& get_fd_settings() const { return flexibledecay_settings; }
+   const Physical_input& get_physical_input() { return physical_input; }
+   const EffectiveCoupling_list& get_normalized_higgs_effc() const {
+      check_spectrum_pointer();
+      return spectrum->get_normalized_higgs_effc();
+   }
+   const SignalResult& get_higgssignals_output() const {
+      check_spectrum_pointer();
+      return spectrum->get_higgssignals_output();
+   }
+   const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const {
+      check_spectrum_pointer();
+      return spectrum->get_higgsbounds_output();
+   }
 
    void put_settings(MLINK link) const;
    void put_sm_input_parameters(MLINK link) const;
@@ -222,14 +249,17 @@ public:
    void put_observables(MLINK link) const;
    void put_slha(MLINK link) const;
 @putDecaysPrototype@
+@putEffCPrototype@
    void put_problems(MLINK link) const;
    void put_warnings(MLINK link) const;
    void put_model_spectra(MLINK link) const;
+   void put_higgstools_results(MLINK, SignalResult const&, std::vector<std::tuple<int, double, double, std::string>> const&) const;
    void put_unitarity(MLINK link) const;
    void calculate_spectrum();
    void check_spectrum(MLINK link) const;
    void calculate_model_observables();
 @calculateModelDecaysPrototype@
+@calculateModelDecaysEffCPrototype@
    void calculate_unitarity();
    double get_model_scale() const {
       check_spectrum_pointer();
@@ -244,6 +274,8 @@ private:
    SLHA_io::Modsel modsel{};                                ///< MODSEL input
    @LToLConversion_private@
    std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr}; ///< spectrum information
+   EffectiveCoupling_list normalized_higgs_effc {};
+   SignalResult higgssignals {};
 
    @ModelName@_slha_io get_slha_io() const;
 
@@ -535,6 +567,7 @@ void Model_data::put_warnings(MLINK link) const
    slha_io.set_sminputs(qedqcd);
    slha_io.set_physical_input(physical_input);
    slha_io.set_modsel(modsel);
+   slha_io.set_FlexibleDecay_settings(flexibledecay_settings);
    slha_io.set_input(input);
    @LToLConversion_set_slha@
    slha_io.set_print_imaginary_parts_of_majorana_mixings(
@@ -694,6 +727,7 @@ void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
       scales.pole_mass_scale);
 }
 @calculateSpectrumDecaysFunction@
+@calculateSpectrumDecaysEffCFunction@
 /******************************************************************/
 
 template <typename Solver_type>
@@ -736,6 +770,32 @@ void Model_data::put_observables(MLINK link) const
    MLEndPacket(link);
 }
 @putDecaysFunction@
+@putEffCFunction@
+
+#ifdef ENABLE_HIGGSTOOLS
+void Model_data::put_higgstools_results(MLINK link, SignalResult const& hs, std::vector<std::tuple<int, double, double, std::string>> const& hb) const
+{
+   MLPutFunction(link, "List", 1);
+   MLPutRule(link, "@ModelName@");
+   MLPutFunction(link, "List", 2);
+   MLPutFunction(link, "List", 4);
+   MLPutRuleTo(link, static_cast<int>(hs.ndof), "ndof");
+   MLPutRuleTo(link, hs.chi2BSM, "chi2");
+   MLPutRuleTo(link, hs.chi2SM, "chi2SM");
+   MLPutRuleTo(link, hs.pval, "pval");
+   MLPutFunction(link, "List", hb.size());
+   for (const auto& el : hb) {
+      MLPutFunction(link, "List", 4);
+      MLPutRuleTo(link, std::get<0>(el), "pdgid");
+      MLPutRuleTo(link, std::get<1>(el), "obsRatio");
+      MLPutRuleTo(link, std::get<2>(el), "expRatio");
+      MLPutFunction(link, "Rule", 2);
+      MLPutString(link, "bestAnalysis");
+      MLPutString(link, std::get<3>(el).c_str());
+   }
+   MLEndPacket(link);
+}
+#endif
 
 /******************************************************************/
 
@@ -797,6 +857,7 @@ void Model_data::calculate_model_observables()
       settings);
 }
 @calculateModelDecaysFunction@
+@calculateModelDecaysEffCFunction@
 /******************************************************************/
 
 void Model_data::calculate_unitarity()
@@ -1232,6 +1293,80 @@ DLLEXPORT int FS@ModelName@CalculateObservables(
    return LIBRARY_NO_ERROR;
 }
 @mathlinkDecaysCalculationFunction@
+@mathlinkCalcNormalizedEffC@
+
+#ifdef ENABLE_LILITH
+DLLEXPORT int FS@ModelName@CallLilith(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::@ModelName@_librarylink;
+
+   if (!check_number_of_args(link, 2, "FS@ModelName@CallLilith"))
+      return LIBRARY_TYPE_ERROR;
+
+   const auto hid = get_handle_from(link);
+
+   const char* llDbFile = "";
+   !MLGetString(link, &llDbFile);
+   if (!std::filesystem::exists(llDbFile)) {
+      put_message(link, "FS@ModelName@CallLilith", "error", std::string(llDbFile) + " is not a valid path");
+      put_error_output(link);
+      return LIBRARY_NO_ERROR;
+   }
+
+   try {
+      auto& data = find_data(hid);
+      std::optional<flexiblesusy::SignalResult> ll =
+         call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), llDbFile);
+   } catch (const flexiblesusy::Error& e) {
+      put_message(link, "FS@ModelName@CallLilith", "error", e.what());
+      put_error_output(link);
+   }
+
+   return LIBRARY_NO_ERROR;
+}
+#endif
+
+#ifdef ENABLE_HIGGSTOOLS
+DLLEXPORT int FS@ModelName@CallHiggsTools(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::@ModelName@_librarylink;
+
+   if (!check_number_of_args(link, 3, "FS@ModelName@CallHiggsTools"))
+      return LIBRARY_TYPE_ERROR;
+
+   const auto hid = get_handle_from(link);
+
+   const char* hbDatabasePath = "";
+   MLGetString(link, &hbDatabasePath);
+   if (!std::filesystem::exists(hbDatabasePath)) {
+      put_message(link, "FS@ModelName@CallHiggsTools", "error", std::string(hbDatabasePath) + " is not a valid path to HiggsBounds database");
+      put_error_output(link);
+      return LIBRARY_NO_ERROR;
+   }
+
+   const char* hsDatabasePath = "";
+   MLGetString(link, &hsDatabasePath);
+   if (!std::filesystem::exists(hsDatabasePath)) {
+      put_message(link, "FS@ModelName@CallHiggsTools", "error", std::string(hsDatabasePath) + " is not a valid path to HiggsSignals database");
+      put_error_output(link);
+      return LIBRARY_NO_ERROR;
+   }
+
+   try {
+      auto& data = find_data(hid);
+      auto [hs, higgsbounds_v] =
+         call_higgstools(data.get_normalized_higgs_effc(), data.get_physical_input(), hsDatabasePath, hbDatabasePath);
+      data.put_higgstools_results(link, hs, higgsbounds_v);
+   } catch (const flexiblesusy::Error& e) {
+      std::cerr << e.what_detailed() << std::endl;
+      return LIBRARY_FUNCTION_ERROR;
+   }
+
+   return LIBRARY_NO_ERROR;
+}
+#endif
 
 DLLEXPORT int FS@ModelName@CalculateUnitarity(
    WolframLibraryData /* libData */, MLINK link)

@@ -36,6 +36,7 @@
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/hana/size.hpp>
 #include <gsl/gsl_monte_miser.h>
 
 #include "standard_model_decays.hpp"
@@ -113,6 +114,11 @@ template <int N>
 constexpr auto _to_array = [](auto&& ...x) {
    return std::array<int, N>{std::forward<decltype(x)>(x)...};
 };
+
+template <typename Field>
+int fieldPDG(const typename field_indices<Field>::type indx) {
+   return boost::hana::unpack(Field::pdgids, _to_array<boost::hana::size(Field::pdgids)>).at(indx.size() > 0 ? indx.at(0) : 0);
+}
 
 /* 1-loop BSM amplitudes
  *
@@ -2233,8 +2239,8 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
    // external particles' masses
    result.m_decay = context.physical_mass<hh>(idx_1);
-   result.m_vector_1 = context.physical_mass<VP>(idx_2);
-   result.m_vector_2 = context.physical_mass<VZ>(idx_3);
+   result.m_vector_1 = 0.;
+   result.m_vector_2 = qedqcd.displayPoleMZ();
 
    // set the initial value of an amplitude to 0
    result.form_factor_g = std::complex<double>(0., 0.);
@@ -4675,8 +4681,8 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VZ, VZ>(
 
    // external particles' masses
    result.m_decay = context.physical_mass<hh>(idx_1);
-   result.m_vector_1 = context.physical_mass<VZ>(idx_2);
-   result.m_vector_2 = context.physical_mass<VZ>(idx_3);
+   result.m_vector_1 = qedqcd.displayPoleMZ();
+   result.m_vector_2 = qedqcd.displayPoleMZ();
 
    // set the initial value of an amplitude to 0
    result.form_factor_g = std::complex<double>(0., 0.);
@@ -5782,8 +5788,7 @@ void CLASSNAME::calculate_hh_decays()
             model.run_to(decay_mass);
          }
          catch (const NonPerturbativeRunningError& e) {
-            std::cout << e.what() << '\n';
-            std::cout << "λ(μ=" << decay_mass << " GeV) = " << model.get_Lambdax() << '\n';
+            WARNING(std::string(e.what()) + " λ(μ=" + std::to_string(decay_mass) + " GeV) = " + std::to_string(model.get_Lambdax()));
          }
          model.solve_ewsb_tree_level();
          model.calculate_DRbar_masses();
@@ -5886,6 +5891,20 @@ void CLASSNAME::calculate_hh_decays()
             }));
 
       }
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) ||
+      flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) ||
+      flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block))
+   {
+      auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(
+         neutral_higgs_effc), [](NeutralHiggsEffectiveCouplings const& effC) {
+         return effC.particle == field_as_string<hh>({});});
+      found->width = decays.get_total_width();
+      found->mass = context.physical_mass<hh>({});
+      const auto _indices = concatenate(typename cxx_diagrams::field_indices<hh>::type {}, typename cxx_diagrams::field_indices<hh>::type {}, typename cxx_diagrams::field_indices<hh>::type {}, typename cxx_diagrams::field_indices<hh>::type {});
+      const auto h4vertex = Vertex<hh, hh, hh, hh>::evaluate(_indices, context);
+      found->lam = std::real(h4vertex.value());
    }
 }
 
