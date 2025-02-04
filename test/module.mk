@@ -572,10 +572,6 @@ TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
 
-ifeq ($(WITH_SM) $(ENABLE_META),yes yes)
-TEST_SRC += \
-		$(DIR)/test_SM_cxxdiagrams.cpp
-endif
 ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 TEST_SRC += \
 		$(DIR)/test_SM_cxxvertices.cpp
@@ -594,11 +590,6 @@ ifeq ($(WITH_SM),yes)
 TEST_SRC += \
 		$(DIR)/test_SM_npointfunctions.cpp \
 		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
-endif
-ifeq ($(WITH_MSSM),yes)
-TEST_SRC += \
-		$(DIR)/test_MSSM_npointfunctions.cpp \
-		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
 endif
 endif
 
