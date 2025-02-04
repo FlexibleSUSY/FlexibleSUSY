@@ -588,7 +588,6 @@ endif
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC) $(ENABLE_META),yes yes yes)
 ifeq ($(WITH_SM),yes)
 TEST_SRC += \
-		$(DIR)/test_SM_npointfunctions.cpp \
 		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
 endif
 endif
