@@ -177,11 +177,6 @@ endif
 
 endif
 
-ifeq ($(ENABLE_COLLIER), yes)
-TEST_SRC += \
-		$(DIR)/test_looplibrary_collier.cpp
-endif
-
 ifeq ($(ENABLE_FFLITE), yes)
 TEST_SRC += \
 		$(DIR)/test_looplibrary_fflite.cpp
