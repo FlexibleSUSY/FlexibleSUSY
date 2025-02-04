@@ -4131,6 +4131,15 @@ double Standard_model::CpbargWpgWpVP() const
    return result;
 }
 
+std::complex<double> Standard_model::CpHpconjHpVPVP() const
+{
+
+   const std::complex<double> result = 0.1*(g2*Sin(ThetaW())*(7.745966692414834*g1
+      *Cos(ThetaW()) + 5*g2*Sin(ThetaW())) + 3*Sqr(g1)*Sqr(Cos(ThetaW())));
+
+   return result;
+}
+
 double Standard_model::CpconjVWpVPVWp() const
 {
    
@@ -4221,6 +4230,30 @@ double Standard_model::CpconjVWpVWpVZ() const
 {
    
    const double result = g2*Cos(ThetaW());
+
+   return result;
+}
+
+double Standard_model::CpconjVWpVPVPVWp3() const
+{
+
+   const double result = -2*Sqr(g2)*Sqr(Sin(ThetaW()));
+
+   return result;
+}
+
+double Standard_model::CpconjVWpVPVPVWp1() const
+{
+
+   const double result = Sqr(g2)*Sqr(Sin(ThetaW()));
+
+   return result;
+}
+
+double Standard_model::CpconjVWpVPVPVWp2() const
+{
+
+   const double result = Sqr(g2)*Sqr(Sin(ThetaW()));
 
    return result;
 }
@@ -4891,6 +4924,33 @@ std::complex<double> Standard_model::self_energy_VWp_1loop(double p ) const
 
    return result * oneOver16PiSqr;
 
+}
+
+std::complex<double> Standard_model::self_energy_VP_1loop(double p ) const
+{
+   std::complex<double> result;
+
+   result += AbsSqr(CpbargWpCgWpCVP())*B00(p,MVWp,MVWp);
+   result += AbsSqr(CpbargWpgWpVP())*B00(p,MVWp,MVWp);
+   result += -(A0(MVWp)*(CpconjVWpVPVPVWp1() + CpconjVWpVPVPVWp2() + 4*
+      CpconjVWpVPVPVWp3()));
+   result += -4*AbsSqr(CpHpconjHpVP())*B00(p,MHp,MHp);
+   result += A0(MHp)*CpHpconjHpVPVP();
+   result += 2*AbsSqr(CpHpconjVWpVP())*B0(p,MVWp,MHp);
+   result += 2*CpconjVWpVPVPVWp3()*Sqr(MVWp);
+   result += -0.6666666666666666*AbsSqr(CpconjVWpVPVWp())*(3*A0(MVWp) + 15*
+      B00(p,MVWp,MVWp) - 6*Sqr(MVWp) + Sqr(p) + 3*B0(p,MVWp,MVWp)*(Sqr(MVWp) + 2*Sqr(p)));
+   result += 3*SUM(gI1,0,2,SUM(gI2,0,2,(AbsSqr(CpbarFdFdVPPL(gI1,gI2)) + AbsSqr(
+      CpbarFdFdVPPR(gI1,gI2)))*H0(p,MFd(gI1),MFd(gI2)) + 4*B0(p,MFd(gI1),MFd(gI2))*
+      MFd(gI1)*MFd(gI2)*Re(Conj(CpbarFdFdVPPL(gI1,gI2))*CpbarFdFdVPPR(gI1,gI2))));
+   result += SUM(gI1,0,2,SUM(gI2,0,2,(AbsSqr(CpbarFeFeVPPL(gI1,gI2)) + AbsSqr(
+      CpbarFeFeVPPR(gI1,gI2)))*H0(p,MFe(gI1),MFe(gI2)) + 4*B0(p,MFe(gI1),MFe(gI2))*
+      MFe(gI1)*MFe(gI2)*Re(Conj(CpbarFeFeVPPL(gI1,gI2))*CpbarFeFeVPPR(gI1,gI2))));
+   result += 3*SUM(gI1,0,2,SUM(gI2,0,2,(AbsSqr(CpbarFuFuVPPL(gI1,gI2)) + AbsSqr(
+      CpbarFuFuVPPR(gI1,gI2)))*H0(p,MFu(gI1),MFu(gI2)) + 4*B0(p,MFu(gI1),MFu(gI2))*
+      MFu(gI1)*MFu(gI2)*Re(Conj(CpbarFuFuVPPL(gI1,gI2))*CpbarFuFuVPPR(gI1,gI2))));
+
+   return result * oneOver16PiSqr;
 }
 
 std::complex<double> Standard_model::self_energy_Fd_1loop_1(double p , int gO1, int gO2) const

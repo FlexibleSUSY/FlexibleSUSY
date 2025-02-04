@@ -745,6 +745,9 @@ private:
    double CpbargWpCgWpCVZ() const;
    double CpbargWpgWpVZ() const;
    double CpconjVWpVWpVZ() const;
+   double CpconjVWpVPVPVWp3() const;
+   double CpconjVWpVPVPVWp1() const;
+   double CpconjVWpVPVPVWp2() const;
    double CpbargWpCgPconjVWp() const;
    double CpbargPgWpconjVWp() const;
    double CpbargZgWpconjVWp() const;
@@ -757,6 +760,7 @@ private:
    std::complex<double> CpVGVGVG() const;
    std::complex<double> CpbargGgGVG() const;
    std::complex<double> CpAhconjHpVWp() const;
+   std::complex<double> CpHpconjHpVPVP() const;
 
    double CpbarFeFvconjHpPR(int , int ) const;
    double CpbarFdFdVGPL(int gI1, int gI2) const;
