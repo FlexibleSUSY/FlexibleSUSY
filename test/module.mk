@@ -94,6 +94,7 @@ TEST_SRC := \
 		$(DIR)/test_standard_model_hh_deriv.cpp \
 		$(DIR)/test_which.cpp \
 		$(DIR)/test_wrappers.cpp \
+		$(DIR)/test_looplibrary_softsusy.cpp \
 		$(DIR)/test_looplibrary_environment.cpp
 
 TEST_SH := \
