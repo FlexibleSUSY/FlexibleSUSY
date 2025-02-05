@@ -199,16 +199,6 @@ endif
 
 endif # shooting
 
-ifeq ($(ENABLE_LOOPTOOLS), yes)
-TEST_SRC += \
-		$(DIR)/test_looplibrary_looptools.cpp
-endif
-
-ifeq ($(ENABLE_COLLIER), yes)
-TEST_SRC += \
-		$(DIR)/test_looplibrary_collier.cpp
-endif
-
 ifeq ($(ENABLE_FFLITE), yes)
 TEST_SRC += \
 		$(DIR)/test_looplibrary_fflite.cpp
