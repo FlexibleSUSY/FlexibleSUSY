@@ -20,9 +20,9 @@
 #define DECAY_FUNCTIONS_H
 
 #include <complex>
-#include "src/lowe.h"
+#include "lowe.h"
 #include "flexibledecay_settings.hpp"
-#include "src/wrappers.hpp"
+#include "wrappers.hpp"
 
 namespace flexiblesusy {
 
@@ -59,6 +59,7 @@ std::complex<double> f(double x) noexcept;
 unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexcept;
 
 static constexpr double deltaqq_QCDxQED = 691/24. - 6*zeta3 - Sqr(Pi);
+
 } // namespace flexiblesusy
 
 #endif

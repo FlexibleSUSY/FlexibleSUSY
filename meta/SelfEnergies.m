@@ -579,9 +579,11 @@ FillHermitianSelfEnergyMatrix[nPointFunction_, sym_String] :=
            dim = GetDimension[field];
            name = CreateFunctionName[nPointFunction, 1];
            "\
-for (int i = 0; i < " <> ToString[dim] <> "; i++)
-   for (int k = i; k < " <> ToString[dim] <> "; k++)
+for (int i = 0; i < " <> ToString[dim] <> "; i++) {
+   for (int k = i; k < " <> ToString[dim] <> "; k++) {
       " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+   }
+}
 
 Hermitianize(" <> sym <> ");
 "
@@ -592,9 +594,11 @@ FillGeneralSelfEnergyFunction[nPointFunction_, sym_String] :=
            dim = GetDimension[field];
            name = CreateFunctionName[nPointFunction, 1];
            "\
-for (int i = 0; i < " <> ToString[dim] <> "; i++)
-   for (int k = 0; k < " <> ToString[dim] <> "; k++)
+for (int i = 0; i < " <> ToString[dim] <> "; i++) {
+   for (int k = 0; k < " <> ToString[dim] <> "; k++) {
       " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+   }
+}
 "
           ];
 

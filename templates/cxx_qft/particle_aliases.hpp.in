@@ -25,7 +25,7 @@
 
 #include "cxx_qft/@ModelName@_fields.hpp"
 
-namespace flexiblesusy {
+namespace flexiblesusy::@ModelName@_cxx_diagrams::fields {
 
 @SMParticlesAliases@
 

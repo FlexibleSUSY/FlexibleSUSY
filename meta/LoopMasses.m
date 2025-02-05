@@ -1465,7 +1465,7 @@ CConversion`ToValidCSymbolString[mass /. FlexibleSUSY`M -> Identity] <>
  * This function finds the lightest supersymmetric particle (LSP) and
  * returns it's mass.  The corresponding particle type is retured in
  * the reference parameter.  The list of potential LSPs is set in the
- * model file varible PotentialLSPParticles.  For this model it is set
+ * model file variable PotentialLSPParticles.  For this model it is set
  * to:
  * " <> ToString[masses] <> "
  *

@@ -41,5 +41,22 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       res_P *= 1. + get_alpha(context)/Pi*17./4.;
    }
 
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(
+         field_as_string<Higgs>(indexIn),
+            {
+               boost::hana::unpack(bar<ChargedLepton>::pdgids, _to_array<bar<ChargedLepton>::numberOfGenerations>).at(indexOut1.at(0)),
+               boost::hana::unpack(ChargedLepton::pdgids, _to_array<ChargedLepton::numberOfGenerations>).at(indexOut2.at(0))
+            },
+         std::pair<std::string, std::complex<double>> {
+            field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<ChargedLepton>::type>(indexOut1) + "-" + field_as_string<ChargedLepton>(indexOut2),
+            std::sqrt(res_S) + 1i*std::sqrt(res_P)
+         }
+      );
+   }
+
    return res_S + res_P;
 }

@@ -75,6 +75,8 @@ void Command_line_options::parse(const Dynamic_array_view<char*>& args)
          higgssignals_dataset = option.substr(23);
       } else if (starts_with(option, "--higgsbounds-dataset=")) {
          higgsbounds_dataset = option.substr(22);
+      } else if (starts_with(option, "--lilith-db=")) {
+         lilith_db = option.substr(12);
       } else if (option == "--version" || option == "-v") {
          print_version(std::cout);
          do_exit = true;
@@ -116,6 +118,7 @@ void Command_line_options::print_usage(std::ostream& ostr) const
            "                                     parameter point to\n"
            "  --higgsbounds-dataset=<directory>  Location of HiggsBounds dataset\n"
            "  --higgssignals-dataset=<directory> Location of HiggsSignals dataset\n"
+           "  --lilith-db=<filename>             Lilith database\n"
            "  --rgflow-output-file=<filename>    File to write rgflow to\n"
            "  --build-info                       Print build information\n"
            "  --model-info                       Print model information\n"

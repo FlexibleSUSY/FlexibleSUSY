@@ -18,9 +18,17 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
+   const int Nf = number_of_active_flavours(qedqcd, mAh);
+   if (Nf < 5) {
+      problems.add_warning(
+         create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx)
+         + ": Pseudoscalar Higgs too light (less than 5 active quark flavours). Disabling higher-order corrections."
+      );
+   }
+
    // higher order QCD corrections
    const double tau = Sqr(mAh/(2.*context.mass<UpTypeQuark>({2})));
-   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && Nf >= 5 && tau < 0.7) {
       // number of active light flavours
       static constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
@@ -77,13 +85,26 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       result += pseudoscalar_corr;
    }
 
+   const std::string tag = field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx);
+
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
-            36 + 10*(in_idx.size()>0 ? in_idx.at(0)-1 : 0), 21, 21,
+            fieldPDG<PseudoscalarHiggs>(in_idx), 21, 21,
             std::sqrt(result/(flux * color_fact * ps * ps_symmetry)/(0.5*Power4(mAh))),
-            field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx)
+            tag
          }
+      );
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(
+         field_as_string<Ah>(in_idx),
+         {21, 21},
+         std::pair<std::string, double> {tag, std::sqrt(result)}
       );
    }
 

@@ -24,6 +24,7 @@
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_spectrum_generator.hpp"
 #include "@ModelName@_utilities.hpp"
+#include "decays/experimental_constraints.hpp"
 @decaysIncludes@
 #include "@ModelName@_unitarity.hpp"
 
@@ -54,7 +55,8 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
                const std::string& slha_output_file,
                const std::string& database_output_file,
                const std::string& spectrum_file,
-               const std::string& rgflow_file)
+               const std::string& rgflow_file,
+               std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset, std::string const& lilith_db)
 {
    using namespace flexiblesusy;
 
@@ -104,6 +106,10 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
       }
    }
 
+   EffectiveCoupling_list effc {};
+   SignalResult hs {};
+   std::vector<std::tuple<int, double, double, std::string>> higgsbounds_v = {};
+   std::optional<SignalResult> lilith;
 @calculateDecaysForModel@
 
    const bool show_result = !problems.have_problem() ||
@@ -162,7 +168,8 @@ int run(
    const std::string& slha_output_file,
    const std::string& database_output_file,
    const std::string& spectrum_file,
-   const std::string& rgflow_file)
+   const std::string& rgflow_file,
+   std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset, std::string const& lilith_db)
 {
    using namespace flexiblesusy;
 
@@ -200,6 +207,9 @@ int main(int argc, char* argv[])
    const std::string slha_input_source(options.get_slha_input_file());
    const std::string slha_output_file(options.get_slha_output_file());
    const std::string spectrum_file(options.get_spectrum_file());
+   const std::string higgsbounds_dataset(options.get_higgsbounds_dataset());
+   const std::string higgssignals_dataset(options.get_higgssignals_dataset());
+   const std::string lilith_db(options.get_lilith_db());
    @ModelName@_slha_io slha_io;
    Spectrum_generator_settings spectrum_generator_settings;
 @decaySettingsObj@
@@ -230,7 +240,7 @@ int main(int argc, char* argv[])
 
    const int exit_code
       = run(slha_io, spectrum_generator_settings, @flexibleDecaySettingsVarInDecl@slha_output_file,
-            database_output_file, spectrum_file, rgflow_file);
+            database_output_file, spectrum_file, rgflow_file, higgsbounds_dataset, higgssignals_dataset, lilith_db);
 
    return exit_code;
 }

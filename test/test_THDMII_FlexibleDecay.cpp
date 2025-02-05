@@ -338,3 +338,4 @@ Block UERMIX
    // Ah -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 5.4527502926727843e-07, 8e-12);
 }
+
