@@ -130,9 +130,9 @@ InitialGuessAtHighScale = {
 };
 
 UseHiggs2LoopMSSM = True;
+UseHiggs3LoopMSSM = True;
 EffectiveMu = \[Mu];
 UseMSSM3LoopRGEs = True;
-UseHiggs3LoopMSSM = True;
 UseMSSMYukawa2Loop = True;
 UseMSSMAlphaS2Loop = True;
 
