@@ -31,57 +31,69 @@ namespace looplibrary
 
 std::complex<double> Softsusy::A0(A_ARGS) noexcept
 {
-   double m2 = m02_in.real();
-   double q2 = scl2_in;
+   const double m2 = m02_in.real();
+   const double q2 = scl2_in;
 
    return {softsusy::rea0(m2, q2), 0.0};
 }
 
 std::complex<double> Softsusy::B0(B_ARGS) noexcept
 {
-   double p = std::sqrt(p10_in.real());
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double q = std::sqrt(scl2_in);
+   const double p = std::sqrt(p10_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double q = std::sqrt(scl2_in);
 
    return {softsusy::b0(p, m1, m2, q), 0.0};
 }
 
 std::complex<double> Softsusy::B1(B_ARGS) noexcept
 {
-   double p = std::sqrt(p10_in.real());
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double q = std::sqrt(scl2_in);
+   const double p = std::sqrt(p10_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double q = std::sqrt(scl2_in);
 
    return {(-1) * softsusy::b1(p, m1, m2, q), 0.0};
 }
 
 std::complex<double> Softsusy::B00(B_ARGS) noexcept
 {
-   double p = std::sqrt(p10_in.real());
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double q = std::sqrt(scl2_in);
+   const double p = std::sqrt(p10_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double q = std::sqrt(scl2_in);
 
    return {softsusy::b22(p, m1, m2, q), 0.0};
 }
 
+
+std::complex<double> Softsusy::DB0(DB_ARGS) noexcept
+{
+   const double p = p10_in.real();
+   const double m1 = m02_in.real();
+   const double m2 = m12_in.real();
+
+   return {softsusy::db0(p, m1, m2), 0.0};
+}
+
+BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (DB_ARGS), (DB1)(DB00))
+
 std::complex<double> Softsusy::C0(C_ARGS) noexcept
 {
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double m3 = std::sqrt(m22_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double m3 = std::sqrt(m22_in.real());
 
    return {softsusy::c0(m1, m2, m3), 0.0};
 }
 
 std::complex<double> Softsusy::C00(C_ARGS) noexcept
 {
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double m3 = std::sqrt(m22_in.real());
-   double q = std::sqrt(scl2_in);
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double m3 = std::sqrt(m22_in.real());
+   const double q = std::sqrt(scl2_in);
 
    return {softsusy::c00(m1, m2, m3, q), 0.0};
 }
@@ -90,20 +102,20 @@ BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (C_ARGS), (C1)(C2)(C11)(C12)(C22))
 
 std::complex<double> Softsusy::D0(D_ARGS) noexcept
 {
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double m3 = std::sqrt(m22_in.real());
-   double m4 = std::sqrt(m32_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double m3 = std::sqrt(m22_in.real());
+   const double m4 = std::sqrt(m32_in.real());
 
    return {softsusy::d0(m1, m2, m3, m4), 0.0};
 }
 
 std::complex<double> Softsusy::D00(D_ARGS) noexcept
 {
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double m3 = std::sqrt(m22_in.real());
-   double m4 = std::sqrt(m32_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double m3 = std::sqrt(m22_in.real());
+   const double m4 = std::sqrt(m32_in.real());
 
    return {softsusy::d27(m1, m2, m3, m4), 0.0};
 }
@@ -113,18 +125,30 @@ BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (D_ARGS),
 
 void Softsusy::A(Acoeff_t& a, A_ARGS) noexcept
 {
-   double m = std::sqrt(m02_in.real());
-   double q = std::sqrt(scl2_in);
+   const double m = std::sqrt(m02_in.real());
+   const double q = std::sqrt(scl2_in);
 
    a.at(0) = {softsusy::a0(m, q), 0.0};
 }
 
+void Softsusy::DB(DBcoeff_t& db, DB_ARGS) noexcept
+{
+   const double p = p10_in.real();
+   const double m1 = m02_in.real();
+   const double m2 = m12_in.real();
+
+   static constexpr std::complex<double> undefined = {NAN_Q, NAN_Q};
+   db.at(0) = {softsusy::db0(p, m1, m2), 0.};
+   db.at(1) = undefined;
+   db.at(2) = undefined;
+}
+
 void Softsusy::B(Bcoeff_t& b, B_ARGS) noexcept
 {
-   double p = std::sqrt(p10_in.real());
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double q = std::sqrt(scl2_in);
+   const double p = std::sqrt(p10_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double q = std::sqrt(scl2_in);
 
    b.at(0) = {softsusy::b0(p, m1, m2, q), 0.0};
    b.at(1) = {(-1) * softsusy::b1(p, m1, m2, q), 0.0};
@@ -133,10 +157,10 @@ void Softsusy::B(Bcoeff_t& b, B_ARGS) noexcept
 
 void Softsusy::C(Ccoeff_t& c, C_ARGS) noexcept
 {
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double m3 = std::sqrt(m22_in.real());
-   double q = std::sqrt(scl2_in);
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double m3 = std::sqrt(m22_in.real());
+   const double q = std::sqrt(scl2_in);
    std::complex<double> undefined = {NAN_Q, NAN_Q};
 
    c.at(0) = {softsusy::c0(m1, m2, m3), 0.0};
@@ -150,10 +174,10 @@ void Softsusy::C(Ccoeff_t& c, C_ARGS) noexcept
 
 void Softsusy::D(Dcoeff_t& d, D_ARGS) noexcept
 {
-   double m1 = std::sqrt(m02_in.real());
-   double m2 = std::sqrt(m12_in.real());
-   double m3 = std::sqrt(m22_in.real());
-   double m4 = std::sqrt(m32_in.real());
+   const double m1 = std::sqrt(m02_in.real());
+   const double m2 = std::sqrt(m12_in.real());
+   const double m3 = std::sqrt(m22_in.real());
+   const double m4 = std::sqrt(m32_in.real());
    std::complex<double> undefined = {NAN_Q, NAN_Q};
 
    d.at(0) = {softsusy::d0(m1, m2, m3, m4), 0.0};

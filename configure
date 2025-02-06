@@ -5,8 +5,8 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=7
-FLEXIBLESUSY_PATCH=1
+FLEXIBLESUSY_MINOR=8
+FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -166,7 +166,10 @@ DEFINE_ENABLE_VERBOSE="#undef ENABLE_VERBOSE"
 DEFINE_ENABLE_TWO_SCALE_SOLVER="#undef ENABLE_TWO_SCALE_SOLVER"
 DEFINE_ENABLE_LATTICE_SOLVER="#undef ENABLE_LATTICE_SOLVER"
 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#undef ENABLE_SEMI_ANALYTIC_SOLVER"
+DEFINE_ENABLE_SHOOTING_SOLVER="#undef ENABLE_SHOOTING_SOLVER"
 DEFINE_ENABLE_ADDONS=""
+DEFINE_ENABLE_FEYNARTS="#undef ENABLE_FEYNARTS"
+DEFINE_ENABLE_FORMCALC="#undef ENABLE_FORMCALC"
 
 boost_lib_dir=""
 boost_inc_dir=""
@@ -218,6 +221,8 @@ LLFLAGS=""
 LLLIBS=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
+HIGGSTOOLSFLAGS="-Imodel_specific/SM"
+HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
 lilith_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
@@ -226,8 +231,8 @@ sqlite_inc_dir=""
 tsil_lib_dir=""
 tsil_inc_dir=""
 # available RG solvers
-SOLVERS="two_scale semi_analytic"
-available_solvers="two_scale lattice semi_analytic"
+SOLVERS="two_scale semi_analytic shooting"
+available_solvers="two_scale lattice semi_analytic shooting"
 # models that will be compiled
 MODELS="all"
 # BEGIN: NOT EXPORTED ##########################################
@@ -266,11 +271,11 @@ SARAH_MINOR="0"
 SARAH_PATCH="0"
 
 # required FeynArts version
-required_feynarts_version="3.9.0"
+required_feynarts_version="3.10.0"
 FEYNARTS_VERSION="unknown"
 
 # required FormCalc version
-required_formcalc_version="9.5.0"
+required_formcalc_version="9.8.0"
 FORMCALC_VERSION="unknown"
 
 # Mathematica version (0 = unknown)
@@ -977,7 +982,7 @@ check_solvers() {
         case "$a" in
             all)
                 SOLVERS="$available_solvers"; break ;;
-            two_scale|lattice|semi_analytic)
+            two_scale|lattice|semi_analytic|shooting)
                 SOLVERS="$SOLVERS $a"
                 continue ;;
             *)
@@ -2175,7 +2180,7 @@ check_higgstools_incl() {
             return 1
         fi
     else
-        HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
+        HIGGSTOOLSFLAGS="$HIGGSTOOLSFLAGS -I$higgstools_inc_dir"
         return 0
     fi
     return 0
@@ -2198,32 +2203,21 @@ check_higgstools_libs() {
         filename=$(basename -- "$found_lib")
         local extension="${filename##*.}"
         local HIGGSTOOLSLIBS_="-lHiggsTools"
-        if [ "$extension" = "a" ] ; then
-            if [ -z "$higgstools_lib_dir" ]; then
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bstatic -$HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
-            else
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
-            fi
-        elif [ "$extension" = "so" ] || [ "$extension" = "dylib" ]; then
-            if [ "x$enable_static" = xyes ] ; then
-               message "Warning: Requested creation of statically link executable but"
-               message "         HiggsTools was compiled as a shared library."
-	         fi
-            if [ -z "$higgstools_lib_dir" ]; then
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-Wl,-Bdynamic -$HIGGSTOOLSLIBS_"
-            else
-                # assume that the linker will look in the default paths
-                HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
-            fi
-        else
+        if [ ! "$extension" = "a" ] && [ ! "$extension" = "so" ] && [ ! "$extension" = "dylib" ]; then
 	         message "Error: Cannot identify the type (static or shared) of"
 	         message "       HiggsTools library."
 	         exit 1
 	     fi
-        return 0
+        if [ -z "$higgstools_lib_dir" ]; then
+           HIGGSTOOLSLIBS="-L$higgstools_lib_dir ${HIGGSTOOLSLIBS_}"
+        else
+           if [ "x$enable_static" = xyes ]; then
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+           else
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+           fi
+        fi
+        HIGGSTOOLSLIBS="${HIGGSTOOLSLIBS} model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
     fi
     return 0
 }
@@ -2237,18 +2231,22 @@ check_higgstools() {
 }
 
 check_python() {
-    checking_msg "python C/C++ extensions"
-    if test "$(command -v python3-config)" = "x" ; then
+    checking_msg "C++ python embedding"
+    path_split=$(echo "$PATH" | sed -e 's/:/ /g')
+    python3config_cmd=$(find $path_split -name "python3*-config" 2>/dev/null)
+    if test -z "$python3config_cmd" ; then
         result "no"
-        message "Warning! Cannot find python3-config. Some features (like the Lilith interface)"
+        message "Warning! Cannot find python3*-config. Some features (like the Lilith interface)"
         message "         will be disabled."
         enable_lilith=no
     else
+        # pick 1st one that was found
+        python3config_cmd=$(echo $python3config_cmd | cut -d ' ' -f 1)
         # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
         # remove duplicates
-        PYTHONFLAGS=$(echo "$(python3-config --includes)" | xargs -n1 | sort -u)
-        PYTHONLIBS="$(python3-config --libs --embed)"
-        result "yes"
+        PYTHONFLAGS=$(echo "$(${python3config_cmd} --includes)" | xargs -n1 | sort -u)
+        PYTHONLIBS="$(${python3config_cmd} --ldflags --embed)"
+        result "found $python3config_cmd"
     fi
 }
 
@@ -2361,7 +2359,7 @@ check_required_libs() {
 
             # early continue to skip expensive Mathematica kernel
             # calls, if possible
-            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
+            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
 
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
                 message "   TSIL is required to build $model_name"
@@ -2379,6 +2377,11 @@ check_required_libs() {
             }
 
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
+                message "   Himalaya is required to build $model_name";
+                enable_himalaya=yes
+            }
+
+            mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopNMSSM" "True" && {
                 message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
@@ -3042,6 +3045,7 @@ EOF
             if version_at_least $FEYNARTS_VERSION "${required_feynarts_version}"; then
                 enable_feynarts="yes"
                 result "ok (version ${FEYNARTS_VERSION})"
+                DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"
             elif test "x$enable_feynarts" = "xautomatic"; then
                 enable_feynarts="no"
                 result "ok (version ${FEYNARTS_VERSION} too old -- support disabled)"
@@ -3118,6 +3122,7 @@ EOF
 
             if version_at_least $FORMCALC_VERSION "${required_formcalc_version}"; then
                 result "ok (version ${FORMCALC_VERSION})"
+                DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"
             elif test "x$enable_formcalc" = "xautomatic"; then
                 enable_formcalc="no"
                 result "ok (version ${FORMCALC_VERSION} too old -- support disabled)"
@@ -3304,6 +3309,10 @@ get_model_specific_corrections() {
         mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && \
         ho="${ho} MSSM_higgs NMSSM_higgs"
 
+    grep -q 'UseHiggs3LoopNMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopNMSSM" "True" && \
+        ho="${ho} MSSM_higgs NMSSM_higgs"
+
     grep -q 'UseHiggs3LoopSplit' "${model_file}" && \
         mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && \
         ho="${ho} SplitMSSM"
@@ -3421,15 +3430,19 @@ enable_defines() {
 
     if test "x$enable_higgstools" = "xyes" ; then
         DEFINE_ENABLE_HIGGSTOOLS="#define ENABLE_HIGGSTOOLS 1"
+        message "Enabling HiggsTools"
     else
         DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
+        message "Disabling HiggsTools"
     fi
     logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
 
     if test "x$enable_lilith" = "xyes" ; then
         DEFINE_ENABLE_LILITH="#define ENABLE_LILITH 1"
+        message "Enabling Lilith"
     else
         DEFINE_ENABLE_LILITH="#undef ENABLE_LILITH"
+        message "Disabling Lilith"
     fi
     logmsg "   ${DEFINE_ENABLE_LILITH}"
 
@@ -3530,9 +3543,11 @@ enable_defines() {
 		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1"
 		DEFINE_ENABLE_LATTICE_SOLVER="#define ENABLE_LATTICE_SOLVER 1"
                 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1"
+                DEFINE_ENABLE_SHOOTING_SOLVER="#define ENABLE_SHOOTING_SOLVER 1"
 		logmsg "   ${DEFINE_ENABLE_TWO_SCALE_SOLVER}"
 		logmsg "   ${DEFINE_ENABLE_LATTICE_SOLVER}"
                 logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+                logmsg "   ${DEFINE_ENABLE_SHOOTING_SOLVER}"
 		break ;;
 	    two_scale)
 		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1";
@@ -3545,6 +3560,10 @@ enable_defines() {
             semi_analytic)
                 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1";
                 logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+                continue ;;
+            shooting)
+                DEFINE_ENABLE_SHOOTING_SOLVER="#define ENABLE_SHOOTING_SOLVER 1";
+                logmsg "   ${DEFINE_ENABLE_SHOOTING_SOLVER}"
                 continue ;;
 	    *)
 		message "Error: unknown solver: $a";
@@ -3582,9 +3601,9 @@ add_metaflags() {
    tcol_='FSEnableColors = '
    col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
-   local tcol_ col_
-   tcol_='FSEnableCompile = '
-   col_="${tcol_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
+   local tcom_ com_
+   tcom_='FSEnableCompile = '
+   com_="${tcom_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
 
    local c_=''
    local fs_=''
@@ -3610,9 +3629,12 @@ add_metaflags() {
 
       c_=$(grep "$tcol_" $fs_)
       if [ "$c_" != "$col_" ]; then
-         [ "$c_" != '' ] && \
-            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
-            echo "$col_" >> $fs_
+         [ "$c_" != '' ] && sed -i "s/${tcol_}.*/${col_}/g" $fs_ || echo "$col_" >> $fs_
+      fi
+
+      c_=$(grep "$tcom_" $fs_)
+      if [ "$c_" != "$com_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tcom_}.*/${com_}/g" $fs_ || echo "$com_" >> $fs_
       fi
 
    done
@@ -3754,7 +3776,7 @@ Package directories, compilation settings and model selection
                             (default: $ADDONS)
   --with-boost-libdir=      Path to search for BOOST libraries
   --with-boost-incdir=      Path to search for BOOST headers
-  --with-cppflags           C preprocessor flags (default: $CPPFLAGS)
+  --with-cppflags=          C preprocessor flags (default: $CPPFLAGS)
   --with-cxx=               C++ compiler (default: $CXX)
   --with-cxxflags=          C++ compiler flags (default: $CXXFLAGS)
   --with-eigen-incdir=      Path to search for Eigen headers
@@ -3956,6 +3978,8 @@ if test "x${enable_meta}" = "xyes"; then
     check_feynarts
     check_formcalc
 else
+    if [ ! "${enable_feynarts}" = "no" ]; then DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"; fi
+    if [ ! "${enable_formcalc}" = "no" ]; then DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"; fi
     enable_feynarts=no
     enable_formcalc=no
 fi
@@ -4100,7 +4124,10 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_TWO_SCALE_SOLVER@|$DEFINE_ENABLE_TWO_SCALE_SOLVER|" \
     -e "s|@DEFINE_ENABLE_LATTICE_SOLVER@|$DEFINE_ENABLE_LATTICE_SOLVER|" \
     -e "s|@DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@|$DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER|" \
+    -e "s|@DEFINE_ENABLE_SHOOTING_SOLVER@|$DEFINE_ENABLE_SHOOTING_SOLVER|" \
     -e "s|@DEFINE_ENABLE_ADDONS@|$DEFINE_ENABLE_ADDONS|"       \
+    -e "s|@DEFINE_ENABLE_FEYNARTS@|$DEFINE_ENABLE_FEYNARTS|"       \
+    -e "s|@DEFINE_ENABLE_FORMCALC@|$DEFINE_ENABLE_FORMCALC|"       \
     -e 's|@n@|\
 |g' \
     < $CONFIGHDR_TMPL > $CONFIGHDR

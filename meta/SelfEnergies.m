@@ -26,6 +26,12 @@ BeginPackage["SelfEnergies`", {"SARAH`", "TextFormatting`", "CConversion`", "Tre
 
 FSSelfEnergy::usage="self-energy head";
 FSSelfEnergyMassEigenstates::usage="head of self-energy in mass eigenstates";
+
+FSSelfEnergyDerivative::usage="head for derivative of self-energy w.r.t. p^2";
+
+(* symbols for derivative of loop functions w.r.t. p^2 *)
+{ DB0, DF0, DG0 }
+
 FSHeavySelfEnergy::usage="head for self-energy w/o BSM particles";
 FSHeavyRotatedSelfEnergy::usage="head for self-energy w/o BSM particles in mass eigenstate basis";
 Tadpole::usage="tadpole head";
@@ -83,6 +89,9 @@ definitions for two-loop Higgs self-energies in the NMSSM";
 CreateThreeLoopSelfEnergiesMSSM::usage="Creates function prototypes
 and definitions for three-loop Higgs contribution in the MSSM";
 
+CreateThreeLoopSelfEnergiesNMSSM::usage="Creates function prototypes
+and definitions for three-loop Higgs contribution in the NMSSM";
+
 CreateThreeLoopSelfEnergiesSplit::usage="Creates function prototypes and
 definitions for three-loop Higgs self-energies in split-SUSY";
 
@@ -103,8 +112,53 @@ NPointFunctionQ[_]                                      := False;
 
 NumberOfLoops[(_[_, expr___])?NPointFunctionQ] := Length[{expr}];
 
+SetSystemOptions[
+   "DifferentiationOptions" ->
+      "ExcludedFunctions"-> DeleteDuplicates[
+         Append[
+            OptionValue[SystemOptions[], "DifferentiationOptions"->"ExcludedFunctions"],
+            SARAH`sum
+         ]
+   ]
+];
+
+SARAH`sum /: D[SARAH`sum[idx_, i_, j_, expr_], p2_] := SARAH`sum[idx, i, j, D[expr, p2]];
+
+D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
+
+Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
+Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];
+Derivative[1, 0, 0][G0][p2_, m12_, m22_] := DG0[p2, m12, m22];
+
+GetExpression[selfEnergy_SelfEnergies`FSSelfEnergy] :=
+    selfEnergy[[2]];
+
+GetExpression[selfEnergy_SelfEnergies`FSSelfEnergyDerivative] :=
+    selfEnergy[[2]];
+
+GetExpression[selfEnergy_SelfEnergies`FSHeavySelfEnergy] :=
+    selfEnergy[[2]];
+
 GetExpression[s_?NPointFunctionQ, loops_:1] :=
     s[[1 + loops]];
+
+GetExpression[tadpole_SelfEnergies`Tadpole] :=
+    tadpole[[2]];
+
+GetField[selfEnergy_SelfEnergies`FSSelfEnergy] :=
+    selfEnergy[[1]];
+
+GetField[selfEnergy_SelfEnergies`FSSelfEnergyDerivative] :=
+    selfEnergy[[1]];
+
+GetField[selfEnergy_SelfEnergies`FSHeavySelfEnergy] :=
+    selfEnergy[[1]];
+
+GetField[selfEnergy_SelfEnergies`FSHeavyRotatedSelfEnergy] :=
+    selfEnergy[[1]];
+
+GetField[tadpole_SelfEnergies`Tadpole] :=
+    tadpole[[1]];
 
 GetField[s_?NPointFunctionQ] :=
     s[[1]];
@@ -457,6 +511,9 @@ CreateSelfEnergyFunctionName[field_, loops_] :=
 CreateSelfEnergyMassEigenstateFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_mass_eigenstates";
 
+CreateSelfEnergyDerivativeFunctionName[field_, loops_] :=
+    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_deriv_p2";
+
 CreateHeavySelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_heavy";
 
@@ -474,6 +531,9 @@ CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergy, loops_] :=
 
 CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergyMassEigenstates, loops_] :=
     CreateSelfEnergyMassEigenstateFunctionName[GetField[selfEnergy], loops];
+
+CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergyDerivative, loops_] :=
+    CreateSelfEnergyDerivativeFunctionName[GetField[selfEnergy], loops];
 
 CreateFunctionName[selfEnergy_SelfEnergies`FSHeavySelfEnergy, loops_] :=
     CreateHeavySelfEnergyFunctionName[GetField[selfEnergy], loops];
@@ -545,9 +605,11 @@ FillHermitianSelfEnergyMatrix[nPointFunction_, sym_String, loops_] :=
            dim = GetDimension[GetField[nPointFunction]];
            name = CreateFunctionName[nPointFunction, loops];
            "\
-for (int i = 0; i < " <> ToString[dim] <> "; i++)
-   for (int k = i; k < " <> ToString[dim] <> "; k++)
+for (int i = 0; i < " <> ToString[dim] <> "; i++) {
+   for (int k = i; k < " <> ToString[dim] <> "; k++) {
       " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+   }
+}
 
 Hermitianize(" <> sym <> ");
 "
@@ -558,9 +620,11 @@ FillGeneralSelfEnergyFunction[nPointFunction_, sym_String, loops_] :=
            dim = GetDimension[GetField[nPointFunction]];
            name = CreateFunctionName[nPointFunction, loops];
            "\
-for (int i = 0; i < " <> ToString[dim] <> "; i++)
-   for (int k = 0; k < " <> ToString[dim] <> "; k++)
+for (int i = 0; i < " <> ToString[dim] <> "; i++) {
+   for (int k = 0; k < " <> ToString[dim] <> "; k++) {
       " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+   }
+}
 "
           ];
 
@@ -594,8 +658,8 @@ CreateNPointFunctionMatrix[nPointFunction_, loops_] :=
           ];
 
 CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
-    Module[{prototypes = "", defs = "", vertexFunctionNames = {}, p, d, l,
-            relevantVertexRules},
+    Module[{prototypes = "", defs = "", vertexFunctionNames = {}, prototype, def,
+            relevantVertexRules, derivatives, pSq},
            (* create coupling functions for all vertices in the list *)
            Print["Converting vertex functions ..."];
            (* extract vertex rules needed for the given nPointFunctions *)
@@ -607,14 +671,34 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            For[k = 1, k <= Length[nPointFunctions], k++,
                For[loops = 1, loops <= NumberOfLoops[nPointFunctions[[k]]], loops++,
                    Utils`UpdateProgressBar[k, Length[nPointFunctions]];
-                   {p,d} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames, loops];
-                   prototypes = prototypes <> p;
-                   defs = defs <> d;
-                   {p,d} = CreateNPointFunctionMatrix[nPointFunctions[[k]], loops];
-                   prototypes = prototypes <> p;
-                   defs = defs <> d;
+                   {prototype,def} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames, loops];
+                   prototypes = prototypes <> prototype;
+                   defs = defs <> def;
+                   {prototype,def} = CreateNPointFunctionMatrix[nPointFunctions[[k]], loops];
+                   prototypes = prototypes <> prototype;
+                   defs = defs <> def;
                   ];
+           ];
+           (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
+           If[ValueQ[SARAH`HiggsBoson],
+              derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]];
+
+              (* SARAH`sum has Attribute Constant because why not!? *)
+              ClearAttributes[SARAH`sum, Constant];
+              derivatives = (D[#, pSq]& /@ (derivatives /. p^2->pSq)) /. pSq -> p^2;
+              SetAttributes[SARAH`sum, Constant];
+
+              Switch[Length[derivatives],
+                     0, Print["Error: no Higgs boson self-energy found."],
+                     1, {prototype, def} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
+                        prototypes = prototypes <> prototype;
+                        defs = defs <> def;
+                        {prototype, def} = CreateNPointFunctionMatrix[First[derivatives]];
+                        prototypes = prototypes <> prototype;
+                        defs = defs <> def;,
+                     _, Print["Error: multiple Higgs boson self-energies found."]
               ];
+           ];
            Utils`StopProgressBar[Length[nPointFunctions]];
            {prototypes, defs}
           ];
@@ -678,7 +762,7 @@ AssertFieldDimension[field_, dim_, model_] :=
 GetTwoLoopTadpoleCorrections[model_String /; model === "MSSM"] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, tanbStr, muStr, m3Str, mAStr},
            AssertFieldDimension[SARAH`HiggsBoson, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -691,7 +775,7 @@ GetTwoLoopTadpoleCorrections[model_String /; model === "MSSM"] :=
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
 
@@ -724,7 +808,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = Sqr(" <> mA0Str <> ");
+const double mAsq = Sqr(" <> mAStr <> ");
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -764,7 +848,7 @@ return tadpole_2l;"
 GetTwoLoopTadpoleCorrections[model_String /; model === "NMSSM"] :=
     Module[{mTop, mBot, mTau,
             g3Str, mtStr, mbStr, mtauStr, lambdaStr,
-            vev2Str, svevStr, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, svevStr, tanbStr, muStr, m3Str, mA2Str},
            AssertFieldDimension[SARAH`HiggsBoson, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -777,7 +861,7 @@ GetTwoLoopTadpoleCorrections[model_String /; model === "NMSSM"] :=
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            svevStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
 "\
@@ -813,7 +897,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = " <> mA0Str <> ";
+const double mAsq = " <> mA2Str <> ";
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -1023,7 +1107,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "MSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mAStr},
            AssertFieldDimension[particle, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -1038,7 +1122,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
 
@@ -1071,7 +1155,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = Sqr(" <> mA0Str <> ");
+const double mAsq = Sqr(" <> mAStr <> ");
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -1109,7 +1193,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
                               model_String /; model === "MSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mA0Str},
+            vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mAStr},
            AssertFieldDimension[particle, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
@@ -1124,7 +1208,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
 
@@ -1157,7 +1241,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = Sqr(" <> mA0Str <> ");
+const double mAsq = Sqr(" <> mAStr <> ");
 const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
@@ -1195,7 +1279,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "NMSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA0Str,
+            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA2Str,
             lambdaStr},
            AssertFieldDimension[particle, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
@@ -1211,7 +1295,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            vsStr   = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
 "\
@@ -1249,7 +1333,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = " <> mA0Str <> ";
+const double mAsq = " <> mA2Str <> ";
 const double cotb = 1.0 / tanb;
 const double rmb = " <> mbStr <> ";
 const double rmbsq = Sqr(rmb);
@@ -1293,7 +1377,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
                               model_String /; model === "NMSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
-            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA0Str,
+            vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA2Str,
             lambdaStr},
            AssertFieldDimension[particle, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
@@ -1309,7 +1393,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            vsStr   = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
 "\
@@ -1347,7 +1431,7 @@ const double vev2 = " <> vev2Str <> ";
 const double tanb = " <> tanbStr <> ";
 const double amu = Re(" <> muStr <> ");
 const double mg = " <> m3Str <> ";
-const double mAsq = " <> mA0Str <> ";
+const double mAsq = " <> mA2Str <> ";
 const double cotb = 1.0 / tanb;
 const double rmb = " <> mbStr <> ";
 const double rmbsq = Sqr(rmb);
@@ -1394,7 +1478,7 @@ DivideOrReturnZeroStr[a_, b_] :=
 GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
                               model_String /; model === "MSSM", 3] :=
     Module[{g3Str, mtStr, mbStr, meStr, mTop, mBot, mTau,
-            vuStr, vdStr, muStr, m3Str, mA0Str,
+            vuStr, vdStr, muStr, m3Str, mAStr,
             AtStr, AbStr, AeStr, mWStr, mZStr,
             mq2Str, md2Str, mu2Str, ml2Str, me2Str},
            AssertFieldDimension[particle, 2, model];
@@ -1409,7 +1493,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            muStr   = CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]];
            m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
-           mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
+           mAStr   = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
            AtStr   = DivideOrReturnZeroStr[SARAH`TrilinearUp[2,2], SARAH`UpYukawa[2,2]];
            AbStr   = DivideOrReturnZeroStr[SARAH`TrilinearDown[2,2], SARAH`DownYukawa[2,2]];
            AeStr   = DivideOrReturnZeroStr[SARAH`TrilinearLepton[2,2], SARAH`ElectronYukawa[2,2]];
@@ -1446,7 +1530,7 @@ pars.MW = " <> mWStr <> ";
 pars.MZ = " <> mZStr <> ";
 pars.Mt = " <> mtStr <> ";
 pars.Mb = " <> mbStr <> ";
-pars.MA = " <> mA0Str <> ";
+pars.MA = " <> mAStr <> ";
 pars.MSt << mst_1, mst_2;
 pars.MSb << msb_1, msb_2;
 pars.s2t = Sin(2*theta_t);
@@ -1488,7 +1572,7 @@ try {
       if (ren_scheme == 1) {
          // calculate shift DR' -> MDR'
          self_energy_3l += - hier.getDMhDRbarPrimeToMDRbarPrimeShift();
-      } else if (ren_scheme == 1) {
+      } else if (ren_scheme == 2) {
          // calculate shift DR' -> H3m
          self_energy_3l += - hier.getDMhDRbarPrimeToH3mShift();
       }
@@ -1514,7 +1598,7 @@ try {
       if (ren_scheme == 1) {
          // calculate shift DR' -> MDR'
          self_energy_3l += - hier.getDMhDRbarPrimeToMDRbarPrimeShift();
-      } else if (ren_scheme == 1) {
+      } else if (ren_scheme == 2) {
          // calculate shift DR' -> H3m
          self_energy_3l += - hier.getDMhDRbarPrimeToH3mShift();
       }
@@ -1530,6 +1614,159 @@ throw HimalayaError(\"The 3-loop corrections to Mh require Himalaya 1.0 \"
                     \"(or higher), but FlexibleSUSY has not been \"
                     \"configured with Himalaya!\");
 #endif // ENABLE_HIMALAYA
+
+return self_energy_3l;"
+          ];
+
+GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
+                              model_String /; model === "NMSSM", 3] :=
+    Module[{g3Str, mtStr, mbStr, meStr, mTop, mBot, mTau,
+            vuStr, vdStr, muStr, m3Str, mA2Str,
+            AtStr, AbStr, AeStr, mWStr, mZStr,
+            mq2Str, md2Str, mu2Str, ml2Str, me2Str,
+            mssm2LSelfEnergyType = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, 2, 2]],
+            nmssm2LSelfEnergyType = CConversion`CreateCType[TreeMasses`GetMassMatrixType[SARAH`HiggsBoson]]
+           },
+           AssertFieldDimension[particle, 3, model];
+           mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
+           mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
+           mTau    = TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]];
+           mtStr   = CConversion`RValueToCFormString[mTop];
+           mbStr   = CConversion`RValueToCFormString[mBot];
+           meStr   = CConversion`RValueToCFormString[mTau];
+           g3Str   = CConversion`RValueToCFormString[SARAH`strongCoupling];
+           vdStr   = CConversion`RValueToCFormString[SARAH`VEVSM1];
+           vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
+           muStr   = CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           mA2Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
+           AtStr   = DivideOrReturnZeroStr[SARAH`TrilinearUp[2,2], SARAH`UpYukawa[2,2]];
+           AbStr   = DivideOrReturnZeroStr[SARAH`TrilinearDown[2,2], SARAH`DownYukawa[2,2]];
+           AeStr   = DivideOrReturnZeroStr[SARAH`TrilinearLepton[2,2], SARAH`ElectronYukawa[2,2]];
+           mWStr   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`VectorW]];
+           mZStr   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`VectorZ]];
+           mq2Str  = CConversion`RValueToCFormString[SARAH`SoftSquark];
+           mu2Str  = CConversion`RValueToCFormString[SARAH`SoftUp];
+           md2Str  = CConversion`RValueToCFormString[SARAH`SoftDown];
+           ml2Str  = CConversion`RValueToCFormString[SARAH`SoftLeftLepton];
+           me2Str  = CConversion`RValueToCFormString[SARAH`SoftRightLepton];
+"// MSSM 2x2 3-loop self-energy
+" <>
+mssm2LSelfEnergyType <> " self_energy_3l_mssm(" <> mssm2LSelfEnergyType <> "::Zero());
+
+#ifdef ENABLE_HIMALAYA
+// calculate 3rd generation sfermion masses and mixing angles
+double mst_1, mst_2, theta_t;
+double msb_1, msb_2, theta_b;
+
+" <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <>
+";
+" <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`BottomSquark, "msb_1", "msb_2", "theta_b"] <>
+";
+
+himalaya::Parameters pars;
+pars.scale = get_scale();
+pars.mu = Re(" <> muStr <> ");
+pars.g3 = " <> g3Str <> ";
+pars.vd = " <> vdStr <> ";
+pars.vu = " <> vuStr <> ";
+pars.mq2 = Re(" <> mq2Str <> ");
+pars.md2 = Re(" <> md2Str <> ");
+pars.mu2 = Re(" <> mu2Str <> ");
+pars.MG = " <> m3Str <> ";
+pars.MW = " <> mWStr <> ";
+pars.MZ = " <> mZStr <> ";
+pars.Mt = " <> mtStr <> ";
+pars.Mb = " <> mbStr <> ";
+pars.MA = Re(Sqrt(" <> mA2Str <> "));
+pars.MSt << mst_1, mst_2;
+pars.MSb << msb_1, msb_2;
+pars.s2t = Sin(2*theta_t);
+pars.s2b = Sin(2*theta_b);
+
+#if Himalaya_VERSION_MAJOR < 2
+   pars.At = Re(" <> AtStr <> ");
+   pars.Ab = Re(" <> AbStr <> ");
+#else
+   pars.Au(2,2) = Re(" <> AtStr <> ");
+   pars.Ad(2,2) = Re(" <> AbStr <> ");
+   pars.Ae(2,2) = Re(" <> AeStr <> ");
+   pars.ml2 = Re(" <> ml2Str <> ");
+   pars.me2 = Re(" <> me2Str <> ");
+   pars.Mtau = " <> meStr <> ";
+#endif
+
+try {
+   const auto ren_scheme = HIGGS_3LOOP_SCHEME;
+   const bool verbose = false;
+   himalaya::HierarchyCalculator hc(pars, verbose);
+
+   if (HIGGS_3LOOP_CORRECTION_AT_AS_AS) {
+#if Himalaya_VERSION_MAJOR < 2
+      const auto hier = hc.calculateDMh3L(false, ren_scheme);
+#else
+      const auto hier = hc.calculateDMh3L(false);
+#endif
+
+      // calculate the 3-loop corrections
+      self_energy_3l_mssm += - hier.getDMh(3);
+
+#if Himalaya_VERSION_MAJOR < 2
+      if (ren_scheme) {
+         // calculate shift DR -> MDR
+         self_energy_3l_mssm += - hier.getDRToMDRShift();
+      }
+#else
+      if (ren_scheme == 1) {
+         // calculate shift DR' -> MDR'
+         self_energy_3l_mssm += - hier.getDMhDRbarPrimeToMDRbarPrimeShift();
+      } else if (ren_scheme == 2) {
+         // calculate shift DR' -> H3m
+         self_energy_3l_mssm += - hier.getDMhDRbarPrimeToH3mShift();
+      }
+#endif
+   }
+
+   if (HIGGS_3LOOP_CORRECTION_AB_AS_AS) {
+#if Himalaya_VERSION_MAJOR < 2
+      const auto hier = hc.calculateDMh3L(true, ren_scheme);
+#else
+      const auto hier = hc.calculateDMh3L(true);
+#endif
+
+      // calculate the 3-loop corrections
+      self_energy_3l_mssm += - hier.getDMh(3);
+
+#if Himalaya_VERSION_MAJOR < 2
+      if (ren_scheme) {
+         // calculate the shift DR -> MDR
+         self_energy_3l_mssm += - hier.getDRToMDRShift();
+      }
+#else
+      if (ren_scheme == 1) {
+         // calculate shift DR' -> MDR'
+         self_energy_3l_mssm += - hier.getDMhDRbarPrimeToMDRbarPrimeShift();
+      } else if (ren_scheme == 2) {
+         // calculate shift DR' -> H3m
+         self_energy_3l_mssm += - hier.getDMhDRbarPrimeToH3mShift();
+      }
+#endif
+   }
+} catch (const std::exception& e) {
+   VERBOSE_MSG(e.what());
+   VERBOSE_MSG(pars);
+   throw HimalayaError(e.what());
+}
+#else // ENABLE_HIMALAYA
+throw HimalayaError(\"The 3-loop corrections to Mh require Himalaya 1.0 \"
+                    \"(or higher), but FlexibleSUSY has not been \"
+                    \"configured with Himalaya!\");
+#endif // ENABLE_HIMALAYA
+
+// create NMSSM 3x3 self-energy matrix from MSSM 2x2 one
+" <>
+nmssm2LSelfEnergyType <> " self_energy_3l(" <> nmssm2LSelfEnergyType <> "::Zero());
+self_energy_3l.topLeftCorner<2,2>() += self_energy_3l_mssm;
 
 return self_energy_3l;"
           ];
@@ -1581,6 +1818,9 @@ CreateTwoLoopSelfEnergiesNMSSM[particles_List] :=
 
 CreateThreeLoopSelfEnergiesMSSM[particles_List] :=
     CreateNLoopSelfEnergies[particles, "MSSM", 3];
+
+CreateThreeLoopSelfEnergiesNMSSM[particles_List] :=
+    CreateNLoopSelfEnergies[particles, "NMSSM", 3];
 
 CreateThreeLoopSelfEnergiesSplit[particles_List] :=
     CreateNLoopSelfEnergies[particles, "Split", 3];

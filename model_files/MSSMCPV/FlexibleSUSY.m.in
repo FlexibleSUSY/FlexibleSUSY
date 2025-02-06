@@ -120,6 +120,8 @@ InitialGuessAtLowScale = {
    {Ye, Automatic}
 };
 
+PotentialLSPParticles = {Chi, Sv, Su, Sd, Se, Cha, Glu};
+
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYOutput, NoScale,
            {{0, Hold[HighScale]},
@@ -130,7 +132,7 @@ ExtraSLHAOutputBlocks = {
             {23, FlexibleSUSYObservable`EDM[Fe[1]]},
             {24, FlexibleSUSYObservable`EDM[Fe[2]]},
             {25, FlexibleSUSYObservable`EDM[Fe[3]]},
-            {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+            {26, FlexibleSUSYObservable`BrLToLGamma[Fe, 2 -> 1]}
            }
    },
    {ALPHA, NoScale,

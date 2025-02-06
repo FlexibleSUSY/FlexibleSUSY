@@ -465,7 +465,7 @@ Lepton, Fermion, Scalar
                       >;
 
    using LeptonZVertex = Vertex<
-                      ZBoson,
+                      fields::ZBoson,
                       Lepton,
                       typename Lepton::lorentz_conjugate
                       >;
@@ -477,7 +477,7 @@ Lepton, Fermion, Scalar
                          >;
 
    using FermionZVertex = Vertex<
-                         ZBoson,
+                         fields::ZBoson,
                          typename Fermion::lorentz_conjugate,
                          Fermion
                          >;
@@ -527,7 +527,7 @@ Lepton, Fermion, Scalar
 
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
-               const auto zMass = context.mass<ZBoson>({ });
+               const auto zMass = context.mass<fields::ZBoson>({ });
 
                static constexpr double fermionChargeCount =
                   Fermion::electricCharge / Lepton::electricCharge;

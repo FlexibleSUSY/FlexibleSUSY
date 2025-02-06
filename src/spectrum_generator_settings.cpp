@@ -43,7 +43,7 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "force output",
    "Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)",
    "beta-function zero threshold",
-   "calculate observables (a_muon, ...)",
+   "calculate all observables",
    "force positive majorana masses",
    "pole mass renormalization scale (0 = SUSY scale)",
    "pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))",
@@ -295,7 +295,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | higgs_2loop_correction_at_at     | 0, 1                                            | 1 (= enabled)   |
  * | higgs_2loop_correction_atau_atau | 0, 1                                            | 1 (= enabled)   |
  * | force_output                     | 0 (no) or 1 (yes)                               | 0 (= no)        |
- * | top_pole_qcd_corrections         | 0 (1L), 1 (2L), 2 (3L)                          | 1 (= 2L QCD)    |
+ * | top_pole_qcd_corrections         | 0 (1L), 1 (2L), 2 (3L), 3 (4L)                  | 3 (= 4L QCD)    |
  * | beta_zero_threshold              | any positive double                             | 1.0e-11         |
  * | calculate_observables            | 0 (no) or 1 (yes)                               | 0 (= no)        |
  * | force_positive_masses            | 0 (no) or 1 (yes)                               | 0 (= no)        |
@@ -325,14 +325,14 @@ void Spectrum_generator_settings::reset()
    values[pole_mass_loop_order]  = 4.;
    values[ewsb_loop_order]       = 4.;
    values[beta_loop_order]       = 4.;
-   values[threshold_corrections_loop_order] = 3.;
+   values[threshold_corrections_loop_order] = 4.;
    values[higgs_2loop_correction_at_as]     = 1.;
    values[higgs_2loop_correction_ab_as]     = 1.;
    values[higgs_2loop_correction_at_at]     = 1.;
    values[higgs_2loop_correction_atau_atau] = 1.;
    values[force_output]                     = 0;
    values[calculate_sm_masses]              = 0.; // 0 = false
-   values[top_pole_qcd_corrections]         = 1.;
+   values[top_pole_qcd_corrections]         = 3.;
    values[beta_zero_threshold]              = 1.0e-11;
    values[calculate_observables]            = 0;
    values[force_positive_masses]            = 0;

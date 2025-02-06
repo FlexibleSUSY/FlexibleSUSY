@@ -102,15 +102,16 @@ FillMt2LStruct[] := "\
 double mst_1, mst_2, theta_t;
 " <> TreeMasses`CallGenerationHelperFunctionName[3, SARAH`TopSquark, "mst_1", "mst_2", "theta_t"] <> ";
 
-mssm_twoloop_mt::Parameters pars;
-pars.g3 = " <> CConversion`RValueToCFormString[SARAH`strongCoupling /. Parameters`ApplyGUTNormalization[]] <> ";
-pars.mt = " <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[]]] <> ";
-pars.mg = " <> CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]] <> ";
-pars.mst1 = mst_1;
-pars.mst2 = mst_2;
-pars.msusy = " <> CConversion`RValueToCFormString[Sqrt[Sqrt[Abs[SARAH`SoftSquark[2,2]] Abs[SARAH`SoftDown[2,2]]]]] <> ";
-pars.xt = Sin(2*theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt);
-pars.Q = get_scale();";
+const mssm_twoloop_mt::Parameters pars{
+   .g3 = " <> CConversion`RValueToCFormString[SARAH`strongCoupling /. Parameters`ApplyGUTNormalization[]] <> ",
+   .mt = " <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[]]] <> ",
+   .mg = " <> CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]] <> ",
+   .mst1 = mst_1,
+   .mst2 = mst_2,
+   .msusy = " <> CConversion`RValueToCFormString[Sqrt[Sqrt[Abs[SARAH`SoftSquark[2,2]] Abs[SARAH`SoftDown[2,2]]]]] <> ",
+   .xt = Sin(2*theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt),
+   .Q = get_scale()
+};";
 
 
 AddMtPoleQCDCorrections[1, expr_] :=
@@ -578,14 +579,17 @@ DoMediumDiagonalization[particle_Symbol /; IsScalar[particle], inputMomentum_, t
            If[dim > 1,
               If[(SARAH`UseHiggs2LoopMSSM === True ||
                   FlexibleSUSY`UseHiggs2LoopNMSSM === True ||
-                  FlexibleSUSY`UseHiggs3LoopMSSM === True) &&
+                  FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+                  FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
                  MemberQ[{SARAH`HiggsBoson, SARAH`PseudoScalar}, particle],
                  addHigherLoopHiggsContributions = "self_energy += self_energy_2l;\n";
                  If[calcEffPot,
                     calcHigherLoopHiggsContributions = CalcEffPot2L[particle];
                    ];
                 ];
-              If[FlexibleSUSY`UseHiggs3LoopMSSM === True && MemberQ[{SARAH`HiggsBoson}, particle],
+              If[(FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+                  FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
+                 MemberQ[{SARAH`HiggsBoson}, particle],
                  addHigherLoopHiggsContributions = addHigherLoopHiggsContributions <> "self_energy += self_energy_3l;\n";
                  If[calcEffPot,
                     calcHigherLoopHiggsContributions = calcHigherLoopHiggsContributions <> CalcEffPot3L[particle];
@@ -868,7 +872,8 @@ DoSlowDiagonalization[particle_Symbol, tadpole_] :=
               effPot = effPot <> CalcEffPot2L[particle];
              ];
            If[dim > 1 &&
-              FlexibleSUSY`UseHiggs3LoopMSSM === True &&
+              (FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+               FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
               MemberQ[{SARAH`HiggsBoson}, particle],
               effPot = effPot <> CalcEffPot3L[particle];
              ];
@@ -1460,7 +1465,7 @@ CConversion`ToValidCSymbolString[mass /. FlexibleSUSY`M -> Identity] <>
  * This function finds the lightest supersymmetric particle (LSP) and
  * returns it's mass.  The corresponding particle type is retured in
  * the reference parameter.  The list of potential LSPs is set in the
- * model file varible PotentialLSPParticles.  For this model it is set
+ * model file variable PotentialLSPParticles.  For this model it is set
  * to:
  * " <> ToString[masses] <> "
  *

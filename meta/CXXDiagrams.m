@@ -255,7 +255,7 @@ ParticleColorRepAsString[part_] :=
       ]
    ];
 
-CreateFields[] :=
+CreateFields[potentialLSPParticles_List] :=
   Module[{fields, scalars, fermions, vectors, ghosts},
        fields = TreeMasses`GetParticles[];
        scalars = Select[fields, TreeMasses`IsScalar];
@@ -291,9 +291,12 @@ CreateFields[] :=
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
               "static constexpr double electricCharge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
+              "static constexpr auto pdgids = boost::hana::make_tuple(" <>
+                   (* in SARAH particles.m PDG is sometimes a list of integers, and sometimes just an integer *)
+                   ToString@If[IntegerQ[SARAH`getPDGList[#]], SARAH`getPDGList[#], StringRiffle[SARAH`getPDGList[#], ","]] <> ");\n" <>
               "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
-              "};" &) /@ fields, "\n\n"] <> "\n\n" <>
+              "};")& /@ fields, "\n\n"] <> "\n\n" <>
 
        "// Named fields\n" <>
        "using Electron = " <> CXXNameOfField[AtomHead @ TreeMasses`GetSMElectronLepton[]] <> ";\n\n" <>
@@ -305,7 +308,8 @@ CreateFields[] :=
        "using vectors = boost::mpl::vector<" <>
          StringRiffle[CXXNameOfField /@ vectors, ", "] <> ">;\n" <>
        "using ghosts = boost::mpl::vector<" <>
-         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;",
+         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;\n" <>
+       "using potentialLSPparticles = boost::mpl::vector<" <> StringRiffle[CXXNameOfField /@ potentialLSPParticles, ", "] <> ">;",
        "// Fields that are their own Lorentz conjugates.\n" <>
        StringRiffle[
          ("template<> struct " <> LorentzConjugateOperation[#] <> "<" <> CXXNameOfField[#, prefixNamespace -> "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">" <>
@@ -1234,21 +1238,23 @@ Module[{cxxVertices, vertexPartition,
          ,
          DistributedContexts->None
       ];
-      cxxVertices =
-         AbsoluteTiming@ParallelMap[
-            CreateVertex,
-            DeleteDuplicates[vertices]
-         ];
+      Off[Part::pkspec1];
+      cxxVertices = AbsoluteTiming@ParallelMap[
+         CreateVertex,
+         DeleteDuplicates[vertices]
+      ];
+      On[Part::pkspec1];
       Needs["Parallel`Developer`"];
       Parallel`Developer`ClearDistributedDefinitions[];
       Parallel`Developer`ClearKernels[];
       CloseKernels[]
       ,
-      cxxVertices =
-         AbsoluteTiming@Map[
-            CreateVertex,
-            DeleteDuplicates[vertices]
-         ],
+      Off[Part::pkspec1];
+      cxxVertices = AbsoluteTiming@Map[
+         CreateVertex,
+         DeleteDuplicates[vertices]
+      ];
+      On[Part::pkspec1];,
       Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
    ];
    Print[""];
@@ -1296,7 +1302,7 @@ CreateVertex[fields_List] :=
 				VertexFunctionBodyForFields[fields] <> "\n"] <>
 		"}"
 		}
-  ]
+  ];
 
 (** \brief Returns the Lorentz structure of a given vertex.
  * param fields a vertex given as a list of fields

@@ -21,6 +21,7 @@ LIB_model_specific_SM_SRC := \
 		$(DIR)/sm_twoloophiggs.cpp \
 		$(DIR)/standard_model.cpp \
 		$(DIR)/standard_model_physical.cpp \
+		$(DIR)/standard_model_shooting_low_scale_constraint.cpp \
 		$(DIR)/standard_model_two_scale_convergence_tester.cpp \
 		$(DIR)/standard_model_two_scale_low_scale_constraint.cpp \
 		$(DIR)/standard_model_two_scale_model.cpp \
@@ -40,6 +41,8 @@ LIB_model_specific_SM_HDR := \
 		$(DIR)/standard_model_convergence_tester.hpp \
 		$(DIR)/standard_model_low_scale_constraint.hpp \
 		$(DIR)/standard_model_physical.hpp \
+		$(DIR)/standard_model_shooting_model.hpp \
+		$(DIR)/standard_model_shooting_low_scale_constraint.hpp \
 		$(DIR)/standard_model_two_scale_convergence_tester.hpp \
 		$(DIR)/standard_model_two_scale_low_scale_constraint.hpp \
 		$(DIR)/standard_model_two_scale_model.hpp \
@@ -70,8 +73,9 @@ ifneq ($(INSTALL_DIR),)
 install-src::
 		$(Q)install -d $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_CXXQFT_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_MK) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(model_specific_SM_CXXQFT_VERTICES_MK) $(SM_INSTALL_CXXQFT_DIR)
 endif
 
 clean-$(MODNAME)-dep:

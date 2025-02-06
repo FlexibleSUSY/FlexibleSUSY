@@ -44,6 +44,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
 		$(DIR)/model.cpp \
+		$(wildcard $(DIR)/observables/*/*.cpp) \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/observables.cpp \
@@ -83,6 +84,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/command_line_options.hpp \
 		$(DIR)/complex.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
+		$(DIR)/composite_root_finder.hpp \
 		$(DIR)/compound_constraint.hpp \
 		$(DIR)/concatenate.hpp \
 		$(DIR)/constraint.hpp \
@@ -137,6 +139,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/mixings.hpp \
 		$(DIR)/model.hpp \
 		$(DIR)/multiindex.hpp \
+		$(wildcard $(DIR)/observables/*/*.hpp) \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
@@ -196,6 +199,17 @@ LIBFLEXI_HDR += \
 		$(DIR)/semi_analytic_solver.hpp \
 		$(DIR)/two_scale_running_precision.hpp \
 		$(DIR)/two_scale_solver.hpp
+endif
+
+LIBFLEXI_SRC += \
+		$(DIR)/decays/experimental_constraints.cpp
+
+LIBFLEXI_HDR += \
+		$(DIR)/decays/experimental_constraints.hpp
+
+ifneq ($(findstring shooting,$(SOLVERS)),)
+LIBFLEXI_HDR += \
+		$(DIR)/shooting_solver.hpp
 endif
 
 # remove duplicates in case multiple solvers are used

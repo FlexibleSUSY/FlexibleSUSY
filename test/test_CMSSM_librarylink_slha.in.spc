@@ -14,7 +14,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top quark 2-loop corrections QCD
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -62,3 +62,14 @@ Block MINPAR                 # Input parameters
     3   10                   # TanBeta
     4   1                    # SignMu
     5   0                    # Azero
+Block FlexibleDecay
+     0     1.00000000E+00
+     1     1.00000000E-05
+     2     4.00000000E+00
+     3     1.00000000E+00
+     4     2.00000000E+00
+     5     1.00000000E+00
+     6     1.00000000E+00
+     7     0.00000000E+00
+     8     0.00000000E+00
+     9     1.00000000E+00

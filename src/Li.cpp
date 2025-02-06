@@ -1,7 +1,19 @@
 // ====================================================================
-// This file is part of Polylogarithm.
+// This file is part of FlexibleSUSY.
 //
-// Polylogarithm is licenced under the MIT License.
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
 // ====================================================================
 
 #include "Li.hpp"
@@ -36,14 +48,12 @@ namespace {
    /// complex logarithm, converts -0.0 to 0.0
    std::complex<double> clog(const std::complex<double>& z) noexcept
    {
-      const double n = std::hypot(std::real(z), std::imag(z));
-      double a = std::arg(z);
-
-      if (std::imag(z) == 0.0 && a < 0.0) {
-         a = -a;
+      if (std::imag(z) == 0.0 && std::real(z) > 0.0) {
+         return { std::log(std::real(z)), 0.0 };
+      } else if (std::imag(z) == 0.0) {
+         return { std::log(-std::real(z)), PI };
       }
-
-      return { std::log(n), a };
+      return { std::log(std::hypot(std::real(z), std::imag(z))), std::arg(z) };
    }
 
    /// Series expansion of Li_n(z) in terms of powers of z.
@@ -185,14 +195,14 @@ std::complex<double> Li(int64_t n, const std::complex<double>& z) noexcept
    } else if (std::isinf(std::real(z)) || std::isinf(std::imag(z))) {
       return {-inf, 0.0};
    } else if (z == 0.0) {
-      return {0.0, 0.0};
+      return z;
    } else if (z == 1.0) {
       if (n <= 0) {
          return {inf, inf};
       }
-      return {zeta(n), 0.0};
+      return {zeta(n), std::imag(z)};
    } else if (z == -1.0) {
-      return {neg_eta(n), 0.0};
+      return {neg_eta(n), std::imag(z)};
    } else if (n < -1) {
       // arXiv:2010.09860
       const double nz = std::norm(z);

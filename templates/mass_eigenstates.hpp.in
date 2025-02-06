@@ -102,7 +102,7 @@ public:
    int solve_ewsb_one_loop();
    int solve_ewsb();            ///< solve EWSB at ewsb_loop_order level
    int solve_ewsb_tree_level_custom();
-   
+
    virtual void calculate_spectrum();
    std::string name() const;
    void run_to(double scale, double eps = -1.0) override;
@@ -132,7 +132,7 @@ public:
    void set_physical(const @ModelName@_physical&) override;
    void clear_problems() override;
 
-@lspGetters@
+@[override]lspGetters@
 @[override]delegateParameterGetters@
 @[override]delegateParameterSetters@
 @[override]massGetters@
@@ -144,6 +144,7 @@ public:
 @[override]massCalculationPrototypes@
 @[override]tadpoleEqPrototypes@
 @selfEnergyPrototypes@
+@selfEnergyDerivPrototypes@
 
    /// calculates the tadpoles at current loop order
    void tadpole_equations(double[number_of_ewsb_equations]) const;
@@ -235,6 +236,11 @@ private:
    double VfFFFFS(double, double, double, double, double) const;
    double GfFFV(double, double) const;
    double GfFbFbV(double, double) const;
+
+   double DB0(double, double, double) const noexcept;
+   double DH0(double, double, double) const noexcept;
+   double DF0(double, double, double) const noexcept;
+   double DG0(double, double, double) const noexcept;
 
    // DR-bar masses
 @physicalMassesDef@

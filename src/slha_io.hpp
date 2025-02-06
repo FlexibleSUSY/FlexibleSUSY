@@ -20,6 +20,7 @@
 #define SLHA_IO_H
 
 #include "slha_format.hpp"
+#include "decays/decay.hpp"
 #include "unitarity.hpp"
 
 #include <complex>
@@ -43,6 +44,7 @@ namespace SLHAea {
 namespace flexiblesusy {
 
    class Spectrum_generator_settings;
+   class LToLConversion_settings;
    class FlexibleDecay_settings;
    class Physical_input;
    struct PMNS_parameters;
@@ -122,6 +124,7 @@ public:
    void fill(softsusy::QedQcd&) const;
    void fill(FlexibleDecay_settings&) const;
    void fill(Spectrum_generator_settings&) const;
+   void fill(LToLConversion_settings&) const;
    void fill(Physical_input&) const;
    const Modsel& get_modsel() const { return modsel; }
    const SLHAea::Coll& get_data() const;
@@ -145,10 +148,15 @@ public:
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block_imag(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
+   void set_hs_or_lilith(std::string const& /* block name */, std::size_t /* n.d.o.f. */, double /* chi2 */, double /* min chi2 in the SM */, double /* SM mh for which SM chi2 was calculated */, double /* p-value */);
+   void set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const&);
    void set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>&);
+   void set_normalized_effectivecouplings_block(EffectiveCoupling_list const&);
+   void set_imnormalized_effectivecouplings_block(EffectiveCoupling_list const&);
    void set_modsel(const Modsel&);
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);
+   void set_LToLConversion_settings(const LToLConversion_settings&);
    void set_FlexibleDecay_settings(const FlexibleDecay_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    void set_unitarity_infinite_s(Spectrum_generator_settings const&, UnitarityInfiniteS const&);

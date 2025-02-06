@@ -16,99 +16,23 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef @ModelName@_TWO_SCALE_MATCHING_H
-#define @ModelName@_TWO_SCALE_MATCHING_H
 
-#include "single_scale_matching.hpp"
-#include <functional>
+#ifndef @ModelName@_STANDARD_MODEL_MATCHING_H
+#define @ModelName@_STANDARD_MODEL_MATCHING_H
+
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "standard_model.hpp"
 
 namespace flexiblesusy {
+namespace @ModelName@_standard_model_matching {
 
-class Model;
-class Two_scale;
+void match_high_to_low_scale_model_tree_level(standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
+void match_high_to_low_scale_model(standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int, int);
 
-template <class T> class @ModelName@;
-template <class T> class @ModelName@_standard_model_matching_up;
-template <class T> class @ModelName@_standard_model_matching_down;
+void match_low_to_high_scale_model_tree_level(@ModelName@_mass_eigenstates&, const standard_model::Standard_model&);
+void match_low_to_high_scale_model(@ModelName@_mass_eigenstates&, const standard_model::Standard_model&, int, int);
 
-namespace standard_model {
-template <class T> class StandardModel;
-}
-
-template<>
-class @ModelName@_standard_model_matching_up<Two_scale> : public Single_scale_matching
-{
-public:
-   using Scale_getter = std::function<double()>;
-
-   @ModelName@_standard_model_matching_up() = default;
-
-   @ModelName@_standard_model_matching_up(standard_model::StandardModel<Two_scale>*,
-                                          @ModelName@<Two_scale>*,
-                                          const Scale_getter&,
-                                          int, int);
-
-   virtual ~@ModelName@_standard_model_matching_up() = default;
-
-   virtual double get_scale() const override;
-   virtual void set_models(Model*, Model*) override;
-   virtual void match() override;
-
-   int get_higgs_index() const;
-   int get_loop_order() const;
-   void set_higgs_index(int);
-   void set_loop_order(int);
-   void set_scale(double);
-   void set_scale(const Scale_getter&);
-   void set_scale(Scale_getter&&);
-   void match_tree_level();
-
-private:
-   @ModelName@<Two_scale>* model{nullptr};
-   standard_model::StandardModel<Two_scale>* eft{nullptr};
-   Scale_getter scale_getter{};
-   double scale{0.};
-   int loop_order{0};
-   int higgs_idx{0}; ///< Higgs index
-};
-
-template<>
-class @ModelName@_standard_model_matching_down<Two_scale> : public Single_scale_matching
-{
-public:
-   using Scale_getter = std::function<double()>;
-
-   @ModelName@_standard_model_matching_down() = default;
-
-   @ModelName@_standard_model_matching_down(standard_model::StandardModel<Two_scale>*,
-                                            @ModelName@<Two_scale>*,
-                                            const Scale_getter&,
-                                            int, int);
-
-   virtual ~@ModelName@_standard_model_matching_down() = default;
-
-   virtual double get_scale() const override;
-   virtual void set_models(Model*, Model*) override;
-   virtual void match() override;
-
-   int get_higgs_index() const;
-   int get_loop_order() const;
-   void set_higgs_index(int);
-   void set_loop_order(int);
-   void set_scale(double);
-   void set_scale(const Scale_getter&);
-   void set_scale(Scale_getter&&);
-   void match_tree_level();
-
-private:
-   @ModelName@<Two_scale>* model{nullptr};
-   standard_model::StandardModel<Two_scale>* eft{nullptr};
-   Scale_getter scale_getter{};
-   double scale{0.};
-   int loop_order{0};
-   int higgs_idx{0}; ///< Higgs index
-};
-
+} // namespace @ModelName@_standard_model_matching
 } // namespace flexiblesusy
 
 #endif

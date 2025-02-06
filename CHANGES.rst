@@ -1,18 +1,54 @@
-FlexibleSUSY 2.8.0 [X, X X]
-==================================
+FlexibleSUSY 2.9.0 [X, XX 2024]
+===============================
 
 New features
 ------------
 
-* Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
-  over SARAH results [`1805.07306 <https://arxiv.org/pdf/1805.07306.pdf>`_].
+* Option to validate a neutral Higgs sector of the model by linking
+  FlexibleSUSY with HiggsTools_ or Lilith_.
+
+* Calculate unitarity constraints in :math:`$s\to \infty$` limit. This is a wrapper
+  over SARAH results [`1805.07306 <https://arxiv.org/abs/1805.07306>`_].
+
+* New FlexibleEFTHiggs method using the shooting solver, as presented
+  in [`2003.04639 <https://arxiv.org/abs/2003.04639>`_]. Provides a
+  precise prediction of the SM-like Higgs boson mass in the MSSM at
+  3-loop level (``NUHMSSMNoFVHimalayaEFTHiggs``) and in the NMSSM at
+  2-loop level (``NMSSMEFTHiggs``) for both low and high SUSY scales,
+  including :math:`$x_t$` resummation.
+
+Fixed bugs
+----------
+
+* Fixed wrong colour factor in decays with an external color octet, triplet,
+  anti-triplet combination, e.g. squark to quark and gluino or sgluon to squark
+  anti-squark.
+
+* Fixed problem with linking with python3 library if it was installed in
+  a non-standard location.
+
+FlexibleSUSY 2.8.0 [February, 23 2024]
+======================================
+
+New features
+------------
+
+* Added an option to calculate new, user defined observables using
+  NPointFunctions module [`2402.14630 <https://arxiv.org/abs/2402.14630>`_].
+  Example application is the calculation of leptonic processes :math:`$l \to
+  l'$` conversion in the nuclei and :math:`$l \to 3l'$` decay, which now can be
+  trivially enabled in all supported models. In general, NPointFunctions allows
+  to compute tree-level and loop amplitudes from within FlexibleSUSY and employ
+  them in the calculation of a user-requested observable. Potential further
+  applications include calculation of amplitudes relevant to :math:`$B_s \to
+  \mu^+ \mu^-$` or Higgs boson decays.
 
 * Moved to C++17. This increased the minimal supported version of compilers to
   g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
 
 * Allow user to calculate the anomalous magnetic moment of the muon
   :math:`$a_\mu$` in 2HDM-like models with `GM2Calc 2`_
-  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_].  See the
+  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_]. See the
   FlexibleSUSY model `THDMII` (`model_files/THDMII/FlexibleSUSY.m.in`)
   for an example.
 
@@ -51,6 +87,54 @@ New features
   generated UFO and CalcHEP models (the latter one being also used by
   micrOMEGAs).
 
+* Added shooting algorithm to solve the boundary value problem for
+  FlexibleEFTHiggs models. The shooting algorithm allows for
+  resummation of certain higher-order contributions and for the
+  inclusion of 2- and 3-loop contributions to the Higgs pole mass in
+  FlexibleEFTHiggs models, leading to an improved precision of the
+  lightest Higgs pole mass prediction in supersymmetric models such as
+  the MSSM or NMSSM [`arXiv:2003.04639
+  <https://arxiv.org/abs/2003.04639>`_].
+
+  To enable the shooting algorithm for a FlexibleEFTHiggs model, add
+  to the FlexibleSUSY model file (see
+  e.g. ``NUHMSSMNoFVHimalayaEFTHiggs``)::
+
+      FSBVPSolvers = { ShootingSolver };
+
+  To use 2-loop contributions to the Higgs boson pole mass in the
+  MSSM-limit (in non-minimal supersymmetric models such as the NMSSM),
+  add the following lines to the FlexibleSUSY model file (see
+  e.g. ``NMSSMEFThiggs``)::
+
+      FSMSSMLimit = {
+         {\[Kappa], FSGaugeLess},
+         {\[Lambda], FSGaugeLess},
+         {vS, Sqrt[2] MuInput/FSGaugeLess},
+         {T[\[Lambda]], ALambdaInput FSGaugeLess}
+      };
+
+  Suported models: ``NUHMSSMNoFVHimalayaEFTHiggs`` (3-loop precision,
+  requires Himalaya), ``NMSSMEFTHiggs`` (2-loop precision).
+
+  Example (``NUHMSSMNoFVHimalayaEFTHiggs``)::
+
+      HIMALAYA_DIR=/path/to/Himalaya-4.2.2
+
+      ./createmodel --name=NUHMSSMNoFVHimalayaEFTHiggs -f
+
+      ./configure --with-models=NUHMSSMNoFVHimalayaEFTHiggs \
+         --enable-himalaya \
+         --with-himalaya-incdir=${HIMALAYA_DIR}/include \
+         --with-himalaya-libdir=${HIMALAYA_DIR}/build
+
+      make
+
+      models/NUHMSSMNoFVHimalayaEFTHiggs/run_NUHMSSMNoFVHimalayaEFTHiggs.x \
+         --slha-input-file=models/NUHMSSMNoFVHimalayaEFTHiggs/LesHouches.in.NUHMSSMNoFVHimalayaEFTHiggs
+
+  Thanks to Thomas Kwasnitza, Dominik Stöckinger and Alexander Voigt.
+
 Fixed bugs
 ----------
 
@@ -61,9 +145,9 @@ Fixed bugs
   (see Eq. 20 of `2106.05038 <https://arxiv.org/abs/2106.05038>`_). Numerical
   impact negligible.
 
-* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` where not applied.
+* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` were not applied.
 
-* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses where computed
+* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses were computed
   incorectly for Higgses lighter than respective Goldstone bosons.
 
 FlexibleSUSY 2.7.1 [June, 07 2022]
@@ -2426,3 +2510,5 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _LoopTools: http://www.feynarts.de/looptools/
 .. _TSIL: https://www.niu.edu/spmartin/tsil/
+.. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
+.. _Lilith: https://github.com/sabinekraml/Lilith-2

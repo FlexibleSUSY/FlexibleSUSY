@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(initialize_library) {
    Loop_library::set(LIBRARY_TYPE);
 }
 
-BOOST_AUTO_TEST_CASE(test_one_loop_A0) {
+BOOST_AUTO_TEST_CASE(test_one_point_A0) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().A0(1e-3, 1).real() , 0.007907755278982136, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().A0(1e-5, 1).real() , 0.000125129254649702, 1e-14 );
 }
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_A) {
    BOOST_CHECK_CLOSE_FRACTION( a[looplibrary::a0].real() , 0.007907755278982136, 1e-15 );
 }
 
-BOOST_AUTO_TEST_CASE(test_two_loop_B0) {
+BOOST_AUTO_TEST_CASE(test_two_point_B0) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(0, 3, 7, 50).real(), 2.33063946108243, 6e-13 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(3, 0, 7, 50).real(), 3.21995847245894, 2e-12 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(3, 7, 0, 50).real(), 3.21995847245894, 2e-12 );
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_two_loop_B0) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(0, 0, 3, 50).real(), 3.81341071676004, 1e-15 );
 }
 
-BOOST_AUTO_TEST_CASE(test_two_loop_B1) {
+BOOST_AUTO_TEST_CASE(test_two_point_B1) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(0, 3, 7, 50).real(), -1.09635895142032, 3e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(3, 0, 7, 50).real(), -1.31382601746235, 2e-12 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(3, 7, 0, 50).real(), -1.90613245499659, 4e-12 );
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_two_loop_B1) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(0, 0, 3, 50).real(), -1.65670535838002, 2e-15 );
 }
 
-BOOST_AUTO_TEST_CASE(test_two_loop_B00) {
+BOOST_AUTO_TEST_CASE(test_two_point_B00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 3, 7, 50).real(), 8.1886770944643, 3e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(3, 0, 7, 50).real(), 5.3363490107432, 4e-13 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(3, 7, 0, 50).real(), 5.3363490107432, 4e-13 );
@@ -67,6 +67,61 @@ BOOST_AUTO_TEST_CASE(test_two_loop_B00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 3, 0, 50).real(), 3.23505803757003, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 0, 3, 50).real(), 3.23505803757003, 2e-15 );
 }
+
+#if LIBRARY_TYPE == 0 ||  LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
+
+// test DB0 for zero momentum
+BOOST_AUTO_TEST_CASE(zero_test_two_point_DB0) {
+   const double x = 2.0; // m_1^2
+   const double y = 3.0; // m_2^2
+
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, x, x, 1).real(), 1.0/(6*x), 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 0, x, 1).real(), x*x/(2*std::pow(x, 3)), 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 0, x, 1).real(), Loop_library::get().DB0(0, x, 0, 1).real(), 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, x, y, 1).real(), (x*x - y*y + 2*x*y*std::log(y/x))/(2*std::pow(x - y, 3)), 1e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, x, y, 1).real(), Loop_library::get().DB0(0, y, x, 1).real(), 1e-14 );
+}
+
+#endif
+
+#if LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
+
+BOOST_AUTO_TEST_CASE(test_two_point_DB0) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 3, 7, 50).real(), 0.034480389560448771, 6e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(3, 0, 7, 50).real(), 0.10192339061643978, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(3, 7, 0, 50).real(), 0.10192339061643968, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(3, 0, 0, 50).real(), -0.33333333333333331, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 3, 0, 50).real(), 0.16666666666666666, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB0(0, 0, 3, 50).real(), 0.16666666666666666, 1e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(test_two_point_DB1) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB1(0, 3, 7, 50).real(), -0.015806374496330072, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB1(3, 0, 7, 50).real(), -0.030768812511413703, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB1(3, 7, 0, 50).real(), -0.071154578105025845, 4e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB1(3, 0, 0, 50).real(), 0.16666666666666666, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB1(0, 3, 0, 50).real(), -0.1111111111111111, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB1(0, 0, 3, 50).real(), -0.055555555555555552, 2e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(test_two_point_DB00) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(0, 3, 7, 50).real(), -0.19326407490093958, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(3, 0, 7, 50).real(), -0.25401401679167102, 4e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(3, 7, 0, 50).real(), -0.25401401679167079, 4e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(3, 0, 0, 50).real(), -0.37333978195222528, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(0, 3, 0, 50).real(), -0.30389533750778081, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().DB00(0, 0, 3, 50).real(), -0.30389533750778075, 2e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(test_DB) {
+   std::array<std::complex<double>, DB_N> db {};
+   Loop_library::get().DB(db, 0, 3, 7, 50);
+   BOOST_CHECK_CLOSE_FRACTION(db[looplibrary::db0].real() ,  0.034480389560448771, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(db[looplibrary::db1].real() , -0.015806374496330072, 9e-16);
+   BOOST_CHECK_CLOSE_FRACTION(db[looplibrary::db00].real(), -0.19326407490093964,  3e-16);
+}
+
+#endif
 
 BOOST_AUTO_TEST_CASE(test_B) {
    std::array<std::complex<double>, B_N> b{};
@@ -79,7 +134,7 @@ BOOST_AUTO_TEST_CASE(test_B) {
 // tests for zero external momentum
 #if LIBRARY_TYPE == 0 || LIBRARY_TYPE == 1 // Looptools gives -nan
 
-BOOST_AUTO_TEST_CASE(zero_test_three_loop_C00) {
+BOOST_AUTO_TEST_CASE(zero_test_three_point_C00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 1, 3, 7, 50).real(), 0.668765485631293, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 0, 3, 7, 50).real(), 0.707659865270607, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 1, 0, 7, 50).real(), 0.785448624549237, 1e-15 );
@@ -93,14 +148,14 @@ BOOST_AUTO_TEST_CASE(zero_test_three_loop_C00) {
 
 #if LIBRARY_TYPE == 0 || LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
 
-BOOST_AUTO_TEST_CASE(zero_test_three_loop_C0) {
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 7, 50).real(), -0.155577518557259, 3e-15 );
+BOOST_AUTO_TEST_CASE(zero_test_three_point_C0) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 7, 50).real(), -0.155577518557259, 4e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 0, 3, 7, 50).real(), -0.211824465096801, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 0, 7, 50).real(), -0.324318358175886, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 0, 50).real(), -0.549306144334055, 1e-15 );
 }
 
-BOOST_AUTO_TEST_CASE(zero_test_four_loop_D0) {
+BOOST_AUTO_TEST_CASE(zero_test_four_point_D0) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 1, 3, 7, 500, 50).real(), 0.0002968842790336, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 0, 3, 7, 500, 50).real(), 0.000408784403554618, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 1, 0, 7, 500, 50).real(), 0.000632584652596653, 2e-15 );
@@ -108,7 +163,7 @@ BOOST_AUTO_TEST_CASE(zero_test_four_loop_D0) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 1, 3, 7,   0, 50).real(), 0.0562469465395424, 2e-15 );
 }
 
-BOOST_AUTO_TEST_CASE(zero_test_four_loop_D00) {
+BOOST_AUTO_TEST_CASE(zero_test_four_point_D00) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 1, 3, 7, 500, 50).real(), -0.00178384476011462, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 0, 3, 7, 500, 50).real(), -0.00185806582987302, 1e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 1, 0, 7, 500, 50).real(), -0.00200650796938982, 2e-15 );
@@ -121,7 +176,7 @@ BOOST_AUTO_TEST_CASE(zero_test_four_loop_D00) {
 // COLLIER and Looptools tests
 #if LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
 
-BOOST_AUTO_TEST_CASE(test_three_loop_Cij) {
+BOOST_AUTO_TEST_CASE(test_three_point_Cij) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(1, 2, 7, 40, 50, 60, 50).real(), -0.0102393301312332, 6e-14 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C1(1, 2, 7, 40, 50, 60, 50).real(), 0.00339093073306662, 9e-13 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C2(1, 2, 7, 40, 50, 60, 50).real(), 0.00325189753369775, 5e-13 );
@@ -143,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_C) {
    BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c22].real(), -0.00157760282471719, 8e-12 );
 }
 
-BOOST_AUTO_TEST_CASE(test_three_loop_Dij) {
+BOOST_AUTO_TEST_CASE(test_four_point_Dij) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -4.13242728302472e-07, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D1(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 1.67874509586995e-07, 4e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D2(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -4.65985813303812e-08, 3e-14 );

@@ -54,7 +54,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -615,10 +615,13 @@ Block UURMIX
    CMSSMCPV_slha_io slha_io;
    slha_io.read_from_stream(istr);
 
+   const double eps = 1e-5;
+
    // extract the input parameters
    softsusy::QedQcd qedqcd;
    CMSSMCPV_input_parameters input;
    Spectrum_generator_settings settings;
+   settings.set(Spectrum_generator_settings::precision, eps);
 
    try {
       slha_io.fill(settings);
@@ -640,11 +643,11 @@ Block UURMIX
    using CMSSMCPV_cxx_diagrams::fields::Fe;
 
    auto de = CMSSMCPV_edm::calculate_edm<Fe>(m, qedqcd, 0);
-   BOOST_CHECK_CLOSE_FRACTION(de, -3.2103089248010137e-13, 9e-13);
+   BOOST_CHECK_CLOSE_FRACTION(de, -3.2103128259718866e-13, eps);
 
    auto dmu = CMSSMCPV_edm::calculate_edm<Fe>(m, qedqcd, 1);
-   BOOST_CHECK_CLOSE_FRACTION(dmu, -6.6379955917989794e-11, 6e-13);
+   BOOST_CHECK_CLOSE_FRACTION(dmu, -6.6380036570347626e-11, eps);
 
    auto dtau = CMSSMCPV_edm::calculate_edm<Fe>(m, qedqcd, 2);
-   BOOST_CHECK_CLOSE_FRACTION(dtau, -1.1209214170045263e-09, 2e-12);
+   BOOST_CHECK_CLOSE_FRACTION(dtau, -1.1209226809367614e-09, eps);
 }
