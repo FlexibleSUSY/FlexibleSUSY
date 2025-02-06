@@ -7,7 +7,7 @@ New features
 * Option to validate a neutral Higgs sector of the model by linking
   FlexibleSUSY with HiggsTools_ or Lilith_.
 
-* Calculate unitarity constraints in `$s\to \infty$` limit. This is a wrapper
+* Calculate unitarity constraints in :math:`$s\to \infty$` limit. This is a wrapper
   over SARAH results [`1805.07306 <https://arxiv.org/abs/1805.07306>`_].
 
 * New FlexibleEFTHiggs method using the shooting solver, as presented

@@ -2359,7 +2359,7 @@ check_required_libs() {
 
             # early continue to skip expensive Mathematica kernel
             # calls, if possible
-            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
+            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
 
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
                 message "   TSIL is required to build $model_name"
@@ -2377,6 +2377,11 @@ check_required_libs() {
             }
 
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
+                message "   Himalaya is required to build $model_name";
+                enable_himalaya=yes
+            }
+
+            mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopNMSSM" "True" && {
                 message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
@@ -3302,6 +3307,10 @@ get_model_specific_corrections() {
 
     grep -q 'UseHiggs2LoopNMSSM' "${model_file}" && \
         mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && \
+        ho="${ho} MSSM_higgs NMSSM_higgs"
+
+    grep -q 'UseHiggs3LoopNMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopNMSSM" "True" && \
         ho="${ho} MSSM_higgs NMSSM_higgs"
 
     grep -q 'UseHiggs3LoopSplit' "${model_file}" && \
