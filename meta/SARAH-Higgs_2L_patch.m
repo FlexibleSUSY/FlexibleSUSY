@@ -28,7 +28,7 @@ For[ii = 1, ii <= Length[dataUnBrokenGaugeGroups], ii++,
    ToExpression[namestub <> "t" <> "4"] -> 
     ToExpression[namestub <> "t" <> "2"]];];
 
-listBrokenGaugeCouplings = Transpose[BetaGauge][[1]];
+listBrokenGaugeCouplings = BetaGauge[[All, 1]];
 For[i = 1, i <= Length[dataUnBrokenGaugeGroups], i++, 
   listBrokenGaugeCouplings = 
    DeleteCases[listBrokenGaugeCouplings, 
