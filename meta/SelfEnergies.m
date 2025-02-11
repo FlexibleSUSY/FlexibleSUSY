@@ -403,7 +403,7 @@ CreateCouplingFunction[coupling_, expr_, inModelClass_] :=
            body = If[inModelClass,
                      Parameters`CreateLocalConstRefsForInputParameters[expr, "LOCALINPUT"],
                      Parameters`CreateLocalConstRefs[expr]
-                    ] <> "\n" <>
+                    ] <>
                   "const " <> typeStr <> " result = " <>
                   Parameters`ExpressionToString[expr] <> ";\n\n" <>
                   "return result;\n";
