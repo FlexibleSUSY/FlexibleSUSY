@@ -671,6 +671,7 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            For[k = 1, k <= Length[nPointFunctions], k++,
                For[loops = 1, loops <= NumberOfLoops[nPointFunctions[[k]]], loops++,
                    Utils`UpdateProgressBar[k, Length[nPointFunctions]];
+                   If[loops == 2 && (FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True), Continue[]];
                    {prototype,def} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames, loops];
                    prototypes = prototypes <> prototype;
                    defs = defs <> def;
@@ -706,12 +707,13 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
           ];
 
 FillArrayWithLoopTadpoles[loopLevel_, higgsAndIdx_List, arrayName_String, sign_String:"-", struct_String:""] :=
-    Module[{body = "", v, field, idx, head, functionName},
+    Module[{body = "", field, idx, head, functionName, modelSpecifiTadpoles},
+           modelSpecifiTadpoles = FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True;
            For[v = 1, v <= Length[higgsAndIdx], v++,
                field = higgsAndIdx[[v,1]];
                idx = higgsAndIdx[[v,2]];
                head = CConversion`ToValidCSymbolString[higgsAndIdx[[v,3]]];
-               functionName = CreateTadpoleFunctionName[field, loopLevel];
+               functionName = If[loopLevel < 2 || modelSpecifiTadpoles, CreateTadpoleFunctionName[field, loopLevel], CreateTadpoleMassEigenstatesFunctionName[field, loopLevel]];
                If[TreeMasses`GetDimension[field] == 1,
                   body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
                          head <> "(" <> struct <> functionName <> "());\n";

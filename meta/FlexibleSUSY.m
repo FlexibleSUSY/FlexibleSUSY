@@ -203,6 +203,7 @@ UseHiggs2LoopSM = False;
 UseHiggs3LoopSM = False;
 UseHiggs4LoopSM = False;
 UseHiggs3LoopSplit = False;
+UseHiggs2Loop = True;
 UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
@@ -1533,11 +1534,11 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSGaugeLessLimit];
               setYukawaLessLimit                = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSYukawaLessLimit];
 	      setMSSMLimit                      = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSMSSMLimit];
-              If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True, 
+              If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
  		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs2LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs2LoopShift["model", SARAH`HiggsBoson, "idx"];
 	      ];
-              If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True, 
+              If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True,
  		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs3LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs3LoopShift["model", "sm", SARAH`HiggsBoson, "idx"];
 		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMtop2LoopFunction[];
@@ -1600,7 +1601,7 @@ WriteEWSBSolverClass[ewsbEquations_List, parametersFixedByEWSB_List, ewsbInitial
              ];
            higgsToEWSBEqAssociation     = CreateHiggsToEWSBEqAssociation[];
            calculateOneLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
-           If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               calculateTwoLoopTadpolesNoStruct = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "+", "model."];
              ];
            ewsbInitialGuess             = EWSB`FillInitialGuessArray[parametersFixedByEWSB, ewsbInitialGuessValues];
@@ -1661,7 +1662,7 @@ WriteSemiAnalyticEWSBSolverClass[ewsbEquations_List, parametersFixedByEWSB_List,
              ];
            higgsToEWSBEqAssociation     = CreateHiggsToEWSBEqAssociation[];
            calculateOneLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
-           If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               calculateTwoLoopTadpolesNoStruct = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "+", "model."];
              ];
            ewsbInitialGuess             = EWSB`FillInitialGuessArray[parametersFixedByEWSB, ewsbInitialGuessValues];
@@ -1816,7 +1817,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            calculateTreeLevelTadpoles   = EWSB`FillArrayWithEWSBEqs[SARAH`HiggsBoson, "tadpole"];
            calculateOneLoopTadpoles     = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "-"];
            divideTadpoleByVEV           = SelfEnergies`DivideTadpoleByVEV[Parameters`DecreaseIndexLiterals @ CreateVEVToTadpoleAssociation[], "tadpole"];
-           If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "-"];
               ,
               calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithLoopTadpoles[2, higgsToEWSBEqAssociation, "tadpole", "-"];
@@ -1837,7 +1838,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSplit[{SARAH`HiggsBoson}];
               threeLoopHiggsHeaders = "#include \"splitmssm_threeloophiggs.hpp\"\n";
              ];
-           If[SARAH`UseHiggs2LoopMSSM === True,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesMSSM[SARAH`HiggsBoson];
               {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesMSSM[{SARAH`HiggsBoson, SARAH`PseudoScalar}];
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n";
@@ -1866,7 +1867,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n#include \"nmssm_twoloophiggs.hpp\"\n";
              ];
            twoLoopThresholdHeaders = ThresholdCorrections`GetTwoLoopThresholdHeaders[];
-           If[SARAH`UseHiggs2LoopMSSM === True ||
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True ||
               FlexibleSUSY`UseHiggs2LoopNMSSM === True ||
               FlexibleSUSY`UseMSSMYukawa2Loop === True ||
               FlexibleSUSY`UseMSSMAlphaS2Loop === True ||
@@ -3669,7 +3670,7 @@ MergeNPointFunctions[se1L_List, se2L_List] :=
 FSCheckFlags[] :=
     Module[{},
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
-              SARAH`UseHiggs2LoopMSSM = True;
+              FlexibleSUSY`UseHiggs2LoopMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
               FlexibleSUSY`UseMSSM3LoopRGEs = True;
@@ -3771,7 +3772,7 @@ FSCheckFlags[] :=
               References`AddReference["Martin:2014cxa"];
              ];
 
-           If[SARAH`UseHiggs2LoopMSSM,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM,
               Print["Adding 2-loop MSSM Higgs mass contributions from ",
                     "[arxiv:hep-ph/0105096, arxiv:hep-ph/0112177, arxiv:hep-ph/0212132,",
                     " arxiv:hep-ph/0206101, arxiv:hep-ph/0305127]"];
