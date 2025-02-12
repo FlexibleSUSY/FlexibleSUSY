@@ -38,7 +38,7 @@ New features
          {T[\[Kappa]], AKappaInput FSGaugeLess}
       };
 
-  Suported models: ``NUHMSSMNoFVHimalayaEFTHiggs`` (3-loop precision,
+  Supported models: ``NUHMSSMNoFVHimalayaEFTHiggs`` (3-loop precision,
   requires Himalaya) and ``NMSSMEFTHiggs`` (3-loop precision).
 
   Example (``NUHMSSMNoFVHimalayaEFTHiggs``)::
