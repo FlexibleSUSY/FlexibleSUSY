@@ -14,7 +14,7 @@ New features
   in [`2003.04639 <https://arxiv.org/abs/2003.04639>`_]. Provides a
   precise prediction of the SM-like Higgs boson mass in the MSSM at
   3-loop level (``NUHMSSMNoFVHimalayaEFTHiggs``) and in the NMSSM at
-  2-loop level (``NMSSMEFTHiggs``) for both low and high SUSY scales,
+  3-loop level (``NMSSMEFTHiggs``) for both low and high SUSY scales,
   including :math:`$x_t$` resummation.
 
 Fixed bugs
