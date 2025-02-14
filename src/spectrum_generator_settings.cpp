@@ -41,7 +41,7 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 2-loop corrections O((alpha_t + alpha_b)^2)",
    "Higgs 2-loop corrections O(alpha_tau^2)",
    "force output",
-   "Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)",
+   "Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)",
    "beta-function zero threshold",
    "calculate all observables",
    "force positive majorana masses",
