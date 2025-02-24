@@ -5612,8 +5612,8 @@ std::complex<double> Standard_model::self_energy_VG_1loop_deriv_p2(double p ) co
 {
    std::complex<double> result;
 
-   result += -(AbsSqr(CpVGVGVG())*(1 + 6*B0(Sqr(p),0,0) + 15*DB00(Sqr(p),0,0) + 6*
-      DB0(Sqr(p),0,0)*Sqr(p)));
+   result += -(AbsSqr(CpVGVGVG())*(1 + 6*B0(p,0,0) + 15*DB00(Sqr(p),0,0) + 6*DB0(
+      Sqr(p),0,0)*Sqr(p)));
    result += 3*AbsSqr(CpbargGgGVG())*DB00(Sqr(p),Sqr(MVG),Sqr(MVG));
    result += 0.5*SUM(gI1,0,2,SUM(gI2,0,2,(AbsSqr(CpbarFdFdVGPL(gI1,gI2)) + AbsSqr(
       CpbarFdFdVGPR(gI1,gI2)))*DH0(Sqr(p),Sqr(MFd(gI1)),Sqr(MFd(gI2))) + 4*DB0(Sqr
@@ -5635,9 +5635,9 @@ std::complex<double> Standard_model::self_energy_VP_1loop_deriv_p2(double p ) co
    result += -4*AbsSqr(CpHpconjHpVP())*DB00(Sqr(p),Sqr(MHp),Sqr(MHp));
    result += AbsSqr(CpbargWpCgWpCVP())*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp));
    result += AbsSqr(CpbargWpgWpVP())*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp));
-   result += -0.6666666666666666*AbsSqr(CpconjVWpVPVWp())*(1 + 6*B0(Sqr(p),Sqr(
-      MVWp),Sqr(MVWp)) + 15*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp)) + 3*DB0(Sqr(p),Sqr(
-      MVWp),Sqr(MVWp))*(Sqr(MVWp) + 2*Sqr(p)));
+   result += -0.6666666666666666*AbsSqr(CpconjVWpVPVWp())*(1 + 6*B0(p,MVWp,MVWp) +
+      15*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp)) + 3*DB0(Sqr(p),Sqr(MVWp),Sqr(MVWp))*(Sqr
+      (MVWp) + 2*Sqr(p)));
    result += 3*SUM(gI1,0,2,SUM(gI2,0,2,(AbsSqr(CpbarFdFdVPPL(gI1,gI2)) + AbsSqr(
       CpbarFdFdVPPR(gI1,gI2)))*DH0(Sqr(p),Sqr(MFd(gI1)),Sqr(MFd(gI2))) + 4*DB0(Sqr
       (p),Sqr(MFd(gI1)),Sqr(MFd(gI2)))*MFd(gI1)*MFd(gI2)*Re(Conj(CpbarFdFdVPPL(gI1
@@ -5664,9 +5664,9 @@ std::complex<double> Standard_model::self_energy_VZ_1loop_deriv_p2(double p ) co
    result += -4*AbsSqr(CpHpconjHpVZ())*DB00(Sqr(p),Sqr(MHp),Sqr(MHp));
    result += AbsSqr(CpbargWpCgWpCVZ())*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp));
    result += AbsSqr(CpbargWpgWpVZ())*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp));
-   result += -0.6666666666666666*AbsSqr(CpconjVWpVWpVZ())*(1 + 6*B0(Sqr(p),Sqr(
-      MVWp),Sqr(MVWp)) + 15*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp)) + 3*DB0(Sqr(p),Sqr(
-      MVWp),Sqr(MVWp))*(Sqr(MVWp) + 2*Sqr(p)));
+   result += -0.6666666666666666*AbsSqr(CpconjVWpVWpVZ())*(1 + 6*B0(p,MVWp,MVWp) +
+      15*DB00(Sqr(p),Sqr(MVWp),Sqr(MVWp)) + 3*DB0(Sqr(p),Sqr(MVWp),Sqr(MVWp))*(Sqr
+      (MVWp) + 2*Sqr(p)));
    result += 3*SUM(gI1,0,2,SUM(gI2,0,2,(AbsSqr(CpbarFdFdVZPL(gI1,gI2)) + AbsSqr(
       CpbarFdFdVZPR(gI1,gI2)))*DH0(Sqr(p),Sqr(MFd(gI1)),Sqr(MFd(gI2))) + 4*DB0(Sqr
       (p),Sqr(MFd(gI1)),Sqr(MFd(gI2)))*MFd(gI1)*MFd(gI2)*Re(Conj(CpbarFdFdVZPL(gI1
@@ -5700,9 +5700,8 @@ std::complex<double> Standard_model::self_energy_VWp_1loop_deriv_p2(double p ) c
    result += AbsSqr(CpbargPgWpconjVWp())*DB00(Sqr(p),Sqr(MVWp),Sqr(MVP));
    result += AbsSqr(CpbargZgWpconjVWp())*DB00(Sqr(p),Sqr(MVWp),Sqr(MVZ));
    result += AbsSqr(CpbargWpCgZconjVWp())*DB00(Sqr(p),Sqr(MVZ),Sqr(MVWp));
-   result += -0.3333333333333333*AbsSqr(CpconjVWpVPVWp())*(2 + 12*B0(Sqr(p),Sqr(
-      MVWp),0) + 30*DB00(Sqr(p),Sqr(MVWp),0) + 3*DB0(Sqr(p),Sqr(MVWp),0)*(Sqr(MVWp
-      ) + 4*Sqr(p)));
+   result += -0.3333333333333333*AbsSqr(CpconjVWpVPVWp())*(2 + 12*B0(p,MVWp,0) +
+      30*DB00(Sqr(p),Sqr(MVWp),0) + 3*DB0(Sqr(p),Sqr(MVWp),0)*(Sqr(MVWp) + 4*Sqr(p)));
    result += -0.3333333333333333*AbsSqr(CpconjVWpVWpVZ())*(2 + 12*B0(Sqr(p),Sqr(
       MVZ),Sqr(MVWp)) + 30*DB00(Sqr(p),Sqr(MVZ),Sqr(MVWp)) + 3*DB0(Sqr(p),Sqr(MVZ)
       ,Sqr(MVWp))*(Sqr(MVWp) + Sqr(MVZ) + 4*Sqr(p)));
