@@ -3813,7 +3813,7 @@ double Standard_model::CpbarFuVZFuPL(int gO1, int gI2) const
 
 double Standard_model::CpconjHpVPVWp() const
 {
-   
+
    const double result = 0.3872983346207417*g1*g2*v*Cos(ThetaW());
 
    return result;
@@ -3821,7 +3821,7 @@ double Standard_model::CpconjHpVPVWp() const
 
 double Standard_model::CphhHpconjHp() const
 {
-   
+
    const double result = -(v*Lambdax);
 
    return result;
@@ -3829,7 +3829,7 @@ double Standard_model::CphhHpconjHp() const
 
 double Standard_model::CpbargWpgZHp() const
 {
-   
+
    const double result = 0.05*g2*v*(-5*g2*Cos(ThetaW()) + 3.872983346207417*g1*Sin
       (ThetaW()));
 
@@ -3838,7 +3838,7 @@ double Standard_model::CpbargWpgZHp() const
 
 double Standard_model::CpbargZgWpconjHp() const
 {
-   
+
    const double result = 0.25*g2*v*(g2*Cos(ThetaW()) + 0.7745966692414834*g1*Sin(
       ThetaW()));
 
@@ -3847,7 +3847,7 @@ double Standard_model::CpbargZgWpconjHp() const
 
 double Standard_model::CpconjHpVWpVZ() const
 {
-   
+
    const double result = -0.3872983346207417*g1*g2*v*Sin(ThetaW());
 
    return result;
@@ -3855,7 +3855,7 @@ double Standard_model::CpconjHpVWpVZ() const
 
 double Standard_model::CpbargWpCgZconjHp() const
 {
-   
+
    const double result = 0.05*g2*v*(-5*g2*Cos(ThetaW()) + 3.872983346207417*g1*Sin
       (ThetaW()));
 
@@ -3864,7 +3864,7 @@ double Standard_model::CpbargWpCgZconjHp() const
 
 double Standard_model::CpbargZgWpCHp() const
 {
-   
+
    const double result = 0.25*g2*v*(g2*Cos(ThetaW()) + 0.7745966692414834*g1*Sin(
       ThetaW()));
 
@@ -3873,7 +3873,7 @@ double Standard_model::CpbargZgWpCHp() const
 
 double Standard_model::CphhconjHpVWp() const
 {
-   
+
    const double result = 0.5*g2;
 
    return result;
@@ -3881,7 +3881,7 @@ double Standard_model::CphhconjHpVWp() const
 
 double Standard_model::CpHpconjHpVP() const
 {
-   
+
    const double result = 0.5*(0.7745966692414834*g1*Cos(ThetaW()) + g2*Sin(ThetaW(
       )));
 
@@ -3890,7 +3890,7 @@ double Standard_model::CpHpconjHpVP() const
 
 double Standard_model::CpHpconjHpVZ() const
 {
-   
+
    const double result = 0.5*(g2*Cos(ThetaW()) - 0.7745966692414834*g1*Sin(ThetaW(
       )));
 
@@ -3899,7 +3899,7 @@ double Standard_model::CpHpconjHpVZ() const
 
 std::complex<double> Standard_model::CpbarFdFuconjHpPL(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -SUM(j2,0,2,Conj(Vu(gI2,j2))*SUM(j1,0,2,
       Conj(Ud(gI1,j1))*Yd(j1,j2)));
 
@@ -3908,7 +3908,7 @@ std::complex<double> Standard_model::CpbarFdFuconjHpPL(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpbarFdFuconjHpPR(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = SUM(j2,0,2,SUM(j1,0,2,Conj(Yu(j1,j2))*Uu(
       gI2,j1))*Vd(gI1,j2));
 
@@ -3917,7 +3917,7 @@ std::complex<double> Standard_model::CpbarFdFuconjHpPR(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpbarFeFvconjHpPL(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -SUM(j1,0,2,Conj(Ue(gI1,j1))*Ye(j1,gI2));
 
    return result;
@@ -3925,7 +3925,7 @@ std::complex<double> Standard_model::CpbarFeFvconjHpPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFeFvconjHpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -3933,7 +3933,7 @@ double Standard_model::CpbarFeFvconjHpPR(int , int ) const
 
 double Standard_model::CpAhAhhh() const
 {
-   
+
    const double result = -(v*Lambdax);
 
    return result;
@@ -3941,7 +3941,7 @@ double Standard_model::CpAhAhhh() const
 
 std::complex<double> Standard_model::CpbargWpCgWpCAh() const
 {
-   
+
    const std::complex<double> result = std::complex<double>(0,0.25)*v*Sqr(g2);
 
    return result;
@@ -3949,7 +3949,7 @@ std::complex<double> Standard_model::CpbargWpCgWpCAh() const
 
 std::complex<double> Standard_model::CpbargWpgWpAh() const
 {
-   
+
    const std::complex<double> result = std::complex<double>(0,-0.25)*v*Sqr(g2);
 
    return result;
@@ -3957,7 +3957,7 @@ std::complex<double> Standard_model::CpbargWpgWpAh() const
 
 std::complex<double> Standard_model::CpAhhhVZ() const
 {
-   
+
    const std::complex<double> result = std::complex<double>(0,-0.1)*(5*g2*Cos(
       ThetaW()) + 3.872983346207417*g1*Sin(ThetaW()));
 
@@ -3966,7 +3966,7 @@ std::complex<double> Standard_model::CpAhhhVZ() const
 
 std::complex<double> Standard_model::CpAhHpconjVWp() const
 {
-   
+
    const std::complex<double> result = std::complex<double>(0,0.5)*g2;
 
    return result;
@@ -3974,7 +3974,7 @@ std::complex<double> Standard_model::CpAhHpconjVWp() const
 
 double Standard_model::CpbargWpCgWpChh() const
 {
-   
+
    const double result = -0.25*v*Sqr(g2);
 
    return result;
@@ -3982,7 +3982,7 @@ double Standard_model::CpbargWpCgWpChh() const
 
 double Standard_model::CpbargWpgWphh() const
 {
-   
+
    const double result = -0.25*v*Sqr(g2);
 
    return result;
@@ -3990,7 +3990,7 @@ double Standard_model::CpbargWpgWphh() const
 
 double Standard_model::CpbargZgZhh() const
 {
-   
+
    const double result = -0.25*v*Sqr(g2*Cos(ThetaW()) + 0.7745966692414834*g1*Sin(
       ThetaW()));
 
@@ -3999,7 +3999,7 @@ double Standard_model::CpbargZgZhh() const
 
 double Standard_model::CphhHpconjVWp() const
 {
-   
+
    const double result = -0.5*g2;
 
    return result;
@@ -4007,7 +4007,7 @@ double Standard_model::CphhHpconjVWp() const
 
 std::complex<double> Standard_model::CpbarFdFdhhPL(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,Conj(Vd(gI2,
       j2))*SUM(j1,0,2,Conj(Ud(gI1,j1))*Yd(j1,j2)));
 
@@ -4016,7 +4016,7 @@ std::complex<double> Standard_model::CpbarFdFdhhPL(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpbarFdFdhhPR(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,SUM(j1,0,2,
       Conj(Yd(j1,j2))*Ud(gI2,j1))*Vd(gI1,j2));
 
@@ -4025,7 +4025,7 @@ std::complex<double> Standard_model::CpbarFdFdhhPR(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpbarFeFehhPL(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,Conj(Ve(gI2,
       j2))*SUM(j1,0,2,Conj(Ue(gI1,j1))*Ye(j1,j2)));
 
@@ -4034,7 +4034,7 @@ std::complex<double> Standard_model::CpbarFeFehhPL(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpbarFeFehhPR(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,SUM(j1,0,2,
       Conj(Ye(j1,j2))*Ue(gI2,j1))*Ve(gI1,j2));
 
@@ -4043,7 +4043,7 @@ std::complex<double> Standard_model::CpbarFeFehhPR(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpbarFuFuhhPR(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,SUM(j1,0,2,
       Conj(Yu(j1,j2))*Uu(gI2,j1))*Vu(gI1,j2));
 
@@ -4052,7 +4052,7 @@ std::complex<double> Standard_model::CpbarFuFuhhPR(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpbarFuFuhhPL(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,Conj(Vu(gI2,
       j2))*SUM(j1,0,2,Conj(Uu(gI1,j1))*Yu(j1,j2)));
 
@@ -4061,7 +4061,7 @@ std::complex<double> Standard_model::CpbarFuFuhhPL(int gI1, int gI2) const
 
 std::complex<double> Standard_model::CpVGVGVG() const
 {
-   
+
    const std::complex<double> result = std::complex<double>(0,-1)*g3;
 
    return result;
@@ -4069,7 +4069,7 @@ std::complex<double> Standard_model::CpVGVGVG() const
 
 std::complex<double> Standard_model::CpbargGgGVG() const
 {
-   
+
    const std::complex<double> result = std::complex<double>(0,-1)*g3;
 
    return result;
@@ -4077,7 +4077,7 @@ std::complex<double> Standard_model::CpbargGgGVG() const
 
 double Standard_model::CpbarFdFdVGPL(int gI1, int gI2) const
 {
-   
+
    const double result = -(g3*KroneckerDelta(gI1,gI2));
 
    return result;
@@ -4085,7 +4085,7 @@ double Standard_model::CpbarFdFdVGPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFdFdVGPR(int gI1, int gI2) const
 {
-   
+
    const double result = -(g3*KroneckerDelta(gI1,gI2));
 
    return result;
@@ -4093,7 +4093,7 @@ double Standard_model::CpbarFdFdVGPR(int gI1, int gI2) const
 
 double Standard_model::CpbarFuFuVGPL(int gI1, int gI2) const
 {
-   
+
    const double result = -(g3*KroneckerDelta(gI1,gI2));
 
    return result;
@@ -4101,7 +4101,7 @@ double Standard_model::CpbarFuFuVGPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFuFuVGPR(int gI1, int gI2) const
 {
-   
+
    const double result = -(g3*KroneckerDelta(gI1,gI2));
 
    return result;
@@ -4109,7 +4109,7 @@ double Standard_model::CpbarFuFuVGPR(int gI1, int gI2) const
 
 double Standard_model::CpHpconjVWpVP() const
 {
-   
+
    const double result = 0.3872983346207417*g1*g2*v*Cos(ThetaW());
 
    return result;
@@ -4117,7 +4117,7 @@ double Standard_model::CpHpconjVWpVP() const
 
 double Standard_model::CpbargWpCgWpCVP() const
 {
-   
+
    const double result = -(g2*Sin(ThetaW()));
 
    return result;
@@ -4125,7 +4125,7 @@ double Standard_model::CpbargWpCgWpCVP() const
 
 double Standard_model::CpbargWpgWpVP() const
 {
-   
+
    const double result = g2*Sin(ThetaW());
 
    return result;
@@ -4142,7 +4142,7 @@ std::complex<double> Standard_model::CpHpconjHpVPVP() const
 
 double Standard_model::CpconjVWpVPVWp() const
 {
-   
+
    const double result = -(g2*Sin(ThetaW()));
 
    return result;
@@ -4150,7 +4150,7 @@ double Standard_model::CpconjVWpVPVWp() const
 
 double Standard_model::CpbarFdFdVPPL(int gI1, int gI2) const
 {
-   
+
    const double result = -0.16666666666666666*KroneckerDelta(gI1,gI2)*(
       0.7745966692414834*g1*Cos(ThetaW()) - 3*g2*Sin(ThetaW()));
 
@@ -4159,7 +4159,7 @@ double Standard_model::CpbarFdFdVPPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFdFdVPPR(int gI1, int gI2) const
 {
-   
+
    const double result = 0.2581988897471611*g1*Cos(ThetaW())*KroneckerDelta(gI1,
       gI2);
 
@@ -4168,7 +4168,7 @@ double Standard_model::CpbarFdFdVPPR(int gI1, int gI2) const
 
 double Standard_model::CpbarFeFeVPPL(int gI1, int gI2) const
 {
-   
+
    const double result = 0.5*KroneckerDelta(gI1,gI2)*(0.7745966692414834*g1*Cos(
       ThetaW()) + g2*Sin(ThetaW()));
 
@@ -4177,7 +4177,7 @@ double Standard_model::CpbarFeFeVPPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFeFeVPPR(int gI1, int gI2) const
 {
-   
+
    const double result = 0.7745966692414834*g1*Cos(ThetaW())*KroneckerDelta(gI1,
       gI2);
 
@@ -4186,7 +4186,7 @@ double Standard_model::CpbarFeFeVPPR(int gI1, int gI2) const
 
 double Standard_model::CpbarFuFuVPPL(int gI1, int gI2) const
 {
-   
+
    const double result = -0.16666666666666666*KroneckerDelta(gI1,gI2)*(
       0.7745966692414834*g1*Cos(ThetaW()) + 3*g2*Sin(ThetaW()));
 
@@ -4195,7 +4195,7 @@ double Standard_model::CpbarFuFuVPPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFuFuVPPR(int gI1, int gI2) const
 {
-   
+
    const double result = -0.5163977794943222*g1*Cos(ThetaW())*KroneckerDelta(gI1,
       gI2);
 
@@ -4204,7 +4204,7 @@ double Standard_model::CpbarFuFuVPPR(int gI1, int gI2) const
 
 double Standard_model::CpHpconjVWpVZ() const
 {
-   
+
    const double result = -0.3872983346207417*g1*g2*v*Sin(ThetaW());
 
    return result;
@@ -4212,7 +4212,7 @@ double Standard_model::CpHpconjVWpVZ() const
 
 double Standard_model::CpbargWpCgWpCVZ() const
 {
-   
+
    const double result = -(g2*Cos(ThetaW()));
 
    return result;
@@ -4220,7 +4220,7 @@ double Standard_model::CpbargWpCgWpCVZ() const
 
 double Standard_model::CpbargWpgWpVZ() const
 {
-   
+
    const double result = g2*Cos(ThetaW());
 
    return result;
@@ -4228,7 +4228,7 @@ double Standard_model::CpbargWpgWpVZ() const
 
 double Standard_model::CpconjVWpVWpVZ() const
 {
-   
+
    const double result = g2*Cos(ThetaW());
 
    return result;
@@ -4260,7 +4260,7 @@ double Standard_model::CpconjVWpVPVPVWp2() const
 
 double Standard_model::CpbarFdFdVZPL(int gI1, int gI2) const
 {
-   
+
    const double result = 0.16666666666666666*KroneckerDelta(gI1,gI2)*(3*g2*Cos(
       ThetaW()) + 0.7745966692414834*g1*Sin(ThetaW()));
 
@@ -4269,7 +4269,7 @@ double Standard_model::CpbarFdFdVZPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFdFdVZPR(int gI1, int gI2) const
 {
-   
+
    const double result = -0.2581988897471611*g1*KroneckerDelta(gI1,gI2)*Sin(ThetaW
       ());
 
@@ -4278,7 +4278,7 @@ double Standard_model::CpbarFdFdVZPR(int gI1, int gI2) const
 
 double Standard_model::CpbarFeFeVZPL(int gI1, int gI2) const
 {
-   
+
    const double result = 0.5*KroneckerDelta(gI1,gI2)*(g2*Cos(ThetaW()) -
       0.7745966692414834*g1*Sin(ThetaW()));
 
@@ -4287,7 +4287,7 @@ double Standard_model::CpbarFeFeVZPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFeFeVZPR(int gI1, int gI2) const
 {
-   
+
    const double result = -0.7745966692414834*g1*KroneckerDelta(gI1,gI2)*Sin(ThetaW
       ());
 
@@ -4296,7 +4296,7 @@ double Standard_model::CpbarFeFeVZPR(int gI1, int gI2) const
 
 double Standard_model::CpbarFuFuVZPL(int gI1, int gI2) const
 {
-   
+
    const double result = 0.03333333333333333*KroneckerDelta(gI1,gI2)*(-15*g2*Cos(
       ThetaW()) + 3.872983346207417*g1*Sin(ThetaW()));
 
@@ -4305,7 +4305,7 @@ double Standard_model::CpbarFuFuVZPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFuFuVZPR(int gI1, int gI2) const
 {
-   
+
    const double result = 0.5163977794943222*g1*KroneckerDelta(gI1,gI2)*Sin(ThetaW(
       ));
 
@@ -4314,7 +4314,7 @@ double Standard_model::CpbarFuFuVZPR(int gI1, int gI2) const
 
 double Standard_model::CpbarFvFvVZPL(int gI1, int gI2) const
 {
-   
+
    const double result = -0.5*KroneckerDelta(gI1,gI2)*(g2*Cos(ThetaW()) +
       0.7745966692414834*g1*Sin(ThetaW()));
 
@@ -4323,7 +4323,7 @@ double Standard_model::CpbarFvFvVZPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFvFvVZPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4331,7 +4331,7 @@ double Standard_model::CpbarFvFvVZPR(int , int ) const
 
 double Standard_model::CpbargWpCgPconjVWp() const
 {
-   
+
    const double result = g2*Sin(ThetaW());
 
    return result;
@@ -4339,7 +4339,7 @@ double Standard_model::CpbargWpCgPconjVWp() const
 
 double Standard_model::CpbargPgWpconjVWp() const
 {
-   
+
    const double result = -(g2*Sin(ThetaW()));
 
    return result;
@@ -4347,7 +4347,7 @@ double Standard_model::CpbargPgWpconjVWp() const
 
 double Standard_model::CpbargZgWpconjVWp() const
 {
-   
+
    const double result = -(g2*Cos(ThetaW()));
 
    return result;
@@ -4355,7 +4355,7 @@ double Standard_model::CpbargZgWpconjVWp() const
 
 double Standard_model::CpbargWpCgZconjVWp() const
 {
-   
+
    const double result = g2*Cos(ThetaW());
 
    return result;
@@ -4363,7 +4363,7 @@ double Standard_model::CpbargWpCgZconjVWp() const
 
 std::complex<double> Standard_model::CpbarFdFuconjVWpPL(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = -0.7071067811865475*g2*SUM(j1,0,2,Conj(Vu(
       gI2,j1))*Vd(gI1,j1));
 
@@ -4372,7 +4372,7 @@ std::complex<double> Standard_model::CpbarFdFuconjVWpPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFdFuconjVWpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4380,7 +4380,7 @@ double Standard_model::CpbarFdFuconjVWpPR(int , int ) const
 
 std::complex<double> Standard_model::CpbarFeFvconjVWpPL(int gI1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-0.7071067811865475*g2*Ve(gI1,
       gI2),0);
 
@@ -4389,7 +4389,7 @@ std::complex<double> Standard_model::CpbarFeFvconjVWpPL(int gI1, int gI2) const
 
 double Standard_model::CpbarFeFvconjVWpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4397,7 +4397,7 @@ double Standard_model::CpbarFeFvconjVWpPR(int , int ) const
 
 std::complex<double> Standard_model::CpbarUFdFdVGPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-(g3*Ud(gI2,gO2)),0);
 
    return result;
@@ -4405,7 +4405,7 @@ std::complex<double> Standard_model::CpbarUFdFdVGPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFdVGPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-(g3*Conj(Vd(gI2,gO1))),0);
 
    return result;
@@ -4413,7 +4413,7 @@ std::complex<double> Standard_model::CpbarUFdFdVGPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFdVPPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,0.2581988897471611*g1*Cos(ThetaW
       ())*Ud(gI2,gO2),0);
 
@@ -4422,7 +4422,7 @@ std::complex<double> Standard_model::CpbarUFdFdVPPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFdVPPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-0.12909944487358055*g1*Conj(Vd(
       gI2,gO1))*Cos(ThetaW()),0) + IF(gI2 < 3,0.5*g2*Conj(Vd(gI2,gO1))*Sin(ThetaW(
       )),0);
@@ -4432,7 +4432,7 @@ std::complex<double> Standard_model::CpbarUFdFdVPPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFdhhPL(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO2 < 3,-0.7071067811865475*SUM(j2,0,2,
       Conj(Vd(gI2,j2))*Yd(gO2,j2)),0);
 
@@ -4441,7 +4441,7 @@ std::complex<double> Standard_model::CpbarUFdFdhhPL(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFdhhPR(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,-0.7071067811865475*SUM(j1,0,2,
       Conj(Yd(j1,gO1))*Ud(gI2,j1)),0);
 
@@ -4450,7 +4450,7 @@ std::complex<double> Standard_model::CpbarUFdFdhhPR(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFdVZPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-0.2581988897471611*g1*Sin(
       ThetaW())*Ud(gI2,gO2),0);
 
@@ -4459,7 +4459,7 @@ std::complex<double> Standard_model::CpbarUFdFdVZPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFdVZPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,0.5*g2*Conj(Vd(gI2,gO1))*Cos(
       ThetaW()),0) + IF(gI2 < 3,0.12909944487358055*g1*Conj(Vd(gI2,gO1))*Sin(
       ThetaW()),0);
@@ -4469,7 +4469,7 @@ std::complex<double> Standard_model::CpbarUFdFdVZPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFuconjHpPL(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO2 < 3,-SUM(j2,0,2,Conj(Vu(gI2,j2))*Yd(
       gO2,j2)),0);
 
@@ -4478,7 +4478,7 @@ std::complex<double> Standard_model::CpbarUFdFuconjHpPL(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFdFuconjHpPR(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,SUM(j1,0,2,Conj(Yu(j1,gO1))*Uu(
       gI2,j1)),0);
 
@@ -4487,7 +4487,7 @@ std::complex<double> Standard_model::CpbarUFdFuconjHpPR(int gO1, int gI2) const
 
 double Standard_model::CpbarUFdFuconjVWpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4495,7 +4495,7 @@ double Standard_model::CpbarUFdFuconjVWpPR(int , int ) const
 
 std::complex<double> Standard_model::CpbarUFdFuconjVWpPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,-0.7071067811865475*g2*Conj(Vu(
       gI2,gO1)),0);
 
@@ -4504,7 +4504,7 @@ std::complex<double> Standard_model::CpbarUFdFuconjVWpPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFdHpPL(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO2 < 3,SUM(j2,0,2,Conj(Vd(gI2,j2))*Yu(
       gO2,j2)),0);
 
@@ -4513,7 +4513,7 @@ std::complex<double> Standard_model::CpbarUFuFdHpPL(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFdHpPR(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,-SUM(j1,0,2,Conj(Yd(j1,gO1))*Ud(
       gI2,j1)),0);
 
@@ -4522,7 +4522,7 @@ std::complex<double> Standard_model::CpbarUFuFdHpPR(int gO1, int gI2) const
 
 double Standard_model::CpbarUFuFdVWpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4530,7 +4530,7 @@ double Standard_model::CpbarUFuFdVWpPR(int , int ) const
 
 std::complex<double> Standard_model::CpbarUFuFdVWpPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,-0.7071067811865475*g2*Conj(Vd(
       gI2,gO1)),0);
 
@@ -4539,7 +4539,7 @@ std::complex<double> Standard_model::CpbarUFuFdVWpPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuVGPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-(g3*Uu(gI2,gO2)),0);
 
    return result;
@@ -4547,7 +4547,7 @@ std::complex<double> Standard_model::CpbarUFuFuVGPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuVGPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-(g3*Conj(Vu(gI2,gO1))),0);
 
    return result;
@@ -4555,7 +4555,7 @@ std::complex<double> Standard_model::CpbarUFuFuVGPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuVPPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-0.5163977794943222*g1*Cos(
       ThetaW())*Uu(gI2,gO2),0);
 
@@ -4564,7 +4564,7 @@ std::complex<double> Standard_model::CpbarUFuFuVPPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuVPPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-0.12909944487358055*g1*Conj(Vu(
       gI2,gO1))*Cos(ThetaW()),0) + IF(gI2 < 3,-0.5*g2*Conj(Vu(gI2,gO1))*Sin(ThetaW
       ()),0);
@@ -4574,7 +4574,7 @@ std::complex<double> Standard_model::CpbarUFuFuVPPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuhhPL(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO2 < 3,-0.7071067811865475*SUM(j2,0,2,
       Conj(Vu(gI2,j2))*Yu(gO2,j2)),0);
 
@@ -4583,7 +4583,7 @@ std::complex<double> Standard_model::CpbarUFuFuhhPL(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuhhPR(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,-0.7071067811865475*SUM(j1,0,2,
       Conj(Yu(j1,gO1))*Uu(gI2,j1)),0);
 
@@ -4592,7 +4592,7 @@ std::complex<double> Standard_model::CpbarUFuFuhhPR(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuVZPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,0.5163977794943222*g1*Sin(ThetaW
       ())*Uu(gI2,gO2),0);
 
@@ -4601,7 +4601,7 @@ std::complex<double> Standard_model::CpbarUFuFuVZPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFuFuVZPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-0.5*g2*Conj(Vu(gI2,gO1))*Cos(
       ThetaW()),0) + IF(gI2 < 3,0.12909944487358055*g1*Conj(Vu(gI2,gO1))*Sin(
       ThetaW()),0);
@@ -4611,7 +4611,7 @@ std::complex<double> Standard_model::CpbarUFuFuVZPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFeFeVPPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,0.7745966692414834*g1*Cos(ThetaW
       ())*Ue(gI2,gO2),0);
 
@@ -4620,7 +4620,7 @@ std::complex<double> Standard_model::CpbarUFeFeVPPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFeFeVPPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,0.3872983346207417*g1*Conj(Ve(
       gI2,gO1))*Cos(ThetaW()),0) + IF(gI2 < 3,0.5*g2*Conj(Ve(gI2,gO1))*Sin(ThetaW(
       )),0);
@@ -4630,7 +4630,7 @@ std::complex<double> Standard_model::CpbarUFeFeVPPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFeFehhPL(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO2 < 3,-0.7071067811865475*SUM(j2,0,2,
       Conj(Ve(gI2,j2))*Ye(gO2,j2)),0);
 
@@ -4639,7 +4639,7 @@ std::complex<double> Standard_model::CpbarUFeFehhPL(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFeFehhPR(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,-0.7071067811865475*SUM(j1,0,2,
       Conj(Ye(j1,gO1))*Ue(gI2,j1)),0);
 
@@ -4648,7 +4648,7 @@ std::complex<double> Standard_model::CpbarUFeFehhPR(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFeFeVZPR(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,-0.7745966692414834*g1*Sin(
       ThetaW())*Ue(gI2,gO2),0);
 
@@ -4657,7 +4657,7 @@ std::complex<double> Standard_model::CpbarUFeFeVZPR(int gO2, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFeFeVZPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gI2 < 3,0.5*g2*Conj(Ve(gI2,gO1))*Cos(
       ThetaW()),0) + IF(gI2 < 3,-0.3872983346207417*g1*Conj(Ve(gI2,gO1))*Sin(
       ThetaW()),0);
@@ -4667,7 +4667,7 @@ std::complex<double> Standard_model::CpbarUFeFeVZPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpbarUFeFvconjHpPL(int gO2, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO2 < 3,-Ye(gO2,gI2),0);
 
    return result;
@@ -4675,7 +4675,7 @@ std::complex<double> Standard_model::CpbarUFeFvconjHpPL(int gO2, int gI2) const
 
 double Standard_model::CpbarUFeFvconjHpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4683,7 +4683,7 @@ double Standard_model::CpbarUFeFvconjHpPR(int , int ) const
 
 double Standard_model::CpbarUFeFvconjVWpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4691,7 +4691,7 @@ double Standard_model::CpbarUFeFvconjVWpPR(int , int ) const
 
 double Standard_model::CpbarUFeFvconjVWpPL(int gO1, int gI2) const
 {
-   
+
    const double result = IF(gI2 < 3,-0.7071067811865475*g2*KroneckerDelta(gI2,gO1)
       ,0);
 
@@ -4700,7 +4700,7 @@ double Standard_model::CpbarUFeFvconjVWpPL(int gO1, int gI2) const
 
 double Standard_model::CpbarFvFeHpPL(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4708,7 +4708,7 @@ double Standard_model::CpbarFvFeHpPL(int , int ) const
 
 std::complex<double> Standard_model::CpbarFvFeHpPR(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = -SUM(j1,0,2,Conj(Ye(j1,gO1))*Ue(gI2,j1));
 
    return result;
@@ -4716,7 +4716,7 @@ std::complex<double> Standard_model::CpbarFvFeHpPR(int gO1, int gI2) const
 
 double Standard_model::CpbarFvFeVWpPR(int , int ) const
 {
-   
+
    const double result = 0;
 
    return result;
@@ -4724,7 +4724,7 @@ double Standard_model::CpbarFvFeVWpPR(int , int ) const
 
 std::complex<double> Standard_model::CpbarFvFeVWpPL(int gO1, int gI2) const
 {
-   
+
    const std::complex<double> result = IF(gO1 < 3,-0.7071067811865475*g2*Conj(Ve(
       gI2,gO1)),0);
 
@@ -4733,7 +4733,7 @@ std::complex<double> Standard_model::CpbarFvFeVWpPL(int gO1, int gI2) const
 
 std::complex<double> Standard_model::CpAhconjHpVWp() const
 {
-   
+
    const std::complex<double> result = std::complex<double>(0,0.5)*g2;
 
    return result;
