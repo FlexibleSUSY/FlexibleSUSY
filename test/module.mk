@@ -521,6 +521,18 @@ TEST_SH += \
 		$(DIR)/test_BLSMlightZp_ZZp_mixing.sh
 endif
 
+ifeq ($(WITH_LQS1_up_basis),yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
+TEST_SRC += \
+		$(DIR)/test_LQS1_self_energies.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_LQS1_self_energies.cpp
+endif
+endif
+
+
 ifeq ($(WITH_MSSM),yes)
 TEST_SH += \
 		$(DIR)/test_standalone.sh
@@ -1338,6 +1350,8 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic) $(LIBTHDMII)
+
+$(DIR)/test_LQS1_self_energies.x: $(LIBLQS1_up_basis)
 
 # test rule for files which depend on pv #######################################
 ifneq ($(OPERATING_SYSTEM),Darwin)
