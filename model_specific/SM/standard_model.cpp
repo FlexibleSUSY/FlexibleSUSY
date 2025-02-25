@@ -5702,9 +5702,9 @@ std::complex<double> Standard_model::self_energy_VWp_1loop_deriv_p2(double p ) c
    result += AbsSqr(CpbargWpCgZconjVWp())*DB00(Sqr(p),Sqr(MVZ),Sqr(MVWp));
    result += -0.3333333333333333*AbsSqr(CpconjVWpVPVWp())*(2 + 12*B0(p,MVWp,0) +
       30*DB00(Sqr(p),Sqr(MVWp),0) + 3*DB0(Sqr(p),Sqr(MVWp),0)*(Sqr(MVWp) + 4*Sqr(p)));
-   result += -0.3333333333333333*AbsSqr(CpconjVWpVWpVZ())*(2 + 12*B0(Sqr(p),Sqr(
-      MVZ),Sqr(MVWp)) + 30*DB00(Sqr(p),Sqr(MVZ),Sqr(MVWp)) + 3*DB0(Sqr(p),Sqr(MVZ)
-      ,Sqr(MVWp))*(Sqr(MVWp) + Sqr(MVZ) + 4*Sqr(p)));
+   result += -0.3333333333333333*AbsSqr(CpconjVWpVWpVZ())*(2 + 12*B0(p,MVZ,MVWp) +
+      30*DB00(Sqr(p),Sqr(MVZ),Sqr(MVWp)) + 3*DB0(Sqr(p),Sqr(MVZ),Sqr(MVWp))*(Sqr(
+      MVWp) + Sqr(MVZ) + 4*Sqr(p)));
    result += 3*SUM(gI1,0,2,SUM(gI2,0,2,(AbsSqr(CpbarFdFuconjVWpPL(gI1,gI2)) +
       AbsSqr(CpbarFdFuconjVWpPR(gI1,gI2)))*DH0(Sqr(p),Sqr(MFd(gI1)),Sqr(MFu(gI2)))
       + 4*DB0(Sqr(p),Sqr(MFd(gI1)),Sqr(MFu(gI2)))*MFd(gI1)*MFu(gI2)*Re(Conj(
