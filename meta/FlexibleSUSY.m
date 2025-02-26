@@ -3587,7 +3587,7 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseHiggs2LoopNMSSM === True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
-              (* FlexibleSUSY`UseMSSM3LoopRGEs = True; *)
+              FlexibleSUSY`UseMSSM3LoopRGEs = True;
              ];
 
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
