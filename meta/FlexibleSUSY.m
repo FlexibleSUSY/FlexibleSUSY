@@ -75,7 +75,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "U. Khasianevich",
               "W. Kotlarski", "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2024";
+FS`Years   = "2013-2025";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
