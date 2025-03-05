@@ -197,6 +197,12 @@ LIBFLEXI_HDR += \
 		$(DIR)/two_scale_solver.hpp
 endif
 
+LIBFLEXI_SRC += \
+		$(DIR)/decays/experimental_constraints.cpp
+
+LIBFLEXI_HDR += \
+		$(DIR)/decays/experimental_constraints.hpp
+
 ifneq ($(findstring shooting,$(SOLVERS)),)
 LIBFLEXI_HDR += \
 		$(DIR)/shooting_solver.hpp

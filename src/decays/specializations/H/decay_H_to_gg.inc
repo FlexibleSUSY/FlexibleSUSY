@@ -15,10 +15,18 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
    // full LO (SM+BSM) result
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
+   const int Nf = number_of_active_flavours(qedqcd, mH);
+   if (Nf < 5) {
+      problems.add_warning(
+         create_process_string<Higgs,Gluon,Gluon>(in_idx, out1_idx, out2_idx)
+         + ": Scalar Higgs too light (less than 5 active quark flavours). Disabling higher-order corrections."
+      );
+   }
+
    const double mt {context.mass<UpTypeQuark>({2})};
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
-   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && Nf >= 5 && tau < 0.7) {
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mH);
       // 5-flavour SM alpha_s
@@ -45,7 +53,6 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       const double Lt = std::log(Sqr(mu/mt));
 
       // eq. 5 of 0708.0916
-      static constexpr int Nf = 5;
       const double hnlo0 =
          95./4. - 7./6.*Nf + (33 - 2*Nf)/6.*LH;
       const double hnlo1 =
@@ -155,13 +162,26 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       }
    }
 
+   const std::string tag = field_as_string<Higgs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx);
+
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
-            25 + 10*(in_idx.size()>0 ? in_idx.at(0) : 0), 21, 21,
+            fieldPDG<Higgs>(in_idx), 21, 21,
             std::sqrt(result/(flux * color_fact * ps * ps_symmetry)/(0.5*Power4(mH))),
-            field_as_string<Higgs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx)
+            tag
          }
+      );
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(
+         field_as_string<Higgs>(in_idx),
+         {21, 21},
+         std::pair<std::string, double> {tag, std::sqrt(result)}
       );
    }
 

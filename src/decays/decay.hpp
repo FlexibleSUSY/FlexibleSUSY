@@ -19,16 +19,18 @@
 #ifndef DECAY_H
 #define DECAY_H
 
+#include <algorithm>
 #include <initializer_list>
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <boost/core/demangle.hpp>
-#include <boost/range/algorithm/equal.hpp>
 
+#include "wrappers.hpp"
 #include "always_false.hpp"
 #include "cxx_qft/fields.hpp"
+#include "cxx_qft/vertices.hpp"
 
 namespace flexiblesusy {
 
@@ -66,6 +68,72 @@ private:
    std::vector<int> pids_out{};
    double width{0.};
    std::string proc_string;
+};
+
+class NeutralHiggsEffectiveCouplings {
+public:
+   std::string particle {};
+   int pdgid {};
+   double mass {};
+   double width {};
+   double width_sm {};
+   double invWidth {0.};
+   int CP {};
+   std::pair<std::string, std::complex<double>> dd {};
+   std::pair<std::string, std::complex<double>> uu {};
+   std::pair<std::string, std::complex<double>> ss {};
+   std::pair<std::string, std::complex<double>> cc {};
+   std::pair<std::string, std::complex<double>> bb {};
+   std::pair<std::string, std::complex<double>> tt {};
+   std::pair<std::string, std::complex<double>> ee {};
+   std::pair<std::string, std::complex<double>> mumu {};
+   std::pair<std::string, std::complex<double>> tautau {};
+   std::pair<std::string, std::complex<double>> emu {};
+   std::pair<std::string, std::complex<double>> etau {};
+   std::pair<std::string, std::complex<double>> mutau {};
+   std::pair<std::string, double> WW {};
+   std::pair<std::string, double> ZZ {};
+   std::pair<std::string, double> Zgam {};
+   std::pair<std::string, double> gamgam {};
+   std::pair<std::string, double> gg = {};
+   double lam {};
+
+   double get_undetected_width() const { return undetectedWidth; }
+   void calculate_undetected_br(bool withTop) {
+      const double _undetectedWidth = width - invWidth - std::norm(dd.second) - std::norm(uu.second) - std::norm(ss.second) - std::norm(cc.second) - std::norm(bb.second) - (withTop ? std::norm(tt.second) : 0.) - std::norm(ee.second) - std::norm(mumu.second) - std::norm(tautau.second) - std::norm(emu.second) - std::norm(etau.second) - std::norm(mutau.second) - Sqr(WW.second) - Sqr(ZZ.second) - Sqr(Zgam.second) - Sqr(gamgam.second) - Sqr(gg.second);
+      if (!(_undetectedWidth < 0 && std::abs(_undetectedWidth)/width < 1e-10)) {
+         undetectedWidth = _undetectedWidth;
+      }
+   }
+private:
+   double undetectedWidth {0.};
+};
+
+class EffectiveCoupling_list {
+public:
+   EffectiveCoupling_list() = default;
+   ~EffectiveCoupling_list() = default;
+
+   std::vector<NeutralHiggsEffectiveCouplings>::iterator begin() noexcept { return effective_coupling_list.begin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator begin() const noexcept { return effective_coupling_list.begin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator cbegin() const noexcept { return effective_coupling_list.cbegin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::iterator end() noexcept { return effective_coupling_list.end(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator end() const noexcept { return effective_coupling_list.end(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator cend() const noexcept { return effective_coupling_list.end(); }
+
+   NeutralHiggsEffectiveCouplings const& operator[](int index) const {
+      return effective_coupling_list[index];
+   }
+
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, double> const&);
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, std::complex<double>> const&);
+   void set_invisible_width(std::string const& p, double);
+   void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
+
+   std::size_t size() const noexcept { return effective_coupling_list.size(); }
+
+private:
+   std::vector<NeutralHiggsEffectiveCouplings> effective_coupling_list {};
 };
 
 std::size_t hash_decay(const Decay& decay);
@@ -107,7 +175,7 @@ public:
          total_width -= pos->second.get_width();
          pos->second.set_width(width);
       } else {
-         decays.insert(pos, std::make_pair(decay_hash, decay));
+         decays.insert(pos, std::make_pair(decay_hash, std::move(decay)));
       }
 
       // some channels give small negative withs
@@ -287,6 +355,27 @@ struct hVV_4body_params {
    double mHOS {};
    double mVOS {};
    double GammaV {};
+};
+
+enum PDG_id_pairs: int {
+   dd = 0,
+   uu = 1,
+   ss = 2,
+   cc = 3,
+   bb = 4,
+   tt = 5,
+   ee = 6,
+   mumu = 7,
+   tautau = 8,
+   WW = 9,
+   ZZ = 10,
+   gamgam = 11,
+   Zgam = 12,
+   gg = 13,
+   emu = 14,
+   etau = 15,
+   mutau = 16,
+   NUMBER_OF_PDG_IDS
 };
 
 } // namespace flexiblesusy

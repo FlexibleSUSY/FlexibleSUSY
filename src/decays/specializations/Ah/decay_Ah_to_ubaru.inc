@@ -144,5 +144,23 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
       result = (1-4.*xOS)*result_DR + 4*xOS*result_OS;
    }
 
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
+         {
+            boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
+            boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
+         },
+         std::pair<std::string, std::complex<double>> {
+            field_as_string<PseudoscalarHiggs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
+            // if the decay is not kinematically allowed return the tree-level coupling,
+            // otherwise a sqrt of a partial width
+            4.*std::max(xDR, xOS) > 1. ? std::imag(AhQQbarVertexDR_P)*1i : std::sqrt(result)*1i
+         }
+         );
+   }
+
    return result;
 }

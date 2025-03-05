@@ -11,10 +11,10 @@
 #include "decays/SM_decays.hpp"
 #include "decays/standard_model_decays.hpp"
 #include "SM_mass_eigenstates_running.hpp"
+#include "decays/experimental_constraints.hpp"
+#include "SM_two_scale_spectrum_generator.hpp"
 
-// #include "wrappers.hpp"
 #include "lowe.h"
-// #include "standard_model.hpp"
 #include "loop_libraries/loop_library.hpp"
 
 using namespace flexiblesusy;
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    // h -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 9.2117697375801348e-06, 2e-13);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.3322476114788634e-06, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.106402229544854e-06, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    // h -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVP(&m), 9.0492996379713826e-06, 2e-13);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVZ(&m), 6.305199201144327e-06, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVZ(&m), 6.0803965974442744e-06, 2e-13);
 }
 
 BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
@@ -203,4 +203,63 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VPVP(&m), decays_sm_no_HO.partial_width_hh_to_VPVP(sm), 1e-16);
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_no_HO.partial_width_hh_to_VPVZ(&m), decays_sm_no_HO.partial_width_hh_to_VPVZ(sm), 1e-16);
+}
+
+BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
+{
+
+   Loop_library::set(-1);
+
+   static constexpr double lambda = 0.194;
+
+   SM_input_parameters input;
+   input.LambdaIN = lambda;
+   input.Qin = 1000;
+   input.QEWSB = 173;
+
+   Spectrum_generator_settings settings;
+   softsusy::QedQcd qedqcd;
+
+   SM_spectrum_generator<Two_scale> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+   auto m = std::get<0>(spectrum_generator.get_models_slha());
+
+   m.do_calculate_sm_pole_masses(true);
+   m.solve_ewsb_tree_level();
+   m.calculate_DRbar_masses();
+   m.solve_ewsb();
+   m.calculate_pole_masses();
+
+   if (m.get_problems().have_problem()) {
+      std::ostringstream ostr;
+      m.get_problems().print_problems(ostr);
+      BOOST_FAIL(ostr.str());
+   }
+
+   Physical_input physical_input;
+   FlexibleDecay_settings flexibledecay_settings;
+   flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, 1);
+
+   SM_decays decays = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
+   decays.calculate_decays();
+   const auto effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, settings, flexibledecay_settings);
+
+   // tolerance in %
+   BOOST_CHECK_CLOSE(effc[0].gg.second, 1, 0.005);
+   BOOST_CHECK_CLOSE(effc[0].gamgam.second, 1, 0.01);
+   BOOST_CHECK_CLOSE(effc[0].Zgam.second, 1, 0.02);
+
+   BOOST_CHECK_CLOSE(effc[0].ZZ.second, 1, 0.04);
+   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 0.007);
+
+   BOOST_CHECK_CLOSE(std::real(effc[0].ee.second),     1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].mumu.second),   1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].tautau.second), 1, 0.002);
+
+   BOOST_CHECK_CLOSE(std::real(effc[0].bb.second), 1, 0.009);
+   BOOST_CHECK_CLOSE(std::real(effc[0].cc.second), 1, 0.001);
+   BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].dd.second), 1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].uu.second), 1, 0.002);
 }

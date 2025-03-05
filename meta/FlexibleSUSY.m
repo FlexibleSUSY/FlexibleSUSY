@@ -75,7 +75,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "U. Khasianevich",
               "W. Kotlarski", "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2024";
+FS`Years   = "2013-2025";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -186,6 +186,7 @@ THRESHOLD;
 VEV::usage = "running SM-like VEV in the full model";
 UseHiggs2LoopNMSSM = False;
 UseHiggs3LoopMSSM = False;
+UseHiggs3LoopNMSSM = False;
 EffectiveMu;
 EffectiveMASqr;
 UseSM3LoopRGEs = False;
@@ -612,7 +613,7 @@ CheckDecaysOptions[] :=
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ]
          ]
-      ]
+      ];
    ];
 
 (* sets model file variables to default values, after SARAH`Start[] has been called *)
@@ -1532,7 +1533,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
  		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs2LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs2LoopShift["model", SARAH`HiggsBoson, "idx"];
 	      ];
-              If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
+              If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True, 
  		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs3LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs3LoopShift["model", "sm", SARAH`HiggsBoson, "idx"];
 		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMtop2LoopFunction[];
@@ -1843,6 +1844,15 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
 #endif
 ";
              ];
+           If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesNMSSM[{SARAH`HiggsBoson}];
+              threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
+#ifdef ENABLE_HIMALAYA
+#include \"himalaya/HierarchyCalculator.hpp\"
+#include \"himalaya/version.hpp\"
+#endif
+";
+             ];
            If[FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesNMSSM[SARAH`HiggsBoson];
               {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesNMSSM[{SARAH`HiggsBoson, SARAH`PseudoScalar}];
@@ -1853,7 +1863,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               FlexibleSUSY`UseHiggs2LoopNMSSM === True ||
               FlexibleSUSY`UseMSSMYukawa2Loop === True ||
               FlexibleSUSY`UseMSSMAlphaS2Loop === True ||
-              FlexibleSUSY`UseHiggs3LoopMSSM === True,
+              FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+              FlexibleSUSY`UseHiggs3LoopNMSSM === True,
               {secondGenerationHelperPrototypes, secondGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[2];
               {thirdGenerationHelperPrototypes, thirdGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[3];
              ];
@@ -1955,7 +1966,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            reorderPoleMasses            = TreeMasses`ReorderGoldstoneBosons["PHYSICAL"];
            checkPoleMassesForTachyons   = TreeMasses`CheckPoleMassesForTachyons["PHYSICAL"];
            WriteOut`ReplaceInFiles[files,
-                          { "@lspGetters@"           -> IndentText[lspGetters],
+                          { "@[abstract]lspGetters@"           -> IndentText[FunctionModifiers`MakeAbstract[lspGetters]],
+                            "@[override]lspGetters@"           -> IndentText[FunctionModifiers`MakeOverride[lspGetters]],
                             "@lspFunctions@"         -> lspFunctions,
                             "@[abstract]parameterGetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterGetter /@ Parameters`GetModelParameters[]]]],
                             "@[override]parameterGetters@" -> IndentText[FunctionModifiers`MakeOverride[StringJoin[Parameters`CreateModelParameterGetter[#, True]& /@ Parameters`GetModelParameters[]]]],
@@ -2023,6 +2035,14 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@setDecouplingYukawaDownLeptons@"  -> IndentText @ IndentText[
                                 ThresholdCorrections`SetDRbarYukawaCouplingElectron[FlexibleSUSY`LowScaleInput]
                                                                              ],
+                            "@overrideTreeHiggsMixings@" -> IndentText@StringJoin[
+                               With[{mixingMatrix = FindMixingMatrixSymbolFor[#]},
+                                  If[mixingMatrix =!= Null,
+                                     ToString@mixingMatrix <> " = this->get_physical()." <> ToString@mixingMatrix <> ";\n",
+                                      ""
+                                  ]
+                               ]& /@ DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[]}, Null]
+                            ],
                             "@copyRunningBSMMassesToDecouplingMasses@" -> IndentText[copyRunningBSMMassesToDecouplingMasses],
                             "@reorderDRbarMasses@"     -> IndentText[reorderDRbarMasses],
                             "@reorderPoleMasses@"      -> IndentText[reorderPoleMasses],
@@ -2244,6 +2264,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@hasOneLoopAmp@" -> loopAmpTag,
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
+                            "@isCPodd@" -> If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && GetDimensionWithoutGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]] > 0, " || std::is_same_v<FieldIn, " <> FSModelName <> "_cxx_diagrams::fields::PseudoscalarHiggs>", ""],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
@@ -2395,7 +2416,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
 
         massFunctions = CXXDiagrams`CreateMassFunctions[];
         physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
-        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[];
+        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[PotentialLSPParticles];
         defineFieldTraits =
            CXXDiagrams`CreateFieldTraitsDefinitions[
               TreeMasses`GetParticles[], "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"
@@ -2713,7 +2734,7 @@ RunEnabledSpectrumGenerator[solver_] :=
                         "slha_io, spectrum_generator_settings, " <>
                         If[FSCalculateDecays, "flexibledecay_settings, ", ""] <>
                         "slha_output_file,\n"]
-                  <> IndentText["database_output_file, spectrum_file, rgflow_file);\n"]
+                  <> IndentText["database_output_file, spectrum_file, rgflow_file, higgsbounds_dataset, higgssignals_dataset, lilith_db);\n"]
                   <> "if (!exit_code || solver_type != 0) break;\n"
                   <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
@@ -2753,16 +2774,45 @@ ExampleDecaysIncludes[] :=
     ];
 
 ExampleCalculateDecaysForModel[] :=
+IndentText[
 "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) &&
      (spectrum_generator_settings.get(Spectrum_generator_settings::force_output) ||
       !problems.have_problem())) {
    if (loop_library_for_decays) {
-      decays.calculate_decays();
-   }
-   else if (!loop_library_for_decays) {
-      WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
-   }
-}";
+      decays.calculate_decays();\n"
+] <>
+IndentText@IndentText@IndentText[
+"effc =
+   get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);\n" <>
+IndentText[
+   "try {\n" <>
+   IndentText[
+      "// structured bindings creates new variables - need to use std::tie
+#ifdef ENABLE_HIGGSTOOLS
+if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
+         std::tie(hs, higgsbounds_v) =
+            call_higgstools(effc, physical_input, higgsbounds_dataset, higgssignals_dataset);
+}
+#endif
+#ifdef ENABLE_LILITH
+if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {
+   lilith = call_lilith(effc, physical_input, lilith_db);
+}
+#endif\n"
+   ] <>
+   "}\n" <>
+   "catch (const std::exception& error) {\n" <>
+      IndentText["ERROR(error.what());\n"] <>
+   "}\n"
+]
+] <>
+IndentText[IndentText[
+"}
+else if (!loop_library_for_decays) {
+   WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
+}"
+] <> "\n}"
+];
 
 ExampleSetDecaysSLHAOutput[] := "\
 const bool show_decays = !decays.get_problems().have_problem() ||
@@ -2774,6 +2824,21 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());
    }
+   if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {
+      slha_io.set_normalized_effectivecouplings_block(effc);\n" <>
+      If[SA`CPViolationHiggsSector || TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null, "slha_io.set_imnormalized_effectivecouplings_block(effc);\n", ""] <>
+   "}
+#ifdef ENABLE_HIGGSTOOLS
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
+      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);
+      slha_io.set_higgsbounds(higgsbounds_v);
+   }
+#endif
+#ifdef ENABLE_LILITH
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith.has_value()) {
+      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, lilith.value().pval);
+   }
+#endif
 }";
 
 ExampleCalculateCmdLineDecays[] :=
@@ -2911,11 +2976,13 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             numberOfObservables, putObservables,
             inputPars, outPars, requestedObservables, defaultSolverType,
             solverIncludes = "", runEnabledSolvers = "",
-            decaysData = "", calculateDecaysVirtualFunc = "", calculateSpectrumDecaysPrototype = "",
-            calculateSpectrumDecaysFunction = "", calculateModelDecaysPrototype = "",
+            decaysData = "", calculateDecaysVirtualFunc = "", calculateDecaysEffCVirtualFunc = "", calculateSpectrumDecaysPrototype = "", calculateSpectrumDecaysEffCPrototype = "",
+            calculateSpectrumDecaysFunction = "", calculateModelDecaysPrototype = "", calculateModelDecaysEffCFunction = "",
+            calculateSpectrumDecaysEffCFunction = "", calculateModelDecaysEffCPrototype = "",
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
-            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
+            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "", putEffCPrototype = "", putEffCFunction = "", callLilithMessages = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
+            mathlinkCalcNormalizedEffC = "", loadCalculateEffCFunction = "", loadCallHiggsToolsFunction = "", loadCallLilithFunction = "",
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
@@ -2955,26 +3022,49 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               getDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysGetterInterface[FlexibleSUSY`FSModelName];
               getSpectrumDecays = CreateSpectrumDecaysGetter[FlexibleSUSY`FSModelName];
               calculateDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysInterface[FlexibleSUSY`FSModelName];
+              calculateDecaysEffCVirtualFunc = FSMathLink`CreateSpectrumDecaysEffCInterface[FlexibleSUSY`FSModelName];
               {calculateSpectrumDecaysPrototype, calculateSpectrumDecaysFunction} =
                   FSMathLink`CreateSpectrumDecaysCalculation[FlexibleSUSY`FSModelName];
+              {calculateSpectrumDecaysEffCPrototype, calculateSpectrumDecaysEffCFunction} =
+                  FSMathLink`CreateSpectrumDecaysEffCCalculation[FlexibleSUSY`FSModelName];
               {calculateModelDecaysPrototype, calculateModelDecaysFunction} =
                   FSMathLink`CreateModelDecaysCalculation[FlexibleSUSY`FSModelName];
+              {calculateModelDecaysEffCPrototype, calculateModelDecaysEffCFunction} =
+                  FSMathLink`CreateModelDecaysEffCCalculation[FlexibleSUSY`FSModelName];
               fillDecaysSLHA = FSMathLink`FillDecaysSLHAData[];
               {putDecaysPrototype, putDecaysFunction} = FSMathLink`PutDecays[FlexibleSUSY`FSModelName];
+              {putEffCPrototype, putEffCFunction} = FSMathLink`PutEffCouplings[FlexibleSUSY`FSModelName];
               mathlinkDecaysCalculationFunction = FSMathLink`CreateMathLinkDecaysCalculation[FlexibleSUSY`FSModelName];
               loadCalculateDecaysFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CalculateDecays\", LinkObject, LinkObject];\n";
+              loadCalculateEffCFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateNormalizedEffectiveCouplings = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CalculateNormalizedEffectiveCouplings\", LinkObject, LinkObject];";
+              loadCallHiggsToolsFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CallHiggsTools\", LinkObject, LinkObject];";
+              loadCallLilithFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallLilith = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CallLilith\", LinkObject, LinkObject];";
               calculateDecaysMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
+              callLilithMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::error = \"`1`\";\n" <>
+                                        "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
               decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"";
+              mathlinkCalcNormalizedEffC = FSMathLink`CalculateNormalizedEffectiveCouplings[FlexibleSUSY`FSModelName];
               fdDefaultSettings =
 "\nfdDefaultSettings = {
    minBRtoPrint -> 1*^-5,
    maxHigherOrderCorrections -> 4,
    alphaThomson -> 1,
-   offShellVV -> 2
+   offShellVV -> 2,
+   printEffCBlock -> 1,
+   calcNormalizedEffC -> 0,
+   callHiggsTools -> 0,
+   callLilith -> 0,
+   usePoleHiggsMixings -> 1
 };\n";
                addFDOptions1 = ", Sequence @@ fdDefaultSettings";
                addFDOptions2 = "| fdSettings";
@@ -2983,15 +3073,25 @@ setFDOptions =
 OptionValue[minBRtoPrint],
 OptionValue[maxHigherOrderCorrections],
 OptionValue[alphaThomson],
-OptionValue[offShellVV]";
+OptionValue[offShellVV],
+OptionValue[printEffCBlock],
+OptionValue[calcNormalizedEffC],
+OptionValue[callHiggsTools],
+OptionValue[callLilith],
+OptionValue[usePoleHiggsMixings]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
 flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections , pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ , pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays , pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars[c++]);
 ";
-decayIndex = "const Index_t n_fd_settings = 4;";
+decayIndex = "const Index_t n_fd_settings = 9;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
              ];
            WriteOut`ReplaceInFiles[files,
@@ -3010,18 +3110,29 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@runEnabledSolvers@" -> runEnabledSolvers,
                             "@defaultSolverType@" -> defaultSolverType,
                             "@calculateDecaysVirtualFunc@" -> IndentText[calculateDecaysVirtualFunc],
+                            "@calculateDecaysEffCVirtualFunc@" -> IndentText[calculateDecaysEffCVirtualFunc],
                             "@calculateSpectrumDecaysPrototype@" -> IndentText[calculateSpectrumDecaysPrototype],
+                            "@calculateSpectrumDecaysEffCPrototype@" -> IndentText[calculateSpectrumDecaysEffCPrototype],
                             "@calculateSpectrumDecaysFunction@" -> calculateSpectrumDecaysFunction,
+                            "@calculateSpectrumDecaysEffCFunction@" -> calculateSpectrumDecaysEffCFunction,
                             "@calculateModelDecaysPrototype@" -> IndentText[calculateModelDecaysPrototype],
                             "@calculateModelDecaysFunction@" -> calculateModelDecaysFunction,
+                            "@calculateModelDecaysEffCPrototype@" -> IndentText[calculateModelDecaysEffCPrototype],
+                            "@calculateModelDecaysEffCFunction@" -> calculateModelDecaysEffCFunction,
                             "@decaysData@" -> IndentText[decaysData],
                             "@fillDecaysSLHA@" -> IndentText[fillDecaysSLHA],
                             "@getDecaysVirtualFunc@" -> IndentText[getDecaysVirtualFunc],
                             "@getSpectrumDecays@" -> IndentText[getSpectrumDecays],
                             "@putDecaysPrototype@" -> IndentText[putDecaysPrototype],
                             "@putDecaysFunction@" -> putDecaysFunction,
+                            "@putEffCPrototype@" -> IndentText[putEffCPrototype],
+                            "@putEffCFunction@" -> putEffCFunction,
                             "@mathlinkDecaysCalculationFunction@" -> mathlinkDecaysCalculationFunction,
                             "@loadCalculateDecaysFunction@" -> loadCalculateDecaysFunction,
+                            "@loadCalculateEffCFunction@" -> loadCalculateEffCFunction,
+                            "@loadCallHiggsToolsFunction@" -> loadCallHiggsToolsFunction,
+                            "@callLilithMessages@" -> callLilithMessages,
+                            "@loadCallLilithFunction@" -> loadCallLilithFunction,
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
                             "@decaysIncludes@" -> decaysIncludes,
@@ -3032,6 +3143,7 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
                             "@fillFDSettings@" -> fillFDSettings,
                             "@decayIndex@" -> decayIndex,
+                            "@mathlinkCalcNormalizedEffC@" -> mathlinkCalcNormalizedEffC,
                             "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
                             "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
                             "@setUnitarity@" -> setUnitarity,
@@ -3275,7 +3387,7 @@ WriteSMParticlesAliases[files_List] := Module[{},
 
    CreateParticleAlias[particle_, namespace_String] :=
       "using " <> SimplifiedName[particle] <> " = " <>
-      CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
+      CXXDiagrams`CXXNameOfField[particle] <> ";";
 
    CreateParticleAliases[particles_, namespace_:""] :=
       Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
@@ -3478,6 +3590,13 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseMSSM3LoopRGEs = True;
              ];
 
+           If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
+              FlexibleSUSY`UseHiggs2LoopNMSSM === True;
+              FlexibleSUSY`UseMSSMYukawa2Loop = True;
+              FlexibleSUSY`UseMSSMAlphaS2Loop = True;
+              FlexibleSUSY`UseMSSM3LoopRGEs = True;
+             ];
+
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
               FlexibleSUSY`UseHiggs2LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
@@ -3608,7 +3727,7 @@ FSCheckFlags[] :=
               References`AddReference["Benakli:2013msa"];
              ];
 
-           If[FlexibleSUSY`UseHiggs3LoopMSSM,
+           If[FlexibleSUSY`UseHiggs3LoopMSSM || FlexibleSUSY`UseHiggs3LoopNMSSM,
               Print["Adding 3-loop MSSM Higgs mass contributions from ",
                     "[arxiv:hep-ph/0803.0672, arxiv:hep-ph/1005.5709,",
                     " arxiv:1409.2297, arxiv:1708.05720]"];

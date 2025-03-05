@@ -14,7 +14,7 @@ Block FlexibleSUSY
    10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
    11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
    12   0                    # force output
-   13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
+   13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)
    14   1.000000000e-11      # beta-function zero threshold
    15   0                    # calculate all observables
    16   0                    # force positive majorana masses
@@ -60,3 +60,14 @@ Block MINPAR                 # Input parameters
     3   10.                  # TanBeta
     4   1                    # SignMu
     5   0                    # Azero
+Block FlexibleDecay
+   0   1                    # calculate decays (0 = no, 1 = yes)
+   1   1e-5                 # minimum BR to print
+   2   4                    # include higher order corrections in decays (0 = LO, 1 = NLO, 2 = NNLO, 3 = N^3LO, 4 = N^4LO )
+   3   1                    # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
+   4   2                    # off-shell decays into VV pair
+   5   1                    # print loop-induced Higgs couplings
+   6   0                    # calculate Higgs effc normalized to SM
+   7   0                    # call HiggsTools
+   8   0                    # call Lilith
+   9   1                    # use pole Higgs mixings in decays

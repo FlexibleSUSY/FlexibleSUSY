@@ -84,6 +84,7 @@ public:
    void set_precision(double);
    double get_precision() const;
    void clear() override;
+   void set_use_pole_higgs_mixings(bool var) { use_pole_higgs_mixings = var; };
 
    // mass_eigenstates_interface functions
 
@@ -107,6 +108,7 @@ public:
    void set_physical(const @ModelName@_physical&) override;
    void clear_problems() override;
 
+@[override]lspGetters@
 @[override]delegateParameterGetters@
 @[override]delegateParameterSetters@
 @[override]massGetters@

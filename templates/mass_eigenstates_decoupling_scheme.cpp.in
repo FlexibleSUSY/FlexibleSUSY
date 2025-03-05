@@ -179,6 +179,11 @@ void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input)
 
    solve_ewsb_equations_tree_level();
    calculate_tree_level_mass_spectrum();
+
+   // override tree-level Higgs mixing matrices with physical ones
+   if (use_pole_higgs_mixings) {
+@overrideTreeHiggsMixings@
+   }
 }
 
 void CLASSNAME::fill_from(const @ModelName@_mass_eigenstates& model)
@@ -393,6 +398,8 @@ Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
 }
 
 @higgsMassGetters@
+
+@lspFunctions@
 
 @massCalculationFunctions@
 

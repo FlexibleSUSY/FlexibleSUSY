@@ -46,6 +46,26 @@ std::size_t hash_pid_list(int pid_in, Container pids_out)
 
 } // anonymous namespace
 
+static std::array<int, 2> pdg_id_pairs[PDG_id_pairs::NUMBER_OF_PDG_IDS] = {
+   {-1, 1},
+   {-2, 2},
+   {-3, 3},
+   {-4, 4},
+   {-5, 5},
+   {-6, 6},
+   {-11, 11},
+   {-13, 13},
+   {-15, 15},
+   {-24, 24},
+   {23, 23},
+   {22, 22},
+   {22, 23},
+   {21, 21},
+   {-11, 13},
+   {-11, 15},
+   {-13, 15}
+};
+
 std::size_t hash_decay(const Decay& decay)
 {
    int pid_in = decay.get_initial_particle_id();
@@ -131,6 +151,175 @@ double hVV_4body(double *q2, size_t /* dim */, void *params)
      mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
      * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
      * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
+}
+
+void EffectiveCoupling_list::set_invisible_width(std::string const& p, double c) {
+      auto found = std::find_if(
+         std::begin(effective_coupling_list), std::end(effective_coupling_list),
+         [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+      );
+      if (found == std::end(effective_coupling_list)) {
+         auto effC = NeutralHiggsEffectiveCouplings {};
+         effC.particle = p;
+         effC.invWidth = c;
+         effective_coupling_list.push_back(std::move(effC));
+      }
+      else {
+         found->invWidth = c;
+      }
+}
+
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string, double> const& c) {
+      auto found = std::find_if(
+         std::begin(effective_coupling_list), std::end(effective_coupling_list),
+         [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+      );
+      auto are_the_same = [](std::array<int, 2> const& a1, std::array<int, 2> const& a2) {return std::is_permutation(a1.begin(), a1.end(), a2.begin(), a2.end());};
+      if (found == std::end(effective_coupling_list)) {
+         auto effC = NeutralHiggsEffectiveCouplings {};
+         effC.particle = p;
+         if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::gg])) {
+            effC.gg = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::gamgam])) {
+            effC.gamgam = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::ZZ])) {
+            effC.ZZ = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::WW])) {
+            effC.WW = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::Zgam])) {
+            effC.Zgam = c;
+         }
+         effective_coupling_list.push_back(std::move(effC));
+      }
+      else {
+         if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::gg])) {
+            found->gg = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::gamgam])) {
+            found->gamgam = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::ZZ])) {
+            found->ZZ = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::WW])) {
+            found->WW = c;
+         }
+         else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::Zgam])) {
+            found->Zgam = c;
+         }
+      }
+   }
+
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::pair<std::string, std::complex<double>> const& c) {
+
+   auto found = std::find_if(
+      std::begin(effective_coupling_list), std::end(effective_coupling_list),
+      [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+   );
+
+   auto are_the_same = [](std::array<int, 2> const& a1, std::array<int, 2> const& a2) {
+         return std::is_permutation(a1.begin(), a1.end(), a2.begin(), a2.end());
+   };
+   auto negate = [](std::array<int, 2> in) {
+      std::for_each(in.begin(), in.end(), [](int& el){el *= -1; });
+      return in;
+   };
+
+   if (found == std::end(effective_coupling_list)) {
+      auto effC = NeutralHiggsEffectiveCouplings {};
+      effC.particle = p;
+      if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::dd])) {
+         effC.dd = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::uu])) {
+         effC.uu = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::ss])) {
+         effC.ss = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::cc])) {
+         effC.cc = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::bb])) {
+         effC.bb = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::tt])) {
+         effC.tt = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::ee])) {
+         effC.ee = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::mumu])) {
+         effC.mumu = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::tautau])) {
+         effC.tautau = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::emu]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::emu]))) {
+         effC.emu.first = c.first;
+         effC.emu.second += c.second;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::etau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::etau]))) {
+         effC.etau.first = c.first;
+         effC.etau.second += c.second;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::mutau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::mutau]))) {
+         effC.mutau.first = c.first;
+         effC.mutau.second = c.second;
+      }
+      else {
+         WARNING("HiggsTools interface warning: trying to add an unknown decay channel {" + std::to_string(fs[0]) + ", " + std::to_string(fs[1]) + "}");
+      }
+      effective_coupling_list.push_back(std::move(effC));
+   }
+   else {
+      if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::dd])) {
+         found->dd = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::uu])) {
+         found->uu = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::ss])) {
+         found->ss = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::cc])) {
+         found->cc = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::bb])) {
+         found->bb = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::tt])) {
+         found->tt = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::ee])) {
+         found->ee = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::mumu])) {
+         found->mumu = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::tautau])) {
+         found->tautau = c;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::emu]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::emu]))) {
+         found->emu.first = c.first;
+         found->emu.second += c.second;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::etau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::etau]))) {
+         found->etau.first = c.first;
+         found->etau.second += c.second;
+      }
+      else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::mutau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::mutau]))) {
+         found->mutau.first = c.first;
+         found->mutau.second += c.second;
+      }
+      else {
+         WARNING("HiggsTools interface warning: trying to add an unknown decay channel {" + std::to_string(fs[0]) + ", " + std::to_string(fs[1]) + "}");
+      }
+   }
 }
 
 } // namespace flexiblesusy

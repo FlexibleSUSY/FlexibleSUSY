@@ -100,6 +100,10 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
+   EffectiveCoupling_list const& get_neutral_higgs_effc() const {return neutral_higgs_effc;};
+   std::vector<std::tuple<int, int, int, double, std::string>> get_effhiggscouplings_block_input() const {
+      return effhiggscouplings_block_input;
+   }
 
    const Decays_list& get_hh_decays() const { return decay_table.get_hh_decays();
       }
@@ -133,6 +137,7 @@ private:
    bool run_to_decay_particle_scale {true};
    standard_model_decay_table decay_table{};
    FlexibleDecay_problems problems{};
+   EffectiveCoupling_list neutral_higgs_effc {};
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type

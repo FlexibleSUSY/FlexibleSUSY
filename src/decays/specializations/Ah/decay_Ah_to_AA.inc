@@ -23,13 +23,26 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       res *= Sqr(alpha_em_0/alpha_em);
    }
 
+   const std::string tag = field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<Photon>(out2_idx);
+
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
-            36 + 10*(in_idx.size()>0 ? in_idx.at(0)-1 : 0), 22, 22,
+            fieldPDG<PseudoscalarHiggs>(in_idx), 22, 22,
             std::sqrt(res/(flux * ps * ps_symmetry)/(0.5*Power4(mAh))),
-            field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Photon>(out1_idx) + "-" + field_as_string<Photon>(out2_idx)
+            tag
          }
+      );
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(
+         field_as_string<PseudoscalarHiggs>(in_idx),
+         {22, 22},
+         std::pair<std::string, double> {tag, std::sqrt(res)}
       );
    }
 

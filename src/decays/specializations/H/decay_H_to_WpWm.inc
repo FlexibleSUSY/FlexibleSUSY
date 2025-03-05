@@ -95,5 +95,16 @@ double CLASSNAME::get_partial_width<Higgs, WpBoson, WmBoson>(
       res = flux * ps * mat_elem_sq;
    }
 
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(
+         field_as_string<Higgs>(indexIn),
+         {-24, 24},
+         std::pair<std::string, double> {field_as_string<Higgs>(indexIn) + "-" + field_as_string<WpBoson>(indexOut1) + "-" + field_as_string<WmBoson>(indexOut2), std::sqrt(res)}
+      );
+   }
+
    return res;
 }

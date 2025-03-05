@@ -28,18 +28,28 @@
 #ifndef @ModelName@_DECAYS_H
 #define @ModelName@_DECAYS_H
 
+#include "config.h"
+
 #include "@ModelName@_decay_table.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
-#include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
+#include "cxx_qft/@ModelName@_particle_aliases.hpp"
+
 #include "decays/flexibledecay_problems.hpp"
-#include "lowe.h"
-#include "wrappers.hpp"
-#include "error.hpp"
-#include "physical_input.hpp"
 #include "decays/flexibledecay_settings.hpp"
 #include "decays/decay_amplitudes.hpp"
 #include "standard_model.hpp"
+#include "decays/decay.hpp"
+#include "logger.hpp"
+#include "lowe.h"
+#include "physical_input.hpp"
+#include "wrappers.hpp"
+
+#include <cmath>
+#include <vector>
+
+#include "boost/mpl/contains.hpp"
+#include <boost/mpl/for_each.hpp>
 
 namespace flexiblesusy {
 
@@ -74,6 +84,7 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
+   EffectiveCoupling_list get_neutral_higgs_effc() const {return neutral_higgs_effc;};
    std::vector<std::tuple<int, int, int, double, std::string>> get_effhiggscouplings_block_input() const {
       return effhiggscouplings_block_input;
    }
@@ -99,6 +110,7 @@ private:
    static constexpr bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    FlexibleDecay_problems problems{};
+   EffectiveCoupling_list neutral_higgs_effc {};
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
@@ -120,6 +132,9 @@ private:
                   typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
                   typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
                   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const;
+
+   double get_alphas(@ModelName@_cxx_diagrams::context_base const&) const;
+   double get_alpha(@ModelName@_cxx_diagrams::context_base const&) const;
    std::vector<std::tuple<int, int, int, double, std::string>> effhiggscouplings_block_input {};
 };
 
@@ -192,9 +207,55 @@ double @ModelName@_decays::get_partial_width(
    }
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
-   const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * amp.square();
+   const auto partialWidth = 0.5/mIn * ps * ps_symmetry * color_factor * amp.square();
 
-   return result;
+   // if there are any potential LSPs
+   if constexpr (boost::mpl::size<@ModelName@_cxx_diagrams::fields::potentialLSPparticles>::value > 0) {
+      // if this is a decay of a CP-even or -odd Higgs to a pair of identical particles (or a particle and its antiparticle)
+      if constexpr (
+         (std::is_same_v<FieldIn, @ModelName@_cxx_diagrams::fields::Higgs>@isCPodd@) &&
+         std::is_same_v<typename FieldOut1::lorentz_conjugate, FieldOut2>
+      ) {
+         // at this point we know that FieldOut1 == FieldOut2 (if they are real) or FieldOut1 == bar|conj[FieldOut2]
+         // and are those particles potential LSPs
+         if constexpr (boost::mpl::contains<@ModelName@_cxx_diagrams::fields::potentialLSPparticles, typename cxx_diagrams::remove_lorentz_conjugation<FieldOut1>::type>::type::value) {
+            // are final states charge and color neutral
+            if constexpr (FieldOut1::electricCharge == 0 && FieldOut1::colorRep == @ModelName@_cxx_diagrams::fields::ParticleColorRep::singlet) {
+               const double needInvWidth =
+                  static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) ||
+                  static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_lilith));
+               if (needInvWidth) {
+                  double mLSP = std::numeric_limits<double>::infinity();
+                  boost::mpl::for_each<@ModelName@_cxx_diagrams::fields::potentialLSPparticles>(
+                     [context,&mLSP](auto arg) {
+                        using T = decltype(arg);
+                        double current_mass;
+                        if constexpr (T::numberOfGenerations == 1) {
+                           current_mass = context.physical_mass<T>({});
+                        }
+                        else {
+                           current_mass = context.physical_mass<T>({0});
+                        }
+                        if (current_mass < mLSP) { mLSP = current_mass; };
+                     }
+                  );
+                  if (mLSP == context.physical_mass<FieldOut1>(indexOut1)) {
+                     if constexpr (FieldOut1::numberOfGenerations == 0) {
+                        neutral_higgs_effc.set_invisible_width(field_as_string<FieldIn>(indexIn), partialWidth);
+                     }
+                     else {
+                        if (indexOut1.at(0) == 0 && indexOut2.at(0) == 0) {
+                           neutral_higgs_effc.set_invisible_width(field_as_string<FieldIn>(indexIn), partialWidth);
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   return partialWidth;
 }
 
 @partialWidthSpecializationDecls@

@@ -829,8 +829,8 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
 
            CheckOffShellDecay[x_, y_] := (
            initialState === x && (
-                 finalState === {y, SARAH`AntiField[y]} ||
-                     finalState === {SARAH`AntiField[y], y}
+                 finalState === {y, TreeMasses`FSAntiField[y]} ||
+                     finalState === {TreeMasses`FSAntiField[y], y}
 
                ));
            (* skip decays of a particle into itself *)
@@ -842,7 +842,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                     ]]&, finalState
               ] <>
               If[
-                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]], "",
+                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]], "",
 
               "if (context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
                StringRiffle[
@@ -940,6 +940,14 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "case 1: {\n" <>
                  TextFormatting`IndentText[
                     "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(model.get_input());\n" <>
+                    If[
+                       MemberQ[
+                          DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[] /. Susyno`LieGroups`conj->Identity}, Null],
+                          particle /. Susyno`LieGroups`conj->Identity
+                       ],
+                       "dm->set_use_pole_higgs_mixings(flexibledecay_settings.get(FlexibleDecay_settings::use_pole_higgs_mixings) != 0.0 ? true : false);\n",
+                       ""
+                    ] <>
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
                     "dm->fill_from(model);\n" <>
@@ -986,14 +994,31 @@ CreateDecaysCalculationFunction[decaysList_] :=
               "context_base context {dec_model.get()};\n" <>
               body;
 
-           body = "\nif (run_to_decay_particle_scale) {\n" <>
-                  TextFormatting`IndentText[runToScale] <> "}\n\n" <> body;
+           body = IndentText["\nif (run_to_decay_particle_scale) {\n" <>
+                  TextFormatting`IndentText[runToScale] <> "}\n\n" <> body ]<>
+                  If[MemberQ[Join[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}], particle],
+                  TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) || flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) || flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
+                  TextFormatting`IndentText[
+                  "auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(neutral_higgs_effc), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
+                  If[particleDim > 1, "gI1", ""] <> "});});\n" <>
+                  "found->width = decays.get_total_width();\n" <>
+                  "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n" <>
+                  "found->calculate_undetected_br(found->mass/2 > context.physical_mass<" <> ToString@TreeMasses`GetSMTopQuarkMultiplet[] <> ">({2}));\n" <>
+                  (* 1 == even, -1 == odd, 0 == undefined - see test/test_HiggsTools_CP.cpp *)
+                  "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, 1], -1] <> ";\n" <>
+                  "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n"] <>
+                  "const auto _indices = concatenate(" <> StringRiffle[Table["typename cxx_diagrams::field_indices<" <> ToString@particle <> ">::type {" <> If[particleDim > 1, "gI1", ""] <> "}", {i, 4}], ", "] <> ");\n" <>
+                  "const auto h4vertex = Vertex<" <> StringRiffle[Table[ToString@particle, {i, 4}], ", "] <> ">::evaluate(_indices, context);\n" <>
+                  "found->lam = std::real(h4vertex.value());\n" <>
+                  "}\n"],
+                  ""
+                  ];
            If[particleDim > 1,
               body = LoopOverIndexCollection[body, {{"gI1", Utils`MathIndexToCPP@particleStart, particleDim}}] <> "\n";
              ];
            "void " <> CreateDecaysCalculationFunctionName[particle, "CLASSNAME"] <>
            "()\n{\n"
-           <> TextFormatting`IndentText[body] <> "\n}\n"
+           <> body <> "\n}\n"
           ];
 
 CreateAmpLoopTag[particleDecays_List] := Module[{listOfFSParticleDecayObjects, hasOneLoopAmp = "", hasTreeAmp = ""},
@@ -1137,18 +1162,28 @@ FillSSVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments
           ];
 
-(* replace 'physical_mass' with 'mass' to check Ward identity *)
+(* For tests: replace 'physical_mass' with 'mass' to check Ward identity *)
 FillSVVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{assignments = ""},
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay]] <>
                          ">(idx_1);\n";
-           assignments = assignments <> structName <> ".m_vector_1 = " <> paramsStruct <> ".physical_mass<" <>
-                         CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <>
-                         ">(idx_2);\n";
-           assignments = assignments <> structName <> ".m_vector_2 = " <> paramsStruct <> ".physical_mass<" <>
-                         CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <>
-                         ">(idx_3);\n";
+           assignments = assignments <> structName <> ".m_vector_1 = " <>
+                         If[IsMassless[First[GetFinalState[decay]]],
+                            "0.",
+                            If[IsZBoson[First[GetFinalState[decay]]],
+                               "qedqcd.displayPoleMZ()",
+                               paramsStruct <> ".physical_mass<" <> CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <> ">(idx_2)"
+                            ]
+                         ] <> ";\n";
+           assignments = assignments <> structName <> ".m_vector_2 = " <>
+                         If[IsMassless[Last[GetFinalState[decay]]],
+                            "0.",
+                            If[IsZBoson[Last[GetFinalState[decay]]],
+                               "qedqcd.displayPoleMZ()",
+                               paramsStruct <> ".physical_mass<" <> CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <> ">(idx_3)"
+                            ]
+                         ] <> ";\n";
            assignments
           ];
 

@@ -579,14 +579,17 @@ DoMediumDiagonalization[particle_Symbol /; IsScalar[particle], inputMomentum_, t
            If[dim > 1,
               If[(SARAH`UseHiggs2LoopMSSM === True ||
                   FlexibleSUSY`UseHiggs2LoopNMSSM === True ||
-                  FlexibleSUSY`UseHiggs3LoopMSSM === True) &&
+                  FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+                  FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
                  MemberQ[{SARAH`HiggsBoson, SARAH`PseudoScalar}, particle],
                  addHigherLoopHiggsContributions = "self_energy += self_energy_2l;\n";
                  If[calcEffPot,
                     calcHigherLoopHiggsContributions = CalcEffPot2L[particle];
                    ];
                 ];
-              If[FlexibleSUSY`UseHiggs3LoopMSSM === True && MemberQ[{SARAH`HiggsBoson}, particle],
+              If[(FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+                  FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
+                 MemberQ[{SARAH`HiggsBoson}, particle],
                  addHigherLoopHiggsContributions = addHigherLoopHiggsContributions <> "self_energy += self_energy_3l;\n";
                  If[calcEffPot,
                     calcHigherLoopHiggsContributions = calcHigherLoopHiggsContributions <> CalcEffPot3L[particle];
@@ -869,7 +872,8 @@ DoSlowDiagonalization[particle_Symbol, tadpole_] :=
               effPot = effPot <> CalcEffPot2L[particle];
              ];
            If[dim > 1 &&
-              FlexibleSUSY`UseHiggs3LoopMSSM === True &&
+              (FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+               FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
               MemberQ[{SARAH`HiggsBoson}, particle],
               effPot = effPot <> CalcEffPot3L[particle];
              ];
@@ -1461,7 +1465,7 @@ CConversion`ToValidCSymbolString[mass /. FlexibleSUSY`M -> Identity] <>
  * This function finds the lightest supersymmetric particle (LSP) and
  * returns it's mass.  The corresponding particle type is retured in
  * the reference parameter.  The list of potential LSPs is set in the
- * model file varible PotentialLSPParticles.  For this model it is set
+ * model file variable PotentialLSPParticles.  For this model it is set
  * to:
  * " <> ToString[masses] <> "
  *
