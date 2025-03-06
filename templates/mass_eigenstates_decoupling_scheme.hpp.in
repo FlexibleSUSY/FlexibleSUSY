@@ -123,6 +123,7 @@ public:
 @[override]selfEnergyPrototypes@
 
 private:
+   bool use_pole_higgs_mixings {false};      ///< use pole Higgs mixing matrices in vertices
    void clear_tree_level_parameters();
    void copy_tree_level_masses_to_pole_masses();
 };
