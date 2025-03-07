@@ -389,8 +389,11 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
                   With below argument set to True, charged particles are inserted twice in
                such bubble - once as particle and once as antiparticle. *)
             If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True],
+            (* 
             IsPossibleNonZeroVertex[Prepend[finalFields, initialField]] && IsOneLoopDecayTopology[graph] && !(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialField] && (Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
                  Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
+                 *)
+                 False
          ];
       If[diagrams =!= {},
          Select[diagrams, IsPossibleNonZeroDiagram[#, True]&],
