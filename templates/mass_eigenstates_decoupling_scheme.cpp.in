@@ -399,8 +399,6 @@ Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
 
 @higgsMassGetters@
 
-@lspFunctions@
-
 @massCalculationFunctions@
 
 @tadpoleEqFunctions@
