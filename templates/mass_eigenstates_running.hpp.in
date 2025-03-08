@@ -41,36 +41,25 @@ public:
 
    void calculate_tree_level_mass_spectrum() override;
    void calculate_pole_mass_spectrum() override;
-   void calculate_mass_spectrum() override;
 
    int solve_ewsb_equations_tree_level() override;
    int solve_ewsb_equations() override;
 
-   Eigen::ArrayXd get_tree_level_masses() const override;
-   Eigen::ArrayXd get_tree_level_masses_and_mixings() const override;
    const @ModelName@_input_parameters& get_input_parameters() const override;
    @ModelName@_input_parameters& get_input_parameters() override;
    Eigen::ArrayXd get_extra_parameters() const override;
    const @ModelName@_physical& get_physical() const override;
    @ModelName@_physical& get_physical() override;
+
    const Problems& get_problems() const override;
    Problems& get_problems() override;
-   void set_tree_level_masses(const Eigen::ArrayXd&) override;
-   void set_tree_level_masses_and_mixings(const Eigen::ArrayXd&) override;
-   void set_extra_parameters(const Eigen::ArrayXd&) override;
-   void set_physical(const @ModelName@_physical&) override;
    void clear_problems() override;
 
 @[override]parameterGetters@
-@[override]parameterSetters@
 @[override]massGetters@
 @[override]higgsMassGetterPrototypes@
 @[override]mixingMatrixGetters@
-@[override]phasesGetterSetters@
-@[override]extraParameterSetters@
 @[override]extraParameterGetters@
-@[override]massCalculationPrototypes@
-@[override]tadpoleEqPrototypes@
 @[override]dependencePrototypes@
 @[override]selfEnergyPrototypes@
 };
