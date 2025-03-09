@@ -96,6 +96,7 @@ public:
 @[override]delegateParameterGetters@
 @[override]massGetters@
 @[override]mixingMatrixGetters@
+@[override]phasesGetterSetters@
 @[override]extraParameterGetters@
 @[override]dependencePrototypes@
 @[override]selfEnergyPrototypes@

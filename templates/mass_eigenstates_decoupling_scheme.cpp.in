@@ -31,6 +31,7 @@
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "ewsb_solver.hpp"
 #include "ew_input.hpp"
+#include "eigen_utils.hpp"
 #include "raii.hpp"
 #include "standard_model.hpp"
 #include "wrappers.hpp"
@@ -39,6 +40,7 @@ namespace flexiblesusy {
 
 #define CLASSNAME @ModelName@_mass_eigenstates_decoupling_scheme
 
+#define INPUTPARAMETER(parameter) model.get_input().parameter
 #define MODELPARAMETER(parameter) model.get_##parameter()
 #define PHYSICAL(parameter) physical.parameter
 
