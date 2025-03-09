@@ -41,6 +41,7 @@ namespace flexiblesusy {
 #define CLASSNAME @ModelName@_mass_eigenstates_decoupling_scheme
 
 #define INPUTPARAMETER(parameter) model.get_input().parameter
+#define LowEnergyConstant(p) Electroweak_constants::p
 #define MODELPARAMETER(parameter) model.get_##parameter()
 #define PHASE(p) model.get_##p()
 #define PHYSICAL(parameter) physical.parameter
