@@ -162,12 +162,12 @@ void CLASSNAME::fill_from(const @ModelName@_mass_eigenstates& model)
 
 const @ModelName@_physical& CLASSNAME::get_physical() const
 {
-   return physical;
+   return @ModelName@_mass_eigenstates::get_physical();
 }
 
 @ModelName@_physical& CLASSNAME::get_physical()
 {
-   return physical;
+   return @ModelName@_mass_eigenstates::get_physical();
 }
 
 const Problems& CLASSNAME::get_problems() const
@@ -177,16 +177,12 @@ const Problems& CLASSNAME::get_problems() const
 
 Problems& CLASSNAME::get_problems()
 {
-   return problems;
+   return @ModelName@_mass_eigenstates::get_problems();
 }
 
 int CLASSNAME::solve_ewsb_equations_tree_level()
 {
-   int error = EWSB_solver::SUCCESS;
-
-@solveTreeLevelEWSBviaSoftHiggsMasses@
-
-   return error;
+   return @ModelName@_mass_eigenstates::solve_ewsb_equations_tree_level();
 }
 
 int CLASSNAME::solve_ewsb_equations()
@@ -216,13 +212,7 @@ void CLASSNAME::print(std::ostream& ostr) const
  */
 void CLASSNAME::calculate_tree_level_mass_spectrum()
 {
-@saveEWSBOutputParameters@
-   solve_ewsb_equations_tree_level();
-
-@calculateAllMasses@
-
-   // move goldstone bosons to the front
-   reorder_tree_level_masses();
+   @ModelName@_mass_eigenstates::calculate_tree_level_mass_spectrum();
 }
 
 /**
@@ -233,25 +223,7 @@ void CLASSNAME::calculate_tree_level_mass_spectrum()
  */
 void CLASSNAME::calculate_pole_mass_spectrum()
 {
-   calculate_tree_level_mass_spectrum();
-   copy_tree_level_masses_to_pole_masses();
-   check_pole_masses_for_tachyons();
-}
-
-void CLASSNAME::copy_tree_level_masses_to_pole_masses()
-{
-@copyDRbarMassesToPoleMasses@
-}
-
-/**
- * reorders @RenScheme@ masses so that golstones are placed at the index
- * specified in the model files definition of the associated
- * gauge boson (see Z-boson definition in default particles.m file
- * in the Models directory of your SARAH distribution for example)
- */
-void CLASSNAME::reorder_tree_level_masses()
-{
-@reorderDRbarMasses@
+   @ModelName@_mass_eigenstates::calculate_pole_mass_spectrum();
 }
 
 void CLASSNAME::clear_tree_level_parameters()
@@ -276,17 +248,17 @@ void CLASSNAME::clear()
 
 const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
 {
-   return get_input();
+   return @ModelName@_mass_eigenstates::get_input_parameters();
 }
 
 @ModelName@_input_parameters& CLASSNAME::get_input_parameters()
 {
-   return get_input();
+   return @ModelName@_mass_eigenstates::get_input_parameters();
 }
 
 Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
 {
-@getExtraParameters@
+   return @ModelName@_mass_eigenstates::get_extra_parameters();
 }
 
 @dependenceFunctions@

@@ -71,7 +71,6 @@ public:
 
    void fill_from(const standard_model::Standard_model&);
    void fill_from(const @ModelName@_mass_eigenstates&);
-   void reorder_tree_level_masses();
    void print(std::ostream&) const override;
    void clear() override;
    void set_use_pole_higgs_mixings(bool var) { use_pole_higgs_mixings = var; };
@@ -104,7 +103,6 @@ public:
 private:
    bool use_pole_higgs_mixings {true};      ///< use pole Higgs mixing matrices in vertices
    void clear_tree_level_parameters();
-   void copy_tree_level_masses_to_pole_masses();
 };
 
 std::ostream& operator<<(std::ostream&, const @ModelName@_mass_eigenstates_decoupling_scheme&);
