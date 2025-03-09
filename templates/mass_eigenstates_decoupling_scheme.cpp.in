@@ -42,6 +42,7 @@ namespace flexiblesusy {
 
 #define INPUTPARAMETER(parameter) model.get_input().parameter
 #define MODELPARAMETER(parameter) model.get_##parameter()
+#define PHASE(p) model.get_##p()
 #define PHYSICAL(parameter) physical.parameter
 
 CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)

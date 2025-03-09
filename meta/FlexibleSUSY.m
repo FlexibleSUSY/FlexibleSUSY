@@ -1956,8 +1956,6 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            checkPoleMassesForTachyons   = TreeMasses`CheckPoleMassesForTachyons["PHYSICAL"];
            WriteOut`ReplaceInFiles[files,
                           { "@lspGetters@"                     -> IndentText[lspGetters],
-                            "@[abstract]lspGetters@"           -> IndentText[FunctionModifiers`MakeAbstract[lspGetters]],
-                            "@[override]lspGetters@"           -> IndentText[FunctionModifiers`MakeOverride[lspGetters]],
                             "@lspFunctions@"         -> lspFunctions,
                             "@[abstract]parameterGetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterGetter /@ Parameters`GetModelParameters[]]]],
                             "@[override]parameterGetters@" -> IndentText[FunctionModifiers`MakeOverride[StringJoin[Parameters`CreateModelParameterGetter[#, True]& /@ Parameters`GetModelParameters[]]]],
