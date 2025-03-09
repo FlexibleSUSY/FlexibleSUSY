@@ -1307,7 +1307,7 @@ DLLEXPORT int FS@ModelName@CallLilith(
    const auto hid = get_handle_from(link);
 
    const char* llDbFile = "";
-   !MLGetString(link, &llDbFile);
+   MLGetString(link, &llDbFile);
    if (!std::filesystem::exists(llDbFile)) {
       put_message(link, "FS@ModelName@CallLilith", "error", std::string(llDbFile) + " is not a valid path");
       put_error_output(link);
