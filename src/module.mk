@@ -6,6 +6,7 @@ LIBFLEXI_MK  := \
 		$(DIR)/module.mk
 
 LIBFLEXI_SRC := \
+		$(DIR)/2LPoleFunctions.f90 \
 		$(DIR)/amm_loop_functions.cpp \
 		$(DIR)/betafunction.cpp \
 		$(DIR)/build_info.cpp \
@@ -63,6 +64,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
+		$(DIR)/two_loop_functions.cpp \
+		$(DIR)/wrappers.cpp \
 		$(DIR)/wrappers.cpp \
 		$(DIR)/zeta.cpp
 
@@ -170,6 +173,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/thread_pool.hpp \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
+		$(DIR)/two_loop_functions.hpp \
 		$(DIR)/unitarity.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp \
@@ -307,7 +311,8 @@ endif
 LIBFLEXI_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBFLEXI_SRC))) \
 		$(patsubst %.c, %.o, $(filter %.c, $(LIBFLEXI_SRC))) \
-		$(patsubst %.f, %.o, $(filter %.f, $(LIBFLEXI_SRC)))
+		$(patsubst %.f, %.o, $(filter %.f, $(LIBFLEXI_SRC))) \
+		$(patsubst %.f90, %.o, $(filter %.f90, $(LIBFLEXI_SRC)))
 
 LIBAUX_OBJ := \
 		$(patsubst %.a, %.o, $(LIBAUX)) \

@@ -40,6 +40,8 @@
 #include "loop_libraries/loop_library.hpp"
 #include "numerics.h"
 #include "raii.hpp"
+#include "two_loop_functions.hpp"
+#include "functors.hpp"
 
 #ifdef ENABLE_THREADS
 #include "thread_pool.hpp"
@@ -461,6 +463,47 @@ double CLASSNAME::G0(double p, double m1, double m2) const noexcept
       - Loop_library::get().A0(m1, scl2) - Loop_library::get().A0(m2, scl2)
    ).real();
 }
+
+double CLASSNAME::TfSS(double x, double y, double z) const { return two_loop_functions::TfSS(x, y, z, Sqr(get_scale())); }
+double CLASSNAME::TfSSS(double x, double y, double z) const { return two_loop_functions::TfSSS(x, y, z, Sqr(get_scale())); }
+double CLASSNAME::TfSSSS(double x, double y, double z, double u) const { return two_loop_functions::TfSSSS(x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::TfSSFF(double x, double y, double z, double u) const { return two_loop_functions::TfSSFF(x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::TfSSFbFb(double x, double y, double z, double u) const { return two_loop_functions::TfSSFbFb(x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::TfFFFbS(double x, double y, double z, double u) const { return two_loop_functions::TfFFFbS(x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::TfFFbFS(double x, double y, double z, double u) const { return two_loop_functions::TfFFbFS(x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::TfFbFbFbS(double x, double y, double z, double u) const { return two_loop_functions::TfFbFbFbS(x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::TfSV(double x) const { return two_loop_functions::TfSV(x, Sqr(get_scale())); }
+double CLASSNAME::TfFV(double x) const { return two_loop_functions::TfFV(x, Sqr(get_scale())); }
+double CLASSNAME::WfSSSS(double x, double y, double z, double u) const { return two_loop_functions::WfSSSS(0., x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::XfSSS(double x, double y, double z) const { return two_loop_functions::XfSSS(0., x, y, z, Sqr(get_scale())); }
+double CLASSNAME::YfSSSS(double x, double y, double z, double u) const { return two_loop_functions::YfSSSS(0., x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::ZfSSSS(double x, double y, double z, double u) const { return two_loop_functions::ZfSSSS(0., x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::SfSSS(double x, double y, double z) const { return two_loop_functions::SfSSS(0., x, y, z, Sqr(get_scale())); }
+double CLASSNAME::UfSSSS(double x, double y, double z, double u) const { return two_loop_functions::UfSSSS(0., x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::VfSSSSS(double x, double y, double z, double u, double v) const { return two_loop_functions::VfSSSSS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfSSSSS(double x, double y, double z, double u, double v) const { return two_loop_functions::MfSSSSS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::WfSSSV(double x) const { return two_loop_functions::WfSSSV(0., x, Sqr(get_scale())); }
+double CLASSNAME::MfSSSSV(double x, double y) const { return two_loop_functions::MfSSSSV(0., x, y, Sqr(get_scale())); }
+double CLASSNAME::WfSSFF(double x, double y, double z, double u) const { return two_loop_functions::WfSSFF(0., x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::WfSSFbFb(double x, double y, double z, double u) const { return two_loop_functions::WfSSFbFb(0., x, y, z, u, Sqr(get_scale())); }
+double CLASSNAME::MfFbFbFbFbS(double x, double y, double z, double u, double v) const { return two_loop_functions::MfFbFbFbFbS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfFFbFbFS(double x, double y, double z, double u, double v) const { return two_loop_functions::MfFFbFbFS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfFFbFFbS(double x, double y, double z, double u, double v) const { return two_loop_functions::MfFFbFFbS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfFFFbFbS(double x, double y, double z, double u, double v) const { return two_loop_functions::MfFFFbFbS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfFFFFS(double x, double y, double z, double u, double v) const { return two_loop_functions::MfFFFFS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfSFbSFbFb(double x, double y, double z, double u, double v) const { return two_loop_functions::MfSFbSFbFb(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfSFSFbF(double x, double y, double z, double u, double v) const { return two_loop_functions::MfSFSFbF(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::MfSFSFFb(double x, double y, double z, double u, double v) const { return two_loop_functions::MfSFSFFb(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfSSSFbFb(double x, double y, double z, double u, double v) const { return two_loop_functions::VfSSSFbFb(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfSSSFF(double x, double y, double z, double u, double v) const { return two_loop_functions::VfSSSFF(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfFbFbFbFbS(double x, double y, double z, double u, double v) const { return two_loop_functions::VfFbFbFbFbS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfFbFFbFS(double x, double y, double z, double u, double v) const { return two_loop_functions::VfFbFFbFS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfFbFFFbS(double x, double y, double z, double u, double v) const { return two_loop_functions::VfFbFFFbS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfFFbFbFS(double x, double y, double z, double u, double v) const { return two_loop_functions::VfFFbFbFS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfFFFbFbS(double x, double y, double z, double u, double v) const { return two_loop_functions::VfFFFbFbS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::VfFFFFS(double x, double y, double z, double u, double v) const { return two_loop_functions::VfFFFFS(0., x, y, z, u, v, Sqr(get_scale())); }
+double CLASSNAME::GfFFV(double x, double y) const { return two_loop_functions::GfFFV(0., x, y, Sqr(get_scale())); }
+double CLASSNAME::GfFbFbV(double x, double y) const { return two_loop_functions::GfFbFbV(0., x, y, Sqr(get_scale())); }
 
 /// derivative of H0(p^2, m1^2, m2^2) w.r.t. p^2
 double CLASSNAME::DH0(double p, double m1, double m2) const noexcept
