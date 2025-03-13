@@ -225,7 +225,9 @@ void CLASSNAME::calculate_tree_level_mass_spectrum()
  */
 void CLASSNAME::calculate_pole_mass_spectrum()
 {
-   @ModelName@_mass_eigenstates::calculate_pole_mass_spectrum();
+   calculate_tree_level_mass_spectrum();
+   copy_DRbar_masses_to_pole_masses();
+   check_pole_masses_for_tachyons();
 }
 
 void CLASSNAME::clear_tree_level_parameters()
