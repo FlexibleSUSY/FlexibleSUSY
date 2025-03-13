@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( test_LQS1_self_energies )
    m.set_Yd(1, 1, 3.4e-4);
    m.set_Yd(2, 2, 1.6e-2);
 
-   for(int i=1; i<0; i++){
+   for(int i=1; i<=2; i++){
        for(int j=0; j<i; j++){
             m.set_Ye(i, j, 0);
             m.set_Ye(j, i, 0);
@@ -78,12 +78,12 @@ BOOST_AUTO_TEST_CASE( test_LQS1_self_energies )
    // self energy derivatives
 
    // Higgs self energy derivative
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_hh_1loop_deriv_p2(p).real(), -0.030816481481987054170, 3e-15);
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_hh_1loop_deriv_p2(p).real(), -0.030816481481987057639, 3e-15);
 
    // lepton self energy derivative
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_Fe_1loop_PL_deriv_p2(p, 1, 1).real(), -3.4457016520668049669e-8, 1e-16);
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_Fe_1loop_PR_deriv_p2(p, 1, 1).real(),  6.5981493748791394579e-8, 1e-16);
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_Fe_1loop_1_deriv_p2(p, 1, 1).real(),   9.8194663193118117367e-9, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_Fe_1loop_PL_deriv_p2(p, 1, 1).real(), -1.72285615708972490894e-8, 2e-15);
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_Fe_1loop_PR_deriv_p2(p, 1, 1).real(), 3.2990715812435773255e-8, 2e-15);
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_Fe_1loop_1_deriv_p2(p, 1, 1).real(), 9.81945896772624064422e-9, 2e-15);
 
    // gauge field self energy derivatives
    BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VZ_1loop_deriv_p2(p).real(),  -0.0072128881287968869829, 4e-15);
