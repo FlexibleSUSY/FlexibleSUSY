@@ -607,6 +607,17 @@ TEST_SRC += \
 endif
 endif
 
+ifeq ($(WITH_SM),yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
+TEST_SRC += \
+		$(DIR)/test_SM_self_energies.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_SM_self_energies.cpp
+endif
+endif
+
 ifeq ($(WITH_SMHighPrecision),yes)
 TEST_SRC += \
 		$(DIR)/test_SMHighPrecision_two_loop_spectrum.cpp
@@ -1243,6 +1254,8 @@ $(DIR)/test_SM_low_scale_constraint.x: $(LIBSM)
 $(DIR)/test_SM_mass_eigenstates_interface.x: $(LIBSM)
 
 $(DIR)/test_SM_mass_eigenstates_decoupling_scheme.x: $(LIBSM)
+
+$(DIR)/test_SM_self_energies.x: $(LIBSM)
 
 $(DIR)/test_SM_tree_level_spectrum.x: $(LIBSM)
 
