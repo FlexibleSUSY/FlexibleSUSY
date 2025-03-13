@@ -12,6 +12,7 @@
 #include "decays/standard_model_decays.hpp"
 #include "SM_mass_eigenstates_running.hpp"
 #include "decays/experimental_constraints.hpp"
+#include "SM_two_scale_spectrum_generator.hpp"
 
 #include "lowe.h"
 #include "loop_libraries/loop_library.hpp"
