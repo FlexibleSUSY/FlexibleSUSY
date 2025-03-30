@@ -369,7 +369,7 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau.second));
 
       // Higgs to LSP decay (if model contains one)
-      s.setDecayWidth("Inv", "Inv", el.invWidth);
+      s.setDecayWidth(HP::Decay::directInv, el.invWidth);
 
       // all remaining partial widths
       s.setDecayWidth("Undetected", "Undetected", el.get_undetected_width());
