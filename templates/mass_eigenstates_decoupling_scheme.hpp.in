@@ -20,7 +20,7 @@
 /**
  * @file @ModelName@_mass_eigenstates_decoupling_scheme.hpp
  *
- * @brief Defines model class for Stöckinger/Kotlarski decoupling scheme.
+ * @brief Implements model class for Stöckinger/Kotlarski decoupling scheme.
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
@@ -28,11 +28,8 @@
 #ifndef @ModelName@_MASS_EIGENSTATES_DECOUPLING_SCHEME_H
 #define @ModelName@_MASS_EIGENSTATES_DECOUPLING_SCHEME_H
 
-#include "@ModelName@_info.hpp"
-#include "@ModelName@_physical.hpp"
 #include "@ModelName@_mass_eigenstates_interface.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
-#include "problems.hpp"
 
 #include <memory>
 
@@ -101,7 +98,7 @@ public:
 @[override]selfEnergyPrototypes@
 
 private:
-   bool use_pole_higgs_mixings {true};      ///< use pole Higgs mixing matrices in vertices
+   bool use_pole_higgs_mixings{true};      ///< use pole Higgs mixing matrices in vertices
    void clear_tree_level_parameters();
 };
 

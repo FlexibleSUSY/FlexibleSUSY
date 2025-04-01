@@ -28,9 +28,6 @@
 #ifndef @ModelName@_MASS_EIGENSTATES_INTERFACE_H
 #define @ModelName@_MASS_EIGENSTATES_INTERFACE_H
 
-#include "@ModelName@_physical.hpp"
-#include "@ModelName@_info.hpp"
-
 #include <memory>
 
 #include <Eigen/Core>
@@ -39,6 +36,7 @@ namespace flexiblesusy {
 
 class Problems;
 struct @ModelName@_input_parameters;
+struct @ModelName@_physical;
 
 /**
  * @class @ModelName@_mass_eigenstates_interface
@@ -46,7 +44,7 @@ struct @ModelName@_input_parameters;
  */
 class @ModelName@_mass_eigenstates_interface {
 public:
-   virtual ~@ModelName@_mass_eigenstates_interface() {}
+   virtual ~@ModelName@_mass_eigenstates_interface() = default;
 
    virtual std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const = 0;
 

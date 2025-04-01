@@ -29,6 +29,9 @@
  */
 
 #include "@ModelName@_mass_eigenstates_running.hpp"
+#include "@ModelName@_info.hpp"
+#include "@ModelName@_physical.hpp"
+#include "problems.hpp"
 #include "wrappers.hpp"
 
 namespace flexiblesusy {

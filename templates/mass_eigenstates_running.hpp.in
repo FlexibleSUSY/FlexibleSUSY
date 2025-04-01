@@ -16,11 +16,24 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+
+/**
+ * @file @ModelName@_mass_eigenstates_running.hpp
+ *
+ * @brief Implements model class for running MS-bar/DR-bar parameters.
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
 #ifndef @ModelName@_MASS_EIGENSTATES_RUNNING_H
 #define @ModelName@_MASS_EIGENSTATES_RUNNING_H
 
 #include "@ModelName@_mass_eigenstates_interface.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
+
+#include <memory>
+
+#include <Eigen/Core>
 
 #define SUPER(p) @ModelName@_soft_parameters::p
 

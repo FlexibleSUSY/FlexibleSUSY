@@ -29,9 +29,12 @@
  */
 
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
+#include "@ModelName@_info.hpp"
+#include "@ModelName@_physical.hpp"
 #include "ewsb_solver.hpp"
 #include "ew_input.hpp"
 #include "eigen_utils.hpp"
+#include "problems.hpp"
 #include "raii.hpp"
 #include "standard_model.hpp"
 #include "wrappers.hpp"
