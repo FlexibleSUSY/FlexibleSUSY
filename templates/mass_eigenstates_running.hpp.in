@@ -48,7 +48,7 @@ public:
    @ModelName@_mass_eigenstates_running(const @ModelName@_input_parameters&);
    @ModelName@_mass_eigenstates_running(const @ModelName@_mass_eigenstates&);
 
-   ~@ModelName@_mass_eigenstates_running() override {}
+   ~@ModelName@_mass_eigenstates_running() override = default;
 
    std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
 

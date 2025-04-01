@@ -60,7 +60,7 @@ public:
    explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates&);
    @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates_decoupling_scheme&) = default;
    @ModelName@_mass_eigenstates_decoupling_scheme(@ModelName@_mass_eigenstates_decoupling_scheme&&) = default;
-   virtual ~@ModelName@_mass_eigenstates_decoupling_scheme() = default;
+   ~@ModelName@_mass_eigenstates_decoupling_scheme() override = default;
    @ModelName@_mass_eigenstates_decoupling_scheme& operator=(const @ModelName@_mass_eigenstates_decoupling_scheme&) = default;
    @ModelName@_mass_eigenstates_decoupling_scheme& operator=(@ModelName@_mass_eigenstates_decoupling_scheme&&) = default;
 
