@@ -1,4 +1,4 @@
-FlexibleSUSY 2.9.0 [X, XX 2024]
+FlexibleSUSY 2.9.0 [April, 06 2025]
 ===============================
 
 New features
