@@ -56,7 +56,7 @@ class @ModelName@_mass_eigenstates_decoupling_scheme
    , public @ModelName@_mass_eigenstates
 {
 public:
-   explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters());
+   explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_input_parameters& input = @ModelName@_input_parameters());
    explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates&);
    @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates_decoupling_scheme&) = default;
    @ModelName@_mass_eigenstates_decoupling_scheme(@ModelName@_mass_eigenstates_decoupling_scheme&&) = default;

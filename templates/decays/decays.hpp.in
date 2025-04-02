@@ -55,7 +55,8 @@ namespace flexiblesusy {
 class @ModelName@_decays {
 public:
    @ModelName@_decays() = default;
-   @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_,
+   @ModelName@_decays(@ModelName@_mass_eigenstates const& model_,
+         softsusy::QedQcd const& qedqcd_,
          Physical_input const& physical_input_,
          FlexibleDecay_settings const& flexibledecay_settings_)
       : model(model_)

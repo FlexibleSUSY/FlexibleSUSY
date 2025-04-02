@@ -49,14 +49,14 @@ namespace flexiblesusy {
 #define PHASE(p) model.get_##p()
 #define PHYSICAL(parameter) physical.parameter
 
-CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
-   : @ModelName@_mass_eigenstates(input_)
+CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input)
+   : @ModelName@_mass_eigenstates(input)
 {
 }
 
 CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
+   : @ModelName@_mass_eigenstates(model)
 {
-   fill_from(model);
 }
 
 std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
