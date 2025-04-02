@@ -2824,7 +2824,10 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 "   }
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
-      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);
+      if (hs.has_value()) {
+         SignalResult hs_ = hs.value();
+         slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval);
+      }
       slha_io.set_higgsbounds(higgsbounds_v);
    }
 #endif

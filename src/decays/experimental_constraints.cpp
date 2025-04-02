@@ -306,7 +306,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 }
 
 #ifdef ENABLE_HIGGSTOOLS
-std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
+std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const& bsm_input,
    Physical_input const& physical_input,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
@@ -315,16 +315,6 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
    // HiggsBounds
    if (higgsbounds_dataset.empty()) {
       throw SetupError("Need to specify location of HiggsBounds database");
-   }
-   else if (!std::filesystem::exists(higgsbounds_dataset)) {
-      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
-   }
-   // HiggsSignals
-   if (higgssignals_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsSignals database");
-   }
-   else if (!std::filesystem::exists(higgssignals_dataset)) {
-      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
    }
 
    auto pred = Higgs::Predictions();
@@ -386,15 +376,23 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
    }
 
-   const auto signals = Higgs::Signals {higgssignals_dataset};
-   const double hs_chisq = signals(pred);
+   std::optional<SignalResult> hs_return = std::nullopt;
+   if (std::filesystem::exists(higgssignals_dataset)) {
+      const auto signals = Higgs::Signals {higgssignals_dataset};
+      const double hs_chisq = signals(pred);
+      const double mhSMref = physical_input.get(Physical_input::mh_pole);
+      const double smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
+      const double pvalue = chi2_to_pval(hs_chisq, smChi2);
+      hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue};
+   }
+   else if (higgssignals_dataset.empty()) {
+      WARNING("Warning: no HiggsSignals database provided");
+   }
+   else {
+      WARNING("Warning: no HiggsSinglas database at " + higgssignals_dataset);
+   }
 
-   const double mhSMref = physical_input.get(Physical_input::mh_pole);
-   const double smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
-
-   const double pvalue = chi2_to_pval(hs_chisq, smChi2);
-
-   return {{signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue}, hb_return};
+   return {hs_return, hb_return};
 }
 #endif
 
