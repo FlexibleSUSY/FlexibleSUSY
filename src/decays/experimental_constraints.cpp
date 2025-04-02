@@ -365,15 +365,23 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       s.setDecayWidth("Undetected", "Undetected", el.get_undetected_width());
    }
 
-   auto bounds = Higgs::Bounds {higgsbounds_dataset};
-   auto hbResult = bounds(pred);
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
-   for (auto const& _hb: hbResult.selectedLimits) {
-      auto found = std::find_if(
-         std::begin(bsm_input), std::end(bsm_input),
-         [&_hb](auto const& el) { return el.particle==_hb.first; }
-      );
-      hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
+   if (std::filesystem::exists(higgsbounds_dataset)) {
+      auto bounds = Higgs::Bounds {higgsbounds_dataset};
+      auto hbResult = bounds(pred);
+      for (auto const& _hb: hbResult.selectedLimits) {
+         auto found = std::find_if(
+            std::begin(bsm_input), std::end(bsm_input),
+            [&_hb](auto const& el) { return el.particle==_hb.first; }
+         );
+         hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
+      }
+   }
+   else if (higgsbounds_dataset.empty()) {
+      WARNING("Warning: no HiggsBounds database provided");
+   }
+   else {
+      WARNING("Warning: no HiggsBounds database at " + higgsbounds_dataset);
    }
 
    std::optional<SignalResult> hs_return;

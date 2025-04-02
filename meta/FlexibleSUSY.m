@@ -2828,7 +2828,9 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
          SignalResult hs_ = hs.value();
          slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval);
       }
-      slha_io.set_higgsbounds(higgsbounds_v);
+      if (higgsbounds_v.size() > 0) {
+         slha_io.set_higgsbounds(higgsbounds_v);
+      }
    }
 #endif
 #ifdef ENABLE_LILITH
