@@ -376,7 +376,7 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
    }
 
-   std::optional<SignalResult> hs_return = std::nullopt;
+   std::optional<SignalResult> hs_return;
    if (std::filesystem::exists(higgssignals_dataset)) {
       const auto signals = Higgs::Signals {higgssignals_dataset};
       const double hs_chisq = signals(pred);
@@ -413,7 +413,7 @@ std::optional<SignalResult> call_lilith(
       }
    }
    if (!higgs_in_range) {
-      return {};
+      return std::nullopt;
    }
 
    std::string XMLinputstring;
