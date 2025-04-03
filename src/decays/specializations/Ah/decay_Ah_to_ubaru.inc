@@ -22,9 +22,9 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
 
    // flavour-violating decay
    if(!boost::range::equal(indexOut1, indexOut2)) {
-      if (!is_zero(AhQQbarVertexDR.left()) || !is_zero(AhQQbarVertexDR.right())) {
-         const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
-         const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
+      const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      if (mAhOS > muqOS1 + muqOS2 && (!is_zero(AhQQbarVertexDR.left()) || !is_zero(AhQQbarVertexDR.right()))) {
          const auto xOS1 = Sqr(muqOS1/mAhOS);
          const auto xOS2 = Sqr(muqOS2/mAhOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
