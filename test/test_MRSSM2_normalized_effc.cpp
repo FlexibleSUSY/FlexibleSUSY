@@ -694,9 +694,25 @@ BOOST_AUTO_TEST_CASE( test_MRSSM2_normalized_effective_couplings )
    BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].uu.second), 0.94768964478700091, 3e-16);
 
    // Ah
+   // -----------------------------------------------------------------
    BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].bb.second), 4.9471107239345873,  0.);
    BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].cc.second), 0.24445945353375145, 0.);
    BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].ss.second), 4.8845714244777474,  0.);
    BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].dd.second), 4.8233392849452121,  0.);
    BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].uu.second), 0.24724669904197341, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].ee.second), 4.9521274449818486, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].mumu.second), 4.9521492793168838, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].tautau.second), 4.9581898246025222, 0.);
+
+   // pure pseudoscalar has no renormalizable VV couplings and only gamma5 couplings to fermions
+   BOOST_REQUIRE_EQUAL(effc[2].ZZ.second,                0.);
+   BOOST_REQUIRE_EQUAL(effc[2].WW.second,                0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].bb.second),     0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].cc.second),     0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].ss.second),     0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].dd.second),     0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].uu.second),     0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].ee.second),     0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].mumu.second),   0.);
+   BOOST_REQUIRE_EQUAL(std::real(effc[2].tautau.second), 0.);
 }
