@@ -104,7 +104,8 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       neutral_higgs_effc.add_coupling(
          field_as_string<Ah>(in_idx),
          {21, 21},
-         std::pair<std::string, double> {tag, std::sqrt(result)}
+         std::pair<std::string, double> {tag, std::sqrt(result)},
+         result
       );
    }
 

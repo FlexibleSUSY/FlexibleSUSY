@@ -682,26 +682,26 @@ Block IMVCKM Q= 1.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(effc[1].ZZ.second, 0.84090671645096526, 6e-5);
    BOOST_CHECK_CLOSE_FRACTION(effc[1].WW.second, 0.83500663372868467, 2e-6);
 
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].ee.second),     1.8693282675754028, 3e-16);
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].mumu.second),   1.8693282402317875, 2e-16);
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].tautau.second), 1.8693212737802281, 2e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].ee.second),     1.8693426000972864, 3e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].mumu.second),   1.8693425997166413, 2e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].tautau.second), 1.8693424926955564, 2e-16);
 
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].bb.second), 1.8564986659704481,  4e-16);
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].cc.second), 0.94769505194041959, 2e-16);
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].ss.second), 1.828375808475458,   2e-16);
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].dd.second), 1.7919566274448113,  2e-16);
-   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].uu.second), 0.94768964478700091, 3e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].bb.second), 1.8553195692953846,  4e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].cc.second), 0.94767263126926116, 2e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].ss.second), 1.8283889115159524,   2e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].dd.second), 1.7919703636003774,  2e-16);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(effc[1].uu.second), 0.94769691044831916, 3e-16);
 
    // Ah
    // -----------------------------------------------------------------
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].bb.second), 4.9471107239345873,  0.);
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].cc.second), 0.24445945353375145, 0.);
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].ss.second), 4.8845714244777474,  0.);
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].dd.second), 4.8233392849452121,  0.);
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].uu.second), 0.24724669904197341, 0.);
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].ee.second), 4.9521274449818486, 0.);
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].mumu.second), 4.9521492793168838, 0.);
-   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].tautau.second), 4.9581898246025222, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].bb.second), 4.9182569958662699,  0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].cc.second), 0.24437097054876519, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].ss.second), 4.8843966385611139,  0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].dd.second), 4.8231852618790141,  0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].uu.second), 0.24723880568584389, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].ee.second), 4.9519693622376648, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].mumu.second), 4.9519693622371799, 0.);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(effc[2].tautau.second), 4.9519693628112655, 0.);
 
    // pure pseudoscalar has no renormalizable VV couplings and only gamma5 couplings to fermions
    BOOST_REQUIRE_EQUAL(effc[2].ZZ.second,                0.);
