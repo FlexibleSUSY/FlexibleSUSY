@@ -48,6 +48,8 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
 
    const auto AhQQbarVertexDR_P = 0.5*(AhQQbarVertexDR.right() - AhQQbarVertexDR.left());
 
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
+
    // off-shell decay
    if (4.*std::max(xDR, xOS) > 1.) {
    }
@@ -56,7 +58,6 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
       const auto betaDR = std::sqrt(1.-4.*xDR);
 
       const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
-      const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
       double amp2DR_P = 0;
       double amp2OS_P = 0;
@@ -147,6 +148,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
        flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
        flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
    ) {
+      const double remove_normalization = flux*phase_spaceOS*2*Sqr(mAhOS);
       neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
          {
             boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
@@ -156,8 +158,9 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
             field_as_string<PseudoscalarHiggs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
             // if the decay is not kinematically allowed return the tree-level coupling,
             // otherwise a sqrt of a partial width
-            4.*std::max(xDR, xOS) > 1. ? std::imag(AhQQbarVertexDR_P)*1i : std::sqrt(result)*1i
-         }
+            4.*std::max(xDR, xOS) > 1. ? std::imag(AhQQbarVertexDR_P)*1i : std::sqrt(result/remove_normalization)*1i
+         },
+         result
          );
    }
 
