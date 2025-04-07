@@ -38,7 +38,8 @@ double CLASSNAME::get_partial_width<Higgs, Photon, Photon>(
       neutral_higgs_effc.add_coupling(
          field_as_string<Higgs>(in_idx),
          {22, 22},
-         std::pair<std::string, double> {tag, std::sqrt(res)}
+         std::pair<std::string, double> {tag, std::sqrt(res)},
+         res
       );
    }
 

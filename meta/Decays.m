@@ -845,7 +845,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                     ]]&, finalState
               ] <>
               If[
-                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]], "",
+                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]] || CheckOffShellDecay[TreeMasses`GetPseudoscalarHiggsBoson[], First@TreeMasses`GetSMUpQuarks[]], "",
 
               "if (context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
                StringRiffle[

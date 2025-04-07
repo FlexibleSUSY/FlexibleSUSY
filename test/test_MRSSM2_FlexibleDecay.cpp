@@ -769,3 +769,4 @@ Block IMVCKM Q= 1.00000000E+03
 
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Su_to_GluFu(&m, 3, 0), 56.21133546983561, 1e-16);
 }
+

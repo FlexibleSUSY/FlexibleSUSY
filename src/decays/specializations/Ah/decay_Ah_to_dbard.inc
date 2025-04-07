@@ -145,6 +145,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
        flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
        flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
    ) {
+      const double remove_normalization = flux*phase_spaceOS*2*Sqr(mAOS);
       neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
          {
             boost::hana::unpack(bar<DownTypeQuark>::pdgids, _to_array<bar<DownTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
@@ -152,8 +153,9 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
          },
          std::pair<std::string, std::complex<double>> {
             field_as_string<PseudoscalarHiggs>(indexIn) + "-" + field_as_string<bar<DownTypeQuark>::type>(indexOut1) + "-" + field_as_string<DownTypeQuark>(indexOut2),
-            1i*std::sqrt(result)
-         }
+            1i*std::sqrt(result/remove_normalization)
+         },
+         result
       );
    }
 
