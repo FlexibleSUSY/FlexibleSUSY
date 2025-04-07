@@ -54,6 +54,8 @@
 #include <gsl/gsl_monte_miser.h>
 #include "cxx_qft/standard_model_context_base.hpp"
 
+#define DECAY_BSM_ORDER @decayBSMOrder@
+
 namespace flexiblesusy {
 
 #define CLASSNAME @ModelName@_decays

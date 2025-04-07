@@ -48,7 +48,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       res_P *= 1. + get_alpha(context)/Pi*17./4.;
    }
 
-   if (true /* higher order BSM corrections */) {
+#if DECAY_BSM_ORDER > 0
 
       namespace smns = standard_model_cxx_diagrams;
 
@@ -395,7 +395,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       }
 
       res += 2.*std::real(amplitude_interference(amp_tree, amp_1l)) /* + ren const */;
-   }
+#endif
 
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
        flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||

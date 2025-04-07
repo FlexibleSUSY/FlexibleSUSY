@@ -214,6 +214,8 @@ FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
 IMEXTPAR = {};
 FSCalculateDecays = False;
+FSDecaysBSMOrder  = FSLO;
+FSNLO;
 FSDecayParticles = Automatic;
 FSEnableParallelism = True;
 FSUnitarityConstraints = True;
@@ -2267,6 +2269,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
                             "@isCPodd@" -> If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && GetDimensionWithoutGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]] > 0, " || std::is_same_v<FieldIn, " <> FSModelName <> "_cxx_diagrams::fields::PseudoscalarHiggs>", ""],
+                            "@decayBSMOrder@" -> Switch[FSDecaysBSMOrder,
+                                                        FSLO, "0",
+                                                        FSNLO, "1",
+                                                        _, Print["Warning: FSDecaysBSMOrder set to ", FSDecaysBSMOrder, " (allowed values are FSLO and FSNLO)."]
+                                                           Print["         Setting FSDecaysBSMOrder to FSLO."];"0"
+                                                 ],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 

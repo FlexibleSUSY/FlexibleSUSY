@@ -53,6 +53,8 @@
 #include "error.hpp"
 #include "cxx_qft/standard_model_qft.hpp"
 
+#define DECAY_BSM_ORDER 0
+
 namespace flexiblesusy {
 
 #define CLASSNAME Standard_model_decays
