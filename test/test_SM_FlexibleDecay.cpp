@@ -26,26 +26,26 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
 
    SM_input_parameters input;
    input.LambdaIN = 0.285;
-   SM<Two_scale> _m;
-   setup_SM_const(_m, input);
+   SM<Two_scale> m_;
+   setup_SM_const(m_, input);
 
-   _m.calculate_DRbar_masses();
+   m_.calculate_DRbar_masses();
 
-   _m.set_pole_mass_loop_order(1);
-   _m.do_calculate_sm_pole_masses(true);
-   _m.solve_ewsb_one_loop();
-   _m.calculate_pole_masses();
+   m_.set_pole_mass_loop_order(1);
+   m_.do_calculate_sm_pole_masses(true);
+   m_.solve_ewsb_one_loop();
+   m_.calculate_pole_masses();
 
-   if (_m.get_problems().have_problem()) {
+   if (m_.get_problems().have_problem()) {
       std::ostringstream ostr;
-      _m.get_problems().print_problems(ostr);
+      m_.get_problems().print_problems(ostr);
       BOOST_FAIL(ostr.str());
    }
 
    softsusy::QedQcd qedqcd;
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings;
-   SM_mass_eigenstates_running m(_m);
+   SM_mass_eigenstates_running m(m_);
 
    // -----------------------------------------------------
    // decays with higher-order SM corrections
@@ -114,17 +114,17 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    SM_input_parameters input;
    input.LambdaIN = 0.285;
 
-   SM<Two_scale> _m;
-   setup_SM_const(_m, input);
-   _m.calculate_DRbar_masses();
-   _m.set_pole_mass_loop_order(1);
-   _m.do_calculate_sm_pole_masses(true);
-   _m.solve_ewsb_one_loop();
-   _m.calculate_pole_masses();
+   SM<Two_scale> m_;
+   setup_SM_const(m_, input);
+   m_.calculate_DRbar_masses();
+   m_.set_pole_mass_loop_order(1);
+   m_.do_calculate_sm_pole_masses(true);
+   m_.solve_ewsb_one_loop();
+   m_.calculate_pole_masses();
 
-   if (_m.get_problems().have_problem()) {
+   if (m_.get_problems().have_problem()) {
       std::ostringstream ostr;
-      _m.get_problems().print_problems(ostr);
+      m_.get_problems().print_problems(ostr);
       BOOST_FAIL(ostr.str());
    }
 
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    softsusy::QedQcd qedqcd;
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings;
-   SM_mass_eigenstates_running m(_m);
+   SM_mass_eigenstates_running m(m_);
 
    SM_decays decays_SM_HO = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
    Standard_model_decays decays_sm_HO = Standard_model_decays(sm, qedqcd, physical_input, flexibledecay_settings);
