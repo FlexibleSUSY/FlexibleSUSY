@@ -39,14 +39,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const auto amp_tree =
       calculate_amplitude_tree<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
 
-   double res = res_S + res_P;
-
    // higher order SM corrections
    if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
       // 1-loop QED corrections
       res_S *= 1. + get_alpha(context)/Pi*17./4.;
       res_P *= 1. + get_alpha(context)/Pi*17./4.;
    }
+
+   double res = res_S + res_P;
 
 #if DECAY_BSM_ORDER > 0
 
