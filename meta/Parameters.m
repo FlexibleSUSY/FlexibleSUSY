@@ -1951,9 +1951,9 @@ CreateInputParameterArraySetter[inputParameters_List] :=
            Return[set];
           ];
 
-CreateModelParameterGetter[par_] :=
+CreateModelParameterGetter[par_, super_:False] :=
     Module[{name = CConversion`ToValidCSymbolString[par]},
-           CConversion`CreateInlineGetters[name, name, GetType[par]]
+           CConversion`CreateInlineGetters[name, name, GetType[par], super]
           ];
 
 CreateDelegateModelParameterGetter[par_, macro_String:"SUPER"] :=
@@ -1961,9 +1961,9 @@ CreateDelegateModelParameterGetter[par_, macro_String:"SUPER"] :=
            CConversion`CreateInlineGetters[name, name, GetType[par], "", macro]
           ];
 
-CreateModelParameterSetter[par_] :=
+CreateModelParameterSetter[par_, super_:False] :=
     Module[{name = CConversion`ToValidCSymbolString[par], type = GetType[par]},
-           CConversion`CreateInlineSetters[name, type]
+           CConversion`CreateInlineSetters[name, type, super]
           ];
 
 FindSLHABlock[blockList_List, par_] :=

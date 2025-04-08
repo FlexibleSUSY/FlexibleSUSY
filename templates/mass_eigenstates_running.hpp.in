@@ -18,15 +18,15 @@
 
 
 /**
- * @file @ModelName@_mass_eigenstates_decoupling_scheme.hpp
+ * @file @ModelName@_mass_eigenstates_running.hpp
  *
- * @brief Implements model class for Stöckinger/Kotlarski decoupling scheme.
+ * @brief Implements model class for running MS-bar/DR-bar parameters.
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_MASS_EIGENSTATES_DECOUPLING_SCHEME_H
-#define @ModelName@_MASS_EIGENSTATES_DECOUPLING_SCHEME_H
+#ifndef @ModelName@_MASS_EIGENSTATES_RUNNING_H
+#define @ModelName@_MASS_EIGENSTATES_RUNNING_H
 
 #include "@ModelName@_mass_eigenstates_interface.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
@@ -39,43 +39,22 @@
 
 namespace flexiblesusy {
 
-namespace standard_model {
-class Standard_model;
-}
-
-struct @ModelName@_input_parameters;
-
-/**
- * @class @ModelName@_mass_eigenstates_decoupling_scheme
- *
- * @brief model class with routines for determing masses and mixings
- * and EWSB in the Stöckinger/Kotlarski decoupling scheme
- */
-class @ModelName@_mass_eigenstates_decoupling_scheme
+class @ModelName@_mass_eigenstates_running
    : public @ModelName@_mass_eigenstates_interface
    , public @ModelName@_mass_eigenstates
 {
 public:
-   explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_input_parameters& input = @ModelName@_input_parameters());
-   explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates&);
-   @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates_decoupling_scheme&) = default;
-   @ModelName@_mass_eigenstates_decoupling_scheme(@ModelName@_mass_eigenstates_decoupling_scheme&&) = default;
-   ~@ModelName@_mass_eigenstates_decoupling_scheme() override = default;
-   @ModelName@_mass_eigenstates_decoupling_scheme& operator=(const @ModelName@_mass_eigenstates_decoupling_scheme&) = default;
-   @ModelName@_mass_eigenstates_decoupling_scheme& operator=(@ModelName@_mass_eigenstates_decoupling_scheme&&) = default;
+   @ModelName@_mass_eigenstates_running() = default;
+   @ModelName@_mass_eigenstates_running(const @ModelName@_input_parameters&);
+   @ModelName@_mass_eigenstates_running(const @ModelName@_mass_eigenstates&);
+
+   ~@ModelName@_mass_eigenstates_running() override = default;
 
    std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
 
-   void fill_from(const standard_model::Standard_model&);
-   void fill_from(const @ModelName@_mass_eigenstates&);
-   void print(std::ostream&) const override;
-   void clear() override;
-   void set_use_pole_higgs_mixings(bool var) { use_pole_higgs_mixings = var; };
-
-   // mass_eigenstates_interface functions
-
    void calculate_tree_level_mass_spectrum() override;
    void calculate_pole_mass_spectrum() override;
+
    int solve_ewsb_equations_tree_level() override;
    int solve_ewsb_equations() override;
 
@@ -89,23 +68,14 @@ public:
    Problems& get_problems() override;
    void clear_problems() override;
 
-@[override]delegateParameterGetters@
+@[override]parameterGetters@
 @[override]massGetters@
 @[override]mixingMatrixGetters@
 @[override]phasesGetterSetters@
 @[override]extraParameterGetters@
 @[override]dependencePrototypes@
 @[override]selfEnergyPrototypes@
-
-private:
-   bool use_pole_higgs_mixings{true};      ///< use pole Higgs mixing matrices in vertices
-   void clear_tree_level_parameters();
 };
-
-std::ostream& operator<<(std::ostream&, const @ModelName@_mass_eigenstates_decoupling_scheme&);
-
-} // namespace flexiblesusy
-
-#undef SUPER
+}
 
 #endif

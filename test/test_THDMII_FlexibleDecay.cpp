@@ -8,6 +8,7 @@
 #include "THDMII_two_scale_model.hpp"
 #include "decays/THDMII_decays.hpp"
 #include "THDMII_slha_io.hpp"
+#include "THDMII_mass_eigenstates_running.hpp"
 
 using namespace flexiblesusy;
 
@@ -255,7 +256,7 @@ Block UERMIX
       BOOST_TEST(false);
    }
 
-   THDMII_slha m(input);
+   THDMII_mass_eigenstates_running m(input);
    slha_io.fill(m);
    m.calculate_DRbar_masses();
    m.reorder_DRbar_masses();
