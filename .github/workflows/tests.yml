@@ -157,7 +157,6 @@ jobs:
           $MY_MATH_PASS
           EOF
           printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi
-          printf "Checking if math command is workings... "; if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi
 
       - name: Install FormCalc
         run: |
@@ -165,6 +164,7 @@ jobs:
           wget -q -O - https://feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
           cd FormCalc-$FORMCALC_VERSION
           ./compile
+          echo "/usr/local/Wolfram/WolframEngine/14.2/Executables" >> $GITHUB_PATH
           echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
 
       - name: Create models
@@ -198,6 +198,7 @@ jobs:
           esac
           models=$(ruby -e "puts ARGV.join(',')" -- $models)
           ./configure \
+            --with-math-cmd=wolframscript \
             --with-cxx=$CXXCOMPILER \
             --with-models=$models \
             --with-loop-libraries=collier,looptools \
@@ -285,6 +286,7 @@ jobs:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |
           ./configure \
+            --with-math-cmd=wolframscript \
             --with-cxx=$CXXCOMPILER \
             --with-models=SM,MRSSM2 \
             --with-loop-libraries=collier,looptools \
@@ -324,6 +326,7 @@ jobs:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |
           ./configure \
+            --with-math-cmd=wolframscript \
             --with-cxx=$CXXCOMPILER \
             --with-models=SM,MRSSM2 \
             --with-loop-libraries=collier,looptools \
@@ -365,6 +368,7 @@ jobs:
           rm -rf models/SM
           ./createmodel --name=SM
           ./configure \
+            --with-math-cmd=wolframscript \
             --with-cxx=$CXXCOMPILER \
             --with-models=SM \
             --with-loop-libraries=collier,looptools \
@@ -381,6 +385,7 @@ jobs:
           rm -rf models/SM
           tar -xf SM.tar.gz
           ./configure \
+            --with-math-cmd=wolframscript \
             --with-cxx=$CXXCOMPILER \
             --with-models=SM \
             --with-loop-libraries=collier,looptools \
