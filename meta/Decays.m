@@ -969,7 +969,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "// positions in tree-level mass and mixing matrices. The\n" <>
                     "// non-decoupled model does not.\n" <>
                     "model.reorder_DRbar_masses();\n" <>
-                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
+                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running>(model);\n" <>
                     "break;\n"
                   ] <>
                   "}\ndefault:\n" <>

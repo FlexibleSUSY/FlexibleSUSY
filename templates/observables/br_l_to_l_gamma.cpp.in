@@ -27,7 +27,7 @@
 #include <complex>
 
 #include "@ModelName@_@filename@.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_running.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
@@ -45,7 +45,7 @@ double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
 @get_MSUSY@
 }
 
-void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
+void run_to_MSUSY(@ModelName@_mass_eigenstates_running& model)
 {
    const double precision_goal = model.get_precision();
    const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
@@ -108,7 +108,7 @@ namespace @namespace@ {
 template <typename FIn, typename FOut, typename T1, typename T2>
 double lepton_total_decay_width(
       T1 const& indices1, T2 const& indices2,
-      const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+      const @ModelName@_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd) {
    return  get_total_width(indices1[0]);
 }
 

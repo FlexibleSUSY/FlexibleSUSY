@@ -30,16 +30,19 @@
 
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_ewsb_solver_interface.hpp"
+#include "@ModelName@_info.hpp"
+#include "@ModelName@_physical.hpp"
 #include "config.h"
 #include "eigen_utils.hpp"
+#include "error.hpp"
 #include "ewsb_solver.hpp"
-#include "wrappers.hpp"
 #include "linalg2.hpp"
 #include "logger.hpp"
-#include "error.hpp"
 #include "loop_libraries/loop_library.hpp"
 #include "numerics.h"
+#include "problems.hpp"
 #include "raii.hpp"
+#include "wrappers.hpp"
 
 #ifdef ENABLE_THREADS
 #include "thread_pool.hpp"
@@ -85,11 +88,6 @@ CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
    : @ModelName@_soft_parameters(input_)
 @defaultEWSBSolverCctor@
 {
-}
-
-std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
-{
-   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
 }
 
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
@@ -496,6 +494,19 @@ double CLASSNAME::DB0(double p2, double m2a, double m2b) const noexcept
    return Loop_library::get().DB0(p2, m2a, m2b, scl2).real();
 }
 
+/// derivative of B1(p^2, ma^2, mb^2) w.r.t. p^2
+double CLASSNAME::DB1(double p, double m1, double m2) const noexcept
+{
+   return Loop_library::get().DB1(p, m1, m2, Sqr(get_scale())).real();
+}
+
+/// derivative of B00(p^2, ma^2, mb^2) w.r.t. p^2
+double CLASSNAME::DB00(double p2, double m2a, double m2b) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return Loop_library::get().DB00(p2, m2a, m2b, scl2).real();
+}
+
 /**
  * routine which finds the @RenScheme@ mass eigenstates and mixings.
  */
@@ -711,8 +722,6 @@ void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
 @tadpoleEqFunctions@
 
 @selfEnergyFunctions@
-
-@selfEnergyDerivFunctions@
 
 @secondGenerationHelperFunctions@
 @thirdGenerationHelperFunctions@
