@@ -1,39 +1,39 @@
 Block MODSEL                 # Select model
-#   12    1000                # parameter output scale (GeV)
+#   12    1000               # parameter output scale (GeV)
+     6       3               # flavour violation
 Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
     2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
     3   1                    # calculate SM pole masses
-    4   4                    # pole mass loop order
-    5   4                    # EWSB loop order
-    6   4                    # beta-functions loop order
-    7   4                    # threshold corrections loop order
+    4   1                    # pole mass loop order
+    5   1                    # EWSB loop order
+    6   0                    # beta-functions loop order
+    7   0                    # threshold corrections loop order
     8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
     9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
    10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
    11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
    12   0                    # force output
-   13   3                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)
+   13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate all observables
+   15   1                    # calculate observables (a_muon, ...)
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
    19   0                    # EFT matching scale (0 = SUSY scale)
-   20   2                    # EFT loop order for upwards matching
-   21   1                    # EFT loop order for downwards matching
+   20   0                    # EFT loop order for upwards matching
+   21   0                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   1                    # calculate BSM pole masses
    24   124111421            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
-   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
-   27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
-   28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
-   29   1                    # Higgs 3-loop corrections O(alpha_t^3)
-   30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+   26   0                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   0                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   0                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   0                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   1                    # loop library (0 = softsusy)
-   32   2                    # loop level to calculate AMM
 Block FlexibleSUSYInput
     0   0.00729735           # alpha_em(0)
     1   125.09               # Mh pole
@@ -54,19 +54,40 @@ Block SMINPUTS               # Standard Model inputs
    22   2.400000000e-03      # mu(2 GeV) MS-bar
    23   1.040000000e-01      # ms(2 GeV) MS-bar
    24   1.270000000e+00      # mc(mc) MS-bar
+Block VCKMIN                 # CKM matrix input (Wolfenstein parameters)
+    1   2.272000000e-01      # lambda(MZ) SM DR-bar
+    2   8.180000000e-01      # A(MZ) SM DR-bar
+    3   2.210000000e-01      # rhobar(MZ) SM DR-bar
+    4   3.400000000e-01      # etabar(MZ) SM DR-bar
 Block MINPAR                 # Input parameters
-    1   0.192                # Lambda(Qin)
-Block EXTPAR                 # Input parameters
-    0   1000                 # input scale Qin
-    1   173.34               # scale QEWSB
+    1   0.192                # Lambda(MZ)
+Block SCALARLEPTOQUARKSIN
+     1     2.25e6           # MS12Input
+     2     1.0               # gHS1Input
+     3     1.0               # lamS1Input
+Block LAMLIN
+  1  1     0.0               # lamQLInput(1,1)
+  1  2     0.0               # lamQLInput(1,2)
+  1  3     0.0               # lamQLInput(1,3)
+  2  1     0.0               # lamQLInput(2,1)
+  2  2     0.0               # lamQLInput(2,2)
+  2  3     0.0               # lamQLInput(2,3)
+  3  1     0.0               # lamQLInput(3,1)
+  3  2     1.0               # lamQLInput(3,2)
+  3  3     0.0               # lamQLInput(3,3)
+Block LAMRIN
+  1  1     0.0               # lamqlInput(1,1)
+  1  2     0.0               # lamqlInput(1,2)
+  1  3     0.0               # lamqlInput(1,3)
+  2  1     0.0               # lamqlInput(2,1)
+  2  2     0.0               # lamqlInput(2,2)
+  2  3     0.0               # lamqlInput(2,3)
+  3  1     0.0               # lamqlInput(3,1)
+  3  2     1.0               # lamqlInput(3,2)
+  3  3     0.0               # lamqlInput(3,3)
 Block FlexibleDecay
    0   1                    # calculate decays (0 = no, 1 = yes)
    1   1e-5                 # minimum BR to print
    2   4                    # include higher order corrections in decays (0 = LO, 1 = NLO, 2 = NNLO, 3 = N^3LO, 4 = N^4LO )
    3   1                    # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
    4   2                    # off-shell decays into VV pair
-   5   1                    # print loop-induced Higgs couplings
-   6   0                    # calculate Higgs effc normalized to SM
-   7   0                    # call HiggsTools
-   8   0                    # call Lilith
-   9   1                    # use pole Higgs mixings in decays

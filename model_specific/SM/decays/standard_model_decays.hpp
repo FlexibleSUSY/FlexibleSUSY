@@ -48,6 +48,33 @@
 
 namespace flexiblesusy {
 
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+struct standard_model_has_oneloop_amp : public std::false_type {};
+
+template<>
+struct standard_model_has_oneloop_amp<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VG, standard_model_cxx_diagrams::fields::VG> : public std::true_type {};
+template<>
+struct standard_model_has_oneloop_amp<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VP, standard_model_cxx_diagrams::fields::VP> : public std::true_type {};
+template<>
+struct standard_model_has_oneloop_amp<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VP, standard_model_cxx_diagrams::fields::VZ> : public std::true_type {};
+template<>
+struct standard_model_has_oneloop_amp<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fv>::type, standard_model_cxx_diagrams::fields::Fv> : public std::true_type {};
+
+
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+struct standard_model_has_tree_amp : public std::false_type {};
+
+template<>
+struct standard_model_has_tree_amp<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VZ, standard_model_cxx_diagrams::fields::VZ> : public std::true_type {};
+template<>
+struct standard_model_has_tree_amp<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VWp, typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type> : public std::true_type {};
+template<>
+struct standard_model_has_tree_amp<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fd>::type, standard_model_cxx_diagrams::fields::Fd> : public std::true_type {};
+template<>
+struct standard_model_has_tree_amp<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type, standard_model_cxx_diagrams::fields::Fu> : public std::true_type {};
+template<>
+struct standard_model_has_tree_amp<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fe>::type, standard_model_cxx_diagrams::fields::Fe> : public std::true_type {};
+
 class Standard_model_decays {
 public:
    Standard_model_decays() = default;
@@ -58,7 +85,9 @@ public:
       , qedqcd(qedqcd_)
       , physical_input(physical_input_)
       , flexibledecay_settings(flexibledecay_settings_)
-      {}
+      {
+         sm.initialise_from_input(qedqcd);
+      }
    Standard_model_decays(const Standard_model_decays&) = default;
    Standard_model_decays(Standard_model_decays&&) = default;
    ~Standard_model_decays() = default;
@@ -80,6 +109,15 @@ public:
       }
    void calculate_hh_decays();
 
+   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+   double get_partial_width(
+      const standard_model_cxx_diagrams::context_base&,
+      typename cxx_diagrams::field_indices<FieldIn>::type const&,
+      typename cxx_diagrams::field_indices<FieldOut1>::type const&,
+      typename cxx_diagrams::field_indices<FieldOut2>::type const&);
+   double get_alphas(standard_model_cxx_diagrams::context_base const&) const;
+   double get_alpha(standard_model_cxx_diagrams::context_base const&) const;
+
 double partial_width_hh_to_VGVG(standard_model::Standard_model const&);
 double partial_width_hh_to_VPVP(standard_model::Standard_model const&);
 double partial_width_hh_to_VPVZ(standard_model::Standard_model const&);
@@ -92,6 +130,7 @@ double partial_width_hh_to_barFeFe(standard_model::Standard_model const&, int, i
 
 private:
    standard_model::Standard_model model{};
+   standard_model::Standard_model sm {};
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};
@@ -102,7 +141,14 @@ private:
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
-   calculate_amplitude(
+   calculate_amplitude_1l(
+      const standard_model_cxx_diagrams::context_base&,
+      const typename cxx_diagrams::field_indices<FieldIn>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut1>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut2>::type&) const;
+   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
+   calculate_amplitude_tree(
       const standard_model_cxx_diagrams::context_base&,
       const typename cxx_diagrams::field_indices<FieldIn>::type&,
       const typename cxx_diagrams::field_indices<FieldOut1>::type&,
@@ -114,53 +160,52 @@ private:
                   typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
                   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const;
 
-   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-   double get_partial_width(
-      const standard_model_cxx_diagrams::context_base&,
-      typename cxx_diagrams::field_indices<FieldIn>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut1>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut2>::type const&);
-   double get_alphas(standard_model_cxx_diagrams::context_base const&) const;
-   double get_alpha(standard_model_cxx_diagrams::context_base const&) const;
    std::vector<std::tuple<int, int, int, double, std::string>> effhiggscouplings_block_input {};
 };
 
 template<>
-Decay_amplitude_SVV Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VG, standard_model_cxx_diagrams::fields::VG>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VG >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VG >::type&) const;
+Decay_amplitude_SVV Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VG, standard_model_cxx_diagrams::fields::VG>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VG >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VG >::type&) const;
 
 template<>
-Decay_amplitude_SVV Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VP, standard_model_cxx_diagrams::fields::VP>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VP >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VP >::type&) const;
+Decay_amplitude_SVV Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VP, standard_model_cxx_diagrams::fields::VP>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VP >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VP >::type&) const;
 
 template<>
-Decay_amplitude_SVV Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VP, standard_model_cxx_diagrams::fields::VZ>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VP >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VZ >::type&) const;
+Decay_amplitude_SVV Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VP, standard_model_cxx_diagrams::fields::VZ>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VP >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VZ >::type&) const;
 
 template<>
-Decay_amplitude_SVV Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VZ, standard_model_cxx_diagrams::fields::VZ>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VZ >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VZ >::type&) const;
+Decay_amplitude_SVV Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VZ, standard_model_cxx_diagrams::fields::VZ>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VZ >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VZ >::type&) const;
 
 template<>
-Decay_amplitude_SVV Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type, standard_model_cxx_diagrams::fields::VWp>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VWp >::type&) const;
+Decay_amplitude_SVV Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type, standard_model_cxx_diagrams::fields::VWp>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::VWp >::type&) const;
 
 template<>
-Decay_amplitude_SFF Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fv>::type, standard_model_cxx_diagrams::fields::Fv>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fv>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fv >::type&) const;
+Decay_amplitude_SFF Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fv>::type, standard_model_cxx_diagrams::fields::Fv>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fv>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fv >::type&) const;
 
 template<>
-Decay_amplitude_SFF Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fd>::type, standard_model_cxx_diagrams::fields::Fd>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fd>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fd >::type&) const;
+Decay_amplitude_SFF Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fd>::type, standard_model_cxx_diagrams::fields::Fd>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fd>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fd >::type&) const;
 
 template<>
-Decay_amplitude_SFF Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type, standard_model_cxx_diagrams::fields::Fu>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fu >::type&) const;
-
+Decay_amplitude_SFF Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type, standard_model_cxx_diagrams::fields::Fu>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fu >::type&) const;
 
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-double
-Standard_model_decays::amplitude_squared(standard_model_cxx_diagrams::context_base const& context,
-                  typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
-                  typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
-                  typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const
+typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
+Standard_model_decays::calculate_amplitude_1l(
+   const standard_model_cxx_diagrams::context_base& context,
+   typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
+   typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
+   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const
 {
+      // amplitude type
+   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type result;
 
-   const auto mat_elem = calculate_amplitude<FieldIn, FieldOut1, FieldOut2>(
-      context, indexIn, indexOut1, indexOut2);
-   return mat_elem.square();
+   // external particles' masses
+   result.m_decay = context.physical_mass<FieldIn>(indexIn);
+   if constexpr (cxx_diagrams::fields::is_fermion<FieldOut1>::value && cxx_diagrams::fields::is_fermion<FieldOut2>::value) {
+      result.m_fermion_1 = context.physical_mass<FieldOut1>(indexOut1);
+      result.m_fermion_2 = context.physical_mass<FieldOut2>(indexOut2);
+   }
+
+   return result;
 }
 
 // generic decay of FieldIn -> FieldOut1 FieldOut2
@@ -180,7 +225,10 @@ double Standard_model_decays::get_partial_width(
 
    // is decay kinematically allowed?
    if(mIn < mOut1 + mOut2) {
-      WARNING("Called kinematically forbidden decay");
+      problems.add_warning(
+         create_process_string<FieldIn,FieldOut1,FieldOut2>(indexIn, indexOut1, indexOut2)
+            + ": Called kinematically forbidden decay."
+      );
       return 0.;
    }
 
@@ -194,12 +242,20 @@ double Standard_model_decays::get_partial_width(
    // color factor
    constexpr double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
 
+   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type amp;
+
    // matrix element squared
-   const auto mat_elem_sq = amplitude_squared<FieldIn, FieldOut1, FieldOut2>(
-      context, indexIn, indexOut1, indexOut2);
+   if constexpr (standard_model_has_tree_amp<FieldIn, FieldOut1, FieldOut2>::value) {
+      amp = calculate_amplitude_tree<FieldIn, FieldOut1, FieldOut2>(
+         context, indexIn, indexOut1, indexOut2);
+   }
+   else if constexpr (standard_model_has_oneloop_amp<FieldIn, FieldOut1, FieldOut2>::value) {
+      amp = calculate_amplitude_1l<FieldIn, FieldOut1, FieldOut2>(
+         context, indexIn, indexOut1, indexOut2);
+   }
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
-   const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * mat_elem_sq;
+   const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * amp.square();
 
    return result;
 }

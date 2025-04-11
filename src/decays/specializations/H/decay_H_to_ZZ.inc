@@ -94,7 +94,7 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
       const double ps_symmetry = 1./2.;
 
       // matrix element squared
-      const auto mat_elem = calculate_amplitude<Higgs, ZBoson, ZBoson>(
+      const auto mat_elem = calculate_amplitude_tree<Higgs, ZBoson, ZBoson>(
          context, indexIn, indexOut1, indexOut2);
       const auto mat_elem_sq = mat_elem.square();
 

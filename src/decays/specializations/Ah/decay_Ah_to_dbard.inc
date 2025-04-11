@@ -27,7 +27,8 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
          const auto xOS1 = Sqr(mdqOS1/mAOS);
          const auto xOS2 = Sqr(mdqOS2/mAOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
-         return flux * phase_space * color_factor * amplitude_squared<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>(context, indexIn, indexOut1, indexOut2);
+         const auto amp = calculate_amplitude_tree<PseudoscalarHiggs, bar<DownTypeQuark>::type, DownTypeQuark>(context, indexIn, indexOut1, indexOut2);
+         return flux * phase_space * color_factor * amp.square();
       }
       return 0.;
    }

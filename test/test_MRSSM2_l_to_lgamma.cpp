@@ -22,6 +22,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "test_MRSSM2.hpp"
+#include "MRSSM2_mass_eigenstates_running.hpp"
 
 #include "wrappers.hpp"
 #include "cxx_qft/MRSSM2_qft.hpp"

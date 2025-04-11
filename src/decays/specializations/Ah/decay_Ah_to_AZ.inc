@@ -9,7 +9,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, ZBoson>(
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Photon,ZBoson>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, ZBoson>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude_1l<PseudoscalarHiggs, Photon, ZBoson>(context, in_idx, out1_idx, out2_idx);
    const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
    const double mZ = qedqcd.displayPoleMZ();
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mAh)));

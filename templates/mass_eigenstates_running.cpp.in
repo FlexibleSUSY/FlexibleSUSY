@@ -1,0 +1,210 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_mass_eigenstates_running.cpp
+ * @brief implementation of the @ModelName@ model class in the decoupling scheme
+ *
+ * Contains the definition of the @ModelName@ model class methods
+ * which solve EWSB and calculate masses and mixings from @RenScheme@
+ * parameters.
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_mass_eigenstates_running.hpp"
+#include "@ModelName@_info.hpp"
+#include "config.h"
+#include "eigen_utils.hpp"
+#include "error.hpp"
+#include "ewsb_solver.hpp"
+#include "ew_input.hpp"
+#include "functors.hpp"
+#include "linalg2.hpp"
+#include "logger.hpp"
+#include "numerics2.hpp"
+#include "raii.hpp"
+#include "standard_model.hpp"
+#include "wrappers.hpp"
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <complex>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+
+namespace flexiblesusy {
+
+#define CLASSNAME @ModelName@_mass_eigenstates_running
+
+#define DERIVEDPARAMETER(p) model.p()
+#define EXTRAPARAMETER(parameter) model.get_##parameter()
+#define INPUT(parameter) model.get_input().parameter
+#define INPUTPARAMETER(parameter) model.get_input().parameter
+#define LOCALINPUT(parameter) input.parameter
+#define LowEnergyGaugeCoupling(i) new_g##i
+#define LowEnergyConstant(p) Electroweak_constants::p
+#define MODELPARAMETER(parameter) model.get_##parameter()
+#define PHASE(p) model.get_##p()
+#define PHYSICAL(parameter) physical.parameter
+
+CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
+   : @ModelName@_mass_eigenstates(input_)
+{
+}
+
+CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& m_)
+   : @ModelName@_mass_eigenstates(m_)
+{
+}
+
+std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
+{
+   return std::make_unique<@ModelName@_mass_eigenstates_running>(*this);
+}
+
+const @ModelName@_physical& CLASSNAME::get_physical() const
+{
+   return physical;
+}
+
+@ModelName@_physical& CLASSNAME::get_physical()
+{
+   return physical;
+}
+
+void CLASSNAME::set_physical(const @ModelName@_physical& physical_)
+{
+   physical = physical_;
+}
+
+const Problems& CLASSNAME::get_problems() const
+{
+   return problems;
+}
+
+Problems& CLASSNAME::get_problems()
+{
+   return problems;
+}
+
+int CLASSNAME::solve_ewsb_equations_tree_level()
+{
+   int error = EWSB_solver::SUCCESS;
+
+@solveTreeLevelEWSBviaSoftHiggsMasses@
+
+   return error;
+}
+
+int CLASSNAME::solve_ewsb_equations()
+{
+   return solve_ewsb_equations_tree_level();
+}
+
+/**
+ * calculates spectrum for model once the @RenScheme@ parameters at
+ * at low energies are known
+ */
+void CLASSNAME::calculate_mass_spectrum()
+{
+   calculate_tree_level_mass_spectrum();
+   calculate_pole_mass_spectrum();
+}
+
+void CLASSNAME::clear_problems()
+{
+   problems.clear();
+}
+
+void CLASSNAME::set_tree_level_masses(const Eigen::ArrayXd& pars)
+{
+@setMasses@
+}
+
+const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
+{
+   return get_input();
+}
+
+@ModelName@_input_parameters& CLASSNAME::get_input_parameters()
+{
+   return get_input();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses() const
+{
+@getMasses@
+}
+
+void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& pars)
+{
+   set_tree_level_masses(pars);
+
+@setMixings@
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses_and_mixings() const
+{
+   Eigen::ArrayXd pars(get_tree_level_masses());
+
+@getMixings@
+
+   return pars;
+}
+
+void CLASSNAME::set_extra_parameters(const Eigen::ArrayXd& pars)
+{
+@setExtraParameters@
+}
+
+Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
+{
+@getExtraParameters@
+}
+
+void CLASSNAME::calculate_tree_level_mass_spectrum() {
+   @ModelName@_mass_eigenstates::calculate_tree_level_mass_spectrum();
+}
+
+void CLASSNAME::calculate_pole_mass_spectrum() {
+   @ModelName@_mass_eigenstates::calculate_pole_mass_spectrum();
+}
+
+@higgsMassGetters@
+
+@massCalculationFunctions@
+
+@tadpoleEqFunctions@
+
+@dependenceFunctions@
+
+@selfEnergyVirtualCalls@
+
+std::ostream& operator<<(std::ostream& ostr, const @ModelName@_mass_eigenstates_running& model)
+{
+   model.print(ostr);
+   return ostr;
+}
+
+} // namespace flexiblesusy
+

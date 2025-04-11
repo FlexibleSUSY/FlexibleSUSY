@@ -5,7 +5,7 @@
 #include <boost/test/unit_test.hpp>
 #include "wrappers.hpp"
 
-#define private public
+#define protected public
 #include "CMSSM_two_scale_model.hpp"
 
 using namespace flexiblesusy;

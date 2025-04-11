@@ -23,7 +23,8 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
          const auto xOS1 = Sqr(mdqOS1/mHOS);
          const auto xOS2 = Sqr(mdqOS2/mHOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
-         return flux * phase_space * color_factor * amplitude_squared<Higgs, bar<DownTypeQuark>::type, DownTypeQuark>(context, indexIn, indexOut1, indexOut2);
+         auto amp = calculate_amplitude_tree<Higgs, bar<DownTypeQuark>::type, DownTypeQuark>(context, indexIn, indexOut1, indexOut2);
+         return flux * phase_space * color_factor * amp.square();
       }
       return 0.;
    }

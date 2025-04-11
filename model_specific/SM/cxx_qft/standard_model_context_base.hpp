@@ -18,7 +18,7 @@
 
 
 /**
- * @file cxx_qft/SM_context_base.hpp
+ * @file cxx_qft/standatd_model_context_base.hpp
  *
  * This file was generated with FlexibleSUSY 2.7.1 and SARAH 4.14.5 .
  */
@@ -28,6 +28,7 @@
 
 #include "standard_model_fields.hpp"
 #include "standard_model.hpp"
+#include "always_false.hpp"
 
 namespace flexiblesusy {
 namespace standard_model_cxx_diagrams {
@@ -196,6 +197,246 @@ double context_base::physical_mass_impl<fields::Fe>(const std::array<int, 1>& in
 template<> inline
 double context_base::physical_mass_impl<fields::VWp>(const std::array<int, 0>& indices) const
 { return model.get_physical().MVWp; }
+
+// self energies
+template<typename Field>
+auto self_energy_1loop(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_1(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PL(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PR(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+// self-energy derivatives w.r.t. p2
+template<typename Field>
+auto self_energy_1loop_deriv_p2(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_1_deriv_p2(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PL_deriv_p2(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PR_deriv_p2(const context_base& context, double p) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<> inline
+auto self_energy_1loop<fields::VG>(const context_base& context, double p) {
+   return context.model.self_energy_VG_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::Hp>(const context_base& context, double p) {
+   return context.model.self_energy_Hp_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fv>(const context_base& context, double p) {
+   return context.model.self_energy_Fv_1loop_1(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fv>(const context_base& context, double p) {
+   return context.model.self_energy_Fv_1loop_PL(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fv>(const context_base& context, double p) {
+   return context.model.self_energy_Fv_1loop_PR(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::Ah>(const context_base& context, double p) {
+   return context.model.self_energy_Ah_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::hh>(const context_base& context, double p) {
+   return context.model.self_energy_hh_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::VP>(const context_base& context, double p) {
+   return context.model.self_energy_VP_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::VZ>(const context_base& context, double p) {
+   return context.model.self_energy_VZ_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fd>(const context_base& context, double p) {
+   return context.model.self_energy_Fd_1loop_1(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fd>(const context_base& context, double p) {
+   return context.model.self_energy_Fd_1loop_PL(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fd>(const context_base& context, double p) {
+   return context.model.self_energy_Fd_1loop_PR(p);
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fu>(const context_base& context, double p) {
+   return context.model.self_energy_Fu_1loop_1(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fu>(const context_base& context, double p) {
+   return context.model.self_energy_Fu_1loop_PL(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fu>(const context_base& context, double p) {
+   return context.model.self_energy_Fu_1loop_PR(p);
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fe>(const context_base& context, double p) {
+   return context.model.self_energy_Fe_1loop_1(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fe>(const context_base& context, double p) {
+   return context.model.self_energy_Fe_1loop_PL(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fe>(const context_base& context, double p) {
+   return context.model.self_energy_Fe_1loop_PR(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::VWp>(const context_base& context, double p) {
+   return context.model.self_energy_VWp_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VG>(const context_base& context, double p) {
+   return context.model.self_energy_VG_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::Hp>(const context_base& context, double p) {
+   return context.model.self_energy_Hp_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fv>(const context_base& context, double p) {
+   return context.model.self_energy_Fv_1loop_1_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fv>(const context_base& context, double p) {
+   return context.model.self_energy_Fv_1loop_PL_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fv>(const context_base& context, double p) {
+   return context.model.self_energy_Fv_1loop_PR_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::Ah>(const context_base& context, double p) {
+   return context.model.self_energy_Ah_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::hh>(const context_base& context, double p) {
+   return context.model.self_energy_hh_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VP>(const context_base& context, double p) {
+   return context.model.self_energy_VP_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VZ>(const context_base& context, double p) {
+   return context.model.self_energy_VZ_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fd>(const context_base& context, double p) {
+   return context.model.self_energy_Fd_1loop_1_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fd>(const context_base& context, double p) {
+   return context.model.self_energy_Fd_1loop_PL_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fd>(const context_base& context, double p) {
+   return context.model.self_energy_Fd_1loop_PR_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fu>(const context_base& context, double p) {
+   return context.model.self_energy_Fu_1loop_1_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fu>(const context_base& context, double p) {
+   return context.model.self_energy_Fu_1loop_PL_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fu>(const context_base& context, double p) {
+   return context.model.self_energy_Fu_1loop_PR_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fe>(const context_base& context, double p) {
+   return context.model.self_energy_Fe_1loop_1_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fe>(const context_base& context, double p) {
+   return context.model.self_energy_Fe_1loop_PL_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fe>(const context_base& context, double p) {
+   return context.model.self_energy_Fe_1loop_PR_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VWp>(const context_base& context, double p) {
+   return context.model.self_energy_VWp_1loop_deriv_p2(p);
+}
 
 } // namespace standard_model_cxx_diagrams
 } // namespace flexiblesusy
