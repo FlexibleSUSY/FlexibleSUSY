@@ -232,6 +232,11 @@ void CLASSNAME::set_ewsb_solver(const std::shared_ptr<@ModelName@_ewsb_solver_in
    ewsb_solver = solver;
 }
 
+std::shared_ptr<@ModelName@_ewsb_solver_interface> CLASSNAME::set_ewsb_solver() const
+{
+   return ewsb_solver;
+}
+
 /**
  * Method which calculates the tadpoles at the current loop order.
  *
