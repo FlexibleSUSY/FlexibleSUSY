@@ -29,6 +29,7 @@
  */
 
 #include "@ModelName@_semi_analytic_model.hpp"
+#include "@ModelName@_semi_analytic_ewsb_solver.hpp"
 
 namespace flexiblesusy {
 
@@ -36,7 +37,7 @@ using namespace @ModelName@_info;
 
 #define CLASSNAME @ModelName@<Semi_analytic>
 
-#define COEFFICIENT(coefficient) solutions.get_##coefficient()
+#define COEFFICIENT(coefficient) get_semi_analytic_solutions().get_##coefficient()
 #define INPUTPARAMETER(parameter) model.get_input().parameter
 #define MODELPARAMETER(parameter) model.get_##parameter()
 
@@ -86,12 +87,30 @@ void CLASSNAME::set_precision(double p)
 
 const @ModelName@_semi_analytic_solutions& CLASSNAME::get_semi_analytic_solutions() const
 {
-   return solutions;
+   using Solver_t = @ModelName@_ewsb_solver<Semi_analytic>;
+
+   auto solver = get_ewsb_solver();
+   std::shared_ptr<Solver_t> semi_analytic_solver = std::dynamic_pointer_cast<Solver_t>(solver);
+
+   if (semi_analytic_solver == nullptr) {
+      throw SetupError("No semi-analytic EWSB solver given.");
+   }
+
+   return semi_analytic_solver->get_semi_analytic_solutions();
 }
 
 @ModelName@_semi_analytic_solutions& CLASSNAME::get_semi_analytic_solutions()
 {
-   return solutions;
+   using Solver_t = @ModelName@_ewsb_solver<Semi_analytic>;
+
+   auto solver = get_ewsb_solver();
+   std::shared_ptr<Solver_t> semi_analytic_solver = std::dynamic_pointer_cast<Solver_t>(solver);
+
+   if (semi_analytic_solver == nullptr) {
+      throw SetupError("No semi-analytic EWSB solver given.");
+   }
+
+   return semi_analytic_solver->get_semi_analytic_solutions();
 }
 
 /**
@@ -103,10 +122,10 @@ const @ModelName@_semi_analytic_solutions& CLASSNAME::get_semi_analytic_solution
  */
 void CLASSNAME::calculate_semi_analytic_solutions(double input_scale)
 {
-   solutions.set_input_scale(input_scale);
-   solutions.set_output_scale(get_scale());
-   solutions.calculate_coefficients(*this);
-   solutions.evaluate_solutions(*this);
+   get_semi_analytic_solutions().set_input_scale(input_scale);
+   get_semi_analytic_solutions().set_output_scale(get_scale());
+   get_semi_analytic_solutions().calculate_coefficients(*this);
+   get_semi_analytic_solutions().evaluate_solutions(*this);
 }
 
 std::ostream& operator<<(std::ostream& ostr, const @ModelName@<Semi_analytic>& model)

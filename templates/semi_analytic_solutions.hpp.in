@@ -33,6 +33,7 @@
 #include <Eigen/SVD>
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace flexiblesusy {
@@ -103,7 +104,7 @@ private:
 
    struct Model_data {
       Boundary_values boundary_values{};
-      @ModelName@_mass_eigenstates model{};
+      std::shared_ptr<@ModelName@_mass_eigenstates> model{};
       std::vector<int> basis_sets{};
    };
 
