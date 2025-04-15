@@ -51,7 +51,7 @@ void @ModelName@_semi_analytic_solutions::initialize_trial_values()
 void @ModelName@_semi_analytic_solutions::calculate_trial_data(const @ModelName@_mass_eigenstates& model)
 {
    for (auto& point: trial_data) {
-      point.model = run_to_output_scale(model, point.boundary_values);
+      point.model = std::make_shared<@ModelName@_mass_eigenstates>(run_to_output_scale(model, point.boundary_values));
    }
 }
 

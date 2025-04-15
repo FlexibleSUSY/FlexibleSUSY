@@ -1067,7 +1067,7 @@ SetBoundaryValueParametersFromModel[solutions_List, struct_String:"model."] :=
            Return[result];
           ];
 
-SetTreeLevelEWSBSolution[ewsbSolution_, solutions_List, substitutions_List, struct_String:"model."] :=
+SetTreeLevelEWSBSolution[ewsbSolution_, solutions_List, substitutions_List, solutionStruct_String:"solutions.", struct_String:"model."] :=
     Module[{parametersFixedByEWSB, i, par, basisPar, parStr, body = "", result = ""},
            If[ewsbSolution =!= {},
               parametersFixedByEWSB = #[[1]]& /@ ewsbSolution;
@@ -1086,7 +1086,7 @@ SetTreeLevelEWSBSolution[ewsbSolution_, solutions_List, substitutions_List, stru
                   parStr = CConversion`ToValidCSymbolString[par];
                   body = body <> Parameters`SetParameter[par, parStr, struct, None];
                  ];
-              body = body <> "solutions->evaluate_solutions(model);\n";
+              body = body <> solutionStruct <> "evaluate_solutions(model);\n";
               If[substitutions === {},
                  result = result <>
                           "if (is_finite) {\n" <>
@@ -1133,8 +1133,8 @@ CreateCoefficientsCalculation[solution_SemiAnalyticSolution] :=
              ];
 
            If[numCols === 1,
-              body = "rhs(j) = data[j]->model.get_" <> parStr <> "();\n";,
-              body = MapIndexed[("rhs(j, " <> ToString[First[#2-1]] <> ") = data[j]->model.get_"
+              body = "rhs(j) = data[j]->model->get_" <> parStr <> "();\n";,
+              body = MapIndexed[("rhs(j, " <> ToString[First[#2-1]] <> ") = data[j]->model->get_"
                                  <> parStr <> "(" <> Utils`StringJoinWithSeparator[ToString /@ #1, ", "]
                                  <> ");\n")&, GetAllIndexCombinations[dims]];
               body = StringJoin[body];
