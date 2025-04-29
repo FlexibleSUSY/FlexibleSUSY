@@ -99,4 +99,5 @@ FSGM2CalcInput = {
 };
 
 FSCalculateDecays = True;
+FSDecaysBSMOrder  = FSNLO;
 

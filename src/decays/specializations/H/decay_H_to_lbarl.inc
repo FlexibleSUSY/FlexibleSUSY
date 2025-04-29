@@ -49,6 +49,16 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    double res = res_S + res_P;
 
 #if DECAY_BSM_ORDER > 0
+   auto get_digit = [](int flags, int pos) -> int
+   {
+      while (--pos >= 0) {
+         flags /= 10;
+      }
+
+      return flags % 10;
+   };
+
+   if (get_digit(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections), 0) > 0) {
 
       namespace smns = standard_model_cxx_diagrams;
 
@@ -62,13 +72,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    //**************************************************************************
    // Lepton Self-Energies
 
-   const auto lepton_PL_all_contribution = self_energy_1loop_PL<ChargedLepton>(context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+   const auto lepton_PL_all_contribution = self_energy_1loop_PL<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
    const auto lepton_PL_sm_contribution = smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
 
-   const auto lepton_PR_all_contribution = self_energy_1loop_PR<ChargedLepton>(context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+   const auto lepton_PR_all_contribution = self_energy_1loop_PR<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
    const auto lepton_PR_sm_contribution = smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
 
-   const auto lepton_1_all_contribution = self_energy_1loop_1<ChargedLepton>(context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+   const auto lepton_1_all_contribution = self_energy_1loop_1<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
    const auto lepton_1_sm_contribution = smns::self_energy_1loop_1<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
 
    const auto lepton_PL_se_dec = lepton_PL_all_contribution - lepton_PL_sm_contribution;
@@ -77,13 +87,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
    //derivative
 
-   const auto lepton_PL_all_contribution_deriv_p2 = self_energy_1loop_PL_deriv_p2<ChargedLepton>(context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+   const auto lepton_PL_all_contribution_deriv_p2 = self_energy_1loop_PL_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
    const auto lepton_PL_sm_contribution_deriv_p2 = smns::self_energy_1loop_PL_deriv_p2<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
 
-   const auto lepton_PR_all_contribution_deriv_p2 = self_energy_1loop_PR_deriv_p2<ChargedLepton>(context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+   const auto lepton_PR_all_contribution_deriv_p2 = self_energy_1loop_PR_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
    const auto lepton_PR_sm_contribution_deriv_p2 = smns::self_energy_1loop_PR_deriv_p2<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
 
-   const auto lepton_1_all_contribution_deriv_p2 = self_energy_1loop_1_deriv_p2<ChargedLepton>(context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+   const auto lepton_1_all_contribution_deriv_p2 = self_energy_1loop_1_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
    const auto lepton_1_sm_contribution_deriv_p2 = smns::self_energy_1loop_1_deriv_p2<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
 
    const auto lepton_PL_se_dec_deriv_p2 = lepton_PL_all_contribution_deriv_p2 - lepton_PL_sm_contribution_deriv_p2;
@@ -96,7 +106,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    //**************************************************************************
    // Higgs Self-Energy
 
-   const auto higgs_all_contribution = self_energy_1loop<Higgs>(context, mHOS);
+   const auto higgs_all_contribution = self_energy_1loop<Higgs>(context, mHOS, indexIn, indexIn);
 
    const auto higgs_sm_contribution = smns::self_energy_1loop<smns::fields::hh>(sm_context, mHOS);
 
@@ -104,7 +114,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
    //derivative
 
-   const auto higgs_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<Higgs>(context, mHOS);
+   const auto higgs_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<Higgs>(context, mHOS, indexIn, indexIn);
 
    const auto higgs_sm_contribution_deriv_p2 = smns::self_energy_1loop_deriv_p2<smns::fields::hh>(sm_context, mHOS);
 
@@ -116,13 +126,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    //**************************************************************************
    // Photon Self-Energy
 
-   const auto P_all_contribution = self_energy_1loop<Photon>(context, 0);
+   const auto P_all_contribution = self_energy_1loop<Photon>(context, 0, {}, {});
    const auto P_sm_contribution = smns::self_energy_1loop<smns::fields::VP>(sm_context, 0);
 
    const auto P_se_dec = P_all_contribution - P_sm_contribution;
 
    //derivative
-   const auto P_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<Photon>(context, 0);
+   const auto P_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<Photon>(context, 0, {}, {});
    const auto P_sm_contribution_deriv_p2 = smns::self_energy_1loop_deriv_p2<smns::fields::VP>(sm_context, 0);
 
    const auto P_se_dec_deriv_p2 = P_all_contribution_deriv_p2 - P_sm_contribution_deriv_p2;
@@ -135,13 +145,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
    const double mZOS = context.physical_mass<ZBoson>({});
 
-   const auto Z_all_contribution = self_energy_1loop<ZBoson>(context, mZOS);
+   const auto Z_all_contribution = self_energy_1loop<ZBoson>(context, mZOS, {}, {});
    const auto Z_sm_contribution = smns::self_energy_1loop<smns::fields::VZ>(sm_context, mZOS);
 
    const auto Z_se_dec = Z_all_contribution - Z_sm_contribution;
 
    //derivative
-   const auto Z_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<ZBoson>(context, mZOS);
+   const auto Z_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<ZBoson>(context, mZOS, {}, {});
    const auto Z_sm_contribution_deriv_p2 = smns::self_energy_1loop_deriv_p2<smns::fields::VZ>(sm_context, mZOS);
 
    const auto Z_se_dec_deriv_p2 = Z_all_contribution_deriv_p2 - Z_sm_contribution_deriv_p2;
@@ -154,14 +164,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
    const double mWOS = context.physical_mass<WpBoson>({});
 
-   const auto W_all_contribution = self_energy_1loop<WpBoson>(context, mWOS);
+   const auto W_all_contribution = self_energy_1loop<WpBoson>(context, mWOS, {}, {});
    const auto W_sm_contribution = smns::self_energy_1loop<smns::fields::VWp>(sm_context, mWOS);
 
    const auto W_se_dec = W_all_contribution - W_sm_contribution;
 
 
    //derivative
-   const auto W_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<WpBoson>(context, mWOS);
+   const auto W_all_contribution_deriv_p2 = self_energy_1loop_deriv_p2<WpBoson>(context, mWOS, {}, {});
    const auto W_sm_contribution_deriv_p2 = smns::self_energy_1loop_deriv_p2<smns::fields::VWp>(sm_context, mWOS);
 
 
@@ -395,6 +405,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       }
 
       res += 2.*std::real(amplitude_interference(amp_tree, amp_1l)) /* + ren const */;
+   }
 #endif
 
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||

@@ -50,6 +50,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
+   flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 4.0);
    SM_decays decays_HO = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
 
    // ------------ tree-level decays ------------

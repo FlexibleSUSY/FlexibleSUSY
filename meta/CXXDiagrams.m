@@ -1731,31 +1731,35 @@ ExtractColourFactor[args___] :=
    (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 
 SelfEnergyWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
+   With[{fieldCPP = If[field === GetWBoson[] && GetElectricCharge[field] < 0, CXXNameOfField[AntiField@field, prefixNamespace -> "fields"], CXXNameOfField[field, prefixNamespace -> "fields"]]},
    "template<> inline
-auto self_energy_1loop<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop(p);
-}\n";
+auto self_energy_1loop<" <> fieldCPP <> ">(const context_base& context, double p, typename field_indices<" <> fieldCPP <> ">::type const& g01, typename field_indices<" <> fieldCPP <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
+}\n"
+   ];
 
 SelfEnergyWrapper[field_?TreeMasses`IsFermion] :=
    StringJoin[Riffle[
    ("template<> inline
-auto self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "(p);
+auto self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g01, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
 
 }\n")& /@ {"1", "PL", "PR"}, "\n"]
    ];
 
 SelfEnergyDerivativeWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
+   With[{fieldCPP = If[field === GetWBoson[] && GetElectricCharge[field] < 0, CXXNameOfField[AntiField@field, prefixNamespace -> "fields"], CXXNameOfField[field, prefixNamespace -> "fields"]]},
    "template<> inline
-auto self_energy_1loop_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_deriv_p2(p);
-}\n";
+auto self_energy_1loop_deriv_p2<" <> fieldCPP <> ">(const context_base& context, double p, typename field_indices<" <> fieldCPP <> ">::type const& g01, typename field_indices<" <> fieldCPP <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_deriv_p2(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
+}\n"
+   ];
 
 SelfEnergyDerivativeWrapper[field_?TreeMasses`IsFermion] :=
    StringJoin[Riffle[
    ("template<> inline
-auto self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "_deriv_p2(p);
+auto self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g01, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "_deriv_p2(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
 }\n")& /@ {"1", "PL", "PR"}, "\n"]
    ];
 
