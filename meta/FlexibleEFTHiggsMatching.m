@@ -214,8 +214,6 @@ const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", 
 const auto sm_1l_gl_no_g3 = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl_no_g3, " <> higgsIndex <> ");
 const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ", 2);
 
-" <> outputModel <> " = sm_2l;
-
 // calculation of 3-loop threshold corrections below
 
 const double lambda_2l = sm_2l.get_Lambdax();
@@ -270,6 +268,7 @@ const double delta_lambda_3l = std::isfinite(mh2_3l_bsm_shift) ? (mh2_3l_bsm_shi
 // Eq.(4.28a) [arxiv:2003.04639] up to (including) 3-loop terms
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
+" <> outputModel <> " = sm_2l;
 " <> outputModel <> ".set_Lambdax(lambda_3l);
 " <> outputModel <> ".calculate_DRbar_masses();"
 ];
