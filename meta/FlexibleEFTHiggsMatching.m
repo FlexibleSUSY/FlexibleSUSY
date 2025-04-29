@@ -182,11 +182,6 @@ const double lambda_2l = lambda_1l + delta_lambda_2l;
 
 sm = sm_1l;
 sm.set_Lambdax(lambda_2l);
-
-if (yt_loop_order > 1) {
-" <> TextFormatting`IndentText[If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True, FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[], ""]] <> "
-}
-
 sm.calculate_DRbar_masses();"
 ];
 
@@ -212,7 +207,7 @@ const auto sm_1l = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", mod
 const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
 const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
 const auto sm_1l_gl_no_g3 = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl_no_g3, " <> higgsIndex <> ");
-const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ", 2);
+const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
 
 // calculation of 3-loop threshold corrections below
 
@@ -221,6 +216,7 @@ const double lambda_2l = sm_2l.get_Lambdax();
 const double v2 = Sqr(sm_0l_gl.get_v());
 const double yt = sm_0l_gl.get_Yu(2, 2);
 const double yt2 = Sqr(yt);
+const double yt_2l = calculate_yt_sm_2l(sm_0l, sm_1l, model);
 const double g3 = sm_0l_gl.get_g3();
 const double g32 = Sqr(g3);
 const double g34 = Sqr(g32);
@@ -236,7 +232,7 @@ const double k2 = twoLoop;
 const double k3 = threeLoop;
 
 const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_no_g3.get_Yu(2, 2);
-const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
+const double delta_yt_2l = yt_2l - sm_1l.get_Yu(2, 2);
 const double delta_g3_1l = sm_1l.get_g3() - g3;
 
 // 1st derivative of 1-loop SM contribution to Mh w.r.t. yt, times Delta yt(2l)
@@ -269,6 +265,9 @@ const double delta_lambda_3l = std::isfinite(mh2_3l_bsm_shift) ? (mh2_3l_bsm_shi
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
 " <> outputModel <> " = sm_2l;
+if (std::isfinite(mh2_3l_bsm_shift)) {
+" <> TextFormatting`IndentText[FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[outputModel <> "."]] <> "
+}
 " <> outputModel <> ".set_Lambdax(lambda_3l);
 " <> outputModel <> ".calculate_DRbar_masses();"
 ];
