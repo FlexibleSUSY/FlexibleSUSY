@@ -258,14 +258,16 @@ const double mh2_3l_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
 // Eq.(4.21) [arxiv:2003.04639] for n=3
 const double mh2_3l_bsm_shift = calculate_Mh2_3l_shift(sm, model_gl, idx);
 
+const bool no_error = std::isfinite(mh2_3l_bsm_shift);
+
 // Eq.(4.28d) [arxiv:2003.04639], Delta lambda^(3l)
-const double delta_lambda_3l = std::isfinite(mh2_3l_bsm_shift) ? (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2 : 0.0;
+const double delta_lambda_3l = no_error ? (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2 : 0.0;
 
 // Eq.(4.28a) [arxiv:2003.04639] up to (including) 3-loop terms
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
 " <> outputModel <> " = sm_2l;
-if (std::isfinite(mh2_3l_bsm_shift)) {
+if (no_error) {
 " <> TextFormatting`IndentText[FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[outputModel <> "."]] <> "
 }
 " <> outputModel <> ".set_Lambdax(lambda_3l);
