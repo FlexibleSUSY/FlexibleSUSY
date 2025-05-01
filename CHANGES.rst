@@ -1,3 +1,14 @@
+FlexibleSUSY 2.9.1 [??, ?? 2025]
+===================================
+
+Fixed bugs
+----------
+
+* [commit 23011a7]: Fixed clean fall-back to 2-loop precision if an
+  error in the calculation of the 3-loop contributions occurs in
+  FlexibleEFTHiggs.
+
+
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
 
