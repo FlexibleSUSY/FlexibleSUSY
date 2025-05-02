@@ -8,6 +8,7 @@
 #include "MSSMCPV_two_scale_model.hpp"
 #include "decays/MSSMCPV_decays.hpp"
 #include "MSSMCPV_slha_io.hpp"
+#include "MSSMCPV_mass_eigenstates_running.hpp"
 
 using namespace flexiblesusy;
 
@@ -807,7 +808,7 @@ Block ImMSOFT Q= 2.00000000E+03
       BOOST_TEST(false);
    }
 
-   MSSMCPV_slha m(input);
+   MSSMCPV_mass_eigenstates_running m(input);
    slha_io.fill(m);
    m.calculate_DRbar_masses();
    m.reorder_DRbar_masses();

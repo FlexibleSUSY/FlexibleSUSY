@@ -447,7 +447,7 @@ TextFormatting`ReplaceCXXTokens["
    const std::array<Eigen::Vector4d, @momenta_length@> &momenta
    @default@",
    {
-      "@eigenstates@" -> FlexibleSUSY`FSModelName<>"_mass_eigenstates",
+      "@eigenstates@" -> FlexibleSUSY`FSModelName<>"_mass_eigenstates_running",
       "@indices_length@" -> ToString@Length@GetExternalIndices@npf,
       "@momenta_length@" -> ToString@Length@GetExternalMomenta@npf,
       "@default@" -> If[control === Default,

@@ -8,6 +8,7 @@
 #include "MSSM_two_scale_model.hpp"
 #include "decays/MSSM_decays.hpp"
 #include "MSSM_slha_io.hpp"
+#include "MSSM_mass_eigenstates_running.hpp"
 
 using namespace flexiblesusy;
 
@@ -638,7 +639,7 @@ Block MSOFT Q= 8.64566212E+02
       BOOST_TEST(false);
    }
 
-   MSSM_slha m(input);
+   MSSM_mass_eigenstates_running m(input);
    slha_io.fill(m);
    m.calculate_DRbar_masses();
    m.reorder_DRbar_masses();

@@ -23,7 +23,7 @@
 #include <iterator>
 
 #include "cxx_qft/SM_qft.hpp"
-#include "SM_mass_eigenstates.hpp"
+#include "SM_mass_eigenstates_running.hpp"
 
 #include "test_complex_equality.hpp"
 
@@ -60,7 +60,7 @@ struct test_zero_vertex
 {
 	SM_cxx_diagrams::context_base context;
 	
-	test_zero_vertex( const SM_mass_eigenstates &model )
+	test_zero_vertex( const SM_mass_eigenstates_running &model )
 	: context( model ) {}
 	
 	template<class Vertex> void operator()( Vertex )
@@ -117,7 +117,7 @@ struct test_vertex_equality
 {
 	SM_cxx_diagrams::context_base context;
 	
-	test_vertex_equality( const SM_mass_eigenstates &model )
+	test_vertex_equality( const SM_mass_eigenstates_running &model )
 	: context( model ) {}
 	
 	template<class VertexPair> void operator()( VertexPair )

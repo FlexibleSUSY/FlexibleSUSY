@@ -26,7 +26,7 @@
 #include <valarray>
 #include <complex>
 
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_running.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
 #include "@ModelName@_@filename@.hpp"
@@ -56,7 +56,7 @@ namespace {
 std::valarray<std::complex<double>> zero(
    int generationIndex1,
    int generationIndex2,
-   const @ModelName@_mass_eigenstates&,
+   const @ModelName@_mass_eigenstates_running&,
    bool){
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    return res;
@@ -67,7 +67,7 @@ double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
 @get_MSUSY@
 }
 
-void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
+void run_to_MSUSY(@ModelName@_mass_eigenstates_running& model)
 {
    const double precision_goal = model.get_precision();
    const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
@@ -171,10 +171,10 @@ double get_capture_rate (const Nucleus N) {
 }
 
 typedef std::valarray<std::complex<double>>  (*ffv_function)
-   (int, int, const @ModelName@_mass_eigenstates&, bool);
+   (int, int, const @ModelName@_mass_eigenstates_running&, bool);
 
 typedef std::array<std::complex<double>, 10> (*npf_function)
-   (const @ModelName@_mass_eigenstates&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&);
+   (const @ModelName@_mass_eigenstates_running&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&);
 
 /**
  * @tparam    Q     Type of a quark field.
@@ -184,7 +184,7 @@ typedef std::array<std::complex<double>, 10> (*npf_function)
  * @return Left part of qqv coupling, multiplied by -i.
  */
 template <class Q, class A>
-std::complex<double> left(const @ModelName@_mass_eigenstates& model, int g) {
+std::complex<double> left(const @ModelName@_mass_eigenstates_running& model, int g) {
     context_base context {model};
     using vertex = Vertex<typename Q::lorentz_conjugate, Q, A>;
     std::array<int, 2> indices {g, g};
@@ -200,7 +200,7 @@ std::complex<double> left(const @ModelName@_mass_eigenstates& model, int g) {
  * @return Right part of qqv coupling, multiplied by -i.
  */
 template <class Q, class A>
-std::complex<double> right(const @ModelName@_mass_eigenstates& model, int g) {
+std::complex<double> right(const @ModelName@_mass_eigenstates_running& model, int g) {
     context_base context {model};
     using vertex = Vertex<typename Q::lorentz_conjugate, Q, A>;
     std::array<int, 2> indices {g, g};
@@ -220,7 +220,7 @@ std::complex<double> right(const @ModelName@_mass_eigenstates& model, int g) {
  */
 template <class Q, class A, class T>
 Eigen::Array<std::complex<double>,10,1> embed_photon(
-   const @ModelName@_mass_eigenstates& model, const T& ff, int g) {
+   const @ModelName@_mass_eigenstates_running& model, const T& ff, int g) {
    // Get quark-photon couplings (without i, as everywhere):
    const auto qL =  left<Q, A>(model, g);
    const auto qR = right<Q, A>(model, g);
@@ -245,7 +245,7 @@ Eigen::Array<std::complex<double>,10,1> embed_photon(
  */
 template <npf_function Name>
 Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
-   const @ModelName@_mass_eigenstates& model, int in, int out, int g) {
+   const @ModelName@_mass_eigenstates_running& model, int in, int out, int g) {
    const auto npf = Name(model,
          std::array<int,4>{in, g, out, g},
          std::array<Eigen::Vector4d, 0>{});
@@ -295,11 +295,11 @@ template<class Lepton, class Up, class Down, class Photon,
    ffv_function photon, npf_function npf_up, npf_function npf_down>
 Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
    const @namespace@::Nucleus nucleus,
-   const @ModelName@_mass_eigenstates& model_,
+   const @ModelName@_mass_eigenstates_running& model_,
    const LToLConversion_settings& parameters,
    const softsusy::QedQcd& qedqcd) {
 
-   @ModelName@_mass_eigenstates model(model_);
+   @ModelName@_mass_eigenstates_running model(model_);
    try {
       run_to_MSUSY(model);
       model.get_physical().clear();
