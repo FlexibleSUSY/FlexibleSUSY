@@ -1,0 +1,267 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+/**
+ * @file @ModelName@_@filename@.cpp
+ *
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
+ */
+
+#include <valarray>
+#include <complex>
+#include <fstream>
+#include <iomanip>
+
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "cxx_qft/@ModelName@_qft.hpp"
+
+#include "@ModelName@_@filename@.hpp"
+#include "@ModelName@_FFV_form_factors.hpp"
+#include "json.hpp"
+#include "wrappers.hpp"
+
+@npf_headers@
+
+namespace flexiblesusy {
+
+namespace @ModelName@_cxx_diagrams {
+namespace npointfunctions {
+
+@npf_definitions@
+
+} // namespace npointfunctions
+} // namespace @ModelName@_cxx_diagrams
+
+namespace {
+
+std::valarray<std::complex<double>> zero(
+   int generationIndex1,
+   int generationIndex2,
+   const @ModelName@_mass_eigenstates&,
+   bool){
+   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
+   return res;
+}
+
+/**
+ * @brief Writes Wilson coefficients in a WCxf format [1712.05298] for
+ *        WET [https://wcxf.github.io/assets/pdf/WET.flavio.pdf].
+ * @tparam Down Type of a down quark.
+ */
+template <class Down>
+void write_btosmumu(
+   const Eigen::Array<std::complex<double>, 10, 1>& coeffs,
+   const @ModelName@_cxx_diagrams::context_base& context,
+   const softsusy::QedQcd& qedqcd) {
+
+   const auto complex_CKM = qedqcd.get_complex_ckm();
+
+   const std::complex<double> Vtb (complex_CKM(2, 2));
+   const std::complex<double> Vts (complex_CKM(2, 1));
+   const auto GF = qedqcd.displayFermiConstant();
+   const auto normalization = 4.*GF/Sqrt(2.) * Vtb*Conj(Vts) *
+      Sqr(unit_charge(context))*oneOver16PiSqr;
+
+   if (is_zero(std::abs(normalization))) {
+      ERROR("btosmumu: Normalization factor is vanishing.");
+      exit(EXIT_FAILURE);
+   }
+
+   const auto mb = context.mass<Down>({2});
+
+   // Dear reader, be aware of vector bosons (in loops) for b -> s mu mu.
+   // Some scheme dependence might be important.
+
+   // Compare to the basis in <DLDL/main.m>.
+   // They put SL on the first positions, we put BL.
+
+   // Here is the place for C7_bs = -1/2 A2R / normalization
+   // Here is the place for C7p_bs = -1/2 A2L / normalization
+
+   const auto C9_bsmumu   = (coeffs[5] + coeffs[4])/(2.*normalization);
+   const auto C9p_bsmumu  = (coeffs[7] + coeffs[6])/(2.*normalization);
+
+   const auto C10_bsmumu  = (coeffs[5] - coeffs[4])/(2.*normalization);
+   const auto C10p_bsmumu = (coeffs[7] - coeffs[6])/(2.*normalization);
+
+   const auto CS_bsmumu   = (coeffs[3] + coeffs[2])/(2.*mb*normalization);
+   const auto CSp_bsmumu  = (coeffs[1] + coeffs[0])/(2.*mb*normalization);
+
+   const auto CP_bsmumu   = (coeffs[3] - coeffs[2])/(2.*mb*normalization);
+   const auto CPp_bsmumu  = (coeffs[1] - coeffs[0])/(2.*mb*normalization);
+
+   // @todo(all): The sigma-sigma operators are missing
+
+   nlohmann::json j;
+   j["eft"] = "WET";
+   j["basis"] = "flavio";
+   j["scale"] = dynamic_cast<@ModelName@_mass_eigenstates const&>(context.model).get_scale();
+   j["values"] = {
+      {"C9_bsmumu",   {{"Re", Re(C9_bsmumu)},   {"Im", Im(C9_bsmumu)}}},
+      {"C9p_bsmumu",  {{"Re", Re(C9p_bsmumu)},  {"Im", Im(C9p_bsmumu)}}},
+      {"C10_bsmumu",  {{"Re", Re(C10_bsmumu)},  {"Im", Im(C10_bsmumu)}}},
+      {"C10p_bsmumu", {{"Re", Re(C10p_bsmumu)}, {"Im", Im(C10p_bsmumu)}}},
+      {"CS_bsmumu",   {{"Re", Re(CS_bsmumu)},   {"Im", Im(CS_bsmumu)}}},
+      {"CSp_bsmumu",  {{"Re", Re(CSp_bsmumu)},  {"Im", Im(CSp_bsmumu)}}},
+      {"CP_bsmumu",   {{"Re", Re(CP_bsmumu)},   {"Im", Im(CP_bsmumu)}}},
+      {"CPp_bsmumu",  {{"Re", Re(CPp_bsmumu)},  {"Im", Im(CPp_bsmumu)}}},
+   };
+   std::ofstream wc_json("WET_bsmumu.json");
+   wc_json << std::setw(4) << j << std::endl;
+   wc_json.close();
+
+}
+
+} // anonymous namespace
+
+using namespace @ModelName@_cxx_diagrams;
+using namespace @ModelName@_FFV_form_factors;
+
+namespace @namespace@ {
+
+typedef std::valarray<std::complex<double>>  (*ffv_function)
+   (int, int, const @ModelName@_mass_eigenstates&, bool);
+
+typedef std::array<std::complex<double>, 10> (*npf_function)
+   (const @ModelName@_mass_eigenstates&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&);
+
+/**
+ * @tparam    L     Type of a lepton field.
+ * @tparam    A     Type of a photon field.
+ * @tparam    T     Type of a form factors.
+ * @param[in] model Mass eigenstates.
+ * @param[in] ff    Lepton-photon form factors.
+ * @param[in] g     Generation index for quarks.
+ * @return Set of four-fermion coefficients from photon penguin amplitudes
+ *         (without overall i; with appropriate embedding).
+ */
+template <class L, class A, class T>
+Eigen::Array<std::complex<double>,10,1> embed_photon(
+   const @ModelName@_mass_eigenstates& model, const T& ff, int g) {
+
+   // Get lepton-photon couplings (without i):
+   context_base context {model};
+   using vertex = Vertex<typename L::lorentz_conjugate, L, A>;
+   const auto value =  vertex::evaluate({g, g}, context);
+   const auto lL =  value.left();
+   const auto lR =  value.right();
+
+   Eigen::Array<std::complex<double>,10,1> res{};
+   // Term from eq. (t.1) will contribute to four-fermion vector coefficients.
+   // Minus comes from the form_factors embedding into four-fermion amplitude:
+   res[4] = - ff[0] * lL;
+   res[5] = - ff[0] * lR;
+   res[6] = - ff[1] * lL;
+   res[7] = - ff[1] * lR;
+   return res;
+};
+
+/**
+ * @tparam    Name  Function name for npf function.
+ * @param[in] model Mass eigenstates.
+ * @param[in] in    Generation index for incoming quark.
+ * @param[in] out   Generation index for outgoing quark.
+ * @param[in] g     Generation index for leptons.
+ * @return Set of four-fermion coefficients for amplitudes without photon
+ *         penguins (without overall i; with fixed signs for tensor operators
+ *         defined in meta/NPointFunctions/DLDL/main.m).
+ */
+template <npf_function Name>
+Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
+   const @ModelName@_mass_eigenstates& model, int in, int out, int g) {
+   const auto npf = Name(model,
+         std::array<int,4>{in, g, out, g},
+         std::array<Eigen::Vector4d, 0>{});
+   Eigen::Array<std::complex<double>,10,1> res(npf.data());
+   res[8] = - res[8];
+   res[9] = - res[9];
+   return res;
+};
+
+/**
+ * Form factors are defined via the following formula (q = pj - pi > 0; see
+ * eq. (3.4) of 1902.06650 (up to electric charge);
+ * pi - momenta[going from blob] of outgoing lepton,
+ * pj - momenta[going into blob] of incoming lepton):
+ *    <pi, q| T exp(i L_@ModelName@ dx)|pj> =
+ *    i * ubari
+ *          q^2 gamma_mu (A1_X * P_X)                                  (t.1)
+ *          + (zero after embedding term)                              (t.2)
+ *          + i mj sigma_munu q^nu (A2_X * P_X)                        (t.3)
+ *        uj e^*mu
+ * @note Form factors below are ordered as A1_L, A1_R, A2_L, A2_R.
+ * @note NPF function returns such result, that G4 = i * npf.
+ * @note Match to a low energy effective model with the same covariant derivative
+ *       for photon, as in @ModelName@, using eq. (t.3).
+ *       Minus comes from the form_factors embedding into four-fermion
+ *       amplitude, because we use descending ordering for external fermions
+ *          <out:l4,q3| T exp(i L_@ModelName@ dx) |in:l2,q1> =: G4
+ * @note For four fermion coefficient matching minus comes from the G4
+ *       definition, because
+ *          <out:l4,q3| T exp(i L_low dx) |in:l2,q1> = -i * C_XY [3X1]*[4Y2].
+ * @tparam    Lepton   Type of a lepton fields.
+ * @tparam    Photon   Type of a photon field.
+ * @tparam    photon   Function name for photon form factors.
+ * @tparam    npf      Function name for npf function for up-quark contribution.
+ * @param[in] dIn     Generation index for incoming quark.
+ * @param[in] dOut    Generation index for outgoing quark.
+ * @param[in] lInOut  Generation index for leptons.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] parameters Parameters for the observable calculation.
+ * @param[in] qedqcd Reference to low-energy data.
+ * @return A dummy zero observable and Wilson coefficients.
+ */
+template<class Down, class Lepton, class Photon, ffv_function photon, npf_function npf>
+Eigen::Array<std::complex<double>, 13, 1> forge(
+   int dIn, int dOut, int lInOut,
+   const @ModelName@_mass_eigenstates& model,
+   const softsusy::QedQcd& qedqcd) {
+
+   context_base context {model};
+
+   const auto form_factors = photon(dIn, dOut, model, true);
+   const auto photon_l = embed_photon<Lepton, Photon>(model, form_factors, lInOut);
+   const auto npf_l = fix_tensors_sign<npf>(model, dIn, dOut, lInOut);
+
+   // Matching
+   const auto DL = - 0.5 * form_factors[2];
+   const auto DR = - 0.5 * form_factors[3];
+   const auto CXY = - photon_l - npf_l;
+
+   if (dIn == 2 && dOut == 1 && lInOut == 1) {
+      write_btosmumu<Down>(CXY, context, qedqcd);
+   } else {
+      // @todo(all): Implement
+      ERROR("dltodl: Unimplemented combination of external particles.");
+      exit(EXIT_FAILURE);
+   }
+
+
+   Eigen::Array<std::complex<double>,13,1> res;
+   res << 0.0, // We need only Wilson coefficients now.
+          DL,      DR,
+          CXY[0], CXY[1], CXY[2], CXY[3],
+          CXY[4], CXY[5], CXY[6], CXY[7],
+          CXY[8], CXY[9];
+   return res;
+}
+@calculate_definitions@
+
+} // namespace @namespace@
+} // namespace flexiblesusy
