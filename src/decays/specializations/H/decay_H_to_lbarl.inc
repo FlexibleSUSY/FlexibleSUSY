@@ -22,17 +22,19 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mHOS);
    const auto xOS2 = Sqr(mL2OS/mHOS);
-   const auto betaOS2 = 1.0 - Sqr((mL1OS + mL2OS)/mHOS);
+   const auto betaOS2_S = 1.0 - Sqr((mL1OS + mL2OS)/mHOS);
+   const auto betaOS2_P = 1.0 - Sqr((mL1OS - mL2OS)/mHOS);
    const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., xOS1, xOS2));
+   const double flux = 1./(2.*mHOS);
 
-   const double amp2_S = Sqr(mHOS) * betaOS2 * 2*std::norm(HLLbarVertexDR_S);
+   const double amp2_S = Sqr(mHOS) * betaOS2_S * 2*std::norm(HLLbarVertexDR_S);
 
    const double amp2_P =
-      info::is_CP_violating_Higgs_sector ? 2. * (Sqr(mHOS) - Sqr(mL1OS -mL2OS)) * std::norm(HLLbarVertexDR_P) : 0.;
+      info::is_CP_violating_Higgs_sector ? Sqr(mHOS) * betaOS2_P * 2.*std::norm(HLLbarVertexDR_P) : 0.;
 
    // flux * phase space factor * symmetry factor * |matrix element|^2
-   double res_S = 0.5 * ps * amp2_S/mHOS;
-   double res_P = 0.5 * ps * amp2_P/mHOS;
+   double res_S = flux * ps * amp2_S;
+   double res_P = flux * ps * amp2_P;
 
    // higher order corrections
    if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
@@ -45,6 +47,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
        flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
        flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
    ) {
+      const double remove_normalization = flux*ps*2*Sqr(mHOS);
       neutral_higgs_effc.add_coupling(
          field_as_string<Higgs>(indexIn),
             {
@@ -53,8 +56,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
             },
          std::pair<std::string, std::complex<double>> {
             field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<ChargedLepton>::type>(indexOut1) + "-" + field_as_string<ChargedLepton>(indexOut2),
-            std::sqrt(res_S) + 1i*std::sqrt(res_P)
-         }
+            std::sqrt(res_S/(remove_normalization*betaOS2_S)) + 1i*std::sqrt(res_P/(remove_normalization*betaOS2_P))
+         },
+         res_S + res_P
       );
    }
 

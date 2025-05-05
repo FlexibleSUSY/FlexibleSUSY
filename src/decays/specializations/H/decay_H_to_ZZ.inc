@@ -109,7 +109,8 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
       neutral_higgs_effc.add_coupling(
          field_as_string<Higgs>(indexIn),
          {23, 23},
-         std::pair<std::string, double> {field_as_string<Higgs>(indexIn) + "-" + field_as_string<ZBoson>(indexOut1) + "-" + field_as_string<ZBoson>(indexOut2), std::sqrt(res)}
+         std::pair<std::string, double> {field_as_string<Higgs>(indexIn) + "-" + field_as_string<ZBoson>(indexOut1) + "-" + field_as_string<ZBoson>(indexOut2), std::sqrt(res)},
+         res
       );
    }
 

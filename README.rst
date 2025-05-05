@@ -117,7 +117,7 @@ Optional:
 * GM2Calc_ (version 2.1.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * HiggsTools_ (version 1.1.4 or higher)
-* Lilith_, requires Python3 development files
+* Lilith_ (requires Python3 development files)
 * COLLIER_
 * Himalaya_
 * TSIL_
@@ -165,7 +165,7 @@ the following setup
 
 .. code-block:: shell
 
-    SARAH_VERSION=4.15.2
+    SARAH_VERSION=4.15.4
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz

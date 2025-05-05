@@ -75,7 +75,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "U. Khasianevich",
               "W. Kotlarski", "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2024";
+FS`Years   = "2013-2025";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -2032,13 +2032,14 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@setDecouplingYukawaDownLeptons@"  -> IndentText @ IndentText[
                                 ThresholdCorrections`SetDRbarYukawaCouplingElectron[FlexibleSUSY`LowScaleInput]
                                                                              ],
-                            "@overrideTreeHiggsMixings@" -> IndentText@StringJoin[
+                            "@overrideTreeHiggsMixings@" -> IndentText@IndentText@StringRiffle[
                                With[{mixingMatrix = FindMixingMatrixSymbolFor[#]},
                                   If[mixingMatrix =!= Null,
-                                     ToString@mixingMatrix <> " = this->get_physical()." <> ToString@mixingMatrix <> ";\n",
-                                      ""
+                                     ToString@mixingMatrix <> " = this->get_physical()." <> ToString@mixingMatrix <> ";",
+                                     ""
                                   ]
-                               ]& /@ DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[]}, Null]
+                               ]& /@ DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[]}, Null],
+                               "\n"
                             ],
                             "@copyRunningBSMMassesToDecouplingMasses@" -> IndentText[copyRunningBSMMassesToDecouplingMasses],
                             "@reorderDRbarMasses@"     -> IndentText[reorderDRbarMasses],
@@ -2819,12 +2820,17 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    }
    if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {
       slha_io.set_normalized_effectivecouplings_block(effc);\n" <>
-      If[SA`CPViolationHiggsSector || TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null, "slha_io.set_imnormalized_effectivecouplings_block(effc);\n", ""] <>
-   "}
+      If[SA`CPViolationHiggsSector || GetDimensionWithoutGoldstones@TreeMasses`GetPseudoscalarHiggsBoson[] != 0, IndentText@IndentText["slha_io.set_imnormalized_effectivecouplings_block(effc);\n"], ""] <>
+"   }
 #ifdef ENABLE_HIGGSTOOLS
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
-      slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);
-      slha_io.set_higgsbounds(higgsbounds_v);
+      if (hs.has_value()) {
+         SignalResult hs_ = hs.value();
+         slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval);
+      }
+      if (higgsbounds_v.size() > 0) {
+         slha_io.set_higgsbounds(higgsbounds_v);
+      }
    }
 #endif
 #ifdef ENABLE_LILITH
@@ -3587,7 +3593,7 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseHiggs2LoopNMSSM === True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
-              (* FlexibleSUSY`UseMSSM3LoopRGEs = True; *)
+              FlexibleSUSY`UseMSSM3LoopRGEs = True;
              ];
 
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
