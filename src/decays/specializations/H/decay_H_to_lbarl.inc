@@ -49,16 +49,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    double res = res_S + res_P;
 
 #if DECAY_BSM_ORDER > 0
-   auto get_digit = [](int flags, int pos) -> int
-   {
-      while (--pos >= 0) {
-         flags /= 10;
-      }
-
-      return flags % 10;
-   };
-
-   if (get_digit(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections), 0) > 0) {
+   if (flexibledecay_settings.get_decay_corrections().bsm > 0) {
 
       namespace smns = standard_model_cxx_diagrams;
 
