@@ -65,7 +65,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       const double alpha_s_red = alpha_s_5f/Pi;
 
       double pseudoscalar_corr = 0.0;
-      switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+      switch (flexibledecay_settings.get_decay_corrections().sm) {
          case 4:
             [[fallthrough]];
          case 3:

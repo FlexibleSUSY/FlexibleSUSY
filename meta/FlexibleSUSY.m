@@ -3072,7 +3072,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               fdDefaultSettings =
 "\nfdDefaultSettings = {
    minBRtoPrint -> 1*^-5,
-   maxHigherOrderCorrections -> 4,
+   maxHigherOrderCorrections -> 41,
    alphaThomson -> 1,
    offShellVV -> 2,
    printEffCBlock -> 1,

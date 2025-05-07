@@ -1840,7 +1840,7 @@ If[Length@positions =!= 1, Quit[1]];
                            (* the quark loop amplitude *)
                            Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
                            "auto temp_result = " <> ampCall <> ";\n" <>
-                           "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
+                           "if (flexibledecay_settings.get_decay_corrections().sm > 0 &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, pos2},
                                  StringRiffle[
@@ -1865,7 +1865,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "result += temp_result;\n",
                            (* colored scalar loop *)
                            If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
-                           "\nif (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
+                           "\nif (flexibledecay_settings.get_decay_corrections().bsm > 0 &&\n" <>
                            TextFormatting`IndentText[
                              Module[{pos1, pos2},
                              StringRiffle[
@@ -1905,7 +1905,7 @@ If[Length@positions =!= 1, Quit[1]];
                            (* the quark loop amplitude *)
                            Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
                            "auto temp_result = " <> ampCall <> ";\n" <>
-                           "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
+                           "if (flexibledecay_settings.get_decay_corrections().sm > 0 &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, pos2},
                                  StringRiffle[
