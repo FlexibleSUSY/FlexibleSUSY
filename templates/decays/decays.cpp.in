@@ -28,6 +28,7 @@
  */
 
 #include <cmath>
+#include <iomanip>
 
 #include <boost/range/algorithm.hpp>
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
@@ -38,6 +39,7 @@
 #include <boost/mpl/list.hpp>
 #include <boost/hana.hpp>
 
+#include "@ModelName@_mass_eigenstates_running.hpp"
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "@ModelName@_info.hpp"
@@ -50,6 +52,9 @@
 #include "wrappers.hpp"
 #include "standard_model.hpp"
 #include <gsl/gsl_monte_miser.h>
+#include "cxx_qft/standard_model_context_base.hpp"
+
+#define DECAY_BSM_ORDER @decayBSMOrder@
 
 namespace flexiblesusy {
 

@@ -28,6 +28,9 @@
 
 #include "@ModelName@_fields.hpp"
 #include "@ModelName@_mass_eigenstates_interface.hpp"
+#include "always_false.hpp"
+
+#include <complex>
 
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
@@ -72,6 +75,58 @@ using cxx_diagrams::field_indices;
 
 @CXXDiagrams_PhysicalMassFunctions@
 
+// self energies
+template<typename Field>
+auto self_energy_1loop(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_1(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PL(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PR(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+// self-energy derivatives w.r.t. p2
+template<typename Field>
+auto self_energy_1loop_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_1_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PL_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<typename Field>
+auto self_energy_1loop_PR_deriv_p2(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+@selfEnergyWrapper@
+@selfEnergyDerivativeWrapper@
 } // namespace @ModelName@_cxx_diagrams
 } // namespace flexiblesusy
 

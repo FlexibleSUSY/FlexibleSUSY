@@ -9,7 +9,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const auto amp = calculate_amplitude<PseudoscalarHiggs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude_1l<PseudoscalarHiggs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
    const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
    static constexpr double ps {1/(8.*Pi)};
    static constexpr double ps_symmetry {0.5};
@@ -65,7 +65,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       const double alpha_s_red = alpha_s_5f/Pi;
 
       double pseudoscalar_corr = 0.0;
-      switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+      switch (flexibledecay_settings.get_decay_corrections().sm) {
          case 4:
             [[fallthrough]];
          case 3:

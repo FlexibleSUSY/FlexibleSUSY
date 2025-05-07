@@ -5,7 +5,7 @@ double CLASSNAME::get_partial_width<Higgs, Photon, Photon>(
       const typename field_indices<Photon>::type& out1_idx,
       const typename field_indices<Photon>::type& out2_idx)
 {
-   const auto amp = calculate_amplitude<Higgs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude_1l<Higgs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<Higgs>(in_idx);
    static constexpr double ps {1/(8.*Pi)};
    static constexpr double ps_symmetry {0.5};

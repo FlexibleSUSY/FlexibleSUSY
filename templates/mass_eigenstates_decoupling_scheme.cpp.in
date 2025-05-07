@@ -29,7 +29,6 @@
  */
 
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_info.hpp"
 #include "config.h"
 #include "eigen_utils.hpp"
@@ -69,7 +68,7 @@ namespace flexiblesusy {
 #define PHYSICAL(parameter) physical.parameter
 
 CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
-   : @ModelName@_soft_parameters(input_)
+   : @ModelName@_mass_eigenstates(input_)
 {
 }
 
@@ -400,13 +399,13 @@ Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
 
 @higgsMassGetters@
 
-@lspFunctions@
-
 @massCalculationFunctions@
 
 @tadpoleEqFunctions@
 
 @dependenceFunctions@
+
+@selfEnergyVirtualCalls@
 
 std::ostream& operator<<(std::ostream& ostr, const @ModelName@_mass_eigenstates_decoupling_scheme& model)
 {

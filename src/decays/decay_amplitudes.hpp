@@ -169,6 +169,8 @@ double square_amplitude(const Amplitude& a)
    return a.square();
 }
 
+std::complex<double> amplitude_interference(const Decay_amplitude_SFF&, const Decay_amplitude_SFF&);
+
 namespace detail {
 
 template <class Field_in, class Field_out_1, class Field_out_2,

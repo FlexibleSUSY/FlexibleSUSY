@@ -10,6 +10,7 @@
 #include "SM_two_scale_model.hpp"
 #include "decays/SM_decays.hpp"
 #include "decays/standard_model_decays.hpp"
+#include "SM_mass_eigenstates_running.hpp"
 #include "decays/experimental_constraints.hpp"
 #include "SM_two_scale_spectrum_generator.hpp"
 
@@ -25,29 +26,31 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
 
    SM_input_parameters input;
    input.LambdaIN = 0.285;
-   SM<Two_scale> m;
-   setup_SM_const(m, input);
+   SM<Two_scale> m_;
+   setup_SM_const(m_, input);
 
-   m.calculate_DRbar_masses();
+   m_.calculate_DRbar_masses();
 
-   m.set_pole_mass_loop_order(1);
-   m.do_calculate_sm_pole_masses(true);
-   m.solve_ewsb_one_loop();
-   m.calculate_pole_masses();
+   m_.set_pole_mass_loop_order(1);
+   m_.do_calculate_sm_pole_masses(true);
+   m_.solve_ewsb_one_loop();
+   m_.calculate_pole_masses();
 
-   if (m.get_problems().have_problem()) {
+   if (m_.get_problems().have_problem()) {
       std::ostringstream ostr;
-      m.get_problems().print_problems(ostr);
+      m_.get_problems().print_problems(ostr);
       BOOST_FAIL(ostr.str());
    }
 
    softsusy::QedQcd qedqcd;
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings;
+   SM_mass_eigenstates_running m(m_);
 
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
+   flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 4.0);
    SM_decays decays_HO = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
 
    // ------------ tree-level decays ------------
@@ -112,17 +115,17 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    SM_input_parameters input;
    input.LambdaIN = 0.285;
 
-   SM<Two_scale> m;
-   setup_SM_const(m, input);
-   m.calculate_DRbar_masses();
-   m.set_pole_mass_loop_order(1);
-   m.do_calculate_sm_pole_masses(true);
-   m.solve_ewsb_one_loop();
-   m.calculate_pole_masses();
+   SM<Two_scale> m_;
+   setup_SM_const(m_, input);
+   m_.calculate_DRbar_masses();
+   m_.set_pole_mass_loop_order(1);
+   m_.do_calculate_sm_pole_masses(true);
+   m_.solve_ewsb_one_loop();
+   m_.calculate_pole_masses();
 
-   if (m.get_problems().have_problem()) {
+   if (m_.get_problems().have_problem()) {
       std::ostringstream ostr;
-      m.get_problems().print_problems(ostr);
+      m_.get_problems().print_problems(ostr);
       BOOST_FAIL(ostr.str());
    }
 
@@ -142,6 +145,7 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    softsusy::QedQcd qedqcd;
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings;
+   SM_mass_eigenstates_running m(m_);
 
    SM_decays decays_SM_HO = SM_decays(m, qedqcd, physical_input, flexibledecay_settings);
    Standard_model_decays decays_sm_HO = Standard_model_decays(sm, qedqcd, physical_input, flexibledecay_settings);

@@ -31,7 +31,7 @@
 
 namespace flexiblesusy {
 
-class @ModelName@_mass_eigenstates;
+class @ModelName@_mass_eigenstates_running;
 
 namespace @ModelName@_FFV_form_factors {
 

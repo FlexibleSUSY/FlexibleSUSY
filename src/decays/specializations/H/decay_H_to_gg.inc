@@ -5,7 +5,7 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
       const typename field_indices<Gluon>::type& out1_idx,
       const typename field_indices<Gluon>::type& out2_idx)
 {
-   const auto amp = calculate_amplitude<Higgs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude_1l<Higgs, Gluon, Gluon>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<Higgs>(in_idx);
    static constexpr double ps {1./(8.*Pi)};
    static constexpr double ps_symmetry {1./2.};
@@ -95,7 +95,7 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
 
       double scalar_corr = 0;
       const double Gamma0 = std::norm(3./4*A12_H);
-      switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+      switch (flexibledecay_settings.get_decay_corrections().sm) {
          case 4:
             [[fallthrough]];
          case 3:
@@ -141,7 +141,7 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
          };
 
          double pseudoscalar_corr = 0.0;
-         switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+         switch (flexibledecay_settings.get_decay_corrections().sm) {
             case 4:
                [[fallthrough]];
             case 3:

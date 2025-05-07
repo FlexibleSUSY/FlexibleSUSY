@@ -24,7 +24,7 @@
  */
 
 #include "@ModelName@_amm.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_running.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "cxx_qft/@ModelName@_particle_aliases.hpp"
@@ -157,7 +157,7 @@ double get_MLCP(const @ModelName@_mass_eigenstates_interface& model)
 @AMMGetMLCP@
 }
 
-void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
+void run_to_MSUSY(@ModelName@_mass_eigenstates_running& model)
 {
    const double precision_goal = model.get_precision();
    const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
@@ -196,7 +196,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 
 /// 1-loop scalar/fermionic contributions
 template <typename Lepton>
-double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates& model, double ml_pole@extraIdxDecl@)
+double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass_eigenstates_running& model, double ml_pole@extraIdxDecl@)
 {
    using namespace @ModelName@_cxx_diagrams::fields;
 
@@ -252,7 +252,7 @@ double calculate_amm_impl_2l_barrzee(const context_base& context, double ml_pole
 }
 
 template <typename Lepton>
-double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+double calculate_amm_impl(const @ModelName@_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
    VERBOSE_MSG("@ModelName@_amm: calculating a_mu at Q = " << model.get_scale());
 
@@ -287,9 +287,9 @@ double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softs
 } // anonymous namespace
 
 template <typename Lepton>
-double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates_running& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
-   @ModelName@_mass_eigenstates model(model_);
+   @ModelName@_mass_eigenstates_running model(model_);
 
    VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu ...");
 
@@ -309,9 +309,9 @@ double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_
 @calculateAForwardDeclaration@
 
 template <typename Lepton>
-double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
+double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates_running& model_, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings@extraIdxDecl@)
 {
-   @ModelName@_mass_eigenstates model(model_);
+   @ModelName@_mass_eigenstates_running model(model_);
 
    VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu uncertainty ...");
 

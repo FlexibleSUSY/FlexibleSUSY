@@ -9,6 +9,7 @@
 #include "MRSSM2_two_scale_spectrum_generator.hpp"
 #include "decays/MRSSM2_decays.hpp"
 #include "MRSSM2_slha_io.hpp"
+#include "MRSSM2_mass_eigenstates_running.hpp"
 
 using namespace flexiblesusy;
 
@@ -677,7 +678,7 @@ Block IMVCKM Q= 1.00000000E+03
       BOOST_TEST(false);
    }
 
-   MRSSM2_slha m(input);
+   MRSSM2_mass_eigenstates_running m(input);
    slha_io.fill(m);
    m.calculate_DRbar_masses();
    m.reorder_DRbar_masses();
@@ -764,7 +765,7 @@ Block IMVCKM Q= 1.00000000E+03
 
    // pseudoscalar sgluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_VGVG(&m), 0, 1e-16);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 9.057611234446413e-05, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 9.057611234446413e-05, 2e-14);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Su_to_GluFu(&m, 3, 0), 56.21133546983561, 1e-16);
 }

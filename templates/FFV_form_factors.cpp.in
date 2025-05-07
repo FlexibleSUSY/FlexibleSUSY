@@ -23,7 +23,7 @@
  */
 
 #include "@ModelName@_FFV_form_factors.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_running.hpp"
 #include "concatenate.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "ffv_loop_functions.hpp"

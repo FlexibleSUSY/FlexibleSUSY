@@ -98,6 +98,9 @@ NumberOfPropagatorsInTopology::usage = "";
 ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
 ExtractColourFactor::usage = "Drop colour generator from the colour factor";
 
+SelfEnergyWrapper::usage = "";
+SelfEnergyDerivativeWrapper::usage = "";
+
 Begin["`Private`"];
 
 LeftChiralVertex::usage="A left projector part of a vertex";
@@ -394,7 +397,7 @@ ColourIndexOfField[field_ /; TreeMasses`ColorChargedQ[field]]:=
  * a reordering of fields in internal vertices and thus any appearing
  * duplicate diagrams are removed.
  **)
-FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List, bothLoopOrientations_:False] :=
+FeynmanDiagramsOfType[adjacencyMatrix_List, externalFields_List, bothLoopOrientations_:False, discardSMIndertions_:False] :=
 	Module[{externalVertices = externalFields[[All,1]],
 			internalVertices,externalRules, internalFieldCouplings,
 			unspecifiedEdgesLess,unspecifiedEdgesEqual,
@@ -435,6 +438,10 @@ not symmetric"];
 			fieldsToInsert}][[All,2]]];
 
 	If[resolvedFields === {}, Return[{}]];
+   If[discardSMIndertions && resolvedFields =!= {{}},
+      resolvedFields = Select[resolvedFields, !And@@(IsSMParticle /@ #)&]
+   ];
+   If[resolvedFields === {}, Return[{}]];
 
 	resolvedFieldCouplings = unresolvedFieldCouplings /.
 		((Rule @@@ Transpose[{fieldsToInsert,#}]) & /@ resolvedFields);
@@ -517,6 +524,11 @@ ConvertColourStructureToColorMathConvention[fields_List,
 ConvertColourStructureToColorMathConvention[fields_List,
 	AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]] :=
 	ColorMath`CMf[cIndex1, cIndex2, cIndex3];
+
+ConvertColourStructureToColorMathConvention[indexedFields_List,
+	KroneckerDeltaColourVertex[cIndex1_, cIndex4_]*KroneckerDeltaColourVertex[cIndex2_, cIndex3_] + KroneckerDeltaColourVertex[cIndex1_, cIndex3_]*KroneckerDeltaColourVertex[cIndex2_, cIndex4_] ] :=
+   ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex1, cIndex4]]*ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex2, cIndex3]] +
+   ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex1, cIndex3]]*ConvertColourStructureToColorMathConvention[indexedFields, KroneckerDeltaColourVertex[cIndex2, cIndex4]];
 
 ConvertColourStructureToColorMathConvention[indexedFields_List,
 	KroneckerDeltaColourVertex[cIndex1_, cIndex2_]] :=
@@ -602,7 +614,7 @@ ConvertColourStructureToColorMathConvention[fields_List,
 
 ConvertColourStructureToColorMathConvention[fields_List,
    UnsupportedColouredVertex] :=
-   (Print["Error! Cannot convert a colour structure to ColorMath convention for fiedls: ", fields]; Quit[1]);
+   (Print["Error! Cannot convert a colour structure to ColorMath convention for fields: ", fields]; Quit[1]);
 
 (* FIXME: Are these correct? *)
 ColorMathToSARAHConvention[expr_] :=
@@ -964,10 +976,22 @@ GaugeStructureOfVertexLorentzPart[
 	scalar_ SARAH`Delta[cIndex1_, cIndex4_] SARAH`Delta[cIndex2_, cIndex3_] :>
 	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex4] KroneckerDeltaColourVertex[cIndex2, cIndex3], lorentzStructure};
 
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /;
+   MatchQ[
+      Collect[fullExpr, SARAH`Delta[__]],
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_]
+         + scalar1_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]
+   ] :=
+   Collect[fullExpr, SARAH`Delta[__]] /.
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] + scalar1_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] :>
+      {scalar1, KroneckerDeltaColourVertex[c1, c4] KroneckerDeltaColourVertex[c2, c3] + KroneckerDeltaColourVertex[c1, c3] KroneckerDeltaColourVertex[c2, c4], lorentzStructure} /;
+         (And @@ Vertices`SarahColorIndexQ /@ {c1, c2, c3, c4}) &&
+         FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
 (* @todo:
       This case catches vertices with sum of products of 2 Kronecker deltas.
-      Currently, if scalar1 and scalar2 coefficients would be equal in principle
-      we could handle this vertex. The case of scalar1 != scalar2 we cannot.
+      The case when scalar1 and scalar2 we handle. The case of scalar1 != scalar2 we cannot.
       For the moment therefore we only print a warning message, similar to
       the generic catch all case *)
 GaugeStructureOfVertexLorentzPart[
@@ -1705,6 +1729,39 @@ ExtractColourFactor[colourfactor1_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctI
 *)
 ExtractColourFactor[args___] :=
    (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
+
+SelfEnergyWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
+   With[{fieldCPP = If[field === GetWBoson[] && GetElectricCharge[field] < 0, CXXNameOfField[AntiField@field, prefixNamespace -> "fields"], CXXNameOfField[field, prefixNamespace -> "fields"]]},
+   "template<> inline
+auto self_energy_1loop<" <> fieldCPP <> ">(const context_base& context, double p, typename field_indices<" <> fieldCPP <> ">::type const& g01, typename field_indices<" <> fieldCPP <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
+}\n"
+   ];
+
+SelfEnergyWrapper[field_?TreeMasses`IsFermion] :=
+   StringJoin[Riffle[
+   ("template<> inline
+auto self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g01, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
+
+}\n")& /@ {"1", "PL", "PR"}, "\n"]
+   ];
+
+SelfEnergyDerivativeWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
+   With[{fieldCPP = If[field === GetWBoson[] && GetElectricCharge[field] < 0, CXXNameOfField[AntiField@field, prefixNamespace -> "fields"], CXXNameOfField[field, prefixNamespace -> "fields"]]},
+   "template<> inline
+auto self_energy_1loop_deriv_p2<" <> fieldCPP <> ">(const context_base& context, double p, typename field_indices<" <> fieldCPP <> ">::type const& g01, typename field_indices<" <> fieldCPP <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_deriv_p2(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
+}\n"
+   ];
+
+SelfEnergyDerivativeWrapper[field_?TreeMasses`IsFermion] :=
+   StringJoin[Riffle[
+   ("template<> inline
+auto self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g01, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g02) {
+   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "_deriv_p2(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
+}\n")& /@ {"1", "PL", "PR"}, "\n"]
+   ];
 
 End[];
 EndPackage[];

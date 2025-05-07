@@ -55,6 +55,7 @@ CreateDecayTableGetterFunctions::usage="create getter definitions for C++ decay 
 CreateDecayTableInitialization::usage="create C++ initializer for decay table.";
 CreateTotalAmplitudeSpecializations::usage="creates specialized functions for higher-order decays.";
 CreatePartialWidthSpecializations::usage="creates specialized functions for particular decays.";
+CreateAmpLoopTag::usage = "";
 
 Begin["`Private`"];
 
@@ -353,7 +354,7 @@ ContainsOnlySupportedVertices[diagram_] :=
                  to fail on unsuported color structure.
               We generated tree and 1-loop amplitude all at once and then select the
               lowest order one. For the process we considered so far the amplitudes with
-              unsuported vertices don't contribitu in the end. *)
+              unsuported vertices don't contribute in the end. *)
            vertexTypes = CXXDiagrams`VertexTypeForFields /@ vertices;
            unsupportedVertices = Complement[vertexTypes, CXXDiagrams`VertexTypes[]];
            If[unsupportedVertices =!= {},
@@ -373,6 +374,12 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
          externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]],
          diagrams
       },
+      If[IsPossibleNonZeroVertex[Prepend[finalFields, initialField]] && IsOneLoopDecayTopology[graph] && !(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialField] && (Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
+                 Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}])),
+         (* disrad A and B bubles on external legs for 1l corrections to tree-level decays
+            @todo: this has to be fixed, not all such diagrams should be discarded *)
+         If[MemberQ[{"T2", "T3", "T5", "T8", "T9", "T10"}, FeynArtsTopologyName[graph]], Return[{}]]
+      ];
       (* vertices in diagrams are not SortCp'ed *)
       diagrams =
          CXXDiagrams`FeynmanDiagramsOfType[
@@ -381,9 +388,17 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
             (* One loop decay topologies T2, T3 & T5 contain an A0 bubble on external leg.
                   With below argument set to True, charged particles are inserted twice in
                such bubble - once as particle and once as antiparticle. *)
-            If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True]
+            If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True],
+            (* 
+            IsPossibleNonZeroVertex[Prepend[finalFields, initialField]] && IsOneLoopDecayTopology[graph] && !(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialField] && (Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
+                 Sort@finalFields === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
+                 *)
+                 False
          ];
-      Select[diagrams, IsPossibleNonZeroDiagram[#, True]&]
+      If[diagrams =!= {},
+         Select[diagrams, IsPossibleNonZeroDiagram[#, True]&],
+         {}
+      ]
    ];
 
 (* returns list of {{number of loops, {{topology, list of insertions}}}, ...} *)
@@ -939,7 +954,6 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
                     "dm->fill_from(model);\n" <>
-                    "standard_model::Standard_model sm{};\n" <>
                     "sm.initialise_from_input(qedqcd);\n" <>
                     "// set loop level for RGE running to match RGE setting\n" <>
                     "// of BSM model\n" <>
@@ -969,7 +983,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "// positions in tree-level mass and mixing matrices. The\n" <>
                     "// non-decoupled model does not.\n" <>
                     "model.reorder_DRbar_masses();\n" <>
-                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
+                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running>(model);\n" <>
                     "break;\n"
                   ] <>
                   "}\ndefault:\n" <>
@@ -1009,6 +1023,28 @@ CreateDecaysCalculationFunction[decaysList_] :=
            "()\n{\n"
            <> body <> "\n}\n"
           ];
+
+CreateAmpLoopTag[particleDecays_List] := Module[{listOfFSParticleDecayObjects, hasOneLoopAmp = "", hasTreeAmp = ""},
+   listOfFSParticleDecayObjects = Flatten[Drop[#, 1]& /@ particleDecays];
+   (
+      finalStates =
+         StringRiffle[
+            CXXNameOfField[#, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] & /@ GetFinalState[#],
+            ", "
+         ];
+      If[IsPossibleTreeLevelDecay[#, True],
+         hasTreeAmp = hasTreeAmp <>
+            "template<>
+struct " <> FlexibleSUSY`FSModelName <> "_has_tree_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
+      ];
+      If[IsPossibleOneLoopDecay[#],
+         hasOneLoopAmp = hasOneLoopAmp <>
+            "template<>
+struct " <> FlexibleSUSY`FSModelName <> "_has_oneloop_amp<" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields::" <> CXXDiagrams`CXXNameOfField[GetInitialState[#]] <> ", " <> finalStates <> "> : public std::true_type {};\n";
+      ];
+   )& /@ listOfFSParticleDecayObjects;
+  {hasTreeAmp, hasOneLoopAmp}
+];
 
 CreateDecaysCalculationFunctions[particleDecays_List] :=
     Utils`StringJoinWithSeparator[CreateDecaysCalculationFunction /@ particleDecays, "\n"];
@@ -1068,7 +1104,7 @@ CreateFieldIndices[particle_, fieldsNamespace_] :=
 
 CreateTotalAmplitudeFunctionName[] := "calculate_amplitude";
 
-CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_] :=
+CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_, oneLoop_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             returnType = "", fieldsNamespace, fieldsList, templatePars = "", args = ""},
            returnType = GetDecayAmplitudeType[initialParticle, finalState];
@@ -1079,7 +1115,7 @@ CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_] :=
            args = "const " <> modelName <> "_cxx_diagrams::context_base&, " <>
                   Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[#, fieldsNamespace] <> "&")& /@ fieldsList, ", "];
            "template<>\n" <> returnType <> " " <> modelName <> "_decays::" <>
-           CreateTotalAmplitudeFunctionName[] <> templatePars <> "(" <> args <> ") const;\n"
+           CreateTotalAmplitudeFunctionName[] <> If[oneLoop, "_1l", "_tree"] <> templatePars <> "(" <> args <> ") const;\n"
           ];
 
 FillSSSDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
@@ -1804,7 +1840,7 @@ If[Length@positions =!= 1, Quit[1]];
                            (* the quark loop amplitude *)
                            Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
                            "auto temp_result = " <> ampCall <> ";\n" <>
-                           "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
+                           "if (flexibledecay_settings.get_decay_corrections().sm > 0 &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, pos2},
                                  StringRiffle[
@@ -1829,7 +1865,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "result += temp_result;\n",
                            (* colored scalar loop *)
                            If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
-                           "\nif (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
+                           "\nif (flexibledecay_settings.get_decay_corrections().bsm > 0 &&\n" <>
                            TextFormatting`IndentText[
                              Module[{pos1, pos2},
                              StringRiffle[
@@ -1869,7 +1905,7 @@ If[Length@positions =!= 1, Quit[1]];
                            (* the quark loop amplitude *)
                            Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
                            "auto temp_result = " <> ampCall <> ";\n" <>
-                           "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
+                           "if (flexibledecay_settings.get_decay_corrections().sm > 0 &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, pos2},
                                  StringRiffle[
@@ -1953,6 +1989,10 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
 
        (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
+       (* if this is a 1l correction to a tree-level decay, discard diagrams without BSM fields *)
+       If[IsPossibleTreeLevelDecay[decay, True],
+          oneLoopTopAndInsertion = DeleteCases[oneLoopTopAndInsertion, And@@(IsSMParticle/@Flatten@Drop[#[[2]], 3]) && !And@@(ColorChargedQ/@Flatten@Drop[#[[2]], 3])&]
+       ];
 
        With[{ret = WrapCodeInLoopOverInternalVertices[decay, Sequence @@ #]},
          FinitePart = (ret[[1]] || FinitePart);
@@ -1967,7 +2007,7 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
 
 (* creates `calculate_amplitude` function
    that returns a total (sumed over internal insertions) 1-loop amplitude for a given external particles *)
-CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
+CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_, oneLoop_:True] :=
    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             fieldsNamespace = "fields",
             returnVar = "result", paramsStruct = "context", returnType = "",
@@ -1992,23 +2032,23 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            (* function body *)
 
-           body = "\n// amplitude type\n";
+           body = "// amplitude type\n";
            body = body <> returnType <> " " <> returnVar <> ";\n";
 
            body = body <> "\n// external particles' masses\n";
            body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct];
 
-           If[IsPossibleTreeLevelDecay[decay, True],
+           If[!oneLoop,
               body = body <> "\n// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
 
-           If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
+           If[oneLoop,
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
                 If[res[[1]],
                   body = body <> "\n// FormCalc's Finite variable\n";
-                  body = body <>"static constexpr double Finite {1.};\n"
+                  body = body <> "static constexpr double Finite {1.};\n"
                 ];
-                body = body <>"\nconst double ren_scale {result.m_decay};\n";
+                body = body <> "\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
              ]
            ];
@@ -2017,9 +2057,9 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
              "// " <> ToString@initialParticle <> " -> " <> ToString@finalState <> "\n" <>
                  "template<>\n" <>
-                 returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <>
+                 returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <> If[oneLoop, "_1l", "_tree"] <>
                  templatePars <>
-                 "(\n" <> TextFormatting`IndentText[args <> ") const{\n"] <>
+                 "(\n" <> TextFormatting`IndentText[args <> ") const {\n\n"] <>
                  TextFormatting`IndentText[body] <>
                  "}\n"
    ];
@@ -2213,10 +2253,20 @@ CreateHiggsToPhotonZTotalAmplitude[particleDecays_List, modelName_] :=
 
 CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
     Module[{decl = "", def = ""},
-           decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName];
-           def = CreateTotalAmplitudeSpecializationDef[decay, modelName];
-           {decl, def}
-          ];
+       If[IsPossibleTreeLevelDecay[decay, True],
+          decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName, False];
+          def = CreateTotalAmplitudeSpecializationDef[decay, modelName, False];
+       ];
+       (* generated 1L amplitude if:
+          1. it exists and
+            2a. tree level doesn't exist
+            2b. or it's a decay of a Higgs into SM particles *)
+       If[IsPossibleOneLoopDecay[decay] && (!IsPossibleTreeLevelDecay[decay, True] || (TreeMasses`GetHiggsBoson[] === GetInitialState[decay] && And@@(IsSMParticle /@ GetFinalState[decay]))),
+          decl = decl <> CreateTotalAmplitudeSpecializationDecl[decay, modelName, True];
+          def = def <> "\n" <> CreateTotalAmplitudeSpecializationDef[decay, modelName, True];
+       ];
+       {decl, def}
+    ];
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations, vertices = {}, listing = {},
