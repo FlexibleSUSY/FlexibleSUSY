@@ -19,6 +19,8 @@
 #ifndef FLEXIBLEDECAY_SETTINGS_H
 #define FLEXIBLEDECAY_SETTINGS_H
 
+#include "decay_corrections.hpp"
+
 #include <array>
 #include <Eigen/Core>
 
@@ -50,6 +52,7 @@ public:
    std::string get_description(Settings) const; ///< get description of spectrum generator setting
    void set(Settings, double); ///< set value of spectrum generator setting
    void set(const Settings_t&);///< set all spectrum generator settings
+   Decay_corrections get_decay_corrections() const;
    void reset();               ///< resets all settings to their defaults
 
 private:

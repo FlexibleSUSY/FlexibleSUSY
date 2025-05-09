@@ -65,7 +65,7 @@ Block MINPAR                 # Input parameters
 Block FlexibleDecay
      0     1.00000000E+00
      1     1.00000000E-05
-     2     4.00000000E+00
+     2     41.0000000E+00
      3     1.00000000E+00
      4     2.00000000E+00
      5     1.00000000E+00
