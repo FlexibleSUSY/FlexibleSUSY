@@ -3569,7 +3569,8 @@ FSPrepareRGEs[loopOrder_] :=
           ];
 
 FSCheckLoopCorrections[eigenstates_] :=
-    Module[{needToCalculateLoopCorrections},
+    Module[{needToCalculateLoopCorrections, selfEnergies,
+            fileName = GetSelfEnergyFileNames[$sarahCurrentOutputMainDir, eigenstates]},
            needToCalculateLoopCorrections = Or[
                NeedToCalculateSelfEnergies[eigenstates],
                NeedToCalculateTadpoles[eigenstates],
@@ -3577,6 +3578,9 @@ FSCheckLoopCorrections[eigenstates_] :=
                                               ];
            If[needToCalculateLoopCorrections,
               SARAH`CalcLoopCorrections[eigenstates];
+              selfEnergies = Get[fileName];
+              selfEnergies = Join[selfEnergies, CorrectionListVectorVector[eigenstates]];
+              Put[selfEnergies, fileName];
              ];
           ];
 
