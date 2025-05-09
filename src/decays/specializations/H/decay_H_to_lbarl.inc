@@ -37,7 +37,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    double res_P = flux * ps * amp2_P;
 
    // higher order corrections
-   if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
+   if (flexibledecay_settings.get_decay_corrections().sm > 0) {
       // 1-loop QED corrections
       res_S *= 1. + get_alpha(context)/Pi*17./4.;
       res_P *= 1. + get_alpha(context)/Pi*17./4.;
