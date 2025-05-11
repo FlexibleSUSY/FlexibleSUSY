@@ -40,7 +40,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       calculate_amplitude_tree<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
 
    // higher order SM corrections
-   if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
+   if (flexibledecay_settings.get_decay_corrections().sm > 0) {
       // 1-loop QED corrections
       res_S *= 1. + get_alpha(context)/Pi*17./4.;
       res_P *= 1. + get_alpha(context)/Pi*17./4.;
@@ -165,25 +165,31 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       const auto delta_Z_A_dec = -photon_se_deriv_dec;
 
-      const double vev = 248.9397360685197;
       const double theta_W = context.model.ThetaW();
 
       const auto delta_e_dec = -0.5*delta_Z_A_dec; //- tan(theta_W) / 2 * delta_Z_ZA
 
       // it is still necessary to decine the W-and Z-mass as well as the vev
-      //vev renormalization constant in the decoupling scheme
-      const auto delta_Z_vev_dec = (1 - 1 / (2 * Sqr(sin(theta_W)))) * delta_Zm_W_dec + 0.5 * Sqr(cos(theta_W) / sin(theta_W)) * delta_Zm_Z_dec - delta_e_dec;
+      // vev renormalization constant in the decoupling scheme
+      const auto delta_Z_vev_dec =
+         (1 - 0.5/Sqr(std::sin(theta_W)))*delta_Zm_W_dec + 0.5/Sqr(std::tan(theta_W))*delta_Zm_Z_dec - delta_e_dec;
 
 
       // --------------------------------------------------------------------------------------
 
-      const auto counter_term_FL1 = 0.5/vev * (mL1OS * delta_ZL_lepton_dec + mL2OS * delta_ZR_lepton_dec) + mL1OS / vev * delta_Zm_lepton_dec ;
-      const auto counter_term_FL2 = mL1OS/vev * (delta_Z_higgs_dec - delta_Z_vev_dec);
-      const auto counter_term_FL = counter_term_FL1 + counter_term_FL2;
+      const double vev = 248.9397360685197;
+      const auto ct_FL1 =
+         0.5/vev*(mL1OS*delta_ZL_lepton_dec + mL2OS*delta_ZR_lepton_dec) + mL1OS/vev*delta_Zm_lepton_dec;
+      const auto ct_FL2 =
+         mL1OS/vev * (delta_Z_higgs_dec - delta_Z_vev_dec);
+      const auto ct_FL =
+         ct_FL1 + ct_FL2;
 
-      const auto counter_term_FR1 = 0.5/vev * (mL1OS * delta_ZR_lepton_dec + mL2OS * delta_ZL_lepton_dec) + mL1OS / vev * delta_Zm_lepton_dec ;
-      const auto counter_term_FR2 = mL1OS/vev * (delta_Z_higgs_dec - delta_Z_vev_dec);
-      const auto counter_term_FR = counter_term_FR1 + counter_term_FR2;
+      const auto ct_FR1 =
+         0.5/vev*(mL1OS*delta_ZR_lepton_dec + mL2OS*delta_ZL_lepton_dec) + mL1OS/vev*delta_Zm_lepton_dec;
+      const auto ct_FR2 =
+         mL1OS/vev*(delta_Z_higgs_dec - delta_Z_vev_dec);
+      const auto ct_FR = ct_FR1 + ct_FR2;
 
       // --------------------------------------------------------------------------------------
 
@@ -199,8 +205,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       Decay_amplitude_SFF amp_counterterm = amp_tree;
 
       // adjust the form factors to hold the counter terms for the left and right form-factors
-      amp_counterterm.form_factor_left = counter_term_FL;
-      amp_counterterm.form_factor_right = counter_term_FR;
+      amp_counterterm.form_factor_left = ct_FL;
+      amp_counterterm.form_factor_right = ct_FR;
 
       if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
 
@@ -278,14 +284,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n Decoupling vev Renormaliztion: " << delta_Z_vev_dec << '\n';
 
 
-         //std::cout << "\n Counter Term 1 left form-factor: " << counter_term_FL1 << '\n';
-         //std::cout << " Counter Term 1 right form-factor: " << counter_term_FR1 << '\n';
+         //std::cout << "\n Counter Term 1 left form-factor: " << ct_FL1 << '\n';
+         //std::cout << " Counter Term 1 right form-factor: " << ct_FR1 << '\n';
 
-         //std::cout << "\n Counter Term 2 left form-factor: " << counter_term_FL2 << '\n';
-         //std::cout << " Counter Term 2 right form-factor: " << counter_term_FR2 << '\n';
+         //std::cout << "\n Counter Term 2 left form-factor: " << ct_FL2 << '\n';
+         //std::cout << " Counter Term 2 right form-factor: " << ct_FR2 << '\n';
 
-         //std::cout << "\n counter term left: " << counter_term_FL << '\n';
-         //std::cout << " counter term right: " << counter_term_FR << '\n';
+         //std::cout << "\n counter term left: " << ct_FL << '\n';
+         //std::cout << " counter term right: " << ct_FR << '\n';
 
          //std::cout << "\n Counter Term left form-factor struct: " << amp_counterterm.form_factor_left << '\n';
          //std::cout << " Counter Term right form-factor struct: " << amp_counterterm.form_factor_right << '\n';
@@ -299,8 +305,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n form factor left 1loop: " << amp_1l.form_factor_left << '\n';
          std::cout << " form factor right 1loop: " << amp_1l.form_factor_right << '\n';
 
-         std::cout << "\n form factor left dec: " << amp_1l.form_factor_left + counter_term_FL << '\n';
-         std::cout << " form factor right dec: " << amp_1l.form_factor_right + counter_term_FR << '\n';
+         std::cout << "\n form factor left dec: " << amp_1l.form_factor_left + ct_FL << '\n';
+         std::cout << " form factor right dec: " << amp_1l.form_factor_right + ct_FR << '\n';
 
          std::cout << "\n 1l* conj(tree): " << amplitude_interference(amp_1l, amp_tree) << '\n';
          std::cout << " |tree|^2: " << amp_tree.square() << '\n';
