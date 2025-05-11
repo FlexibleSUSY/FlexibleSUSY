@@ -179,27 +179,27 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       const double vev = 248.9397360685197;
       const auto ct_FL1 =
-         0.5/vev*(mL1OS*delta_ZL_lepton_dec + mL2OS*delta_ZR_lepton_dec) + mL1OS/vev*delta_Zm_lepton_dec;
+         amp_tree.form_factor_left * (0.5*(delta_ZL_lepton_dec + delta_ZR_lepton_dec) + delta_Zm_lepton_dec);
       const auto ct_FL2 =
-         mL1OS/vev * (delta_Z_higgs_dec - delta_Z_vev_dec);
+         amp_tree.form_factor_left * (delta_Z_higgs_dec - delta_Z_vev_dec);
       const auto ct_FL =
          ct_FL1 + ct_FL2;
 
       const auto ct_FR1 =
-         0.5/vev*(mL1OS*delta_ZR_lepton_dec + mL2OS*delta_ZL_lepton_dec) + mL1OS/vev*delta_Zm_lepton_dec;
+         amp_tree.form_factor_left * (0.5*(delta_ZR_lepton_dec + delta_ZL_lepton_dec) + delta_Zm_lepton_dec);
       const auto ct_FR2 =
-         mL1OS/vev*(delta_Z_higgs_dec - delta_Z_vev_dec);
+        amp_tree.form_factor_left * (delta_Z_higgs_dec - delta_Z_vev_dec);
       const auto ct_FR = ct_FR1 + ct_FR2;
 
       // --------------------------------------------------------------------------------------
 
       const auto amp_1l = calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
+      //const auto amp_1l_sm = smns::calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(sm_context, indexIn, indexOut1, indexOut2); 
 
       // mix term between tree and 1loop amplitude
-      double res_1l_tree = 0.5 * ps * 2.*std::real(amplitude_interference(amp_tree, amp_1l)) / mHOS;
-
-      // add the 1loop contributions to the decay width --> this is now the MSbar renormalized decay width!!!
-      res += res_1l_tree;
+      double res_1l_tree = flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_1l));
+      
+      res -= flux * ps * 2 * res_1l_tree;
 
       // copy the structure of a generic Amplitude from the tree-level amplitude --> A ~ FL * PL + FR * PR
       Decay_amplitude_SFF amp_counterterm = amp_tree;
@@ -317,7 +317,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << " Decay Width MSbar: " << res << '\n';
       }
 
-      res += 2.*std::real(amplitude_interference(amp_tree, amp_1l)) /* + ren const */;
+      res += flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm));
    }
 #endif
 
