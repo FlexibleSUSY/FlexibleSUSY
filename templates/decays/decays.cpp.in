@@ -38,6 +38,7 @@
 #include <boost/mpl/list.hpp>
 #include <boost/hana.hpp>
 
+#include "@ModelName@_mass_eigenstates_running.hpp"
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "@ModelName@_info.hpp"

@@ -1,0 +1,125 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_mass_eigenstates_running.cpp
+ * @brief implementation of the @ModelName@ model class in the decoupling scheme
+ *
+ * Contains the definition of the @ModelName@ model class methods
+ * which solve EWSB and calculate masses and mixings from @RenScheme@
+ * parameters.
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_mass_eigenstates_running.hpp"
+#include "@ModelName@_info.hpp"
+#include "@ModelName@_physical.hpp"
+#include "problems.hpp"
+#include "wrappers.hpp"
+
+namespace flexiblesusy {
+
+#define CLASSNAME @ModelName@_mass_eigenstates_running
+
+CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
+   : @ModelName@_mass_eigenstates(input_)
+{
+}
+
+CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& m_)
+   : @ModelName@_mass_eigenstates(m_)
+{
+}
+
+std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
+{
+   return std::make_unique<@ModelName@_mass_eigenstates_running>(*this);
+}
+
+const @ModelName@_physical& CLASSNAME::get_physical() const
+{
+   return @ModelName@_mass_eigenstates::get_physical();
+}
+
+@ModelName@_physical& CLASSNAME::get_physical()
+{
+   return @ModelName@_mass_eigenstates::get_physical();
+}
+
+const Problems& CLASSNAME::get_problems() const
+{
+   return @ModelName@_mass_eigenstates::get_problems();
+}
+
+Problems& CLASSNAME::get_problems()
+{
+   return @ModelName@_mass_eigenstates::get_problems();
+}
+
+int CLASSNAME::solve_ewsb_equations_tree_level()
+{
+   return @ModelName@_mass_eigenstates::solve_ewsb_equations_tree_level();
+}
+
+int CLASSNAME::solve_ewsb_equations()
+{
+   return solve_ewsb_equations_tree_level();
+}
+
+void CLASSNAME::clear_problems()
+{
+   problems.clear();
+}
+
+const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
+{
+   return @ModelName@_mass_eigenstates::get_input();
+}
+
+@ModelName@_input_parameters& CLASSNAME::get_input_parameters()
+{
+   return @ModelName@_mass_eigenstates::get_input();
+}
+
+Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
+{
+   return @ModelName@_mass_eigenstates::get_extra_parameters();
+}
+
+void CLASSNAME::calculate_tree_level_mass_spectrum() {
+   @ModelName@_mass_eigenstates::calculate_tree_level_mass_spectrum();
+}
+
+void CLASSNAME::calculate_pole_mass_spectrum() {
+   @ModelName@_mass_eigenstates::calculate_pole_mass_spectrum();
+}
+
+@dependenceFunctions@
+
+@selfEnergyVirtualCalls@
+
+std::ostream& operator<<(std::ostream& ostr, const @ModelName@_mass_eigenstates_running& model)
+{
+   model.print(ostr);
+   return ostr;
+}
+
+} // namespace flexiblesusy
+

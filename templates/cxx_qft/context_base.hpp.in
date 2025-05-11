@@ -28,6 +28,7 @@
 
 #include "@ModelName@_fields.hpp"
 #include "@ModelName@_mass_eigenstates_interface.hpp"
+#include "@ModelName@_physical.hpp"
 
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
