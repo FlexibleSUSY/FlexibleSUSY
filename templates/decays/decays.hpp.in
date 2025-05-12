@@ -44,6 +44,7 @@
 #include "lowe.h"
 #include "physical_input.hpp"
 #include "wrappers.hpp"
+#include "decays/standard_model_decays.hpp"
 
 #include <cmath>
 #include <vector>
@@ -62,6 +63,7 @@ template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 struct @ModelName@_has_tree_amp : public std::false_type {};
 
 @hasTreeAmp@
+
 class @ModelName@_decays {
 public:
    @ModelName@_decays() = default;
@@ -104,6 +106,7 @@ public:
 private:
    @ModelName@_mass_eigenstates model{};
    standard_model::Standard_model sm {};
+   Standard_model_decays sm_decays {};
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};

@@ -194,11 +194,11 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // --------------------------------------------------------------------------------------
 
       const auto amp_1l = calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
-      //const auto amp_1l_sm = smns::calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(sm_context, indexIn, indexOut1, indexOut2); 
+      const auto amp_1l_sm = sm_decays.calculate_amplitude_1l<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, indexIn, indexOut1, indexOut2);
 
       // mix term between tree and 1loop amplitude
       double amp_1l_tree = 2.*std::real(amplitude_interference(amp_tree, amp_1l));
-      
+
       // if the interference needs to be addded or subtracted dependes on the convention and still needs to be figured out
       res -= flux * ps * amp_1l_tree;
 
