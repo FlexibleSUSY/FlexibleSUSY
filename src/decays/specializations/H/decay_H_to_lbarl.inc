@@ -186,9 +186,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          ct_FL1 + ct_FL2;
 
       const auto ct_FR1 =
-         amp_tree.form_factor_left * (0.5*(delta_ZR_lepton_dec + delta_ZL_lepton_dec) + delta_Zm_lepton_dec);
+         amp_tree.form_factor_right * (0.5*(delta_ZR_lepton_dec + delta_ZL_lepton_dec) + delta_Zm_lepton_dec);
       const auto ct_FR2 =
-        amp_tree.form_factor_left * (delta_Z_higgs_dec - delta_Z_vev_dec);
+        amp_tree.form_factor_right * (delta_Z_higgs_dec - delta_Z_vev_dec);
       const auto ct_FR = ct_FR1 + ct_FR2;
 
       // --------------------------------------------------------------------------------------
@@ -197,9 +197,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       //const auto amp_1l_sm = smns::calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(sm_context, indexIn, indexOut1, indexOut2); 
 
       // mix term between tree and 1loop amplitude
-      double res_1l_tree = flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_1l));
+      double amp_1l_tree = 2.*std::real(amplitude_interference(amp_tree, amp_1l));
       
-      res -= flux * ps * 2 * res_1l_tree;
+      // if the interference needs to be addded or subtracted dependes on the convention and still needs to be figured out
+      res -= flux * ps * amp_1l_tree;
 
       // copy the structure of a generic Amplitude from the tree-level amplitude --> A ~ FL * PL + FR * PR
       Decay_amplitude_SFF amp_counterterm = amp_tree;
