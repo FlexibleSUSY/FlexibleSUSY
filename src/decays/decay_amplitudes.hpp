@@ -115,6 +115,7 @@ struct Decay_amplitude_SFF {
 };
 Decay_amplitude_SFF operator*(std::complex<double>, Decay_amplitude_SFF const&);
 Decay_amplitude_SFF operator*(Decay_amplitude_SFF const&, std::complex<double>);
+Decay_amplitude_SFF operator-(Decay_amplitude_SFF const&, Decay_amplitude_SFF const&);
 
 /**
  * @class Decay_amplitude_FFS

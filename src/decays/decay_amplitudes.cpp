@@ -212,6 +212,15 @@ Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF c
    amp.form_factor_right = factor * amp2.form_factor_right;
    return amp;
 }
+Decay_amplitude_SFF operator-(Decay_amplitude_SFF const& amp1, Decay_amplitude_SFF const& amp2) {
+   Decay_amplitude_SFF amp;
+   amp.m_decay = amp1.m_decay;
+   amp.m_fermion_1 = amp1.m_fermion_1;
+   amp.m_fermion_2 = amp1.m_fermion_2;
+   amp.form_factor_left = amp1.form_factor_left - amp2.form_factor_left;
+   amp.form_factor_right = amp1.form_factor_right - amp2.form_factor_right;
+   return amp;
+}
 Decay_amplitude_SFF operator*(Decay_amplitude_SFF const& amp, std::complex<double> factor) {
    return operator*(factor, amp);
 }
