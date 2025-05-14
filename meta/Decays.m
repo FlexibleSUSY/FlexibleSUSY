@@ -971,6 +971,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "sm.solve_ewsb_tree_level();\n" <>
                     "sm.calculate_DRbar_masses();\n" <>
                     "dm->fill_from(sm);\n" <>
+                    "sm.calculate_pole_masses();\n" <>
                     "sm_decays = Standard_model_decays(sm, qedqcd, physical_input, flexibledecay_settings);\n" <>
                     "return dm;\n" <>
                     "break;\n"

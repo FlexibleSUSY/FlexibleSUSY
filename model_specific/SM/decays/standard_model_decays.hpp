@@ -187,27 +187,6 @@ Decay_amplitude_SFF Standard_model_decays::calculate_amplitude_1l<standard_model
 template<>
 Decay_amplitude_SFF Standard_model_decays::calculate_amplitude_1l<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type, standard_model_cxx_diagrams::fields::Fu>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fu >::type&) const;
 
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
-Standard_model_decays::calculate_amplitude_1l(
-   const standard_model_cxx_diagrams::context_base& context,
-   typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
-   typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
-   typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2) const
-{
-      // amplitude type
-   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type result;
-
-   // external particles' masses
-   result.m_decay = context.physical_mass<FieldIn>(indexIn);
-   if constexpr (cxx_diagrams::fields::is_fermion<FieldOut1>::value && cxx_diagrams::fields::is_fermion<FieldOut2>::value) {
-      result.m_fermion_1 = context.physical_mass<FieldOut1>(indexOut1);
-      result.m_fermion_2 = context.physical_mass<FieldOut2>(indexOut2);
-   }
-
-   return result;
-}
-
 // generic decay of FieldIn -> FieldOut1 FieldOut2
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 double Standard_model_decays::get_partial_width(
