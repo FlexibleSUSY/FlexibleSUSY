@@ -25,7 +25,7 @@
  */
 
 #include "@ModelName@_semi_analytic_solutions.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_soft_parameters.hpp"
 
 #include "wrappers.hpp"
 
@@ -48,17 +48,17 @@ void @ModelName@_semi_analytic_solutions::initialize_trial_values()
 @initializeTrialBoundaryValues@
 }
 
-void @ModelName@_semi_analytic_solutions::calculate_trial_data(const @ModelName@_mass_eigenstates& model)
+void @ModelName@_semi_analytic_solutions::calculate_trial_data(const @ModelName@_soft_parameters& model)
 {
    for (auto& point: trial_data) {
-      point.model = std::make_shared<@ModelName@_mass_eigenstates>(run_to_output_scale(model, point.boundary_values));
+      point.model = run_to_output_scale(model, point.boundary_values);
    }
 }
 
-@ModelName@_mass_eigenstates @ModelName@_semi_analytic_solutions::run_to_output_scale(
-   const @ModelName@_mass_eigenstates& model, const Boundary_values& values) const
+@ModelName@_soft_parameters @ModelName@_semi_analytic_solutions::run_to_output_scale(
+   const @ModelName@_soft_parameters& model, const Boundary_values& values) const
 {
-   @ModelName@_mass_eigenstates result(model);
+   @ModelName@_soft_parameters result(model);
    set_to_boundary_values(result, values);
 
    result.run_to(output_scale);
@@ -92,9 +92,9 @@ std::map<int,@ModelName@_semi_analytic_solutions::Data_vector_t> @ModelName@_sem
  * each term defines a linear system, which is solved for the
  * coefficients.
  */
-void @ModelName@_semi_analytic_solutions::calculate_coefficients(const @ModelName@_mass_eigenstates& model_)
+void @ModelName@_semi_analytic_solutions::calculate_coefficients(const @ModelName@_soft_parameters& model_)
 {
-   @ModelName@_mass_eigenstates model(model_);
+   @ModelName@_soft_parameters model(model_);
    model.run_to(input_scale);
 
    calculate_trial_data(model);
@@ -106,7 +106,7 @@ void @ModelName@_semi_analytic_solutions::calculate_coefficients(const @ModelNam
 }
 
 void @ModelName@_semi_analytic_solutions::set_to_boundary_values(
-   @ModelName@_mass_eigenstates& model, const Boundary_values& boundary_values) const
+   @ModelName@_soft_parameters& model, const Boundary_values& boundary_values) const
 {
 @applyBoundaryConditions@
 }
@@ -118,7 +118,7 @@ void @ModelName@_semi_analytic_solutions::set_to_boundary_values(
  * appearing in the boundary conditions.
  */
 void @ModelName@_semi_analytic_solutions::evaluate_solutions(
-   @ModelName@_mass_eigenstates& model) const
+   @ModelName@_soft_parameters& model) const
 {
 @evaluateSemiAnalyticSolns@
 }
