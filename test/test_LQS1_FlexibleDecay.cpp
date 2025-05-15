@@ -5,6 +5,9 @@
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
+
+#define private public
+
 #include <iomanip>
 
 #include "test_LQS1.hpp"
@@ -28,11 +31,11 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    Loop_library::set(-1);
 
    LQS1_up_basis_input_parameters input;
-   
+
    input.LambdaIN = 0.285;
    input.MS12Input = 2250000;
    input.gHS1Input = 0.1;
-   
+
    LQS1_up_basis<Two_scale> _m;
    setup_LQS1_up_basis_const(_m, input);
 
@@ -48,25 +51,25 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
       _m.get_problems().print_problems(ostr);
       BOOST_FAIL(ostr.str());
    }
-   
+
    softsusy::QedQcd qedqcd;
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings;
    LQS1_up_basis_mass_eigenstates_running m(_m);
-   
+
    m.set_scale(100.0);
 
    const double p = 100.0;
-   
+
    std::cout << std::setprecision(20) << '\n';
    std::cout << "Scale: " << m.get_scale() << '\n';
-   
+
    std::cout << "MS1c: " << m.get_MS1c() << '\n';
    std::cout << "gHS1: " << m.get_gHS1() << '\n';
    std::cout << "lamQL: \n" << m.get_lamQL() << '\n';
    std::cout << "lamql: \n" << m.get_lamql() << '\n';
-   
-   
+
+
    // SM  printouts  of  physical  masses  and  tree - level  masses  and  parameters
    std::cout  << " Physical Masses \n";
    std::cout  << " mh: " << m.get_physical().Mhh << '\n';
@@ -94,6 +97,12 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    // decays with higher-order SM corrections
 
    LQS1_up_basis_decays decays_HO = LQS1_up_basis_decays(m, qedqcd, physical_input, flexibledecay_settings);
+   decays_HO.sm.initialise_from_input(qedqcd);
+   decays_HO.sm.set_loops(m.get_loops());
+   decays_HO.sm.solve_ewsb_tree_level();
+   decays_HO.sm.calculate_DRbar_masses();
+   decays_HO.sm.calculate_pole_masses();
+   decays_HO.sm_decays = Standard_model_decays(decays_HO.sm, qedqcd, physical_input, flexibledecay_settings);
 
    // ------------ tree-level decays ------------
 
