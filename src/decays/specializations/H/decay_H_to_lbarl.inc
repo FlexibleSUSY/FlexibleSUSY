@@ -298,11 +298,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          //std::cout << "\n Counter Term left form-factor struct: " << amp_counterterm.form_factor_left << '\n';
          //std::cout << " Counter Term right form-factor struct: " << amp_counterterm.form_factor_right << '\n';
 
-         std::cout << "\n counter term left struct: " << amp_counterterm.form_factor_left << '\n';
-         std::cout << "\n counter term right struct: " << amp_counterterm.form_factor_right << '\n';
+         std::cout << "\n counter term left: " << ct_FL << '\n';
+         std::cout << " counter term right: " << ct_FR << '\n';
 
          std::cout << "\n form factor left tree: " << amp_tree.form_factor_left << '\n';
          std::cout << " form factor right tree: " << amp_tree.form_factor_right << '\n';
+
+         std::cout << "\n form factor left 1loop SM: " << amp_1l_sm.form_factor_left << '\n';
+         std::cout << " form factor right 1loop SM: " << amp_1l_sm.form_factor_right << '\n';
 
          std::cout << "\n form factor left 1loop: " << amp_1l.form_factor_left << '\n';
          std::cout << " form factor right 1loop: " << amp_1l.form_factor_right << '\n';
@@ -320,6 +323,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       }
 
       res += flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm));
+      
+      if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
+         std::cout << " Decay Width Dec: " << res << '\n';
+      } 
    }
 #endif
 
