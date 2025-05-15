@@ -147,12 +147,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // --------------------------------------------------------------------------------------
 
+      const double mLTree = context.model.get_MFe(indexOut2.at(0));
+
       const auto delta_ZL_lepton_dec =
-         -2*lepton_se_dec_PL - 2*mL1OS*mL1OS*(lepton_se_deriv_dec_PL + lepton_se_deriv_dec_PR) - mL1OS*(lepton_se_deriv_dec_1 + lepton_se_deriv_dec_1);
+         -2*lepton_se_dec_PL - 2*mLTree*mLTree*(lepton_se_deriv_dec_PL + lepton_se_deriv_dec_PR) - mLTree*(lepton_se_deriv_dec_1 + lepton_se_deriv_dec_1);
       const auto delta_ZR_lepton_dec =
-         -2*lepton_se_dec_PR - 2*mL1OS*mL1OS*(lepton_se_deriv_dec_PL + lepton_se_deriv_dec_PR) - mL1OS*(lepton_se_deriv_dec_1 + lepton_se_deriv_dec_1);
+         -2*lepton_se_dec_PR - 2*mLTree*mLTree*(lepton_se_deriv_dec_PL + lepton_se_deriv_dec_PR) - mLTree*(lepton_se_deriv_dec_1 + lepton_se_deriv_dec_1);
       const auto delta_Zm_lepton_dec =
-         (lepton_se_dec_PR + lepton_se_dec_PR) + 0.5/mL1OS*(lepton_1_se_dec + lepton_1_se_dec);
+         (lepton_se_dec_PR + lepton_se_dec_PR) + 0.5/mLTree*(lepton_1_se_dec + lepton_1_se_dec);
 
       const auto delta_Z_higgs_dec = -higgs_se_deriv_dec;
       const auto delta_Zm_higgs_dec = higgs_se_dec/Sqr(mHOS);
