@@ -27,7 +27,7 @@
 #ifndef @ModelName@_SEMI_ANALYTIC_SOLUTIONS_H
 #define @ModelName@_SEMI_ANALYTIC_SOLUTIONS_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_soft_parameters.hpp"
 
 #include <Eigen/Core>
 #include <Eigen/SVD>
@@ -87,14 +87,14 @@ public:
     *
     * @param[in] model model to calculate semi-analytic coefficients for
     */
-   void calculate_coefficients(const @ModelName@_mass_eigenstates&);
+   void calculate_coefficients(const @ModelName@_soft_parameters&);
 
    /**
     * @brief applies the semi-analytic solutions to the model
     *
     * @param[out] model model to apply semi-analytic solutions to
     */
-   void evaluate_solutions(@ModelName@_mass_eigenstates&) const;
+   void evaluate_solutions(@ModelName@_soft_parameters&) const;
 
 private:
    struct Boundary_values {
@@ -103,7 +103,7 @@ private:
 
    struct Model_data {
       Boundary_values boundary_values{};
-      @ModelName@_mass_eigenstates model{};
+      @ModelName@_soft_parameters model{};
       std::vector<int> basis_sets{};
    };
 
@@ -117,11 +117,11 @@ private:
 @semiAnalyticSolutionsDefs@
 
    void initialize_trial_values();
-   void calculate_trial_data(const @ModelName@_mass_eigenstates&);
-   void set_to_boundary_values(@ModelName@_mass_eigenstates&,
+   void calculate_trial_data(const @ModelName@_soft_parameters&);
+   void set_to_boundary_values(@ModelName@_soft_parameters&,
                                const Boundary_values&) const;
-   @ModelName@_mass_eigenstates run_to_output_scale(
-      const @ModelName@_mass_eigenstates&, const Boundary_values&) const;
+   @ModelName@_soft_parameters run_to_output_scale(
+      const @ModelName@_soft_parameters&, const Boundary_values&) const;
    std::map<int,Data_vector_t> create_datasets() const;
 
    template <class MatrixType, int BasisSize, class BasisEvaluator>
