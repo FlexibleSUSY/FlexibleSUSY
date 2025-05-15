@@ -538,10 +538,14 @@ ifeq ($(WITH_LQS1_up_basis),yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_LQS1_self_energies.cpp
+TEST_SRC += \
+		$(DIR)/test_LQS1_FlexibleDecay.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_LQS1_self_energies.cpp
+TEST_SRC += \
+		$(DIR)/test_LQS1_FlexibleDecay.cpp
 endif
 endif
 
@@ -1365,6 +1369,8 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.x: $(LIBTHDMIIEWS
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic) $(LIBTHDMII)
 
 $(DIR)/test_LQS1_self_energies.x: $(LIBLQS1_up_basis)
+
+$(DIR)/test_LQS1_FlexibleDecay.x: $(LIBLQS1_up_basis)
 
 # test rule for files which depend on pv #######################################
 ifneq ($(OPERATING_SYSTEM),Darwin)
