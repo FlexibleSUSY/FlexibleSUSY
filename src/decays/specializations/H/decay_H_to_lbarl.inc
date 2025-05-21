@@ -196,7 +196,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // --------------------------------------------------------------------------------------
 
       const auto amp_1l = calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
-      const auto amp_1l_sm = sm_decays.calculate_amplitude_1l<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, indexIn, indexOut1, indexOut2);
+      const auto amp_1l_sm = sm_decays.calculate_amplitude_1l<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, {}, indexOut1, indexOut2);
       const auto amp_1l_dec = amp_1l-amp_1l_sm;
 
       // mix term between tree and 1loop amplitude
