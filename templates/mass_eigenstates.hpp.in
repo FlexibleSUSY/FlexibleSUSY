@@ -193,6 +193,50 @@ private:
    double F0(double, double, double) const noexcept;
    double G0(double, double, double) const noexcept;
 
+   // 2-loop tadpole functions
+   double TfSS(double, double, double) const;
+   double TfSSS(double, double, double) const;
+   double TfSSSS(double, double, double, double) const;
+   double TfSSFF(double, double, double, double) const;
+   double TfSSFbFb(double, double, double, double) const;
+   double TfFFFbS(double, double, double, double) const;
+   double TfFFbFS(double, double, double, double) const;
+   double TfFbFbFbS(double, double, double, double) const;
+   double TfSV(double) const;
+   double TfFV(double) const;
+
+   // 2-loop self-energy functions
+   double WfSSSS(double, double, double, double) const;
+   double XfSSS(double, double, double) const;
+   double YfSSSS(double, double, double, double) const;
+   double ZfSSSS(double, double, double, double) const;
+   double SfSSS(double, double, double) const;
+   double UfSSSS(double, double, double, double) const;
+   double VfSSSSS(double, double, double, double, double) const;
+   double MfSSSSS(double, double, double, double, double) const;
+   double WfSSSV(double) const;
+   double MfSSSSV(double, double) const;
+   double WfSSFF(double, double, double, double) const;
+   double WfSSFbFb(double, double, double, double) const;
+   double MfFbFbFbFbS(double, double, double, double, double) const;
+   double MfFFbFbFS(double, double, double, double, double) const;
+   double MfFFbFFbS(double, double, double, double, double) const;
+   double MfFFFbFbS(double, double, double, double, double) const;
+   double MfFFFFS(double, double, double, double, double) const;
+   double MfSFbSFbFb(double, double, double, double, double) const;
+   double MfSFSFbF(double, double, double, double, double) const;
+   double MfSFSFFb(double, double, double, double, double) const;
+   double VfSSSFbFb(double, double, double, double, double) const;
+   double VfSSSFF(double, double, double, double, double) const;
+   double VfFbFbFbFbS(double, double, double, double, double) const;
+   double VfFbFFbFS(double, double, double, double, double) const;
+   double VfFbFFFbS(double, double, double, double, double) const;
+   double VfFFbFbFS(double, double, double, double, double) const;
+   double VfFFFbFbS(double, double, double, double, double) const;
+   double VfFFFFS(double, double, double, double, double) const;
+   double GfFFV(double, double) const;
+   double GfFbFbV(double, double) const;
+
    double DB0(double, double, double) const noexcept;
    double DH0(double, double, double) const noexcept;
    double DF0(double, double, double) const noexcept;
