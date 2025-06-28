@@ -26,7 +26,7 @@ double CLASSNAME::get_partial_width<Higgs, Gluon, Gluon>(
    const double mt {context.mass<UpTypeQuark>({2})};
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
-   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && Nf >= 5 && tau < 0.7) {
+   if (flexibledecay_settings.get_decay_corrections().sm > 0 && Nf >= 5 && tau < 0.7) {
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mH);
       // 5-flavour SM alpha_s
