@@ -100,6 +100,7 @@ ExtractColourFactor::usage = "Drop colour generator from the colour factor";
 
 SelfEnergyWrapper::usage = "";
 SelfEnergyDerivativeWrapper::usage = "";
+TadpoleWrapper::usage = "";
 
 Begin["`Private`"];
 
@@ -1743,7 +1744,6 @@ SelfEnergyWrapper[field_?TreeMasses`IsFermion] :=
    ("template<> inline
 auto self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g01, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g02) {
    return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
-
 }\n")& /@ {"1", "PL", "PR"}, "\n"]
    ];
 
@@ -1762,6 +1762,10 @@ auto self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName
    return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "_deriv_p2(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
 }\n")& /@ {"1", "PL", "PR"}, "\n"]
    ];
+
+TadpoleWrapper[] := "template<> inline std::complex<double> tadpole_1loop<" <> TreeMasses`CreateFieldClassName[TreeMasses`GetHiggsBoson[], prefixNamespace -> "fields"] <> ">(const context_base& context, typename field_indices<" <> TreeMasses`CreateFieldClassName[TreeMasses`GetHiggsBoson[], prefixNamespace -> "fields"] <> ">::type const& g01) {
+   return context.model.tadpole_" <> TreeMasses`CreateFieldClassName[TreeMasses`GetHiggsBoson[]] <> "_1loop(" <> If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] >1, "g01.at(0)" <> ""] <> ");
+}\n"
 
 End[];
 EndPackage[];
