@@ -3573,7 +3573,8 @@ FSCheckLoopCorrections[eigenstates_] :=
            If[needToCalculateLoopCorrections,
               SARAH`CalcLoopCorrections[eigenstates];
               selfEnergies = Get[fileName];
-              selfEnergies = Join[selfEnergies, CorrectionListVectorVector[eigenstates]];
+              Get["createVPVZ.m"];
+              AppendTo[selfEnergies, {{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}, Global`GetVPVZSelfEnergy}];
               Put[selfEnergies, fileName];
              ];
           ];
