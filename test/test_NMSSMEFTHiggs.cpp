@@ -748,7 +748,7 @@ double calc_DMh(double ms, double tb, double xt, double lambda, double kappa, in
          settings.set(Spectrum_generator_settings::eft_matching_scale, Q);
          const double Mh_at_Q = calc_Mh(input, qedqcd, settings);
          const double diff = std::abs(Mh - Mh_at_Q); // Eq.(8.1) arxiv:2003.04639
-         if (diff > DMh_Q) {
+         if (Mh_at_Q > 0 && diff > DMh_Q) {
             DMh_Q = diff;
          }
       }

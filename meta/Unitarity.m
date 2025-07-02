@@ -28,13 +28,14 @@ Begin["`Private`"];
 
 FSScatteringPairsSizes[pairs_] := Map[TreeMasses`GetDimension, pairs, {2}];
 
-InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0, decrementIndices, removeFactor=16*Pi},
+InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Parameters`FindAllParametersClassified[a0Input], paramsCPP, mixingCPP, a0, decrementIndices, removeFactor=16*Pi, inputPars},
    (* CPP definitions of parameters present in the expression *)
    paramsCPP =
       StringJoin[
          ("const auto " <> ToString@CConversion`ToValidCSymbol[#] <>
             " = model.get_" <> ToString@CConversion`ToValidCSymbol[#] <> "();\n")& /@ Join[Parameters`FSModelParameters /. params, Parameters`FSPhases /. params, Parameters`FSOutputParameters /. params]
       ];
+   inputPars = ("const auto " <> ToString@CConversion`ToValidCSymbol[#] <> " = model.get_input_parameters()." <> ToString@CConversion`ToValidCSymbol[#] <> ";\n")& /@ (Parameters`FSInputParameters /. params);
    decrementIndices = (#[i_, j_] /; Or@@(IntegerQ/@{i,j}) :> #@@(If[IntegerQ@#, #-1, #]& /@ {i, j}))& /@ Select[Join[Parameters`FSModelParameters /. params, Parameters`FSOutputParameters /. params], Length[GetParameterDimensions[#]]===2&];
 
    (* replace input parameters with their FS names *)
@@ -114,7 +115,7 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
          ]
       ]
    ];
-   TextFormatting`IndentText[paramsCPP <> "\n" <> resultInfinite]
+   TextFormatting`IndentText[paramsCPP <> inputPars <> resultInfinite]
 ];
 
 GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs, FSScatteringPairsSizes},

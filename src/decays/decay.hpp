@@ -97,16 +97,15 @@ public:
    std::pair<std::string, double> gamgam {};
    std::pair<std::string, double> gg = {};
    double lam {};
+   double undetectedWidth {0.};
 
    double get_undetected_width() const { return undetectedWidth; }
    void calculate_undetected_br(bool withTop) {
-      const double _undetectedWidth = width - invWidth - std::norm(dd.second) - std::norm(uu.second) - std::norm(ss.second) - std::norm(cc.second) - std::norm(bb.second) - (withTop ? std::norm(tt.second) : 0.) - std::norm(ee.second) - std::norm(mumu.second) - std::norm(tautau.second) - std::norm(emu.second) - std::norm(etau.second) - std::norm(mutau.second) - Sqr(WW.second) - Sqr(ZZ.second) - Sqr(Zgam.second) - Sqr(gamgam.second) - Sqr(gg.second);
-      if (!(_undetectedWidth < 0 && std::abs(_undetectedWidth)/width < 1e-10)) {
-         undetectedWidth = _undetectedWidth;
+      undetectedWidth += width - invWidth;
+      if (undetectedWidth < 0 && std::abs(undetectedWidth)/width < 1e-10) {
+         undetectedWidth = 0.;
       }
    }
-private:
-   double undetectedWidth {0.};
 };
 
 class EffectiveCoupling_list {
@@ -125,8 +124,8 @@ public:
       return effective_coupling_list[index];
    }
 
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, double> const&);
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, std::complex<double>> const&);
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, double> const&, double);
+   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, std::complex<double>> const&, double);
    void set_invisible_width(std::string const& p, double);
    void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
 
