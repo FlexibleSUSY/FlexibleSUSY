@@ -238,13 +238,19 @@ AppendFieldIndices[lst_List, idx__] :=
     Module[{k, field, result = lst},
            For[k = 1, k <= Length[result], k++,
                field = GetField[result[[k]]];
+               If[ListQ[field],
                If[GetDimension[field[[1]]] > 1,
                   result[[k,1,1]] = field[[1]][(List@idx)[[1]]];
                  ];
                If[GetDimension[field[[2]]] > 1,
                   result[[k,1,2]] = field[[2]][(List@idx)[[2]]];
                  ];
-              ];
+              ,
+               If[GetDimension[field] > 1,
+               result[[k,1]] = field[idx];
+               ]
+               ]
+           ];
            result
           ];
 
@@ -516,7 +522,7 @@ ExtractFieldName[field_[PR]]          := ExtractFieldName[field];
 ExtractFieldName[field_[1]]           := ExtractFieldName[field];
 ExtractFieldName[field_[idx_]]        := ExtractFieldName[field];
 ExtractFieldName[field_]              := ToValidCSymbolString[field];
-ExtractFieldName[{field_, field_}]              := ToValidCSymbolString[field];
+ExtractFieldName[{field_, field_}]    := ToValidCSymbolString[field];
 
 CreateSelfEnergyFunctionName[field_, loops_] :=
    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
