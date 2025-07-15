@@ -1846,7 +1846,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
 ";
              ];
            If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesNMSSM[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesNMSSM[{{SARAH`HiggsBoson,SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
 #ifdef ENABLE_HIMALAYA
 #include \"himalaya/HierarchyCalculator.hpp\"
@@ -1856,7 +1856,13 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
              ];
            If[FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesNMSSM[SARAH`HiggsBoson];
-              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesNMSSM[{SARAH`HiggsBoson, SARAH`PseudoScalar}];
+              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} =
+                  SelfEnergies`CreateTwoLoopSelfEnergiesNMSSM[
+                     {
+                        {SARAH`HiggsBoson, SARAH`HiggsBoson},
+                        {SARAH`PseudoScalar, SARAH`PseudoScalar}
+                     }
+                  ];
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n#include \"nmssm_twoloophiggs.hpp\"\n";
              ];
            twoLoopThresholdHeaders = ThresholdCorrections`GetTwoLoopThresholdHeaders[];

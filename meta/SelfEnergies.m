@@ -516,45 +516,24 @@ ExtractChiraility[field_[1]]           := "_1";
 ExtractChiraility[field_[idx_]]        := ExtractChiraility[field];
 ExtractChiraility[field_]              := "";
 
-ExtractFieldName[field_[idx1_,idx2_]] := ExtractFieldName[field];
-ExtractFieldName[field_[PL]]          := ExtractFieldName[field];
-ExtractFieldName[field_[PR]]          := ExtractFieldName[field];
-ExtractFieldName[field_[1]]           := ExtractFieldName[field];
-ExtractFieldName[field_[idx_]]        := ExtractFieldName[field];
-ExtractFieldName[field_]              := ToValidCSymbolString[field];
-ExtractFieldName[{field_, field_}]    := ToValidCSymbolString[field];
+ExtractFieldName[field_[_]]                  := ExtractFieldName[field];
+ExtractFieldName[{field1_[_], field2_[_]}]   := ExtractFieldName[{field1, field2}];
+ExtractFieldName[field_]                     := ToValidCSymbolString[field];
+ExtractFieldName[{field_, field_}]           := ToValidCSymbolString[field];
+(* Z-gamma self energy case *)
+ExtractFieldName[{field1_, field2_}]         := ToValidCSymbolString[field1] <> ToValidCSymbolString[field2];
 
 CreateSelfEnergyFunctionName[field_, loops_] :=
-   "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
-CreateSelfEnergyFunctionName[{field_, field_}, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
-CreateSelfEnergyFunctionName[{field_, field_}[chirality_], loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop_" <> ToString[chirality];
-CreateSelfEnergyFunctionName[{field_[_], field_[_]}[chirality_], loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop_" <> ToString[chirality];
-CreateSelfEnergyFunctionName[{field1_, field2_}, loops_] :=
-    "self_energy_" <> ExtractFieldName[field1] <> ExtractFieldName[field2] <> "_" <> ToString[loops] <> "loop";
-CreateSelfEnergyFunctionName[{field1_, field2_}[chirality_], loops_] :=
-    "self_energy_" <> ExtractFieldName[field1] <> ExtractFieldName[field2] <> "_" <> ToString[loops] <> "loop_" <> ToString[chirality];
 
 CreateSelfEnergyDerivativeFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_deriv_p2";
 
 CreateHeavySelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_heavy";
-CreateHeavySelfEnergyFunctionName[{field_, field_}[chirality_], loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop_" <> ToString[chirality] <> "_heavy";
-CreateHeavySelfEnergyFunctionName[{field_[_], field_[_]}[chirality_], loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop_" <> ToString[chirality] <> "_heavy";
-CreateHeavySelfEnergyFunctionName[{field_, field_}, loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> "_heavy";
 
-CreateHeavyRotatedSelfEnergyFunctionName[{field_, field_}, loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> "_heavy_rotated";
-CreateHeavyRotatedSelfEnergyFunctionName[{field_, field_}[chirality_], loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop_" <> ToString[chirality] <> "_heavy_rotated";
-CreateHeavyRotatedSelfEnergyFunctionName[{field_[_], field_[_]}[chirality_], loops_] :=
-    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop_" <> ToString[chirality] <> "_heavy_rotated";
+CreateHeavyRotatedSelfEnergyFunctionName[field_, loops_] :=
+    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_heavy_rotated";
 
 CreateTadpoleFunctionName[field_, loops_] :=
     "tadpole_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
@@ -580,7 +559,7 @@ CreateFunctionPrototype[tadpole_SelfEnergies`Tadpole, loops_] :=
 
 CreateFunctionPrototype[selfEnergy_, loops_] :=
     CreateFunctionName[selfEnergy, loops] <>
-    "(" <> CreateCType[CConversion`ScalarType[CConversion`realScalarCType]] <> " p " <> DeclareFieldIndices[GetField[selfEnergy]] <> ") const";
+    "(" <> CreateCType[CConversion`ScalarType[CConversion`realScalarCType]] <> " p" <> DeclareFieldIndices[GetField[selfEnergy]] <> ") const";
 
 CreateFunctionPrototypeMatrix[s_, loops_] :=
     CreateFunctionName[s, loops] <> "(double p) const";
@@ -706,7 +685,7 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            ];
            (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
            If[ValueQ[SARAH`HiggsBoson],
-              derivatives = Cases[nPointFunctions, FSSelfEnergy[SARAH`HiggsBoson | SARAH`HiggsBoson[__], ___]];
+              derivatives = Cases[nPointFunctions, FSSelfEnergy[{SARAH`HiggsBoson, SARAH`HiggsBoson} | {SARAH`HiggsBoson[__], SARAH`HiggsBoson[__]}, ___]];
 
               (* SARAH`sum has Attribute Constant because why not!? *)
               ClearAttributes[SARAH`sum, Constant];
@@ -996,8 +975,7 @@ CreateTwoLoopTadpolesNMSSM[higgsBoson_] :=
 GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "SM", 2] :=
     Module[{mtStr, ytStr, mbStr, ybStr, mtauStr, ytauStr, g3Str},
-           AssertFieldDimension[particle[[1]], 1, model];
-           AssertFieldDimension[particle[[2]], 1, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 1, model];
            mtStr   = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]];
            ytStr   = CConversion`RValueToCFormString[Parameters`GetThirdGeneration[SARAH`UpYukawa]];
            mbStr   = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]]];
@@ -1041,8 +1019,7 @@ return self_energy;"
 GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "SM", 3] :=
     Module[{mTop, mtStr, yt, ytStr, g3Str, mHiggs, mhStr},
-           AssertFieldDimension[particle[[1]], 1, model];
-           AssertFieldDimension[particle[[2]], 1, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 1, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mtStr   = CConversion`RValueToCFormString[mTop];
            yt      = Parameters`GetThirdGeneration[SARAH`UpYukawa];
@@ -1078,8 +1055,7 @@ return self_energy;"
 GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "SM", 4] :=
     Module[{mTop, mtStr, yt, ytStr, g3Str, mHiggs, mhStr},
-           AssertFieldDimension[particle[[1]], 1, model];
-           AssertFieldDimension[particle[[2]], 1, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 1, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mtStr   = CConversion`RValueToCFormString[mTop];
            yt      = Parameters`GetThirdGeneration[SARAH`UpYukawa];
@@ -1103,10 +1079,10 @@ if (HIGGS_4LOOP_CORRECTION_AT_AS_AS_AS) {
 return self_energy;"
           ];
 
-GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
+GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "Split", 3] :=
     Module[{mTop, mGluino, mtStr, mgStr, yt, ytStr, g3Str},
-           AssertFieldDimension[particle, 1, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 1, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mtStr   = CConversion`RValueToCFormString[mTop];
            mGluino = TreeMasses`GetMass[Parameters`GetParticleFromDescription["Gluino"]];
@@ -1131,12 +1107,12 @@ if (HIGGS_3LOOP_CORRECTION_AT_AS_AS) {
 return self_energy;"
           ];
 
-GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
+GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "MSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
             vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mAStr},
-           AssertFieldDimension[particle, 2, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
            mTau    = TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]];
@@ -1217,12 +1193,12 @@ if (HIGGS_2LOOP_CORRECTION_ATAU_ATAU) {
 return self_energy_2l;"
           ];
 
-GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
+GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`PseudoScalar, SARAH`PseudoScalar},
                               model_String /; model === "MSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
             vev2Str, vuStr, vdStr, tanbStr, muStr, m3Str, mAStr},
-           AssertFieldDimension[particle, 2, model];
+           AssertFieldDimension[SARAH`PseudoScalar, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
            mTau    = TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]];
@@ -1303,13 +1279,13 @@ if (HIGGS_2LOOP_CORRECTION_ATAU_ATAU) {
 return self_energy_2l;"
           ];
 
-GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
+GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "NMSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
             vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA2Str,
             lambdaStr},
-           AssertFieldDimension[particle, 3, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
            mTau    = TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]];
@@ -1401,13 +1377,13 @@ if (HIGGS_2LOOP_CORRECTION_ATAU_ATAU) {
 return self_energy_2l;"
           ];
 
-GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
+GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`PseudoScalar, SARAH`PseudoScalar},
                               model_String /; model === "NMSSM", 2] :=
     Module[{g3Str, mtStr, mbStr, mtauStr,
             mTop, mBot, mTau,
             vev2Str, vuStr, vdStr, vsStr, tanbStr, muStr, m3Str, mA2Str,
             lambdaStr},
-           AssertFieldDimension[particle, 3, model];
+           AssertFieldDimension[SARAH`PseudoScalar, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
            mTau    = TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]];
@@ -1503,13 +1479,13 @@ return self_energy_2l;"
 DivideOrReturnZeroStr[a_, b_] :=
     CConversion`RValueToCFormString[b] <> " == 0 ? 0 : " <> CConversion`RValueToCFormString[a] <> "/" <> CConversion`RValueToCFormString[b];
 
-GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
+GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "MSSM", 3] :=
     Module[{g3Str, mtStr, mbStr, meStr, mTop, mBot, mTau,
             vuStr, vdStr, muStr, m3Str, mAStr,
             AtStr, AbStr, AeStr, mWStr, mZStr,
             mq2Str, md2Str, mu2Str, ml2Str, me2Str},
-           AssertFieldDimension[particle, 2, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 2, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
            mTau    = TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]];
@@ -1646,7 +1622,7 @@ throw HimalayaError(\"The 3-loop corrections to Mh require Himalaya 1.0 \"
 return self_energy_3l;"
           ];
 
-GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
+GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "NMSSM", 3] :=
     Module[{g3Str, mtStr, mbStr, meStr, mTop, mBot, mTau,
             vuStr, vdStr, muStr, m3Str, mA2Str,
@@ -1655,7 +1631,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
             mssm2LSelfEnergyType = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, 2, 2]],
             nmssm2LSelfEnergyType = CConversion`CreateCType[TreeMasses`GetMassMatrixType[SARAH`HiggsBoson]]
            },
-           AssertFieldDimension[particle, 3, model];
+           AssertFieldDimension[SARAH`HiggsBoson, 3, model];
            mTop    = TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]];
            mBot    = TreeMasses`GetMass[TreeMasses`GetDownQuark[3,True]];
            mTau    = TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]];
