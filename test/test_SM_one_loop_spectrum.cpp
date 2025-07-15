@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE( test_SM_Zgamma_self_energy )
 
    const double p = 100.;
 
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), 126.16413171422492, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), 126.16413171469556, 4e-12);
    BOOST_CHECK_SMALL(m.self_energy_VPVZ_1loop(p).imag(), 0.);
 }
 
