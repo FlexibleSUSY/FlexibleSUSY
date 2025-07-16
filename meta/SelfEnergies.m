@@ -509,7 +509,6 @@ DeclareFieldIndices[field_[1]]  := DeclareFieldIndices[field];
 DeclareFieldIndices[field_[ind_]] :=
     "int " <> ToValidCSymbolString[ind];
 
-ExtractChiraility[field_[idx1_,idx2_]] := ExtractChiraility[field];
 ExtractChiraility[field_[PL]]          := "_PL";
 ExtractChiraility[field_[PR]]          := "_PR";
 ExtractChiraility[field_[1]]           := "_1";
@@ -636,8 +635,8 @@ for (int i = 0; i < " <> ToString[dim1] <> "; i++) {
           ];
 
 FillSelfEnergyMatrix[nPointFunction_, sym_String] :=
-    Module[{particle = GetField[nPointFunction]},
-           Which[(IsScalar[particle] || IsVector[particle]) && SelfEnergyIsSymmetric[particle],
+    Module[{particle = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}},
+           Which[(IsScalar[particle[[1]]] || IsVector[particle[[1]]]) && SelfEnergyIsSymmetric[particle[[1]]],
                  FillHermitianSelfEnergyMatrix[nPointFunction, sym],
                  True,
                  FillGeneralSelfEnergyFunction[nPointFunction, sym]
