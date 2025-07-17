@@ -24,15 +24,28 @@
 
 BeginPackage["SelfEnergies`", {"SARAH`", "TextFormatting`", "CConversion`", "TreeMasses`", "Parameters`", "Vertices`", "Utils`"}];
 
-FSSelfEnergy::usage="self-energy head";
+FSSelfEnergy::usage = "
+Head representing a self energy in a format
 
-FSSelfEnergyDerivative::usage="head for derivative of self-energy w.r.t. p^2";
+FSSelfEnergy[{particle1[gen1], particle2[gen2]}[lor], expr]
+
+where gen1 and gen2 are integers representing generations and lor = 1|PL|PR
+
+The first argument can be
+
+{particle1, particle2} for dim=1 scalar or vector multiplet
+{particle1[gen1], particle2[gen2]} for dim>1 scalar or vector multiplet
+{particle1, particle2}[lor] for dim=1 fermion multiplet
+{particle1[gen1], particle2[gen2]}[lor] for dim>1 fermion multiplet 
+";
+
+FSSelfEnergyDerivative::usage="Head for derivative of self-energy w.r.t. p^2, see FSSelfEnergy for argument list";
 
 (* symbols for derivative of loop functions w.r.t. p^2 *)
 { DB0, DF0, DG0 }
 
-FSHeavySelfEnergy::usage="head for self-energy w/o BSM particles";
-FSHeavyRotatedSelfEnergy::usage="head for self-energy w/o BSM particles in mass eigenstate basis";
+FSHeavySelfEnergy::usage="head for self-energy w/o BSM particles, see FSSelfEnergy for argument list";
+FSHeavyRotatedSelfEnergy::usage="head for self-energy w/o BSM particles in mass eigenstate basis, see FSSelfEnergy for argument list";
 Tadpole::usage="tadpole head";
 
 GetField::usage="Returns field in self-energy or tadpole";
