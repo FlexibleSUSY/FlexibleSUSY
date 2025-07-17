@@ -121,7 +121,7 @@ DefVZSelfEnergy[] :=
            result = "const auto pizzt   = ";
            If[!MuonDecayWorks,
               Return[result <> "0.;"]];
-           result <> "Re(model->" <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorZ, 1] <> "(p));"
+           result <> "Re(model->" <> SelfEnergies`CreateSelfEnergyFunctionName[{SARAH`VectorZ, SARAH`VectorZ}, 1] <> "(p));"
           ];
 
 DefVWSelfEnergy[] :=
@@ -129,7 +129,7 @@ DefVWSelfEnergy[] :=
            result = "const auto piwwt   = ";
            If[!MuonDecayWorks,
               Return[result <> "0.;"]];
-           result <> "Re(model->" <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(p));"
+           result <> "Re(model->" <> SelfEnergies`CreateSelfEnergyFunctionName[{SARAH`VectorW, SARAH`VectorW}, 1] <> "(p));"
           ];
 
 YukawaMatching[] :=
@@ -162,11 +162,11 @@ YukawaMatching[] :=
 DefVZVWSelfEnergies[] :=
     Module[{result},
            result = "const double sigma_Z_MZ_Model = Re(model->";
-           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorZ, 1] <> "(MZ));\n";
+           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[{SARAH`VectorZ, SARAH`VectorZ}, 1] <> "(MZ));\n";
            result = result <> "const double sigma_W_MW_Model = Re(model->";
-           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(MW));\n";
+           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[{SARAH`VectorW, SARAH`VectorW}, 1] <> "(MW));\n";
            result = result <> "const double sigma_W_0_Model  = Re(model->";
-           result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(0.));"
+           result <> SelfEnergies`CreateSelfEnergyFunctionName[{SARAH`VectorW, SARAH`VectorW}, 1] <> "(0.));"
           ];
 
 DeltaAlphaHatBSM[scheme_] :=
