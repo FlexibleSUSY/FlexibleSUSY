@@ -238,17 +238,17 @@ AppendFieldIndices[lst_List, idx__] :=
     Module[{k, field, result = lst},
            For[k = 1, k <= Length[result], k++,
                field = GetField[result[[k]]];
+               (* self energies or tadpoles *)
                If[ListQ[field],
-               If[GetDimension[field[[1]]] > 1,
-                  result[[k,1,1]] = field[[1]][(List@idx)[[1]]];
-                 ];
-               If[GetDimension[field[[2]]] > 1,
-                  result[[k,1,2]] = field[[2]][(List@idx)[[2]]];
-                 ];
-              ,
-               If[GetDimension[field] > 1,
-               result[[k,1]] = field[idx];
-               ]
+                  If[GetDimension[field[[1]]] > 1,
+                     result[[k,1,1]] = field[[1]][(List@idx)[[1]]];
+                  ];
+                  If[GetDimension[field[[2]]] > 1,
+                     result[[k,1,2]] = field[[2]][(List@idx)[[2]]];
+                  ],
+                  If[GetDimension[field] > 1,
+                     result[[k,1]] = field[idx];
+                  ]
                ]
            ];
            result
