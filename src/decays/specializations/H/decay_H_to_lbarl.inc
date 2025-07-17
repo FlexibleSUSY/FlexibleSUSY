@@ -1,3 +1,5 @@
+#include <iostream>
+
 template <>
 double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLepton>(
    const context_base& context,
@@ -39,6 +41,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const auto amp_tree =
       calculate_amplitude_tree<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
 
+   std::cout << std::setprecision(20) << '\n';
+
    // higher order SM corrections
    if (flexibledecay_settings.get_decay_corrections().sm > 0) {
       // 1-loop QED corrections
@@ -54,20 +58,45 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       namespace smns = standard_model_cxx_diagrams;
       smns::context_base sm_context {sm};
 
+      std::cout << " SM scale: " << sm.get_scale() << '\n';
+
+      std::cout << "\n SM physical Higgs Mass: " << sm.get_physical().Mhh << '\n';
+      std::cout << " SM physical Z Mass: " << sm.get_physical().MVZ << '\n';
+      std::cout << " SM physical W Mass: " << sm.get_physical().MVWp << '\n';
+      std::cout << " SM physical e Mass: " << sm.get_physical().MFe(0) << '\n';
+      std::cout << " SM physical mu Mass: " << sm.get_physical().MFe(1) << '\n';
+      std::cout << " SM physical tau Mass: " << sm.get_physical().MFe(2) << '\n';
+      
+      std::cout << "\n SM Higgs Mass: " << sm.get_Mhh() << '\n';
+      std::cout << " SM Z Mass: " << sm.get_MVZ() << '\n';
+      std::cout << " SM W Mass: " << sm.get_MVWp() << '\n';
+      std::cout << " SM lepton Mass: " << sm.get_MFe() << '\n';
+      std::cout << " SM up Mass: " << sm.get_MFu() << '\n';
+      std::cout << " SM down Mass: " << sm.get_MFd() << '\n';
+      
+      std::cout  << " SM g1: " << sm.get_g1() << '\n';
+      std::cout  << " SM g2: " << sm.get_g2() << '\n';
+      std::cout  << " SM v: " << sm.get_v() << '\n';
+
+
+      const double mHSMOS = sm.get_physical().Mhh;
+      const double mL1SMOS = sm.get_physical().MFe(indexOut1.at(0));
+      const double mL2SMOS = sm.get_physical().MFe(indexOut2.at(0));
+
       // self-energies, to be moved outside
 
       // lepton self-energy [PL]
       const auto lepton_se_all_PL =
          self_energy_1loop_PL<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_se_sm_PL =
-         smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+         smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_dec_PL = lepton_se_all_PL - lepton_se_sm_PL;
 
       // lepton self-energy [PR]
       const auto lepton_se_all_PR =
          self_energy_1loop_PR<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_se_sm_PR =
-         smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+         smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_dec_PR =
          lepton_se_all_PR - lepton_se_sm_PR;
 
@@ -75,7 +104,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto lepton_1_all =
          self_energy_1loop_1<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_1_sm =
-         smns::self_energy_1loop_1<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+         smns::self_energy_1loop_1<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_1_se_dec =
          lepton_1_all - lepton_1_sm;
 
@@ -83,7 +112,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto lepton_se_deriv_all_PL =
          self_energy_1loop_PL_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_se_deriv_sm_PL =
-         smns::self_energy_1loop_PL_deriv_p2<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+         smns::self_energy_1loop_PL_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_deriv_dec_PL =
          lepton_se_deriv_all_PL - lepton_se_deriv_sm_PL;
 
@@ -91,7 +120,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto lepton_se_deriv_all_PR =
          self_energy_1loop_PR_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_se_deriv_sm_PR =
-         smns::self_energy_1loop_PR_deriv_p2<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+         smns::self_energy_1loop_PR_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_deriv_dec_PR =
          lepton_se_deriv_all_PR - lepton_se_deriv_sm_PR;
 
@@ -99,24 +128,24 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto lepton_se_deriv_all_1 =
          self_energy_1loop_1_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_se_deriv_sm_1 =
-         smns::self_energy_1loop_1_deriv_p2<smns::fields::Fe>(sm_context, mL1OS).coeff(indexOut1.at(0), indexOut2.at(0));
+         smns::self_energy_1loop_1_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_deriv_dec_1 =
          lepton_se_deriv_all_1 - lepton_se_deriv_sm_1;
 
       // higgs se
       const auto higgs_se_all = self_energy_1loop<Higgs>(context, mHOS, indexIn, indexIn);
-      const auto higgs_se_sm = smns::self_energy_1loop<smns::fields::hh>(sm_context, mHOS);
+      const auto higgs_se_sm = smns::self_energy_1loop<smns::fields::hh>(sm_context, mHSMOS);
       const auto higgs_se_dec = higgs_se_all - higgs_se_sm;
 
       // higgs se derivative
       const auto higgs_se_deriv_all = self_energy_1loop_deriv_p2<Higgs>(context, mHOS, indexIn, indexIn);
-      const auto higgs_se_deriv_sm = smns::self_energy_1loop_deriv_p2<smns::fields::hh>(sm_context, mHOS);
+      const auto higgs_se_deriv_sm = smns::self_energy_1loop_deriv_p2<smns::fields::hh>(sm_context, mHSMOS);
       const auto higgs_se_deriv_dec = higgs_se_deriv_all - higgs_se_deriv_sm;
 
       // photon se
-      //const auto photon_se_all = self_energy_1loop<Photon>(context, 0, {}, {});
-      //const auto photon_se_sm = smns::self_energy_1loop<smns::fields::VP>(sm_context, 0);
-      //const auto photon_se_dec = photon_se_all - photon_se_sm;
+      const auto photon_se_all = self_energy_1loop<Photon>(context, 0, {}, {});
+      const auto photon_se_sm = smns::self_energy_1loop<smns::fields::VP>(sm_context, 0);
+      const auto photon_se_dec = photon_se_all - photon_se_sm;
 
       // photon se derivative
       const auto photon_se_deriv_all = self_energy_1loop_deriv_p2<Photon>(context, 0, {}, {});
@@ -125,72 +154,129 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // Z se
       const double mZOS = context.physical_mass<ZBoson>({});
+      const double mZSMOS = sm.get_physical().MVZ;
       const auto Z_se_all = self_energy_1loop<ZBoson>(context, mZOS, {}, {});
-      const auto Z_se_sm = smns::self_energy_1loop<smns::fields::VZ>(sm_context, mZOS);
+      const auto Z_se_sm = smns::self_energy_1loop<smns::fields::VZ>(sm_context, mZSMOS);
       const auto Z_se_dec = Z_se_all - Z_se_sm;
 
       // Z se derivative
       const auto Z_se_deriv_all = self_energy_1loop_deriv_p2<ZBoson>(context, mZOS, {}, {});
-      const auto Z_se_deriv_sm = smns::self_energy_1loop_deriv_p2<smns::fields::VZ>(sm_context, mZOS);
+      const auto Z_se_deriv_sm = smns::self_energy_1loop_deriv_p2<smns::fields::VZ>(sm_context, mZSMOS);
       const auto Z_se_deriv_dec = Z_se_deriv_all - Z_se_deriv_sm;
 
       // W se
       const double mWOS = context.physical_mass<WpBoson>({});
+      const double mWSMOS = sm.get_physical().MVWp;
       const auto W_se_all = self_energy_1loop<WpBoson>(context, mWOS, {}, {});
-      const auto W_se_sm = smns::self_energy_1loop<smns::fields::VWp>(sm_context, mWOS);
+      const auto W_se_sm = smns::self_energy_1loop<smns::fields::VWp>(sm_context, mWSMOS);
       const auto W_se_dec = W_se_all - W_se_sm;
 
       // W se derivative
       const auto W_se_deriv_all = self_energy_1loop_deriv_p2<WpBoson>(context, mWOS, {}, {});
-      const auto W_se_deriv_sm = smns::self_energy_1loop_deriv_p2<smns::fields::VWp>(sm_context, mWOS);
+      const auto W_se_deriv_sm = smns::self_energy_1loop_deriv_p2<smns::fields::VWp>(sm_context, mWSMOS);
       const auto W_se_dec_deriv_p2 = W_se_deriv_all - W_se_deriv_sm;
 
+
+      // --------------------------------------------------------------------------------------
+
+      const double mLSMTree = sm.get_MFe(indexOut2.at(0));
+
+      const auto delta_ZL_lepton_sm =
+         -2*lepton_se_sm_PL - 2*mLSMTree*mLSMTree*(lepton_se_deriv_sm_PL + lepton_se_deriv_sm_PR) - mLSMTree*(lepton_se_deriv_sm_1 + lepton_se_deriv_sm_1);
+      const auto delta_ZR_lepton_sm =
+         -2*lepton_se_sm_PR - 2*mLSMTree*mLSMTree*(lepton_se_deriv_sm_PL + lepton_se_deriv_sm_PR) - mLSMTree*(lepton_se_deriv_sm_1 + lepton_se_deriv_sm_1);
+      const auto delta_Zm_lepton_sm =
+         (lepton_se_sm_PR + lepton_se_sm_PR) + 0.5/mLSMTree*(lepton_1_sm + lepton_1_sm);
+
+      const auto delta_Z_higgs_sm = -higgs_se_deriv_sm;
+      const auto delta_Zm_higgs_sm = higgs_se_sm/Sqr(mHSMOS);
+
+      const auto delta_Z_W_sm = -W_se_deriv_sm;
+      const auto delta_Zm_W_sm = W_se_sm/Sqr(mWSMOS);
+
+      const auto delta_Z_Z_sm = -Z_se_deriv_sm;
+      const auto delta_Zm_Z_sm = Z_se_sm/Sqr(mZSMOS);
+
+      const auto delta_Z_A_sm = -photon_se_deriv_sm;
+
+      const double theta_W_sm = sm.ThetaW();
+
+      const auto delta_e_sm = -0.5*delta_Z_A_sm; //- tan(theta_W) / 2 * delta_Z_ZA
+
+      // it is still necessary to decine the W-and Z-mass as well as the vev
+      // vev renormalization constant in the decoupling scheme
+      const auto delta_Z_vev_sm =
+         (1 - 0.5/Sqr(std::sin(theta_W_sm)))*delta_Zm_W_sm + 0.5/Sqr(std::tan(theta_W_sm))*delta_Zm_Z_sm - delta_e_sm;
+      
       // --------------------------------------------------------------------------------------
 
       const double mLTree = context.model.get_MFe(indexOut2.at(0));
 
-      const auto delta_ZL_lepton_dec =
-         -2*lepton_se_dec_PL - 2*mLTree*mLTree*(lepton_se_deriv_dec_PL + lepton_se_deriv_dec_PR) - mLTree*(lepton_se_deriv_dec_1 + lepton_se_deriv_dec_1);
-      const auto delta_ZR_lepton_dec =
-         -2*lepton_se_dec_PR - 2*mLTree*mLTree*(lepton_se_deriv_dec_PL + lepton_se_deriv_dec_PR) - mLTree*(lepton_se_deriv_dec_1 + lepton_se_deriv_dec_1);
-      const auto delta_Zm_lepton_dec =
-         (lepton_se_dec_PR + lepton_se_dec_PR) + 0.5/mLTree*(lepton_1_se_dec + lepton_1_se_dec);
+      const auto delta_ZL_lepton =
+         -2*lepton_se_all_PL - 2*mLTree*mLTree*(lepton_se_deriv_all_PL + lepton_se_deriv_all_PR) - mLTree*(lepton_se_deriv_all_1 + lepton_se_deriv_all_1);
+      const auto delta_ZR_lepton =
+         -2*lepton_se_all_PR - 2*mLTree*mLTree*(lepton_se_deriv_all_PL + lepton_se_deriv_all_PR) - mLTree*(lepton_se_deriv_all_1 + lepton_se_deriv_all_1);
+      const auto delta_Zm_lepton =
+         (lepton_se_all_PR + lepton_se_all_PR) + 0.5/mLTree*(lepton_1_all + lepton_1_all);
 
-      const auto delta_Z_higgs_dec = -higgs_se_deriv_dec;
-      const auto delta_Zm_higgs_dec = higgs_se_dec/Sqr(mHOS);
+      const auto delta_Z_higgs = -higgs_se_deriv_all;
+      const auto delta_Zm_higgs = higgs_se_all/Sqr(mHOS);
 
-      const auto delta_Z_W_dec = -W_se_dec_deriv_p2;
-      const auto delta_Zm_W_dec = W_se_dec/Sqr(mWOS);
+      const auto delta_Z_W = -W_se_deriv_all;
+      const auto delta_Zm_W = W_se_all/Sqr(mWOS);
 
-      const auto delta_Z_Z_dec = -Z_se_deriv_dec;
-      const auto delta_Zm_Z_dec = Z_se_dec/Sqr(mZOS);
+      const auto delta_Z_Z = -Z_se_deriv_all;
+      const auto delta_Zm_Z = Z_se_all/Sqr(mZOS);
 
-      const auto delta_Z_A_dec = -photon_se_deriv_dec;
+      const auto delta_Z_A = -photon_se_deriv_all;
 
       const double theta_W = context.model.ThetaW();
 
-      const auto delta_e_dec = -0.5*delta_Z_A_dec; //- tan(theta_W) / 2 * delta_Z_ZA
+      const auto delta_e = -0.5*delta_Z_A; //- tan(theta_W) / 2 * delta_Z_ZA
 
       // it is still necessary to decine the W-and Z-mass as well as the vev
       // vev renormalization constant in the decoupling scheme
-      const auto delta_Z_vev_dec =
-         (1 - 0.5/Sqr(std::sin(theta_W)))*delta_Zm_W_dec + 0.5/Sqr(std::tan(theta_W))*delta_Zm_Z_dec - delta_e_dec;
+      const auto delta_Z_vev =
+         (1 - 0.5/Sqr(std::sin(theta_W)))*delta_Zm_W + 0.5/Sqr(std::tan(theta_W))*delta_Zm_Z - delta_e;
 
 
       // --------------------------------------------------------------------------------------
 
-      const double vev = 248.9397360685197;
+      const auto delta_ZL_lepton_dec = delta_ZL_lepton - delta_ZL_lepton_sm;
+      const auto delta_ZR_lepton_dec = delta_ZR_lepton - delta_ZR_lepton_sm;
+      const auto delta_Zm_lepton_dec = delta_Zm_lepton - delta_Zm_lepton_sm;
+
+      const auto delta_Z_higgs_dec = delta_Z_higgs - delta_Z_higgs_sm;
+      const auto delta_Zm_higgs_dec = delta_Zm_higgs - delta_Zm_higgs_sm;
+
+      const auto delta_Z_W_dec = delta_Z_W - delta_Z_W_sm;
+      const auto delta_Zm_W_dec = delta_Zm_W - delta_Zm_W_sm;
+
+      const auto delta_Z_Z_dec = delta_Z_Z - delta_Z_Z_sm;
+      const auto delta_Zm_Z_dec = delta_Zm_Z - delta_Zm_Z_sm;
+
+      const auto delta_Z_A_dec = delta_Z_A - delta_Z_A_sm;
+
+      const auto delta_e_dec = delta_e - delta_e_sm; //- tan(theta_W) / 2 * delta_Z_ZA
+
+      // it is still necessary to decine the W-and Z-mass as well as the vev
+      // vev renormalization constant in the decoupling scheme
+      const auto delta_Z_vev_dec = (1 - 0.5/Sqr(std::sin(theta_W)))*delta_Zm_W_dec + 0.5/Sqr(std::tan(theta_W))*delta_Zm_Z_dec - delta_e;
+
+
+      // --------------------------------------------------------------------------------------
+
       const auto ct_FL1 =
-         amp_tree.form_factor_left * (0.5*(delta_ZL_lepton_dec + delta_ZR_lepton_dec) + delta_Zm_lepton_dec);
+         amp_tree.form_factor_left * (0.5*(delta_ZL_lepton + delta_ZR_lepton) + delta_Zm_lepton_dec);
       const auto ct_FL2 =
-         amp_tree.form_factor_left * (delta_Z_higgs_dec - delta_Z_vev_dec);
+         amp_tree.form_factor_left * (delta_Z_higgs - delta_Z_vev_dec);
       const auto ct_FL =
          ct_FL1 + ct_FL2;
 
       const auto ct_FR1 =
-         amp_tree.form_factor_right * (0.5*(delta_ZR_lepton_dec + delta_ZL_lepton_dec) + delta_Zm_lepton_dec);
+         amp_tree.form_factor_right * (0.5*(delta_ZR_lepton + delta_ZL_lepton) + delta_Zm_lepton_dec);
       const auto ct_FR2 =
-        amp_tree.form_factor_right * (delta_Z_higgs_dec - delta_Z_vev_dec);
+        amp_tree.form_factor_right * (delta_Z_higgs - delta_Z_vev_dec);
       const auto ct_FR = ct_FR1 + ct_FR2;
 
       // --------------------------------------------------------------------------------------
@@ -214,8 +300,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
 
-         //std::cout << "\n model lam: " << context.model.get_Lambdax() << '\n';
-         //std::cout << " sm lam: " << sm_context.model.get_Lambdax() << '\n';
+         std::cout << "\n model lam: " << context.model.get_Lambdax() << '\n';
+         std::cout << " sm lam: " << sm_context.model.get_Lambdax() << '\n';
 
          //std::cout << "\n model mH: " << context.physical_mass<Higgs>(indexIn) << '\n';
          //std::cout << "\n sm mH: " << sm_context.physical_mass<smns::fields::hh>(indexIn) << '\n';
@@ -223,54 +309,79 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          //std::cout << "\n Autogenerated Self-Energies: " << '\n';
          //std::cout << "\n Higgs Self-Energies: \n";
 
-         //std::cout << "\n Higgs SM: " << higgs_all_contribution << '\n';
-         //std::cout << " Higgs SM deriv: " << higgs_all_contribution_deriv_p2 << '\n';
+         //std::cout << "\n Higgs SM: " << higgs_se_all << '\n';
+         //std::cout << " Higgs SM deriv: " << higgs_se_deriv_all << '\n';
 
          //std::cout << "\n Fermion Self-Energies: \n";
 
-         //std::cout << "\n Fermion SM PL: " << lepton_PL_all_contribution << '\n';
-         //std::cout << " Fermion SM PR: " << lepton_PR_all_contribution << '\n';
-         //std::cout << " Fermion SM 1: " << lepton_1_all_contribution << '\n';
+         std::cout << "\n Fermion SM PL: " << lepton_se_all_PL << '\n';
+         std::cout << " Fermion SM PR: " << lepton_se_all_PR << '\n';
+         std::cout << " Fermion SM 1: " << lepton_1_all << '\n';
 
-         //std::cout << "\n Fermion SM PL deriv: " << fermion_PL_all_contribution_deriv_p2 << '\n';
-         //std::cout << " Fermion SM PR deriv: " << fermion_PR_all_contribution_deriv_p2 << '\n';
-         //std::cout << " Fermion SM 1 deriv: " << fermion_1_all_contribution_deriv_p2 << '\n';
+         std::cout << "\n Fermion SM PL deriv: " << lepton_se_deriv_all_PL << '\n';
+         std::cout << " Fermion SM PR deriv: " << lepton_se_deriv_all_PR << '\n';
+         std::cout << " Fermion SM 1 deriv: " << lepton_se_deriv_all_1 << '\n';
 
-         //std::cout << "\n Z Self-Energies: \n";
-         //std::cout << "\n Z SM: " << Z_all_contribution << '\n';
-         //std::cout << " Z SM deriv: " << Z_all_contribution_deriv_p2 << '\n';
+         std::cout << "\n Z Self-Energies: \n";
+         std::cout << "\n Z SM: " << Z_se_all << '\n';
+         std::cout << " Z SM deriv: " << Z_se_deriv_all << '\n';
 
-         //std::cout << "\n Photon Self-Energies: \n";
-         //std::cout << "\n P SM: " << P_all_contribution << '\n';
-         //std::cout << " P SM deriv: " << P_all_contribution_deriv_p2 << '\n';
+         std::cout << "\n Photon Self-Energies: \n";
+         std::cout << "\n P SM: " << photon_se_all << '\n';
+         std::cout << " P SM deriv: " << photon_se_deriv_all << '\n';
+         
+         std::cout << "\n W Self-Energies: \n";
+         std::cout << "\n W SM: " << W_se_all << '\n';
+         std::cout << " W SM deriv: " << W_se_deriv_all << '\n';
 
          // Build-In Self-Energies
-         //std::cout << "\n Build-in SM Self-Energies: " << '\n';
-         //std::cout << "\n Higgs Self-Energies: \n";
+         std::cout << "\n Build-in SM Self-Energies: " << '\n';
+         std::cout << "\n Higgs Self-Energies: \n";
 
-         //std::cout << "\n Higgs SM: " << higgs_sm_contribution << '\n';
-         //std::cout << " Higgs SM deriv: " << higgs_sm_contribution_deriv_p2 << '\n';
+         std::cout << "\n Higgs SM: " << higgs_se_sm << '\n';
+         std::cout << " Higgs SM deriv: " << higgs_se_deriv_sm << '\n';
 
-         //std::cout << "\n Fermion Self-Energies: \n";
+         std::cout << "\n Fermion Self-Energies: \n";
 
-         //std::cout << "\n Fermion SM PL: " << fermion_PL_sm_contribution << '\n';
-         //std::cout << " Fermion SM PR: " << fermion_PR_sm_contribution << '\n';
-         //std::cout << " Fermion SM 1: " << fermion_1_sm_contribution << '\n';
+         std::cout << "\n Fermion SM PL: " << lepton_se_sm_PL << '\n';
+         std::cout << " Fermion SM PR: " << lepton_se_sm_PR << '\n';
+         std::cout << " Fermion SM 1: " << lepton_1_sm << '\n';
 
-         //std::cout << "\n Fermion SM PL deriv: " << fermion_PL_sm_contribution_deriv_p2 << '\n';
-         //std::cout << " Fermion SM PR deriv: " << fermion_PR_sm_contribution_deriv_p2 << '\n';
-         //std::cout << " Fermion SM 1 deriv: " << fermion_1_sm_contribution_deriv_p2 << '\n';
+         std::cout << "\n Fermion SM PL deriv: " << lepton_se_deriv_sm_PL << '\n';
+         std::cout << " Fermion SM PR deriv: " << lepton_se_deriv_sm_PR << '\n';
+         std::cout << " Fermion SM 1 deriv: " << lepton_se_deriv_sm_1 << '\n';
 
-         //std::cout << "\n Z Self-Energies: \n";
-         //std::cout << "\n Z SM: " << Z_sm_contribution << '\n';
-         //std::cout << " Z SM deriv: " << Z_sm_contribution_deriv_p2 << '\n';
+         std::cout << "\n Z Self-Energies: \n";
+         std::cout << "\n Z SM: " << Z_se_sm << '\n';
+         std::cout << " Z SM deriv: " << Z_se_deriv_sm << '\n';
 
-         //std::cout << "\n Photon Self-Energies: \n";
-         //std::cout << "\n P SM: " << P_sm_contribution << '\n';
-         //std::cout << " P SM deriv: " << P_sm_contribution_deriv_p2 << '\n';
+         std::cout << "\n Photon Self-Energies: \n";
+         std::cout << "\n P SM: " << photon_se_sm << '\n';
+         std::cout << " P SM deriv: " << photon_se_deriv_sm << '\n';
+         
+         std::cout << "\n W Self-Energies: \n";
+         std::cout << "\n W SM: " << W_se_sm << '\n';
+         std::cout << " W SM deriv: " << W_se_deriv_sm << '\n';
 
          // Renormalization Constants
+         std::cout << "\n SM Renormalization Constants" << '\n';
+         std::cout << "\n Higgs Field Renormalization: " << delta_Z_higgs_sm << '\n';
+         std::cout << " Higgs Mass Renormalization: " << delta_Zm_higgs_sm << '\n';
 
+         std::cout << "\n Fermion PL Field Renormalization: " << delta_ZL_lepton_sm << '\n';
+         std::cout << " Fermion PR Field Renormalization: " << delta_ZR_lepton_sm << '\n';
+         std::cout << " Fermion Mass Renormalization: " << delta_Zm_lepton_sm << '\n';
+
+         std::cout << "\n Z Field Renormalization: " << delta_Z_Z_sm << '\n';
+         std::cout << " Z Mass Renormalization: " << delta_Zm_Z_sm << '\n';
+
+         std::cout << "\n W Field Renormalization: " << delta_Z_W_sm << '\n';
+         std::cout << " W Mass Renormalization: " << delta_Zm_W_sm << '\n';
+
+         std::cout << "\n Charge Renormalization: " << delta_e_sm << '\n';
+         std::cout << "\n ev Renormaliztion: " << delta_Z_vev_sm << '\n';
+         
+         std::cout << "\n Decoupling Renormalization Constants" << '\n';
          std::cout << "\n Decoupling Higgs Field Renormalization: " << delta_Z_higgs_dec << '\n';
          std::cout << " Decoupling Higgs Mass Renormalization: " << delta_Zm_higgs_dec << '\n';
 
@@ -288,17 +399,11 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n Decoupling vev Renormaliztion: " << delta_Z_vev_dec << '\n';
 
 
-         //std::cout << "\n Counter Term 1 left form-factor: " << ct_FL1 << '\n';
-         //std::cout << " Counter Term 1 right form-factor: " << ct_FR1 << '\n';
+         std::cout << "\n Counter Term 1 left form-factor: " << ct_FL1 << '\n';
+         std::cout << " Counter Term 1 right form-factor: " << ct_FR1 << '\n';
 
-         //std::cout << "\n Counter Term 2 left form-factor: " << ct_FL2 << '\n';
-         //std::cout << " Counter Term 2 right form-factor: " << ct_FR2 << '\n';
-
-         //std::cout << "\n counter term left: " << ct_FL << '\n';
-         //std::cout << " counter term right: " << ct_FR << '\n';
-
-         //std::cout << "\n Counter Term left form-factor struct: " << amp_counterterm.form_factor_left << '\n';
-         //std::cout << " Counter Term right form-factor struct: " << amp_counterterm.form_factor_right << '\n';
+         std::cout << "\n Counter Term 2 left form-factor: " << ct_FL2 << '\n';
+         std::cout << " Counter Term 2 right form-factor: " << ct_FR2 << '\n';
 
          std::cout << "\n counter term left: " << ct_FL << '\n';
          std::cout << " counter term right: " << ct_FR << '\n';
@@ -312,19 +417,19 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n form factor left 1loop: " << amp_1l.form_factor_left << '\n';
          std::cout << " form factor right 1loop: " << amp_1l.form_factor_right << '\n';
 
-         std::cout << "\n form factor left dec: " << amp_1l.form_factor_left + ct_FL << '\n';
-         std::cout << " form factor right dec: " << amp_1l.form_factor_right + ct_FR << '\n';
+         std::cout << "\n form factor left dec: " << amp_1l_dec.form_factor_left - ct_FL << '\n';
+         std::cout << " form factor right dec: " << amp_1l_dec.form_factor_right - ct_FR << '\n';
 
          std::cout << "\n 1l* conj(tree): " << amplitude_interference(amp_1l, amp_tree) << '\n';
          std::cout << " |tree|^2: " << amp_tree.square() << '\n';
          std::cout << " |1l|^2: " << amp_1l.square() << '\n';
          std::cout << " |A|^2: " << amp_tree.square() + amp_1l.square() + 2.0 * std::real(amplitude_interference(amp_1l, amp_tree)) << '\n';
 
-         std::cout << "\n Decay Width tree: " << 0.5 * ps * amp_tree.square() / mHOS << '\n';
+         std::cout << "\n Decay Width tree: " << flux * ps * amp_tree.square() << '\n';
          std::cout << " Decay Width MSbar: " << res << '\n';
       }
 
-      res += flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm));
+      res = res + flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm)) > 0 ? res + flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm)) : -(res + flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm)));
       
       if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
          std::cout << " Decay Width Dec: " << res << '\n';
