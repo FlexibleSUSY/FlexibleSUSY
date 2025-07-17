@@ -429,11 +429,11 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << " Decay Width MSbar: " << res << '\n';
       }
 
-      res = res + flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm)) > 0 ? res + flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm)) : -(res + flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm)));
-      
+      res += flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm));
+
       if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
          std::cout << " Decay Width Dec: " << res << '\n';
-      } 
+      }
    }
 #endif
 
