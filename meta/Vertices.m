@@ -294,7 +294,7 @@ EnforceCpColorStructures[nPointFunctions_List] :=
     EnforceCpColorStructures /@ nPointFunctions;
 
 EnforceCpColorStructures[
-    SelfEnergies`FSSelfEnergy[p : f_Symbol[__] | f_Symbol, expr__]] :=
+    SelfEnergies`FSSelfEnergy[p : {f_Symbol[_], f_Symbol[_]}[_] | {f_Symbol[_], f_Symbol[_]} | {f_Symbol, f_Symbol} | {f_Symbol, f_Symbol}[_] , expr__]] :=
     SelfEnergies`FSSelfEnergy@@Prepend[EnforceCpColorStructures[f, {expr}], p];
 
 EnforceCpColorStructures[nPointFunction_] := nPointFunction;
