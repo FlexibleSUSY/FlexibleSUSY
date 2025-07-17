@@ -266,7 +266,7 @@ Remove1DimensionalFieldIndices[lst_List] :=
     Module[{k, fields, result = lst},
            For[k = 1, k <= Length[result], k++,
                fields = GetField[result[[k]]] /. {f__}[_] :> {f};
-               For[i = 1, i <= 2, i++,
+               For[i = 1, i <= Length[fields], i++,
                    If[GetDimension[fields[[i]]] == 1,
                       result[[k,2]] = result[[k,2]] /. fields[[i]][{__}] :> fields[[i]];
                      ];
