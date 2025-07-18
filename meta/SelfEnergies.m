@@ -36,7 +36,7 @@ The first argument can be
 {particle1, particle2} for dim=1 scalar or vector multiplet
 {particle1[gen1], particle2[gen2]} for dim>1 scalar or vector multiplet
 {particle1, particle2}[lor] for dim=1 fermion multiplet
-{particle1[gen1], particle2[gen2]}[lor] for dim>1 fermion multiplet 
+{particle1[gen1], particle2[gen2]}[lor] for dim>1 fermion multiplet
 ";
 
 FSSelfEnergyDerivative::usage="Head for derivative of self-energy w.r.t. p^2, see FSSelfEnergy for argument list";
@@ -526,8 +526,10 @@ DeclareFieldIndices[field_[ind_]] :=
     "int " <> ToValidCSymbolString[ind];
 
 CallFieldIndices[field_Symbol] := "";
+CallFieldIndices[{field1_, field2_}] := "";
 
-CallFieldIndices[field_[ind1_, ind2_]] :=
+CallFieldIndices[{field_, field_}[chirality_]] := CallFieldIndices[{field, field}];
+CallFieldIndices[{field1_[ind1_], field2_[ind2_]}] :=
     ", " <> ToValidCSymbolString[ind1] <>
     ", " <> ToValidCSymbolString[ind2];
 
@@ -615,7 +617,7 @@ CreateSelfEnergyVirtualCall[nPointFunction_] :=
            functionName = CreateFunctionPrototype[nPointFunction, 1];
            prototype = type <> " CLASSNAME::" <> functionName <> " {\n";
            prototype = prototype <> IndentText["return " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates::" <> CreateFunctionName[nPointFunction, 1] <> If[Head[nPointFunction] =!= SelfEnergies`Tadpole, "(p", "("] <> CallFieldIndices[GetField[nPointFunction]] <> ");\n"] <> "}\n";
-           dim = GetDimension[GetField[nPointFunction]];
+           dim = GetDimension[GetField[nPointFunction] /. {a_, b_}[_] :> {a, b} /. {a_, b_} :> a];
            If[Head[nPointFunction] =!= SelfEnergies`Tadpole && dim > 1,
               functionName = CreateFunctionPrototypeMatrix[nPointFunction, 1];
               type = CConversion`CreateCType[CConversion`MatrixType[CConversion`complexScalarCType, dim, dim]];

@@ -1764,8 +1764,8 @@ auto self_energy_1loop_" <> # <> "_deriv_p2<" <> TreeMasses`CreateFieldClassName
    ];
 
 TadpoleWrapper[] := "template<> inline std::complex<double> tadpole_1loop<" <> TreeMasses`CreateFieldClassName[TreeMasses`GetHiggsBoson[], prefixNamespace -> "fields"] <> ">(const context_base& context, typename field_indices<" <> TreeMasses`CreateFieldClassName[TreeMasses`GetHiggsBoson[], prefixNamespace -> "fields"] <> ">::type const& g01) {
-   return context.model.tadpole_" <> TreeMasses`CreateFieldClassName[TreeMasses`GetHiggsBoson[]] <> "_1loop(" <> If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] >1, "g01.at(0)" <> ""] <> ");
-}\n"
+   return context.model.tadpole_" <> TreeMasses`CreateFieldClassName[TreeMasses`GetHiggsBoson[]] <> "_1loop(" <> If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]]>1, "g01.at(0)", ""] <> ");
+}\n";
 
 End[];
 EndPackage[];
