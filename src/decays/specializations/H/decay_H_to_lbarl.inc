@@ -66,14 +66,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       std::cout << " SM physical e Mass: " << sm.get_physical().MFe(0) << '\n';
       std::cout << " SM physical mu Mass: " << sm.get_physical().MFe(1) << '\n';
       std::cout << " SM physical tau Mass: " << sm.get_physical().MFe(2) << '\n';
-      
+
       std::cout << "\n SM Higgs Mass: " << sm.get_Mhh() << '\n';
       std::cout << " SM Z Mass: " << sm.get_MVZ() << '\n';
       std::cout << " SM W Mass: " << sm.get_MVWp() << '\n';
       std::cout << " SM lepton Mass: " << sm.get_MFe() << '\n';
       std::cout << " SM up Mass: " << sm.get_MFu() << '\n';
       std::cout << " SM down Mass: " << sm.get_MFd() << '\n';
-      
+
       std::cout  << " SM g1: " << sm.get_g1() << '\n';
       std::cout  << " SM g2: " << sm.get_g2() << '\n';
       std::cout  << " SM v: " << sm.get_v() << '\n';
@@ -87,14 +87,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // lepton self-energy [PL]
       const auto lepton_se_all_PL =
-         self_energy_1loop_PL<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
+         self_energy_1loop_PL<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_se_sm_PL =
          smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_dec_PL = lepton_se_all_PL - lepton_se_sm_PL;
 
       // lepton self-energy [PR]
       const auto lepton_se_all_PR =
-         self_energy_1loop_PR<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
+         self_energy_1loop_PR<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_se_sm_PR =
          smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_dec_PR =
@@ -102,7 +102,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // lepton self-energy [1]
       const auto lepton_1_all =
-         self_energy_1loop_1<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
+         self_energy_1loop_1<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
       const auto lepton_1_sm =
          smns::self_energy_1loop_1<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_1_se_dec =
@@ -133,7 +133,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          lepton_se_deriv_all_1 - lepton_se_deriv_sm_1;
 
       // higgs se
-      const auto higgs_se_all = self_energy_1loop<Higgs>(context, mHOS, indexIn, indexIn);
+      const auto higgs_se_all = self_energy_1loop<Higgs,Higgs>(context, mHOS, indexIn, indexIn);
       const auto higgs_se_sm = smns::self_energy_1loop<smns::fields::hh>(sm_context, mHSMOS);
       const auto higgs_se_dec = higgs_se_all - higgs_se_sm;
 
@@ -143,7 +143,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto higgs_se_deriv_dec = higgs_se_deriv_all - higgs_se_deriv_sm;
 
       // photon se
-      const auto photon_se_all = self_energy_1loop<Photon>(context, 0, {}, {});
+      const auto photon_se_all = self_energy_1loop<Photon,Photon>(context, 0, {}, {});
       const auto photon_se_sm = smns::self_energy_1loop<smns::fields::VP>(sm_context, 0);
       const auto photon_se_dec = photon_se_all - photon_se_sm;
 
@@ -155,7 +155,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // Z se
       const double mZOS = context.physical_mass<ZBoson>({});
       const double mZSMOS = sm.get_physical().MVZ;
-      const auto Z_se_all = self_energy_1loop<ZBoson>(context, mZOS, {}, {});
+      const auto Z_se_all = self_energy_1loop<ZBoson,ZBoson>(context, mZOS, {}, {});
       const auto Z_se_sm = smns::self_energy_1loop<smns::fields::VZ>(sm_context, mZSMOS);
       const auto Z_se_dec = Z_se_all - Z_se_sm;
 
@@ -167,7 +167,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // W se
       const double mWOS = context.physical_mass<WpBoson>({});
       const double mWSMOS = sm.get_physical().MVWp;
-      const auto W_se_all = self_energy_1loop<WpBoson>(context, mWOS, {}, {});
+      const auto W_se_all = self_energy_1loop<WpBoson,WpBoson>(context, mWOS, {}, {});
       const auto W_se_sm = smns::self_energy_1loop<smns::fields::VWp>(sm_context, mWSMOS);
       const auto W_se_dec = W_se_all - W_se_sm;
 
@@ -300,6 +300,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
 
+         std::cout << "\n Photon-Z Self-Energies: \n";
+         std::cout << "\n BSM: " << self_energy_1loop<Photon,ZBoson>(context, mHOS, {}, {}) << '\n';
+
          std::cout << "\n model lam: " << context.model.get_Lambdax() << '\n';
          std::cout << " sm lam: " << sm_context.model.get_Lambdax() << '\n';
 
@@ -329,7 +332,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n Photon Self-Energies: \n";
          std::cout << "\n P SM: " << photon_se_all << '\n';
          std::cout << " P SM deriv: " << photon_se_deriv_all << '\n';
-         
+
          std::cout << "\n W Self-Energies: \n";
          std::cout << "\n W SM: " << W_se_all << '\n';
          std::cout << " W SM deriv: " << W_se_deriv_all << '\n';

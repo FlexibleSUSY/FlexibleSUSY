@@ -76,27 +76,27 @@ using cxx_diagrams::field_indices;
 @CXXDiagrams_PhysicalMassFunctions@
 
 // self energies
-template<typename Field>
-auto self_energy_1loop(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
-   static_assert(always_false<Field>);
+template<typename Field1, typename Field2>
+auto self_energy_1loop(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
    return 0.;
 }
 
-template<typename Field>
-auto self_energy_1loop_1(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
-   static_assert(always_false<Field>);
+template<typename Field1, typename Field2>
+auto self_energy_1loop_1(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
    return 0.;
 }
 
-template<typename Field>
-auto self_energy_1loop_PL(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
-   static_assert(always_false<Field>);
+template<typename Field1, typename Field2>
+auto self_energy_1loop_PL(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
    return 0.;
 }
 
-template<typename Field>
-auto self_energy_1loop_PR(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field>::type const&, typename field_indices<Field>::type const&) {
-   static_assert(always_false<Field>);
+template<typename Field1, typename Field2>
+auto self_energy_1loop_PR(const @ModelName@_cxx_diagrams::context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
    return 0.;
 }
 

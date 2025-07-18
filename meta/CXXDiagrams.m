@@ -1731,18 +1731,21 @@ ExtractColourFactor[colourfactor1_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctI
 ExtractColourFactor[args___] :=
    (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 
-SelfEnergyWrapper[field_] /; (TreeMasses`IsScalar[field] || TreeMasses`IsVector[field]) :=
-   With[{fieldCPP = If[field === GetWBoson[] && GetElectricCharge[field] < 0, CXXNameOfField[AntiField@field, prefixNamespace -> "fields"], CXXNameOfField[field, prefixNamespace -> "fields"]]},
+SelfEnergyWrapper[field1_, field2_] /; (TreeMasses`IsScalar[field1] || TreeMasses`IsVector[field1]) && (TreeMasses`IsScalar[field2] || TreeMasses`IsVector[field2]) :=
+   With[{
+field1CPP = If[field1 === GetWBoson[] && GetElectricCharge[field1] < 0, CXXNameOfField[AntiField@field1, prefixNamespace -> "fields"], CXXNameOfField[field1, prefixNamespace -> "fields"]],
+field2CPP = If[field2 === GetWBoson[] && GetElectricCharge[field2] < 0, CXXNameOfField[AntiField@field2, prefixNamespace -> "fields"], CXXNameOfField[field2, prefixNamespace -> "fields"]]
+},
    "template<> inline
-auto self_energy_1loop<" <> fieldCPP <> ">(const context_base& context, double p, typename field_indices<" <> fieldCPP <> ">::type const& g01, typename field_indices<" <> fieldCPP <> ">::type const& g02) {
-   return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
+auto self_energy_1loop<" <> field1CPP <> "," <> field2CPP <> ">(const context_base& context, double p, typename field_indices<" <> field1CPP <> ">::type const& g01, typename field_indices<" <> field2CPP <> ">::type const& g02) {
+   return context.model.self_energy_" <> If[field1===field2, TreeMasses`CreateFieldClassName[field1], TreeMasses`CreateFieldClassName[field1]<>TreeMasses`CreateFieldClassName[field2]] <> "_1loop(p" <> If[TreeMasses`GetDimension[field1]>1, ", g01.at(0), g02.at(0)", ""] <> ");
 }\n"
    ];
 
-SelfEnergyWrapper[field_?TreeMasses`IsFermion] :=
+SelfEnergyWrapper[field_?TreeMasses`IsFermion, field_?TreeMasses`IsFermion] :=
    StringJoin[Riffle[
    ("template<> inline
-auto self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g01, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g02) {
+auto self_energy_1loop_" <> # <> "<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ", " <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">(const context_base& context, double p, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g01, typename field_indices<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> "fields"] <> ">::type const& g02) {
    return context.model.self_energy_" <> TreeMasses`CreateFieldClassName[field] <> "_1loop_" <> # <> "(p" <> If[TreeMasses`GetDimension[field]>1, ", g01.at(0), g02.at(0)", ""] <> ");
 }\n")& /@ {"1", "PL", "PR"}, "\n"]
    ];

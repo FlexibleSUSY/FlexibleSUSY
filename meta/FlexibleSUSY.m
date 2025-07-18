@@ -2467,7 +2467,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
                              "@CXXDiagrams_MassFunctions@"         -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
                              "@defineFieldTraits@"                 -> defineFieldTraits,
-                             "@selfEnergyWrapper@"                 -> StringJoin[Riffle[CXXDiagrams`SelfEnergyWrapper /@ Select[GetParticles[], (!IsGhost[#])&], "\n"]],
+                             "@selfEnergyWrapper@"                 -> StringJoin[Riffle[CXXDiagrams`SelfEnergyWrapper @@@ Append[Transpose[{Select[GetParticles[], (!IsGhost[#])&], Select[GetParticles[], (!IsGhost[#])&]}], {TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}], "\n"]],
                              "@tadpoleWrapper@"                    -> CXXDiagrams`TadpoleWrapper[],
                              "@selfEnergyDerivativeWrapper@"       -> StringJoin[Riffle[CXXDiagrams`SelfEnergyDerivativeWrapper /@ Select[GetParticles[], (!IsGhost[#])&], "\n"]],
                              "@CXXDiagrams_VertexPrototypes@"  ->
