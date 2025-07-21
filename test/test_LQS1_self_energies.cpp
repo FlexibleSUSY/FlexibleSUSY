@@ -75,6 +75,8 @@ BOOST_AUTO_TEST_CASE( test_LQS1_self_energies )
    BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VP_1loop(p).real(),  38.769814264189520259, 6e-14);
    BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VWp_1loop(p).real(), 64.570698773836241458, 2e-15);
 
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(),  -9.5039237984465216869, 3e-15);
+
    // self energy derivatives
 
    // Higgs self energy derivative
