@@ -546,11 +546,12 @@ ExtractChiraility[field_[idx_]]        := ExtractChiraility[field];
 ExtractChiraility[field_]              := "";
 
 ExtractFieldName[field_[_]]                  := ExtractFieldName[field];
+ExtractFieldName[field_Symbol]               := ToValidCSymbolString[field];
 ExtractFieldName[{field1_[_], field2_[_]}]   := ExtractFieldName[{field1, field2}];
-ExtractFieldName[field_]                     := ToValidCSymbolString[field];
 ExtractFieldName[{field_, field_}]           := ToValidCSymbolString[field];
 (* Z-gamma self energy case *)
 ExtractFieldName[{field1_, field2_}]         := ToValidCSymbolString[field1] <> ToValidCSymbolString[field2];
+ExtractFieldName[field_] := (Print["Error: Cannot get the name of fields ", field]; Quit[1]);
 
 CreateSelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];

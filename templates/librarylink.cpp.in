@@ -448,8 +448,8 @@ void Model_data::put_settings(MLINK link) const
 
 void Model_data::put_sm_input_parameters(MLINK link) const
 {
-   MLPutFunction(link, "List",softsusy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS
-                              + Physical_input::NUMBER_OF_INPUT_PARAMETERS);
+   MLPutFunction(link, "List", static_cast<int>(softsusy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS)
+                              + static_cast<int>(Physical_input::NUMBER_OF_INPUT_PARAMETERS));
 
    MLPutRuleTo(link, qedqcd.displayAlphaEmInput(), "alphaEmMZ");
    MLPutRuleTo(link, qedqcd.displayFermiConstant(), "GF");
@@ -880,8 +880,8 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    using Index_t = typename Dynamic_array_view<Element_t>::Index_t;
 
    const Index_t n_settings = Spectrum_generator_settings::NUMBER_OF_OPTIONS,
-      n_sm_parameters = softsusy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS
-                        + Physical_input::NUMBER_OF_INPUT_PARAMETERS,
+      n_sm_parameters = static_cast<int>(softsusy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS)
+                        + static_cast<int>(Physical_input::NUMBER_OF_INPUT_PARAMETERS),
       n_input_pars = @numberOfInputParameters@;
    @decayIndex@
    const Index_t n_total = n_settings + n_sm_parameters + n_input_pars + n_fd_settings;
