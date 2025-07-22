@@ -36,7 +36,7 @@ The first argument can be
 {particle1, particle2} for dim=1 scalar or vector multiplet
 {particle1[gen1], particle2[gen2]} for dim>1 scalar or vector multiplet
 {particle1, particle2}[lor] for dim=1 fermion multiplet
-{particle1[gen1], particle2[gen2]}[lor] for dim>1 fermion multiplet 
+{particle1[gen1], particle2[gen2]}[lor] for dim>1 fermion multiplet
 ";
 
 FSSelfEnergyDerivative::usage="Head for derivative of self-energy w.r.t. p^2, see FSSelfEnergy for argument list";
@@ -529,11 +529,12 @@ ExtractChiraility[field_[idx_]]        := ExtractChiraility[field];
 ExtractChiraility[field_]              := "";
 
 ExtractFieldName[field_[_]]                  := ExtractFieldName[field];
+ExtractFieldName[field_Symbol]               := ToValidCSymbolString[field];
 ExtractFieldName[{field1_[_], field2_[_]}]   := ExtractFieldName[{field1, field2}];
-ExtractFieldName[field_]                     := ToValidCSymbolString[field];
 ExtractFieldName[{field_, field_}]           := ToValidCSymbolString[field];
 (* Z-gamma self energy case *)
 ExtractFieldName[{field1_, field2_}]         := ToValidCSymbolString[field1] <> ToValidCSymbolString[field2];
+ExtractFieldName[field_] := (Print["Error: Cannot get the name of fields ", field]; Quit[1]);
 
 CreateSelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];

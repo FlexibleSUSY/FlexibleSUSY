@@ -291,9 +291,9 @@ Do1DimFermion[particle_ /; particle === TreeMasses`GetSMTopQuarkMultiplet[], mas
             qcdOneLoop, qcdTwoLoop, qcdThreeLoop, qcdFourLoop
            },
            massName = ToValidCSymbolString[FlexibleSUSY`M[particle]];
-           topSelfEnergyFunctionS  = SelfEnergies`CreateHeavySelfEnergyFunctionName[particle[1], 1];
-           topSelfEnergyFunctionPL = SelfEnergies`CreateHeavySelfEnergyFunctionName[particle[PL], 1];
-           topSelfEnergyFunctionPR = SelfEnergies`CreateHeavySelfEnergyFunctionName[particle[PR], 1];
+           topSelfEnergyFunctionS  = SelfEnergies`CreateHeavySelfEnergyFunctionName[{particle, particle}[1], 1];
+           topSelfEnergyFunctionPL = SelfEnergies`CreateHeavySelfEnergyFunctionName[{particle, particle}[PL], 1];
+           topSelfEnergyFunctionPR = SelfEnergies`CreateHeavySelfEnergyFunctionName[{particle, particle}[PR], 1];
            qcdOneLoop = N[SimpQCD[-TwoLoopQCD`GetDeltaMPoleOverMRunningQCDOneLoop[particle, Global`currentScale, FlexibleSUSY`FSRenormalizationScheme]]];
            qcdTwoLoop = N[SimpQCD[-TwoLoopQCD`GetDeltaMPoleOverMRunningQCDTwoLoop[particle, Global`currentScale, FlexibleSUSY`FSRenormalizationScheme]]];
            qcdThreeLoop = If[FlexibleSUSY`FSRenormalizationScheme === FlexibleSUSY`MSbar,
@@ -645,9 +645,9 @@ DoMediumDiagonalization[particle_Symbol /; IsFermion[particle], inputMomentum_, 
            eigenArrayType = CreateCType[CConversion`ArrayType[CConversion`realScalarCType, dim]];
            topTwoLoop = particle === TreeMasses`GetSMTopQuarkMultiplet[];
            If[topTwoLoop,
-              topSelfEnergyFunctionS  = SelfEnergies`CreateHeavySelfEnergyFunctionName[particle[1], 1];
-              topSelfEnergyFunctionPL = SelfEnergies`CreateHeavySelfEnergyFunctionName[particle[PL], 1];
-              topSelfEnergyFunctionPR = SelfEnergies`CreateHeavySelfEnergyFunctionName[particle[PR], 1];
+              topSelfEnergyFunctionS  = SelfEnergies`CreateHeavySelfEnergyFunctionName[{particle, particle}[1], 1];
+              topSelfEnergyFunctionPL = SelfEnergies`CreateHeavySelfEnergyFunctionName[{particle, particle}[PL], 1];
+              topSelfEnergyFunctionPR = SelfEnergies`CreateHeavySelfEnergyFunctionName[{particle, particle}[PR], 1];
               thirdGenMass = TreeMasses`GetThirdGenerationMass[particle];
               qcdOneLoop = N[SimpQCD[-TwoLoopQCD`GetDeltaMPoleOverMRunningQCDOneLoop[particle, Global`currentScale, FlexibleSUSY`FSRenormalizationScheme]]];
               qcdTwoLoop = N[SimpQCD[-TwoLoopQCD`GetDeltaMPoleOverMRunningQCDTwoLoop[particle, Global`currentScale, FlexibleSUSY`FSRenormalizationScheme]]];
