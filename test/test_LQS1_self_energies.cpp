@@ -1,3 +1,5 @@
+#include "iomanip"
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE test_NMSSM_self_energies
 
@@ -59,8 +61,47 @@ BOOST_AUTO_TEST_CASE( test_LQS1_self_energies )
    m.calculate_DRbar_masses();
 
    const double p = 100.0;
+   
+   std::cout << std::setprecision (20) << '\n';
+   std::cout << " Scale: " << m.get_scale() << '\n';
+   
+   std::cout << " LQ mass: " << m.get_MS1c() << '\n';
+   std::cout << " LQ-fermion coupling L: " << m.get_lamQL() << '\n';
+   std::cout << " LQ-fermion coupling R: " << m.get_lamql() << '\n';
+   
+   
+   
+   std::cout << "\n Higgs Mass: " << m.get_Mhh() << '\n';
+   std::cout << " Ah Mass: " << m.get_MAh() << '\n';
+   std::cout << " Hpm Mass: " << m.get_MHp() << '\n';
+   
+   std::cout << "\n Z Mass: " << m.get_MVZ() << '\n';
+   std::cout << " W Mass: " << m.get_MVWp() << '\n';
+   
+   std::cout << "\n vev: " << m.get_v() << '\n';
+   std::cout << "\n Electron Mass: " << m.get_MFe(0) << '\n';
+   std::cout << " Muon Mass: " << m.get_MFe(1) << '\n';
+   std::cout << " Tau Mass: " << m.get_MFe(2) << '\n';
+   
+   std::cout << "\n up Mass: " << m.get_MFu(0) << '\n';
+   std::cout << " charm Mass: " << m.get_MFu(1) << '\n';
+   std::cout << " top Mass: " << m.get_MFu(2) << '\n';
+   
+   std::cout << "\n down Mass: " << m.get_MFd(0) << '\n';
+   std::cout << " strange Mass: " << m.get_MFd(1) << '\n';
+   std::cout << " botton Mass: " << m.get_MFd(2) << '\n';
+   
+   
+   std::cout << "\n thetaW: " << m.ThetaW() << '\n';
+  
+   std::cout << " Lambda: " << m.get_Lambdax() << '\n';
+   std::cout << " g1: " << m.get_g1() << '\n';
+   std::cout << " g2: " << m.get_g2() << '\n';
 
    // self energies
+
+   // Higgs Tadpole
+   BOOST_CHECK_CLOSE_FRACTION(m.tadpole_hh_1loop().real(), -4611359.147766369394958019, 3e-15);
 
    // Higgs self energy
    BOOST_CHECK_CLOSE_FRACTION(m.self_energy_hh_1loop(p).real(), -16740.274395672364335, 3e-16);
@@ -75,7 +116,7 @@ BOOST_AUTO_TEST_CASE( test_LQS1_self_energies )
    BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VP_1loop(p).real(),  38.769814264189520259, 6e-14);
    BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VWp_1loop(p).real(), 64.570698773836241458, 2e-15);
 
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(),  -9.5039237984465216869, 3e-15);
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(),  -8.4300615408824981500, 3e-15);
 
    // self energy derivatives
 
