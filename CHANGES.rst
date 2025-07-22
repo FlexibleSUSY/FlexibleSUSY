@@ -1,6 +1,12 @@
 FlexibleSUSY 2.9.1 [??, ?? 2025]
 ===================================
 
+New features
+------------
+
+* Moved to C++20. This increased the minimal supported version of compilers to
+  g++ >= 8.0.0 or clang++ >= 10.0.0.
+
 Fixed bugs
 ----------
 
