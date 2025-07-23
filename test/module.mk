@@ -373,7 +373,10 @@ TEST_SRC += \
 		$(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.cpp
 endif
 
-ifeq ($(WITH_THDMII) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(WITH_THDMII), yes)
+TEST_SRC += \
+		$(DIR)/test_THDMII_self_energies.cpp
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecay.cpp
@@ -381,6 +384,7 @@ endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecay.cpp
+endif
 endif
 endif
 
@@ -535,17 +539,17 @@ TEST_SH += \
 endif
 
 ifeq ($(WITH_LQS1_up_basis),yes)
-ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_LQS1_self_energies.cpp
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_LQS1_FlexibleDecay.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_LQS1_self_energies.cpp
-TEST_SRC += \
 		$(DIR)/test_LQS1_FlexibleDecay.cpp
+endif
 endif
 endif
 
@@ -609,9 +613,12 @@ TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
 
-ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(WITH_SM), yes)
+TEST_SRC += \
+		$(DIR)/test_SM_self_energies.cpp
 TEST_SRC += \
 		$(DIR)/test_SM_cxxvertices.cpp
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_SM_FlexibleDecay.cpp
@@ -620,16 +627,6 @@ ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_SM_FlexibleDecay.cpp
 endif
-endif
-
-ifeq ($(WITH_SM),yes)
-ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
-TEST_SRC += \
-		$(DIR)/test_SM_self_energies.cpp
-endif
-ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
-TEST_SRC += \
-		$(DIR)/test_SM_self_energies.cpp
 endif
 endif
 
@@ -1359,6 +1356,8 @@ $(DIR)/test_SSMSemiAnalytic_ewsb.x: $(LIBSSMSemiAnalytic)
 $(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.x: $(LIBSSMSemiAnalytic)
 
 $(DIR)/test_SSMSemiAnalytic_consistent_solutions.x: $(LIBSSMSemiAnalytic) $(LIBSSM)
+
+$(DIR)/test_THDMII_self_energies.x: $(LIBTHDMII)
 
 $(DIR)/test_THDMII_FlexibleDecay.x: $(LIBTHDMII)
 
