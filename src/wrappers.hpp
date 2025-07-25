@@ -608,16 +608,12 @@ auto SignedAbsSqrt(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Deri
 
 // Sqrt ////////////////////////////////////////////////////////////////
 
-template <class T>
-requires std::is_floating_point_v<T>
-T Sqrt(T a) noexcept
+std::floating_point auto Sqrt(std::floating_point auto a) noexcept
 {
    return std::sqrt(a);
 }
 
-template <class T>
-requires std::is_integral_v<T>
-double Sqrt(T a) noexcept
+double Sqrt(std::integral auto a) noexcept
 {
    return std::sqrt(static_cast<double>(a));
 }
