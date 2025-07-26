@@ -236,38 +236,38 @@ std::string create_process_string(
 
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr double squared_color_generator() noexcept {
-   if constexpr (cxx_diagrams::fields::is_singlet_v<FieldIn>) {
+   if constexpr (cxx_diagrams::fields::is_singlet<FieldIn>) {
       // 1 -> 1, 1
-      if constexpr (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>) {
+      if constexpr (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>) {
          return 1.;
       }
       // 1 -> 3, -3
       else if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
+         || (cxx_diagrams::fields::is_anti_triplet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 3.;
       }
       // 1 -> 8, 8
-      else if constexpr (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2>) {
+      else if constexpr (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2>) {
          return 8.;
       }
       else {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
       }
    }
-   else if constexpr (cxx_diagrams::fields::is_triplet_v<FieldIn>) {
+   else if constexpr (cxx_diagrams::fields::is_triplet<FieldIn>) {
       // 3 -> 1, 3
       if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 1.;
       }
       // 3 -> 3, 8
       else if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldIn> && cxx_diagrams::fields::is_octet<FieldOut2>)
+         || (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 16/3.;
       }
@@ -275,18 +275,18 @@ constexpr double squared_color_generator() noexcept {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
       }
    }
-   else if constexpr (cxx_diagrams::fields::is_anti_triplet_v<FieldIn>) {
+   else if constexpr (cxx_diagrams::fields::is_anti_triplet<FieldIn>) {
       // -3 -> 1, -3
       if constexpr (
-         (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_anti_triplet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
       ) {
          return 1.;
       }
       // -3 -> -3, 8
       else if constexpr (
-         (cxx_diagrams::fields::is_anti_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_anti_triplet<FieldIn> && cxx_diagrams::fields::is_octet<FieldOut2>)
+         || (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
       ) {
          return 16/3.;
       }
@@ -294,24 +294,24 @@ constexpr double squared_color_generator() noexcept {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
       }
    }
-   else if constexpr (cxx_diagrams::fields::is_octet_v<FieldIn>) {
+   else if constexpr (cxx_diagrams::fields::is_octet<FieldIn>) {
       // 8 -> 1, 8
       if constexpr (
-         (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2>)
       ) {
          return 1.;
       }
       else if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
+         || (cxx_diagrams::fields::is_anti_triplet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 2.;
       }
       // 8 -> 8, 8 with identical particles in the final state
       // because of symmetry of the final state it must be proportional to d^2
       else if constexpr (
-         cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2> && std::is_same_v<FieldOut1, FieldOut2>
+         cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2> && std::is_same_v<FieldOut1, FieldOut2>
       ) {
          // color:   d^2 = (2 (4 - 5 Nc^2 + Nc^4) TR)/Nc = 40/3
          // average: 1/8
@@ -319,7 +319,7 @@ constexpr double squared_color_generator() noexcept {
       }
       // 8 -> 8, 8 with differnt particles in the final state
       else if constexpr (
-         cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2> && !std::is_same_v<FieldOut1, FieldOut2>
+         cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2> && !std::is_same_v<FieldOut1, FieldOut2>
       ) {
          // color:   f^2 = 2 Nc (-1 + Nc^2) TR = 24
          // average: 1/8
