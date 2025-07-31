@@ -53,6 +53,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    double res = res_S + res_P;
 
 #if DECAY_BSM_ORDER > 0
+   auto& lib = Loop_library::get();
+looplibrary::Bcoeff_t B_coeffs;
+lib.B(B_coeffs, 1., 2., 3., 4.);
+
+//looplibrary::Ccoeff_t C_coeffs;
+//lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLF4*mLF4, mLF6*mLF6,
+//mLF5*mLF5, scale*scale);
+
    if (flexibledecay_settings.get_decay_corrections().bsm > 0) {
 
       namespace smns = standard_model_cxx_diagrams;
