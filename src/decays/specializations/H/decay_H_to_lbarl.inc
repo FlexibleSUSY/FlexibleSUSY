@@ -53,38 +53,81 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    double res = res_S + res_P;
 
 #if DECAY_BSM_ORDER > 0
-   auto& lib = Loop_library::get();
-looplibrary::Bcoeff_t B_coeffs;
-lib.B(B_coeffs, 1., 2., 3., 4.);
 
-//looplibrary::Ccoeff_t C_coeffs;
-//lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLF4*mLF4, mLF6*mLF6,
-//mLF5*mLF5, scale*scale);
+
+//--------------------------------------------------------------------------------
+//Explicit photon diagrams
+//--------------------------------------------------------------------------------
+
+   auto& lib = Loop_library::get();
+   looplibrary::Bcoeff_t B_coeffs;
+
+   auto& lib1 = Loop_library::get();
+   looplibrary::Bcoeff_t B_coeffp;
+   looplibrary::Ccoeff_t C_coeffp;
+   
+   //const double scale = context.model.get_scale();
+   const double mL1Tree = context.model.get_MFe(indexOut1.at(0));
+   const double mL2Tree = context.model.get_MFe(indexOut2.at(0));
+   const double vev = context.model.get_v();
+
+
+   // B function for self energies, evaluated at the tree mass
+   lib.B(B_coeffs, Sqr(mL2Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+
+   // B,C functions for triangle diagram, evaluated at physical and tree masses
+   lib1.B(B_coeffp, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
+   lib.C(C_coeffp, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+
+   const auto b0 = B_coeffs.at(0);
+   const auto b1 = B_coeffs.at(1);
+
+   const auto b0p = B_coeffp.at(0);
+   const auto c0 = C_coeffp.at(0);
+   const auto c1 = C_coeffp.at(1);
+   const auto c2 = C_coeffp.at(2);
+
+   const double g2SU2 = context.model.get_g2();
+   const double angle_W = context.model.ThetaW();
+   const double charge = g2SU2 * sin(angle_W);
+
+
+   const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
+   const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
+   const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
+
+   const auto gamma_triangle = oneOver16PiSqr / vev * Sqr(charge) * mL1Tree * (-2)  
+                              * (-1 + 2 * b0p 
+                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS))
+                                 + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
+                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree - mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS)));
+
+   //-------------------------------------------------------------------------------------------------------------------
 
    if (flexibledecay_settings.get_decay_corrections().bsm > 0) {
 
       namespace smns = standard_model_cxx_diagrams;
       smns::context_base sm_context {sm};
 
-      std::cout << " SM scale: " << sm.get_scale() << '\n';
+      //std::cout << " SM scale: " << sm.get_scale() << '\n';
 
-      std::cout << "\n SM physical Higgs Mass: " << sm.get_physical().Mhh << '\n';
-      std::cout << " SM physical Z Mass: " << sm.get_physical().MVZ << '\n';
-      std::cout << " SM physical W Mass: " << sm.get_physical().MVWp << '\n';
-      std::cout << " SM physical e Mass: " << sm.get_physical().MFe(0) << '\n';
-      std::cout << " SM physical mu Mass: " << sm.get_physical().MFe(1) << '\n';
-      std::cout << " SM physical tau Mass: " << sm.get_physical().MFe(2) << '\n';
+      //std::cout << "\n SM physical Higgs Mass: " << sm.get_physical().Mhh << '\n';
+      //std::cout << " SM physical Z Mass: " << sm.get_physical().MVZ << '\n';
+      //std::cout << " SM physical W Mass: " << sm.get_physical().MVWp << '\n';
+      //std::cout << " SM physical e Mass: " << sm.get_physical().MFe(0) << '\n';
+      //std::cout << " SM physical mu Mass: " << sm.get_physical().MFe(1) << '\n';
+      //std::cout << " SM physical tau Mass: " << sm.get_physical().MFe(2) << '\n';
 
-      std::cout << "\n SM Higgs Mass: " << sm.get_Mhh() << '\n';
-      std::cout << " SM Z Mass: " << sm.get_MVZ() << '\n';
-      std::cout << " SM W Mass: " << sm.get_MVWp() << '\n';
-      std::cout << " SM lepton Mass: " << sm.get_MFe() << '\n';
-      std::cout << " SM up Mass: " << sm.get_MFu() << '\n';
-      std::cout << " SM down Mass: " << sm.get_MFd() << '\n';
+      //std::cout << "\n SM Higgs Mass: " << sm.get_Mhh() << '\n';
+      //std::cout << " SM Z Mass: " << sm.get_MVZ() << '\n';
+      //std::cout << " SM W Mass: " << sm.get_MVWp() << '\n';
+      //std::cout << " SM lepton Mass: " << sm.get_MFe() << '\n';
+      //std::cout << " SM up Mass: " << sm.get_MFu() << '\n';
+      //std::cout << " SM down Mass: " << sm.get_MFd() << '\n';
 
-      std::cout  << " SM g1: " << sm.get_g1() << '\n';
-      std::cout  << " SM g2: " << sm.get_g2() << '\n';
-      std::cout  << " SM v: " << sm.get_v() << '\n';
+      //std::cout  << " SM g1: " << sm.get_g1() << '\n';
+      //std::cout  << " SM g2: " << sm.get_g2() << '\n';
+      //std::cout  << " SM v: " << sm.get_v() << '\n';
 
 
       const double mHSMOS = sm.get_physical().Mhh;
@@ -96,6 +139,9 @@ lib.B(B_coeffs, 1., 2., 3., 4.);
       // lepton self-energy [PL]
       const auto lepton_se_all_PL =
          self_energy_1loop_PL<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
+
+      lepton_se_all_PL -= gamma_se_PL; // Removal of photon contributions
+
       const auto lepton_se_sm_PL =
          smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_dec_PL = lepton_se_all_PL - lepton_se_sm_PL;
@@ -103,6 +149,9 @@ lib.B(B_coeffs, 1., 2., 3., 4.);
       // lepton self-energy [PR]
       const auto lepton_se_all_PR =
          self_energy_1loop_PR<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
+
+      lepton_se_all_PR -= gamma_se_PR; // removal of photon contibution
+
       const auto lepton_se_sm_PR =
          smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_se_dec_PR =
@@ -111,6 +160,9 @@ lib.B(B_coeffs, 1., 2., 3., 4.);
       // lepton self-energy [1]
       const auto lepton_1_all =
          self_energy_1loop_1<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
+
+      lepton_1_all -= gamma_se_1; // removal of photon contibution
+
       const auto lepton_1_sm =
          smns::self_energy_1loop_1<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       const auto lepton_1_se_dec =
