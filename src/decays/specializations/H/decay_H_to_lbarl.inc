@@ -42,6 +42,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       calculate_amplitude_tree<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
 
    std::cout << std::setprecision(20) << '\n';
+   //std::cout << " Tree Level Amp: " << amp_tree << '\n';
 
    // higher order SM corrections
    if (flexibledecay_settings.get_decay_corrections().sm > 0) {
@@ -87,9 +88,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const auto c1 = C_coeffp.at(1);
    const auto c2 = C_coeffp.at(2);
 
-   const double g2SU2 = context.model.get_g2();
-   const double angle_W = context.model.ThetaW();
-   const double charge = g2SU2 * sin(angle_W);
+   const auto g2SU2 = context.model.get_g2();
+   const auto angle_W = context.model.ThetaW();
+   const auto charge = g2SU2 * sin(angle_W);
 
 
    const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
@@ -137,7 +138,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // self-energies, to be moved outside
 
       // lepton self-energy [PL]
-      const auto lepton_se_all_PL =
+      auto lepton_se_all_PL =
          self_energy_1loop_PL<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
       lepton_se_all_PL -= gamma_se_PL; // Removal of photon contributions
@@ -147,7 +148,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto lepton_se_dec_PL = lepton_se_all_PL - lepton_se_sm_PL;
 
       // lepton self-energy [PR]
-      const auto lepton_se_all_PR =
+      auto lepton_se_all_PR =
          self_energy_1loop_PR<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
       lepton_se_all_PR -= gamma_se_PR; // removal of photon contibution
@@ -158,7 +159,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          lepton_se_all_PR - lepton_se_sm_PR;
 
       // lepton self-energy [1]
-      const auto lepton_1_all =
+      auto lepton_1_all =
          self_energy_1loop_1<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
       lepton_1_all -= gamma_se_1; // removal of photon contibution
