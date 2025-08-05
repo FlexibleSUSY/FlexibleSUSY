@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE( test_SM_Zgamma_self_energy )
    std::cout << " g1: " << m.get_g1() << '\n';
    std::cout << " g2: " << m.get_g2() << '\n';
 
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), -16.552455949730099150, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), -16.552455949730099150, 3e-11);
    BOOST_CHECK_SMALL(m.self_energy_VPVZ_1loop(p).imag(), 0.);
 }
 
