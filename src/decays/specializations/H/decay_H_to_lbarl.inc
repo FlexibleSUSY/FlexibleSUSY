@@ -97,11 +97,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
    const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
 
-   const auto gamma_triangle = oneOver16PiSqr / vev * Sqr(charge) * mL1Tree * (-2)  
+   const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * amp_tree  
                               * (-1 + 2 * b0p 
                                  + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS))
                                  + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
                                  + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree - mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS)));
+
+   std::cout << "\n Photon Triangle Diagram: " << gamma_triangle.form_factor_left << '\n';
 
    //-------------------------------------------------------------------------------------------------------------------
 
@@ -342,7 +344,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // --------------------------------------------------------------------------------------
 
-      const auto amp_1l = calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
+      auto amp_1l = calculate_amplitude_1l<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
+
+      amp_1l = amp_1l - gamma_triangle; // removal of photon triangle
+
       const auto amp_1l_sm = sm_decays.calculate_amplitude_1l<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, {}, indexOut1, indexOut2);
       const auto amp_1l_dec = amp_1l-amp_1l_sm;
 
