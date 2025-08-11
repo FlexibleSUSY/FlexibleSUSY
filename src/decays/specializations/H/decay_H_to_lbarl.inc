@@ -82,7 +82,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       const auto b0 = B_coeffs.at(0);
       const auto b1 = B_coeffs.at(1);
-
+      const auto db0 = lib.DB0(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
+      const auto db1 = lib.DB1(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
+ 
       const auto c0 = C_coeffs.at(0);
       const auto c1 = C_coeffs.at(1);
       const auto c2 = C_coeffs.at(2);
@@ -95,6 +97,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
       const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
       const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
+
+      const auto gamma_se_deriv_PL = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
+      const auto gamma_se_deriv_PR = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
+      const auto gamma_se_deriv_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * db0) * mL1Tree;
+
+      std::cout << " PL deriv: " << gamma_se_deriv_PL << '\n';
+      std::cout << " PR deriv: " << gamma_se_deriv_PR << '\n';
+      std::cout << " 1 deriv: " << gamma_se_deriv_1 << '\n';
 
       const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * amp_tree  
                               * (-1 + 2 * b0 
@@ -127,6 +137,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       const auto b0SM = B_coeffsm.at(0);
       const auto b1SM = B_coeffsm.at(1);
+      const auto db0SM = lib.DB0(Sqr(mL1OSSM), 0, Sqr(mL2TreeSM), Sqr(scaleSM));
+      const auto db1SM = lib.DB1(Sqr(mL1OSSM), 0, Sqr(mL2TreeSM), Sqr(scaleSM));
       
       const auto c0SM = C_coeffsm.at(0);
       const auto c1SM = C_coeffsm.at(1);
@@ -140,6 +152,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto gamma_se_PR_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * b0SM + 2 * b1SM - 1);
       const auto gamma_se_1_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * (2 * b0SM - 1) * mL1TreeSM;
 
+      const auto gamma_se_deriv_PL_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * db0SM + 2 * b1SM);
+      const auto gamma_se_deriv_PR_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * db0SM + 2 * db1SM);
+      const auto gamma_se__deriv_1_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * (2 * db0SM) * mL1TreeSM;
+
       // amp_tree must still be changed
       const auto gamma_triangle_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * amp_tree  
                               * (-1 + 2 * b0SM 
@@ -147,10 +163,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
                                  + c0SM * mL1TreeSM * (2 * mL1TreeSM + 2 * mL2TreeSM + mL1OSSM - mL2OSSM)
                                  + c1SM * (Sqr(mHOSSM) + mL1OSSM * (mL1TreeSM - mL2TreeSM) + Sqr(mL1OSSM) - Sqr(mL2OSSM)));
 
-
       std::cout << "\n Photon Triangle Diagram SM: " << gamma_triangle_sm.form_factor_left << '\n';
-      std::cout << "Lepton mass: " << mL1Tree << "\n Lepton mass SM: " << mL1TreeSM << '\n';
-      std::cout << "Lepton mass OS: " << mL1OS << "\n Lepton mass OS SM: " << mL1OSSM << '\n';
 
       //std::cout << " SM scale: " << sm.get_scale() << '\n';
 
@@ -188,7 +201,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       auto lepton_se_sm_PL =
          smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       
-      lepton_se_sm_PL -= gamma_se_PL_sm;
+      lepton_se_sm_PL -= gamma_se_PL_sm; // removal of photon contribution
 
       const auto lepton_se_dec_PL = lepton_se_all_PL - lepton_se_sm_PL;
 
@@ -196,12 +209,12 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       auto lepton_se_all_PR =
          self_energy_1loop_PR<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
-      lepton_se_all_PR -= gamma_se_PR; // removal of photon contibution
+      lepton_se_all_PR -= gamma_se_PR; // removal of photon contribution
 
       auto lepton_se_sm_PR =
          smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       
-      lepton_se_sm_PR -= gamma_se_PR_sm;
+      lepton_se_sm_PR -= gamma_se_PR_sm; // removal of photon contribution
       
       const auto lepton_se_dec_PR =
          lepton_se_all_PR - lepton_se_sm_PR;
@@ -215,32 +228,50 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       auto lepton_1_sm =
          smns::self_energy_1loop_1<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       
-      lepton_1_sm -= gamma_se_1_sm;
+      lepton_1_sm -= gamma_se_1_sm; // removal of photon contribution
       
       const auto lepton_1_se_dec =
          lepton_1_all - lepton_1_sm;
 
       // lepton self-energy derivative [PL]
-      const auto lepton_se_deriv_all_PL =
+      auto lepton_se_deriv_all_PL =
          self_energy_1loop_PL_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
-      const auto lepton_se_deriv_sm_PL =
+
+      lepton_se_deriv_all_PL -= gamma_se_deriv_PL; // removal of photon contribution
+
+      auto lepton_se_deriv_sm_PL =
          smns::self_energy_1loop_PL_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
+
+      lepton_se_deriv_sm_PL -= gamma_se_deriv_PL_sm; // removal of photon contribution
+
       const auto lepton_se_deriv_dec_PL =
          lepton_se_deriv_all_PL - lepton_se_deriv_sm_PL;
 
       // lepton self-energy derivative [PR]
-      const auto lepton_se_deriv_all_PR =
+      auto lepton_se_deriv_all_PR =
          self_energy_1loop_PR_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
-      const auto lepton_se_deriv_sm_PR =
+
+      lepton_se_deriv_all_PR -= gamma_se_deriv_PR; // removal of photon contribution
+
+      auto lepton_se_deriv_sm_PR =
          smns::self_energy_1loop_PR_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
+
+      lepton_se_deriv_sm_PR -= gamma_se_deriv_PR_sm; // removal of photon contribution
+
       const auto lepton_se_deriv_dec_PR =
          lepton_se_deriv_all_PR - lepton_se_deriv_sm_PR;
 
       // lepton self-energy derivative [1]
-      const auto lepton_se_deriv_all_1 =
+      auto lepton_se_deriv_all_1 =
          self_energy_1loop_1_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
-      const auto lepton_se_deriv_sm_1 =
+   
+      lepton_se_deriv_all_1 -= gamma_se_deriv_1; // removal of photon contribution
+
+      auto lepton_se_deriv_sm_1 =
          smns::self_energy_1loop_1_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
+
+      lepton_se_deriv_sm_1 -= gamma_se__deriv_1_sm; // removal of photon contribution
+
       const auto lepton_se_deriv_dec_1 =
          lepton_se_deriv_all_1 - lepton_se_deriv_sm_1;
 
