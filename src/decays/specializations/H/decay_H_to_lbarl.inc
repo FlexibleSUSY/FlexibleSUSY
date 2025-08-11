@@ -69,31 +69,23 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       auto& lib = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffs;
-
-      auto& lib1 = Loop_library::get();
-      looplibrary::Bcoeff_t B_coeffp;
-      looplibrary::Ccoeff_t C_coeffp;
+      looplibrary::Ccoeff_t C_coeffs;
    
       //const double scale = context.model.get_scale();
       const double mL1Tree = context.model.get_MFe(indexOut1.at(0));
       const double mL2Tree = context.model.get_MFe(indexOut2.at(0));
       const double vev = context.model.get_v();
 
-
-      // B function for self energies, evaluated at the tree mass
-      lib.B(B_coeffs, Sqr(mL2Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
-
       // B,C functions for triangle diagram, evaluated at physical and tree masses
-      lib1.B(B_coeffp, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
-      lib.C(C_coeffp, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+      lib.B(B_coeffs, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
+      lib.C(C_coeffs, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
 
       const auto b0 = B_coeffs.at(0);
       const auto b1 = B_coeffs.at(1);
 
-      const auto b0p = B_coeffp.at(0);
-      const auto c0 = C_coeffp.at(0);
-      const auto c1 = C_coeffp.at(1);
-      const auto c2 = C_coeffp.at(2);
+      const auto c0 = C_coeffs.at(0);
+      const auto c1 = C_coeffs.at(1);
+      const auto c2 = C_coeffs.at(2);
 
       const auto g2SU2 = context.model.get_g2();
       const auto angle_W = context.model.ThetaW();
@@ -105,7 +97,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
 
       const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * amp_tree  
-                              * (-1 + 2 * b0p 
+                              * (-1 + 2 * b0 
                                  + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS))
                                  + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
                                  + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree - mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS)));
@@ -119,10 +111,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       auto& libSM = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffsm;
-
-      auto& lib1SM = Loop_library::get();
-      looplibrary::Bcoeff_t B_coeffpsm;
-      looplibrary::Ccoeff_t C_coeffpsm;
+      looplibrary::Ccoeff_t C_coeffsm;
 
       const double scaleSM = sm.get_scale();
       const double mHOSSM = sm.get_physical().Mhh;
@@ -132,20 +121,16 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const double mL2TreeSM = sm.get_MFe(indexOut2.at(0));
       const double vevSM = sm.get_v();
 
-      // B function for self energies, evaluated at the tree mass
-      libSM.B(B_coeffsm, Sqr(mL2TreeSM), 0, Sqr(mL2TreeSM), Sqr(scaleSM));
-      
       // B,C functions for triangle diagram, evaluated at physical and tree masses
-      lib1SM.B(B_coeffpsm, Sqr(mL1OSSM), 0, Sqr(mL1TreeSM), Sqr(scaleSM));
-      lib1SM.C(C_coeffpsm, Sqr(mL1OSSM), Sqr(mL2OSSM), Sqr(mHOSSM), Sqr(mL1TreeSM), 0, Sqr(mL2TreeSM), Sqr(scaleSM));
+      libSM.B(B_coeffsm, Sqr(mL1OSSM), 0, Sqr(mL1TreeSM), Sqr(scaleSM));
+      libSM.C(C_coeffsm, Sqr(mL1OSSM), Sqr(mL2OSSM), Sqr(mHOSSM), Sqr(mL1TreeSM), 0, Sqr(mL2TreeSM), Sqr(scaleSM));
 
       const auto b0SM = B_coeffsm.at(0);
       const auto b1SM = B_coeffsm.at(1);
       
-      const auto b0pSM = B_coeffpsm.at(0);
-      const auto c0SM = C_coeffpsm.at(0);
-      const auto c1SM = C_coeffpsm.at(1);
-      const auto c2SM = C_coeffpsm.at(2);
+      const auto c0SM = C_coeffsm.at(0);
+      const auto c1SM = C_coeffsm.at(1);
+      const auto c2SM = C_coeffsm.at(2);
 
       const auto g2SU2SM = sm.get_g2();
       const auto angle_WSM = sm.ThetaW();
@@ -157,7 +142,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // amp_tree must still be changed
       const auto gamma_triangle_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * amp_tree  
-                              * (-1 + 2 * b0pSM 
+                              * (-1 + 2 * b0SM 
                                  + c2SM * (2 * Sqr(mHOSSM) + (mL1TreeSM + mL2TreeSM) * (mL1OSSM - mL2OSSM))
                                  + c0SM * mL1TreeSM * (2 * mL1TreeSM + 2 * mL2TreeSM + mL1OSSM - mL2OSSM)
                                  + c1SM * (Sqr(mHOSSM) + mL1OSSM * (mL1TreeSM - mL2TreeSM) + Sqr(mL1OSSM) - Sqr(mL2OSSM)));
