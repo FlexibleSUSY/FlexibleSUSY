@@ -56,61 +56,116 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 #if DECAY_BSM_ORDER > 0
 
 
-//--------------------------------------------------------------------------------
-//Explicit photon diagrams
-//--------------------------------------------------------------------------------
 
-   auto& lib = Loop_library::get();
-   looplibrary::Bcoeff_t B_coeffs;
-
-   auto& lib1 = Loop_library::get();
-   looplibrary::Bcoeff_t B_coeffp;
-   looplibrary::Ccoeff_t C_coeffp;
-   
-   //const double scale = context.model.get_scale();
-   const double mL1Tree = context.model.get_MFe(indexOut1.at(0));
-   const double mL2Tree = context.model.get_MFe(indexOut2.at(0));
-   const double vev = context.model.get_v();
-
-
-   // B function for self energies, evaluated at the tree mass
-   lib.B(B_coeffs, Sqr(mL2Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
-
-   // B,C functions for triangle diagram, evaluated at physical and tree masses
-   lib1.B(B_coeffp, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
-   lib.C(C_coeffp, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
-
-   const auto b0 = B_coeffs.at(0);
-   const auto b1 = B_coeffs.at(1);
-
-   const auto b0p = B_coeffp.at(0);
-   const auto c0 = C_coeffp.at(0);
-   const auto c1 = C_coeffp.at(1);
-   const auto c2 = C_coeffp.at(2);
-
-   const auto g2SU2 = context.model.get_g2();
-   const auto angle_W = context.model.ThetaW();
-   const auto charge = g2SU2 * sin(angle_W);
-
-
-   const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
-   const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
-   const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
-
-   const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * amp_tree  
-                              * (-1 + 2 * b0p 
-                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS))
-                                 + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
-                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree - mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS)));
-
-   std::cout << "\n Photon Triangle Diagram: " << gamma_triangle.form_factor_left << '\n';
-
-   //-------------------------------------------------------------------------------------------------------------------
 
    if (flexibledecay_settings.get_decay_corrections().bsm > 0) {
 
       namespace smns = standard_model_cxx_diagrams;
       smns::context_base sm_context {sm};
+
+      //--------------------------------------------------------------------------------
+      //Explicit photon diagrams (BSM model)
+      //--------------------------------------------------------------------------------
+
+      auto& lib = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffs;
+
+      auto& lib1 = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffp;
+      looplibrary::Ccoeff_t C_coeffp;
+   
+      //const double scale = context.model.get_scale();
+      const double mL1Tree = context.model.get_MFe(indexOut1.at(0));
+      const double mL2Tree = context.model.get_MFe(indexOut2.at(0));
+      const double vev = context.model.get_v();
+
+
+      // B function for self energies, evaluated at the tree mass
+      lib.B(B_coeffs, Sqr(mL2Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+
+      // B,C functions for triangle diagram, evaluated at physical and tree masses
+      lib1.B(B_coeffp, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
+      lib.C(C_coeffp, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+
+      const auto b0 = B_coeffs.at(0);
+      const auto b1 = B_coeffs.at(1);
+
+      const auto b0p = B_coeffp.at(0);
+      const auto c0 = C_coeffp.at(0);
+      const auto c1 = C_coeffp.at(1);
+      const auto c2 = C_coeffp.at(2);
+
+      const auto g2SU2 = context.model.get_g2();
+      const auto angle_W = context.model.ThetaW();
+      const auto charge = g2SU2 * sin(angle_W);
+
+
+      const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
+      const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
+      const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
+
+      const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * amp_tree  
+                              * (-1 + 2 * b0p 
+                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS))
+                                 + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
+                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree - mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS)));
+
+      std::cout << "\n Photon Triangle Diagram: " << gamma_triangle.form_factor_left << '\n';
+
+      //-------------------------------------------------------------------------------------------------------------------
+      // Explicit photon diagrams (Build-in SM)
+      //------------------------------------------------------------------------------------------------------------------
+
+
+      auto& libSM = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffsm;
+
+      auto& lib1SM = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffpsm;
+      looplibrary::Ccoeff_t C_coeffpsm;
+
+      const double scaleSM = sm.get_scale();
+      const double mHOSSM = sm.get_physical().Mhh;
+      const double mL1OSSM = sm.get_physical().MFe(indexOut1.at(0));
+      const double mL2OSSM = sm.get_physical().MFe(indexOut2.at(0));
+      const double mL1TreeSM = sm.get_MFe(indexOut1.at(0));
+      const double mL2TreeSM = sm.get_MFe(indexOut2.at(0));
+      const double vevSM = sm.get_v();
+
+      // B function for self energies, evaluated at the tree mass
+      libSM.B(B_coeffsm, Sqr(mL2TreeSM), 0, Sqr(mL2TreeSM), Sqr(scaleSM));
+      
+      // B,C functions for triangle diagram, evaluated at physical and tree masses
+      lib1SM.B(B_coeffpsm, Sqr(mL1OSSM), 0, Sqr(mL1TreeSM), Sqr(scaleSM));
+      lib1SM.C(C_coeffpsm, Sqr(mL1OSSM), Sqr(mL2OSSM), Sqr(mHOSSM), Sqr(mL1TreeSM), 0, Sqr(mL2TreeSM), Sqr(scaleSM));
+
+      const auto b0SM = B_coeffsm.at(0);
+      const auto b1SM = B_coeffsm.at(1);
+      
+      const auto b0pSM = B_coeffpsm.at(0);
+      const auto c0SM = C_coeffpsm.at(0);
+      const auto c1SM = C_coeffpsm.at(1);
+      const auto c2SM = C_coeffpsm.at(2);
+
+      const auto g2SU2SM = sm.get_g2();
+      const auto angle_WSM = sm.ThetaW();
+      const auto chargeSM = g2SU2SM * sin(angle_WSM);
+
+      const auto gamma_se_PL_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * b0SM + 2 * b1SM - 1);
+      const auto gamma_se_PR_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * b0SM + 2 * b1SM - 1);
+      const auto gamma_se_1_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * (2 * b0SM - 1) * mL1TreeSM;
+
+      // amp_tree must still be changed
+      const auto gamma_triangle_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * amp_tree  
+                              * (-1 + 2 * b0pSM 
+                                 + c2SM * (2 * Sqr(mHOSSM) + (mL1TreeSM + mL2TreeSM) * (mL1OSSM - mL2OSSM))
+                                 + c0SM * mL1TreeSM * (2 * mL1TreeSM + 2 * mL2TreeSM + mL1OSSM - mL2OSSM)
+                                 + c1SM * (Sqr(mHOSSM) + mL1OSSM * (mL1TreeSM - mL2TreeSM) + Sqr(mL1OSSM) - Sqr(mL2OSSM)));
+
+
+      std::cout << "\n Photon Triangle Diagram SM: " << gamma_triangle_sm.form_factor_left << '\n';
+      std::cout << "Lepton mass: " << mL1Tree << "\n Lepton mass SM: " << mL1TreeSM << '\n';
+      std::cout << "Lepton mass OS: " << mL1OS << "\n Lepton mass OS SM: " << mL1OSSM << '\n';
 
       //std::cout << " SM scale: " << sm.get_scale() << '\n';
 
@@ -145,8 +200,11 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       lepton_se_all_PL -= gamma_se_PL; // Removal of photon contributions
 
-      const auto lepton_se_sm_PL =
+      auto lepton_se_sm_PL =
          smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
+      
+      lepton_se_sm_PL -= gamma_se_PL_sm;
+
       const auto lepton_se_dec_PL = lepton_se_all_PL - lepton_se_sm_PL;
 
       // lepton self-energy [PR]
@@ -155,8 +213,11 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       lepton_se_all_PR -= gamma_se_PR; // removal of photon contibution
 
-      const auto lepton_se_sm_PR =
+      auto lepton_se_sm_PR =
          smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
+      
+      lepton_se_sm_PR -= gamma_se_PR_sm;
+      
       const auto lepton_se_dec_PR =
          lepton_se_all_PR - lepton_se_sm_PR;
 
@@ -166,8 +227,11 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       lepton_1_all -= gamma_se_1; // removal of photon contibution
 
-      const auto lepton_1_sm =
+      auto lepton_1_sm =
          smns::self_energy_1loop_1<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
+      
+      lepton_1_sm -= gamma_se_1_sm;
+      
       const auto lepton_1_se_dec =
          lepton_1_all - lepton_1_sm;
 
@@ -348,7 +412,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       amp_1l = amp_1l - gamma_triangle; // removal of photon triangle
 
-      const auto amp_1l_sm = sm_decays.calculate_amplitude_1l<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, {}, indexOut1, indexOut2);
+      auto amp_1l_sm = sm_decays.calculate_amplitude_1l<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, {}, indexOut1, indexOut2);
+
+      amp_1l_sm = amp_1l_sm - gamma_triangle_sm;
+
       const auto amp_1l_dec = amp_1l-amp_1l_sm;
 
       // mix term between tree and 1loop amplitude
