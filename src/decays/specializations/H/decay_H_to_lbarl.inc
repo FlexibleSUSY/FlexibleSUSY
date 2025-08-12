@@ -196,12 +196,12 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       auto lepton_se_all_PL =
          self_energy_1loop_PL<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
-      lepton_se_all_PL -= gamma_se_PL; // Removal of photon contributions
+      lepton_se_all_PL -= 0.5 * gamma_se_PL; // Removal of photon contributions
 
       auto lepton_se_sm_PL =
          smns::self_energy_1loop_PL<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       
-      lepton_se_sm_PL -= gamma_se_PL_sm; // removal of photon contribution
+      lepton_se_sm_PL -= 0.5 * gamma_se_PL_sm; // removal of photon contribution
 
       const auto lepton_se_dec_PL = lepton_se_all_PL - lepton_se_sm_PL;
 
@@ -209,12 +209,12 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       auto lepton_se_all_PR =
          self_energy_1loop_PR<ChargedLepton,ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
-      lepton_se_all_PR -= gamma_se_PR; // removal of photon contribution
+      lepton_se_all_PR -= 0.5 * gamma_se_PR; // removal of photon contribution
 
       auto lepton_se_sm_PR =
          smns::self_energy_1loop_PR<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
       
-      lepton_se_sm_PR -= gamma_se_PR_sm; // removal of photon contribution
+      lepton_se_sm_PR -= 0.5 * gamma_se_PR_sm; // removal of photon contribution
       
       const auto lepton_se_dec_PR =
          lepton_se_all_PR - lepton_se_sm_PR;
@@ -237,12 +237,12 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       auto lepton_se_deriv_all_PL =
          self_energy_1loop_PL_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
-      lepton_se_deriv_all_PL -= gamma_se_deriv_PL; // removal of photon contribution
+      lepton_se_deriv_all_PL -= 0.5 * gamma_se_deriv_PL; // removal of photon contribution
 
       auto lepton_se_deriv_sm_PL =
          smns::self_energy_1loop_PL_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
 
-      lepton_se_deriv_sm_PL -= gamma_se_deriv_PL_sm; // removal of photon contribution
+      lepton_se_deriv_sm_PL -= 0.5 * gamma_se_deriv_PL_sm; // removal of photon contribution
 
       const auto lepton_se_deriv_dec_PL =
          lepton_se_deriv_all_PL - lepton_se_deriv_sm_PL;
@@ -251,12 +251,12 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       auto lepton_se_deriv_all_PR =
          self_energy_1loop_PR_deriv_p2<ChargedLepton>(context, mL1OS, indexOut1, indexOut2);
 
-      lepton_se_deriv_all_PR -= gamma_se_deriv_PR; // removal of photon contribution
+      lepton_se_deriv_all_PR -= 0.5 * gamma_se_deriv_PR; // removal of photon contribution
 
       auto lepton_se_deriv_sm_PR =
          smns::self_energy_1loop_PR_deriv_p2<smns::fields::Fe>(sm_context, mL1SMOS).coeff(indexOut1.at(0), indexOut2.at(0));
 
-      lepton_se_deriv_sm_PR -= gamma_se_deriv_PR_sm; // removal of photon contribution
+      lepton_se_deriv_sm_PR -= 0.5 * gamma_se_deriv_PR_sm; // removal of photon contribution
 
       const auto lepton_se_deriv_dec_PR =
          lepton_se_deriv_all_PR - lepton_se_deriv_sm_PR;
