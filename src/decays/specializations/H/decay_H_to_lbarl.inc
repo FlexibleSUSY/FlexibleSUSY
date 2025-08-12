@@ -55,9 +55,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
 #if DECAY_BSM_ORDER > 0
 
-
-
-
    if (flexibledecay_settings.get_decay_corrections().bsm > 0) {
 
       namespace smns = standard_model_cxx_diagrams;
@@ -102,22 +99,16 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto gamma_se_deriv_PR = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
       const auto gamma_se_deriv_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * db0) * mL1Tree;
 
-      std::cout << " PL deriv: " << gamma_se_deriv_PL << '\n';
-      std::cout << " PR deriv: " << gamma_se_deriv_PR << '\n';
-      std::cout << " 1 deriv: " << gamma_se_deriv_1 << '\n';
-
       const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * amp_tree  
                               * (-1 + 2 * b0 
-                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS))
                                  + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
-                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree - mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS)));
+                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree + mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS))
+                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS)));
 
-      std::cout << "\n Photon Triangle Diagram: " << gamma_triangle.form_factor_left << '\n';
 
-      //-------------------------------------------------------------------------------------------------------------------
+      //-----------------------------------------------------------------------------------------------------------------
       // Explicit photon diagrams (Build-in SM)
-      //------------------------------------------------------------------------------------------------------------------
-
+      //-----------------------------------------------------------------------------------------------------------------
 
       auto& libSM = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffsm;
@@ -163,7 +154,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
                                  + c0SM * mL1TreeSM * (2 * mL1TreeSM + 2 * mL2TreeSM + mL1OSSM - mL2OSSM)
                                  + c1SM * (Sqr(mHOSSM) + mL1OSSM * (mL1TreeSM - mL2TreeSM) + Sqr(mL1OSSM) - Sqr(mL2OSSM)));
 
-      std::cout << "\n Photon Triangle Diagram SM: " << gamma_triangle_sm.form_factor_left << '\n';
+
+      //---------------------------------------------------------------------------------------------------
+
 
       //std::cout << " SM scale: " << sm.get_scale() << '\n';
 
