@@ -87,9 +87,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       const auto charge = unit_charge(context);
 
-      const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
-      const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
-      const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
+      auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), mHOS);
 
       const auto gamma_se_deriv_PL = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
       const auto gamma_se_deriv_PR = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
@@ -116,7 +114,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const double mL2OSSM = sm.get_physical().MFe(indexOut2.at(0));
       const double mL1TreeSM = sm.get_MFe(indexOut1.at(0));
       const double mL2TreeSM = sm.get_MFe(indexOut2.at(0));
-      const double vevSM = sm.get_v();
 
       // B,C functions for triangle diagram, evaluated at physical and tree masses
       libSM.B(B_coeffsm, Sqr(mL1OSSM), 0, Sqr(mL1TreeSM), Sqr(scaleSM));
