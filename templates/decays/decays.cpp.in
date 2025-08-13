@@ -76,14 +76,15 @@ const FlexibleDecay_problems& CLASSNAME::get_problems() const
    return problems;
 }
 
+template <typename F>
 std::complex<double> subtract_1l_QED_triangle(
-   @ModelName@_cxx_diagrams::context_base const& context, int idxIn, int idxOut1, int idxOut2)
+   @ModelName@_cxx_diagrams::context_base const& context, typename field_indices<F>::type const& idxIn, int idxOut1, int idxOut2)
 {
       auto& lib = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffs;
       looplibrary::Ccoeff_t C_coeffs;
 
-      const double mHOS = context.physical_mass<Higgs>({idxIn});
+      const double mHOS = context.physical_mass<F>(idxIn);
       const double mL1OS = context.physical_mass<ChargedLepton>({idxOut1});
       const double mL2OS = context.physical_mass<ChargedLepton>({idxOut2});
       const double mL1Tree = context.mass<ChargedLepton>({idxOut1});

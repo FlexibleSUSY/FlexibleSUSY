@@ -59,9 +59,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       namespace smns = standard_model_cxx_diagrams;
       smns::context_base sm_context {sm};
 
-      auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), mHOS);
-      auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut1.at(0), mHOS);
-      const auto gamma_triangle = subtract_1l_QED_triangle(context, indexIn.at(0), indexOut1.at(0), indexOut2.at(0)) * amp_tree;
+      const auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), mHOS);
+      const auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut1.at(0), mHOS);
+      const auto gamma_triangle = subtract_1l_QED_triangle<Higgs>(context, indexIn, indexOut1.at(0), indexOut2.at(0)) * amp_tree;
 
       //-----------------------------------------------------------------------------------------------------------------
       // Explicit photon diagrams (Build-in SM)
