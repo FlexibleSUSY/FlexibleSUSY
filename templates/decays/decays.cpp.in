@@ -76,6 +76,38 @@ const FlexibleDecay_problems& CLASSNAME::get_problems() const
    return problems;
 }
 
+std::complex<double> subtract_1l_QED_triangle(
+   @ModelName@_cxx_diagrams::context_base const& context, int idxIn, int idxOut1, int idxOut2)
+{
+      auto& lib = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffs;
+      looplibrary::Ccoeff_t C_coeffs;
+
+      const double mHOS = context.physical_mass<Higgs>({idxIn});
+      const double mL1OS = context.physical_mass<ChargedLepton>({idxOut1});
+      const double mL2OS = context.physical_mass<ChargedLepton>({idxOut2});
+      const double mL1Tree = context.mass<ChargedLepton>({idxOut1});
+      const double mL2Tree = context.mass<ChargedLepton>({idxOut2});
+
+      // B,C functions for triangle diagram, evaluated at physical and tree masses
+      lib.B(B_coeffs, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
+      lib.C(C_coeffs, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+
+      const auto b0 = B_coeffs.at(0);
+      const auto c0 = C_coeffs.at(0);
+      const auto c1 = C_coeffs.at(1);
+      const auto c2 = C_coeffs.at(2);
+
+      const auto charge = unit_charge(context);
+
+      const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * (-1 + 2 * b0
+                                 + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
+                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree + mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS))
+                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS)));
+
+      return gamma_triangle;
+}
+
 std::array<std::complex<double>, 3> subtract_1l_QED_se(
    @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale)
 {
@@ -94,6 +126,27 @@ std::array<std::complex<double>, 3> subtract_1l_QED_se(
       const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
       const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
       const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
+
+      return {gamma_se_1, gamma_se_PL, gamma_se_PR};
+}
+
+std::array<std::complex<double>, 3> subtract_1l_QED_se_deriv(
+   @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale)
+{
+      auto& lib = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffs;
+
+      const double mLTree = context.mass<ChargedLepton>({idx});
+      const double mLOS = context.physical_mass<ChargedLepton>({idx});
+
+      const auto db0 = lib.DB0(Sqr(mLOS), 0, Sqr(mLTree), Sqr(scale));
+      const auto db1 = lib.DB1(Sqr(mLOS), 0, Sqr(mLTree), Sqr(scale));
+
+      const auto charge = unit_charge(context);
+
+      const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
+      const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
+      const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * db0) * mLTree;
 
       return {gamma_se_1, gamma_se_PL, gamma_se_PR};
 }

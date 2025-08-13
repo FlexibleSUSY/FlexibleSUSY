@@ -54,7 +54,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    double res = res_S + res_P;
 
 #if DECAY_BSM_ORDER > 0
-
    if (flexibledecay_settings.get_decay_corrections().bsm > 0) {
 
       namespace smns = standard_model_cxx_diagrams;
@@ -65,40 +64,18 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       //--------------------------------------------------------------------------------
 
       auto& lib = Loop_library::get();
-      looplibrary::Bcoeff_t B_coeffs;
-      looplibrary::Ccoeff_t C_coeffs;
 
-      //const double scale = context.model.get_scale();
-      const double mL1Tree = context.model.get_MFe(indexOut1.at(0));
-      const double mL2Tree = context.model.get_MFe(indexOut2.at(0));
+      //const double mL1Tree = context.model.get_MFe(indexOut1.at(0));
+      //const double mL2Tree = context.model.get_MFe(indexOut2.at(0));
 
-      // B,C functions for triangle diagram, evaluated at physical and tree masses
-      lib.B(B_coeffs, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
-      lib.C(C_coeffs, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+      //const auto db0 = lib.DB0(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
+      //const auto db1 = lib.DB1(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
 
-      const auto b0 = B_coeffs.at(0);
-      const auto b1 = B_coeffs.at(1);
-      const auto db0 = lib.DB0(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
-      const auto db1 = lib.DB1(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
-
-      const auto c0 = C_coeffs.at(0);
-      const auto c1 = C_coeffs.at(1);
-      const auto c2 = C_coeffs.at(2);
-
-      const auto charge = unit_charge(context);
+      //const auto charge = unit_charge(context);
 
       auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), mHOS);
-
-      const auto gamma_se_deriv_PL = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
-      const auto gamma_se_deriv_PR = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
-      const auto gamma_se_deriv_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * db0) * mL1Tree;
-
-      const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * amp_tree
-                              * (-1 + 2 * b0
-                                 + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
-                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree + mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS))
-                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS)));
-
+      auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut1.at(0), mHOS);
+      const auto gamma_triangle = subtract_1l_QED_triangle(context, indexIn.at(0), indexOut1.at(0), indexOut2.at(0)) * amp_tree;
 
       //-----------------------------------------------------------------------------------------------------------------
       // Explicit photon diagrams (Build-in SM)
