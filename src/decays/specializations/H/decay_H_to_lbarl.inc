@@ -59,20 +59,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       namespace smns = standard_model_cxx_diagrams;
       smns::context_base sm_context {sm};
 
-      //--------------------------------------------------------------------------------
-      //Explicit photon diagrams (BSM model)
-      //--------------------------------------------------------------------------------
-
-      auto& lib = Loop_library::get();
-
-      //const double mL1Tree = context.model.get_MFe(indexOut1.at(0));
-      //const double mL2Tree = context.model.get_MFe(indexOut2.at(0));
-
-      //const auto db0 = lib.DB0(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
-      //const auto db1 = lib.DB1(Sqr(mL1OS), 0, Sqr(mL2Tree), Sqr(mHOS));
-
-      //const auto charge = unit_charge(context);
-
       auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), mHOS);
       auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut1.at(0), mHOS);
       const auto gamma_triangle = subtract_1l_QED_triangle(context, indexIn.at(0), indexOut1.at(0), indexOut2.at(0)) * amp_tree;
@@ -81,6 +67,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // Explicit photon diagrams (Build-in SM)
       //-----------------------------------------------------------------------------------------------------------------
 
+      auto& lib = Loop_library::get();
       auto& libSM = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffsm;
       looplibrary::Ccoeff_t C_coeffsm;
