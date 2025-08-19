@@ -157,7 +157,6 @@ jobs:
           $MY_MATH_PASS
           EOF
           printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi
-          printf "Checking if math command is workings... "; if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi
 
       - name: Install FormCalc
         run: |
