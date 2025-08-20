@@ -270,7 +270,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // photon-Z se
       
       const auto PZ_se_all = self_energy_1loop<Photon,ZBoson>(context, 0, {}, {});
-      //const auto PZ_se_sm = smns::self_energy_1loop<smns::fields::Photon,smns::fields::ZBoson>(sm_context, 0);
+      const auto PZ_se_sm = sm.self_energy_VPVZ_1loop(0);
 
       // --------------------------------------------------------------------------------------
       // SM On-Shell Renormalization Constants
@@ -297,7 +297,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto delta_Z_A_sm = -photon_se_deriv_sm;
       
       // still needs the correct build-in ZA self energy
-      const auto delta_Z_ZA_sm = 2 * PZ_se_all / Sqr(mZSMOS);
+      const auto delta_Z_ZA_sm = 2 * PZ_se_sm / Sqr(mZSMOS);
 
       const double theta_W_sm = sm.ThetaW();
 
@@ -449,8 +449,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << " W deriv: " << W_se_deriv_all << '\n';
 
          std::cout << "\n Photon-Z Self-Energies: \n";
-         std::cout << "\n BSM: " << self_energy_1loop<Photon,ZBoson>(context, mHOS, {}, {}) << '\n';
-         std::cout << "\n SM:  " << sm.self_energy_VPVZ_1loop(mHOS) << '\n';
+         std::cout << "\n BSM: " << PZ_se_all << '\n';
+         std::cout << "\n SM:  " << PZ_se_sm << '\n';
 
          // Build-In Self-Energies
          std::cout << "\n Build-in SM Self-Energies: " << '\n';
