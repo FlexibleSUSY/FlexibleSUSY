@@ -5002,31 +5002,31 @@ std::complex<double> Standard_model::self_energy_VPVZ_1loop(double p) const
 {
    std::complex<double> result;
 
-   result += B00(Sqr(p),Sqr(MVWp),Sqr(MVWp))*CpbargWpCgWpCVP()*CpVZbargWpCgWpC();
-   result += B00(Sqr(p),Sqr(MVWp),Sqr(MVWp))*CpbargWpgWpVP()*CpVZbargWpgWp();
-   result += -(A0(Sqr(MVWp))*(CpconjVWpVPVWpVZ1() + 4*CpconjVWpVPVWpVZ2() +
+   result += B00(p,MVWp,MVWp)*CpbargWpCgWpCVP()*CpVZbargWpCgWpC();
+   result += B00(p,MVWp,MVWp)*CpbargWpgWpVP()*CpVZbargWpgWp();
+   result += -(A0(MVWp)*(CpconjVWpVPVWpVZ1() + 4*CpconjVWpVPVWpVZ2() +
       CpconjVWpVPVWpVZ3()));
-   result += A0(Sqr(MHp))*CpHpconjHpVPVZ();
-   result += -4*B00(Sqr(p),Sqr(MHp),Sqr(MHp))*CpHpconjHpVP()*CpHpconjHpVZ();
-   result += B0(Sqr(p),Sqr(MVWp),Sqr(MHp))*CpconjHpVWpVZ()*CpHpconjVWpVP();
-   result += B0(Sqr(p),Sqr(MVWp),Sqr(MHp))*CpconjHpVPVWp()*CpHpconjVWpVZ();
+   result += A0(MHp)*CpHpconjHpVPVZ();
+   result += -4*B00(p,MHp,MHp)*CpHpconjHpVP()*CpHpconjHpVZ();
+   result += B0(p,MVWp,MHp)*CpconjHpVWpVZ()*CpHpconjVWpVP();
+   result += B0(p,MVWp,MHp)*CpconjHpVPVWp()*CpHpconjVWpVZ();
    result += 2*CpconjVWpVPVWpVZ2()*Sqr(MVWp);
-   result += -0.6666666666666666*CpconjVWpVPVWp(1,0)*CpconjVWpVZVWp(1,0)*(3*A0(Sqr
-      (MVWp)) + 15*B00(Sqr(p),Sqr(MVWp),Sqr(MVWp)) - 6*Sqr(MVWp) + Sqr(p) + 3*B0(
-      Sqr(p),Sqr(MVWp),Sqr(MVWp))*(Sqr(MVWp) + 2*Sqr(p)));
+   result += -0.6666666666666666*CpconjVWpVPVWp(1,0)*CpconjVWpVZVWp(1,0)*(3*A0(MVWp)
+      + 15*B00(p,MVWp,MVWp) - 6*Sqr(MVWp) + Sqr(p) + 3*B0(p,MVWp,MVWp)*(Sqr(MVWp)
+      + 2*Sqr(p)));
    result += 3*SUM(gI1,0,2,SUM(gI2,0,2,(CpbarFdFdVPPL(gI1,gI2)*CpVZbarFdFdPL(gI2,
-      gI1) + CpbarFdFdVPPR(gI1,gI2)*CpVZbarFdFdPR(gI2,gI1))*H0(Sqr(p),Sqr(MFd(gI1)
-      ),Sqr(MFd(gI2))) + 2*B0(Sqr(p),Sqr(MFd(gI1)),Sqr(MFd(gI2)))*(CpbarFdFdVPPR(
+      gI1) + CpbarFdFdVPPR(gI1,gI2)*CpVZbarFdFdPR(gI2,gI1))*H0(p,MFd(gI1)
+      ,MFd(gI2)) + 2*B0(p,MFd(gI1),MFd(gI2))*(CpbarFdFdVPPR(
       gI1,gI2)*CpVZbarFdFdPL(gI2,gI1) + CpbarFdFdVPPL(gI1,gI2)*CpVZbarFdFdPR(gI2,
       gI1))*MFd(gI1)*MFd(gI2)));
    result += SUM(gI1,0,2,SUM(gI2,0,2,(CpbarFeFeVPPL(gI1,gI2)*CpVZbarFeFePL(gI2,gI1
-      ) + CpbarFeFeVPPR(gI1,gI2)*CpVZbarFeFePR(gI2,gI1))*H0(Sqr(p),Sqr(MFe(gI1)),
-      Sqr(MFe(gI2))) + 2*B0(Sqr(p),Sqr(MFe(gI1)),Sqr(MFe(gI2)))*(CpbarFeFeVPPR(gI1
+      ) + CpbarFeFeVPPR(gI1,gI2)*CpVZbarFeFePR(gI2,gI1))*H0(p,MFe(gI1),
+      MFe(gI2)) + 2*B0(p,MFe(gI1),MFe(gI2))*(CpbarFeFeVPPR(gI1
       ,gI2)*CpVZbarFeFePL(gI2,gI1) + CpbarFeFeVPPL(gI1,gI2)*CpVZbarFeFePR(gI2,gI1)
       )*MFe(gI1)*MFe(gI2)));
    result += 3*SUM(gI1,0,2,SUM(gI2,0,2,(CpbarFuFuVPPL(gI1,gI2)*CpVZbarFuFuPL(gI2,
-      gI1) + CpbarFuFuVPPR(gI1,gI2)*CpVZbarFuFuPR(gI2,gI1))*H0(Sqr(p),Sqr(MFu(gI1)
-      ),Sqr(MFu(gI2))) + 2*B0(Sqr(p),Sqr(MFu(gI1)),Sqr(MFu(gI2)))*(CpbarFuFuVPPR(
+      gI1) + CpbarFuFuVPPR(gI1,gI2)*CpVZbarFuFuPR(gI2,gI1))*H0(p,MFu(gI1
+      ),MFu(gI2)) + 2*B0(p,MFu(gI1),MFu(gI2))*(CpbarFuFuVPPR(
       gI1,gI2)*CpVZbarFuFuPL(gI2,gI1) + CpbarFuFuVPPL(gI1,gI2)*CpVZbarFuFuPR(gI2,
       gI1))*MFu(gI1)*MFu(gI2)));
 
