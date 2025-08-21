@@ -366,7 +366,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // it is still necessary to decine the W-and Z-mass as well as the vev
       // vev renormalization constant in the decoupling scheme
-      const auto delta_Z_vev_dec = (1 - 0.5/Sqr(std::sin(theta_W)))*delta_Zm_W_dec + 0.5/Sqr(std::tan(theta_W))*delta_Zm_Z_dec - delta_e_dec;
+      const auto delta_Z_vev_dec = delta_Z_vev - delta_Z_vev_sm;
 
 
       // --------------------------------------------------------------------------------------
@@ -374,14 +374,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto ct_FL1 =
          amp_tree.form_factor_left * (0.5*(delta_ZL_lepton + delta_ZR_lepton) + delta_Zm_lepton_dec);
       const auto ct_FL2 =
-         amp_tree.form_factor_left * (delta_Z_higgs - delta_Z_vev_dec);
+         amp_tree.form_factor_left * (delta_Z_higgs/2 - delta_Z_vev_dec);
       const auto ct_FL =
          ct_FL1 + ct_FL2;
 
       const auto ct_FR1 =
          amp_tree.form_factor_right * (0.5*(delta_ZR_lepton + delta_ZL_lepton) + delta_Zm_lepton_dec);
       const auto ct_FR2 =
-        amp_tree.form_factor_right * (delta_Z_higgs - delta_Z_vev_dec);
+        amp_tree.form_factor_right * (delta_Z_higgs/2 - delta_Z_vev_dec);
       const auto ct_FR = ct_FR1 + ct_FR2;
 
       // --------------------------------------------------------------------------------------
@@ -497,7 +497,24 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << " W Mass Renormalization: " << delta_Zm_W_sm << '\n';
 
          std::cout << "\n Charge Renormalization: " << delta_e_sm << '\n';
-         std::cout << "\n ev Renormaliztion: " << delta_Z_vev_sm << '\n';
+         std::cout << "\n vev Renormaliztion: " << delta_Z_vev_sm << '\n';
+
+         std::cout << "\n BSM Renormalization Constants" << '\n';
+         std::cout << "\n Higgs Field Renormalization: " << delta_Z_higgs << '\n';
+         std::cout << " Higgs Mass Renormalization: " << delta_Zm_higgs << '\n';
+
+         std::cout << "\n Fermion PL Field Renormalization: " << delta_ZL_lepton << '\n';
+         std::cout << " Fermion PR Field Renormalization: " << delta_ZR_lepton << '\n';
+         std::cout << " Fermion Mass Renormalization: " << delta_Zm_lepton << '\n';
+
+         std::cout << "\n Z Field Renormalization: " << delta_Z_Z << '\n';
+         std::cout << " Z Mass Renormalization: " << delta_Zm_Z << '\n';
+
+         std::cout << "\n W Field Renormalization: " << delta_Z_W << '\n';
+         std::cout << " W Mass Renormalization: " << delta_Zm_W << '\n';
+
+         std::cout << "\n Charge Renormalization: " << delta_e << '\n';
+         std::cout << "\n vev Renormaliztion: " << delta_Z_vev << '\n';
          
          std::cout << "\n Decoupling Renormalization Constants" << '\n';
          std::cout << "\n Decoupling Higgs Field Renormalization: " << delta_Z_higgs_dec << '\n';
