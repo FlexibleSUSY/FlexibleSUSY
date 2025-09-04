@@ -98,7 +98,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto gamma_se_PR_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * b0SM + 2 * b1SM - 1);
       const auto gamma_se_1_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * (2 * b0SM - 1) * mL1TreeSM;
 
-      const auto gamma_se_deriv_PL_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * db0SM + 2 * b1SM);
+      const auto gamma_se_deriv_PL_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * db0SM + 2 * db1SM);
       const auto gamma_se_deriv_PR_sm = oneOver16PiSqr * Sqr(chargeSM) * (2 * db0SM + 2 * db1SM);
       const auto gamma_se__deriv_1_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * (2 * db0SM) * mL1TreeSM;
 
@@ -111,8 +111,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
 
       //---------------------------------------------------------------------------------------------------
-
-
       //std::cout << " SM scale: " << sm.get_scale() << '\n';
 
       //std::cout << "\n SM physical Higgs Mass: " << sm.get_physical().Mhh << '\n';
@@ -235,7 +233,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       // photon se
       const auto photon_se_all = self_energy_1loop<Photon,Photon>(context, 0, {}, {});
-      const auto photon_se_sm = sm.self_energy_VWp_1loop(0);
+      const auto photon_se_sm = sm.self_energy_VP_1loop(0);
       const auto photon_se_dec = photon_se_all - photon_se_sm;
 
       // photon se derivative
@@ -283,7 +281,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto delta_ZR_lepton_sm =
          -2*lepton_se_sm_PR - 2*mLSMTree*mLSMTree*(lepton_se_deriv_sm_PL + lepton_se_deriv_sm_PR) - mLSMTree*(lepton_se_deriv_sm_1 + lepton_se_deriv_sm_1);
       const auto delta_Zm_lepton_sm =
-         (lepton_se_sm_PR + lepton_se_sm_PR) + 0.5/mLSMTree*(lepton_1_sm + lepton_1_sm);
+        0.5 * (2 * lepton_se_sm_PL + 2 * lepton_se_sm_PR) + 0.5/mLSMTree*(lepton_1_sm + lepton_1_sm);
 
       const auto delta_Z_higgs_sm = -higgs_se_deriv_sm;
       const auto delta_Zm_higgs_sm = higgs_se_sm/Sqr(mHSMOS);
@@ -319,7 +317,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto delta_ZR_lepton =
          -2*lepton_se_all_PR - 2*mLTree*mLTree*(lepton_se_deriv_all_PL + lepton_se_deriv_all_PR) - mLTree*(lepton_se_deriv_all_1 + lepton_se_deriv_all_1);
       const auto delta_Zm_lepton =
-         (lepton_se_all_PR + lepton_se_all_PR) + 0.5/mLTree*(lepton_1_all + lepton_1_all);
+         0.5 * (2 * lepton_se_all_PL + 2 * lepton_se_all_PR) + 0.5/mLTree*(lepton_1_all + lepton_1_all);
 
       const auto delta_Z_higgs = -higgs_se_deriv_all;
       const auto delta_Zm_higgs = higgs_se_all/Sqr(mHOS);
