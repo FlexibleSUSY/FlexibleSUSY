@@ -130,6 +130,14 @@ double partial_width_hh_to_barFeFe(standard_model::Standard_model const&, int, i
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
+   calculate_amplitude_tree(
+      const standard_model_cxx_diagrams::context_base&,
+      const typename cxx_diagrams::field_indices<FieldIn>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut1>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut2>::type&) const;
+
+   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
    calculate_amplitude_1l(
       const standard_model_cxx_diagrams::context_base&,
       const typename cxx_diagrams::field_indices<FieldIn>::type&,
@@ -145,14 +153,6 @@ private:
    standard_model_decay_table decay_table{};
    FlexibleDecay_problems problems{};
    EffectiveCoupling_list neutral_higgs_effc {};
-
-   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
-   calculate_amplitude_tree(
-      const standard_model_cxx_diagrams::context_base&,
-      const typename cxx_diagrams::field_indices<FieldIn>::type&,
-      const typename cxx_diagrams::field_indices<FieldOut1>::type&,
-      const typename cxx_diagrams::field_indices<FieldOut2>::type&) const;
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    double amplitude_squared(standard_model_cxx_diagrams::context_base const& context,
