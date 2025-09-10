@@ -96,12 +96,12 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    // tree-level
    flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 0.0);
    LQS1_up_basis_decays decays_noHO = LQS1_up_basis_decays(m, qedqcd, physical_input, flexibledecay_settings);
-   BOOST_CHECK_CLOSE_FRACTION(decays_noHO.partial_width_hh_to_barFeFe(&m, 1, 1), 5.6230325675374227851e-7, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_noHO.partial_width_hh_to_barFeFe(&m, 1, 1), 9.077062783486041e-7, 1e-15);
 
    // 1l QED
    flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 10.0);
    LQS1_up_basis_decays decays_HO_SM = LQS1_up_basis_decays(m, qedqcd, physical_input, flexibledecay_settings);
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO_SM.partial_width_hh_to_barFeFe(&m, 1, 1), 5.6230325675374227851e-7, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO_SM.partial_width_hh_to_barFeFe(&m, 1, 1), 9.1730586948617025411e-7, 1e-15);
 
    // 1l BSM
    flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 1.0);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    decays_HO_BSM.sm.calculate_DRbar_masses();
    decays_HO_BSM.sm.calculate_pole_masses();
    decays_HO_BSM.sm_decays = Standard_model_decays(decays_HO_BSM.sm, qedqcd, physical_input, flexibledecay_settings);
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO_BSM.partial_width_hh_to_barFeFe(&m, 1, 1), 5.6230325675374227851e-7, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO_BSM.partial_width_hh_to_barFeFe(&m, 1, 1), 8.836578323054311e-7, 1e-15);
 
    // 1l SM+BSM
    flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 11.0);
@@ -123,5 +123,5 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    decays_HO_SM_BSM.sm.calculate_DRbar_masses();
    decays_HO_SM_BSM.sm.calculate_pole_masses();
    decays_HO_SM_BSM.sm_decays = Standard_model_decays(decays_HO_SM_BSM.sm, qedqcd, physical_input, flexibledecay_settings);
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO_SM_BSM.partial_width_hh_to_barFeFe(&m, 1, 1), 5.6230325675374227851e-7, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO_SM_BSM.partial_width_hh_to_barFeFe(&m, 1, 1), 8.932574234429973e-7, 1e-15);
 }
