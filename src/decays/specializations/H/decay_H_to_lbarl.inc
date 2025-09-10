@@ -42,7 +42,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       calculate_amplitude_tree<Higgs, bar<ChargedLepton>::type, ChargedLepton>(context, indexIn, indexOut1, indexOut2);
 
    std::cout << std::setprecision(20) << '\n';
-   //std::cout << " Tree Level Amp: " << amp_tree << '\n';
 
    // higher order SM corrections
    if (flexibledecay_settings.get_decay_corrections().sm > 0) {
@@ -59,8 +58,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       namespace smns = standard_model_cxx_diagrams;
       smns::context_base sm_context {sm};
 
-      const auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), mHOS);
-      const auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut1.at(0), mHOS);
+      const auto amp_tree_sm =
+         sm_decays.calculate_amplitude_tree<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, indexIn, indexOut1, indexOut2);
+
+      const double scale = model.get_scale();
+
+      const auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), scale);
+      const auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut2.at(0), scale);
       const auto gamma_triangle = subtract_1l_QED_triangle<Higgs>(context, indexIn, indexOut1.at(0), indexOut2.at(0)) * amp_tree;
 
       //-----------------------------------------------------------------------------------------------------------------
@@ -103,12 +107,11 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto gamma_se__deriv_1_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * (2 * db0SM) * mL1TreeSM;
 
       // amp_tree must still be changed
-      const auto gamma_triangle_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * amp_tree
+      const auto gamma_triangle_sm = oneOver16PiSqr * Sqr(chargeSM) * (-2) * amp_tree_sm
                               * (-1 + 2 * b0SM
-                                 + c2SM * (2 * Sqr(mHOSSM) + (mL1TreeSM + mL2TreeSM) * (mL1OSSM - mL2OSSM))
                                  + c0SM * mL1TreeSM * (2 * mL1TreeSM + 2 * mL2TreeSM + mL1OSSM - mL2OSSM)
-                                 + c1SM * (Sqr(mHOSSM) + mL1OSSM * (mL1TreeSM - mL2TreeSM) + Sqr(mL1OSSM) - Sqr(mL2OSSM)));
-
+                                 + c1SM * (Sqr(mHOSSM) + mL1OSSM * (mL1TreeSM + mL2TreeSM) + Sqr(mL1OSSM) - Sqr(mL2OSSM))
+                                 + c2SM * (2 * Sqr(mHOSSM) + (mL1TreeSM + mL2TreeSM) * (mL1OSSM - mL2OSSM)));
 
       //---------------------------------------------------------------------------------------------------
       //std::cout << " SM scale: " << sm.get_scale() << '\n';
@@ -395,7 +398,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto amp_1l_dec = amp_1l-amp_1l_sm;
 
       // mix term between tree and 1loop amplitude
-      double amp_1l_tree = 2.*std::real(amplitude_interference(amp_tree, amp_1l_dec));
+      double amp_1l_tree = 2.*std::real(amplitude_interference(amp_tree, amp_1l));
 
       // if the interference needs to be addded or subtracted dependes on the convention and still needs to be figured out
       res -= flux * ps * amp_1l_tree;
@@ -408,7 +411,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       amp_counterterm.form_factor_right = ct_FR;
 
       if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
-
          std::cout << "\n model lam: " << context.model.get_Lambdax() << '\n';
          std::cout << " sm lam: " << sm_context.model.get_Lambdax() << '\n';
 
@@ -514,6 +516,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n Charge Renormalization: " << delta_e << '\n';
          std::cout << "\n vev Renormaliztion: " << delta_Z_vev << '\n';
          
+         std::cout << "Decoupling Renormalization Constants" << '\n';
          std::cout << "\n Decoupling Renormalization Constants" << '\n';
          std::cout << "\n Decoupling Higgs Field Renormalization: " << delta_Z_higgs_dec << '\n';
          std::cout << " Decoupling Higgs Mass Renormalization: " << delta_Zm_higgs_dec << '\n';
@@ -531,7 +534,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n Decoupling Charge Renormalization: " << delta_e_dec << '\n';
          std::cout << "\n Decoupling vev Renormaliztion: " << delta_Z_vev_dec << '\n';
 
-
+         std::cout << "Decoupling Counter Terms:";
          std::cout << "\n Counter Term 1 left form-factor: " << ct_FL1 << '\n';
          std::cout << " Counter Term 1 right form-factor: " << ct_FR1 << '\n';
 
@@ -541,6 +544,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n counter term left: " << ct_FL << '\n';
          std::cout << " counter term right: " << ct_FR << '\n';
 
+         std::cout << "Form Factors:" << '\n';
          std::cout << "\n form factor left tree: " << amp_tree.form_factor_left << '\n';
          std::cout << " form factor right tree: " << amp_tree.form_factor_right << '\n';
 
@@ -556,7 +560,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n 1l* conj(tree): " << amplitude_interference(amp_1l, amp_tree) << '\n';
          std::cout << " |tree|^2: " << amp_tree.square() << '\n';
          std::cout << " |1l|^2: " << amp_1l.square() << '\n';
-         std::cout << " |A|^2: " << amp_tree.square() + amp_1l.square() + 2.0 * std::real(amplitude_interference(amp_1l, amp_tree)) << '\n';
+         std::cout << " |A|^2: " << amp_tree.square() - 2.0 * std::real(amplitude_interference(amp_tree, amp_1l)) + amp_1l.square() << '\n';
 
          std::cout << "\n Decay Width tree: " << flux * ps * amp_tree.square() << '\n';
          std::cout << " Decay Width MSbar: " << res << '\n';
