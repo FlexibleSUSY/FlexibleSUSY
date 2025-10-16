@@ -78,15 +78,13 @@ const FlexibleDecay_problems& CLASSNAME::get_problems() const
 
 template <typename F>
 std::complex<double> subtract_1l_QED_triangle(
-   @ModelName@_cxx_diagrams::context_base const& context, typename field_indices<F>::type const& idxIn, int idxOut1, int idxOut2)
+   @ModelName@_cxx_diagrams::context_base const& context, typename field_indices<F>::type const& idxIn, int idxOut1, int idxOut2, double mL1OS, double mL2OS)
 {
       auto& lib = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffs;
       looplibrary::Ccoeff_t C_coeffs;
 
       const double mHOS = context.physical_mass<F>(idxIn);
-      const double mL1OS = context.physical_mass<ChargedLepton>({idxOut1});
-      const double mL2OS = context.physical_mass<ChargedLepton>({idxOut2});
       const double mL1Tree = context.mass<ChargedLepton>({idxOut1});
       const double mL2Tree = context.mass<ChargedLepton>({idxOut2});
 
@@ -110,13 +108,12 @@ std::complex<double> subtract_1l_QED_triangle(
 }
 
 std::array<std::complex<double>, 3> subtract_1l_QED_se(
-   @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale)
+   @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale, double mL1OS)
 {
       auto& lib = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffs;
 
       const double mL1Tree = context.mass<ChargedLepton>({idx});
-      const double mL1OS = context.physical_mass<ChargedLepton>({idx});
 
       lib.B(B_coeffs, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(scale));
       const auto b0 = B_coeffs.at(0);
@@ -132,13 +129,12 @@ std::array<std::complex<double>, 3> subtract_1l_QED_se(
 }
 
 std::array<std::complex<double>, 3> subtract_1l_QED_se_deriv(
-   @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale)
+   @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale, double mLOS)
 {
       auto& lib = Loop_library::get();
       looplibrary::Bcoeff_t B_coeffs;
 
       const double mLTree = context.mass<ChargedLepton>({idx});
-      const double mLOS = context.physical_mass<ChargedLepton>({idx});
 
       const auto db0 = lib.DB0(Sqr(mLOS), 0, Sqr(mLTree), Sqr(scale));
       const auto db1 = lib.DB1(Sqr(mLOS), 0, Sqr(mLTree), Sqr(scale));

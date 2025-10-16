@@ -1,4 +1,18 @@
-#include <iostream>
+
+namespace {
+double get_lepton_masses(const context_base& context, const softsusy::QedQcd& qedqcd, int idx) {
+   switch (idx) {
+      case 0:
+         return qedqcd.displayMass(softsusy::mElectron);
+      case 1:
+         return qedqcd.displayMass(softsusy::mMuon);
+      case 2:
+         return qedqcd.displayMass(softsusy::mTau);
+      default:
+         return context.physical_mass<ChargedLepton>({idx});
+   }
+}
+} // anonymous namespace
 
 template <>
 double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLepton>(
@@ -18,21 +32,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    }
 
    const double mHOS = context.physical_mass<Higgs>(indexIn);
-   auto lmass = [&context,this](int idx) {
-      switch (idx) {
-         case 0:
-            return qedqcd.displayMass(softsusy::mElectron);
-         case 1:
-            return qedqcd.displayMass(softsusy::mMuon);
-         case 2:
-            return qedqcd.displayMass(softsusy::mTau);
-         default:
-            return context.physical_mass<ChargedLepton>({idx});
-      }
-   };
-
-   const double mL1OS = lmass(indexOut1.at(0));
-   const double mL2OS = lmass(indexOut2.at(0));
+   const double mL1OS = get_lepton_masses(context, qedqcd, indexOut1.at(0));
+   const double mL2OS = get_lepton_masses(context, qedqcd, indexOut2.at(0));
 
    // phase space without symmetry factor for BSM model
    const auto xOS1 = Sqr(mL1OS/mHOS);
@@ -101,9 +102,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       const double scale = model.get_scale();
 
-      const auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), scale);
-      const auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut2.at(0), scale);
-      const auto gamma_triangle = subtract_1l_QED_triangle<Higgs>(context, indexIn, indexOut1.at(0), indexOut2.at(0), scale) * amp_tree;
+      const auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), scale, mL1OS);
+      const auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut2.at(0), scale, mL1OS);
+      const auto gamma_triangle = subtract_1l_QED_triangle<Higgs>(context, indexIn, indexOut1.at(0), indexOut2.at(0), mL1OS, mL2OS) * amp_tree;
 
       //-----------------------------------------------------------------------------------------------------------------
       // Explicit photon diagrams (Build-in SM)
