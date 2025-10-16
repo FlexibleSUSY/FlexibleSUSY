@@ -18,8 +18,21 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    }
 
    const double mHOS = context.physical_mass<Higgs>(indexIn);
-   const double mL1OS = context.physical_mass<bar<ChargedLepton>::type>(indexOut1);
-   const double mL2OS = context.physical_mass<ChargedLepton>(indexOut2);
+   auto lmass = [&context,this](int idx) {
+      switch (idx) {
+         case 0:
+            return qedqcd.displayMass(softsusy::mElectron);
+         case 1:
+            return qedqcd.displayMass(softsusy::mMuon);
+         case 2:
+            return qedqcd.displayMass(softsusy::mTau);
+         default:
+            return context.physical_mass<ChargedLepton>({idx});
+      }
+   };
+
+   const double mL1OS = lmass(indexOut1.at(0));
+   const double mL2OS = lmass(indexOut2.at(0));
 
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mHOS);
