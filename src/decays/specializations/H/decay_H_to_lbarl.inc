@@ -21,13 +21,25 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const double mL1OS = context.physical_mass<bar<ChargedLepton>::type>(indexOut1);
    const double mL2OS = context.physical_mass<ChargedLepton>(indexOut2);
 
-   // phase space without symmetry factor
+   // phase space without symmetry factor for BSM model
    const auto xOS1 = Sqr(mL1OS/mHOS);
    const auto xOS2 = Sqr(mL2OS/mHOS);
    const auto betaOS2_S = 1.0 - Sqr((mL1OS + mL2OS)/mHOS);
    const auto betaOS2_P = 1.0 - Sqr((mL1OS - mL2OS)/mHOS);
    const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., xOS1, xOS2));
    const double flux = 1./(2.*mHOS);
+
+   const double mHOSSM = sm.get_physical().Mhh;
+   const double mL1OSSM = sm.get_physical().MFe(indexOut1.at(0));
+   const double mL2OSSM = sm.get_physical().MFe(indexOut2.at(0));
+
+   // phase space without symmetry factor for build-in SM
+   const auto xOSSM1 = Sqr(mL1OSSM/mHOSSM);
+   const auto xOSSM2 = Sqr(mL2OSSM/mHOSSM);
+   const auto betaOSSM2_S = 1.0 - Sqr((mL1OSSM + mL2OSSM)/mHOSSM);
+   const auto betaOSSM2_P = 1.0 - Sqr((mL1OSSM - mL2OSSM)/mHOSSM);
+   const double psSM = 1./(8.*Pi)*std::sqrt(KallenLambda(1., xOSSM1, xOSSM2));
+   const double fluxSM = 1./(2.*mHOSSM);
 
    const double amp2_S = Sqr(mHOS) * betaOS2_S * 2*std::norm(HLLbarVertexDR_S);
 
@@ -46,11 +58,12 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    // higher order SM corrections
    if (flexibledecay_settings.get_decay_corrections().sm > 0) {
       // 1-loop QED corrections
-      res_S *= 1. + get_alpha(context)/Pi*17./4.;
+      res_S *= (1. + get_alpha(context)/Pi*17./4.);
       res_P *= 1. + get_alpha(context)/Pi*17./4.;
    }
 
    double res = res_S + res_P;
+   double res_tree = res;
 
 #if DECAY_BSM_ORDER > 0
    if (flexibledecay_settings.get_decay_corrections().bsm > 0) {
@@ -61,11 +74,23 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       const auto amp_tree_sm =
          sm_decays.calculate_amplitude_tree<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, indexIn, indexOut1, indexOut2);
 
+      //std::cout << "\n amp squared: " << amp2_S << '\n';
+      //std::cout << " tree DW: " << flux * ps * amp2_S << '\n';
+      //std::cout << " tree DW + QED: " << res_tree << '\n';
+      //std::cout << "\n BSM amp tree squared: " << amp_tree.square() << '\n';
+      //std::cout << " BSM DW: " << flux * ps * amp_tree.square() << '\n';
+      //std::cout << " BSM DW + QED: " << (flux * ps * amp_tree.square()) * (1 + get_alpha(context)/Pi * 17/4) << '\n';
+      //std::cout << " BSM QED: " << 1 + get_alpha(context)/Pi * 17/4 << '\n';
+      //std::cout << "\n SM amp tree squared: " << amp_tree_sm.square() << '\n';
+      //std::cout << " SM DW: " << flux * ps * amp_tree_sm.square() << '\n';
+      //std::cout << " SM SW + QED: " << (flux * ps * amp_tree_sm.square()) * (1 + Sqr(unit_charge(sm_context))/(4 * Sqr(Pi)) * 17./4.) << '\n';
+      //std::cout << " SM QED: " << 1 + Sqr(unit_charge(sm_context)) / (4 * Sqr(Pi)) * 17/4 << '\n';
+
       const double scale = model.get_scale();
 
       const auto [gamma_se_1, gamma_se_PL, gamma_se_PR] = subtract_1l_QED_se(context, indexOut1.at(0), scale);
       const auto [gamma_se_deriv_1, gamma_se_deriv_PL, gamma_se_deriv_PR] = subtract_1l_QED_se_deriv(context, indexOut2.at(0), scale);
-      const auto gamma_triangle = subtract_1l_QED_triangle<Higgs>(context, indexIn, indexOut1.at(0), indexOut2.at(0)) * amp_tree;
+      const auto gamma_triangle = subtract_1l_QED_triangle<Higgs>(context, indexIn, indexOut1.at(0), indexOut2.at(0), scale) * amp_tree;
 
       //-----------------------------------------------------------------------------------------------------------------
       // Explicit photon diagrams (Build-in SM)
@@ -77,9 +102,6 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       looplibrary::Ccoeff_t C_coeffsm;
 
       const double scaleSM = sm.get_scale();
-      const double mHOSSM = sm.get_physical().Mhh;
-      const double mL1OSSM = sm.get_physical().MFe(indexOut1.at(0));
-      const double mL2OSSM = sm.get_physical().MFe(indexOut2.at(0));
       const double mL1TreeSM = sm.get_MFe(indexOut1.at(0));
       const double mL2TreeSM = sm.get_MFe(indexOut2.at(0));
 
@@ -114,26 +136,27 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
                                  + c2SM * (2 * Sqr(mHOSSM) + (mL1TreeSM + mL2TreeSM) * (mL1OSSM - mL2OSSM)));
 
       //---------------------------------------------------------------------------------------------------
-      //std::cout << " SM scale: " << sm.get_scale() << '\n';
+      if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
+         std::cout << " SM scale: " << sm.get_scale() << '\n';
 
-      //std::cout << "\n SM physical Higgs Mass: " << sm.get_physical().Mhh << '\n';
-      //std::cout << " SM physical Z Mass: " << sm.get_physical().MVZ << '\n';
-      //std::cout << " SM physical W Mass: " << sm.get_physical().MVWp << '\n';
-      //std::cout << " SM physical e Mass: " << sm.get_physical().MFe(0) << '\n';
-      //std::cout << " SM physical mu Mass: " << sm.get_physical().MFe(1) << '\n';
-      //std::cout << " SM physical tau Mass: " << sm.get_physical().MFe(2) << '\n';
+         std::cout << "\n SM physical Higgs Mass: " << sm.get_physical().Mhh << '\n';
+         std::cout << " SM physical Z Mass: " << sm.get_physical().MVZ << '\n';
+         std::cout << " SM physical W Mass: " << sm.get_physical().MVWp << '\n';
+         std::cout << " SM physical e Mass: " << sm.get_physical().MFe(0) << '\n';
+         std::cout << " SM physical mu Mass: " << sm.get_physical().MFe(1) << '\n';
+         std::cout << " SM physical tau Mass: " << sm.get_physical().MFe(2) << '\n';
 
-      //std::cout << "\n SM Higgs Mass: " << sm.get_Mhh() << '\n';
-      //std::cout << " SM Z Mass: " << sm.get_MVZ() << '\n';
-      //std::cout << " SM W Mass: " << sm.get_MVWp() << '\n';
-      //std::cout << " SM lepton Mass: " << sm.get_MFe() << '\n';
-      //std::cout << " SM up Mass: " << sm.get_MFu() << '\n';
-      //std::cout << " SM down Mass: " << sm.get_MFd() << '\n';
+         std::cout << "\n SM Higgs Mass: " << sm.get_Mhh() << '\n';
+         std::cout << " SM Z Mass: " << sm.get_MVZ() << '\n';
+         std::cout << " SM W Mass: " << sm.get_MVWp() << '\n';
+         std::cout << " SM lepton Mass: " << sm.get_MFe() << '\n';
+         std::cout << " SM up Mass: " << sm.get_MFu() << '\n';
+         std::cout << " SM down Mass: " << sm.get_MFd() << '\n';
 
-      //std::cout  << " SM g1: " << sm.get_g1() << '\n';
-      //std::cout  << " SM g2: " << sm.get_g2() << '\n';
-      //std::cout  << " SM v: " << sm.get_v() << '\n';
-
+         std::cout  << " SM g1: " << sm.get_g1() << '\n';
+         std::cout  << " SM g2: " << sm.get_g2() << '\n';
+         std::cout  << " SM v: " << sm.get_v() << '\n';
+      }
 
       const double mHSMOS = sm.get_physical().Mhh;
       const double mL1SMOS = sm.get_physical().MFe(indexOut1.at(0));
@@ -369,6 +392,14 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       // vev renormalization constant in the decoupling scheme
       const auto delta_Z_vev_dec = delta_Z_vev - delta_Z_vev_sm;
 
+   
+      // --------------------------------------------------------------------------------------
+      
+      const auto ct_FL_MSbar =
+         amp_tree_sm.form_factor_left * (0.5*(delta_ZL_lepton_sm + delta_ZR_lepton_sm + delta_Z_higgs_sm));
+
+      const auto ct_FR_MSbar =
+         amp_tree_sm.form_factor_right * (0.5*(delta_ZL_lepton_sm + delta_ZR_lepton_sm + delta_Z_higgs_sm));
 
       // --------------------------------------------------------------------------------------
 
@@ -376,8 +407,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          amp_tree.form_factor_left * (0.5*(delta_ZL_lepton + delta_ZR_lepton) + delta_Zm_lepton_dec);
       const auto ct_FL2 =
          amp_tree.form_factor_left * (delta_Z_higgs/2 - delta_Z_vev_dec);
-      const auto ct_FL =
-         ct_FL1 + ct_FL2;
+      const auto ct_FL = ct_FL1 + ct_FL2;
 
       const auto ct_FR1 =
          amp_tree.form_factor_right * (0.5*(delta_ZR_lepton + delta_ZL_lepton) + delta_Zm_lepton_dec);
@@ -404,6 +434,13 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       res -= flux * ps * amp_1l_tree;
 
       // copy the structure of a generic Amplitude from the tree-level amplitude --> A ~ FL * PL + FR * PR
+
+      Decay_amplitude_SFF amp_counterterm_msbar = amp_tree_sm;
+
+      // adjust the form factors to hold the counter terms for the left and right form-factors
+      amp_counterterm_msbar.form_factor_left = ct_FL_MSbar;
+      amp_counterterm_msbar.form_factor_right = ct_FR_MSbar;
+
       Decay_amplitude_SFF amp_counterterm = amp_tree;
 
       // adjust the form factors to hold the counter terms for the left and right form-factors
@@ -417,8 +454,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          //std::cout << "\n model lam: " << context.model.get_Lambdax() << '\n';
          //std::cout << " sm lam: " << sm.get_Lambdax() << '\n';
 
-         //std::cout << "\n model mH: " << context.physical_mass<Higgs>(indexIn) << '\n';
-         //std::cout << "\n sm mH: " << sm_context.physical_mass<smns::fields::hh>(indexIn) << '\n';
+         std::cout << "\n model mH: " << context.physical_mass<Higgs>(indexIn) << '\n';
+         std::cout << "\n sm mH: " << sm_context.physical_mass<smns::fields::hh>(indexIn) << '\n';
 
          std::cout << "\n Autogenerated Self-Energies: " << '\n';
          std::cout << "\n Higgs Self-Energies: \n";
@@ -483,21 +520,21 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
          // Renormalization Constants
          std::cout << "\n SM Renormalization Constants" << '\n';
-         std::cout << "\n Higgs Field Renormalization: " << delta_Z_higgs_sm << '\n';
-         std::cout << " Higgs Mass Renormalization: " << delta_Zm_higgs_sm << '\n';
+         std::cout << "\n Higgs Field Renormalization SM: " << delta_Z_higgs_sm << '\n';
+         std::cout << " Higgs Mass Renormalization SM: " << delta_Zm_higgs_sm << '\n';
 
-         std::cout << "\n Fermion PL Field Renormalization: " << delta_ZL_lepton_sm << '\n';
-         std::cout << " Fermion PR Field Renormalization: " << delta_ZR_lepton_sm << '\n';
-         std::cout << " Fermion Mass Renormalization: " << delta_Zm_lepton_sm << '\n';
+         std::cout << "\n Fermion PL Field Renormalization SM: " << delta_ZL_lepton_sm << '\n';
+         std::cout << " Fermion PR Field Renormalization SM: " << delta_ZR_lepton_sm << '\n';
+         std::cout << " Fermion Mass Renormalization SM: " << delta_Zm_lepton_sm << '\n';
 
-         std::cout << "\n Z Field Renormalization: " << delta_Z_Z_sm << '\n';
-         std::cout << " Z Mass Renormalization: " << delta_Zm_Z_sm << '\n';
+         std::cout << "\n Z Field Renormalization SM: " << delta_Z_Z_sm << '\n';
+         std::cout << " Z Mass Renormalization SM: " << delta_Zm_Z_sm << '\n';
 
-         std::cout << "\n W Field Renormalization: " << delta_Z_W_sm << '\n';
-         std::cout << " W Mass Renormalization: " << delta_Zm_W_sm << '\n';
+         std::cout << "\n W Field Renormalization SM: " << delta_Z_W_sm << '\n';
+         std::cout << " W Mass Renormalization SM: " << delta_Zm_W_sm << '\n';
 
-         std::cout << "\n Charge Renormalization: " << delta_e_sm << '\n';
-         std::cout << "\n vev Renormaliztion: " << delta_Z_vev_sm << '\n';
+         std::cout << "\n Charge Renormalization SM: " << delta_e_sm << '\n';
+         std::cout << "\n vev Renormaliztion SM: " << delta_Z_vev_sm << '\n';
 
          std::cout << "\n BSM Renormalization Constants" << '\n';
          std::cout << "\n Higgs Field Renormalization: " << delta_Z_higgs << '\n';
@@ -547,6 +584,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "Form Factors:" << '\n';
          std::cout << "\n form factor left tree: " << amp_tree.form_factor_left << '\n';
          std::cout << " form factor right tree: " << amp_tree.form_factor_right << '\n';
+         std::cout << "\n tree square plus QED: " << amp2_S << '\n';
+         std::cout << " tree square plus QED SM: " << amp_tree_sm.square() << '\n';
+         std::cout << "\n BSM alpha: " << get_alpha(context) << '\n';
+         std::cout << " SM alpha: " << Sqr(chargeSM)/(4 * Pi) << '\n';
 
          std::cout << "\n form factor left 1loop SM: " << amp_1l_sm.form_factor_left << '\n';
          std::cout << " form factor right 1loop SM: " << amp_1l_sm.form_factor_right << '\n';
@@ -554,8 +595,15 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << "\n form factor left 1loop: " << amp_1l.form_factor_left << '\n';
          std::cout << " form factor right 1loop: " << amp_1l.form_factor_right << '\n';
 
+         std::cout << "\n interference tree 1loop SM: " << amplitude_interference(amp_1l_sm, amp_tree_sm) << '\n';
+         std::cout << " interference tre 1loop + CT: " << amplitude_interference(amp_1l, amp_tree) - amplitude_interference(amp_counterterm, amp_tree) << '\n';
+
          std::cout << "\n form factor left dec: " << amp_1l_dec.form_factor_left - ct_FL << '\n';
          std::cout << " form factor right dec: " << amp_1l_dec.form_factor_right - ct_FR << '\n';
+
+         std::cout << "\n 1l-tree amplitude_interference: " << std::real(amplitude_interference(amp_1l, amp_tree)) << '\n';
+         std::cout << " CT-tree amplitude_interference: " << std::real(amplitude_interference(amp_counterterm, amp_tree)) << '\n';
+         
 
          std::cout << "\n 1l* conj(tree): " << amplitude_interference(amp_1l, amp_tree) << '\n';
          std::cout << " |tree|^2: " << amp_tree.square() << '\n';
@@ -563,7 +611,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
          std::cout << " |A|^2: " << amp_tree.square() - 2.0 * std::real(amplitude_interference(amp_tree, amp_1l)) + amp_1l.square() << '\n';
 
          std::cout << "\n Decay Width tree: " << flux * ps * amp_tree.square() << '\n';
-         std::cout << " Decay Width MSbar: " << res << '\n';
+         std::cout << "\n Decay Width SM 1l: " << fluxSM * psSM * (amp_tree_sm.square()*(1. + Sqr(chargeSM)/(4 * Sqr(Pi))*17./4.) - 2.0 * std::real(amplitude_interference(amp_tree_sm, amp_1l_sm)) + 2.0 * std::real(amplitude_interference(amp_tree_sm, amp_counterterm_msbar))) << '\n';
+         std::cout << " Decay Width MSbar: " << res + flux * ps * 2.0 * std::real(amplitude_interference(amp_tree_sm, amp_counterterm_msbar)) << '\n';
       }
 
       res += flux * ps * 2.*std::real(amplitude_interference(amp_tree, amp_counterterm));
