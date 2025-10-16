@@ -1,19 +1,4 @@
 
-namespace {
-double get_lepton_masses(const context_base& context, const softsusy::QedQcd& qedqcd, int idx) {
-   switch (idx) {
-      case 0:
-         return qedqcd.displayMass(softsusy::mElectron);
-      case 1:
-         return qedqcd.displayMass(softsusy::mMuon);
-      case 2:
-         return qedqcd.displayMass(softsusy::mTau);
-      default:
-         return context.physical_mass<ChargedLepton>({idx});
-   }
-}
-} // anonymous namespace
-
 template <>
 double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLepton>(
    const context_base& context,

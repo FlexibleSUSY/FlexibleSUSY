@@ -76,6 +76,21 @@ const FlexibleDecay_problems& CLASSNAME::get_problems() const
    return problems;
 }
 
+namespace {
+double get_lepton_masses(const context_base& context, const softsusy::QedQcd& qedqcd, int idx) {
+   switch (idx) {
+      case 0:
+         return qedqcd.displayMass(softsusy::mElectron);
+      case 1:
+         return qedqcd.displayMass(softsusy::mMuon);
+      case 2:
+         return qedqcd.displayMass(softsusy::mTau);
+      default:
+         return context.physical_mass<ChargedLepton>({idx});
+   }
+}
+} // anonymous namespace
+
 template <typename F>
 std::complex<double> subtract_1l_QED_triangle(
    @ModelName@_cxx_diagrams::context_base const& context, typename field_indices<F>::type const& idxIn, int idxOut1, int idxOut2, double mL1OS, double mL2OS)

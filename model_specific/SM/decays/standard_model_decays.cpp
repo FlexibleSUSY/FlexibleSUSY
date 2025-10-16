@@ -65,6 +65,21 @@ using namespace standard_model_cxx_diagrams::fields;
 namespace info = standard_model_info;
 using namespace std::complex_literals;
 
+namespace {
+double get_lepton_masses(const context_base& context, const softsusy::QedQcd& qedqcd, int idx) {
+   switch (idx) {
+      case 0:
+         return qedqcd.displayMass(softsusy::mElectron);
+      case 1:
+         return qedqcd.displayMass(softsusy::mMuon);
+      case 2:
+         return qedqcd.displayMass(softsusy::mTau);
+      default:
+         return context.physical_mass<ChargedLepton>({idx});
+   }
+}
+} // anonymous namespace
+
 const standard_model_decay_table& CLASSNAME::get_decay_table() const
 {
    return decay_table;
