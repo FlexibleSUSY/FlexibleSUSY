@@ -958,19 +958,22 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "// set loop level for RGE running to match RGE setting\n" <>
                     "// of BSM model\n" <>
                     "sm.set_loops(model.get_loops());\n" <>
+                    "auto decay_mass = PHYSICAL(" <>
+                       CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle  /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
                     "if (run_to_decay_particle_scale) {\n" <>
                     TextFormatting`IndentText[
-                       "auto decay_mass = PHYSICAL(" <>
-                          CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle  /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
                        "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
                        TextFormatting`IndentText[
+                          "set_sm_lambda_to_match_bsm_mh(sm, decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ", \"\");\n" <>
                           "sm.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
                        ] <> "}\n"
                     ] <>
                     "}\n" <>
+                    "set_sm_lambda_to_match_bsm_mh(sm, decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ", \"\");\n" <>
                     "sm.solve_ewsb_tree_level();\n" <>
                     "sm.calculate_DRbar_masses();\n" <>
                     "dm->fill_from(sm);\n" <>
+                    "sm.solve_ewsb();\n" <>
                     "sm.calculate_pole_masses();\n" <>
                     "sm_decays = Standard_model_decays(sm, qedqcd, physical_input, flexibledecay_settings);\n" <>
                     "return dm;\n" <>
