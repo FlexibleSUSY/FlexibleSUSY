@@ -7,6 +7,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    typename field_indices<ChargedLepton>::type const& indexOut2)
 {
 
+   const_cast<double&>(context.model.get_physical().MFe[indexOut1.at(0)]) = get_lepton_masses(context, qedqcd, indexOut1.at(0));
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
    const auto HLLbarVertexDR = Vertex<bar<ChargedLepton>::type, ChargedLepton, Higgs>::evaluate(indices, context);
    const auto HLLbarVertexDR_S = 0.5*(HLLbarVertexDR.left() + HLLbarVertexDR.right());
@@ -29,8 +30,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const double flux = 1./(2.*mHOS);
 
    const double mHOSSM = sm.get_physical().Mhh;
-   const double mL1OSSM = sm.get_physical().MFe(indexOut1.at(0));
-   const double mL2OSSM = sm.get_physical().MFe(indexOut2.at(0));
+   const double mL1OSSM = mL1OS; //sm.get_physical().MFe(indexOut1.at(0));
+   const double mL2OSSM = mL2OS; //sm.get_physical().MFe(indexOut2.at(0));
 
    // phase space without symmetry factor for build-in SM
    const auto xOSSM1 = Sqr(mL1OSSM/mHOSSM);
@@ -69,6 +70,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
 
       namespace smns = standard_model_cxx_diagrams;
       smns::context_base sm_context {sm};
+      const_cast<double&>(sm_context.model.get_physical().MFe[indexOut1.at(0)]) = get_lepton_masses(context, qedqcd, indexOut1.at(0));
 
       const auto amp_tree_sm =
          sm_decays.calculate_amplitude_tree<smns::fields::hh, bar<smns::fields::Fe>::type, smns::fields::Fe>(sm_context, indexIn, indexOut1, indexOut2);
@@ -158,8 +160,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       }
 
       const double mHSMOS = sm.get_physical().Mhh;
-      const double mL1SMOS = sm.get_physical().MFe(indexOut1.at(0));
-      const double mL2SMOS = sm.get_physical().MFe(indexOut2.at(0));
+      const double mL1SMOS = mL1OS; //sm.get_physical().MFe(indexOut1.at(0));
+      const double mL2SMOS = mL2OS; //sm.get_physical().MFe(indexOut2.at(0));
 
       // self-energies, to be moved outside
 
@@ -449,6 +451,9 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
       if (indexOut1.at(0) == 1 && indexOut2.at(0) == 1) {
          std::cout << "\n model lam: " << context.model.get_Lambdax() << '\n';
          std::cout << " sm lam: " << sm_context.model.get_Lambdax() << '\n';
+
+         std::cout << "\n Muon mass BSM: " << mL1OS << '\n';
+         std::cout << "\n Muon mass SM: " << mL1SMOS << '\n';
 
          //std::cout << "\n model lam: " << context.model.get_Lambdax() << '\n';
          //std::cout << " sm lam: " << sm.get_Lambdax() << '\n';
