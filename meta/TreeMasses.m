@@ -1956,13 +1956,13 @@ GetSMVEVExpr[symbIfUndefined_:Undefined] :=
               If[vexp === {},
                  If[Parameters`IsParameter[SARAH`VEVSM],
                     SARAH`VEVSM,
-                    DebugPrint["Warning: SM-like Higgs vev is not define in the SARAH model file!"];
+                    FSDebugPrint["TreeMasses", "Warning: SM-like Higgs vev is not define in the SARAH model file!"];
                     symbIfUndefined]
                  ,
                  First[vexp]
               ]
               ,
-              DebugPrint["Warning: SM-like Higgs vev is not define in the SARAH model file!"];
+              FSDebugPrint["TreeMasses", "Warning: SM-like Higgs vev is not define in the SARAH model file!"];
               symbIfUndefined
            ]
     ];
