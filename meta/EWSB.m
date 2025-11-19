@@ -99,10 +99,6 @@ flagging a problem if no solution is found.";
 
 Begin["`Private`"];
 
-DebugPrint[msg___] :=
-    If[FlexibleSUSY`FSDebugOutput,
-       Print["Debug<EWSB>: ", Sequence @@ InputFormOfNonStrings /@ {msg}]];
-
 AppearsInEquationOnlyAs[parameter_, equation_, function_] :=
     FreeQ[equation /. function[parameter] :> Unique[CConversion`ToValidCSymbolString[parameter]], parameter];
 
@@ -352,26 +348,26 @@ SplitRealAndImagParts[eqs_List, pars_List] :=
 SimplifyEwsbEqs[equations_List, parametersFixedByEWSB_List] :=
     Module[{realParameters, complexParameters, simplificationRules,
             renamedEqs, splitEqs},
-           DebugPrint["Splitting Re[] and Im[] within EWSB eqs. ..."];
+           FSDebugPrint["EWSB", "Splitting Re[] and Im[] within EWSB eqs. ..."];
            splitEqs = SplitRealAndImagParts[equations, parametersFixedByEWSB];
            realParameters = Select[parametersFixedByEWSB, Parameters`IsRealParameter[#]&];
-           DebugPrint["real parameters: ", realParameters];
+           FSDebugPrint["EWSB", "real parameters: ", realParameters];
            complexParameters = Complement[parametersFixedByEWSB, realParameters];
-           DebugPrint["complex parameters: ", complexParameters];
+           FSDebugPrint["EWSB", "complex parameters: ", complexParameters];
            (* make parameters unique *)
            uniqueParameters = MakeParametersUnique[parametersFixedByEWSB];
-           DebugPrint["Making parameters unique via: ", uniqueParameters];
+           FSDebugPrint["EWSB", "Making parameters unique via: ", uniqueParameters];
            realParameters = realParameters /. uniqueParameters;
            complexParameters = complexParameters /. uniqueParameters;
            renamedEqs = splitEqs /. uniqueParameters;
-           DebugPrint["EWSB eqs. with unique parameters: ", renamedEqs];
+           FSDebugPrint["EWSB", "EWSB eqs. with unique parameters: ", renamedEqs];
            simplificationRules =
                Flatten[Join[{Rule[SARAH`Conj[#],#],
                              Rule[Susyno`LieGroups`conj[#],#]}& /@ realParameters,
                             ComplexParameterReplacementRules[renamedEqs, complexParameters]
                            ]
                       ];
-           DebugPrint["Simplification rules: ", simplificationRules];
+           FSDebugPrint["EWSB", "Simplification rules: ", simplificationRules];
            (* substitute back *)
            uniqueParameters = Reverse /@ uniqueParameters;
            renamedEqs /. simplificationRules /. uniqueParameters
@@ -431,7 +427,7 @@ TimeConstrainedEliminate[eqs_List, par_] :=
            result = TimeConstrained[Eliminate[eqs, par],
                                     FlexibleSUSY`FSSolveEWSBTimeConstraint, {}];
            If[result === {},
-              DebugPrint["unable to eliminate ", par, ": ", eqs];
+              FSDebugPrint["EWSB", "unable to eliminate ", par, ": ", eqs];
              ];
            result
           ];
@@ -470,7 +466,7 @@ EliminateOneParameter[{}, _List] := {};
 
 EliminateOneParameter[{eq_}, {p_}] :=
     Block[{},
-          DebugPrint["eliminating ", p, ": ", eq];
+          FSDebugPrint["EWSB", "eliminating ", p, ": ", eq];
           {TimeConstrainedSolve[eq, p]}
          ];
 
@@ -478,22 +474,22 @@ EliminateOneParameter[{eq_}, {p_}] :=
 SolveRest[eq1_, eq2_, par_] :=
     Module[{rest = {}, solution},
            If[FreeQ[eq1, par],
-              DebugPrint[par, " does not appear in equation: ", eq1];,
-              DebugPrint["solving rest for ", par, ": ", eq1];
+              FSDebugPrint["EWSB", par, " does not appear in equation: ", eq1];,
+              FSDebugPrint["EWSB", "solving rest for ", par, ": ", eq1];
               solution = TimeConstrainedSolve[eq1, par];
               If[IsNoSolution[solution],
-                 DebugPrint["Failed"];,
-                 DebugPrint["Solution found: ", solution];
+                 FSDebugPrint["EWSB", "Failed"];,
+                 FSDebugPrint["EWSB", "Solution found: ", solution];
                  AppendTo[rest, solution];
                 ];
              ];
            If[FreeQ[eq2, par],
-              DebugPrint[par, " does not appear in equation: ", eq2];,
-              DebugPrint["solving rest for ", par, ": ", eq2];
+              FSDebugPrint["EWSB", par, " does not appear in equation: ", eq2];,
+              FSDebugPrint["EWSB", "solving rest for ", par, ": ", eq2];
               solution = TimeConstrainedSolve[eq2, par];
               If[IsNoSolution[solution],
-                 DebugPrint["Failed"];,
-                 DebugPrint["Solution found: ", solution];
+                 FSDebugPrint["EWSB", "Failed"];,
+                 FSDebugPrint["EWSB", "Solution found: ", solution];
                  AppendTo[rest, solution];
                 ];
              ];
@@ -502,7 +498,7 @@ SolveRest[eq1_, eq2_, par_] :=
 
 EliminateOneParameter[{eq1_, eq2_}, {p1_, p2_}] :=
     Module[{reduction = {{}, {}}, solution, rest},
-           DebugPrint["Trying to eliminate one of the parameters ",
+           FSDebugPrint["EWSB", "Trying to eliminate one of the parameters ",
                       {p1,p2}, " from the eqs.: ",
                       {eq1,eq2}];
            If[FreeQ[{eq1, eq2}, p1],
@@ -516,69 +512,69 @@ EliminateOneParameter[{eq1_, eq2_}, {p1_, p2_}] :=
            (* special case: no elimination needed *)
            If[!FreeQ[{eq1},p1] && FreeQ[{eq1},p2] &&
               !FreeQ[{eq2},p2] && FreeQ[{eq2},p1],
-              DebugPrint["The two equations are independent of each other."];
-              DebugPrint["Step 1: solving for ", p1, ": ", eq1];
+              FSDebugPrint["EWSB", "The two equations are independent of each other."];
+              FSDebugPrint["EWSB", "Step 1: solving for ", p1, ": ", eq1];
               reduction[[1]] = TimeConstrainedSolve[{eq1}, p1];
               If[IsNoSolution[reduction[[1]]],
-                 DebugPrint["Failed"];
+                 FSDebugPrint["EWSB", "Failed"];
                  Return[{}];,
-                 DebugPrint["Solution: ", reduction[[1]]];
+                 FSDebugPrint["EWSB", "Solution: ", reduction[[1]]];
                 ];
-              DebugPrint["Step 2: solving for ", p2, ": ", eq2];
+              FSDebugPrint["EWSB", "Step 2: solving for ", p2, ": ", eq2];
               reduction[[2]] = TimeConstrainedSolve[{eq2}, p2];
               If[IsNoSolution[reduction[[2]]],
-                 DebugPrint["Failed"];
+                 FSDebugPrint["EWSB", "Failed"];
                  Return[{}];,
-                 DebugPrint["Solution: ", reduction[[2]]];
+                 FSDebugPrint["EWSB", "Solution: ", reduction[[2]]];
                 ];
-              DebugPrint["Full solution: ", reduction];
+              FSDebugPrint["EWSB", "Full solution: ", reduction];
               Return[reduction];
              ];
            If[!FreeQ[{eq1},p2] && FreeQ[{eq1},p1] &&
               !FreeQ[{eq2},p1] && FreeQ[{eq2},p2],
-              DebugPrint["The two equations are independent of each other."];
-              DebugPrint["Step 1: solving for ", p2, ": ", eq1];
+              FSDebugPrint["EWSB", "The two equations are independent of each other."];
+              FSDebugPrint["EWSB", "Step 1: solving for ", p2, ": ", eq1];
               reduction[[1]] = TimeConstrainedSolve[{eq1}, p2];
               If[IsNoSolution[reduction[[1]]],
-                 DebugPrint["Failed"];
+                 FSDebugPrint["EWSB", "Failed"];
                  Return[{}];,
-                 DebugPrint["Solution: ", reduction[[1]]];
+                 FSDebugPrint["EWSB", "Solution: ", reduction[[1]]];
                 ];
-              DebugPrint["Step 2: solving for ", p1, ": ", eq2];
+              FSDebugPrint["EWSB", "Step 2: solving for ", p1, ": ", eq2];
               reduction[[2]] = TimeConstrainedSolve[{eq2}, p1];
               If[IsNoSolution[reduction[[2]]],
-                 DebugPrint["Failed"];
+                 FSDebugPrint["EWSB", "Failed"];
                  Return[{}];,
-                 DebugPrint["Solution: ", reduction[[2]]];
+                 FSDebugPrint["EWSB", "Solution: ", reduction[[2]]];
                 ];
-              DebugPrint["Full solution: ", reduction];
+              FSDebugPrint["EWSB", "Full solution: ", reduction];
               Return[reduction];
              ];
-           DebugPrint["eliminate ", p1, " and solve for ", p2, ": ", {eq1, eq2}];
+           FSDebugPrint["EWSB", "eliminate ", p1, " and solve for ", p2, ": ", {eq1, eq2}];
            reduction[[1]] =
            TimeConstrainedSolve[TimeConstrainedEliminate[{eq1, eq2}, p1], p2];
-           DebugPrint["eliminate ", p2, " and solve for ", p1, ": ", {eq1, eq2}];
+           FSDebugPrint["EWSB", "eliminate ", p2, " and solve for ", p1, ": ", {eq1, eq2}];
            reduction[[2]] =
            TimeConstrainedSolve[TimeConstrainedEliminate[{eq1, eq2}, p2], p1];
            If[IsNoSolution[reduction[[1]]] || IsNoSolution[reduction[[2]]],
-              DebugPrint["Failed"];
+              FSDebugPrint["EWSB", "Failed"];
               Return[{}];
              ];
            If[ByteCount[reduction[[1]]] <= ByteCount[reduction[[2]]],
-              DebugPrint["continue with solution 1, because it is simpler:",
+              FSDebugPrint["EWSB", "continue with solution 1, because it is simpler:",
                          reduction[[1]]];
               rest = SolveRest[eq1, eq2, p1];
               If[IsNoSolution[rest],
-                 DebugPrint["could not solve rest for solution 1"];
+                 FSDebugPrint["EWSB", "could not solve rest for solution 1"];
                  Return[{}];
                 ];
               Return[{reduction[[1]], rest}];
               ,
-              DebugPrint["continue with solution 2, because it is simpler:",
+              FSDebugPrint["EWSB", "continue with solution 2, because it is simpler:",
                          reduction[[2]]];
               rest = SolveRest[eq1, eq2, p2];
               If[IsNoSolution[rest],
-                 DebugPrint["could not solve rest for solution 2"];
+                 FSDebugPrint["EWSB", "could not solve rest for solution 2"];
                  Return[{}];
                 ];
               Return[{reduction[[2]], rest}];
@@ -591,7 +587,7 @@ EliminateOneParameter[equations_List, parameters_List] :=
             largestIndependentSubset, s},
            independentSubset = FindIndependentSubset[equations, parameters];
            If[independentSubset === {},
-              DebugPrint["EWSB equations are not reducible"];
+              FSDebugPrint["EWSB", "EWSB equations are not reducible"];
               Return[{}];
              ];
            (* search for the largest independent equation subset *)
@@ -608,17 +604,17 @@ EliminateOneParameter[equations_List, parameters_List] :=
            reducedPars = largestIndependentSubset[[2]];
            reducedSolution = EliminateOneParameter[reducedEqs, reducedPars];
            If[reducedSolution === {},
-              DebugPrint["Could not solve reduced EWSB eqs. subset"];
+              FSDebugPrint["EWSB", "Could not solve reduced EWSB eqs. subset"];
               Return[{}];
              ];
            complementEq = Complement[equations, reducedEqs];
            complementPar = Complement[parameters, reducedPars];
            complementSolution = EliminateOneParameter[complementEq, complementPar];
            If[complementSolution === {},
-              DebugPrint["Could not solve remaining EWSB eqs. subset"];
+              FSDebugPrint["EWSB", "Could not solve remaining EWSB eqs. subset"];
               Return[{}];
              ];
-           DebugPrint["Solution = ", Join[reducedSolution, complementSolution]];
+           FSDebugPrint["EWSB", "Solution = ", Join[reducedSolution, complementSolution]];
            Join[reducedSolution, complementSolution]
           ];
 
@@ -630,18 +626,18 @@ ToMathematicaSolutionFormat[sol_List] :=
 FindSolution[equations_List, parametersFixedByEWSB_List] :=
     Module[{simplifiedEqs, makeParsUnique, solution,
             uniquePars, uniqueEqs},
-           DebugPrint["Simplifying the EWSB eqs. ..."];
+           FSDebugPrint["EWSB", "Simplifying the EWSB eqs. ..."];
            simplifiedEqs = SimplifyEwsbEqs[equations, parametersFixedByEWSB];
            simplifiedEqs = (# == 0)& /@ simplifiedEqs;
-           DebugPrint["Simplified EWSB eqs.: ", simplifiedEqs];
+           FSDebugPrint["EWSB", "Simplified EWSB eqs.: ", simplifiedEqs];
            (* replace non-symbol parameters by unique symbols *)
            makeParsUnique = MakeParametersUnique[parametersFixedByEWSB];
            uniquePars = parametersFixedByEWSB /. makeParsUnique;
            uniqueEqs = simplifiedEqs /. makeParsUnique;
-           DebugPrint["Eliminating the parameters ", uniquePars];
+           FSDebugPrint["EWSB", "Eliminating the parameters ", uniquePars];
            solution = ToMathematicaSolutionFormat @ EliminateOneParameter[uniqueEqs, uniquePars];
            If[solution === {},
-              DebugPrint["Trying Mathematica's Solve[] with time constraint of ",
+              FSDebugPrint["EWSB", "Trying Mathematica's Solve[] with time constraint of ",
                          FlexibleSUSY`FSSolveEWSBTimeConstraint, " seconds"];
               solution = TimeConstrainedSolve[uniqueEqs, uniquePars];
              ];
@@ -666,10 +662,10 @@ SignOrPhase[par_] :=
 ReduceTwoSolutions[sol1_, sol2_] :=
     Module[{par, signOrPhase, reducedSolution},
            par = sol1[[1]];
-           DebugPrint["Reducing solutions for ", par, "..."];
+           FSDebugPrint["EWSB", "Reducing solutions for ", par, "..."];
            signOrPhase = SignOrPhase[par];
            If[PossibleZeroQ[sol1[[2]] - sol2[[2]]],
-              DebugPrint["The two solutions for ", par, " are identical"];
+              FSDebugPrint["EWSB", "The two solutions for ", par, " are identical"];
               Return[{sol1}];
              ];
            If[!PossibleZeroQ[sol1[[2]] + sol2[[2]]],
@@ -679,13 +675,13 @@ ReduceTwoSolutions[sol1_, sol2_] :=
               ];
               Return[{}];
              ];
-           DebugPrint["The two solutions for ", par,
+           FSDebugPrint["EWSB", "The two solutions for ", par,
                       " are related by a global sign/phase: ",
                       sol1, ", ", sol2];
            reducedSolution = sol1 /.
                Rule[p_, expr_] :>
                Rule[p, signOrPhase StripSign[expr]];
-           DebugPrint["=> the reduced solution is: ",
+           FSDebugPrint["EWSB", "=> the reduced solution is: ",
                       {reducedSolution, signOrPhase}];
            {reducedSolution, signOrPhase}
           ];
@@ -694,7 +690,7 @@ ReduceSolution[{sol_}] := {{sol},{}};
 
 ReduceSolution[{sol1_, sol2_}] :=
     Module[{reducedSolution = {}, freePhases = {}, s, red},
-           DebugPrint["Reducing the two solutions: ", {sol1,sol2}];
+           FSDebugPrint["EWSB", "Reducing the two solutions: ", {sol1,sol2}];
            For[s = 1, s <= Length[sol1], s++,
                red = ReduceTwoSolutions[sol1[[s]], sol2[[s]]];
                Switch[Length[red],
@@ -725,13 +721,13 @@ FindSolutionAndFreePhases[equations_List, parametersFixedByEWSB_List, outputFile
              ];
            solution = FindSolution[eqsToSolve, parametersFixedByEWSB];
            {reducedSolution, freePhases} = ReduceSolution[solution];
-           DebugPrint["The full, reduced solution to the EWSB eqs. is:",
+           FSDebugPrint["EWSB", "The full, reduced solution to the EWSB eqs. is:",
                       reducedSolution];
            If[outputFile != "",
               If[reducedSolution === {},
-                 DebugPrint["Writing full, non-reduced solution to file ", outputFile];
+                 FSDebugPrint["EWSB", "Writing full, non-reduced solution to file ", outputFile];
                  Put[solution, outputFile];,
-                 DebugPrint["Writing reduced solution to file ", outputFile];
+                 FSDebugPrint["EWSB", "Writing reduced solution to file ", outputFile];
                  Put[reducedSolution, outputFile];
                 ];
              ];

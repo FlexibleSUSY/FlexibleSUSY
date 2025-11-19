@@ -451,10 +451,6 @@ HaveBVPSolver[solver_] := MemberQ[FlexibleSUSY`FSBVPSolvers, solver];
 ToVersionString[{major_Integer, minor_Integer, patch_Integer}] :=
     ToString[major] <> "." <> ToString[minor] <> "." <> ToString[patch];
 
-DebugPrint[msg___] :=
-    If[FlexibleSUSY`FSDebugOutput,
-       Print["Debug<FlexibleSUSY>: ", Sequence @@ InputFormOfNonStrings /@ {msg}]];
-
 ReplaceSymbolsInUserInput[rules_] :=
     Module[{},
            (* input/output blocks *)
@@ -3822,7 +3818,7 @@ PrepareUnrotatedParticles[eigenstates_] :=
              ];
            Print["Reading unrotated particles from file ", nonMixedParticlesFile, " ..."];
            nonMixedParticles = Get[nonMixedParticlesFile];
-           DebugPrint["unrotated particles: ", nonMixedParticles];
+           FSDebugPrint["FlexibleSUSY", "unrotated particles: ", nonMixedParticles];
            TreeMasses`SetUnrotatedParticles[nonMixedParticles];
           ];
 
@@ -4374,7 +4370,7 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
            (* store all model parameters *)
            allParameters = StripSARAHIndices[((#[[1]])& /@ Join[susyBetaFunctions, susyBreakingBetaFunctions])];
            Parameters`SetModelParameters[allParameters];
-           DebugPrint["Model parameters: ", allParameters];
+           FSDebugPrint["FlexibleSUSY", "Model parameters: ", allParameters];
 
            (* collect all phases from SARAH *)
            phases = DeleteDuplicates @ Join[
@@ -4426,7 +4422,7 @@ SetupMassMatrices[allParameters_] :=
 		       allIntermediateOutputParameters =
 		         Parameters`GetIntermediateOutputParameterDependencies[
 		           TreeMasses`GetMassMatrix /@ massMatrices];
-		       DebugPrint["intermediate output parameters = ", allIntermediateOutputParameters];
+		       FSDebugPrint["FlexibleSUSY", "intermediate output parameters = ", allIntermediateOutputParameters];
 
 		       (* decrease index literals of intermediate output parameters in mass matrices *)
 		       allIntermediateOutputParameterIndexReplacementRules =
@@ -4445,7 +4441,7 @@ SetupOutputParameters[massMatrices_] :=
                     Flatten[TreeMasses`GetMixingMatrixSymbol[#]& /@ massMatrices]]], Null];
 
            Parameters`SetOutputParameters[allOutputParameters];
-           DebugPrint["output parameters = ", allOutputParameters];
+           FSDebugPrint["FlexibleSUSY", "output parameters = ", allOutputParameters];
     ];
 
 CheckObsDependencies[requested_List] :=
@@ -4520,9 +4516,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             decaysSources = {}, decaysHeaders = {}, decaysSLHAIncludeFiles = {}},
 
            Utils`PrintHeadline["Starting FlexibleSUSY"];
-           FSDebugOutput["meta code directory: ", $flexiblesusyMetaDir];
-           FSDebugOutput["config directory   : ", $flexiblesusyConfigDir];
-           FSDebugOutput["templates directory: ", $flexiblesusyTemplateDir];
+           FSDebugPrint["FlexibleSUSY", "meta code directory: ", $flexiblesusyMetaDir];
+           FSDebugPrint["FlexibleSUSY", "config directory   : ", $flexiblesusyConfigDir];
+           FSDebugPrint["FlexibleSUSY", "templates directory: ", $flexiblesusyTemplateDir];
 
            (* check if SARAH`Start[] was called *)
            If[!ValueQ[Model`Name],
@@ -4557,7 +4553,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
              				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
            PrepareUnrotatedParticles[FSEigenstates];
 
-           DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
+           FSDebugPrint["FlexibleSUSY", "particles (mass eigenstates): ", TreeMasses`GetParticles[]];
 
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
 
@@ -4653,8 +4649,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            inputParameters = Parameters`GetInputParametersAndTypes[];
 
-           DebugPrint["input parameters: ", Parameters`GetInputParameters[]];
-           DebugPrint["auxiliary parameters: ", Parameters`GetExtraParameters[]];
+           FSDebugPrint["FlexibleSUSY", "input parameters: ", Parameters`GetInputParameters[]];
+           FSDebugPrint["FlexibleSUSY", "auxiliary parameters: ", Parameters`GetExtraParameters[]];
 
            On[Assert];
 

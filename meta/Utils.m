@@ -183,6 +183,12 @@ In[1]:= rules = {a -> b, {c, d} -> e};
         Utils`UnzipRules[rules]
 Out[1]= {a -> b, c -> e, d -> e}";
 
+FSDebugPrint::usage = "
+@brief Print debug messages from the meta phase. Printout is controlled by the
+       FlexibleSUSY`FSDebugOutput global variable.
+@param module name as string (e.g. Utils), message as sequence of strings
+";
+
 Begin["`Private`"];
 
 AppendOrReplaceInList[values_List, elem_, test_:SameQ] :=
@@ -537,6 +543,10 @@ VersionOrderGtEqThan[version_List, minimRequired_List] /;
 
 FSRound[num_, prec_] :=
    PaddedForm[num, {IntegerPart[Log[10, Abs[num]]] + prec + 1, prec}];
+
+FSDebugPrint[module_String, msg___] :=
+    If[FlexibleSUSY`FSDebugOutput,
+       Print["Debug<" <> module <> ">: ", Sequence @@ Utils`InputFormOfNonStrings /@ {msg}]];
 
 End[];
 
