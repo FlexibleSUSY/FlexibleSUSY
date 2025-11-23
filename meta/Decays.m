@@ -320,8 +320,8 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
            result
           ];
 
-FinalStateContainsInitialState[initialParticle_, finalState_List] :=
-         If[!FreeQ[finalState, initialParticle],
+FinalStateAlwaysContainsInitialState[initialParticle_, finalState_List] :=
+         If[MemberQ[finalState, initialParticle],
             TreeMasses`GetDimensionWithoutGoldstones[initialParticle] == 1,
             False
          ]
@@ -579,7 +579,7 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            isPossibleDecay[finalState_] := (IsPhysicalFinalState[finalState] &&
                                             IsElectricChargeConservingDecay[particle, finalState] &&
                                             IsColorInvariantDecay[particle, finalState] &&
-                                            !FinalStateContainsInitialState[particle, finalState]);
+                                            !FinalStateAlwaysContainsInitialState[particle, finalState]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
@@ -2266,7 +2266,11 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
           1. it exists and
             2a. tree level doesn't exist
             2b. or it's a decay of a Higgs into SM particles *)
-       If[IsPossibleOneLoopDecay[decay] && (!IsPossibleTreeLevelDecay[decay, True] || (TreeMasses`GetHiggsBoson[] === GetInitialState[decay] && And@@(IsSMParticle /@ GetFinalState[decay]))),
+       If[IsPossibleOneLoopDecay[decay] && (
+          !IsPossibleTreeLevelDecay[decay, True]
+          || (TreeMasses`GetHiggsBoson[] === GetInitialState[decay] && And@@(IsSMParticle /@ GetFinalState[decay]))
+          || (TreeMasses`GetHiggsBoson[] === GetInitialState[decay] && !FinalStateAlwaysContainsInitialState[GetInitialState[decay], GetFinalState[decay]])
+          ),
           decl = decl <> CreateTotalAmplitudeSpecializationDecl[decay, modelName, True];
           def = def <> "\n" <> CreateTotalAmplitudeSpecializationDef[decay, modelName, True];
        ];
