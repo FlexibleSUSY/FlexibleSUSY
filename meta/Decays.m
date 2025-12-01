@@ -2111,22 +2111,7 @@ SelectAAFinalState[decays_List] :=
            result
           ];
 
-SelectAZFinalState[decays_List] :=
-    Module[{photonSymbol = TreeMasses`GetPhoton[], zSymbol = TreeMasses`GetZBoson[], result = {}},
-           If[photonSymbol =!= Null,
-              result = SelectDecayByFinalState[{photonSymbol, zSymbol}, decays];
-             ];
-           result
-          ];
 (*
-SelectHiggsHiggsFinalState[decays_List] :=
-    Module[{higgsSymbol = TreeMasses`GetHiggsBoson[], result = {}},
-           If[higgsSymbol =!= Null,
-              result = SelectDecayByFinalState[{higgsSymbol, higgsSymbol}, decays];
-             ];
-           result
-          ];
-
 SelectPseudoscalarHiggsHiggsFinalState[decays_List] :=
     Module[{psSymbol = TreeMasses`GetPseudoscalarHiggsBoson[], result = {}},
            If[psSymbol =!= Null,
@@ -2391,7 +2376,7 @@ CreateHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
 
 CreateHiggsToAZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
-           decay = SelectAZFinalState[decaysList];
+           decay = SelectPhotonZFinalState[decaysList];
            If[decay =!= {},
               decay = First[decay];
               declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
@@ -2422,7 +2407,7 @@ CreatePseudoscalarHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_]
 
 CreatePseudoscalarHiggsToAZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
-           decay = SelectAZFinalState[decaysList];
+           decay = SelectPhotonZFinalState[decaysList];
            If[decay =!= {},
               decay = First[decay];
               {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
