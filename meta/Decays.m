@@ -353,7 +353,7 @@ ContainsOnlySupportedVertices[diagram_] :=
                  to fail on unsuported color structure.
               We generated tree and 1-loop amplitude all at once and then select the
               lowest order one. For the process we considered so far the amplitudes with
-              unsuported vertices don't contribitu in the end. *)
+              unsuported vertices don't contribute in the end. *)
            vertexTypes = CXXDiagrams`VertexTypeForFields /@ vertices;
            unsupportedVertices = Complement[vertexTypes, CXXDiagrams`VertexTypes[]];
            If[unsupportedVertices =!= {},
