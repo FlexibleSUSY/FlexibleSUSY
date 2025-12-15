@@ -402,7 +402,7 @@ jobs:
           done
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
