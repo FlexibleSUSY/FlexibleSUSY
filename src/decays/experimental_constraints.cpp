@@ -90,6 +90,9 @@ double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) 
 #ifdef ENABLE_LILITH
 double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& lilithdb) {
 
+// Lilith fails in LO precision when ZZ = 1
+// added tiny offset
+
    const std::string XMLinputstring =
       R"(<?xml version="1.0"?>
 <lilithinput>
@@ -98,7 +101,8 @@ double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& 
 <C to="gammagamma">1.0</C>
 <C to="Zgamma">1.0</C>
 <C to="gg">1.0</C>
-<C to="VV">1.0</C>
+<C to="WW">1.0</C>
+<C to="ZZ">1.00001</C>
 <C to="ff" part="re">1.0</C>
 <C to="ff" part="im">0.0</C>
 <precision>)" + (cpEvenHiggs ? "BEST-QCD" : "LO") + R"(</precision>
