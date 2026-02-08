@@ -1033,8 +1033,8 @@ void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t 
    ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + std::to_string(mhSM) + " GeV");
-   // SLHA doesn't print nicelly numbers with 3 digit exponent
-   ss << FORMAT_ELEMENT(4, pval > 1e-100 ? pval : 0., "p-value");
+   // SLHA doesn't print nicely numbers with 3 digit exponent
+   ss << FORMAT_ELEMENT(4, pval > 1e-99 ? pval : 0., "p-value");
 
    set_block(ss);
 }
