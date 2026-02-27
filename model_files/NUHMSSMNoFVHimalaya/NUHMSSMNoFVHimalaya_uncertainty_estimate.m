@@ -101,6 +101,9 @@ SetDigit[num_, pos_, val_, base_:10] :=
 LogRange[start_, stop_, steps_] :=
     Exp /@ Range[Log[start], Log[stop], (Log[stop] - Log[start])/steps];
 
+(* calculation of Mh failed *)
+MhFailed[mh_] := mh === $Failed || PossibleZeroQ[mh];
+
 (* calculate Higgs mass *)
 CalcNUHMSSMNoFVHimalayaMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
     CalcNUHMSSMNoFVHimalayaMh[a, Sequence @@ s, r];
@@ -150,8 +153,8 @@ CalcNUHMSSMNoFVHimalayaDMh[args__] :=
                         LogRange[MS/2, 2 MS, 10];
            If[MemberQ[varyQpole, $Failed], Return[{ Mh0, $Failed }]];
            (* combine uncertainty estimates *)
-           DMh   = Max[Abs[Max[varyQpole] - Mh],
-                       Abs[Min[varyQpole] - Mh]] +
-                   Abs[Mh - MhAs] + Abs[Mh - MhYt];
+           DMh = Max[Abs[Max[varyQpole] - Mh], Abs[Min[varyQpole] - Mh]];
+           If[!MhFailed[Mh] && !MhFailed[MhAs], DMh += Abs[Mh - MhAs]];
+           If[!MhFailed[Mh] && !MhFailed[MhYt], DMh += Abs[Mh - MhYt]];
            { Mh0, DMh }
           ];
