@@ -3669,6 +3669,10 @@ MergeNPointFunctions[se1L_List, se2L_List] :=
 
 FSCheckFlags[] :=
     Module[{},
+           If[FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+              FlexibleSUSY`UseHiggs2Loop = False;
+           ];
+
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
               FlexibleSUSY`UseHiggs2LoopMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
@@ -3684,7 +3688,7 @@ FSCheckFlags[] :=
              ];
 
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
-              FlexibleSUSY`UseHiggs2LoopSM = True;
+              If[!FlexibleSUSY`UseHiggs2Loop, FlexibleSUSY`UseHiggs2LoopSM = True];
               FlexibleSUSY`UseSMAlphaS3Loop = True;
               (* FlexibleSUSY`UseSMYukawa2Loop = True; *)
               FlexibleSUSY`UseYukawa3LoopQCD = True;
@@ -3692,7 +3696,7 @@ FSCheckFlags[] :=
              ];
 
            If[FlexibleSUSY`UseHiggs4LoopSM === True,
-              FlexibleSUSY`UseHiggs2LoopSM = True;
+              If[!FlexibleSUSY`UseHiggs2Loop, FlexibleSUSY`UseHiggs2LoopSM = True];
               FlexibleSUSY`UseHiggs3LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
               FlexibleSUSY`UseSMAlphaS4Loop = True;

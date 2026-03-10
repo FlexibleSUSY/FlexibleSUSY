@@ -524,7 +524,7 @@ CreateTadpoleFunctionName[field_, loops_] :=
     "tadpole_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
 
 CreateTadpoleMassEigenstatesFunctionName[field_, loops_] :=
-    "tadpole_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_mass_eigenstates";
+    "tadpole_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field]; (* <> "_mass_eigenstates";*)
 
 CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergy, loops_] :=
     CreateSelfEnergyFunctionName[GetField[selfEnergy], loops];
