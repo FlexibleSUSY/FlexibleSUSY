@@ -43,7 +43,7 @@ modification, extension and reuse.
 
   If you use **FlexibleDecay** in your work, please cite [2106.05038]_ and
   [1211.2099]_. If you compute Higgs-physics constrainst using HiggsTools or
-  Lilith please also cite [2502.XXXXX]_ and (as appropriate) [2210.09332]_ or
+  Lilith please also cite [2603.12119]_ and (as appropriate) [2210.09332]_ or
   [1502.04138]_, [1908.03952]_, [2012.11408]_.
 
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
@@ -1110,4 +1110,4 @@ References
 .. [1502.04138] `Eur. Phys. J. C75 (2015) no. 9, 440 <https://inspirehep.net/literature/1345039>`_ [`arxiv:1502.04138 <https://arxiv.org/pdf/1502.04138.pdf>`_]
 .. [1908.03952] `SciPost Phys. 7 (2019) 4, 052 <https://inspirehep.net/literature/1749361>`_ [`arxiv:1908.03952 <https://arxiv.org/pdf/1908.03952.pdf>`_]
 .. [2012.11408] [`arxiv:2012.11408 <https://arxiv.org/pdf/2012.11408.pdf>`_]
-.. [2502.XXXXX] `CPC`_ [`arxiv:2502.XXXX <>`_]
+.. [2603.12119] [`arXiv:2603.12119 <https://arxiv.org/abs/2603.12119>`_]
