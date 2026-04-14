@@ -1820,7 +1820,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "-"];
               ,
-              calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithLoopTadpoles[2, higgsToEWSBEqAssociation, "tadpole", "-"];
+              If[!FlexibleSUSY`UseHiggs2LoopSM, calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithLoopTadpoles[2, higgsToEWSBEqAssociation, "tadpole", "-"]];
              ];
            If[FlexibleSUSY`UseHiggs2LoopSM === True,
               {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesSM[{SARAH`HiggsBoson}];

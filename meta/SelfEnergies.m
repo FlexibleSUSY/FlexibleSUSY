@@ -713,7 +713,11 @@ FillArrayWithLoopTadpoles[loopLevel_, higgsAndIdx_List, arrayName_String, sign_S
                field = higgsAndIdx[[v,1]];
                idx = higgsAndIdx[[v,2]];
                head = CConversion`ToValidCSymbolString[higgsAndIdx[[v,3]]];
-               functionName = If[loopLevel < 2 || modelSpecifiTadpoles, CreateTadpoleFunctionName[field, loopLevel], CreateTadpoleMassEigenstatesFunctionName[field, loopLevel]];
+               functionName =
+	          If[loopLevel < 2 || modelSpecifiTadpoles,
+		     CreateTadpoleFunctionName[field, loopLevel],
+		     CreateTadpoleMassEigenstatesFunctionName[field, loopLevel]
+		  ];
                If[TreeMasses`GetDimension[field] == 1,
                   body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
                          head <> "(" <> struct <> functionName <> "());\n";
