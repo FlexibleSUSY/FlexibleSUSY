@@ -257,9 +257,11 @@ Do1DimScalar[particle_, particleName_String, massName_String, massMatrixName_Str
              selfEnergyFunction_String, momentum_String, tadpole_String:""] :=
     "const double p = " <> momentum <> ";\n" <>
     "double self_energy = Re(" <> selfEnergyFunction <> "(p));\n" <>
-    If[FlexibleSUSY`UseHiggs2LoopSM === True && particle === SARAH`HiggsBoson,
-       "if (pole_mass_loop_order > 1)\n" <>
-       IndentText["self_energy += self_energy_" <> particleName <> "_2loop(p);\n"], ""] <>
+    If[(FlexibleSUSY`UseHiggs2Loop === True || FlexibleSUSY`UseHiggs2LoopSM === True) && particle === SARAH`HiggsBoson,
+       "if (pole_mass_loop_order > 1) {\n" <>
+       IndentText["// hardcoded 2-loop self energies are real\n"] <>
+       IndentText["// but auto-generated ones are complex\n"] <>
+       IndentText["self_energy += Re(self_energy_" <> particleName <> "_2loop(p));\n"], ""] <> "}\n" <>
     If[FlexibleSUSY`UseHiggs3LoopSM === True && particle === SARAH`HiggsBoson,
        "if (pole_mass_loop_order > 2)\n" <>
        IndentText["self_energy += self_energy_" <> particleName <> "_3loop();\n"], ""] <>
