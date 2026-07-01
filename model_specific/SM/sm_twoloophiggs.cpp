@@ -18,6 +18,7 @@
 
 #include "sm_twoloophiggs.hpp"
 #include "loop_libraries/loop_library.hpp"
+#include "Li2.hpp"
 
 #include <cmath>
 
