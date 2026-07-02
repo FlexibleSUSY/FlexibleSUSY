@@ -391,6 +391,21 @@ double tadpole_higgs_2loop_at_as_sm(
    return result * twoLoop;
 }
 
+double tadpole_higgs_2loop_at_as_sm_full(
+   double scale, double mt, double yt, double g3)
+{
+   const double yt2 = sqr(yt);
+   const double g32 = sqr(g3);
+   const double t = sqr(mt);
+   const double q = sqr(scale);
+   const double lnt = std::log(t/q);
+
+   const double result =
+      -16 * g32 * t * yt2 * (5 - 5*lnt + 3*sqr(lnt));
+
+   return result * twoLoop;
+}
+
 /**
  * Standard Model Higgs tadpole 2-loop, \f$O(\alpha_b \alpha_s)\f$.
  *
