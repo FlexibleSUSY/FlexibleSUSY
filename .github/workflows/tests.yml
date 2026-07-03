@@ -38,7 +38,7 @@ jobs:
   no-meta:
     strategy:
       matrix:
-        OS: [macos-10.15, ubuntu-20.04]
+        OS: [macos-10.15, ubuntu-latest]
         CXXCOMPILER: [g++, clang++]
     runs-on: ${{ matrix.OS }}
     if: false
@@ -128,7 +128,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.18.9
+      image: navir/opensuseleap-for-flexiblesusy:0.18.10
 
     strategy:
       fail-fast: false
