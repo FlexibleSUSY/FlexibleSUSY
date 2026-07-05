@@ -35,7 +35,7 @@ jobs:
           sudo apt-get install -y shellcheck
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Check scripts
         run: |
