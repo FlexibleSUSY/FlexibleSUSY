@@ -232,7 +232,7 @@ jobs:
       # restore content of Output directory from previous run
       - name: Restore cached SARAH outputs
         id: cache-sarah-output-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: Output
           key: sarah-outputs-${{ matrix.PART }}-${{ env.SARAH_HASH }}
@@ -242,7 +242,7 @@ jobs:
 
       - name: Save SARAH outputs
         id: cache-sarah-output-save
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: Output
           key: ${{ steps.cache-sarah-output-restore.outputs.cache-primary-key }}
