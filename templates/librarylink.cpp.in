@@ -784,7 +784,8 @@ void Model_data::put_higgstools_results(MLINK link, std::optional<SignalResult> 
       MLPutRuleTo(link, static_cast<int>(hs_.ndof), "ndof");
       MLPutRuleTo(link, hs_.chi2BSM, "chi2");
       MLPutRuleTo(link, hs_.chi2SM, "chi2SM");
-      MLPutRuleTo(link, hs_.pval, "pval");
+      MLPutRuleTo(link, hs_.pval1d, "pval1d");
+      MLPutRuleTo(link, hs_.pval2d, "pval2d");
    }
    else {
       MLPutFunction(link, "List", 0);

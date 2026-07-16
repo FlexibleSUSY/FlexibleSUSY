@@ -233,8 +233,8 @@ void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double ma
 }
 } // anonymous
 
-double chi2_to_pval(double chi2BSM, double chi2SM) {
-   boost::math::chi_squared dist(2);
+double chi2_to_pval(double chi2BSM, double chi2SM, int d) {
+   boost::math::chi_squared dist(d);
    const double pval = chi2BSM<=chi2SM ? 1 : boost::math::cdf(complement(dist, chi2BSM-chi2SM));
    return pval;
 }
@@ -394,8 +394,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       const double hs_chisq = signals(pred);
       const double mhSMref = physical_input.get(Physical_input::mh_pole);
       const double smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
-      const double pvalue = chi2_to_pval(hs_chisq, smChi2);
-      hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue};
+      const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
+      const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
+      hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
    }
    else if (higgssignals_dataset.empty()) {
       WARNING("Warning: no HiggsSignals database provided");
@@ -499,8 +500,9 @@ std::optional<SignalResult> call_lilith(
 
     Py_Finalize();
 
-    const double pvalue = chi2_to_pval(my_likelihood, sm_likelihood);
-    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue};
+    const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
+    const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
+    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue1d, pvalue2d};
 
     return res;
 }

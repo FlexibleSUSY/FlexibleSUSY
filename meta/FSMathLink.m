@@ -346,7 +346,7 @@ FillDecaysSLHAData[] :=
        "if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
           TextFormatting`IndentText[
              "const SignalResult& hs = get_higgssignals_output();\n" <>
-             "slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval);\n"
+             "slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval1d, hs.pval2d);\n"
           ] <>
        "}\n" <>
        "if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {\n" <>

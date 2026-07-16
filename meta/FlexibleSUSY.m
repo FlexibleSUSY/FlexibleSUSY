@@ -2828,7 +2828,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
       if (hs.has_value()) {
          SignalResult hs_ = hs.value();
-         slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval);
+         slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval1d, hs_.pval2d);
       }
       if (higgsbounds_v.size() > 0) {
          slha_io.set_higgsbounds(higgsbounds_v);
@@ -2837,7 +2837,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 #endif
 #ifdef ENABLE_LILITH
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith.has_value()) {
-      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, lilith.value().pval);
+      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, lilith.value().pval1d, lilith.value().pval2d);
    }
 #endif
 }";
