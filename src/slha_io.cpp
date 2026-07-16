@@ -1025,7 +1025,7 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
-void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t ndof, const double chi2, const double chi2SMmin, const double mhSM, const double pval)
+void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t ndof, const double chi2, const double chi2SMmin, const double mhSM, const double pval1d, const double pval2d)
 {
    std::ostringstream ss;
 
@@ -1034,7 +1034,8 @@ void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t 
    ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
    ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + std::to_string(mhSM) + " GeV");
    // SLHA doesn't print nicely numbers with 3 digit exponent
-   ss << FORMAT_ELEMENT(4, pval > 1e-99 ? pval : 0., "p-value");
+   ss << FORMAT_ELEMENT(4, pval1d > 1e-99 ? pval1d : 0., "p-value (1d)");
+   ss << FORMAT_ELEMENT(5, pval2d > 1e-99 ? pval2d : 0., "p-value (2d)");
 
    set_block(ss);
 }
