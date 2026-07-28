@@ -30,6 +30,7 @@
 
 #include "@ModelName@_ewsb_solver.hpp"
 #include "@ModelName@_ewsb_solver_interface.hpp"
+#include "@ModelName@_semi_analytic_solutions.hpp"
 #include "error.hpp"
 
 #include <Eigen/Core>
@@ -40,7 +41,6 @@ class EWSB_solver;
 class Semi_analytic;
 
 class @ModelName@_mass_eigenstates;
-class @ModelName@_semi_analytic_solutions;
 
 template<>
 class @ModelName@_ewsb_solver<Semi_analytic> : public @ModelName@_ewsb_solver_interface {
@@ -60,9 +60,12 @@ public:
    virtual int get_number_of_iterations() const override { return number_of_iterations; }
    virtual double get_precision() const override { return precision; }
 
-   void set_semi_analytic_solutions(@ModelName@_semi_analytic_solutions*);
+   void set_semi_analytic_solutions(@ModelName@_semi_analytic_solutions*); /// @todo(alex): maybe remove or change signature
+   const @ModelName@_semi_analytic_solutions& get_semi_analytic_solutions() const { return solutions; }
+   @ModelName@_semi_analytic_solutions& get_semi_analytic_solutions() { return solutions; }
 
    virtual int solve(@ModelName@_mass_eigenstates&) override;
+
 private:
    static constexpr int number_of_ewsb_equations = @numberOfEWSBEquations@;
    using EWSB_vector_t = Eigen::Matrix<double,number_of_ewsb_equations,1>;
@@ -76,7 +79,7 @@ private:
    int number_of_iterations{100}; ///< maximum number of iterations
    int loop_order{2};             ///< loop order to solve EWSB at
    double precision{1.e-5};       ///< precision goal
-   @ModelName@_semi_analytic_solutions* solutions{nullptr}; ///< semi-analytic solutions calculator
+   @ModelName@_semi_analytic_solutions solutions{}; ///< semi-analytic solutions
 
    void set_ewsb_solution(@ModelName@_mass_eigenstates&, const EWSB_solver*);
    template <typename It> void set_best_ewsb_solution(@ModelName@_mass_eigenstates&, It, It);
