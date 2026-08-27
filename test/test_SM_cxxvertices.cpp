@@ -27,6 +27,7 @@
 #include "SM_two_scale_spectrum_generator.hpp"
 #include "cxx_qft/SM_qft.hpp"
 #include "cxx_qft/standard_model_qft.hpp"
+#include "SM_mass_eigenstates_running.hpp"
 
 using namespace flexiblesusy;
 
@@ -42,10 +43,11 @@ BOOST_AUTO_TEST_CASE( test_sm_cxxvertices )
    SM_spectrum_generator<Two_scale> spectrum_generator;
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
-   auto sm = std::get<0>(spectrum_generator.get_models_slha());
-   sm.set_Lambdax(lambda);
-   sm.solve_ewsb();
-   sm.calculate_DRbar_masses();
+   auto _sm = std::get<0>(spectrum_generator.get_models_slha());
+   _sm.set_Lambdax(lambda);
+   _sm.solve_ewsb();
+   _sm.calculate_DRbar_masses();
+   SM_mass_eigenstates_running sm(_sm);
 
    standard_model::Standard_model standard_model {};
    standard_model.initialise_from_input(qedqcd);

@@ -27,6 +27,7 @@
 #include "lowe.h"
 
 #include "SM_two_scale_model.hpp"
+#include "SM_mass_eigenstates_running.hpp"
 #include "SM_amm.hpp"
 #include "cxx_qft/SM_qft.hpp"
 

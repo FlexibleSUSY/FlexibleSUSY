@@ -60,3 +60,5 @@ Block MINPAR                 # Input parameters
     3   52.9427817096        # TanBeta
     4   1                    # SignMu
     5   -45.7405445434       # Azero
+Block FlexibleDecay
+    1  0

@@ -28,6 +28,7 @@
  */
 
 #include <cmath>
+#include <iomanip>
 
 #include <boost/range/algorithm.hpp>
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
@@ -50,6 +51,9 @@
 #include "cxx_qft/standard_model_particle_aliases.hpp"
 #include "cxx_qft/standard_model_vertices.hpp"
 #include "error.hpp"
+#include "cxx_qft/standard_model_qft.hpp"
+
+#define DECAY_BSM_ORDER 0
 
 namespace flexiblesusy {
 
@@ -60,6 +64,21 @@ using namespace standard_model_cxx_diagrams;
 using namespace standard_model_cxx_diagrams::fields;
 namespace info = standard_model_info;
 using namespace std::complex_literals;
+
+namespace {
+double get_lepton_masses(const context_base& context, const softsusy::QedQcd& qedqcd, int idx) {
+   switch (idx) {
+      case 0:
+         return qedqcd.displayMass(softsusy::mElectron);
+      case 1:
+         return qedqcd.displayMass(softsusy::mMuon);
+      case 2:
+         return qedqcd.displayMass(softsusy::mTau);
+      default:
+         return context.physical_mass<ChargedLepton>({idx});
+   }
+}
+} // anonymous namespace
 
 const standard_model_decay_table& CLASSNAME::get_decay_table() const
 {
@@ -129,7 +148,7 @@ int fieldPDG(const typename field_indices<Field>::type indx) {
 
 // hh -> {VG, VG}
 template<>
-Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
+Decay_amplitude_SVV CLASSNAME::calculate_amplitude_1l<hh, VG, VG>(
    const context_base& context,
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<fields::VG >::type const& idx_2,
@@ -162,9 +181,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
       using vertexId2 = Vertex<typename bar<Fd>::type, Fd, VG>;
       using vertexId3 = Vertex<typename bar<Fd>::type, Fd, VG>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {2.000000000000000};
+      static constexpr double colorFac {2.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -219,9 +238,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
       using vertexId2 = Vertex<typename bar<Fu>::type, Fu, VG>;
       using vertexId3 = Vertex<typename bar<Fu>::type, Fu, VG>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {2.000000000000000};
+      static constexpr double colorFac {2.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -276,9 +295,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
       using vertexId2 = Vertex<typename bar<Fd>::type, Fd, VG>;
       using vertexId3 = Vertex<typename bar<Fd>::type, Fd, VG>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {2.000000000000000};
+      static constexpr double colorFac {2.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -333,9 +352,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
       using vertexId2 = Vertex<typename bar<Fu>::type, Fu, VG>;
       using vertexId3 = Vertex<typename bar<Fu>::type, Fu, VG>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {2.000000000000000};
+      static constexpr double colorFac {2.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -388,7 +407,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VG, VG>(
 
 // hh -> {VP, VP}
 template<>
-Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
+Decay_amplitude_SVV CLASSNAME::calculate_amplitude_1l<hh, VP, VP>(
    const context_base& context,
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<fields::VP >::type const& idx_2,
@@ -411,7 +430,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
    result.form_factor_eps = std::complex<double>(0., 0.);
 
    // FormCalc's Finite variable
-   constexpr double Finite {1.};
+   static constexpr double Finite {1.};
 
    const double ren_scale {result.m_decay};
 
@@ -424,9 +443,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<Fd>::type, Fd, VP>;
       using vertexId3 = Vertex<typename bar<Fd>::type, Fd, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -495,9 +514,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<Fe>::type, Fe, VP>;
       using vertexId3 = Vertex<typename bar<Fe>::type, Fe, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -552,9 +571,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<Fu>::type, Fu, VP>;
       using vertexId3 = Vertex<typename bar<Fu>::type, Fu, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -623,9 +642,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<gWp>::type, gWp, VP>;
       using vertexId3 = Vertex<typename bar<gWp>::type, gWp, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -679,9 +698,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<gWpC>::type, gWpC, VP>;
       using vertexId3 = Vertex<typename bar<gWpC>::type, gWpC, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -735,9 +754,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<Hp, typename conj<Hp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -791,9 +810,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -847,9 +866,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -903,9 +922,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -959,9 +978,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1015,9 +1034,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1071,9 +1090,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1127,9 +1146,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename conj<VWp>::type, VP, VWp>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1185,9 +1204,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<Fd>::type, Fd, VP>;
       using vertexId3 = Vertex<typename bar<Fd>::type, Fd, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1256,9 +1275,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<Fe>::type, Fe, VP>;
       using vertexId3 = Vertex<typename bar<Fe>::type, Fe, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1313,9 +1332,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<Fu>::type, Fu, VP>;
       using vertexId3 = Vertex<typename bar<Fu>::type, Fu, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1384,9 +1403,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<gWp>::type, gWp, VP>;
       using vertexId3 = Vertex<typename bar<gWp>::type, gWp, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1440,9 +1459,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename bar<gWpC>::type, gWpC, VP>;
       using vertexId3 = Vertex<typename bar<gWpC>::type, gWpC, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1496,9 +1515,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<Hp, typename conj<Hp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1552,9 +1571,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1608,9 +1627,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1664,9 +1683,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1720,9 +1739,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1776,9 +1795,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1832,9 +1851,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1888,9 +1907,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId2 = Vertex<typename conj<VWp>::type, VP, VWp>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1945,9 +1964,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId1 = Vertex<hh, Hp, typename conj<Hp>::type>;
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP, VP>;
 
-      constexpr double symmetryFac {2.000000000000000};
+      static constexpr double symmetryFac {2.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -1992,9 +2011,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId1 = Vertex<hh, typename conj<VWp>::type, VWp>;
       using vertexId2 = Vertex<typename conj<VWp>::type, VP, VP, VWp>;
 
-      constexpr double symmetryFac {2.000000000000000};
+      static constexpr double symmetryFac {2.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2041,9 +2060,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId1 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId2 = Vertex<hh, Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2088,9 +2107,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId1 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId2 = Vertex<hh, typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2135,9 +2154,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId1 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId2 = Vertex<hh, Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2182,9 +2201,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
       using vertexId1 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId2 = Vertex<hh, typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2228,11 +2247,11 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VP>(
 
 // hh -> {VP, VZ}
 template<>
-Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
+Decay_amplitude_SVV CLASSNAME::calculate_amplitude_1l<hh, VP, VZ>(
    const context_base& context,
-   typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<fields::VP >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::VZ >::type const& idx_3) const{
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<fields::VP>::type const& idx_2,
+   typename cxx_diagrams::field_indices<fields::VZ>::type const& idx_3) const {
 
    // amplitude type
    Decay_amplitude_SVV result;
@@ -2251,7 +2270,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
    result.form_factor_eps = std::complex<double>(0., 0.);
 
    // FormCalc's Finite variable
-   constexpr double Finite {1.};
+   static constexpr double Finite {1.};
 
    const double ren_scale {result.m_decay};
 
@@ -2264,9 +2283,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<Fd>::type, Fd, VZ>;
       using vertexId3 = Vertex<typename bar<Fd>::type, Fd, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2335,9 +2354,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<Fe>::type, Fe, VZ>;
       using vertexId3 = Vertex<typename bar<Fe>::type, Fe, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2392,9 +2411,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<Fu>::type, Fu, VZ>;
       using vertexId3 = Vertex<typename bar<Fu>::type, Fu, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2463,9 +2482,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<gWp>::type, gWp, VZ>;
       using vertexId3 = Vertex<typename bar<gWp>::type, gWp, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2519,9 +2538,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<gWpC>::type, gWpC, VZ>;
       using vertexId3 = Vertex<typename bar<gWpC>::type, gWpC, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2575,9 +2594,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<Hp, typename conj<Hp>::type, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2631,9 +2650,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2687,9 +2706,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2743,9 +2762,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2799,9 +2818,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VZ>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2855,9 +2874,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VZ>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2911,9 +2930,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -2967,9 +2986,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename conj<VWp>::type, VP, VWp>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3025,9 +3044,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<Fd>::type, Fd, VZ>;
       using vertexId3 = Vertex<typename bar<Fd>::type, Fd, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3096,9 +3115,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<Fe>::type, Fe, VZ>;
       using vertexId3 = Vertex<typename bar<Fe>::type, Fe, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3153,9 +3172,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<Fu>::type, Fu, VZ>;
       using vertexId3 = Vertex<typename bar<Fu>::type, Fu, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {3.000000000000000};
+      static constexpr double colorFac {3.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3224,9 +3243,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<gWp>::type, gWp, VZ>;
       using vertexId3 = Vertex<typename bar<gWp>::type, gWp, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3280,9 +3299,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename bar<gWpC>::type, gWpC, VZ>;
       using vertexId3 = Vertex<typename bar<gWpC>::type, gWpC, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3336,9 +3355,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<Hp, typename conj<Hp>::type, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3392,9 +3411,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3448,9 +3467,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3504,9 +3523,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3560,9 +3579,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VZ>;
       using vertexId3 = Vertex<typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3616,9 +3635,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VWp, VZ>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3672,9 +3691,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId3 = Vertex<Hp, typename conj<VWp>::type, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3728,9 +3747,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId2 = Vertex<typename conj<VWp>::type, VP, VWp>;
       using vertexId3 = Vertex<typename conj<VWp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3881,9 +3900,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId1 = Vertex<hh, Hp, typename conj<Hp>::type>;
       using vertexId2 = Vertex<Hp, typename conj<Hp>::type, VP, VZ>;
 
-      constexpr double symmetryFac {2.000000000000000};
+      static constexpr double symmetryFac {2.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3928,9 +3947,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId1 = Vertex<hh, typename conj<VWp>::type, VWp>;
       using vertexId2 = Vertex<typename conj<VWp>::type, VP, VWp, VZ>;
 
-      constexpr double symmetryFac {2.000000000000000};
+      static constexpr double symmetryFac {2.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -3977,9 +3996,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId1 = Vertex<typename conj<Hp>::type, VP, VWp>;
       using vertexId2 = Vertex<hh, Hp, typename conj<VWp>::type, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4024,9 +4043,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId1 = Vertex<Hp, typename conj<VWp>::type, VP>;
       using vertexId2 = Vertex<hh, typename conj<Hp>::type, VWp, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4071,9 +4090,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId1 = Vertex<typename conj<Hp>::type, VWp, VZ>;
       using vertexId2 = Vertex<hh, Hp, typename conj<VWp>::type, VP>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4118,9 +4137,9 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
       using vertexId1 = Vertex<Hp, typename conj<VWp>::type, VZ>;
       using vertexId2 = Vertex<hh, typename conj<Hp>::type, VP, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4670,11 +4689,11 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VP, VZ>(
 
 // hh -> {VZ, VZ}
 template<>
-Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VZ, VZ>(
+Decay_amplitude_SVV CLASSNAME::calculate_amplitude_tree<hh, VZ, VZ>(
    const context_base& context,
-   typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<fields::VZ >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::VZ >::type const& idx_3) const{
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<fields::VZ>::type const& idx_2,
+   typename cxx_diagrams::field_indices<fields::VZ>::type const& idx_3) const {
 
    // amplitude type
    Decay_amplitude_SVV result;
@@ -4703,20 +4722,19 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VZ, VZ>(
 
 // hh -> {VWp, conj[VWp]}
 template<>
-Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VWp, typename conj<VWp>::type>(
+Decay_amplitude_SVV CLASSNAME::calculate_amplitude_tree<hh, VWp, typename conj<VWp>::type>(
    const context_base& context,
-   typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<fields::VWp >::type const& idx_2,
-   typename cxx_diagrams::field_indices<typename fields::conj<fields::VWp>::type >::type const& idx_3
-) const{
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<fields::VWp>::type const& idx_2,
+   typename cxx_diagrams::field_indices<typename fields::conj<fields::VWp>::type>::type const& idx_3) const {
 
    // amplitude type
    Decay_amplitude_SVV result;
 
    // external particles' masses
    result.m_decay = context.physical_mass<hh>(idx_1);
-   result.m_vector_2 = context.physical_mass<VWp>(idx_2);
-   result.m_vector_1 = context.physical_mass<typename conj<VWp>::type>(idx_3);
+   result.m_vector_1 = context.physical_mass<VWp>(idx_2);
+   result.m_vector_2 = context.physical_mass<typename conj<VWp>::type>(idx_3);
 
    // set the initial value of an amplitude to 0
    result.form_factor_g = std::complex<double>(0., 0.);
@@ -4728,7 +4746,7 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VWp, typename conj<VWp>::
    // @todo correct prefactors
    // tree-level amplitude
    const auto indices = concatenate(idx_1, idx_2, idx_3);
-   const auto vertex =  Vertex<hh, VWp, typename conj<VWp>::type>::evaluate(indices, context);
+   const auto vertex =  Vertex<hh, typename conj<VWp>::type, VWp>::evaluate(indices, context);
 
    result.form_factor_g += vertex.value();
 
@@ -4737,11 +4755,11 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VWp, typename conj<VWp>::
 
 // hh -> {bar[Fv], Fv}
 template<>
-Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, Fv>(
+Decay_amplitude_SFF CLASSNAME::calculate_amplitude_1l<hh, typename bar<Fv>::type, Fv>(
    const context_base& context,
-   typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fv>::type >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::Fv >::type const& idx_3) const {
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fv>::type>::type const& idx_2,
+   typename cxx_diagrams::field_indices<fields::Fv>::type const& idx_3) const {
 
    // amplitude type
    Decay_amplitude_SFF result;
@@ -4756,7 +4774,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
    result.form_factor_right = std::complex<double>(0., 0.);
 
    // FormCalc's Finite variable
-   constexpr double Finite {1.};
+   static constexpr double Finite {1.};
 
    const double ren_scale {result.m_decay};
 
@@ -4769,9 +4787,9 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
       using vertexId2 = Vertex<typename bar<Fe>::type, Fe, hh>;
       using vertexId3 = Vertex<typename bar<Fv>::type, Fe, Hp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4826,9 +4844,9 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
       using vertexId2 = Vertex<typename bar<Fe>::type, Fe, hh>;
       using vertexId3 = Vertex<typename bar<Fv>::type, Fe, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4884,9 +4902,9 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
       using vertexId2 = Vertex<typename bar<Fv>::type, Fe, Hp>;
       using vertexId3 = Vertex<hh, Hp, typename conj<Hp>::type>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4940,9 +4958,9 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
       using vertexId2 = Vertex<typename bar<Fv>::type, Fe, VWp>;
       using vertexId3 = Vertex<hh, Hp, typename conj<VWp>::type>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -4996,9 +5014,9 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
       using vertexId2 = Vertex<typename bar<Fv>::type, Fe, Hp>;
       using vertexId3 = Vertex<hh, typename conj<Hp>::type, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -5052,9 +5070,9 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
       using vertexId2 = Vertex<typename bar<Fv>::type, Fe, VWp>;
       using vertexId3 = Vertex<hh, typename conj<VWp>::type, VWp>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -5108,9 +5126,9 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
       using vertexId2 = Vertex<typename bar<Fv>::type, Fv, VZ>;
       using vertexId3 = Vertex<hh, VZ, VZ>;
 
-      constexpr double symmetryFac {1.000000000000000};
+      static constexpr double symmetryFac {1.000000000000000};
 
-      constexpr double colorFac {1.000000000000000};
+      static constexpr double colorFac {1.000000000000000};
 
       // loops over vertices' indices
       for (const auto& indexId1: index_range<vertexId1>()) {
@@ -5670,11 +5688,11 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
 
 // hh -> {bar[Fd], Fd}
 template<>
-Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fd>::type, Fd>(
+Decay_amplitude_SFF CLASSNAME::calculate_amplitude_tree<hh, typename bar<Fd>::type, Fd>(
    const context_base& context,
-   typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fd>::type >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::Fd >::type const& idx_3) const{
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fd>::type>::type const& idx_2,
+   typename cxx_diagrams::field_indices<fields::Fd>::type const& idx_3) const {
 
    // amplitude type
    Decay_amplitude_SFF result;
@@ -5700,11 +5718,11 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fd>::type, F
 
 // hh -> {bar[Fu], Fu}
 template<>
-Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fu>::type, Fu>(
+Decay_amplitude_SFF CLASSNAME::calculate_amplitude_tree<hh, typename bar<Fu>::type, Fu>(
    const context_base& context,
-   typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fu>::type >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::Fu >::type const& idx_3) const{
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fu>::type>::type const& idx_2,
+   typename cxx_diagrams::field_indices<fields::Fu>::type const& idx_3) const {
 
    // amplitude type
    Decay_amplitude_SFF result;
@@ -5724,6 +5742,793 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fu>::type, F
 
    result.form_factor_left += vertex.left();
    result.form_factor_right += vertex.right();
+
+   return result;
+}
+
+// hh -> {bar[Fe], Fe}
+template<>
+Decay_amplitude_SFF CLASSNAME::calculate_amplitude_tree<hh, typename bar<Fe>::type, Fe>(
+   const context_base& context,
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fe>::type>::type const& idx_2,
+   typename cxx_diagrams::field_indices<fields::Fe>::type const& idx_3) const {
+
+      // amplitude type
+   Decay_amplitude_SFF result;
+
+   // external particles' masses
+   result.m_decay = context.physical_mass<hh>(idx_1);
+   result.m_fermion_1 = context.physical_mass<typename bar<Fe>::type>(idx_2);
+   result.m_fermion_2 = context.physical_mass<Fe>(idx_3);
+
+   // @todo correct prefactors
+   // tree-level amplitude
+   const auto indices = concatenate(idx_3, idx_2, idx_1);
+   const auto vertex =  Vertex<typename bar<Fe>::type, Fe, hh>::evaluate(indices, context);
+
+   result.form_factor_left += vertex.left();
+   result.form_factor_right += vertex.right();
+
+   return result;
+}
+
+// hh -> {bar[Fe], Fe}
+template<>
+Decay_amplitude_SFF CLASSNAME::calculate_amplitude_1l<hh, typename bar<Fe>::type, Fe>(
+   const context_base& context,
+   typename cxx_diagrams::field_indices<fields::hh>::type const& idx_1,
+   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fe>::type>::type const& idx_2,
+   typename cxx_diagrams::field_indices<fields::Fe>::type const& idx_3) const {
+
+      // amplitude type
+   Decay_amplitude_SFF result;
+
+   // external particles' masses
+   result.m_decay = context.physical_mass<hh>(idx_1);
+   result.m_fermion_1 = context.physical_mass<typename bar<Fe>::type>(idx_2);
+   result.m_fermion_2 = context.physical_mass<Fe>(idx_3);
+
+   // FormCalc's Finite variable
+   static constexpr double Finite {1.};
+
+   const double ren_scale {result.m_decay};
+
+   // ----------------- 1-loop contributions to the amplitude -----------------
+
+   // topology T1
+   // internal particles in the diagram: Ah, Ah, Fe
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, Ah>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, Ah>;
+      using vertexId3 = Vertex<Ah, Ah, hh>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<2>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<0>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<Ah>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<Ah>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g2n2_SSF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
+                        1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.value(),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: Ah, VZ, Fe
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, Ah>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, VZ>;
+      using vertexId3 = Vertex<Ah, hh, VZ>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<1>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<0>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<Ah>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<VZ>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g4n4_SVF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
+                        , -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(1, 0),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: bar[Fe], Fe, Ah
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, Ah>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, hh>;
+      using vertexId3 = Vertex<typename bar<Fe>::type, Fe, Ah>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId2::template indices_of_field<2>(indexId2);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId3::template indices_of_field<0>(indexId3);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               if (vertexId2::template indices_of_field<0>(indexId2) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+                  const double mInternal2 {context.mass<typename bar<Fe>::type>(vertexId2::template indices_of_field<0>(indexId2))};
+                  const double mInternal3 {context.mass<Ah>(vertexId1::template indices_of_field<2>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g1n1_FFS(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
+                        1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
+                        (),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: bar[Fe], Fe, hh
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, hh>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, hh>;
+      using vertexId3 = Vertex<typename bar<Fe>::type, Fe, hh>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId2::template indices_of_field<2>(indexId2);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId3::template indices_of_field<0>(indexId3);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               if (vertexId2::template indices_of_field<0>(indexId2) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+                  const double mInternal2 {context.mass<typename bar<Fe>::type>(vertexId2::template indices_of_field<0>(indexId2))};
+                  const double mInternal3 {context.mass<hh>(vertexId1::template indices_of_field<2>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g1n1_FFS(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
+                        1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.left(), 1.0i*vertexId3Val.right
+                        (),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: bar[Fe], Fe, VP
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, VP>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, hh>;
+      using vertexId3 = Vertex<typename bar<Fe>::type, Fe, VP>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId2::template indices_of_field<2>(indexId2);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId3::template indices_of_field<0>(indexId3);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               if (vertexId2::template indices_of_field<0>(indexId2) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+                  const double mInternal2 {context.mass<typename bar<Fe>::type>(vertexId2::template indices_of_field<0>(indexId2))};
+                  const double mInternal3 {context.mass<VP>(vertexId1::template indices_of_field<2>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g3n3_FFV(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     -1.0i*vertexId1Val.left(), -1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left()
+                        , 1.0i*vertexId2Val.right(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
+                        left(),
+                     ren_scale,
+                     Finite);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: bar[Fe], Fe, VZ
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, VZ>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, hh>;
+      using vertexId3 = Vertex<typename bar<Fe>::type, Fe, VZ>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId2::template indices_of_field<2>(indexId2);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId3::template indices_of_field<0>(indexId3);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               if (vertexId2::template indices_of_field<0>(indexId2) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+                  const double mInternal2 {context.mass<typename bar<Fe>::type>(vertexId2::template indices_of_field<0>(indexId2))};
+                  const double mInternal3 {context.mass<VZ>(vertexId1::template indices_of_field<2>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g3n3_FFV(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     -1.0i*vertexId1Val.left(), -1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left()
+                        , 1.0i*vertexId2Val.right(), -1.0i*vertexId3Val.right(), -1.0i*vertexId3Val.
+                        left(),
+                     ren_scale,
+                     Finite);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: hh, hh, Fe
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, hh>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, hh>;
+      using vertexId3 = Vertex<hh, hh, hh>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<0>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<hh>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<hh>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g2n2_SSF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
+                        1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.value(),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: VZ, Ah, Fe
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, VZ>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, Ah>;
+      using vertexId3 = Vertex<Ah, hh, VZ>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<1>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<0>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<VZ>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<Ah>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g5n5_VSF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     -1.0i*vertexId1Val.left(), -1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left()
+                        , 1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.value(1, 0),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: VZ, VZ, Fe
+   {
+      using vertexId1 = Vertex<typename bar<Fe>::type, Fe, VZ>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fe, VZ>;
+      using vertexId3 = Vertex<hh, VZ, VZ>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<0>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<VZ>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<VZ>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fe>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g6n6_VVF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.right
+                        (), -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: Hp, conj[Hp], Fv
+   {
+      using vertexId1 = Vertex<typename bar<Fv>::type, Fe, Hp>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fv, typename conj<Hp>::type>;
+      using vertexId3 = Vertex<hh, Hp, typename conj<Hp>::type>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<0>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<Hp>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<typename conj<Hp>::type>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fv>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g2n2_SSF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left(),
+                        1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.value(),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: Hp, conj[VWp], Fv
+   {
+      using vertexId1 = Vertex<typename bar<Fv>::type, Fe, Hp>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fv, typename conj<VWp>::type>;
+      using vertexId3 = Vertex<hh, typename conj<Hp>::type, VWp>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<0>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<Hp>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<typename conj<VWp>::type>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fv>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g4n4_SVF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     1.0i*vertexId1Val.left(), 1.0i*vertexId1Val.right(), -1.0i*vertexId2Val.right()
+                        , -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(0, 1),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: VWp, conj[Hp], Fv
+   {
+      using vertexId1 = Vertex<typename bar<Fv>::type, Fe, VWp>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fv, typename conj<Hp>::type>;
+      using vertexId3 = Vertex<hh, Hp, typename conj<VWp>::type>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<0>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<VWp>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<typename conj<Hp>::type>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fv>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g5n5_VSF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     -1.0i*vertexId1Val.left(), -1.0i*vertexId1Val.right(), 1.0i*vertexId2Val.left()
+                        , 1.0i*vertexId2Val.right(), 1.0i*vertexId3Val.value(0, 1),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
+
+   // topology T1
+   // internal particles in the diagram: VWp, conj[VWp], Fv
+   {
+      using vertexId1 = Vertex<typename bar<Fv>::type, Fe, VWp>;
+      using vertexId2 = Vertex<typename bar<Fe>::type, Fv, typename conj<VWp>::type>;
+      using vertexId3 = Vertex<hh, typename conj<VWp>::type, VWp>;
+
+      static constexpr double symmetryFac {1.000000000000000};
+
+      static constexpr double colorFac {1.000000000000000};
+
+      // loops over vertices' indices
+      for (const auto& indexId1: index_range<vertexId1>()) {
+         for (const auto& indexId2: index_range<vertexId2>()) {
+            for (const auto& indexId3: index_range<vertexId3>()) {
+
+               // skip indices that don't match external indices
+               const auto externalFieldIndicesIn1 = vertexId3::template indices_of_field<0>(indexId3);
+               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+               const auto externalFieldIndicesIn3 = vertexId2::template indices_of_field<0>(indexId2);
+
+               if (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)
+                  continue;
+
+               // connect internal particles in vertices
+               if (vertexId1::template indices_of_field<2>(indexId1) != vertexId3::template indices_of_field<1>(indexId3))
+                  continue;
+
+               if (vertexId2::template indices_of_field<2>(indexId2) != vertexId3::template indices_of_field<2>(indexId3))
+                  continue;
+
+               if (vertexId1::template indices_of_field<0>(indexId1) != vertexId2::template indices_of_field<1>(indexId2))
+                  continue;
+
+               auto const vertexId1Val = vertexId1::evaluate(indexId1, context);
+               auto const vertexId2Val = vertexId2::evaluate(indexId2, context);
+               auto const vertexId3Val = vertexId3::evaluate(indexId3, context);
+
+               if (!vertexId1Val.isZero() && !vertexId2Val.isZero() && !vertexId3Val.isZero()) {
+                  // internal masses
+                  const double mInternal1 {context.mass<VWp>(vertexId1::template indices_of_field<2>(indexId1))};
+                  const double mInternal2 {context.mass<typename conj<VWp>::type>(vertexId2::template indices_of_field<2>(indexId2))};
+                  const double mInternal3 {context.mass<typename bar<Fv>::type>(vertexId1::template indices_of_field<0>(indexId1))};
+
+                  result += symmetryFac * colorFac * calculate_diagram_SFF_t1g6n6_VVF(
+                     result.m_decay, result.m_fermion_1, result.m_fermion_2,
+                     mInternal1, mInternal2, mInternal3,
+                     -1.0i*vertexId1Val.right(), -1.0i*vertexId1Val.left(), -1.0i*vertexId2Val.right
+                        (), -1.0i*vertexId2Val.left(), 1.0i*vertexId3Val.value(),
+                     ren_scale);
+               }
+            }
+         }
+      }
+   }
 
    return result;
 }

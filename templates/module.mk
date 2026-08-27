@@ -39,6 +39,8 @@ BASE_TEMPLATES := \
 		$(DIR)/mass_eigenstates_interface.hpp.in \
 		$(DIR)/mass_eigenstates_decoupling_scheme.hpp.in \
 		$(DIR)/mass_eigenstates_decoupling_scheme.cpp.in \
+		$(DIR)/mass_eigenstates_running.hpp.in \
+		$(DIR)/mass_eigenstates_running.cpp.in \
 		$(DIR)/model.hpp.in \
 		$(DIR)/model_slha.hpp.in \
 		$(DIR)/lepton_amm_wrapper.hpp.in \

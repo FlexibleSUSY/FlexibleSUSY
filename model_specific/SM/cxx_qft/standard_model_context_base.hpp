@@ -18,7 +18,7 @@
 
 
 /**
- * @file cxx_qft/SM_context_base.hpp
+ * @file cxx_qft/standatd_model_context_base.hpp
  *
  * This file was generated with FlexibleSUSY 2.7.1 and SARAH 4.14.5 .
  */
@@ -28,6 +28,7 @@
 
 #include "standard_model_fields.hpp"
 #include "standard_model.hpp"
+#include "always_false.hpp"
 
 namespace flexiblesusy {
 namespace standard_model_cxx_diagrams {
@@ -197,7 +198,265 @@ template<> inline
 double context_base::physical_mass_impl<fields::VWp>(const std::array<int, 0>& indices) const
 { return model.get_physical().MVWp; }
 
-} // namespace standard_model_cxx_diagrams
+/*
+// self energies
+template<typename Field1, typename Field2>
+auto self_energy_1loop(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+template<typename Field1, typename Field2>
+auto self_energy_1loop_1(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+template<typename Field1, typename Field2>
+auto self_energy_1loop_PL(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+template<typename Field1, typename Field2>
+auto self_energy_1loop_PR(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+// self-energy derivatives w.r.t. p2
+template<typename Field1, typename Field2>
+auto self_energy_1loop_deriv_p2(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+template<typename Field1, typename Field2>
+auto self_energy_1loop_1_deriv_p2(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+template<typename Field1, typename Field2>
+auto self_energy_1loop_PL_deriv_p2(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+template<typename Field1, typename Field2>
+auto self_energy_1loop_PR_deriv_p2(const context_base& context, double p, typename field_indices<Field1>::type const&, typename field_indices<Field2>::type const&) {
+   static_assert(always_false<Field1>);
+   return 0.;
+}
+
+// tadpoles
+template<typename Field>
+std::complex<double> tadpole_1loop(const context_base& context, typename field_indices<Field>::type const&) {
+   static_assert(always_false<Field>);
+   return 0.;
+}
+
+template<> inline
+auto self_energy_1loop<fields::VG,fields::VG>(const context_base& context, double p, typename field_indices<fields::VG>::type const& g01, typename field_indices<fields::VG>::type const& g02) {
+   return context.model.self_energy_VG_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::Hp,fields::Hp>(const context_base& context, double p, typename field_indices<fields::Hp>::type const& g01, typename field_indices<fields::Hp>::type const& g02) {
+   return context.model.self_energy_Hp_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fv, fields::Fv>(const context_base& context, double p, typename field_indices<fields::Fv>::type const& g01, typename field_indices<fields::Fv>::type const& g02) {
+   return context.model.self_energy_Fv_1loop_1(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fv, fields::Fv>(const context_base& context, double p, typename field_indices<fields::Fv>::type const& g01, typename field_indices<fields::Fv>::type const& g02) {
+   return context.model.self_energy_Fv_1loop_PL(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fv, fields::Fv>(const context_base& context, double p, typename field_indices<fields::Fv>::type const& g01, typename field_indices<fields::Fv>::type const& g02) {
+   return context.model.self_energy_Fv_1loop_PR(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop<fields::Ah,fields::Ah>(const context_base& context, double p, typename field_indices<fields::Ah>::type const& g01, typename field_indices<fields::Ah>::type const& g02) {
+   return context.model.self_energy_Ah_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::hh,fields::hh>(const context_base& context, double p, typename field_indices<fields::hh>::type const& g01, typename field_indices<fields::hh>::type const& g02) {
+   return context.model.self_energy_hh_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::VP,fields::VP>(const context_base& context, double p, typename field_indices<fields::VP>::type const& g01, typename field_indices<fields::VP>::type const& g02) {
+   return context.model.self_energy_VP_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::VZ,fields::VZ>(const context_base& context, double p, typename field_indices<fields::VZ>::type const& g01, typename field_indices<fields::VZ>::type const& g02) {
+   return context.model.self_energy_VZ_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fd, fields::Fd>(const context_base& context, double p, typename field_indices<fields::Fd>::type const& g01, typename field_indices<fields::Fd>::type const& g02) {
+   return context.model.self_energy_Fd_1loop_1(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fd, fields::Fd>(const context_base& context, double p, typename field_indices<fields::Fd>::type const& g01, typename field_indices<fields::Fd>::type const& g02) {
+   return context.model.self_energy_Fd_1loop_PL(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fd, fields::Fd>(const context_base& context, double p, typename field_indices<fields::Fd>::type const& g01, typename field_indices<fields::Fd>::type const& g02) {
+   return context.model.self_energy_Fd_1loop_PR(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fu, fields::Fu>(const context_base& context, double p, typename field_indices<fields::Fu>::type const& g01, typename field_indices<fields::Fu>::type const& g02) {
+   return context.model.self_energy_Fu_1loop_1(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fu, fields::Fu>(const context_base& context, double p, typename field_indices<fields::Fu>::type const& g01, typename field_indices<fields::Fu>::type const& g02) {
+   return context.model.self_energy_Fu_1loop_PL(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fu, fields::Fu>(const context_base& context, double p, typename field_indices<fields::Fu>::type const& g01, typename field_indices<fields::Fu>::type const& g02) {
+   return context.model.self_energy_Fu_1loop_PR(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_1<fields::Fe, fields::Fe>(const context_base& context, double p, typename field_indices<fields::Fe>::type const& g01, typename field_indices<fields::Fe>::type const& g02) {
+   return context.model.self_energy_Fe_1loop_1(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL<fields::Fe, fields::Fe>(const context_base& context, double p, typename field_indices<fields::Fe>::type const& g01, typename field_indices<fields::Fe>::type const& g02) {
+   return context.model.self_energy_Fe_1loop_PL(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR<fields::Fe, fields::Fe>(const context_base& context, double p, typename field_indices<fields::Fe>::type const& g01, typename field_indices<fields::Fe>::type const& g02) {
+   return context.model.self_energy_Fe_1loop_PR(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop<fields::VWp,fields::VWp>(const context_base& context, double p, typename field_indices<fields::VWp>::type const& g01, typename field_indices<fields::VWp>::type const& g02) {
+   return context.model.self_energy_VWp_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop<fields::VP,fields::VZ>(const context_base& context, double p, typename field_indices<fields::VP>::type const& g01, typename field_indices<fields::VZ>::type const& g02) {
+   return context.model.self_energy_VPVZ_1loop(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VG,fields::VG>(const context_base& context, double p, typename field_indices<fields::VG>::type const& g01, typename field_indices<fields::VG>::type const& g02) {
+   return context.model.self_energy_VG_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::Hp,fields::Hp>(const context_base& context, double p, typename field_indices<fields::Hp>::type const& g01, typename field_indices<fields::Hp>::type const& g02) {
+   return context.model.self_energy_Hp_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fv>(const context_base& context, double p, typename field_indices<fields::Fv>::type const& g01, typename field_indices<fields::Fv>::type const& g02) {
+   return context.model.self_energy_Fv_1loop_1_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fv, fields::Fv>(const context_base& context, double p, typename field_indices<fields::Fv>::type const& g01, typename field_indices<fields::Fv>::type const& g02) {
+   return context.model.self_energy_Fv_1loop_PL_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fv, fields::Fv>(const context_base& context, double p, typename field_indices<fields::Fv>::type const& g01, typename field_indices<fields::Fv>::type const& g02) {
+   return context.model.self_energy_Fv_1loop_PR_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::Ah>(const context_base& context, double p, typename field_indices<fields::Ah>::type const& g01, typename field_indices<fields::Ah>::type const& g02) {
+   return context.model.self_energy_Ah_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::hh>(const context_base& context, double p, typename field_indices<fields::hh>::type const& g01, typename field_indices<fields::hh>::type const& g02) {
+   return context.model.self_energy_hh_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VP>(const context_base& context, double p, typename field_indices<fields::VP>::type const& g01, typename field_indices<fields::VP>::type const& g02) {
+   return context.model.self_energy_VP_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VZ>(const context_base& context, double p, typename field_indices<fields::VZ>::type const& g01, typename field_indices<fields::VZ>::type const& g02) {
+   return context.model.self_energy_VZ_1loop_deriv_p2(p);
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fd>(const context_base& context, double p, typename field_indices<fields::Fd>::type const& g01, typename field_indices<fields::Fd>::type const& g02) {
+   return context.model.self_energy_Fd_1loop_1_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fd>(const context_base& context, double p, typename field_indices<fields::Fd>::type const& g01, typename field_indices<fields::Fd>::type const& g02) {
+   return context.model.self_energy_Fd_1loop_PL_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fd>(const context_base& context, double p, typename field_indices<fields::Fd>::type const& g01, typename field_indices<fields::Fd>::type const& g02) {
+   return context.model.self_energy_Fd_1loop_PR_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fu>(const context_base& context, double p, typename field_indices<fields::Fu>::type const& g01, typename field_indices<fields::Fu>::type const& g02) {
+   return context.model.self_energy_Fu_1loop_1_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fu>(const context_base& context, double p, typename field_indices<fields::Fu>::type const& g01, typename field_indices<fields::Fu>::type const& g02) {
+   return context.model.self_energy_Fu_1loop_PL_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fu>(const context_base& context, double p, typename field_indices<fields::Fu>::type const& g01, typename field_indices<fields::Fu>::type const& g02) {
+   return context.model.self_energy_Fu_1loop_PR_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_1_deriv_p2<fields::Fe,fields::Fe>(const context_base& context, double p, typename field_indices<fields::Fe>::type const& g01, typename field_indices<fields::Fe>::type const& g02) {
+   return context.model.self_energy_Fe_1loop_1_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PL_deriv_p2<fields::Fe,fields::Fe>(const context_base& context, double p, typename field_indices<fields::Fe>::type const& g01, typename field_indices<fields::Fe>::type const& g02) {
+   return context.model.self_energy_Fe_1loop_PL_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_PR_deriv_p2<fields::Fe,fields::Fe>(const context_base& context, double p, typename field_indices<fields::Fe>::type const& g01, typename field_indices<fields::Fe>::type const& g02) {
+   return context.model.self_energy_Fe_1loop_PR_deriv_p2(p, g01.at(0), g02.at(0));
+}
+
+template<> inline
+auto self_energy_1loop_deriv_p2<fields::VWp>(const context_base& context, double p, typename field_indices<fields::VWp>::type const& g01, typename field_indices<fields::VWp>::type const& g02) {
+   return context.model.self_energy_VWp_1loop_deriv_p2(p);
+}
+
+template<> inline std::complex<double> tadpole_1loop<fields::hh>(const context_base& context, typename field_indices<fields::hh>::type const& g01) {
+   return context.model.tadpole_hh_1loop();
+}
+*/
+
+} // namespace cxx_diagrams
 } // namespace flexiblesusy
 
 #include "standard_model_vertices.hpp"

@@ -25,17 +25,17 @@
 #ifndef @ModelName@_EDM_H
 #define @ModelName@_EDM_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_running.hpp"
 #include "lowe.h"
 
 namespace flexiblesusy {
 
-class @ModelName@_mass_eigenstates;
+class @ModelName@_mass_eigenstates_running;
 
 namespace @ModelName@_edm {
 
 template <typename Lepton>
-double calculate_edm(const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&@extraIdxDecl@);
+double calculate_edm(const @ModelName@_mass_eigenstates_running&, const softsusy::QedQcd&@extraIdxDecl@);
 
 } // namespace @ModelName@_edm
 } // namespace flexiblesusy

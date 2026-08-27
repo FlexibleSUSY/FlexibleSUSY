@@ -276,7 +276,7 @@ Module[{stringPattern, patternNames, uniqueNames, lhsRepl, rhsRepl, warn,
    ];
 
    specialWords = {
-      "auto model" -> OptionValue[InsertionFunction]["const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model"],
+      "auto model" -> OptionValue[InsertionFunction]["const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model"],
       "auto qedqcd" -> OptionValue[InsertionFunction]["const softsusy::QedQcd& qedqcd"],
       "context" -> GetObservableNamespace[obs]
    };

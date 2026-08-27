@@ -5,7 +5,7 @@ double CLASSNAME::get_partial_width<Higgs, Photon, ZBoson>(
       const typename field_indices<Photon>::type& out1_idx,
       const typename field_indices<ZBoson>::type& out2_idx)
 {
-   const auto amp = calculate_amplitude<Higgs, Photon, ZBoson>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude_1l<Higgs, Photon, ZBoson>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<Higgs>(in_idx);
    const double mZ = qedqcd.displayPoleMZ();
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mH)));

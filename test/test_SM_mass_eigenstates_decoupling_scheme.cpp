@@ -4,7 +4,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "test_SM.hpp"
-#include "SM_mass_eigenstates.hpp"
+#include "SM_mass_eigenstates_running.hpp"
 #include "SM_mass_eigenstates_decoupling_scheme.hpp"
 #include "standard_model.hpp"
 
@@ -63,11 +63,11 @@ using namespace flexiblesusy;
 
 using Model_ifc_ptr = std::unique_ptr<SM_mass_eigenstates_interface>;
 using Model_ifc_ptrs = std::pair<Model_ifc_ptr, Model_ifc_ptr>;
-using Model_ptrs = std::pair<std::unique_ptr<SM_mass_eigenstates>, std::unique_ptr<SM_mass_eigenstates_decoupling_scheme>>;
+using Model_ptrs = std::pair<std::unique_ptr<SM_mass_eigenstates_running>, std::unique_ptr<SM_mass_eigenstates_decoupling_scheme>>;
 
 Model_ptrs make_model_ptrs(const SM_input_parameters& input)
 {
-   auto me = std::make_unique<SM_mass_eigenstates>();
+   auto me = std::make_unique<SM_mass_eigenstates_running>();
    setup_SM_const(*me, input);
 
    auto dec = std::make_unique<SM_mass_eigenstates_decoupling_scheme>();

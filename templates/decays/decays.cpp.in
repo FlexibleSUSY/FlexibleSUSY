@@ -28,6 +28,7 @@
  */
 
 #include <cmath>
+#include <iomanip>
 
 #include <boost/range/algorithm.hpp>
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
@@ -38,6 +39,7 @@
 #include <boost/mpl/list.hpp>
 #include <boost/hana.hpp>
 
+#include "@ModelName@_mass_eigenstates_running.hpp"
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "@ModelName@_info.hpp"
@@ -50,6 +52,12 @@
 #include "wrappers.hpp"
 #include "standard_model.hpp"
 #include <gsl/gsl_monte_miser.h>
+#include "cxx_qft/standard_model_context_base.hpp"
+
+#include <gsl/gsl_min.h>
+#include <random>
+
+#define DECAY_BSM_ORDER @decayBSMOrder@
 
 namespace flexiblesusy {
 
@@ -69,6 +77,174 @@ const @ModelName@_decay_table& CLASSNAME::get_decay_table() const
 const FlexibleDecay_problems& CLASSNAME::get_problems() const
 {
    return problems;
+}
+
+namespace {
+double get_lepton_masses(const context_base& context, const softsusy::QedQcd& qedqcd, int idx) {
+   switch (idx) {
+      case 0:
+         return qedqcd.displayMass(softsusy::mElectron);
+      case 1:
+         return qedqcd.displayMass(softsusy::mMuon);
+      case 2:
+         return qedqcd.displayMass(softsusy::mTau);
+      default:
+         return context.physical_mass<ChargedLepton>({idx});
+   }
+}
+
+void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double mass, std::string const& name) {
+
+      // set SM λ such that mhSM == mass
+      auto match_Higgs_mass = [&sm, mass](double x) {
+         sm.set_Lambdax(x);
+         sm.calculate_DRbar_masses(); // internaly calls solve_ewsb_tree_level()
+         sm.solve_ewsb();
+         sm.calculate_Mhh_pole();
+         return std::abs(sm.get_physical().Mhh - mass);
+      };
+
+      int status, iter = 0;
+      static constexpr int max_iter = 100;
+      const gsl_min_fminimizer_type *T;
+      gsl_min_fminimizer *sGSL;
+      // find λ in range [0, 5]
+      double a = 0.0001, b = 5;
+      // initial guess for the location of minimum: λ=(mass/v)^2/2
+      double m = 0.5*Sqr(mass/247);
+
+      // hack to pass lambda-function to GSL
+      std::function<double(double)> f = std::bind(match_Higgs_mass, std::placeholders::_1);
+      gsl_function F = {
+         [](double d, void* vf) -> double {
+            auto& f = *static_cast<std::function<double(double)>*>(vf);
+            return f(d);
+         },
+         &f
+      };
+
+      // checked on a single point in the MRSSM2:
+      //    brent seems faster and more accurate than quad_golden
+      T = gsl_min_fminimizer_brent;
+      sGSL = gsl_min_fminimizer_alloc (T);
+
+      // gsl_min_fminimizer_set expects f(m) < f(a) && f(m) < f(b),
+      // otherwise it returns GSL_EINVAL status.
+      // In this case we randomly try different m from [max(a, 0.01m), min(b, 100m)]
+      // until status != GSL_EINVAL
+      gsl_error_handler_t * _error_handler = gsl_set_error_handler_off();
+      status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+      if (status == GSL_EINVAL) {
+         std::random_device rd;
+         std::mt19937 gen(rd());
+         std::uniform_real_distribution<> dis(std::max(a,1e-2*m), std::min(b,1e+2*m));
+         int iterCount = 0;
+         do {
+            m = dis(gen);
+            status = gsl_min_fminimizer_set (sGSL, &F, m, a, b);
+            iterCount++;
+         } while (status == GSL_EINVAL && iterCount < 100);
+      }
+      gsl_set_error_handler (_error_handler);
+
+      static constexpr double mass_precision = 1e-4;
+
+      do
+      {
+           iter++;
+           status = gsl_min_fminimizer_iterate (sGSL);
+
+           m = gsl_min_fminimizer_x_minimum (sGSL);
+           a = gsl_min_fminimizer_x_lower (sGSL);
+           b = gsl_min_fminimizer_x_upper (sGSL);
+      }
+      while (std::abs(1. - sm.get_physical().Mhh/mass) > mass_precision && iter < max_iter);
+
+      gsl_min_fminimizer_free (sGSL);
+
+      if (const double diff = std::abs(1. - sm.get_physical().Mhh/mass); diff > mass_precision) {
+         throw std::runtime_error("Normalized Higgs effective couplings: Cannot find a SM equivalent of " + name +
+                     " after " + std::to_string(iter+1) + "/" + std::to_string(max_iter) + " iterations. "
+                     "Mass difference: " + std::to_string(mass) + " GeV (BSM) vs " +
+                     std::to_string(sm.get_physical().Mhh) + " GeV (SM) for λSM = " + std::to_string(m) +
+                     ". Difference: " + std::to_string(100*diff) + "%. ");
+      }
+
+
+}
+
+} // anonymous namespace
+
+template <typename F>
+std::complex<double> subtract_1l_QED_triangle(
+   @ModelName@_cxx_diagrams::context_base const& context, typename field_indices<F>::type const& idxIn, int idxOut1, int idxOut2, double mL1OS, double mL2OS)
+{
+      auto& lib = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffs;
+      looplibrary::Ccoeff_t C_coeffs;
+
+      const double mHOS = context.physical_mass<F>(idxIn);
+      const double mL1Tree = context.mass<ChargedLepton>({idxOut1});
+      const double mL2Tree = context.mass<ChargedLepton>({idxOut2});
+
+      // B,C functions for triangle diagram, evaluated at physical and tree masses
+      lib.B(B_coeffs, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(mHOS));
+      lib.C(C_coeffs, Sqr(mL1OS), Sqr(mL2OS), Sqr(mHOS), Sqr(mL1Tree), 0, Sqr(mL2Tree), Sqr(mHOS));
+
+      const auto b0 = B_coeffs.at(0);
+      const auto c0 = C_coeffs.at(0);
+      const auto c1 = C_coeffs.at(1);
+      const auto c2 = C_coeffs.at(2);
+
+      const auto charge = unit_charge(context);
+
+      const auto gamma_triangle = oneOver16PiSqr * Sqr(charge) * (-2) * (-1 + 2 * b0
+                                 + c0 * mL1Tree * (2 * mL1Tree + 2 * mL2Tree + mL1OS - mL2OS)
+                                 + c1 * (Sqr(mHOS) + mL1OS * (mL1Tree + mL2Tree) + Sqr(mL1OS) - Sqr(mL2OS))
+                                 + c2 * (2 * Sqr(mHOS) + (mL1Tree + mL2Tree) * (mL1OS - mL2OS)));
+
+      return gamma_triangle;
+}
+
+std::array<std::complex<double>, 3> subtract_1l_QED_se(
+   @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale, double mL1OS)
+{
+      auto& lib = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffs;
+
+      const double mL1Tree = context.mass<ChargedLepton>({idx});
+
+      lib.B(B_coeffs, Sqr(mL1OS), 0, Sqr(mL1Tree), Sqr(scale));
+      const auto b0 = B_coeffs.at(0);
+      const auto b1 = B_coeffs.at(1);
+
+      const auto charge = unit_charge(context);
+
+      const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
+      const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * b0 + 2 * b1 - 1);
+      const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * b0 - 1) * mL1Tree;
+
+      return {gamma_se_1, gamma_se_PL, gamma_se_PR};
+}
+
+std::array<std::complex<double>, 3> subtract_1l_QED_se_deriv(
+   @ModelName@_cxx_diagrams::context_base const&  context, int idx, double scale, double mLOS)
+{
+      auto& lib = Loop_library::get();
+      looplibrary::Bcoeff_t B_coeffs;
+
+      const double mLTree = context.mass<ChargedLepton>({idx});
+
+      const auto db0 = lib.DB0(Sqr(mLOS), 0, Sqr(mLTree), Sqr(scale));
+      const auto db1 = lib.DB1(Sqr(mLOS), 0, Sqr(mLTree), Sqr(scale));
+
+      const auto charge = unit_charge(context);
+
+      const auto gamma_se_PL = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
+      const auto gamma_se_PR = oneOver16PiSqr * Sqr(charge) * (2 * db0 + 2 * db1);
+      const auto gamma_se_1 = oneOver16PiSqr * Sqr(charge) * (-2) * (2 * db0) * mLTree;
+
+      return {gamma_se_1, gamma_se_PL, gamma_se_PR};
 }
 
 void CLASSNAME::clear_problems()

@@ -18,7 +18,7 @@
 
 
 /**
- * @file cxx_qft/SM_vertices.cpp
+ * @file cxx_qft/standard_model_vertices.cpp
  *
  * This file was generated with FlexibleSUSY 2.7.1 and SARAH 4.14.5 .
  */
@@ -1381,6 +1381,22 @@ cxx_diagrams::QuadrupleVectorVertex VertexImpl<typename standard_model_cxx_diagr
    const std::complex<double> part3 = -Sqr(g2);
 
    return {part1, part2, part3};
+}
+
+cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fe>::type, standard_model_cxx_diagrams::fields::Fe, standard_model_cxx_diagrams::fields::Ah>::evaluate(
+   const std::array<int, 2>& indices, const context_base& context)
+{
+   const int gt1 = indices[0];
+   const int gt2 = indices[1];
+   const auto Ye = MODELPARAMETER(Ye);
+   const auto Ve = MODELPARAMETER(Ve);
+   const auto Ue = MODELPARAMETER(Ue);
+
+   const std::complex<double> left = std::complex<double>(0.,0.7071067811865475)*SUM(j2,0,2,Conj(Ve(gt2,j2))*SUM(j1,0,2,Conj(Ue(gt1,j1))*Ye(j1,j2)));
+
+   const std::complex<double> right = std::complex<double>(0.,-0.7071067811865475)*SUM(j2,0,2,SUM(j1,0,2,Conj(Ye(j1,j2))*Ue(gt2,j1))*Ve(gt1,j2));
+
+   return {left, right};
 }
 
 } // namespace detail

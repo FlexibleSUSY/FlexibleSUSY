@@ -159,7 +159,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                   " "
                ]
             ] <>
-            "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, bool);";
+            "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running&, bool);";
 
       templateWrapperDef =
          "template <typename Fj, typename Fi, typename V>\n" <>
@@ -178,7 +178,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                   "int generationIndex2,\n",
                   " "
                ] <>
-               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, bool discard_SM_contributions) {\n"
+               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model, bool discard_SM_contributions) {\n"
             ] <>
             "return calculate_" <> CXXNameOfField[Fj] <>
             "_" <> CXXNameOfField[Fi] <> "_" <> CXXNameOfField[V] <> "_form_factors(" <>
@@ -204,7 +204,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                   "int,\n",
                   " "
                ] <>
-               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, bool);"
+               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running&, bool);"
             ];
 
       prototype =
@@ -219,7 +219,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                   "int generationIndex2,\n",
                   " "
                ] <>
-               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, bool discard_SM_contributions)"
+               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_running& model, bool discard_SM_contributions)"
             ];
 
       definition =
@@ -269,7 +269,7 @@ CreateCall[Fj_, Fi_, V_, topology_, diagram_] :=
 
 CalculateFormFactorsForwardDeclaration[Fj_, Fi_, V_] :=
 "template calculate_form_factors<" <> StringRiffle[CXXDiagrams`CXXNameOfField /@ {Fj, Fi, V}, ","] <> ">(" <>
-"int, int, const " <> FlexibleSUSY`FSModelName <> " _mass_eigenstates&, bool);"
+"int, int, const " <> FlexibleSUSY`FSModelName <> " _mass_eigenstates_running&, bool);"
 
 End[];
 EndPackage[];

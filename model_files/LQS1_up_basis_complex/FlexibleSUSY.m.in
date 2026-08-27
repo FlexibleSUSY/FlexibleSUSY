@@ -1,0 +1,67 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = LQS1_up_basis;
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+MINPAR = {
+   {1, LambdaIN}
+};
+
+EWSBOutputParameters = { mu2 };
+FSSolveEWSBTreeLevelFor = EWSBOutputParameters;
+
+LowScale = LowEnergyConstant[MZ];
+LowScaleFirstGuess = LowScale;
+LowScaleInput = {
+   {Yu, Sqrt[2] upQuarksDRbar / v},
+   {Yd, Sqrt[2] MatMul[downQuarksDRbar, Conjugate@CKM] / v},
+   {Ye, Sqrt[2] downLeptonsDRbar / v},
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]}
+};
+InitialGuessAtLowScale = {
+   {v, LowEnergyConstant[vev]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+FSAuxiliaryParameterInfo = {
+    {RelamQLInput,  { LesHouches -> LAMQLLIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {RelamqlInput,  { LesHouches -> LAMQLRIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ImlamQLInput,  { LesHouches -> IMLAMQLLIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+                } },
+    {ImlamqlInput,  { LesHouches -> IMLAMQLRIN,
+                  ParameterDimensions -> {3,3},
+                  InputParameter -> True
+    } }
+};
+
+RealParameters = {\[Lambda], Yu, Yd, Ye, mu2};
+
+SUSYScale = LowScale;
+SUSYScaleFirstGuess = LowScale;
+SUSYScaleInput = {
+   {\[Lambda], LambdaIN},
+   {MS12,  LHInput@MS12},
+   {gHS1,  LHInput@gHS1},
+   {lamS1, LHInput@lamS1},
+   {lamQL, RelamQLInput + I ImlamQLInput},
+   {lamql, RelamqlInput + I ImlamqlInput}
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh};
+
+ExtraSLHAOutputBlocks = {
+};
+
+FSCalculateDecays = !False;
