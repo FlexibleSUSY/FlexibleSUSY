@@ -31,7 +31,7 @@ Module[{
       fieldsFFV = {#, #} &/@ observables[[All, 1]];
       verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
 
-      {additionalVertices, npfDefinitions, prototypes, definitions} = create@observables;
+      {additionalVertices, npfDefinitions, prototypes, definitions} = Create@observables;
    ];
 
    WriteOut`ReplaceInFiles[
@@ -55,14 +55,14 @@ Module[{
    }
 ];
 
-create[manyObservables:{__FlexibleSUSYObservable`LToLConversion}] := {
+Create[manyObservables:{__FlexibleSUSYObservable`LToLConversion}] := {
    DeleteDuplicates[Join@@#[[All,1]]],
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
-}&[create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
+}&[Create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
 
-create[obs:FlexibleSUSYObservable`LToLConversion[in_, __, con_, loopN_]] :=
+Create[obs:FlexibleSUSYObservable`LToLConversion[in_, __, con_, loopN_]] :=
 Module[{npfVertices, npfDefinition, calculateDefinition, prototype},
    {npfVertices, npfDefinition} = generate@obs;
 
