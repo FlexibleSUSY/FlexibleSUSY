@@ -261,7 +261,12 @@ Do1DimScalar[particle_, particleName_String, massName_String, massMatrixName_Str
        "if (pole_mass_loop_order > 1) {\n" <>
        IndentText["// hardcoded 2-loop self energies are real\n"] <>
        IndentText["// but auto-generated ones are complex\n"] <>
-       IndentText["self_energy += Re(self_energy_" <> particleName <> "_2loop(p));\n"], ""] <> "}\n" <>
+       If[FlexibleSUSY`UseHiggs2Loop === True,
+          (* auto-generated 2-loop self-energy is calculated in the Landau gauge *)
+          IndentText[SelfEnergies`CreateLandauGaugeModel[] <>
+                     "self_energy += Re(" <> SelfEnergies`LandauGaugeModelName <> ".self_energy_" <> particleName <> "_2loop(p));\n"],
+          IndentText["self_energy += Re(self_energy_" <> particleName <> "_2loop(p));\n"]
+         ] <> "}\n", ""] <>
     If[FlexibleSUSY`UseHiggs3LoopSM === True && particle === SARAH`HiggsBoson,
        "if (pole_mass_loop_order > 2)\n" <>
        IndentText["self_energy += self_energy_" <> particleName <> "_3loop();\n"], ""] <>
@@ -339,6 +344,54 @@ CastIfReal[str_String, type_[CConversion`realScalarCType, ___]] :=
 
 CastIfReal[str_String, type_[___]] := str;
 
+(* True if the auto-generated 2-loop self-energy (calculated in the
+   mass eigenstate basis) is to be added to the self-energy of the
+   multiplet *)
+Use2LoopMassEigenstateSelfEnergy[particle_] :=
+    FlexibleSUSY`UseHiggs2Loop === True &&
+    GetDimension[particle] > 1 &&
+    MemberQ[{SARAH`HiggsBoson, SARAH`PseudoScalar}, particle] &&
+    Head[FindMixingMatrixSymbolFor[particle]] =!= List;
+
+(* Creates a Landau gauge copy of the model in the gaugeless limit,
+   which is used to evaluate the auto-generated 2-loop self-energies,
+   because the underlying SARAH diagrams are derived in the Landau
+   gauge and in the gaugeless limit. *)
+Create2LoopLandauGaugeModel[] :=
+    Module[{type = FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge"},
+           "std::unique_ptr<const " <> type <> "> " <> SelfEnergies`LandauGaugeModelName <> ";\n" <>
+           "if (pole_mass_loop_order > 1) {\n" <>
+           IndentText[SelfEnergies`LandauGaugeModelName <> " = std::make_unique<const " <> type <> ">(*this);\n"] <>
+           "}\n"
+          ];
+
+(* Adds the auto-generated 2-loop self-energy at the momentum p to the
+   self-energy matrix `self_energy'.  The self-energy is calculated in
+   the mass eigenstate basis and is rotated to the gauge eigenstate
+   basis with the mixing matrix of the Landau gauge copy of the model
+   (see Create2LoopLandauGaugeModel[]).  If element is not empty
+   (e.g. "(i1,i2)"), only the corresponding matrix element is added. *)
+Add2LoopMassEigenstateSelfEnergy[particle_, selfEnergyMatrixType_, element_String:""] :=
+    Module[{model = SelfEnergies`LandauGaugeModelName,
+            Z, functionName = SelfEnergies`CreateSelfEnergyMassEigenstateFunctionName[{particle, particle}, 2],
+            selfEnergyMatrixCType = CreateCType[selfEnergyMatrixType]},
+           Z = model <> "->get_" <> ToValidCSymbolString[FindMixingMatrixSymbolFor[particle]] <> "()";
+           "if (" <> model <> ") {\n" <>
+           IndentText[
+               "// rotate from the mass to the gauge eigenstate basis\n" <>
+               "const " <> selfEnergyMatrixCType <> " self_energy_2l(" <>
+               CastIfReal[Z <> ".adjoint().cast<std::complex<double>>() * " <>
+                          model <> "->" <> functionName <> "(p) * " <>
+                          Z <> ".cast<std::complex<double>>()", selfEnergyMatrixType] <> ");\n" <>
+               "if (self_energy_2l.allFinite()) {\n" <>
+               IndentText["self_energy" <> element <> " += self_energy_2l" <> element <> ";\n"] <>
+               "} else {\n" <>
+               IndentText["problems.flag_bad_mass(" <> FlexibleSUSY`FSModelName <> "_info::" <>
+                          ToValidCSymbolString[particle] <> ");\n"] <>
+               "}\n"] <>
+           "}\n"
+          ];
+
 DoFastDiagonalization[particle_Symbol /; IsScalar[particle], tadpoles_List] :=
     Module[{result, dim, dimStr, massName, massNameReordered, particleName,
             mixingMatrix, selfEnergyFunction, reorderMasses,
@@ -363,6 +416,8 @@ DoFastDiagonalization[particle_Symbol /; IsScalar[particle], tadpoles_List] :=
               selfEnergyIsSymmetric = Length[Flatten[{mixingMatrix}]] === 1;
               result = reorderMasses <> "\n" <>
                        tadpoleMatrix <>
+                       If[Use2LoopMassEigenstateSelfEnergy[particle],
+                          Create2LoopLandauGaugeModel[], ""] <>
                        selfEnergyMatrixCType <> " self_energy;\n" <>
                        "for (int i1 = 0; i1 < " <> dimStr <>"; ++i1) {\n" <>
                        IndentText["for (int i2 = " <> If[selfEnergyIsSymmetric,"i1","0"] <>
@@ -370,7 +425,10 @@ DoFastDiagonalization[particle_Symbol /; IsScalar[particle], tadpoles_List] :=
                                   IndentText["const double p = AbsSqrt(" <> massNameReordered <> "(i1) * " <>
                                              massNameReordered <> "(i2));\n" <>
                                              "self_energy(i1,i2) = " <> CastIfReal[
-                                             selfEnergyFunction <> "(p,i1,i2)", selfEnergyMatrixType] <> ";\n"] <>
+                                             selfEnergyFunction <> "(p,i1,i2)", selfEnergyMatrixType] <> ";\n" <>
+                                             If[Use2LoopMassEigenstateSelfEnergy[particle],
+                                                Add2LoopMassEigenstateSelfEnergy[particle, selfEnergyMatrixType, "(i1,i2)"],
+                                                ""]] <>
                                   "}\n"
                                  ] <>
                        "}\n" <>
@@ -588,6 +646,10 @@ DoMediumDiagonalization[particle_Symbol /; IsScalar[particle], inputMomentum_, t
                  If[calcEffPot,
                     calcHigherLoopHiggsContributions = CalcEffPot2L[particle];
                    ];
+                ];
+              If[Use2LoopMassEigenstateSelfEnergy[particle],
+                 calcHigherLoopHiggsContributions = Create2LoopLandauGaugeModel[];
+                 addHigherLoopHiggsContributions = Add2LoopMassEigenstateSelfEnergy[particle, selfEnergyMatrixType];
                 ];
               If[(FlexibleSUSY`UseHiggs3LoopMSSM === True ||
                   FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&

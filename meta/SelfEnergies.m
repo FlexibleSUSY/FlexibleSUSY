@@ -67,6 +67,12 @@ given list of self-energies and tadpoles";
 CreateSelfEnergyFunctionName::usage="creates self-energy function name
 for a given field";
 
+CreateLandauGaugeModel::usage="creates a copy of the model with the
+tree-level masses and mixings in the Landau gauge";
+LandauGaugeModelName::usage="name of the Landau gauge copy of the model";
+CreateSelfEnergyMassEigenstateFunctionName::usage="creates function
+name of the self-energy in the mass eigenstate basis for a given field";
+
 CreateHeavySelfEnergyFunctionName::usage="creates heavy self-energy
 function name for a given field";
 
@@ -285,12 +291,13 @@ AppendFieldIndexTo[field_, idx__] :=
    therefore not be accessed in the form Glu(gO2).
  *)
 Remove1DimensionalFieldIndices[lst_List] :=
-    Module[{k, fields, result = lst},
+    Module[{k, i, fields, result = lst},
            For[k = 1, k <= Length[result], k++,
                fields = GetField[result[[k]]] /. {f__}[_] :> {f};
                For[i = 1, i <= Length[fields], i++,
                    If[GetDimension[fields[[i]]] == 1,
-                      result[[k,2]] = result[[k,2]] /. fields[[i]][{__}] :> fields[[i]];
+                      (* remove indices from expressions of all loop orders *)
+                      result[[k]] = MapAt[(# /. fields[[i]][{__}] :> fields[[i]])&, result[[k]], 2;;];
                      ];
                   ]
               ];
@@ -299,21 +306,22 @@ Remove1DimensionalFieldIndices[lst_List] :=
 
 (* decompose fermionic self-energies into L,R,S parts *)
 SplitFermionSelfEnergies[lst_List] :=
-    Module[{result = lst, k, field, expr, fermionSE},
+    Module[{result = lst, k, field, exprs, fermionSE},
            (* filter out all fermionic self-energies *)
-           fermionSE = Cases[result, SelfEnergies`FSSelfEnergy[_, List[__]]];
+           fermionSE = Cases[result, SelfEnergies`FSSelfEnergy[_, List[__], ___]];
            result = Select[result, (Head[GetExpression[#]] =!= List)&];
            (* decompose fermionic self-energies into L,R,S parts *)
            For[k = 1, k <= Length[fermionSE], k++,
                field = GetField[fermionSE[[k]]];
-               expr = GetExpression[fermionSE[[k]]];
-               If[Length[expr] != 3,
+               (* expressions of all loop orders, Null = not available *)
+               exprs = List @@ Rest[fermionSE[[k]]] /. Null -> {Null, Null, Null};
+               If[!MatchQ[exprs, {{_, _, _}..}],
                   Print["Error: self-energy of ", field, " does not have 3 parts"];
                   Continue[];
                  ];
-               AppendTo[result, SelfEnergies`FSSelfEnergy[field[1]       , expr[[1]]]];
-               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PR], expr[[2]]]];
-               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PL], expr[[3]]]];
+               AppendTo[result, SelfEnergies`FSSelfEnergy[field[1]       , Sequence @@ exprs[[All,1]]]];
+               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PR], Sequence @@ exprs[[All,2]]]];
+               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PL], Sequence @@ exprs[[All,3]]]];
               ];
            result
           ];
@@ -750,8 +758,19 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
           ];
 
 FillArrayWithLoopTadpoles[loopLevel_, higgsAndIdx_List, arrayName_String, sign_String:"-", struct_String:""] :=
-    Module[{body = "", field, idx, head, functionName, modelSpecifiTadpoles},
+    Module[{body = "", v, field, idx, head, functionName, modelSpecifiTadpoles, isRotated, model = struct},
            modelSpecifiTadpoles = FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True;
+           (* auto-generated 2-loop tadpoles are calculated in the Landau gauge *)
+           If[loopLevel >= 2 && !modelSpecifiTadpoles && higgsAndIdx =!= {},
+              body = CreateLandauGaugeModel[If[struct === "", "*this", StringDrop[struct, -1]]];
+              model = LandauGaugeModelName <> ".";
+             ];
+           (* auto-generated 2-loop tadpoles of multiplets are calculated
+              in the mass eigenstate basis and must be rotated to the
+              gauge eigenstate basis *)
+           isRotated[f_] := loopLevel >= 2 && !modelSpecifiTadpoles && TreeMasses`GetDimension[f] > 1;
+           body = body <> StringJoin[RotateTadpolesToGaugeEigenstates[#, loopLevel, model]& /@
+                                     Select[DeleteDuplicates[higgsAndIdx[[All,1]]], isRotated]];
            For[v = 1, v <= Length[higgsAndIdx], v++,
                field = higgsAndIdx[[v,1]];
                idx = higgsAndIdx[[v,2]];
@@ -761,16 +780,58 @@ FillArrayWithLoopTadpoles[loopLevel_, higgsAndIdx_List, arrayName_String, sign_S
 		     CreateTadpoleFunctionName[field, loopLevel],
 		     CreateTadpoleMassEigenstatesFunctionName[field, loopLevel]
 		  ];
+               If[isRotated[field],
+                  body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
+                         head <> "(" <> CreateRotatedTadpoleName[field, loopLevel] <>
+                         "(" <> ToString[idx - 1] <> "));\n";
+                  Continue[];
+                 ];
                If[TreeMasses`GetDimension[field] == 1,
                   body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
-                         head <> "(" <> struct <> functionName <> "());\n";
+                         head <> "(" <> model <> functionName <> "());\n";
                   ,
                   body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
-                         head <> "(" <> struct <> functionName <>
+                         head <> "(" <> model <> functionName <>
                          "(" <> ToString[idx - 1] <> "));\n";
                  ];
               ];
            body
+          ];
+
+LandauGaugeModelName = "model_landau_gauge";
+
+(* Creates a copy of the model, where the tree-level masses and
+   mixings are calculated in the Landau gauge.  The auto-generated
+   2-loop tadpoles and self-energies must be evaluated with this copy,
+   because the underlying SARAH diagrams are derived in the Landau
+   gauge. *)
+CreateLandauGaugeModel[model_String:"*this"] :=
+    "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge " <>
+    LandauGaugeModelName <> "(" <> model <> ");\n";
+
+CreateRotatedTadpoleName[field_, loopLevel_] :=
+    "tadpole_" <> ToString[loopLevel] <> "l_" <> CConversion`ToValidCSymbolString[field];
+
+(* Creates a vector with the tadpoles of the multiplet field in the
+   gauge eigenstate basis from the tadpoles in the mass eigenstate
+   basis.  With field_i = Z_ij field^0_j one has
+
+     T^0_j = dV/d(field^0_j) = Z_ij T_i
+ *)
+RotateTadpolesToGaugeEigenstates[field_, loopLevel_, struct_String] :=
+    Module[{dimStr = ToString[TreeMasses`GetDimension[field]],
+            name = CreateRotatedTadpoleName[field, loopLevel],
+            functionName = CreateTadpoleMassEigenstatesFunctionName[field, loopLevel],
+            Z = struct <> "get_" <> CConversion`ToValidCSymbolString[FindMixingMatrixSymbolFor[field]] <> "()",
+            vectorType},
+           vectorType = "Eigen::Matrix<std::complex<double>," <> dimStr <> ",1>";
+           vectorType <> " " <> name <> "_mass_eigenstates;\n" <>
+           "for (int i = 0; i < " <> dimStr <> "; i++) {\n" <>
+           IndentText[name <> "_mass_eigenstates(i) = " <> struct <> functionName <> "(i);\n"] <>
+           "}\n" <>
+           "// rotate from the mass to the gauge eigenstate basis\n" <>
+           "const " <> vectorType <> " " <> name <> "(" <> Z <>
+           ".transpose().cast<std::complex<double>>() * " <> name <> "_mass_eigenstates);\n"
           ];
 
 FillArrayWithTwoLoopTadpoles[higgsBoson_, arrayName_String, sign_String:"-", struct_String:""] :=

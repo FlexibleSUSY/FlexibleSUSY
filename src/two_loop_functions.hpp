@@ -28,6 +28,9 @@
 namespace flexiblesusy {
 namespace two_loop_functions {
 
+/// renormalization scheme of the 2-loop functions
+enum class Scheme { DRbar, MSbar };
+
 // tadpole functions
 
 double TfSS(double, double, double, double) PVATTR;
@@ -39,7 +42,7 @@ double TfFFFbS(double, double, double, double, double) PVATTR;
 double TfFFbFS(double, double, double, double, double) PVATTR;
 double TfFbFbFbS(double, double, double, double, double) PVATTR;
 double TfSV(double, double) PVATTR;
-double TfFV(double, double) PVATTR;
+double TfFV(double, double, Scheme = Scheme::DRbar) PVATTR;
 
 // self-energy functions
 
@@ -71,8 +74,8 @@ double VfFbFFFbS(double, double, double, double, double, double, double) PVATTR;
 double VfFFbFbFS(double, double, double, double, double, double, double) PVATTR;
 double VfFFFbFbS(double, double, double, double, double, double, double) PVATTR;
 double VfFFFFS(double, double, double, double, double, double, double) PVATTR;
-double GfFFV(double, double, double, double) PVATTR;
-double GfFbFbV(double, double, double, double) PVATTR;
+double GfFFV(double, double, double, double, Scheme = Scheme::DRbar) PVATTR;
+double GfFbFbV(double, double, double, double, Scheme = Scheme::DRbar) PVATTR;
 
 } // namespace two_loop_functions
 } // namespace flexiblesusy

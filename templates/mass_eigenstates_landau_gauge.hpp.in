@@ -1,0 +1,68 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_mass_eigenstates_landau_gauge.hpp
+ *
+ * @brief contains class for the model with tree-level masses and
+ *        mixings in the Landau gauge
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#ifndef @ModelName@_MASS_EIGENSTATES_LANDAU_GAUGE_H
+#define @ModelName@_MASS_EIGENSTATES_LANDAU_GAUGE_H
+
+#include "@ModelName@_mass_eigenstates.hpp"
+
+#include <Eigen/Core>
+
+namespace flexiblesusy {
+
+/**
+ * @class @ModelName@_mass_eigenstates_landau_gauge
+ * @brief model class with tree-level masses and mixings in the Landau gauge
+ *
+ * Copy of a given model in the gaugeless limit, i.e. with the gauge
+ * couplings of the gauge groups broken by EWSB set to zero, where
+ * the tree-level masses and mixings are re-calculated with the gauge
+ * dependent ones (e.g. those of the Goldstone bosons) in the Landau
+ * gauge (xi = 0).  As in the given model, the tree-level masses are
+ * calculated at the tree-level minimum, so the Goldstone bosons are
+ * massless.  It is used to evaluate the auto-generated 2-loop
+ * tadpoles and self-energies, which are derived in the gaugeless
+ * limit and in the Landau gauge.
+ */
+class @ModelName@_mass_eigenstates_landau_gauge : public @ModelName@_mass_eigenstates
+{
+public:
+   explicit @ModelName@_mass_eigenstates_landau_gauge(const @ModelName@_mass_eigenstates&);
+   @ModelName@_mass_eigenstates_landau_gauge(const @ModelName@_mass_eigenstates_landau_gauge&) = default;
+   @ModelName@_mass_eigenstates_landau_gauge(@ModelName@_mass_eigenstates_landau_gauge&&) = default;
+   virtual ~@ModelName@_mass_eigenstates_landau_gauge() = default;
+   @ModelName@_mass_eigenstates_landau_gauge& operator=(const @ModelName@_mass_eigenstates_landau_gauge&) = default;
+   @ModelName@_mass_eigenstates_landau_gauge& operator=(@ModelName@_mass_eigenstates_landau_gauge&&) = default;
+
+   // gauge dependent tree-level masses and mixings
+@massCalculationPrototypes@
+};
+
+} // namespace flexiblesusy
+
+#endif

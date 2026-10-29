@@ -1,4 +1,4 @@
-! This file is part of SARAH 4.9.3
+! This file is part of SARAH 4.15.5 (adapted for FlexibleSUSY)
 ! Author: Florian Staub, Mark Goodsell
 
 Module Pole2LFunctions
@@ -14,9 +14,16 @@ Complex(dp), Parameter :: ZeroC=(0._dp,0._dp)
   Module Procedure SmalldpR, SmalldpC
  End Interface
 
+
+! FlexibleSUSY always uses the treatment of the Goldstone boson
+! catastrophe of Braathen and Goodsell [arXiv:1609.06977] (NewGBC in SPheno)
+Logical, Parameter :: NewGBC = .True.
+! the MS-bar parts are added by the MS-bar wrappers below
+Real(dp), Parameter :: rMS = 0._dp
+
 Contains
 
-!!!!!!!!!!! TADPOLE FUNCTIONS (subroutine wrappers to interface with C/C++)
+!!!!!!!!!!! subroutine wrappers to interface with C/C++
 
 Subroutine CTfSS(out,x,y,z,Q2)
 Implicit None
@@ -24,69 +31,270 @@ real(dp), intent(in):: x,y,z,q2
 real(dp) :: out
 out = TfSS(x,y,z,Q2)
 End Subroutine CTfSS
-
 Subroutine CTfSSS(out,x,y,z,Q2)
 Implicit None
 real(dp), intent(in):: x,y,z,q2
 real(dp) :: out
 out = TfSSS(x,y,z,Q2)
 End Subroutine CTfSSS
-
 Subroutine CTfSSSS(out,x,y,z,u,Q2)
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfSSSS(x,y,z,u,Q2)
 End Subroutine CTfSSSS
-
 Subroutine CTfSSFF(out,x,y,z,u,Q2)
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfSSFF(x,y,z,u,Q2)
 End Subroutine CTfSSFF
-
 Subroutine CTfSSFbFb(out,x,y,z,u,Q2)
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfSSFbFb(x,y,z,u,Q2)
 End Subroutine CTfSSFbFb
-
 Subroutine CTfFFFbS(out,x,y,z,u,Q2)
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfFFFbS(x,y,z,u,Q2)
 End Subroutine CTfFFFbS
-
 Subroutine CTfFFbFS(out,x,y,z,u,Q2)
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfFFbFS(x,y,z,u,Q2)
 End Subroutine CTfFFbFS
-
 Subroutine CTfFbFbFbS(out,x,y,z,u,Q2)
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfFbFbFbS(x,y,z,u,Q2)
 End Subroutine CTfFbFbFbS
-
 Subroutine CTfSV(out,x,Q2)
 Implicit None
 real(dp), intent(in):: x,q2
 real(dp) :: out
 out = TfSV(x,Q2)
 End Subroutine CTfSV
-
 Subroutine CTfFV(out,x,Q2)
 Implicit None
 real(dp), intent(in):: x,q2
 real(dp) :: out
 out = TfFV(x,Q2)
 End Subroutine CTfFV
+Subroutine CWfSSSS (out,p2,x,y,z,u,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,q2
+real(dp) :: out
+out = WfSSSS(p2,x,y,z,u,Q2)
+end Subroutine CWfSSSS
+Subroutine CXfSSS(out,p2,x,y,z,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,q2
+real(dp) :: out
+out = XfSSS(p2,x,y,z,Q2)
+end Subroutine CXfSSS
+Subroutine CYfSSSS(out,p2,x,y,z,u,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,q2
+real(dp) :: out
+out = YfSSSS(p2,x,y,z,u,Q2)
+end Subroutine CYfSSSS
+Subroutine CZfSSSS(out,p2,x,y,z,u,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,q2
+real(dp) :: out
+out = ZfSSSS(p2,x,y,z,u,Q2)
+end Subroutine CZfSSSS
+Subroutine CSfSSS(out,p2,x,y,z,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,q2
+real(dp) :: out
+out = SfSSS(p2,x,y,z,Q2)
+end Subroutine CSfSSS
+Subroutine CUfSSSS(out,p2,x,y,z,u,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,q2
+real(dp) :: out
+out = UfSSSS(p2,x,y,z,u,Q2)
+end Subroutine CUfSSSS
+Subroutine CVfSSSSS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfSSSSS(p2,x,y,z,u,v,Q2)
+end Subroutine CVfSSSSS
+Subroutine CMfSSSSS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfSSSSS(p2,x,y,z,u,v,Q2)
+end Subroutine CMfSSSSS
+Subroutine CWfSSSV(out,p2,x,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,q2
+real(dp) :: out
+out = WfSSSV(p2,x,Q2)
+end Subroutine CWfSSSV
+Subroutine CMfSSSSV(out,p2,x,y,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,q2
+real(dp) :: out
+out = MfSSSSV(p2,x,y,Q2)
+end Subroutine CMfSSSSV
+Subroutine CWfSSFF (out,p2,x,y,z,u,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,q2
+real(dp) :: out
+out = WfSSFF(p2,x,y,z,u,Q2)
+end Subroutine CWfSSFF
+Subroutine CWfSSFbFb (out,p2,x,y,z,u,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,q2
+real(dp) :: out
+out = WfSSFbFb(p2,x,y,z,u,Q2)
+end Subroutine CWfSSFbFb
+Subroutine CMfFbFbFbFbS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfFbFbFbFbS(p2,x,y,z,u,v,Q2)
+end Subroutine CMfFbFbFbFbS
+Subroutine CMfFFbFbFS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfFFbFbFS(p2,x,y,z,u,v,Q2)
+end Subroutine CMfFFbFbFS
+Subroutine CMfFFbFFbS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfFFbFFbS(p2,x,y,z,u,v,Q2)
+end Subroutine CMfFFbFFbS
+Subroutine CMfFFFbFbS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfFFFbFbS(p2,x,y,z,u,v,Q2)
+end Subroutine CMfFFFbFbS
+Subroutine CMfFFFFS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfFFFFS(p2,x,y,z,u,v,Q2)
+end Subroutine CMfFFFFS
+Subroutine CMfSFbSFbFb(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfSFbSFbFb(p2,x,y,z,u,v,Q2)
+end Subroutine CMfSFbSFbFb
+Subroutine CMfSFSFbF(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfSFSFbF(p2,x,y,z,u,v,Q2)
+end Subroutine CMfSFSFbF
+Subroutine CMfSFSFFb(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = MfSFSFFb(p2,x,y,z,u,v,Q2)
+end Subroutine CMfSFSFFb
+Subroutine CVfSSSFbFb(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfSSSFbFb(p2,x,y,z,u,v,Q2)
+end Subroutine CVfSSSFbFb
+Subroutine CVfSSSFF(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfSSSFF(p2,x,y,z,u,v,Q2)
+end Subroutine CVfSSSFF
+Subroutine CVfFbFbFbFbS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfFbFbFbFbS(p2,x,y,z,u,v,Q2)
+end Subroutine CVfFbFbFbFbS
+Subroutine CVfFbFFbFS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfFbFFbFS(p2,x,y,z,u,v,Q2)
+end Subroutine CVfFbFFbFS
+Subroutine CVfFbFFFbS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfFbFFFbS(p2,x,y,z,u,v,Q2)
+end Subroutine CVfFbFFFbS
+Subroutine CVfFFbFbFS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfFFbFbFS(p2,x,y,z,u,v,Q2)
+end Subroutine CVfFFbFbFS
+Subroutine CVfFFFbFbS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfFFFbFbS(p2,x,y,z,u,v,Q2)
+end Subroutine CVfFFFbFbS
+Subroutine CVfFFFFS(out,p2,x,y,z,u,v,Q2)
+Implicit None
+real(dp), intent(in):: p2,x,y,z,u,v,q2
+real(dp) :: out
+out = VfFFFFS(p2,x,y,z,u,v,Q2)
+end Subroutine CVfFFFFS
+Subroutine CGfFFV(out,p2,x,y,Q2)
+Implicit None
+real(dp), intent(in) :: p2,x,y,q2
+real(dp) :: out
+out = GfFFV(p2,x,y,Q2)
+end Subroutine CGfFFV
+Subroutine CGfFbFbV(out,p2,x,y,Q2)
+Implicit None
+real(dp), intent(in) :: p2,x,y,q2
+real(dp) :: out
+out = GfFbFbV(p2,x,y,Q2)
+end Subroutine CGfFbFbV
+Subroutine CTfFVMSbar(out,x,Q2)
+Implicit None
+real(dp), intent(in):: x,q2
+real(dp) :: out
+out = TfFV(x,Q2)
+if (.not. smallc(x/q2)) then
+   out = out + real(4._dp*x*(2._dp*log(x/q2)-1._dp),dp)
+end if
+End Subroutine CTfFVMSbar
+Subroutine CGfFFVMSbar(out,p2,x_in,y_in,Q2)
+Implicit None
+real(dp), intent(in) :: p2,x_in,y_in,q2
+real(dp) :: out,x,y,z,u,v
+out = GfFFV(p2,x_in,y_in,Q2)
+call atvals(x,y,z,u,v,x_in,y_in)
+if (.not. (smalldp(x,y) .and. smallc(x/q2,y/q2))) then
+   out = out + real(4._dp*(x+y+J0(x,q2)+J0(y,q2)-(x+y)*BB(x,y,q2)),dp)
+end if
+end Subroutine CGfFFVMSbar
+Subroutine CGfFbFbVMSbar(out,p2,x_in,y_in,Q2)
+Implicit None
+real(dp), intent(in) :: p2,x_in,y_in,q2
+real(dp) :: out,x,y,z,u,v
+out = GfFbFbV(p2,x_in,y_in,Q2)
+call atvals(x,y,z,u,v,x_in,y_in)
+if (.not. (smalldp(x,y) .and. smallc(x/q2,y/q2))) then
+   out = out - real(4._dp*(-1.0_dp+2._dp*BB(x,y,q2)),dp)
+end if
+end Subroutine CGfFbFbVMSbar
+
 
 !!!!!!!!!!! TADPOLE FUNCTIONS
 
@@ -99,8 +307,23 @@ real(dp) :: res
 if (smallc(z/q2)) then
    res = 0._dp
 else
-  res = real(-J0(z,Q2)*BB(x,y,q2),dp)
+  if (NewGBC) Then
+   if(allsmall(q2,x,y)) Then
+      res = 0._dp
+   else
+      res = real(-J0(z,Q2)*BB(x,y,q2),dp)
+   end if
+  Else
+       res = real(-J0(z,Q2)*BB(x,y,q2),dp)
+  End if
+
+   
 end if
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
 
 TfSS=res
 end function tfss
@@ -113,6 +336,12 @@ real(dp) :: res
 
 res=-real(II(x,y,z,q2),dp)
 
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
+
+
 TfSSS=res
 end function tfsss
 
@@ -121,11 +350,34 @@ Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: res
 
-If(smalldp(x,y)) then
+If (NewGBC) Then
+ if(allsmall(q2,x,y)) then
+   if(allsmall(q2,z,u)) then
+      ! GGGG -> 0
+      res=0._dp
+   else
+      ! R_SS(0,0,z,u,q2)
+      res=real(RSS(z,u,q2),dp)
+   end if
+ else
+   ! Just U_0
+      If(smalldp(x,y)) then
+         res=real(-1._dp*IIp(x,z,u,q2),dp)
+      else
+         res=Real((II(x,z,u,q2) - II(y,z,u,q2))/(y-x),dp)
+      end if
+ end if
+Else 
+ If(smalldp(x,y)) then
       res=real(-1._dp*IIp(x,z,u,q2),dp)
-else
+ else
    res=Real((II(x,z,u,q2) - II(y,z,u,q2))/(y-x),dp)
-end if
+ end if
+End if
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 TfSSSS=res
 end function tfssss
@@ -137,7 +389,19 @@ Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: res
 
-res=real(-(z+u-y)*UU(x,y,z,u,q2)-II(x,z,u,q2)+BB(x,y,q2)*(J0(z,q2)+J0(u,q2)),dp)
+If (NewGBC) Then
+ if(allsmall(q2,x,y)) then
+   res=real(-II(z,u,0._dp,q2)-(z+u)*RSS(z,u,q2),dp)
+ else
+   res=real(-(z+u-y)*UU(x,y,z,u,q2)-II(x,z,u,q2)+BB(x,y,q2)*(J0(z,q2)+J0(u,q2)),dp)
+ end if
+Else
+ res=real(-(z+u-y)*UU(x,y,z,u,q2)-II(x,z,u,q2)+BB(x,y,q2)*(J0(z,q2)+J0(u,q2)),dp)
+End If
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 TfSSFF=res
 end function tfssff
@@ -147,7 +411,20 @@ Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: res
 
-RES=real(UU(x,y,z,u,q2),dp)
+If (NewGBC) Then
+ if(allsmall(q2,x,y)) then
+   res=real(RSS(z,u,q2),dp)
+ else
+   RES=real(UU(x,y,z,u,q2),dp) !!!!!!! NB THIS IS opposite of definition in paper !! April 17
+ end if
+Else
+ RES=real(UU(x,y,z,u,q2),dp)
+End if
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
 
 TfSSFbFb=res
 end function tfssfbfb
@@ -159,6 +436,12 @@ real(dp) :: res
 
 RES=real(II(x,z,u,q2)-(x+y)/2._dp*UU(x,y,z,u,q2),dp)
 
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
+
+
 TfFFFbS=res
 end function TfFFFbS
 
@@ -169,6 +452,12 @@ real(dp) :: res
 
 RES=Fffs100(x,y,z,u,q2)
 
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
+
+
 TfFFbFS=res
 end function TfFFbFS
 
@@ -177,7 +466,12 @@ Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: res
 
-RES=real(UU(x,y,z,u,q2),dp)
+RES=real(UU(x,y,z,u,q2),dp)!!!! opposite sign definition to paper!
+
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 TfFbFbFbS=res
 end function tffbfbfbs
@@ -193,6 +487,11 @@ else
    res=real(3._dp*x*(-5._dp+4._dp*log(x/q2)-(log(x/q2))**2)-J0(x,q2)+2._dp*x,dp)
 end if
 
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
 TfSV=res
 end function tfsv
 
@@ -204,227 +503,23 @@ real(dp) :: res
 
 if(smallc(x/q2)) then
 res=0._dp
+tffv=res
+return
 else
    res=real(4._dp*x*(6._dp-7._dp*log(x/q2)+3._dp*(log(x/q2))**2),dp)
 end if
 
+if(rMS.ne.0._dp) then
+   res=res+real(4._dp*x*(2._dp*log(x/q2)-1._dp),dp)
+end if
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+   
+
 TfFV=res
 end function tffv
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!! MASS FUNCTIONS (subroutine wrappers to interface with C/C++)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-Subroutine CWfSSSS (out,p2,x,y,z,u,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,q2
-real(dp) :: out
-out = WfSSSS(p2,x,y,z,u,Q2)
-end Subroutine CWfSSSS
-
-Subroutine CXfSSS(out,p2,x,y,z,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,q2
-real(dp) :: out
-out = XfSSS(p2,x,y,z,Q2)
-end Subroutine CXfSSS
-
-Subroutine CYfSSSS(out,p2,x,y,z,u,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,q2
-real(dp) :: out
-out = YfSSSS(p2,x,y,z,u,Q2)
-end Subroutine CYfSSSS
-
-Subroutine CZfSSSS(out,p2,x,y,z,u,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,q2
-real(dp) :: out
-out = ZfSSSS(p2,x,y,z,u,Q2)
-end Subroutine CZfSSSS
-
-Subroutine CSfSSS(out,p2,x,y,z,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,q2
-real(dp) :: out
-out = SfSSS(p2,x,y,z,Q2)
-end Subroutine CSfSSS
-
-Subroutine CUfSSSS(out,p2,x,y,z,u,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,q2
-real(dp) :: out
-out = UfSSSS(p2,x,y,z,u,Q2)
-end Subroutine CUfSSSS
-
-Subroutine CVfSSSSS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfSSSSS(p2,x,y,z,u,v,Q2)
-end Subroutine CVfSSSSS
-
-Subroutine CMfSSSSS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfSSSSS(p2,x,y,z,u,v,Q2)
-end Subroutine CMfSSSSS
-
-Subroutine CWfSSSV(out,p2,x,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,q2
-real(dp) :: out
-out = WfSSSV(p2,x,Q2)
-end Subroutine CWfSSSV
-
-Subroutine CMfSSSSV(out,p2,x,y,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,q2
-real(dp) :: out
-out = MfSSSSV(p2,x,y,Q2)
-end Subroutine CMfSSSSV
-
-Subroutine CWfSSFF (out,p2,x,y,z,u,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,q2
-real(dp) :: out
-out = WfSSFF(p2,x,y,z,u,Q2)
-end Subroutine CWfSSFF
-
-Subroutine CWfSSFbFb (out,p2,x,y,z,u,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,q2
-real(dp) :: out
-out = WfSSFbFb(p2,x,y,z,u,Q2)
-end Subroutine CWfSSFbFb
-
-Subroutine CMfFbFbFbFbS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfFbFbFbFbS(p2,x,y,z,u,v,Q2)
-end Subroutine CMfFbFbFbFbS
-
-Subroutine CMfFFbFbFS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfFFbFbFS(p2,x,y,z,u,v,Q2)
-end Subroutine CMfFFbFbFS
-
-Subroutine CMfFFbFFbS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfFFbFFbS(p2,x,y,z,u,v,Q2)
-end Subroutine CMfFFbFFbS
-
-Subroutine CMfFFFbFbS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfFFFbFbS(p2,x,y,z,u,v,Q2)
-end Subroutine CMfFFFbFbS
-
-Subroutine CMfFFFFS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfFFFFS(p2,x,y,z,u,v,Q2)
-end Subroutine CMfFFFFS
-
-Subroutine CMfSFbSFbFb(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfSFbSFbFb(p2,x,y,z,u,v,Q2)
-end Subroutine CMfSFbSFbFb
-
-Subroutine CMfSFSFbF(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfSFSFbF(p2,x,y,z,u,v,Q2)
-end Subroutine CMfSFSFbF
-
-Subroutine CMfSFSFFb(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = MfSFSFFb(p2,x,y,z,u,v,Q2)
-end Subroutine CMfSFSFFb
-
-Subroutine CVfSSSFbFb(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfSSSFbFb(p2,x,y,z,u,v,Q2)
-end Subroutine CVfSSSFbFb
-
-Subroutine CVfSSSFF(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfSSSFF(p2,x,y,z,u,v,Q2)
-end Subroutine CVfSSSFF
-
-Subroutine CVfFbFbFbFbS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfFbFbFbFbS(p2,x,y,z,u,v,Q2)
-end Subroutine CVfFbFbFbFbS
-
-Subroutine CVfFbFFbFS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfFbFFbFS(p2,x,y,z,u,v,Q2)
-end Subroutine CVfFbFFbFS
-
-Subroutine CVfFbFFFbS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfFbFFFbS(p2,x,y,z,u,v,Q2)
-end Subroutine CVfFbFFFbS
-
-Subroutine CVfFFbFbFS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfFFbFbFS(p2,x,y,z,u,v,Q2)
-end Subroutine CVfFFbFbFS
-
-Subroutine CVfFFFbFbS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfFFFbFbS(p2,x,y,z,u,v,Q2)
-end Subroutine CVfFFFbFbS
-
-Subroutine CVfFFFFS(out,p2,x,y,z,u,v,Q2)
-Implicit None
-real(dp), intent(in):: p2,x,y,z,u,v,q2
-real(dp) :: out
-out = VfFFFFS(p2,x,y,z,u,v,Q2)
-end Subroutine CVfFFFFS
-
-Subroutine CGfFFV(out,p2,x,y,Q2)
-Implicit None
-real(dp), intent(in) :: p2,x,y,q2
-real(dp) :: out
-out = GfFFV(p2,x,y,Q2)
-end Subroutine CGfFFV
-
-Subroutine CGfFbFbV(out,p2,x,y,Q2)
-Implicit None
-real(dp), intent(in) :: p2,x,y,q2
-real(dp) :: out
-out = GfFbFbV(p2,x,y,Q2)
-end Subroutine CGfFbFbV
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MASS FUNCTIONS
@@ -440,14 +535,27 @@ y=y_in
 z=z_in
 u=u_in
 
-
-If(smalldp(x,y)) then
+If (NewGBC) Then 
+ if(allsmall(q2,x,y)) then
+   res=real(RSS(z,u,q2),dp)
+ else
+   If(smalldp(x,y)) then
+      res=real(-1._dp*IIp(x,z,u,q2),dp)
+   else
+      res=Real((II(x,z,u,q2) - II(y,z,u,q2))/(y-x),dp)
+   end if
+ end if
+Else
+ If(smalldp(x,y)) then
    res=real(-1._dp*IIp(x,z,u,q2),dp)
-else
+ else
    res=Real((II(x,z,u,q2) - II(y,z,u,q2))/(y-x),dp)
-end if
+ end if
+End if
 
-
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 WfSSSS=res
 
 end function WfSSSS
@@ -462,8 +570,20 @@ real(dp) :: res
 if (smallc(z/q2)) then
    res = 0._dp
 else
+ If (NewGBC) Then
+   if(allsmall(q2,x,y)) then
+      res=0._dp
+   else      
+      res = real(-J0(z,Q2)*BB(x,y,q2),dp)
+   end if
+ Else
   res = real(-J0(z,Q2)*BB(x,y,q2),dp)
+ End if
 end if
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 XfSSS = res
 end function XfSSS
@@ -478,8 +598,20 @@ real(dp) :: res
 if(smallc(u/q2)) then
    res = 0._dp
 else
-   res = real(J0(u,q2)*CC(x,y,z,q2),dp)
+ If (NewGBC) Then
+   if(allsmall(q2,y,z)) then
+      res = 0._dp
+   else
+      res = real(J0(u,q2)*CC(x,y,z,q2),dp)
+   end if
+ Else
+    res = real(J0(u,q2)*CC(x,y,z,q2),dp)
+ End if
 end if
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 YfSSSS=res
 
@@ -493,7 +625,11 @@ real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: res
 
 
-res = real(BB(x,y,q2)*BB(z,u,q2),dp)
+If (NewGBC) Then
+ res=real(BBs(p2,x,y,q2)*BBs(p2,z,u,q2),dp)
+Else
+ res = real(BB(x,y,q2)*BB(z,u,q2),dp)
+End if
 ZfSSSS=res
 end function ZfSSSS
 
@@ -505,6 +641,10 @@ real(dp) :: res
 
 res = -real(II(x,y,z,q2),dp)
 
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
 SfSSS=res
 end function SfSSS
 
@@ -513,10 +653,25 @@ real(dp), intent(in):: p2,x,y,z,u,q2
 
 real(dp) :: res
 
-res = UU(x,y,z,u,q2)
+If (NewGBC) Then 
+ res = real(UUs(p2,x,y,z,u,q2),dp)
+Else
+ res = UU(x,y,z,u,q2)
+End if
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 UfSSSS=res
 end function UfSSSS
+
+
+
+
+
+
+
 
 real(dp) Function VfSSSSS(p2,x_in,y_in,z_in,u_in,v_in,Q2)
 real(dp), intent(in):: p2,x_in,y_in,z_in,u_in,v_in,q2
@@ -535,6 +690,67 @@ x=x_in
 y=y_in
 z=z_in
 
+If (NewGBC) Then
+if(allsmall(q2,y,z)) then
+   !V(x,0,0,u,v)
+   if(allsmall(q2,u,v)) then
+      !V(x,0,0,0,0) -> no coupling to this
+      res=0._dp
+   else
+      if(smallc(x/q2)) then
+         !V(0,0,0,u,v)
+!         res=real(-BB(u,v,q2)*(1._dp-2._dp*clog(-p2/q2))/p2 +RSS(u,v,q2)/p2,dp)
+         res=0._dp
+         !! Need case for u=0
+         if(smallc(u/q2)) then
+            !V(0,0,0,0,v)
+            res=res+real( clog(-p2/q2)/(-2._dp*v) +(5._dp+2._dp*clog(v/q2))/(4._dp*v),dp)
+         else
+            if(smalldp(u,v)) then
+               res=res+real(clog(-p2/q2)/(-6._dp*u) +(11._dp+3._dp*clog(u/q2))/(18._dp*u),dp)
+            else             
+               res=res+real( (-clog(-p2/q2)/(2._dp*(v-u)**3))*(v**2-u**2-2*u*v*clog(v/u)),dp)
+               ! res=res+real((0.25_dp/((v-u)**3))*(5._dp*(v-u)**2 + 2._dp*u*clog(u/q2)*(2._dp*v-u+2._dp*v*clog(v/q2)) +2._dp*v*clog(v/q2)*(v-2._dp*u-2._dp*u*clog(v/q2))-8._dp*u*v*CLi2_mod(cmplx(1._dp-u/v,0._dp,dp))),dp)
+               !res=res+real((0.25_dp/((v-u)**3))*(5._dp*(v**2-u**2) + 2._dp*u*clog(u/q2)*(2._dp*v-u+2._dp*v*clog(u/q2)) +2._dp*v*clog(v/q2)*(v-2._dp*u-2._dp*u*clog(v/q2))-4._dp*u*v*(CLi2_mod(cmplx(1._dp-u/v,0._dp,dp)) - CLi2_mod(cmplx(1._dp-v/u,0._dp,dp)) )),dp)
+
+               res=res+real((0.25_dp/((v-u)**3))*(5._dp*(v**2-u**2) + 2._dp*u*clog(u/q2)*(2._dp*v-u+2._dp*v*clog(v/q2)) +2._dp*v*clog(v/q2)*(v-2._dp*u-2._dp*u*clog(v/q2))-8._dp*u*v*CLi2_mod(cmplx(1._dp-u/v,0._dp,dp))),dp)
+               
+
+            end if
+         endif
+               
+      else
+         !! no momentum dependence necessary
+         !res=real(UU(x,0._dp,u,v,q2)/x**2+(RSS(u,v,q2)+BB(u,v,q2)*(clog(x/q2)-1._dp))/x,dp)
+         !res=real(UU(x,0._dp,u,v,q2)/x+(RSS(u,v,q2)+BB(u,v,q2)*(clog(x/q2)-1._dp))/x,dp)
+         res=real(UU(x,0._dp,u,v,q2)/x+(-RSS(u,v,q2)+BB(u,v,q2)*(clog(x/q2)-1._dp))/x,dp)
+ 
+      end if
+   end if
+
+   
+ if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+   
+else
+   if(smalldp(x,y)) then
+      res=real(-VV0(z,x,u,v,q2),dp)
+   else
+      if(smalldp(y,z)) then
+         res=real(-VV0(x,y,u,v,q2),dp)
+      else
+         res=real((UU(x,y,u,v,q2)-UU(x,z,u,v,q2))/(y-z),dp)
+      end if
+   end if
+
+   if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
+   
+end if
+Else 
+
 if(smalldp(x,y)) then
        res=real(-VV0(z,x,u,v,q2),dp)
 else
@@ -545,8 +761,12 @@ else
    end if
 end if
 
+End if
 
-
+! if(res .ne. res) then
+!       write(*,*) "Problem in VfSSSSS"
+!    end if
+   
 VfSSSSS=res
 end function VfSSSSS
 
@@ -555,12 +775,163 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
+res=0._dp
 
-
-res=-real(MM(x,y,z,u,v,q2),dp)
+If (NewGBC) Then
+if(allsmall(q2,z,u,v)) then
+   res=0._dp
+else
+   if(allsmall(q2,x,y,v)) then
+      res=0._dp
+   else
+      if(allsmall(q2,x,z)) then
+         if(allsmall(q2,y,u)) then
+            ! M(0,0,0,0,v)
+            res=-real((clog(-p2/v)**2-2._dp*clog(-p2/v)+Pi**2/3._dp)/v,dp)
+         else
+            ! -M(0,y,0,u,v)
+            res=-real(MM00(p2,y,u,v,q2),dp)
+         end if
+      else
+         if(allsmall(q2,y,u)) then
+            ! -M(x,0,z,0,v)
+            res=-real(MM00(p2,x,z,v,q2),dp)
+         else
+            !! FINITE!
+            res=-real(MM(x,y,z,u,v,q2),dp)
+         end if
+      end if
+   end if
+end if
+Else
+ res=-real(MM(x,y,z,u,v,q2),dp)
+End if
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 MfSSSSS=res
 end function MfSSSSS
+
+
+complex(dp) function AM(yin,uin,vin,q2)
+  
+  real(dp), intent(in) :: yin,uin,vin,q2
+  real(dp) :: y,u,v
+  complex(dp) :: res
+  real(dp) :: invals(3)
+  
+  ! if( abs(yin) .le. abs(uin)) then
+  !    if( abs(uin) .le. abs(vin)) then
+  !       call atvals(y,u,v,x,y,yin,uin,vin)
+
+  !    else
+  !       if(
+  !    end if
+  ! else
+  ! end if
+  invals = (/ yin, uin,vin /)
+  call sortabsvals(invals)
+  y=invals(1)
+  u=invals(2)
+  v=invals(3)
+
+
+  
+  if(smallc(y/q2)) then
+     !!! Are assuming only one value can be zero
+     if(smalldp(u,v)) then
+        res=-1._dp/u
+        
+     else
+        res=clog(v/u)/(u-v)
+     end if
+  else
+     if(smalldp(y,u)) then
+        if(smalldp(y,v)) then
+           !AM(y,y,y)
+           res=-0.5_dp/y
+        else
+           !AM(y,y,v)
+           res=v*clog(y/v)/((y-v)**2)-1._dp/(y-v)
+        end if
+     else
+        if(smalldp(u,v)) then
+           !AM(y,u,u)
+           res=y*clog(u/y)/((u-y)**2)-1._dp/(u-y)
+        else
+           !AM(y,u,v)
+           res=u*clog(u/q2)/((y-u)*(u-v))-y*clog(y/q2)/((y-u)*(y-v))-v*clog(v/q2)/((y-v)*(u-v))
+        end if
+     end if
+  end if
+  
+  AM=res
+end function AM
+
+
+complex(dp) function MM00(p2,yin,uin,v,q2)
+real(dp), intent(in):: p2,yin,uin,v,q2
+
+complex(dp) :: res
+complex(dp) :: rAM, BM
+real(dp) :: y,u
+
+!!! 
+res=(0._dp,0._dp)
+
+if(abs(yin) .le. abs(uin)) then
+   y=yin
+   u=uin
+else
+   y=uin
+   u=yin
+endif
+   
+rAM=AM(yin,uin,v,q2)
+
+if(smallc(v/q2)) then
+   if(smalldp(y,u)) then
+      BM=(2._dp+clog(y/q2))/y
+   else
+      BM=clog(u/y)*(4._dp+clog(u/q2)+clog(y/q2))/(2._dp*(u-y))
+   end if
+else
+   if(smalldp(u,v)) then
+      if(smalldp(y,u)) then
+!!! BM(y,y,y)
+        BM=0.5_dp/y-(2._dp+clog(y/q2))*rAM
+      else
+         !! BM(y,u,u)
+         BM=-(2._dp+clog(u/q2))*rAM+2._dp/(u-y)-(u+y)*CLi2_mod(cmplx(1._dp-y/u,0.,dp))/((u-y)**2)
+      end if
+   else
+      if(smalldp(y,v)) then
+         ! BM(y,u,y) = BM(u,y,y)
+         BM=-(2._dp+clog(y/q2))*rAM+2._dp/(y-u)-(u+y)*CLi2_mod(cmplx(1._dp-u/y,0.,dp))/((u-y)**2)
+      else
+         if(smalldp(y,u)) then
+            ! BM(y,y,v)
+            BM=-(2._dp+clog(v/q2))*rAM+((v+y)*clog(y/v)+2._dp*v*CLi2_mod(cmplx(1._dp-y/v,0.,dp)))/((y-v)**2)
+         else
+            ! BM(y,u,v)
+            BM=-(2._dp+clog(v/q2))*rAM+(u+v)*CLi2_mod(cmplx(1._dp-u/v,0.,dp))/((y-u)*(u-v))-(v+y)*CLi2_mod(cmplx(1._dp-y/v,0.,dp))/((y-u)*(y-v))
+         end if
+      
+      end if
+   end if
+end if
+
+res=BM+rAM*clog(-p2/q2)
+
+if(res.ne.res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
+MM00=res
+
+end function MM00
+
 
 !!!!!!!!!!!!!!!!! SCALARS AND VECTORS
 
@@ -576,6 +947,11 @@ if(smallc(x/q2)) then
 else
    res=real(3._dp*x*(-5._dp+4._dp*log(x/q2)-(log(x/q2))**2)-J0(x,q2)+2._dp*x,dp)
 end if
+
+
+if(res .ne. res) then
+      continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 WfSSSV=res
 
@@ -595,8 +971,14 @@ else
 end if
 
 if(smalldp(x,y)) then
-   call saveme(q2,y) !!!! y > x so just maybe ..
-   res = real( -1 + 5*log(y/q2) -3 *log(y/q2)**2,dp)
+   ! call saveme(q2,y) !!!! y > x so just maybe ..
+   if(smallc(x/q2)) then
+      res=0._dp
+      continue ! diagnostic output removed for FlexibleSUSY
+   else
+      res = real( -1 + 5*log(y/q2) -3 *log(y/q2)**2,dp)
+   end if
+
 else
    if(smallc(x/q2)) then
      !!! NB the case that they are both small is dealt with above ...
@@ -618,11 +1000,26 @@ Implicit None
 real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: res
 
+If (NewGBC) Then
+if(allsmall(q2,x,y)) then
+   
+      res = real( -II(z,u,0._dp,q2) -(z+u)*RSS(z,u,q2),dp)
+   else
+      
+      res = real( &
+           & -(z+u-y)*UU(x,y,z,u,q2)-II(x,z,u,q2)+BB(x,y,q2)*(J0(z,q2)+J0(u,q2)) &
+           & ,dp)
+  end if
+Else
 res = real( &
 & -(z+u-y)*UU(x,y,z,u,q2)-II(x,z,u,q2)+BB(x,y,q2)*(J0(z,q2)+J0(u,q2)) &
 & ,dp)
+End if
 
-
+if(res.ne.res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+end if
+  
 WfSSFF=res
 
 end function WfSSFF
@@ -635,6 +1032,9 @@ real(dp) :: res
 
 res=real(-2._dp*WfSSSS(p2,x,y,z,u,Q2),dp)
 
+if(res.ne.res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 WfSSFbFb=res
 
@@ -713,8 +1113,20 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
-res=2._dp*real(MM(x,y,z,u,v,Q2),dp)
+If (NewGBC) Then
+if(allsmall(q2,x,z)) then
+   res=2._dp*real(MM00(p2,y,u,v,q2),dp)
+   else
+      res=2._dp*real(MM(x,y,z,u,v,Q2),dp)
+   end if
+Else
+ res=2._dp*real(MM(x,y,z,u,v,Q2),dp)
+End if
 
+if(res.ne.res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+end if
+   
 MfSFbSFbFb=res
 end function MfSFbSFbFb
 
@@ -724,7 +1136,19 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
+If (NewGBC) Then
+if(allsmall(q2,x,z)) then
+   res=real((v+y)*MM00(p2,y,u,v,q2)+UU(y,u,z,v,q2)-UUs(p2,x,z,u,v,q2)-(2._dp-clog(-p2/q2))*BB(y,u,q2),dp)
+  else 
+     res=real((v-x+y)*MM(x,y,z,u,v,q2)+UU(y,u,z,v,q2)-UU(x,z,u,v,q2)-BB(x,z,q2)*BB(y,u,q2),dp)
+end if
+Else
 res=real((v-x+y)*MM(x,y,z,u,v,q2)+UU(y,u,z,v,q2)-UU(x,z,u,v,q2)-BB(x,z,q2)*BB(y,u,q2),dp)
+End if
+
+if(res.ne.res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 MfSFSFbF=res
 end function MfSFSFbF
@@ -734,7 +1158,19 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
+If (NewGBC) Then
+if(allsmall(q2,x,z)) then
+   res=real((y+u)*MM00(p2,y,u,v,q2)-UUs(p2,x,z,u,v,q2)-UUs(p2,z,x,y,v,q2),dp)
+   else
 res=real((y+u)*MM(x,y,z,u,v,q2)-UU(x,z,u,v,q2)-UU(z,x,y,v,q2),dp)
+end if
+Else
+res=real((y+u)*MM(x,y,z,u,v,q2)-UU(x,z,u,v,q2)-UU(z,x,y,v,q2),dp)
+End if
+
+if(res.ne.res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+   end if
 
 MfSFSFFb=res
 end function MfSFSFFb
@@ -754,17 +1190,33 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
+If (NewGBC) Then
+if(allsmall(q2,y,z)) then
+   res = real(UUs(p2,x,0._dp,u,v,q2) -(u+v)*VfSSSSS(p2,x,0._dp,0._dp,u,v,q2),dp)
+else
+   res = UU(x,y,u,v,q2) +(z-u-v)*VfSSSSS(p2,x,y,z,u,v,q2)-(J0(u,Q2) +J0(v,Q2))*CC(x,y,z,q2)
+end if
+Else
 res = UU(x,y,u,v,q2) +(z-u-v)*VfSSSSS(p2,x,y,z,u,v,q2)-(J0(u,Q2) +J0(v,Q2))*CC(x,y,z,q2)
+End if
 
 VfSSSFF=res
 end function VfSSSFF
+
+!!!! For these functions don't want to interfere with the small cases -> but if the fermion masses are "small", so are the prefactors -> set to zero
 
 real(dp) Function VfFbFbFbFbS(p2,x,y,z,u,v,Q2)
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
-res = real(-2._dp*VfSSSSS(p2,x,y,z,u,v,q2),dp)
+!if(smallc(x/q2,y/q2,z/q2,u/q2)) then
+if(smallc(y/q2,z/q2)) then !! more conservative, just don't activate GB routines
+   res = 0._dp
+else
+   res = real(-2._dp*VfSSSSS(p2,x,y,z,u,v,q2),dp)
+end if
+
 
 VfFbFbFbFbS=res
 end function VfFbFbFbFbS
@@ -774,7 +1226,11 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
+if(smallc(x/q2,z/q2)) then
+   res = 0._dp
+else
 res = real(-UU(x,y,u,v,q2) +(v-z-u)*VfSSSSS(p2,x,y,z,u,v,q2)-(J0(v,Q2) -J0(u,Q2))*CC(x,y,z,q2),dp)
+end if 
 
 VfFbFFbFS=res
 end function VfFbFFbFS
@@ -784,7 +1240,18 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
-res = real(-2._dp*UU(x,y,u,v,q2) -2._dp*z*VfSSSSS(p2,x,y,z,u,v,q2),dp)
+!res = real(-2._dp*UU(x,y,u,v,q2) -2._dp*z*VfSSSSS(p2,x,y,z,u,v,q2),dp)
+!if(smallc(x/q2,u/q2)) then
+if(smallc(x/q2)) then !!! more conservative, just make sure we don't activate the GB routines
+   res = 0._dp
+else
+   if(smallc(z/q2)) then
+      res=real(-2._dp*UU(x,y,u,v,q2),dp)
+   else
+      res = real(-2._dp*UU(x,y,u,v,q2) -2._dp*z*VfSSSSS(p2,x,y,z,u,v,q2),dp)
+   end if
+end if
+
 
 VfFbFFFbS=res
 end function VfFbFFFbS
@@ -796,10 +1263,16 @@ real(dp) :: res,x,y,z,v,u
 
 call atvals(x,y,z,u,v,x_in,y_in,z_in,u_in,v_in)
 
-call saveme(q2,x,y,z,u)
+!call saveme(q2,x,y,z,u)
 
 
-res=Fffs200(x,y,z,u,v,q2)
+
+if(smallc(y/q2,z/q2)) then
+   res = 0._dp
+else
+   res=Fffs200(x,y,z,u,v,q2)
+end if
+
 
 VfFFbFbFS=res
 end function VfFFbFbFS
@@ -809,7 +1282,13 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
-res = real( -UU(x,y,u,v,q2) - UU(y,z,u,v,q2) -(x+z)*VfSSSSS(p2,x,y,z,u,v,q2),dp)
+!if(smallc(z/q2,u/q2)) then
+if(smallc(z/q2)) then 
+   res = 0._dp
+else
+   res = real( -UU(x,y,u,v,q2) - UU(y,z,u,v,q2) -(x+z)*VfSSSSS(p2,x,y,z,u,v,q2),dp)
+end if
+
 
 VfFFFbFbS=res
 end function VfFFFbFbS
@@ -819,7 +1298,14 @@ real(dp), intent(in):: p2,x,y,z,u,v,q2
 
 real(dp) :: res
 
-res = Fffs100(y,z,u,v,q2)+x*Fffs200(y,x,z,u,v,q2)
+if(smallc(x/q2)) then
+   res = Fffs100(y,z,u,v,q2)
+else
+!!!! NB Fffs200 is symmetric in y<->x !!!!!!!!!!
+!!!!! Nb that since x !=0 we will never activate the GB regulator
+res = Fffs100(y,z,u,v,q2)+x*Fffs200(y,x,z,u,v,q2)   
+end if
+
 
 
 VfFFFFS=res
@@ -838,16 +1324,20 @@ call atvals(x,y,z,u,v,x_in,y_in)
 if(smalldp(x,y)) then
    if(smallc(x/q2,y/q2)) then
       res = 0._dp 
+      gfffv=res
+      return 
    else
       res = real(x*(20 - 32*Log(x/Q2) + 24*Log(x/Q2)**2),dp)
    end if
 else
 
-res=Real( 2._dp*(  (x+y)*(3._dp*UU(x,y,x,0._dp,q2)     &
-     +3._dp*UU(x,y,y,0._dp,q2) - 5._dp*BB(x,y,q2))     &
-     -3._dp*II(x,x,0._dp,q2)-3._dp*II(y,y,0._dp,q2)    &
-     +5._dp*J0(x,q2)+5._dp*J0(y,q2)-8*(x+y)),dp)
+res=Real( 2._dp*(  (x+y)*(3._dp*UU(x,y,x,0._dp,q2)+3._dp*UU(x,y,y,0._dp,q2) - 5._dp*BB(x,y,q2))-3._dp*II(x,x,0._dp,q2)-3._dp*II(y,y,0._dp,q2)+5._dp*J0(x,q2)+5._dp*J0(y,q2)-8*(x+y)),dp)
 
+
+end if
+
+if(rMS.ne.0._dp) then
+res=res+real(4._dp*(x+y+J0(x,q2)+J0(y,q2)-(x+y)*BB(x,y,q2)),dp)
 end if
 
 
@@ -865,6 +1355,8 @@ call atvals(x,y,z,u,v,x_in,y_in)
 if(smalldp(x,y)) then
    if(smallc(x/q2,y/q2)) then
       res = 0._dp !!! since the function will be multiplied by zero anyway
+      gffbfbv=res
+      return
    else
       res = real(-4 - 4*Log(x/Q2) + 12*Log(x/Q2)**2,dp)
    end if
@@ -872,6 +1364,13 @@ else
    res=real(12._dp*UU(x,y,x,0._dp,q2)+12._dp*UU(x,y,y,0._dp,q2)-20._dp*BB(x,y,q2)-16._dp,dp) 
 
 end if
+
+
+if(rMS.ne.0._dp) then
+res=res-real(4._dp*(-1.0_dp+2._dp*BB(x,y,q2)),dp)
+end if
+
+
 GfFbFbV = res
 
 
@@ -925,6 +1424,76 @@ end function Fffs200
 
 
 
+real(dp) function RSS(xin,yin,Q2)
+implicit none
+real(dp), intent(in) :: xin,yin,Q2
+real(dp) :: res,x,y
+
+if(abs(xin) .le. abs(yin)) then
+   x=xin
+   y=yin
+else
+   x=yin
+   y=xin 
+end if
+
+
+if(smallc(x/q2)) then
+   if(smallc(y/q2)) then
+      !RSS(0,0) -> return zero but really shouldn't be here
+      res = 0._dp
+   else
+      !RSS(0,y)
+      res=0.5_dp-Pi**2/6._dp-0.5_dp*clog(y/q2)**2
+   end if
+else
+   
+   if(smalldp(x,y)) then
+      ! RSS(x,x)
+         !      res = real(-3._dp-2._dp*J0(x,q2)/x-((J0(x,q2))**2)/(2._dp*x**2),dp)
+         res = real(-1._dp -0.5_dp*(clog(x/q2)+1._dp)**2,dp)  
+      else
+         ! RSS(x,y)
+      !   res = real(((x+y)**2+2._dp*J0(x,q2)*J0(y,q2)-2._dp*x*J0(x,q2)-2._dp*y*J0(y,q2)+(x+y)*II(x,y,0._dp,q2))/((y-x)**2),dp)
+      res=real(0.5_dp +(0.5_dp/(x-y))*(2._dp*y*clog(x/q2)*clog(y/q2)-(x+y)*(clog(x/q2)**2+2._dp*CLi2_mod(cmplx(1._dp-y/x,0.,dp)))),dp)
+   end if
+
+end if
+
+if(res .ne. res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+   end if
+
+RSS=res
+end function RSS
+
+
+complex(dp) function BBs(p2,m1_in,m2_in,q2)
+implicit none
+real(dp), intent(in) :: p2,m1_in,m2_in,q2
+complex(dp) ::res
+real(dp) :: m1,m2
+
+m1=m1_in
+m2=m2_in
+
+if(allsmall(q2,m1,m2)) then
+   res=2._dp-clog(-p2/q2)
+else
+   If(smalldp(m1,m2)) then
+!   call saveme(q2,m1) !!! Should not need that now
+      res=-clog(m1/q2)
+   else
+      res=(J0(m1,q2) - J0(m2,q2))/(m2-m1) 
+   end if
+end if
+
+
+BBs = res
+
+end function BBs
+
+
 complex(dp) function BB(m1_in,m2_in,q2)
 implicit none
 real(dp), intent(in) :: m1_in,m2_in,q2
@@ -934,12 +1503,25 @@ real(dp) :: m1,m2
 m1=m1_in
 m2=m2_in
 
+If (newGBC) Then
+if(allsmall(q2,m1,m2)) then
+      res=0._dp  !!! Need this to catch the goldstone boson cases in 1L routines
+else
+   If(smalldp(m1,m2)) then
+            
+      res=-clog(m1/q2)
+   else
+      res=(J0(m1,q2) - J0(m2,q2))/(m2-m1) 
+   end if
+end if
+Else 
 If(smalldp(m1,m2)) then
    call saveme(q2,m1)
    res=-clog(m1/q2)
 else
    res=(J0(m1,q2) - J0(m2,q2))/(m2-m1) 
 end if
+End if
 
 BB = res
 
@@ -952,10 +1534,38 @@ real(dp), intent(in) :: x_in,y_in,z_in,q2
 complex(dp) :: res
 real(dp) :: x,y,z
 
-x=x_in
-y=y_in
-z=z_in
+real(dp) :: invals(3)
+invals = (/ x_in, y_in,z_in /)
+call sortabsvals(invals)
+  x=invals(1)
+  y=invals(2)
+  z=invals(3)
 
+
+! x=x_in
+! y=y_in
+! z=z_in
+
+If (NewGBC) Then
+If(smalldp(y,z)) then
+   If(smalldp(x,y)) then
+      !      call saveme(q2,x)
+      if(allsmall(q2,x)) then
+         res=0._dp  !!! Need this to catch the goldstone boson cases in 1L routines
+      else
+         res  =0.5_dp/x
+      end if
+   else
+      if(allsmall(q2,x)) then
+         res = 1.0_dp/y
+      else
+         res = (-x + y + x*clog(x/y))/(x - y)**2
+      end if
+   end if
+else
+   res=(BB(x,y,q2) - BB(x,z,q2))/(z-y)
+end if
+Else
 If(smalldp(y,z)) then
    If(smalldp(x,y)) then
       call saveme(q2,x)
@@ -966,12 +1576,29 @@ If(smalldp(y,z)) then
 else
    res=(BB(x,y,q2) - BB(x,z,q2))/(z-y)
 end if
+End if
 
+if(res.ne.res) then
+   continue ! diagnostic output removed for FlexibleSUSY
+   end if
 CC = res
 
 end function CC
 
+complex(dp) function CCtilde(x_in,y_in,z_in,q2)        !!!!! 1/(k+x)(k+y)(k+z) but zero if y=z=0.
+implicit none
+real(dp), intent(in) :: x_in,y_in,z_in,q2
+complex(dp) :: res
 
+if(allsmall(q2,y_in,z_in)) then
+   res=0._dp
+else
+   res=CC(x_in,y_in,z_in,q2)
+end if
+
+CCtilde=res
+
+end function CCtilde
 
 
 
@@ -986,8 +1613,15 @@ y=y_in
 
 
 If(smalldp(x,y)) then
-   call saveme(q2,y)
-   res = -1._dp/(2._dp*y)
+   !   call saveme(q2,y)
+   if(smallc(y/q2)) then
+      continue ! diagnostic output removed for FlexibleSUSY
+      res = 0._dp !!!!!! Something wrong in this case but set to zero
+   else
+
+      res = -1._dp/(2._dp*y)
+   end if
+
 else
 res = (x-y-x*clog(x/y))/((x-y)**2)
 end if
@@ -1049,7 +1683,13 @@ Complex(dp) :: res
 
 
 x=x_in
-call saveme(q2,x)
+!call saveme(q2,x)
+
+if(smallc(x/q2)) then
+   continue ! diagnostic output removed for FlexibleSUSY
+   IIp=0._dp
+   return
+end if
 
 
 if(abs(z_in) .lt. abs(y_in)) then
@@ -1071,9 +1711,7 @@ else
 if(smalldp(x,y) .and. smalldp(x,z)) then
 res = 0.5_dp*real(-(1._dp- cLog(x/Q2))**2 + phimod(x, x, x),dp)
 else
-res = real(0.5_dp*(-1._dp + clog(y/Q2)* clog(z/Q2)     &
-     - cLog(x/Q2) *(-2._dp + cLog(y/Q2) + cLog(z/Q2))) &
-     -0.5_dp*((x-y-z)/z)*phimod(x,y,z),dp)
+res = real(0.5_dp*(-1._dp + clog(y/Q2)* clog(z/Q2) - cLog(x/Q2) *(-2._dp + cLog(y/Q2) + cLog(z/Q2))) -0.5_dp*((x-y-z)/z)*phimod(x,y,z),dp)
 end if
 
 end if
@@ -1099,12 +1737,74 @@ res = -real(IIp(x,z,u,q2),dp)
 else
 res = real((II(x,z,u,q2) - II(y,z,u,q2))/(y-x),dp)
 if(res.ne.res) then
-   write(*,*) "Problem in UU: ",x,y,z,u,II(x,z,u,q2),II(y,z,u,q2)
+   continue ! diagnostic output removed for FlexibleSUSY
    end if
 end if
 
 UU=res
 end function UU
+
+complex(dp) function UUs(p2,x,y,zin,uin,Q2)
+implicit none
+real(dp), intent(in) :: p2,x,y,zin,uin,Q2
+complex(dp) :: res
+real(dp) :: z,u
+
+if(abs(zin) .gt. abs(uin)) then !!! order the arguments so that z <= u
+   z=uin
+   u=zin
+else
+   z=zin
+   u=uin
+end if
+
+
+if(allsmall(q2,x,y)) then
+   ! U(0,0,z,u) needs momentum
+   if(allsmall(q2,z,u)) then
+      res=1._dp+0.25_dp*((clog(-p2/q2)-3._dp)**2)
+
+      if(res.ne.res) then
+         continue ! diagnostic output removed for FlexibleSUSY
+      end if
+      
+   else
+      
+      
+      if(smalldp(z,u)) then
+         res=clog(z/q2)*clog(-p2/q2)-1.5_dp-3._dp*clog(z/q2)-0.25_dp*(clog(z/q2)**2)
+      else
+         
+         if(smallc(z/q2)) then
+            res=(clog(u/q2)-1._dp)*clog(-p2/q2)-Pi**2/6._dp+2.5_dp-clog(u/q2)*(2._dp+0.5_dp*clog(u/q2))
+         else
+            res=-BB(q2,z,u)*clog(-p2/q2)+2.5_dp+(0.5_dp/(u-z))*(-(z+u)*((clog(u/q2))**2) +4._dp*z*clog(z/q2)-4._dp*u*clog(u/q2)+2._dp*z*clog(z/q2)*clog(u/q2)-2._dp*(z+u)*Cli2_mod((1._dp,0._dp)-z/u))
+         end if
+      end if
+   end if
+   if(res.ne.res) then
+         continue ! diagnostic output removed for FlexibleSUSY
+      end if
+
+   
+else
+   if(smalldp(x,y)) then
+      res = -real(IIp(x,z,u,q2),dp)
+   else
+      res = real((II(x,z,u,q2) - II(y,z,u,q2))/(y-x),dp)
+      ! if(res.ne.res) then
+      !    write(*,*) "Problem in UU: ",x,y,z,u,II(x,z,u,q2),II(y,z,u,q2)
+      ! end if
+   end if
+end if
+if(res.ne.res) then
+         continue ! diagnostic output removed for FlexibleSUSY
+      end if
+!write(*,*) "uus: ",res
+UUs=res
+end function UUs
+
+
 
 
 
@@ -1125,39 +1825,37 @@ end if
 
 if(smalldp(x,y)) then
    
-   !!!!! 1/2d^2/dx^2 I(x,u,v)
-   if(smallc(u/q2)) then
-      if(smallc(v/q2)) then 
-         !! I(x'',0,0)/2
-         call saveme(q2,x) !!!! always singular if x=0
-         res = real((1._dp - cLog(x/Q2))/(2._dp*x),dp)
-      else
-         !! I(x'',0,v)
-         if(smalldp(x,v)) then
-            !!! I(x'',0,x)/2 
-            call saveme(q2,x)
-            res = real(-cLog(x/Q2)/(2.*x),dp)
-         else
-            call saveme(q2,x)
-            res = real(-(v*(-v + x)*cLog(v/Q2) + v**2*cLog(v/x) + (v - x)*(-x + (v + x)*cLog(x/Q2)))/(2.*(v - x)*x**2),dp)
-         end if
-      end if
+!!!!! 1/2d^2/dx^2 I(x,u,v)
+   if(smallc(x/q2)) then ! always singular if x=0
+      continue ! diagnostic output removed for FlexibleSUSY
+      res=0._dp
    else
-      !!! u,v are not small 
-      call saveme(q2,x) 
-      
-      res = real((-(deltanm(x,u,v)*(-2 + cLog(u/Q2) + cLog(v/Q2))) &
-           + (u + v - x)*((u - v)*cLog(v/u)                        &
-           + x*cLog(x**2/(u*v))))/(4.*x*deltanm(x,u,v)),dp)
-      res=res+real(u*phimod(x,u,v)/deltanm(x,u,v),dp)
-      
+      if(smallc(u/q2)) then
+         if(smallc(v/q2)) then 
+            !! I(x'',0,0)/2
+            !         call saveme(q2,x) !!!! always singular if x=0
+            res = real((1._dp - cLog(x/Q2))/(2._dp*x),dp)      
+         else
+            !! I(x'',0,v)
+            if(smalldp(x,v)) then
+!!! I(x'',0,x)/2 
+               res = real(-cLog(x/Q2)/(2.*x),dp)
+            else
+               res = real(-(v*(-v + x)*cLog(v/Q2) + v**2*cLog(v/x) + (v - x)*(-x + (v + x)*cLog(x/Q2)))/(2.*(v - x)*x**2),dp)
+            end if
+         end if
+      else
+!!! u,v are not small 
+          res = real((-(deltanm(x,u,v)*(-2 + cLog(u/Q2) + cLog(v/Q2))) + (u + v - x)*((u - v)*cLog(v/u) + x*cLog(x**2/(u*v))))/(4.*x*deltanm(x,u,v)),dp)
+         res=res+real(u*phimod(x,u,v)/deltanm(x,u,v),dp)
 
+
+      end if
    end if
-   
 else
    res = real((IIp(y,u,v,q2) + UU(x,y,u,v,q2))/(y-x),dp)
    if(res.ne.res) then
-         write(*,*) "problem VV0: ",x,y,u,v,IIp(y,u,v,q2),UU(x,y,u,v,q2)
+         continue ! diagnostic output removed for FlexibleSUSY
          end if
 
 end if
@@ -1185,9 +1883,21 @@ else
 end if
 
 if(smalldp(u,y)) then
-   call saveme(q2,x,y)
+   !   call saveme(q2,x,y) -> we shouldn't get here, the new routines should take over
+   if(smallc(y/q2)) then
+      continue ! diagnostic output removed for FlexibleSUSY
+      MM=0._dp
+      return
+   end if
+
    if(smalldp(x,z)) then
       ! result is I(x',y',v)
+      if(smallc(x/q2)) then
+         continue ! diagnostic output removed for FlexibleSUSY
+         MM=0._dp
+         return
+      end if
+
       if(smalldp(x,y)) then      
          !Result is I(x',x',v)
          if(smallc(v/q2)) then
@@ -1202,9 +1912,7 @@ if(smalldp(u,y)) then
             ! result is I(x',y',0) with x =!= y
             res = real(clog(x/y)/(x-y),dp)
          else
-            res = real((deltanm(x,y,v)*(v*(cLog(v/x)) + y*phimod(x,y,v)) &
-                 - (v - x + y)*(v*((v - x)*cLog(v/x) - y*(cLog(y/v) &
-                 + cLog(y/x))) + y*(-v - x + y)*phimod(x,y,v)))/(2.*v*y*deltanm(x,y,v)),dp)
+            res = real((deltanm(x,y,v)*(v*(cLog(v/x)) + y*phimod(x,y,v)) - (v - x + y)*(v*((v - x)*cLog(v/x) - y*(cLog(y/v) + cLog(y/x))) + y*(-v - x + y)*phimod(x,y,v)))/(2.*v*y*deltanm(x,y,v)),dp)
          end if
       end if
       
@@ -1248,7 +1956,7 @@ end function MM
 
 
   if(phimod.ne.phimod) then
-     write(*,*) "wtf is up with phimod? ",x,y,z
+     continue ! diagnostic output removed for FlexibleSUSY
      end if
 
  Contains
@@ -1329,7 +2037,7 @@ x = x_in
 y = y_in
 z = z_in
 If (Q2.le.0._dp) Then 
-  write(*,*) 'invalid renormalization scale!'
+  continue ! diagnostic output removed for FlexibleSUSY
   return
 end if
 Call SortArguments3C(x,y,z) ! sort x<=y<=z
@@ -1369,7 +2077,7 @@ res=res - 2.5_dp*(x+y+z)
 res=res - 0.5*XiFunction(x,y,z)
 II = res
 if(res.ne. res) then
-   write(*,*) "Problem in general II: ",x,y,z,xifunction(x,y,z)
+   continue ! diagnostic output removed for FlexibleSUSY
 end if
 
 End If
@@ -1660,21 +2368,25 @@ end if
 
 if(present(y)) then
    if(abs(y) .lt. minM) then
+!       write(*,*) "Saveme invoked!"
        y = minM
    end if
 end if
 if(present(z)) then
    if(abs(z) .lt. minM) then
+!      write(*,*) "Saveme invoked!"
        z = minM
    end if
 end if
 if(present(u)) then
    if(abs(u) .lt. minM) then
+!      write(*,*) "Saveme invoked!"
        u = minM
    end if
 end if
 if(present(v)) then
    if(abs(v) .lt. minM) then
+!      write(*,*) "Saveme invoked!"
        v = minM
    end if
 end if
@@ -1713,6 +2425,61 @@ else
 end if
 
 end subroutine atvals
+
+
+
+
+
+Logical Function allsmall(q2,x,y,z)
+Implicit None
+real(dp), Intent(in) :: q2,x
+real(dp), Intent(in),optional :: y,z
+real(dp) :: gbm2
+
+allsmall=.True.
+
+gbm2=q2*epsM
+If(abs(x) .gt. gbm2) then
+   allsmall = .False.
+end if
+if(present(y)) then
+      if(abs(y) .gt. gbm2) then
+         allsmall= .False.
+      end if
+end if
+
+if(present(z)) then
+      if(abs(z) .gt. gbm2) then
+         allsmall = .False.
+      end if
+end if
+
+
+
+end function allsmall
+
+
+
+SUBROUTINE sortabsvals(a)
+    real(dp), INTENT(IN OUT) :: a(:)
+    INTEGER :: i, minIndex
+    real(dp) :: temp
+    
+    DO i = 1, SIZE(a)-1
+       minIndex = MINLOC(abs(a(i:)), 1) + i - 1
+       IF (abs(a(i)) > abs(a(minIndex))) THEN
+          temp = a(i)
+          a(i) = a(minIndex)
+          a(minIndex) = temp
+       END IF
+    END DO
+END SUBROUTINE sortabsvals
+
+
+
+
+
+
 
  Real(Dp) Function Li2(X)
  !---------------------------------------------------------------------
@@ -1796,6 +2563,5 @@ end subroutine atvals
   LI2=H
 
  End Function Li2
-
 
 End module Pole2LFunctions

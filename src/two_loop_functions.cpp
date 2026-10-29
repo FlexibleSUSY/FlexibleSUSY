@@ -30,6 +30,7 @@ extern void __pole2lfunctions_MOD_ctfffbfs(double&, const double&, const double&
 extern void __pole2lfunctions_MOD_ctffbfbfbs(double&, const double&, const double&, const double&, const double&, const double&);
 extern void __pole2lfunctions_MOD_ctfsv(double&, const double&, const double&);
 extern void __pole2lfunctions_MOD_ctffv(double&, const double&, const double&);
+extern void __pole2lfunctions_MOD_ctffvmsbar(double&, const double&, const double&);
 
 // self-energy functions
 extern void __pole2lfunctions_MOD_cwfssss(double&, const double&, const double&, const double&, const double&, const double&, const double&);
@@ -61,7 +62,9 @@ extern void __pole2lfunctions_MOD_cvfffbfbfs(double&, const double&, const doubl
 extern void __pole2lfunctions_MOD_cvffffbfbs(double&, const double&, const double&, const double&, const double&, const double&, const double&, const double&);
 extern void __pole2lfunctions_MOD_cvfffffs(double&, const double&, const double&, const double&, const double&, const double&, const double&, const double&);
 extern void __pole2lfunctions_MOD_cgfffv(double&, const double&, const double&, const double&, const double&);
+extern void __pole2lfunctions_MOD_cgfffvmsbar(double&, const double&, const double&, const double&, const double&);
 extern void __pole2lfunctions_MOD_cgffbfbv(double&, const double&, const double&, const double&, const double&);
+extern void __pole2lfunctions_MOD_cgffbfbvmsbar(double&, const double&, const double&, const double&, const double&);
 }
 
 namespace flexiblesusy {
@@ -130,10 +133,14 @@ double TfSV(double x, double scl2) noexcept
    return out;
 }
 
-double TfFV(double x, double scl2) noexcept
+double TfFV(double x, double scl2, Scheme scheme) noexcept
 {
    double out = 0.;
-   __pole2lfunctions_MOD_ctffv(out, x, scl2);
+   if (scheme == Scheme::MSbar) {
+      __pole2lfunctions_MOD_ctffvmsbar(out, x, scl2);
+   } else {
+      __pole2lfunctions_MOD_ctffv(out, x, scl2);
+   }
    return out;
 }
 
@@ -335,17 +342,25 @@ double VfFFFFS(double p2, double x, double y, double z, double u, double v, doub
    return out;
 }
 
-double GfFFV(double p2, double x, double y, double scl2) noexcept
+double GfFFV(double p2, double x, double y, double scl2, Scheme scheme) noexcept
 {
    double out = 0.;
-   __pole2lfunctions_MOD_cgfffv(out, p2, x, y, scl2);
+   if (scheme == Scheme::MSbar) {
+      __pole2lfunctions_MOD_cgfffvmsbar(out, p2, x, y, scl2);
+   } else {
+      __pole2lfunctions_MOD_cgfffv(out, p2, x, y, scl2);
+   }
    return out;
 }
 
-double GfFbFbV(double p2, double x, double y, double scl2) noexcept
+double GfFbFbV(double p2, double x, double y, double scl2, Scheme scheme) noexcept
 {
    double out = 0.;
-   __pole2lfunctions_MOD_cgffbfbv(out, p2, x, y, scl2);
+   if (scheme == Scheme::MSbar) {
+      __pole2lfunctions_MOD_cgffbfbvmsbar(out, p2, x, y, scl2);
+   } else {
+      __pole2lfunctions_MOD_cgffbfbv(out, p2, x, y, scl2);
+   }
    return out;
 }
 

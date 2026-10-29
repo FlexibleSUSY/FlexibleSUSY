@@ -12,9 +12,9 @@ AppendIndex[Susyno`LieGroups`conj[p_], idx_] := Susyno`LieGroups`conj[AppendInde
 AppendIndex[p_, idx_] := p[{idx}];
 
 DistChir[{}, {}] := 1;
-DistChir[{0, rest1___}, {c_, rest2___}] := c     DistributeChiralities[{rest1}, {rest2}];
-DistChir[{L, rest1___}, {c_, rest2___}] := c[PL] DistributeChiralities[{rest1}, {rest2}];
-DistChir[{R, rest1___}, {c_, rest2___}] := c[PR] DistributeChiralities[{rest1}, {rest2}];
+DistChir[{0, rest1___}, {c_, rest2___}] := c     DistChir[{rest1}, {rest2}];
+DistChir[{L, rest1___}, {c_, rest2___}] := c[PL] DistChir[{rest1}, {rest2}];
+DistChir[{R, rest1___}, {c_, rest2___}] := c[PR] DistChir[{rest1}, {rest2}];
 
 DistributeChiralities[chiralities_List, couplings_List] :=
     If[chiralities === (chiralities /. {L -> R, R -> L}),
@@ -22,8 +22,13 @@ DistributeChiralities[chiralities_List, couplings_List] :=
        DistChir[chiralities, couplings] + (DistChir[chiralities /. {L -> R, R -> L}, couplings])
       ];
 
+(* the self-energy loop functions depend on the external momentum,
+   the tadpole loop functions (Tf...) do not *)
+MomentumArgument[func_Symbol] :=
+    If[StringMatchQ[SymbolName[func], "Tf" ~~ ___], {}, {SARAH`p^2}];
+
 MultLF[{factor_, func_, chiralities_List}, particles_List, expr_] := 
-    factor func[Sequence @@ (
+    factor func[Sequence @@ MomentumArgument[func], Sequence @@ (
         If[#3 === 1, SARAH`Mass2[#1], 
            SARAH`Mass2[#1, #2]]& @@@ particles
     )] DistributeChiralities[chiralities, expr];
@@ -41,13 +46,30 @@ IsAmbiguousContraction[indices_List] :=
 IsAmbiguousIndex[indices_List] := 
     Or @@ ((#[[2]] > 1)& /@ Tally[First /@ indices]);
 
+(* Assigns the indices to the fields of a coupling: each field gets
+   the first unused index of the same field from the list of indices,
+   i.e. identical fields get their indices in the order of the list.
+   The list of indices may be ordered differently than the fields of
+   the coupling, and fields without index (e.g. singlets) do not appear
+   in it; such fields are left unchanged. *)
+AssignIndicesInOrder[{}, {}] := {};
+AssignIndicesInOrder[{}, indices_List] :=
+    (Print["Error: could not assign the indices ", indices, " to the fields of a 2-loop coupling."];
+     Quit[1]);
+AssignIndicesInOrder[{p_, rest___}, indices_List] :=
+    Module[{pos = FirstPosition[indices, {p, _}, {Missing[]}, {1}][[1]]},
+           If[MissingQ[pos],
+              Prepend[AssignIndicesInOrder[{rest}, indices], p],
+              Prepend[AssignIndicesInOrder[{rest}, Delete[indices, pos]],
+                      AppendIndex[p, indices[[pos, 2]]]]
+             ]
+          ];
+
 DistributeIndices[{}, coupling_] := coupling;
 DistributeIndices[indices_List, c : C[particles__]] :=
     If[IsAmbiguousIndex[indices],
        (* replace indices in order from indices list *)
-       Assert[First /@ indices === {particles}];
-       C[Sequence @@ 
-         MapThread[(#1 /. #2)&, {{particles}, (Rule[#1, AppendIndex[#1, #2]]& @@@ indices)}]]
+       C @@ AssignIndicesInOrder[{particles}, indices]
        ,
        (* use one common replacement rule for all fields *)
        c /. (Rule[#1, AppendIndex[#1, #2]]& @@@ indices)
@@ -71,8 +93,11 @@ CreateTadpoleDiag[{particles_List, loopFuncs_List, couplings_List}] :=
 (* sums all diagrams that for a given type *)
 SumTadpoleType[{type_, diags_List}] := Total[CreateTadpoleDiag /@ diags];
 
+(* SARAH's 2-loop diagrams have the opposite sign compared to the
+   1-loop self-energies and tadpoles, cf. SPheno:
+   PiSf - Pi2S_EffPot and Tad1Loop - ti_ep2L *)
 ConvertSarah2LDiagramList[tad_List, head_:Total] :=
-    head[SumTadpoleType /@ tad] //. {
+    -head[SumTadpoleType /@ tad] //. {
         (m : (SARAH`Mass | SARAH`Mass2))[(SARAH`bar | Susyno`LieGroups`conj)[p_], idx___] :> m[p, idx],
         (m : (SARAH`Mass | SARAH`Mass2))[p_, idx__] :> m[p[{idx}]],
         C[p__] :> Cp[p]

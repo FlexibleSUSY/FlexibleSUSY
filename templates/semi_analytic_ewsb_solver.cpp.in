@@ -27,6 +27,7 @@
 
 #include "@ModelName@_semi_analytic_ewsb_solver.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_landau_gauge.hpp"
 #include "@ModelName@_semi_analytic_solutions.hpp"
 #include "error.hpp"
 #include "ew_input.hpp"
