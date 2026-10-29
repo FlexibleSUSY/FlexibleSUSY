@@ -55,13 +55,14 @@ struct SignalResult {
    double chi2BSM {};
    // SM chi2 for Physical_input::mh_pole
    double chi2SM {};
-   double pval {};
+   double pval1d {};
+   double pval2d {};
 };
 
-double chi2_to_pval(double /* chi2BSM */, double /* chi2SM */);
+double chi2_to_pval(double /* chi2BSM */, double /* chi2SM */, int /*dim*/);
 
 #ifdef ENABLE_HIGGSTOOLS
-std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
+std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const&,
    Physical_input const&,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset);

@@ -146,15 +146,15 @@ CalcHSSUSYDMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List,
     CalcHSSUSYDMh[a, Sequence @@ s, r];
 
 CalcHSSUSYDMh[args__] :=
-    Module[{Mh0, Mh, MhYt3L, MhEFT, MhYtMSSM, varyQpole, varyQmatch,
+    Module[{Mh0, Mh, MhYt4L, MhEFT, MhYtMSSM, varyQpole, varyQmatch,
             DMhSM, DMhEFT, DMhSUSY,
             MS = MSUSY /. { args }, Mlow = MEWSB /. { args }},
            Mh0        = CalcHSSUSYMh[-1, 0, 0, 0, 0, args];
            If[Mh0 === $Failed, Return[{$Failed, $Failed}]];
            Mh         = CalcHSSUSYMh[3, 0, 0, 0, 0, args];
            If[Mh === $Failed, Return[{Mh0, $Failed}]];
-           MhYt3L     = CalcHSSUSYMh[4, 0, 0, 0, 0, args];
-           If[MhYt3L === $Failed, Return[{Mh0, $Failed}]];
+           MhYt4L     = CalcHSSUSYMh[4, 0, 0, 0, 0, args];
+           If[MhYt4L === $Failed, Return[{Mh0, $Failed}]];
            MhEFT      = CalcHSSUSYMh[3, 0, 0, 1, 0, args];
            If[MhEFT === $Failed, Return[{Mh0, $Failed}]];
            MhYtMSSM   = CalcHSSUSYMh[3, 0, 0, 0, 1, args];
@@ -169,7 +169,7 @@ CalcHSSUSYDMh[args__] :=
            (* combine uncertainty estimates *)
            DMhSM   = Max[Abs[Max[varyQpole] - Mh],
                          Abs[Min[varyQpole] - Mh]] +
-                     Abs[Mh - MhYt3L];
+                     Abs[Mh - MhYt4L];
            DMhEFT  = Abs[Mh - MhEFT];
            DMhSUSY = Max[Abs[Max[varyQmatch] - Mh],
                          Abs[Min[varyQmatch] - Mh]] +

@@ -43,7 +43,7 @@ modification, extension and reuse.
 
   If you use **FlexibleDecay** in your work, please cite [2106.05038]_ and
   [1211.2099]_. If you compute Higgs-physics constrainst using HiggsTools or
-  Lilith please also cite [2502.XXXXX]_ and (as appropriate) [2210.09332]_ or
+  Lilith please also cite [2603.12119]_ and (as appropriate) [2210.09332]_ or
   [1502.04138]_, [1908.03952]_, [2012.11408]_.
 
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
@@ -102,7 +102,7 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++17 compiler (g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0)
+* C++20 compiler (g++ >= 8.0.0 or clang++ >= 10.0.0 or icpc >= 18.0.0)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
@@ -117,7 +117,7 @@ Optional:
 * GM2Calc_ (version 2.1.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * HiggsTools_ (version 1.1.4 or higher)
-* Lilith_, requires Python3 development files
+* Lilith_ (requires Python3 development files)
 * COLLIER_
 * Himalaya_
 * TSIL_
@@ -165,7 +165,7 @@ the following setup
 
 .. code-block:: shell
 
-    SARAH_VERSION=4.15.2
+    SARAH_VERSION=4.15.4
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
@@ -1105,9 +1105,9 @@ References
 .. [2106.05038] `CPC 283 (2023) 108584 <https://inspirehep.net/literature/1867840>`_ [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
 .. [2110.13238] `Eur. Phys. J. C82 (2022) no. 3, 229 <https://inspirehep.net/literature/1952331>`_ [`arxiv:2110.13238 <https://arxiv.org/abs/2110.13238>`_]
 .. [2204.05285] `Phys. Rev. D 106 (2022) 9, 095023 <https://inspirehep.net/literature/2065408>`_ [`arxiv:2204.05285 <https://arxiv.org/abs/2204.05285>`_]
-.. [2402.14630] `CPC 302 (2024) 109244 <https://inspirehep.net/literature/2760779>`_ [`arxiv:2402.14630 <https://arxiv.org/pdf/2402.14630.pdf>`_]
-.. [2210.09332] `CPC 291 (2023) 108803 <https://inspirehep.net/literature/2166780>`_ [`arxiv:2210.09332 <https://arxiv.org/pdf/2210.09332.pdf>`_]
-.. [1502.04138] `Eur. Phys. J. C75 (2015) no. 9, 440 <https://inspirehep.net/literature/1345039>`_ [`arxiv:1502.04138 <https://arxiv.org/pdf/1502.04138.pdf>`_]
-.. [1908.03952] `SciPost Phys. 7 (2019) 4, 052 <https://inspirehep.net/literature/1749361>`_ [`arxiv:1908.03952 <https://arxiv.org/pdf/1908.03952.pdf>`_]
-.. [2012.11408] [`arxiv:2012.11408 <https://arxiv.org/pdf/2012.11408.pdf>`_]
-.. [2502.XXXXX] `CPC`_ [`arxiv:2502.XXXX <>`_]
+.. [2402.14630] `CPC 302 (2024) 109244 <https://inspirehep.net/literature/2760779>`_ [`arxiv:2402.14630 <https://arxiv.org/abs/2402.14630>`_]
+.. [2210.09332] `CPC 291 (2023) 108803 <https://inspirehep.net/literature/2166780>`_ [`arxiv:2210.09332 <https://arxiv.org/abs/2210.09332>`_]
+.. [1502.04138] `Eur. Phys. J. C75 (2015) no. 9, 440 <https://inspirehep.net/literature/1345039>`_ [`arxiv:1502.04138 <https://arxiv.org/abs/1502.04138>`_]
+.. [1908.03952] `SciPost Phys. 7 (2019) 4, 052 <https://inspirehep.net/literature/1749361>`_ [`arxiv:1908.03952 <https://arxiv.org/abs/1908.03952>`_]
+.. [2012.11408] `PoS TOOLS2020 (2021), 040 <https://inspirehep.net/literature/1837690>`_ [`arxiv:2012.11408 <https://arxiv.org/abs/2012.11408>`_]
+.. [2603.12119] `JHEP <https://inspirehep.net/literature/3128784>`_ [`arXiv:2603.12119 <https://arxiv.org/abs/2603.12119>`_]

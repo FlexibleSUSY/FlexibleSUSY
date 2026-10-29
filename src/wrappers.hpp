@@ -28,6 +28,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <concepts>
 #include <Eigen/Core>
 
 #include "eigen_tensor.hpp"
@@ -607,14 +608,12 @@ auto SignedAbsSqrt(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Deri
 
 // Sqrt ////////////////////////////////////////////////////////////////
 
-template <class T, typename = std::enable_if_t<std::is_floating_point<T>::value,T>>
-T Sqrt(T a) noexcept
+std::floating_point auto Sqrt(std::floating_point auto a) noexcept
 {
    return std::sqrt(a);
 }
 
-template <class T, typename = std::enable_if_t<std::is_integral<T>::value,T>>
-double Sqrt(T a) noexcept
+double Sqrt(std::integral auto a) noexcept
 {
    return std::sqrt(static_cast<double>(a));
 }
@@ -635,7 +634,8 @@ constexpr std::complex<T> Sqr(const std::complex<T>& a) noexcept
    return a * a;
 }
 
-template <typename T, class = std::enable_if_t<std::is_arithmetic<T>::value,T>>
+template <typename T>
+requires std::is_arithmetic_v<T>
 constexpr T Sqr(T a) noexcept
 {
    return a * a;

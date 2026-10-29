@@ -22,6 +22,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/decay_functions.cpp \
 		$(DIR)/decays/flexibledecay_settings.cpp \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
+		$(DIR)/decays/decay_corrections.cpp \
 		$(DIR)/eta.cpp \
 		$(DIR)/factorial.cpp \
 		$(DIR)/ffv_loop_functions.cpp \
@@ -100,6 +101,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/decay_problems.hpp \
 		$(DIR)/decays/flexibledecay_settings.hpp \
 		$(DIR)/decays/one_loop_decay_diagrams.hpp \
+		$(DIR)/decays/decay_corrections.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/eigen_utils.hpp \
 		$(DIR)/eigen_tensor.hpp \

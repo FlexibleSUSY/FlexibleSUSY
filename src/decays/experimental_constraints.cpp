@@ -90,6 +90,9 @@ double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) 
 #ifdef ENABLE_LILITH
 double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& lilithdb) {
 
+// Lilith fails in LO precision when ZZ = 1
+// added tiny offset
+
    const std::string XMLinputstring =
       R"(<?xml version="1.0"?>
 <lilithinput>
@@ -98,7 +101,8 @@ double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& 
 <C to="gammagamma">1.0</C>
 <C to="Zgamma">1.0</C>
 <C to="gg">1.0</C>
-<C to="VV">1.0</C>
+<C to="WW">1.0</C>
+<C to="ZZ">1.00001</C>
 <C to="ff" part="re">1.0</C>
 <C to="ff" part="im">0.0</C>
 <precision>)" + (cpEvenHiggs ? "BEST-QCD" : "LO") + R"(</precision>
@@ -229,8 +233,8 @@ void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double ma
 }
 } // anonymous
 
-double chi2_to_pval(double chi2BSM, double chi2SM) {
-   boost::math::chi_squared dist(2);
+double chi2_to_pval(double chi2BSM, double chi2SM, int d) {
+   boost::math::chi_squared dist(d);
    const double pval = chi2BSM<=chi2SM ? 1 : boost::math::cdf(complement(dist, chi2BSM-chi2SM));
    return pval;
 }
@@ -306,7 +310,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
 }
 
 #ifdef ENABLE_HIGGSTOOLS
-std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
+std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, double, std::string>>> call_higgstools(
    EffectiveCoupling_list const& bsm_input,
    Physical_input const& physical_input,
    std::string const& higgsbounds_dataset, std::string const& higgssignals_dataset) {
@@ -315,16 +319,6 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
    // HiggsBounds
    if (higgsbounds_dataset.empty()) {
       throw SetupError("Need to specify location of HiggsBounds database");
-   }
-   else if (!std::filesystem::exists(higgsbounds_dataset)) {
-      throw SetupError("No HiggsBounds database found at " + higgsbounds_dataset);
-   }
-   // HiggsSignals
-   if (higgssignals_dataset.empty()) {
-      throw SetupError("Need to specify location of HiggsSignals database");
-   }
-   else if (!std::filesystem::exists(higgssignals_dataset)) {
-      throw SetupError("No HiggsSignals database found at " + higgssignals_dataset);
    }
 
    auto pred = Higgs::Predictions();
@@ -369,32 +363,49 @@ std::tuple<SignalResult, std::vector<std::tuple<int, double, double, std::string
       s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau.second));
 
       // Higgs to LSP decay (if model contains one)
-      s.setDecayWidth("Inv", "Inv", el.invWidth);
+      s.setDecayWidth(HP::Decay::directInv, el.invWidth);
 
       // all remaining partial widths
       s.setDecayWidth("Undetected", "Undetected", el.get_undetected_width());
    }
 
-   auto bounds = Higgs::Bounds {higgsbounds_dataset};
-   auto hbResult = bounds(pred);
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
-   for (auto const& _hb: hbResult.selectedLimits) {
-      auto found = std::find_if(
-         std::begin(bsm_input), std::end(bsm_input),
-         [&_hb](auto const& el) { return el.particle==_hb.first; }
-      );
-      hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
+   if (std::filesystem::exists(higgsbounds_dataset)) {
+      auto bounds = Higgs::Bounds {higgsbounds_dataset};
+      auto hbResult = bounds(pred);
+      for (auto const& _hb: hbResult.selectedLimits) {
+         auto found = std::find_if(
+            std::begin(bsm_input), std::end(bsm_input),
+            [&_hb](auto const& el) { return el.particle==_hb.first; }
+         );
+         hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
+      }
+   }
+   else if (higgsbounds_dataset.empty()) {
+      WARNING("Warning: no HiggsBounds database provided");
+   }
+   else {
+      WARNING("Warning: no HiggsBounds database at " + higgsbounds_dataset);
    }
 
-   const auto signals = Higgs::Signals {higgssignals_dataset};
-   const double hs_chisq = signals(pred);
+   std::optional<SignalResult> hs_return;
+   if (std::filesystem::exists(higgssignals_dataset)) {
+      const auto signals = Higgs::Signals {higgssignals_dataset};
+      const double hs_chisq = signals(pred);
+      const double mhSMref = physical_input.get(Physical_input::mh_pole);
+      const double smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
+      const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
+      const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
+      hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
+   }
+   else if (higgssignals_dataset.empty()) {
+      WARNING("Warning: no HiggsSignals database provided");
+   }
+   else {
+      WARNING("Warning: no HiggsSinglas database at " + higgssignals_dataset);
+   }
 
-   const double mhSMref = physical_input.get(Physical_input::mh_pole);
-   const double smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
-
-   const double pvalue = chi2_to_pval(hs_chisq, smChi2);
-
-   return {{signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue}, hb_return};
+   return {hs_return, hb_return};
 }
 #endif
 
@@ -415,7 +426,7 @@ std::optional<SignalResult> call_lilith(
       }
    }
    if (!higgs_in_range) {
-      return {};
+      return std::nullopt;
    }
 
    std::string XMLinputstring;
@@ -489,8 +500,9 @@ std::optional<SignalResult> call_lilith(
 
     Py_Finalize();
 
-    const double pvalue = chi2_to_pval(my_likelihood, sm_likelihood);
-    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue};
+    const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
+    const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
+    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue1d, pvalue2d};
 
     return res;
 }

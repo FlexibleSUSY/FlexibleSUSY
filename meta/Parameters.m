@@ -548,10 +548,6 @@ AddRealParameter[parameter_] :=
 SetRealParameters[parameters_List] :=
     additionalRealParameters = parameters;
 
-DebugPrint[msg___] :=
-    If[FlexibleSUSY`FSDebugOutput,
-       Print["Debug<Parameters>: ", Sequence @@ InputFormOfNonStrings /@ {msg}]];
-
 FindSymbolDef[sym_, opt_:DependenceNum] :=
     Module[{symDef},
            symDef = Cases[SARAH`ParameterDefinitions,
@@ -1610,7 +1606,7 @@ GetParameterFromDescription[description_String] :=
            parameter = Cases[SARAH`ParameterDefinitions,
                              {parameter_, {___, SARAH`Description -> description, ___}} :> parameter];
            Switch[parameter,
-                  {}, DebugPrint["Note: Parameter with description \"", description, "\" not found."]; Null,
+                  {}, FSDebugPrint["Parameters", "Note: Parameter with description \"", description, "\" not found."]; Null,
                   {_}, First[parameter],
                   {_, __}, Utils`FSFancyWarning["Parameter with description \"", description, "\" not unique: ", parameter]; First[parameter],
                   _, Print["Error: Cases did not return a list in GetParameterFromDescription[", parameter, "]."]; Quit[1]
@@ -1622,7 +1618,7 @@ GetParticleFromDescription[description_String, eigenstates_:FlexibleSUSY`FSEigen
            particle = Cases[SARAH`ParticleDefinitions[eigenstates],
                             {particle_, {___, SARAH`Description -> description, ___}} :> particle];
            Switch[particle,
-                  {}, DebugPrint["Note: Particle with description \"", description, "\" not found."]; Null,
+                  {}, FSDebugPrint["Parameters", "Note: Particle with description \"", description, "\" not found."]; Null,
                   {_}, First[particle],
                   {_, __}, Utils`FSFancyWarning["Particle with description \"", description, "\" not unique: ", particle]; First[particle],
                   _, Print["Error: Cases did not return a list in GetParticleFromDescription[", particle, "]."]; Quit[1]

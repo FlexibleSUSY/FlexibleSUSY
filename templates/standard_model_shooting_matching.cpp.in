@@ -66,9 +66,6 @@ void match_high_to_low_scale_sm_1l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
 
 void match_high_to_low_scale_sm_2l(
-   standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int, int);
-
-void match_high_to_low_scale_sm_2l(
    standard_model::Standard_model&, const @ModelName@_mass_eigenstates&, int);
 
 void match_high_to_low_scale_sm_3l(
@@ -948,11 +945,10 @@ standard_model::Standard_model match_high_to_low_scale_sm_1l_copy(
 standard_model::Standard_model match_high_to_low_scale_sm_2l_copy(
    const standard_model::Standard_model& sm,
    const @ModelName@_mass_eigenstates& model,
-   int idx,
-   int yt_loop_order)
+   int idx)
 {
    auto sm_2l = sm;
-   match_high_to_low_scale_sm_2l(sm_2l, model, idx, yt_loop_order);
+   match_high_to_low_scale_sm_2l(sm_2l, model, idx);
    return sm_2l;
 }
 
@@ -1076,37 +1072,19 @@ void match_high_to_low_scale_sm_1l(
 /**
  * Calculates SM parameters `sm' from @ModelName@ parameters at 2-loop level
  *
- * @param sm SM (output) parameters (to be determined)
- * @param model_input BSM (input) parameters
- * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
- * @param yt_loop_order loop order at which the SM top quark Yukawa coupling should be determined
- */
-void match_high_to_low_scale_sm_2l(
-   standard_model::Standard_model& sm,
-   const @ModelName@_mass_eigenstates& model_input,
-   int idx,
-   int yt_loop_order)
-{
-@twoLoopLambdaMatching@
-}
-
-/**
- * Calculates SM parameters `sm' from @ModelName@ parameters at 2-loop
- * level.
- *
  * @note The top quark Yukawa coupling is determined at the 1-loop
  * level.
  *
  * @param sm SM (output) parameters (to be determined)
- * @param model BSM (input) parameters
+ * @param model_input BSM (input) parameters
  * @param idx Higgs index (from the mass ordered Higgs multiplet in the high-scale model)
  */
 void match_high_to_low_scale_sm_2l(
    standard_model::Standard_model& sm,
-   const @ModelName@_mass_eigenstates& model,
+   const @ModelName@_mass_eigenstates& model_input,
    int idx)
 {
-   match_high_to_low_scale_sm_2l(sm, model, idx, 1);
+@twoLoopLambdaMatching@
 }
 
 /**

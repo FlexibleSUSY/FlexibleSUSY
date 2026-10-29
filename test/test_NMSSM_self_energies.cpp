@@ -108,3 +108,32 @@ BOOST_AUTO_TEST_CASE( test_NMSSM_self_energy_neutral_higgs )
    BOOST_CHECK_CLOSE_FRACTION(Ah_ss(1), Ah_fs(1), 9.0e-05);
    BOOST_CHECK_CLOSE_FRACTION(Ah_ss(2), Ah_fs(2), 4.0e-04);
 }
+
+BOOST_AUTO_TEST_CASE( test_NMSSM_self_energy_photon_Z )
+{
+   NMSSM_input_parameters input;
+   input.m0 = 300.; // avoids tree-level tachyons
+   input.m12 = 200.;
+   input.TanBeta = 10.;
+   input.Azero = -500.;
+   input.LambdaInput = 0.1;
+   input.SignvS = 1;
+   NMSSM<Two_scale> m;
+   NmssmSoftsusy s;
+   setup_NMSSM_const(m, s, input);
+   m.do_force_output(true);
+
+   // initial guess
+   m.set_Kappa(0.1);
+   m.set_vS(5000.);
+   m.set_ms2(-Sqr(input.m0));
+   m.set_mHu2(-Sqr(input.m0));
+   m.set_mHd2(Sqr(input.m0));
+
+   m.calculate_DRbar_masses();
+
+   const double p = 100;
+
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), 109.34557661080734, 7.0e-15);
+   BOOST_CHECK_SMALL(m.self_energy_VPVZ_1loop(p).imag(), 0.);
+}

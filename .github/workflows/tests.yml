@@ -38,7 +38,7 @@ jobs:
   no-meta:
     strategy:
       matrix:
-        OS: [macos-10.15, ubuntu-20.04]
+        OS: [macos-10.15, ubuntu-latest]
         CXXCOMPILER: [g++, clang++]
     runs-on: ${{ matrix.OS }}
     if: false
@@ -53,7 +53,7 @@ jobs:
           brew install gsl
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install conan
         run: |
@@ -128,7 +128,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.18.3
+      image: navir/opensuseleap-for-flexiblesusy:0.18.10
 
     strategy:
       fail-fast: false
@@ -138,14 +138,14 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.10'
-      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic MSSMNoFVEFTHiggs'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic MSSMNoFVEFTHiggs UMSSM'
       MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3 NMSSMCPV'
 
     steps:
 
       # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Activate Wolfram Engine
         env:
@@ -157,14 +157,12 @@ jobs:
           $MY_MATH_PASS
           EOF
           printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi
-          printf "Checking if math command is workings... "; if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi
 
       - name: Install FormCalc
         run: |
           cd /fs_dependencies/gcc
           wget -q -O - https://feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
           cd FormCalc-$FORMCALC_VERSION
-          mv bin/Linux-x86-64-kernel2.6 bin/Linux-x86-64
           ./compile
           echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
 
@@ -234,7 +232,7 @@ jobs:
       # restore content of Output directory from previous run
       - name: Restore cached SARAH outputs
         id: cache-sarah-output-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: Output
           key: sarah-outputs-${{ matrix.PART }}-${{ env.SARAH_HASH }}
@@ -244,7 +242,7 @@ jobs:
 
       - name: Save SARAH outputs
         id: cache-sarah-output-save
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: Output
           key: ${{ steps.cache-sarah-output-restore.outputs.cache-primary-key }}
@@ -403,7 +401,7 @@ jobs:
           done
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
