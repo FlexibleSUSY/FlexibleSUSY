@@ -353,40 +353,40 @@ Use2LoopMassEigenstateSelfEnergy[particle_] :=
     MemberQ[{SARAH`HiggsBoson, SARAH`PseudoScalar}, particle] &&
     Head[FindMixingMatrixSymbolFor[particle]] =!= List;
 
-(* Creates a Landau gauge copy of the model in the gaugeless limit,
-   which is used to evaluate the auto-generated 2-loop self-energies,
-   because the underlying SARAH diagrams are derived in the Landau
-   gauge and in the gaugeless limit. *)
-Create2LoopLandauGaugeModel[] :=
-    Module[{type = FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge"},
-           "std::unique_ptr<const " <> type <> "> " <> SelfEnergies`LandauGaugeModelName <> ";\n" <>
-           "if (pole_mass_loop_order > 1) {\n" <>
-           IndentText[SelfEnergies`LandauGaugeModelName <> " = std::make_unique<const " <> type <> ">(*this);\n"] <>
-           "}\n"
-          ];
+(* The auto-generated 2-loop self-energies are derived in the
+   effective potential approximation and do not depend on the external
+   momentum, except for terms in which p^2 != 0 regularizes the
+   Goldstone boson catastrophe (SARAH's NewGBC loop functions).  As in
+   SPheno, they are evaluated once per pole mass calculation, outside
+   the momentum iteration, at the momentum twoLoopRegulatorMomentum. *)
+twoLoopRegulatorMomentum = 125;
 
-(* Adds the auto-generated 2-loop self-energy at the momentum p to the
-   self-energy matrix `self_energy'.  The self-energy is calculated in
-   the mass eigenstate basis and is rotated to the gauge eigenstate
-   basis with the mixing matrix of the Landau gauge copy of the model
-   (see Create2LoopLandauGaugeModel[]).  If element is not empty
-   (e.g. "(i1,i2)"), only the corresponding matrix element is added. *)
-Add2LoopMassEigenstateSelfEnergy[particle_, selfEnergyMatrixType_, element_String:""] :=
+(* Calculates the auto-generated 2-loop self-energy `self_energy_2l' in
+   the gauge eigenstate basis.  The self-energy is calculated in the
+   mass eigenstate basis with a Landau gauge copy of the model in the
+   gaugeless limit (the SARAH diagrams are derived in the Landau gauge
+   and in the gaugeless limit) and is rotated to the gauge eigenstate
+   basis with the mixing matrix of that copy. *)
+Calc2LoopMassEigenstateSelfEnergy[particle_, selfEnergyMatrixType_] :=
     Module[{model = SelfEnergies`LandauGaugeModelName,
+            type = FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge",
             Z, functionName = SelfEnergies`CreateSelfEnergyMassEigenstateFunctionName[{particle, particle}, 2],
             selfEnergyMatrixCType = CreateCType[selfEnergyMatrixType]},
-           Z = model <> "->get_" <> ToValidCSymbolString[FindMixingMatrixSymbolFor[particle]] <> "()";
-           "if (" <> model <> ") {\n" <>
+           Z = model <> ".get_" <> ToValidCSymbolString[FindMixingMatrixSymbolFor[particle]] <> "()";
+           selfEnergyMatrixCType <> " self_energy_2l(" <> selfEnergyMatrixCType <> "::Zero());\n" <>
+           "if (pole_mass_loop_order > 1) {\n" <>
            IndentText[
+               "const " <> type <> " " <> model <> "(*this);\n" <>
+               "// momentum regularizing the Goldstone boson catastrophe\n" <>
+               "const double p_2l = " <> ToString[twoLoopRegulatorMomentum] <> ".;\n" <>
                "// rotate from the mass to the gauge eigenstate basis\n" <>
-               "const " <> selfEnergyMatrixCType <> " self_energy_2l(" <>
+               "self_energy_2l = " <>
                CastIfReal[Z <> ".adjoint().cast<std::complex<double>>() * " <>
-                          model <> "->" <> functionName <> "(p) * " <>
-                          Z <> ".cast<std::complex<double>>()", selfEnergyMatrixType] <> ");\n" <>
-               "if (self_energy_2l.allFinite()) {\n" <>
-               IndentText["self_energy" <> element <> " += self_energy_2l" <> element <> ";\n"] <>
-               "} else {\n" <>
-               IndentText["problems.flag_bad_mass(" <> FlexibleSUSY`FSModelName <> "_info::" <>
+                          model <> "." <> functionName <> "(p_2l) * " <>
+                          Z <> ".cast<std::complex<double>>()", selfEnergyMatrixType] <> ";\n" <>
+               "if (!self_energy_2l.allFinite()) {\n" <>
+               IndentText["self_energy_2l.setZero();\n" <>
+                          "problems.flag_bad_mass(" <> FlexibleSUSY`FSModelName <> "_info::" <>
                           ToValidCSymbolString[particle] <> ");\n"] <>
                "}\n"] <>
            "}\n"
@@ -417,7 +417,7 @@ DoFastDiagonalization[particle_Symbol /; IsScalar[particle], tadpoles_List] :=
               result = reorderMasses <> "\n" <>
                        tadpoleMatrix <>
                        If[Use2LoopMassEigenstateSelfEnergy[particle],
-                          Create2LoopLandauGaugeModel[], ""] <>
+                          Calc2LoopMassEigenstateSelfEnergy[particle, selfEnergyMatrixType], ""] <>
                        selfEnergyMatrixCType <> " self_energy;\n" <>
                        "for (int i1 = 0; i1 < " <> dimStr <>"; ++i1) {\n" <>
                        IndentText["for (int i2 = " <> If[selfEnergyIsSymmetric,"i1","0"] <>
@@ -427,7 +427,7 @@ DoFastDiagonalization[particle_Symbol /; IsScalar[particle], tadpoles_List] :=
                                              "self_energy(i1,i2) = " <> CastIfReal[
                                              selfEnergyFunction <> "(p,i1,i2)", selfEnergyMatrixType] <> ";\n" <>
                                              If[Use2LoopMassEigenstateSelfEnergy[particle],
-                                                Add2LoopMassEigenstateSelfEnergy[particle, selfEnergyMatrixType, "(i1,i2)"],
+                                                "self_energy(i1,i2) += self_energy_2l(i1,i2);\n",
                                                 ""]] <>
                                   "}\n"
                                  ] <>
@@ -648,8 +648,11 @@ DoMediumDiagonalization[particle_Symbol /; IsScalar[particle], inputMomentum_, t
                    ];
                 ];
               If[Use2LoopMassEigenstateSelfEnergy[particle],
-                 calcHigherLoopHiggsContributions = Create2LoopLandauGaugeModel[];
-                 addHigherLoopHiggsContributions = Add2LoopMassEigenstateSelfEnergy[particle, selfEnergyMatrixType];
+                 (* in DoSlowDiagonalization[] it is calculated before the momentum iteration *)
+                 If[calcEffPot,
+                    calcHigherLoopHiggsContributions = Calc2LoopMassEigenstateSelfEnergy[particle, selfEnergyMatrixType];
+                   ];
+                 addHigherLoopHiggsContributions = "self_energy += self_energy_2l;\n";
                 ];
               If[(FlexibleSUSY`UseHiggs3LoopMSSM === True ||
                   FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
@@ -940,6 +943,10 @@ DoSlowDiagonalization[particle_Symbol, tadpole_] :=
                FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
               MemberQ[{SARAH`HiggsBoson}, particle],
               effPot = effPot <> CalcEffPot3L[particle];
+             ];
+           If[Use2LoopMassEigenstateSelfEnergy[particle],
+              effPot = effPot <> Calc2LoopMassEigenstateSelfEnergy[
+                  particle, TreeMasses`GetMassMatrixType[particle]];
              ];
            body = DoMediumDiagonalization[particle, inputMomenta, tadpole, effPot === ""] <> "\n" <>
                   outputMomenta <> " = PHYSICAL(" <> massName <> ");\n" <>

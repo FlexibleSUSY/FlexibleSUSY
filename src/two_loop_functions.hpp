@@ -21,6 +21,11 @@
 
 #include "cextensions.hpp"
 
+#include <array>
+#include <cstddef>
+#include <functional>
+#include <unordered_map>
+
 #ifndef PVATTR
 #define PVATTR noexcept ATTR(const)
 #endif
@@ -76,6 +81,51 @@ double VfFFFbFbS(double, double, double, double, double, double, double) PVATTR;
 double VfFFFFS(double, double, double, double, double, double, double) PVATTR;
 double GfFFV(double, double, double, double, Scheme = Scheme::DRbar) PVATTR;
 double GfFbFbV(double, double, double, double, Scheme = Scheme::DRbar) PVATTR;
+
+/**
+ * Cache for the values of a pure function of N double arguments.
+ *
+ * The generated 2-loop self-energies call the same loop functions
+ * with identical arguments many times (once for each external index
+ * combination), so the loop function values are cached.  The key
+ * must contain all arguments, including the renormalization scale.
+ * The cache is cleared when it reaches max_size entries.
+ */
+template <std::size_t N>
+class Memo {
+public:
+   using Key = std::array<double, N>;
+
+   template <class F>
+   double operator()(const Key& key, F f)
+   {
+      const auto it = cache.find(key);
+      if (it != cache.end()) {
+         return it->second;
+      }
+      if (cache.size() >= max_size) {
+         cache.clear();
+      }
+      const double value = f();
+      cache.emplace(key, value);
+      return value;
+   }
+
+private:
+   struct Hash {
+      std::size_t operator()(const Key& key) const noexcept
+      {
+         std::size_t seed = 0;
+         for (const double k : key) {
+            seed ^= std::hash<double>{}(k) + 0x9e3779b97f4a7c15ULL + (seed << 6) + (seed >> 2);
+         }
+         return seed;
+      }
+   };
+
+   static constexpr std::size_t max_size = std::size_t(1) << 18;
+   std::unordered_map<Key, double, Hash> cache;
+};
 
 } // namespace two_loop_functions
 } // namespace flexiblesusy

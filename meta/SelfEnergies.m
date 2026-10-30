@@ -647,6 +647,85 @@ CreateNPointFunction[nPointFunction_, vertexRules_List, loops_] :=
            Return[{prototype, decl}];
           ];
 
+(* Splits an expression into a list of {sums, body}, where sums is the
+   list of index sums {idx, start, stop} and body is free of sums, such
+   that expr == Total[sum over sums of body]. *)
+SplitSums[expr_ /; FreeQ[expr, SARAH`sum]] := {{{}, expr}};
+SplitSums[expr_Plus] := Join @@ (SplitSums /@ List @@ expr);
+SplitSums[SARAH`sum[idx_, start_, stop_, ex_]] :=
+    {Prepend[#[[1]], {idx, start, stop}], #[[2]]}& /@ SplitSums[ex];
+SplitSums[expr_Times] :=
+    {Join @@ (First /@ #), Times @@ (Last /@ #)}& /@ Tuples[SplitSums /@ List @@ expr];
+SplitSums[expr_] :=
+    (Print["Error: cannot split the index sums of ", expr]; Quit[1]);
+
+IsTwoLoopFunction[f_Symbol] := StringMatchQ[SymbolName[f], RegularExpression["[A-Z]f[SFVb]+"]];
+IsTwoLoopFunction[_] := False;
+
+(* Creates the C++ code that adds the contribution of one term
+   {sums, body} of a 2-loop self-energy to the matrix `result'.  The
+   body is linear in the loop functions, body = Sum_k c_k(gE1,gE2) f_k.
+   As in SPheno, each loop function f_k is evaluated once per set of
+   internal indices (instead of once per matrix element) and only if
+   its coefficient matrix c_k is non-zero. *)
+CreateTwoLoopSelfEnergyTerm[{sums_List, body_}, dim_Integer, heads_] :=
+    Module[{lfs, coeffs, rest, loopsBegin, loopsEnd, cs, code},
+           lfs = DeleteDuplicates @ Cases[body, f_[__] /; IsTwoLoopFunction[f], {0, Infinity}];
+           coeffs = (body /. Thread[lfs -> #])& /@ IdentityMatrix[Length[lfs]];
+           rest = body /. Thread[lfs -> 0];
+           If[rest =!= 0, AppendTo[lfs, 1]; AppendTo[coeffs, rest]];
+           cs = Table["c" <> ToString[k], {k, Length[lfs]}];
+           loopsBegin = StringJoin[
+               Module[{i = CConversion`ToValidCSymbolString[#[[1]]]},
+                      "for (int " <> i <> " = " <> Parameters`ExpressionToString[#[[2]] - 1] <>
+                      "; " <> i <> " <= " <> Parameters`ExpressionToString[#[[3]] - 1] <>
+                      "; ++" <> i <> ") {\n"]& /@ sums];
+           loopsEnd = StringJoin[Table["}\n", {Length[sums]}]];
+           code =
+               StringJoin[("Eigen::Matrix<std::complex<double>," <> ToString[dim] <> "," <>
+                           ToString[dim] <> "> " <> # <> ";\n")& /@ cs] <>
+               "for (int gE1 = 0; gE1 < " <> ToString[dim] <> "; ++gE1) {\n" <>
+               IndentText["for (int gE2 = 0; gE2 < " <> ToString[dim] <> "; ++gE2) {\n" <>
+                          IndentText[StringJoin[MapThread[
+                              (#1 <> "(gE1,gE2) = " <> Parameters`ExpressionToString[#2, heads] <> ";\n")&,
+                              {cs, coeffs}]]] <>
+                          "}\n"] <>
+               "}\n" <>
+               StringJoin[MapThread[
+                   ("if ((" <> #1 <> ".array() != 0.).any()) {\n" <>
+                    IndentText["result += " <> #1 <> If[#2 === 1, "", " * " <>
+                               Parameters`ExpressionToString[#2, heads]] <> ";\n"] <>
+                    "}\n")&,
+                   {cs, lfs}]];
+           "{\n" <> IndentText[loopsBegin <> IndentText[code] <> loopsEnd] <> "}\n"
+          ];
+
+(* Creates the matrix function of a 2-loop self-energy in the mass
+   eigenstate basis.  The matrix is symmetrized, (S + S^\dagger)/2,
+   because SARAH's diagram list contains diagrams with the external
+   legs at different vertices in one orientation only (as in SPheno). *)
+CreateTwoLoopSelfEnergyMatrix[nPointFunction_, vertexRules_List] :=
+    Module[{dim, expr, functionName, type, prototype, terms, body},
+           dim = GetDimension[GetField[nPointFunction] /. {a_, b_}[_] :> {a, b} /. {a_, b_} :> a];
+           expr = GetExpression[nPointFunction, 2];
+           If[dim == 1 || expr === Null, Return[{"", ""}]];
+           expr = DecreaseLiteralCouplingIndices[expr] /.
+                  vertexRules /.
+                  a_[List[i__]] :> a[i] /.
+                  ReplaceGhosts[FlexibleSUSY`FSEigenstates] /.
+                  C -> 1;
+           terms = SplitSums[expr];
+           functionName = CreateFunctionPrototypeMatrix[nPointFunction, 2];
+           type = CConversion`CreateCType[CConversion`MatrixType[CConversion`complexScalarCType, dim, dim]];
+           prototype = type <> " " <> functionName <> ";\n";
+           body = type <> " result(" <> type <> "::Zero());\n\n" <>
+                  StringJoin[CreateTwoLoopSelfEnergyTerm[#, dim, TreeMasses`GetParticles[]]& /@ terms] <>
+                  "\nreturn 0.5 * (result + result.adjoint()) * " <>
+                  CConversion`RValueToCFormString[CConversion`oneOver16PiSqr^2] <> ";\n";
+           { prototype, "\n" <> type <> " CLASSNAME::" <> functionName <> "\n{\n" <>
+                        IndentText[WrapLines[body]] <> "}\n" }
+          ];
+
 CreateNPointFunctionMatrix[(SelfEnergies`Tadpole | SelfEnergies`TadpoleMassEigenstates)[__], _] := { "", "" };
 
 (* The 2-loop expressions are not symmetric in the external indices
@@ -734,7 +813,9 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
                    {prototype,def} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames, loops];
                    prototypes = prototypes <> prototype;
                    defs = defs <> def;
-                   {prototype,def} = CreateNPointFunctionMatrix[nPointFunctions[[k]], loops];
+                   {prototype,def} = If[loops == 2 && Head[nPointFunctions[[k]]] === SelfEnergies`FSSelfEnergyMassEigenstates,
+                                        CreateTwoLoopSelfEnergyMatrix[nPointFunctions[[k]], vertexFunctionNames],
+                                        CreateNPointFunctionMatrix[nPointFunctions[[k]], loops]];
                    prototypes = prototypes <> prototype;
                    defs = defs <> def;
                   ];

@@ -36,8 +36,13 @@ namespace flexiblesusy {
 #define CLASSNAME @ModelName@_mass_eigenstates_landau_gauge
 
 CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
-   : @ModelName@_mass_eigenstates(model)
+   : @ModelName@_mass_eigenstates(model.get_input())
 {
+   // copy the running parameters only: the pole masses and problems of
+   // the given model may be written concurrently by other threads
+   // during the parallel pole mass calculation
+   @ModelName@_soft_parameters::operator=(model);
+
    // the SARAH 2-loop diagrams are derived in the gaugeless limit
 @setGaugelessLimit@
 
