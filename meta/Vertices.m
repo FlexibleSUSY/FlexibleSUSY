@@ -159,8 +159,8 @@ SortCps[nPointFunctions_List] := Module[{
 	Module[{sortedCp = SortCp[#2]},
 	    If[sortedCp =!= #2, #1 /. #2 -> sortedCp, #1]] &,
 	nPointFunctions,
-	Union @ Select[Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
-		       UnresolvedColorFactorFreeQ[#, exprs] &]]
+	Select[Union @ Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
+	       UnresolvedColorFactorFreeQ[#, exprs] &]]
 ];
 
 SortCp[SARAH`Cp[fields__]] :=
@@ -306,7 +306,7 @@ EnforceCpColorStructures[nPointFunction_] := nPointFunction;
 EnforceCpColorStructures[externalField_, exprs_List] := Fold[
     EnforceCpColorStructure[externalField, #1, #2] &,
     exprs,
-    Select[Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
+    Select[Union @ Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
 	   !UnresolvedColorFactorFreeQ[#, exprs] &]
 ];
 
@@ -812,6 +812,9 @@ UnresolvedColorFactorFreeQ[cpPattern_, exprs_] := Module[{
     },
     cpInstance = Extract[exprs, fstPos];
     exprInstance = Extract[exprs, Take[fstPos, 1]];
+    (* shortcut: expressions without any color factor, e.g. the 2-loop
+       expressions, which are expensive to expand *)
+    If[FreeQ[exprInstance, C], Return[True]];
     FreeQ[Coefficient[exprInstance //. SARAH`sum[__, ex_] :> ex, cpInstance],
 	  C]
 ];

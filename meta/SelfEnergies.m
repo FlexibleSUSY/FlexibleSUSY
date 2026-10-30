@@ -649,15 +649,23 @@ CreateNPointFunction[nPointFunction_, vertexRules_List, loops_] :=
 
 CreateNPointFunctionMatrix[(SelfEnergies`Tadpole | SelfEnergies`TadpoleMassEigenstates)[__], _] := { "", "" };
 
+(* The 2-loop expressions are not symmetric in the external indices
+   (SARAH's diagram list contains diagrams with the external legs at
+   different vertices in one orientation only), so the off-diagonal
+   elements are averaged over both orientations, as in SPheno. *)
 FillHermitianSelfEnergyMatrix[nPointFunction_, sym_String, loops_] :=
-    Module[{field = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}, dim1, dim2, name},
+    Module[{field = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}, dim1, dim2, name, element},
            dim1 = GetDimension[field[[1]]];
            dim2 = GetDimension[field[[2]]];
            name = CreateFunctionName[nPointFunction, loops];
+           element = If[loops > 1,
+                        "i == k ? " <> name <> "(p, i, i) : 0.5*(" <>
+                        name <> "(p, i, k) + std::conj(" <> name <> "(p, k, i)))",
+                        name <> "(p, i, k)"];
            "\
 for (int i = 0; i < " <> ToString[dim1] <> "; i++) {
    for (int k = i; k < " <> ToString[dim2] <> "; k++) {
-      " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+      " <> sym <> "(i, k) = " <> element <> ";
    }
 }
 
