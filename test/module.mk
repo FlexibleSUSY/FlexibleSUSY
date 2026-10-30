@@ -89,6 +89,7 @@ TEST_SRC := \
 		$(DIR)/test_string_utils.cpp \
 		$(DIR)/test_threshold_corrections.cpp \
 		$(DIR)/test_threshold_loop_functions.cpp \
+		$(DIR)/test_two_loop_functions.cpp \
 		$(DIR)/test_spectrum_generator_settings.cpp \
 		$(DIR)/test_standard_model_G_fermi.cpp \
 		$(DIR)/test_standard_model_hh_deriv.cpp \
@@ -1072,6 +1073,12 @@ $(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_F
 
 endif
 ifeq ($(WITH_MSSM),yes)
+
+$(DIR)/test_two_loop_functions.x: $(DIR)/test_two_loop_functions.o $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(LIBTEST)
+		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS) $(LIBTEST)
+
+$(DIR)/test_wrappers.x: $(DIR)/test_wrappers.o $(LIBSoftsusyMSSM) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(LIBTEST)
+		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS) $(LIBTEST)
 
 $(DIR)/test_MSSM_npointfunctions.o $(DIR)/test_MSSM_npointfunctions.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
