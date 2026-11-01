@@ -28,7 +28,7 @@
 #include <fstream>
 
 #include "@ModelName@_b_to_s_gamma.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_running.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
@@ -76,7 +76,7 @@ void write_wilsoncoeffs(const std::complex<double>& C7NP_bs, const std::complex<
  *        BR(B->Xs gamma)
  */
 std::array<std::complex<double>, 4> calculate_b_to_s_gamma(
-   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+   const @ModelName@_mass_eigenstates_running& model, const softsusy::QedQcd& qedqcd)
 {
    context_base context { model };
 

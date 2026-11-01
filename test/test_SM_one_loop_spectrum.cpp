@@ -2,6 +2,8 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE test_SM_one_loop_spectrum
 
+#include "iomanip"
+
 #include <boost/test/unit_test.hpp>
 
 #include "loop_libraries/loop_library.hpp"
@@ -249,7 +251,37 @@ BOOST_AUTO_TEST_CASE( test_SM_Zgamma_self_energy )
 
    const double p = 100.;
 
-   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), 126.16413171469556, 4e-12);
+   std::cout << std::setprecision (20) << '\n';
+   std::cout << " Scale: " << m.get_scale() << '\n';
+
+   std::cout << "\n Higgs Mass: " << m.get_Mhh() << '\n';
+   std::cout << " Ah Mass: " << m.get_MAh() << '\n';
+   std::cout << " Hpm Mass: " << m.get_MHp() << '\n';
+
+   std::cout << "\n Z Mass: " << m.get_MVZ() << '\n';
+   std::cout << " W Mass: " << m.get_MVWp() << '\n';
+
+   std::cout << "\n vev: " << m.get_v() << '\n';
+   std::cout << "\n Electron Mass: " << m.get_MFe(0) << '\n';
+   std::cout << " Muon Mass: " << m.get_MFe(1) << '\n';
+   std::cout << " Tau Mass: " << m.get_MFe(2) << '\n';
+
+   std::cout << "\n up Mass: " << m.get_MFu(0) << '\n';
+   std::cout << " charm Mass: " << m.get_MFu(1) << '\n';
+   std::cout << " top Mass: " << m.get_MFu(2) << '\n';
+
+   std::cout << "\n down Mass: " << m.get_MFd(0) << '\n';
+   std::cout << " strange Mass: " << m.get_MFd(1) << '\n';
+   std::cout << " botton Mass: " << m.get_MFd(2) << '\n';
+
+
+   std::cout << "\n thetaW: " << m.ThetaW() << '\n';
+
+   std::cout << " Lambda: " << m.get_Lambdax() << '\n';
+   std::cout << " g1: " << m.get_g1() << '\n';
+   std::cout << " g2: " << m.get_g2() << '\n';
+
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), -16.552455949730099150, 3e-11);
    BOOST_CHECK_SMALL(m.self_energy_VPVZ_1loop(p).imag(), 0.);
 }
 

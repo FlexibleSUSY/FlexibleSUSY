@@ -144,6 +144,10 @@ void process_sminputs_tuple(softsusy::QedQcd& qedqcd, int key, double value)
    case 14:
       qedqcd.setNeutrinoPoleMass(2, value);
       break;
+   case 15:
+      qedqcd.setMass(softsusy::mTau, value);
+      qedqcd.setPoleMtau(value);
+      break;
    case 21:
       qedqcd.setMass(softsusy::mDown, value);
       qedqcd.setMd2GeV(value);

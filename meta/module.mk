@@ -67,6 +67,7 @@ META_SRC     := \
 		$(DIR)/CConversion.m \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \
+		$(DIR)/createVPVZ.m \
 		$(DIR)/CXXDiagrams.m \
 		$(DIR)/Decays.m \
 		$(DIR)/GM2Calc.m \

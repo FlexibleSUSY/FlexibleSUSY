@@ -87,11 +87,6 @@ CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
 {
 }
 
-std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
-{
-   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
-}
-
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
 {
    calculate_sm_pole_masses = flag;
@@ -496,6 +491,19 @@ double CLASSNAME::DB0(double p2, double m2a, double m2b) const noexcept
    return Loop_library::get().DB0(p2, m2a, m2b, scl2).real();
 }
 
+/// derivative of B1(p^2, ma^2, mb^2) w.r.t. p^2
+double CLASSNAME::DB1(double p, double m1, double m2) const noexcept
+{
+   return Loop_library::get().DB1(p, m1, m2, Sqr(get_scale())).real();
+}
+
+/// derivative of B00(p^2, ma^2, mb^2) w.r.t. p^2
+double CLASSNAME::DB00(double p2, double m2a, double m2b) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return Loop_library::get().DB00(p2, m2a, m2b, scl2).real();
+}
+
 /**
  * routine which finds the @RenScheme@ mass eigenstates and mixings.
  */
@@ -711,8 +719,6 @@ void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
 @tadpoleEqFunctions@
 
 @selfEnergyFunctions@
-
-@selfEnergyDerivFunctions@
 
 @secondGenerationHelperFunctions@
 @thirdGenerationHelperFunctions@

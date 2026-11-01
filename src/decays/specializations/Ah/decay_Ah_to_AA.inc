@@ -9,7 +9,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Photon, Photon>(
       throw OutOfBoundsError("Error in " + create_process_string<PseudoscalarHiggs,Photon,Photon>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const auto amp = calculate_amplitude<PseudoscalarHiggs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude_1l<PseudoscalarHiggs, Photon, Photon>(context, in_idx, out1_idx, out2_idx);
    const double mAh = context.physical_mass<PseudoscalarHiggs>(in_idx);
    static constexpr double ps {1./(8.*Pi)};
    static constexpr double ps_symmetry {0.5};

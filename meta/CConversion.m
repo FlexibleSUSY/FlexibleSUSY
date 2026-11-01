@@ -335,57 +335,57 @@ CreateInlineSetter[parameter_String, type_String] :=
 CreateInlineSetter[parameter_String, type_] :=
     CreateInlineSetter[parameter, CreateSetterInputType[type]];
 
-CreateInlineSetters[parameter_String, type_] :=
+CreateInlineSetters[parameter_String, type_, super_:False] :=
     If[MatchQ[type, ScalarType[_]],
        CreateInlineSetter[parameter, type],
        CreateInlineSetter[parameter, type] <> CreateInlineElementSetter[parameter, type]
       ];
 
 (* Creates a C++ inline element getter *)
-CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim_Integer, postFix_String:"", wrapper_String:""] :=
+CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim_Integer, postFix_String:"", wrapper_String:"", super_:False] :=
     elementType <> " get_" <> parameter <> postFix <> "(int i) const" <>
-    " { return " <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i)" <> If[wrapper != "", ")", ""] <> "; }\n";
+    " { return " <> If[super, "SUPER(", ""] <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i)" <> If[wrapper != "", ")", ""] <> If[super, ")", ""] <> "; }\n";
 
-CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim1_Integer, dim2_Integer, postFix_String:"", wrapper_String:""] :=
+CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim1_Integer, dim2_Integer, postFix_String:"", wrapper_String:"", super_:False] :=
     elementType <> " get_" <> parameter <> postFix <> "(int i, int k) const" <>
-    " { return " <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i,k)" <> If[wrapper != "", ")", ""] <> "; }\n";
+    " { return " <> If[super, "SUPER(", ""] <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i,k)" <> If[wrapper != "", ")", ""] <> If[super, ")", ""] <> "; }\n";
 
-CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim1_Integer, dim2_Integer, dim3_Integer, postFix_String:"", wrapper_String:""] :=
+CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim1_Integer, dim2_Integer, dim3_Integer, postFix_String:"", wrapper_String:"", super_:False] :=
     elementType <> " get_" <> parameter <> postFix <> "(int i, int k, int l) const" <>
-    " { return " <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i,k,l)" <> If[wrapper != "", ")", ""] <> "; }\n";
+    " { return " <> If[super, "SUPER(", ""] <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i,k,l)" <> If[wrapper != "", ")", ""] <> If[super, ")", ""] <> "; }\n";
 
-CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim1_Integer, dim2_Integer, dim3_Integer, dim4_Integer, postFix_String:"", wrapper_String:""] :=
+CreateInlineElementGetter[parameter_String, expr_String, elementType_String, dim1_Integer, dim2_Integer, dim3_Integer, dim4_Integer, postFix_String:"", wrapper_String:"", super_:False] :=
     elementType <> " get_" <> parameter <> postFix <> "(int i, int k, int l, int j) const" <>
-    " { return " <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i,k,l,j)" <> If[wrapper != "", ")", ""] <> "; }\n";
+    " { return " <> If[super, "SUPER(", ""] <> If[wrapper != "", wrapper <> "(", ""] <> expr <> "(i,k,l,j)" <> If[wrapper != "", ")", ""] <> If[super, ")", ""] <> "; }\n";
 
-CreateInlineElementGetter[parameter_String, expr_, CConversion`ScalarType[t_], postFix_String:"", wrapper_String:""] :=
-    CreateInlineGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], postFix, wrapper];
+CreateInlineElementGetter[parameter_String, expr_, CConversion`ScalarType[t_], postFix_String:"", wrapper_String:"", super_:False] :=
+    CreateInlineGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], postFix, wrapper, super];
 
-CreateInlineElementGetter[parameter_String, expr_, CConversion`ArrayType[t_, entries_], postFix_String:"", wrapper_String:""] :=
-    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], entries, postFix, wrapper];
+CreateInlineElementGetter[parameter_String, expr_, CConversion`ArrayType[t_, entries_], postFix_String:"", wrapper_String:"", super_:False] :=
+    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], entries, postFix, wrapper, super];
 
-CreateInlineElementGetter[parameter_String, expr_, CConversion`VectorType[t_, entries_], postFix_String:"", wrapper_String:""] :=
-    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], entries, postFix, wrapper];
+CreateInlineElementGetter[parameter_String, expr_, CConversion`VectorType[t_, entries_], postFix_String:"", wrapper_String:"", super_:False] :=
+    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], entries, postFix, wrapper, super];
 
-CreateInlineElementGetter[parameter_String, expr_, CConversion`MatrixType[t_, dim1_, dim2_], postFix_String:"", wrapper_String:""] :=
-    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], dim1, dim2, postFix, wrapper];
+CreateInlineElementGetter[parameter_String, expr_, CConversion`MatrixType[t_, dim1_, dim2_], postFix_String:"", wrapper_String:"", super_:False] :=
+    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], dim1, dim2, postFix, wrapper, super];
 
-CreateInlineElementGetter[parameter_String, expr_, CConversion`TensorType[t_, dims__], postFix_String:"", wrapper_String:""] :=
-    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], dims, postFix, wrapper];
+CreateInlineElementGetter[parameter_String, expr_, CConversion`TensorType[t_, dims__], postFix_String:"", wrapper_String:"", super_:False] :=
+    CreateInlineElementGetter[parameter, RValueToCFormString[expr], CreateCType[ScalarType[t]], dims, postFix, wrapper, super];
 
 (* Creates a C++ inline getter *)
-CreateInlineGetter[parameter_String, expr_String, type_String, postFix_String:"", wrapper_String:""] :=
+CreateInlineGetter[parameter_String, expr_String, type_String, postFix_String:"", wrapper_String:"", super_:False] :=
     type <> " get_" <> parameter <> postFix <>
-    "() const { return " <> If[wrapper != "", wrapper <> "(", ""] <> expr <> If[wrapper != "", ")", ""] <> "; }\n";
+    "() const { return " <> If[super, "SUPER(", ""] <> If[wrapper != "", wrapper <> "(", ""] <> expr <> If[wrapper != "", ")", ""] <> If[super, ")", ""] <> "; }\n";
 
-CreateInlineGetter[parameter_String, expr_, type_, postFix_String:"", wrapper_String:""] :=
-    CreateInlineGetter[ToValidCSymbolString[parameter], RValueToCFormString[expr], CreateGetterReturnType[type], postFix, wrapper];
+CreateInlineGetter[parameter_String, expr_, type_, postFix_String:"", wrapper_String:"", super_:False] :=
+    CreateInlineGetter[ToValidCSymbolString[parameter], RValueToCFormString[expr], CreateGetterReturnType[type], postFix, wrapper, super];
 
-CreateInlineGetters[parameter_String, expr_, type_, postFix_String:"", wrapper_String:""] :=
+CreateInlineGetters[parameter_String, expr_, type_, postFix_String:"", wrapper_String:"", super_:False] :=
     If[MatchQ[type, ScalarType[_]],
-       CreateInlineGetter[parameter, expr, type, postFix, wrapper],
+       CreateInlineGetter[parameter, expr, type, postFix, wrapper, super],
        CreateInlineGetter[parameter, expr, type, postFix, wrapper] <>
-       CreateInlineElementGetter[parameter, expr, type, postFix, wrapper]
+       CreateInlineElementGetter[parameter, expr, type, postFix, wrapper, super]
       ];
 
 (* Creates C++ getter prototype *)

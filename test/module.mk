@@ -373,7 +373,10 @@ TEST_SRC += \
 		$(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.cpp
 endif
 
-ifeq ($(WITH_THDMII) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(WITH_THDMII), yes)
+TEST_SRC += \
+		$(DIR)/test_THDMII_self_energies.cpp
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecay.cpp
@@ -381,6 +384,7 @@ endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecay.cpp
+endif
 endif
 endif
 
@@ -534,6 +538,21 @@ TEST_SH += \
 		$(DIR)/test_BLSMlightZp_ZZp_mixing.sh
 endif
 
+ifeq ($(WITH_LQS1_up_basis),yes)
+TEST_SRC += \
+		$(DIR)/test_LQS1_self_energies.cpp
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
+TEST_SRC += \
+		$(DIR)/test_LQS1_FlexibleDecay.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_LQS1_FlexibleDecay.cpp
+endif
+endif
+endif
+
 ifeq ($(WITH_MSSM),yes)
 TEST_SH += \
 		$(DIR)/test_standalone.sh
@@ -594,9 +613,12 @@ TEST_SH += \
 		$(DIR)/test_SM_observable_problems.sh
 endif
 
-ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(WITH_SM), yes)
+TEST_SRC += \
+		$(DIR)/test_SM_self_energies.cpp
 TEST_SRC += \
 		$(DIR)/test_SM_cxxvertices.cpp
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_SM_FlexibleDecay.cpp
@@ -604,6 +626,7 @@ endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
 		$(DIR)/test_SM_FlexibleDecay.cpp
+endif
 endif
 endif
 
@@ -1244,6 +1267,8 @@ $(DIR)/test_SM_mass_eigenstates_interface.x: $(LIBSM)
 
 $(DIR)/test_SM_mass_eigenstates_decoupling_scheme.x: $(LIBSM)
 
+$(DIR)/test_SM_self_energies.x: $(LIBSM)
+
 $(DIR)/test_SM_tree_level_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_FlexibleDecay.x: $(LIBSM)
@@ -1332,6 +1357,8 @@ $(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.x: $(LIBSSMSemiAnalytic)
 
 $(DIR)/test_SSMSemiAnalytic_consistent_solutions.x: $(LIBSSMSemiAnalytic) $(LIBSSM)
 
+$(DIR)/test_THDMII_self_energies.x: $(LIBTHDMII)
+
 $(DIR)/test_THDMII_FlexibleDecay.x: $(LIBTHDMII)
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
@@ -1339,6 +1366,10 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic) $(LIBTHDMII)
+
+$(DIR)/test_LQS1_self_energies.x: $(LIBLQS1_up_basis)
+
+$(DIR)/test_LQS1_FlexibleDecay.x: $(LIBLQS1_up_basis)
 
 # test rule for files which depend on pv #######################################
 ifneq ($(OPERATING_SYSTEM),Darwin)

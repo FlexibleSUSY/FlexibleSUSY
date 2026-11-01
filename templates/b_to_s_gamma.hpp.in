@@ -31,11 +31,11 @@ class QedQcd;
 }
 
 namespace flexiblesusy {
-class @ModelName@_mass_eigenstates;
+class @ModelName@_mass_eigenstates_running;
 
 namespace @ModelName@_b_to_s_gamma {
     std::array<std::complex<double>, 4> calculate_b_to_s_gamma(
-            const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&);
+            const @ModelName@_mass_eigenstates_running&, const softsusy::QedQcd&);
 }
 } // namespace flexiblesusy
 
