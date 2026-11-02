@@ -1110,4 +1110,4 @@ References
 .. [1502.04138] `Eur. Phys. J. C75 (2015) no. 9, 440 <https://inspirehep.net/literature/1345039>`_ [`arxiv:1502.04138 <https://arxiv.org/abs/1502.04138>`_]
 .. [1908.03952] `SciPost Phys. 7 (2019) 4, 052 <https://inspirehep.net/literature/1749361>`_ [`arxiv:1908.03952 <https://arxiv.org/abs/1908.03952>`_]
 .. [2012.11408] `PoS TOOLS2020 (2021), 040 <https://inspirehep.net/literature/1837690>`_ [`arxiv:2012.11408 <https://arxiv.org/abs/2012.11408>`_]
-.. [2603.12119] `JHEP <https://inspirehep.net/literature/3128784>`_ [`arXiv:2603.12119 <https://arxiv.org/abs/2603.12119>`_]
+.. [2603.12119] `JHEP 10 (2026) 277 <https://inspirehep.net/literature/3128784>`_ [`arXiv:2603.12119 <https://arxiv.org/abs/2603.12119>`_]

@@ -1,4 +1,4 @@
-FlexibleSUSY 2.9.1 [??, ?? 2025]
+FlexibleSUSY 2.9.1 [November, ?? 2026]
 ===================================
 
 New features
@@ -6,6 +6,9 @@ New features
 
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 8.0.0 or clang++ >= 10.0.0.
+* Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
+  HiggsSignals and Lilith. Previously available 2D p-values are marked
+  accordingly.
 
 Fixed bugs
 ----------
