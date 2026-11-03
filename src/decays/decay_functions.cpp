@@ -247,7 +247,7 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
       const std::complex<double> F01l = -1./3. - 2./45*r - 1./140.*Sqr(r) - 2./1575*Cube(r) - 1./4158*Power4(r);
       const std::complex<double> F02la = -3./4. - 29./216.*r - 4973./226800.*Sqr(r) - 3137./882000.*Cube(r) - 1180367./2095632000.*Power4(r);
       const std::complex<double> F02lb = -1./4. - 1./15.*r - 9./560.*Sqr(r) - 2./525.*Cube(r) - 5./5544.*Power4(r);
-      const std::complex<double> F02lc = - 3/.4*F01l;
+      const std::complex<double> F02lc = - 3/4.*F01l;
       return (F02la + (F02lb + F02lc)*std::log(Sqr(msq/mu)))/F01l;
    }
    else if (std::abs(r) > 1.5) {
@@ -260,7 +260,7 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
             )/Sqr(r);
       const std::complex<double> F02lb =
          (6.*std::log(-r) - 3.*Sqr(std::log(-r)))/Sqr(r);
-      const std::complex<double> F02lc = - 3/.4*F01l;
+      const std::complex<double> F02lc = - 3/4.*F01l;
       return (F02la + (F02lb + F02lc)*std::log(Sqr(msq/mu)))/F01l;
    }
    else {
