@@ -158,8 +158,11 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               decays_sm_HO.partial_width_hh_to_barFeFe(sm, 2, 2), 1e-16);
    // h -> W+ W-
+   // Monte Carlo integration with a relative error of a few 1e-4. A difference
+   // of the W mass at the level of rounding errors changes the result by a
+   // similar amount.
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VWpconjVWp(&m),
-                              decays_sm_HO.partial_width_hh_to_conjVWpVWp(sm), 1e-16);
+                              decays_sm_HO.partial_width_hh_to_conjVWpVWp(sm), 1e-3);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VZVZ(&m),
                               decays_sm_HO.partial_width_hh_to_VZVZ(sm), 1e-16);
