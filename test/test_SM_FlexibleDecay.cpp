@@ -164,8 +164,9 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VWpconjVWp(&m),
                               decays_sm_HO.partial_width_hh_to_conjVWpVWp(sm), 1e-3);
    // h -> Z Z
+   // Monte Carlo integration, see comment for h -> W+ W- above
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VZVZ(&m),
-                              decays_sm_HO.partial_width_hh_to_VZVZ(sm), 1e-16);
+                              decays_sm_HO.partial_width_hh_to_VZVZ(sm), 1e-3);
 
    // ------------ loop-induces decays_HO ------------
 
