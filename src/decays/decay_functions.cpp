@@ -147,31 +147,23 @@ std::complex<double> f(double tau) noexcept {
    }
 }
 
-std::complex<double> taum1fprime(double tau) noexcept {
-   if (is_zero(tau-1)) {
-      return 0.;
-   }
-   else if (tau < 1) {
-      return (tau-1.)*std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
-   }
-   else {
-      return
-(tau-1.)*(1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) +
-     2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
-   }
-}
-
+/// derivative of f(tau) w.r.t. tau
 std::complex<double> fprime(double tau) noexcept {
    if (tau < 1) {
       return std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
    }
    else {
-      return
-(1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) +
-     2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
+      const double beta = std::sqrt(1.-1./tau);
+      return -(std::log((1.+beta)/(1.-beta)) - 1i*Pi)/(2.*std::sqrt(tau*(tau-1.)));
    }
+}
+
+/// (tau - 1)*f'(tau), which is finite at tau = 1
+std::complex<double> taum1fprime(double tau) noexcept {
+   if (is_zero(tau-1)) {
+      return 0.;
+   }
+   return (tau-1.)*fprime(tau);
 }
 
 // eq. 2.5, 2.7 & 2.8 of https://arxiv.org/pdf/hep-ph/0509189.pdf
@@ -204,7 +196,7 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
    return (F0HC1H + F0HC2H*std::log(Sqr(mu/mq)))/F0H;
 }
 
-// eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+// eq. 2.19, 2.20 & 2.21 of https://arxiv.org/pdf/hep-ph/0509189.pdf
 std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept {
    const double tau = Sqr(mAh/(2.*mq));
    // know threshold singularity at mAh = 2*mq
