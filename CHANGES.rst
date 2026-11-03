@@ -25,6 +25,9 @@ Fixed bugs
   scalar loops to :math:`$H\to\gamma\gamma$`. This changes the partial width
   of :math:`$H\to\gamma\gamma$` in models with such scalars.
 
+* [commit 8cb6814ce]: Fixed swapped up- and down-quark entries in the blocks
+  ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
+
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
