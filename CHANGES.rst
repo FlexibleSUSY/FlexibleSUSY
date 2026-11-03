@@ -28,6 +28,11 @@ Fixed bugs
 * [commit 8cb6814ce]: Fixed swapped up- and down-quark entries in the blocks
   ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
 
+* [commit ceee684fc]: Fixed wrong 2-loop QCD corrections from quark loops to
+  :math:`$H\to\gamma\gamma$` and :math:`$A\to\gamma\gamma$` for Higgs masses
+  above twice the quark mass. This changes the partial widths of
+  :math:`$H\to\gamma\gamma$` and :math:`$A\to\gamma\gamma$`.
+
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
