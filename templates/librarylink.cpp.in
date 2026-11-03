@@ -780,7 +780,7 @@ void Model_data::put_higgstools_results(MLINK link, std::optional<SignalResult> 
    MLPutFunction(link, "List", 2);
    if (hs.has_value()) {
       SignalResult hs_ = hs.value();
-      MLPutFunction(link, "List", 4);
+      MLPutFunction(link, "List", 5);
       MLPutRuleTo(link, static_cast<int>(hs_.ndof), "ndof");
       MLPutRuleTo(link, hs_.chi2BSM, "chi2");
       MLPutRuleTo(link, hs_.chi2SM, "chi2SM");
