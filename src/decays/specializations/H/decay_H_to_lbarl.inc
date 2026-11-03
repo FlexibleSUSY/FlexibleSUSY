@@ -11,7 +11,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
    const auto HLLbarVertexDR_S = 0.5*(HLLbarVertexDR.left() + HLLbarVertexDR.right());
    const auto HLLbarVertexDR_P = 0.5*(HLLbarVertexDR.right() - HLLbarVertexDR.left());
 
-   if (is_zero(HLLbarVertexDR_S) && is_zero(HLLbarVertexDR_S)) {
+   if (is_zero(HLLbarVertexDR_S) && is_zero(HLLbarVertexDR_P)) {
       return 0.;
    }
 
