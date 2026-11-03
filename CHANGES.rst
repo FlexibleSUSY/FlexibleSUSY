@@ -17,6 +17,14 @@ Fixed bugs
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
 
+* [commit 198c82dd4]: Fixed wrong 2-loop QCD corrections from quark loops
+  to :math:`$A\to\gamma\gamma$`. This changes the partial width of
+  :math:`$A\to\gamma\gamma$`.
+
+* [commit 0c18a1b31]: Fixed wrong 2-loop QCD corrections from coloured
+  scalar loops to :math:`$H\to\gamma\gamma$`. This changes the partial width
+  of :math:`$H\to\gamma\gamma$` in models with such scalars.
+
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
