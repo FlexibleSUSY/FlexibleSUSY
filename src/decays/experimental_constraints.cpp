@@ -500,8 +500,8 @@ std::optional<SignalResult> call_lilith(
 
     Py_Finalize();
 
-    const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
-    const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
+    const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
+    const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
     const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue1d, pvalue2d};
 
     return res;
