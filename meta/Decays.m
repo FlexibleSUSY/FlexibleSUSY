@@ -388,7 +388,7 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
 
 (* returns list of {{number of loops, {{topology, list of insertions}}}, ...} *)
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
-    Module[{nFinalParticles = Length[finalParticles], topologies, diagrams},
+    Module[{nFinalParticles = Length[finalParticles], topologies, diagrams, minLoops},
            (* Until we include non-renormalizable operators, existence
               of tree-level amplitude for h->Zgamma or h->gamma gamma
               would violate Ward identity (as at the level of dim 4
@@ -397,7 +397,7 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
               is such a coupling, it must be 0. So for those processes
               we start generating amplitudes from the 1-loop level. *)
            minLoops =
-              If[(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
+              If[(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, initialParticle] &&
                  (Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
                  Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
                  ||
