@@ -33,6 +33,14 @@ Fixed bugs
   above twice the quark mass. This changes the partial widths of
   :math:`$H\to\gamma\gamma$` and :math:`$A\to\gamma\gamma$`.
 
+* [commit d05b47d34]: Fixed crashes of the Mathematica kernel when calling Lilith
+  through the Mathematica interface. This could happen on the first call, if
+  numpy is linked to the system BLAS and LAPACK libraries, and on every later
+  call in the same kernel.
+
+* [commit c053bce2f]: The Mathematica function ``FS<Model>CallLilith`` now returns
+  the result of the Lilith call.
+
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
