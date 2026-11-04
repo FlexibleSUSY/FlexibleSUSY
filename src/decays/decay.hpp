@@ -100,7 +100,7 @@ public:
    double undetectedWidth {0.};
 
    double get_undetected_width() const { return undetectedWidth; }
-   void calculate_undetected_br(bool withTop) {
+   void calculate_undetected_br() {
       undetectedWidth += width - invWidth;
       if (undetectedWidth < 0 && std::abs(undetectedWidth)/width < 1e-10) {
          undetectedWidth = 0.;
