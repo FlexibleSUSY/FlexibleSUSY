@@ -17,6 +17,9 @@ Fixed bugs
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
 
+* Fixed swapped up- and down-quark entries in the blocks
+  ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
+
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
