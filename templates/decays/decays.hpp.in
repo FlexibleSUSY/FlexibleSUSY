@@ -207,7 +207,7 @@ double @ModelName@_decays::get_partial_width(
                      }
                   );
                   if (mLSP == context.physical_mass<FieldOut1>(indexOut1)) {
-                     if constexpr (FieldOut1::numberOfGenerations == 0) {
+                     if constexpr (FieldOut1::numberOfGenerations == 1) {
                         neutral_higgs_effc.set_invisible_width(field_as_string<FieldIn>(indexIn), partialWidth);
                      }
                      else {
