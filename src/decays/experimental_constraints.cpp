@@ -23,6 +23,14 @@
  * @brief contains interface to HiggsTools
  */
 
+#include "config.h"
+
+#ifdef ENABLE_LILITH
+#include <Python.h>
+#include "lilith.h"
+#include "lilith.c"
+#endif
+
 #include "experimental_constraints.hpp"
 #include "decays/standard_model_decays.hpp"
 
@@ -42,12 +50,6 @@
 #include "Higgs/Bounds.hpp"
 #include "Higgs/Signals.hpp"
 namespace HP = Higgs::predictions;
-#endif
-
-#ifdef ENABLE_LILITH
-#include <Python.h>
-#include "lilith.h"
-#include "lilith.c"
 #endif
 
 namespace flexiblesusy {
