@@ -343,6 +343,21 @@ Handle get_handle_from(MArgument arg)
 
 /******************************************************************/
 
+std::string get_string_from(MLINK link)
+{
+   const char* str = nullptr;
+
+   if (!MLGetString(link, &str))
+      return {};
+
+   std::string result(str);
+   MLReleaseString(link, str);
+
+   return result;
+}
+
+/******************************************************************/
+
 long number_of_args(MLINK link, const std::string& head)
 {
    long argc;
@@ -1335,10 +1350,9 @@ DLLEXPORT int FS@ModelName@CallLilith(
 
    const auto hid = get_handle_from(link);
 
-   const char* llDbFile = "";
-   MLGetString(link, &llDbFile);
+   const std::string llDbFile = get_string_from(link);
    if (!std::filesystem::exists(llDbFile)) {
-      put_message(link, "FS@ModelName@CallLilith", "error", std::string(llDbFile) + " is not a valid path");
+      put_message(link, "FS@ModelName@CallLilith", "error", llDbFile + " is not a valid path");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
    }
@@ -1368,13 +1382,11 @@ DLLEXPORT int FS@ModelName@CallHiggsTools(
 
    const auto hid = get_handle_from(link);
 
-   const char* hsDatabasePath = "";
-   MLGetString(link, &hsDatabasePath);
-   const char* hbDatabasePath = "";
-   MLGetString(link, &hbDatabasePath);
+   const std::string hsDatabasePath = get_string_from(link);
+   const std::string hbDatabasePath = get_string_from(link);
 
    if (!std::filesystem::exists(hsDatabasePath) && !std::filesystem::exists(hbDatabasePath)) {
-      put_message(link, "FS@ModelName@CallHiggsTools", "error", std::string(hsDatabasePath) + " and " + std::string(hbDatabasePath) + " are not valid paths");
+      put_message(link, "FS@ModelName@CallHiggsTools", "error", hsDatabasePath + " and " + hbDatabasePath + " are not valid paths");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
    }
