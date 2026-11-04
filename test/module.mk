@@ -100,6 +100,7 @@ TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
+		$(DIR)/test_shell_completions.sh \
 		$(DIR)/test_space_dir.sh \
 		$(DIR)/test_wolframscript.sh \
 		$(DIR)/test_looplibrary_environment.sh
