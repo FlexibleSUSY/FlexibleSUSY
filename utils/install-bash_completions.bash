@@ -87,6 +87,40 @@ __select_from_list()
     fi
 }
 
+# same as __select_from_list, for an option that takes a comma separated list:
+# completes the last entry and doesn't offer entries that are already selected
+__select_from_comma_list()
+{
+    local pprev="$1"
+    shift
+    local prev="$1"
+    shift
+    local cur="$1"
+    shift
+    local option="$1"
+    shift
+    local list="$@"
+
+    # handle --XXX=
+    if [[ ${prev}${cur} == "${option}" ]] ; then
+        echo "$list"
+        return 0
+    fi
+
+    # handle --XXX=YYY,ZZZ
+    if [[ ${pprev}${prev} == "${option}" ]] ; then
+        local selected=""
+        [[ ${cur} == *,* ]] && selected="${cur%,*},"
+        local last="${cur##*,}"
+        local x
+        for x in ${list} ; do
+            [[ ",${selected}" == *",${x},"* ]] && continue
+            [[ $x == "${last}"* ]] && echo "${selected}${x}"
+        done
+        return 0
+    fi
+}
+
 _run_spectrum_generator()
 {
     local opts="
@@ -209,19 +243,19 @@ _configure()
     # handle --with-addons=
     if [[ ${prev}${cur} == "--with-addons=" || ${pprev}${prev} == "--with-addons=" ]] ; then
         local available_addons=$(__find_available_addons)
-        COMPREPLY=( $(__select_from_list "${pprev}" "${prev}" "${cur}" "--with-addons=" "$available_addons") )
+        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-addons=" "$available_addons") )
         return 0
     fi
 
     # handle --with-solvers=
     if [[ ${prev}${cur} == "--with-solvers=" || ${pprev}${prev} == "--with-solvers=" ]] ; then
-        COMPREPLY=( $(__select_from_list "${pprev}" "${prev}" "${cur}" "--with-solvers=" "two_scale lattice") )
+        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-solvers=" "two_scale lattice") )
         return 0
     fi
 
     # handle --with-loop-libraries=
     if [[ ${prev}${cur} == "--with-loop-libraries=" || ${pprev}${prev} == "--with-loop-libraries=" ]] ; then
-        COMPREPLY=( $(__select_from_list "${pprev}" "${prev}" "${cur}" "--with-loop-libraries=" "collier looptools fflite") )
+        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-loop-libraries=" "collier looptools fflite") )
         return 0
     fi
 
@@ -282,13 +316,13 @@ _configure()
     # handle --with-models=
     if [[ ${prev}${cur} == "--with-models=" || ${pprev}${prev} == "--with-models=" ]] ; then
         local available_models=$(__find_created_models)
-        COMPREPLY=( $(__select_from_list "${pprev}" "${prev}" "${cur}" "--with-models=" "$available_models") )
+        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-models=" "$available_models") )
         return 0
     fi
 
     # handle --with-optional-modules=
     if [[ ${prev}${cur} == "--with-optional-modules=" || ${pprev}${prev} == "--with-optional-modules=" ]] ; then
-        COMPREPLY=( $(__select_from_list "${pprev}" "${prev}" "${cur}" "--with-optional-modules=" "examples test") )
+        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-optional-modules=" "examples test") )
         return 0
     fi
 
