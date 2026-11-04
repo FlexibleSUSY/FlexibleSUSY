@@ -82,7 +82,7 @@ CalculateMHiggs3LoopShift[inputModel_String, outputModel_String, higgsBoson_, hi
 
 try {
    // 3-loop self-energy, calculated using tree-level parameters
-   const auto self_energy_3l = Re(model." <> SelfEnergies`CreateSelfEnergyFunctionName[higgsBoson, 3] <> "());
+   const auto self_energy_3l = Re(model." <> SelfEnergies`CreateSelfEnergyFunctionName[{higgsBoson, higgsBoson}, 3] <> "());
    const auto mass_matrix = (calculate_mh2_0l(model) - self_energy_3l).eval();
    const double Mh2_pole = calculate_eigenvalue(mass_matrix, idx);
    const double mh2_tree = Sqr(model.get_" <> higgsMassStr <> "(idx));

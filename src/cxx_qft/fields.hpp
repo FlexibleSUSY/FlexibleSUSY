@@ -20,6 +20,7 @@
 #define CXXQFT_FIELDS_H
 
 #include <array> /**< Only for field_indices and isSMField*/
+#include <concepts>
 
 #include <boost/array.hpp>
 #include <boost/version.hpp>
@@ -125,11 +126,7 @@ namespace flexiblesusy::cxx_diagrams {
    };
 
    template<typename Field>
-   struct is_massless {
-      static constexpr bool value = Field::massless;
-   };
-   template<typename Field>
-   constexpr bool is_massless_v = is_massless<Field>::value;
+   concept is_massless = Field::massless;
 
    enum class ParticleColorRep {
       singlet,
@@ -139,56 +136,26 @@ namespace flexiblesusy::cxx_diagrams {
       octet
    };
 
-   template<typename Field>
-   struct is_singlet {
-      static constexpr bool value =
-         Field::colorRep == ParticleColorRep::singlet;
-   };
-   template<typename Field>
-   constexpr bool is_singlet_v = is_singlet<Field>::value;
+   template <typename Field>
+   concept is_singlet = Field::colorRep == ParticleColorRep::singlet;
+   template <typename Field>
+   concept is_triplet = Field::colorRep == ParticleColorRep::triplet;
+   template <typename Field>
+   concept is_anti_triplet = Field::colorRep == ParticleColorRep::anti_triplet;
+   template <typename Field>
+   concept is_octet = Field::colorRep == ParticleColorRep::octet;
 
    template<typename Field>
-   struct is_triplet {
-      static constexpr bool value = Field::colorRep == ParticleColorRep::triplet;
-   };
-   template<typename Field>
-   constexpr bool is_triplet_v = is_triplet<Field>::value;
-
-   template<typename Field>
-   struct is_anti_triplet {
-      static constexpr bool value =
-         Field::colorRep == ParticleColorRep::anti_triplet;
-   };
-   template<typename Field>
-   constexpr bool is_anti_triplet_v = is_anti_triplet<Field>::value;
-
-   template<typename Field>
-   struct is_octet {
-      static constexpr bool value = Field::colorRep == ParticleColorRep::octet;
-   };
-   template<typename Field>
-   constexpr bool is_octet_v = is_octet<Field>::value;
-
-   template<typename Field>
-   constexpr std::enable_if_t<
-      is_triplet<Field>::value, ParticleColorRep
-      >
-   color_conj() {
-      return ParticleColorRep::anti_triplet;
-   }
-   template<typename Field>
-   constexpr std::enable_if_t<
-      is_anti_triplet<Field>::value, ParticleColorRep
-      >
-   color_conj() {
-      return ParticleColorRep::triplet;
-   }
-   template<typename Field>
-   constexpr std::enable_if_t<
-      !is_triplet<Field>::value && !is_anti_triplet<Field>::value, ParticleColorRep
-      >
-   color_conj() {
-      return Field::colorRep;
+   constexpr ParticleColorRep color_conj() {
+      if constexpr (is_triplet<Field>) {
+         return ParticleColorRep::anti_triplet;
+      }
+      else if (is_anti_triplet<Field>) {
+         return ParticleColorRep::triplet;
+      }
+      else {
+         return Field::colorRep;
+      }
    }
 
    template<class Field>

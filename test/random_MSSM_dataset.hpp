@@ -19,7 +19,7 @@
 #ifndef TEST_RANDOM_MSSM_DATASET_H
 #define TEST_RANDOM_MSSM_DATASET_H
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 
 #include "MSSM_two_scale_spectrum_generator.hpp"

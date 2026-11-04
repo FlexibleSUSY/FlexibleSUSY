@@ -357,7 +357,7 @@ Eigen::ArrayXd extract_entry(const std::string& file_name, long long entry)
    const auto number_of_observables =
       (observables ? @ModelName@_observables::NUMBER_OF_OBSERVABLES : 0);
    const auto total_entries = 9 + number_of_input_parameters + number_of_extra_parameters
-      + number_of_parameters + 2*(number_of_masses + number_of_mixings)
+      + number_of_parameters + 2*(static_cast<int>(number_of_masses) + static_cast<int>(number_of_mixings))
       + number_of_low_energy_input_parameters
       + number_of_extra_physical_input_parameters + number_of_observables;
 
@@ -396,12 +396,12 @@ Eigen::ArrayXd extract_entry(const std::string& file_name, long long entry)
    offset += number_of_extra_parameters;
 
    // restore DR-bar masses and mixings
-   model.set_DRbar_masses_and_mixings(values.block(offset, 0, number_of_masses + number_of_mixings, 1));
-   offset += number_of_masses + number_of_mixings;
+   model.set_DRbar_masses_and_mixings(values.block(offset, 0, static_cast<int>(number_of_masses) + static_cast<int>(number_of_mixings), 1));
+   offset += static_cast<int>(number_of_masses) + static_cast<int>(number_of_mixings);
 
    // restore pole masses and mixings
-   model.get_physical().set(values.block(offset, 0, number_of_masses + number_of_mixings, 1));
-   offset += number_of_masses + number_of_mixings;
+   model.get_physical().set(values.block(offset, 0, static_cast<int>(number_of_masses) + static_cast<int>(number_of_mixings), 1));
+   offset += static_cast<int>(number_of_masses) + static_cast<int>(number_of_mixings);
 
    // fill low-energy data (optional)
    if (qedqcd) {

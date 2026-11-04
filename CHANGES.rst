@@ -1,5 +1,16 @@
-FlexibleSUSY 2.9.1 [??, ?? 2025]
+FlexibleSUSY 2.9.1 [November, ?? 2026]
 ===================================
+
+New features
+------------
+
+* Moved to C++20. This increased the minimal supported version of compilers to
+  g++ >= 8.0.0 or clang++ >= 10.0.0.
+* Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
+  HiggsSignals and Lilith. Previously available 2D p-values are marked
+  accordingly.
+* Lilith is no longer accessible only via the command-line interface (see
+  footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
 Fixed bugs
 ----------
@@ -8,6 +19,13 @@ Fixed bugs
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
 
+* [commit 87728f8]: Fixed swapped up- and down-quark entries in the blocks
+  ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
+
+* [commit 580274c]: Fixed crashes of the Mathematica kernel when calling Lilith
+  through the Mathematica interface. This could happen on the first call, if
+  numpy is linked to the system BLAS and LAPACK libraries, and on every later
+  call in the same kernel.
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
@@ -17,6 +35,35 @@ New features
 
 * Option to validate a neutral Higgs sector of the model by linking
   FlexibleSUSY with HiggsTools_ or Lilith_.
+
+  Example in ``THDMII``::
+
+      HIGGSTOOLS_DIR=/path/to/HiggsTools
+      LILITH_DIR=/path/to/Lilith
+      HSDATABASE_DIR=/path/to/HiggsSignals/Database
+      HBDATABASE_DIR=/path/to/HiggsBounds/Database
+
+      ./createmodel --name=THDMII -f
+
+      ./configure --with-models=THDMII \
+         --enable-himalaya \
+         --with-higgstools-incdir=${HIGGSTOOLS_DIR}/include \
+         --with-higgstools-libdir=${HIGGSTOOLS_DIR}/lib64 \
+         --with-lilith=${LILITH_DIR}
+
+      make
+
+      models/THDMII/run_THDMII.x \
+         --slha-input-file=models/THDMII/LesHouches.in.THDMII \
+         --higgssignals-dataset=${HSDATABASE_DIR} \
+         --higgsbounds-dataset=${HBDATABASE_DIR}
+
+  Decays computation requires use of a dedicated loop library (here Collier).
+  HiggsTools and Lilith are called only if appropriate flags in FlexibleDecay
+  block have been turned on. By default we use a default Lilith database file.
+  This can be changed by using the ``--lilith-db`` option of ``run_${MODEL}.x``
+  and providing the full path to Lilith's ``.list`` file (e.g. ``run_THDMII.x
+  --lilith-db=/path/latestRun2.list``).
 
 * Calculate unitarity constraints in :math:`$s\to \infty$` limit. This is a wrapper
   over SARAH results [`1805.07306 <https://arxiv.org/abs/1805.07306>`_].

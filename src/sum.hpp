@@ -41,7 +41,7 @@ template<typename T>
 struct is_eigen_type
 {
     static constexpr auto value =
-	std::is_base_of<Eigen::EigenBase<T>, T>::value;
+       std::is_base_of_v<Eigen::EigenBase<T>, T>;
 };
 
 template<typename Idx, typename Function, bool isEigenType>

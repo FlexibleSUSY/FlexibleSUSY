@@ -90,6 +90,9 @@ double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) 
 #ifdef ENABLE_LILITH
 double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& lilithdb) {
 
+// Lilith fails in LO precision when ZZ = 1
+// added tiny offset
+
    const std::string XMLinputstring =
       R"(<?xml version="1.0"?>
 <lilithinput>
@@ -98,7 +101,8 @@ double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& 
 <C to="gammagamma">1.0</C>
 <C to="Zgamma">1.0</C>
 <C to="gg">1.0</C>
-<C to="VV">1.0</C>
+<C to="WW">1.0</C>
+<C to="ZZ">1.00001</C>
 <C to="ff" part="re">1.0</C>
 <C to="ff" part="im">0.0</C>
 <precision>)" + (cpEvenHiggs ? "BEST-QCD" : "LO") + R"(</precision>
@@ -109,13 +113,9 @@ double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& 
 </reducedcouplings>
 </lilithinput>)";
 
-   Py_Initialize();
-
    PyObject* lilithcalc2 = initialize_lilith(const_cast<char*>(lilithdb.c_str()));
    lilith_readuserinput(lilithcalc2, const_cast<char*>(XMLinputstring.c_str()));
    const double my_likelihood = lilith_computelikelihood(lilithcalc2);
-
-   Py_Finalize();
 
    return my_likelihood;
 }
@@ -229,8 +229,8 @@ void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double ma
 }
 } // anonymous
 
-double chi2_to_pval(double chi2BSM, double chi2SM) {
-   boost::math::chi_squared dist(2);
+double chi2_to_pval(double chi2BSM, double chi2SM, int d) {
+   boost::math::chi_squared dist(d);
    const double pval = chi2BSM<=chi2SM ? 1 : boost::math::cdf(complement(dist, chi2BSM-chi2SM));
    return pval;
 }
@@ -390,8 +390,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       const double hs_chisq = signals(pred);
       const double mhSMref = physical_input.get(Physical_input::mh_pole);
       const double smChi2 = minChi2SM_hs(mhSMref, higgssignals_dataset);
-      const double pvalue = chi2_to_pval(hs_chisq, smChi2);
-      hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue};
+      const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
+      const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
+      hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
    }
    else if (higgssignals_dataset.empty()) {
       WARNING("Warning: no HiggsSignals database provided");
@@ -480,7 +481,18 @@ std::optional<SignalResult> call_lilith(
     XMLinputstring += "</lilithinput>\n";
     VERBOSE_MSG("Lilith input: \n" << XMLinputstring);
 
+    // Python stays initialized for the lifetime of the process, because numpy
+    // can't be imported again after Py_Finalize. This function can be called
+    // repeatedly through the Mathematica interface.
     Py_Initialize();
+
+    // A Mathematica kernel exposes its ILP64 MKL under the standard BLAS and
+    // LAPACK names. Without RTLD_DEEPBIND, numpy can resolve these to MKL and
+    // crash, as it passes 32-bit integers.
+    PyRun_SimpleString(
+       "import os, sys\n"
+       "if hasattr(os, 'RTLD_DEEPBIND'):\n"
+       "    sys.setdlopenflags(os.RTLD_NOW | os.RTLD_DEEPBIND)\n");
 
     // Creating an object of the class Lilith: lilithcalc
     PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));
@@ -493,10 +505,9 @@ std::optional<SignalResult> call_lilith(
     const double mhSMref = physical_input.get(Physical_input::mh_pole);
     const double sm_likelihood = minChi2SM_lilith(mhSMref, cpEvenHiggs, lilith_db);
 
-    Py_Finalize();
-
-    const double pvalue = chi2_to_pval(my_likelihood, sm_likelihood);
-    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue};
+    const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
+    const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
+    const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue1d, pvalue2d};
 
     return res;
 }

@@ -74,7 +74,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
          );
       }
 
-      if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5) {
+      if (flexibledecay_settings.get_decay_corrections().sm > 0 && Nf >= 5) {
             double alpha_s_red;
             double Y_conversion = 1.;
             switch (Nf) {

@@ -451,10 +451,6 @@ HaveBVPSolver[solver_] := MemberQ[FlexibleSUSY`FSBVPSolvers, solver];
 ToVersionString[{major_Integer, minor_Integer, patch_Integer}] :=
     ToString[major] <> "." <> ToString[minor] <> "." <> ToString[patch];
 
-DebugPrint[msg___] :=
-    If[FlexibleSUSY`FSDebugOutput,
-       Print["Debug<FlexibleSUSY>: ", Sequence @@ InputFormOfNonStrings /@ {msg}]];
-
 ReplaceSymbolsInUserInput[rules_] :=
     Module[{},
            (* input/output blocks *)
@@ -1732,7 +1728,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             physicalMassesDef = "", mixingMatricesDef = "",
             massCalculationPrototypes = "", massCalculationFunctions = "",
             calculateAllMasses = "",
-            selfEnergyPrototypes = "", selfEnergyFunctions = "", 
+            selfEnergyPrototypes = "", selfEnergyFunctions = "",
             selfEnergyDerivPrototypes = "",   selfEnergyDerivFunctions = "",
             twoLoopTadpolePrototypes = "", twoLoopTadpoleFunctions = "",
             twoLoopSelfEnergyPrototypes = "", twoLoopSelfEnergyFunctions = "",
@@ -1816,28 +1812,28 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "-"];
              ];
            If[FlexibleSUSY`UseHiggs2LoopSM === True,
-              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesSM[{SARAH`HiggsBoson}];
+              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               twoLoopHiggsHeaders = "#include \"sm_twoloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSM[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = "#include \"sm_threeloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs4LoopSM === True,
-              {fourLoopSelfEnergyPrototypes, fourLoopSelfEnergyFunctions} = SelfEnergies`CreateFourLoopSelfEnergiesSM[{SARAH`HiggsBoson}];
+              {fourLoopSelfEnergyPrototypes, fourLoopSelfEnergyFunctions} = SelfEnergies`CreateFourLoopSelfEnergiesSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               fourLoopHiggsHeaders = "#include \"sm_fourloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs3LoopSplit === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSplit[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSplit[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = "#include \"splitmssm_threeloophiggs.hpp\"\n";
              ];
            If[SARAH`UseHiggs2LoopMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesMSSM[SARAH`HiggsBoson];
-              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesMSSM[{SARAH`HiggsBoson, SARAH`PseudoScalar}];
+              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesMSSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}, {SARAH`PseudoScalar, SARAH`PseudoScalar}}];
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
 #ifdef ENABLE_HIMALAYA
 #include \"himalaya/HierarchyCalculator.hpp\"
@@ -1846,7 +1842,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
 ";
              ];
            If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesNMSSM[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesNMSSM[{{SARAH`HiggsBoson,SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
 #ifdef ENABLE_HIMALAYA
 #include \"himalaya/HierarchyCalculator.hpp\"
@@ -1856,7 +1852,13 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
              ];
            If[FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesNMSSM[SARAH`HiggsBoson];
-              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesNMSSM[{SARAH`HiggsBoson, SARAH`PseudoScalar}];
+              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} =
+                  SelfEnergies`CreateTwoLoopSelfEnergiesNMSSM[
+                     {
+                        {SARAH`HiggsBoson, SARAH`HiggsBoson},
+                        {SARAH`PseudoScalar, SARAH`PseudoScalar}
+                     }
+                  ];
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n#include \"nmssm_twoloophiggs.hpp\"\n";
              ];
            twoLoopThresholdHeaders = ThresholdCorrections`GetTwoLoopThresholdHeaders[];
@@ -2826,7 +2828,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
       if (hs.has_value()) {
          SignalResult hs_ = hs.value();
-         slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval);
+         slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval1d, hs_.pval2d);
       }
       if (higgsbounds_v.size() > 0) {
          slha_io.set_higgsbounds(higgsbounds_v);
@@ -2835,7 +2837,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 #endif
 #ifdef ENABLE_LILITH
    if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith.has_value()) {
-      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, lilith.value().pval);
+      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, lilith.value().pval1d, lilith.value().pval2d);
    }
 #endif
 }";
@@ -3056,7 +3058,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               fdDefaultSettings =
 "\nfdDefaultSettings = {
    minBRtoPrint -> 1*^-5,
-   maxHigherOrderCorrections -> 4,
+   maxHigherOrderCorrections -> 41,
    alphaThomson -> 1,
    offShellVV -> 2,
    printEffCBlock -> 1,
@@ -3569,7 +3571,8 @@ FSPrepareRGEs[loopOrder_] :=
           ];
 
 FSCheckLoopCorrections[eigenstates_] :=
-    Module[{needToCalculateLoopCorrections},
+    Module[{needToCalculateLoopCorrections, selfEnergies,
+            fileName = GetSelfEnergyFileNames[$sarahCurrentOutputMainDir, eigenstates]},
            needToCalculateLoopCorrections = Or[
                NeedToCalculateSelfEnergies[eigenstates],
                NeedToCalculateTadpoles[eigenstates],
@@ -3577,6 +3580,11 @@ FSCheckLoopCorrections[eigenstates_] :=
                                               ];
            If[needToCalculateLoopCorrections,
               SARAH`CalcLoopCorrections[eigenstates];
+              selfEnergies = Get[fileName];
+              selfEnergies = {{#1, #1}, #2}& @@@ selfEnergies;
+              Get["createVPVZ.m"];
+              AppendTo[selfEnergies, {{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}, Global`GetVPVZSelfEnergy /. C->Cp}];
+              Put[selfEnergies, fileName];
              ];
           ];
 
@@ -3810,7 +3818,7 @@ PrepareUnrotatedParticles[eigenstates_] :=
              ];
            Print["Reading unrotated particles from file ", nonMixedParticlesFile, " ..."];
            nonMixedParticles = Get[nonMixedParticlesFile];
-           DebugPrint["unrotated particles: ", nonMixedParticles];
+           FSDebugPrint["FlexibleSUSY", "unrotated particles: ", nonMixedParticles];
            TreeMasses`SetUnrotatedParticles[nonMixedParticles];
           ];
 
@@ -4362,7 +4370,7 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
            (* store all model parameters *)
            allParameters = StripSARAHIndices[((#[[1]])& /@ Join[susyBetaFunctions, susyBreakingBetaFunctions])];
            Parameters`SetModelParameters[allParameters];
-           DebugPrint["Model parameters: ", allParameters];
+           FSDebugPrint["FlexibleSUSY", "Model parameters: ", allParameters];
 
            (* collect all phases from SARAH *)
            phases = DeleteDuplicates @ Join[
@@ -4414,7 +4422,7 @@ SetupMassMatrices[allParameters_] :=
 		       allIntermediateOutputParameters =
 		         Parameters`GetIntermediateOutputParameterDependencies[
 		           TreeMasses`GetMassMatrix /@ massMatrices];
-		       DebugPrint["intermediate output parameters = ", allIntermediateOutputParameters];
+		       FSDebugPrint["FlexibleSUSY", "intermediate output parameters = ", allIntermediateOutputParameters];
 
 		       (* decrease index literals of intermediate output parameters in mass matrices *)
 		       allIntermediateOutputParameterIndexReplacementRules =
@@ -4433,7 +4441,7 @@ SetupOutputParameters[massMatrices_] :=
                     Flatten[TreeMasses`GetMixingMatrixSymbol[#]& /@ massMatrices]]], Null];
 
            Parameters`SetOutputParameters[allOutputParameters];
-           DebugPrint["output parameters = ", allOutputParameters];
+           FSDebugPrint["FlexibleSUSY", "output parameters = ", allOutputParameters];
     ];
 
 CheckObsDependencies[requested_List] :=
@@ -4508,9 +4516,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             decaysSources = {}, decaysHeaders = {}, decaysSLHAIncludeFiles = {}},
 
            Utils`PrintHeadline["Starting FlexibleSUSY"];
-           FSDebugOutput["meta code directory: ", $flexiblesusyMetaDir];
-           FSDebugOutput["config directory   : ", $flexiblesusyConfigDir];
-           FSDebugOutput["templates directory: ", $flexiblesusyTemplateDir];
+           FSDebugPrint["FlexibleSUSY", "meta code directory: ", $flexiblesusyMetaDir];
+           FSDebugPrint["FlexibleSUSY", "config directory   : ", $flexiblesusyConfigDir];
+           FSDebugPrint["FlexibleSUSY", "templates directory: ", $flexiblesusyTemplateDir];
 
            (* check if SARAH`Start[] was called *)
            If[!ValueQ[Model`Name],
@@ -4545,7 +4553,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
              				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
            PrepareUnrotatedParticles[FSEigenstates];
 
-           DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
+           FSDebugPrint["FlexibleSUSY", "particles (mass eigenstates): ", TreeMasses`GetParticles[]];
 
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
 
@@ -4641,8 +4649,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            inputParameters = Parameters`GetInputParametersAndTypes[];
 
-           DebugPrint["input parameters: ", Parameters`GetInputParameters[]];
-           DebugPrint["auxiliary parameters: ", Parameters`GetExtraParameters[]];
+           FSDebugPrint["FlexibleSUSY", "input parameters: ", Parameters`GetInputParameters[]];
+           FSDebugPrint["FlexibleSUSY", "auxiliary parameters: ", Parameters`GetExtraParameters[]];
 
            On[Assert];
 
