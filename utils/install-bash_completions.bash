@@ -128,6 +128,9 @@ _run_spectrum_generator()
 --slha-output-file=
 --spectrum-output-file=
 --database-output-file=
+--higgsbounds-dataset=
+--higgssignals-dataset=
+--lilith-db=
 --rgflow-output-file=
 --build-info
 --model-info
@@ -249,7 +252,7 @@ _configure()
 
     # handle --with-solvers=
     if [[ ${prev}${cur} == "--with-solvers=" || ${pprev}${prev} == "--with-solvers=" ]] ; then
-        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-solvers=" "two_scale lattice") )
+        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-solvers=" "all two_scale lattice semi_analytic shooting") )
         return 0
     fi
 
@@ -316,7 +319,7 @@ _configure()
     # handle --with-models=
     if [[ ${prev}${cur} == "--with-models=" || ${pprev}${prev} == "--with-models=" ]] ; then
         local available_models=$(__find_created_models)
-        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-models=" "$available_models") )
+        COMPREPLY=( $(__select_from_comma_list "${pprev}" "${prev}" "${cur}" "--with-models=" "all $available_models") )
         return 0
     fi
 
@@ -398,6 +401,7 @@ _createmodel()
 --sarah-model=
 --with-math-cmd=
 --enable-debug
+--disable-debug
 --force
 --help
 "
