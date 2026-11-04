@@ -254,6 +254,7 @@ public:
    void put_warnings(MLINK link) const;
    void put_model_spectra(MLINK link) const;
    void put_higgstools_results(MLINK, std::optional<SignalResult> const&, std::vector<std::tuple<int, double, double, std::string>> const&) const;
+   void put_lilith_results(MLINK, std::optional<SignalResult> const&) const;
    void put_unitarity(MLINK link) const;
    void calculate_spectrum();
    void check_spectrum(MLINK link) const;
@@ -771,6 +772,27 @@ void Model_data::put_observables(MLINK link) const
 }
 @putDecaysFunction@
 @putEffCFunction@
+
+#ifdef ENABLE_LILITH
+void Model_data::put_lilith_results(MLINK link, std::optional<SignalResult> const& ll) const
+{
+   MLPutFunction(link, "List", 1);
+   MLPutRule(link, "@ModelName@");
+   if (ll.has_value()) {
+      SignalResult ll_ = ll.value();
+      MLPutFunction(link, "List", 5);
+      MLPutRuleTo(link, static_cast<int>(ll_.ndof), "ndof");
+      MLPutRuleTo(link, ll_.chi2BSM, "chi2");
+      MLPutRuleTo(link, ll_.chi2SM, "chi2SM");
+      MLPutRuleTo(link, ll_.pval1d, "pval1d");
+      MLPutRuleTo(link, ll_.pval2d, "pval2d");
+   }
+   else {
+      MLPutFunction(link, "List", 0);
+   }
+   MLEndPacket(link);
+}
+#endif
 
 #ifdef ENABLE_HIGGSTOOLS
 void Model_data::put_higgstools_results(MLINK link, std::optional<SignalResult> const& hs, std::vector<std::tuple<int, double, double, std::string>> const& hb) const
@@ -1325,6 +1347,7 @@ DLLEXPORT int FS@ModelName@CallLilith(
       auto& data = find_data(hid);
       std::optional<flexiblesusy::SignalResult> ll =
          call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), llDbFile);
+      data.put_lilith_results(link, ll);
    } catch (const flexiblesusy::Error& e) {
       put_message(link, "FS@ModelName@CallLilith", "error", e.what());
       put_error_output(link);
