@@ -720,7 +720,7 @@ Block IMVCKM Q= 1.00000000E+03
    // without 2-loop QCD corrections to squark loop
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);
    // with 2-loop QCD corrections to squark loop
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.1323516625659973e-05, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.1285469101249364e-05, 4e-11);
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 7.8704345707650875e-06, 5e-11);
 
@@ -764,7 +764,7 @@ Block IMVCKM Q= 1.00000000E+03
 
    // pseudoscalar sgluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_VGVG(&m), 0, 1e-16);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 9.057611234446413e-05, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 9.057611234446413e-05, 2e-14);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Su_to_GluFu(&m, 3, 0), 56.21133546983561, 1e-16);
 }

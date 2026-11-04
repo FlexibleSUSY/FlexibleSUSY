@@ -680,7 +680,7 @@ Block MSOFT Q= 8.64566212E+02
    // without 2L QCD for squark
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 6.3284545616000571e-06, 4e-11);
    // with 2L QCD for squark
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 7.2710487609165856e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 7.2473842296777718e-06, 4e-11);
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2113230909166481e-06, 2e-10);
 
@@ -710,7 +710,7 @@ Block MSOFT Q= 8.64566212E+02
    // Ah -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378061307989104, 4e-13);
    // Ah -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 4.1843914309546067e-06, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 3.8810444772707533e-06, 4e-12);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections

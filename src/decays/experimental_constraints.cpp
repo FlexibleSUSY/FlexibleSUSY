@@ -153,7 +153,7 @@ void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double ma
       // set SM λ such that mhSM == mass
       auto match_Higgs_mass = [&sm, mass](double x) {
          sm.set_Lambdax(x);
-         sm.calculate_DRbar_masses(); // internaly calls solve_ewsb_tree_level()
+         sm.calculate_DRbar_masses(); // internally calls solve_ewsb_tree_level()
          sm.solve_ewsb();
          sm.calculate_Mhh_pole();
          return std::abs(sm.get_physical().Mhh - mass);
@@ -252,7 +252,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
       const double mass = el.mass;
       // in the SM, λ = (mh/v)^2/2
       // for mh > 650 GeV this gives λ > 4
-      // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
+      // it probably makes no sense to use coupling strength modifiers in this case so we skip those particles
       // On the other hand there's a problem with finding a SM equivalent of very light states
       if (mass > 650 || mass < 1) {
          VERBOSE_MSG("Cannot construct normalization for effective coupling of " + el.particle + " with mass of " + std::to_string(mass) + " GeV");
@@ -351,7 +351,7 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
 
       effectiveCouplingInput(s, effc, refModel, calcggH, calcHgamgam);
 
-      // Effective coupligs below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
+      // Effective couplings below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
       // (note that this is different than couplings like gg, WW etc)
       // so taking a norm gives a total partial width
       s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu.second));
