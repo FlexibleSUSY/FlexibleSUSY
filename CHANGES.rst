@@ -9,6 +9,8 @@ New features
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
   accordingly.
+* Lilith is no longer accessible only via the command-line interface (see
+  footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
 Fixed bugs
 ----------
@@ -17,9 +19,13 @@ Fixed bugs
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
 
-* Fixed swapped up- and down-quark entries in the blocks
+* [commit 87728f8]: Fixed swapped up- and down-quark entries in the blocks
   ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
 
+* [commit 580274c]: Fixed crashes of the Mathematica kernel when calling Lilith
+  through the Mathematica interface. This could happen on the first call, if
+  numpy is linked to the system BLAS and LAPACK libraries, and on every later
+  call in the same kernel.
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
