@@ -39,7 +39,10 @@ Fixed bugs
   call in the same kernel.
 
 * [commit c053bce2f]: The Mathematica function ``FS<Model>CallLilith`` now returns
-  the result of the Lilith call.
+  the result of the Lilith call. Together with the fix above, this lifts the
+  restriction stated in footnote 2 of
+  [`2603.12119 <https://arxiv.org/abs/2603.12119>`_], so Lilith is no longer
+  accessible only via the command-line interface.
 
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
