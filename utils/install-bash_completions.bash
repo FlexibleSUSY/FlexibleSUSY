@@ -116,9 +116,14 @@ _configure()
 --enable-compile
 --enable-compiler-warnings
 --enable-debug
+--enable-feynarts
 --enable-fflite
+--enable-formcalc
+--enable-gm2calc
+--enable-higgstools
 --enable-himalaya
 --enable-librarylink
+--enable-lilith
 --enable-looptools
 --enable-mass-error-check
 --enable-meta
@@ -134,9 +139,14 @@ _configure()
 --disable-compile
 --disable-compiler-warnings
 --disable-debug
+--disable-feynarts
 --disable-fflite
+--disable-formcalc
+--disable-gm2calc
+--disable-higgstools
 --disable-himalaya
 --disable-librarylink
+--disable-lilith
 --disable-looptools
 --disable-mass-error-check
 --disable-meta
@@ -151,16 +161,27 @@ _configure()
 --with-addons=
 --with-boost-libdir=
 --with-boost-incdir=
+--with-collier-libdir=
+--with-collier-incdir=
+--with-cppflags=
 --with-cxx=
 --with-cxxflags=
 --with-eigen-incdir=
 --with-fc=
 --with-fflags=
 --with-flibs=
+--with-gm2calc-libdir=
+--with-gm2calc-incdir=
 --with-gsl-config=
+--with-higgstools-libdir=
+--with-higgstools-incdir=
 --with-himalaya-libdir=
 --with-himalaya-incdir=
 --with-install-dir=
+--with-lilith=
+--with-llflags=
+--with-lllibs=
+--with-loop-libraries=
 --with-looptools-libdir=
 --with-looptools-incdir=
 --with-math-cmd=
@@ -195,6 +216,30 @@ _configure()
     # handle --with-solvers=
     if [[ ${prev}${cur} == "--with-solvers=" || ${pprev}${prev} == "--with-solvers=" ]] ; then
         COMPREPLY=( $(__select_from_list "${pprev}" "${prev}" "${cur}" "--with-solvers=" "two_scale lattice") )
+        return 0
+    fi
+
+    # handle --with-loop-libraries=
+    if [[ ${prev}${cur} == "--with-loop-libraries=" || ${pprev}${prev} == "--with-loop-libraries=" ]] ; then
+        COMPREPLY=( $(__select_from_list "${pprev}" "${prev}" "${cur}" "--with-loop-libraries=" "collier looptools fflite") )
+        return 0
+    fi
+
+    # handle --with-cppflags=
+    if [[ ${prev}${cur} == "--with-cppflags=" || ${pprev}${prev} == "--with-cppflags=" ]] ; then
+        COMPREPLY=()
+        return 0
+    fi
+
+    # handle --with-llflags=
+    if [[ ${prev}${cur} == "--with-llflags=" || ${pprev}${prev} == "--with-llflags=" ]] ; then
+        COMPREPLY=()
+        return 0
+    fi
+
+    # handle --with-lllibs=
+    if [[ ${prev}${cur} == "--with-lllibs=" || ${pprev}${prev} == "--with-lllibs=" ]] ; then
+        COMPREPLY=()
         return 0
     fi
 
