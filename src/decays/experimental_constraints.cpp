@@ -113,13 +113,9 @@ double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& 
 </reducedcouplings>
 </lilithinput>)";
 
-   Py_Initialize();
-
    PyObject* lilithcalc2 = initialize_lilith(const_cast<char*>(lilithdb.c_str()));
    lilith_readuserinput(lilithcalc2, const_cast<char*>(XMLinputstring.c_str()));
    const double my_likelihood = lilith_computelikelihood(lilithcalc2);
-
-   Py_Finalize();
 
    return my_likelihood;
 }
@@ -485,7 +481,18 @@ std::optional<SignalResult> call_lilith(
     XMLinputstring += "</lilithinput>\n";
     VERBOSE_MSG("Lilith input: \n" << XMLinputstring);
 
+    // Python stays initialized for the lifetime of the process, because numpy
+    // can't be imported again after Py_Finalize. This function can be called
+    // repeatedly through the Mathematica interface.
     Py_Initialize();
+
+    // A Mathematica kernel exposes its ILP64 MKL under the standard BLAS and
+    // LAPACK names. Without RTLD_DEEPBIND, numpy can resolve these to MKL and
+    // crash, as it passes 32-bit integers.
+    PyRun_SimpleString(
+       "import os, sys\n"
+       "if hasattr(os, 'RTLD_DEEPBIND'):\n"
+       "    sys.setdlopenflags(os.RTLD_NOW | os.RTLD_DEEPBIND)\n");
 
     // Creating an object of the class Lilith: lilithcalc
     PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));
@@ -497,8 +504,6 @@ std::optional<SignalResult> call_lilith(
     const std::size_t exp_ndf = static_cast<std::size_t>(lilith_exp_ndf(lilithcalc));
     const double mhSMref = physical_input.get(Physical_input::mh_pole);
     const double sm_likelihood = minChi2SM_lilith(mhSMref, cpEvenHiggs, lilith_db);
-
-    Py_Finalize();
 
     const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
     const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
