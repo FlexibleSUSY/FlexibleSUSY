@@ -796,6 +796,7 @@ ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_SH += \
 		$(DIR)/test_flexiblesusy-config.sh
 TEST_META += \
+		$(DIR)/test_SM_librarylink_invalid_paths.m \
 		$(DIR)/test_SM_observable_problems.m
 endif
 
