@@ -102,7 +102,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
        flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
    ) {
       neutral_higgs_effc.add_coupling(
-         field_as_string<Ah>(in_idx),
+         field_as_string<PseudoscalarHiggs>(in_idx),
          {21, 21},
          std::pair<std::string, double> {tag, std::sqrt(result)},
          result
