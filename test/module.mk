@@ -51,9 +51,9 @@ TEST_SRC := \
 		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_array_view.cpp \
 		$(DIR)/test_cast_model.cpp \
+		$(DIR)/test_effective_coupling_list.cpp \
 		$(DIR)/test_ckm.cpp \
 		$(DIR)/test_composite_root_finder.cpp \
-		$(DIR)/test_effective_coupling_list.cpp \
 		$(DIR)/test_logger.cpp \
 		$(DIR)/test_derivative.cpp \
 		$(DIR)/test_eigen_utils.cpp \
