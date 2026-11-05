@@ -5,7 +5,7 @@ New features
 ------------
 
 * Moved to C++20. This increased the minimal supported version of compilers to
-  g++ >= 8.0.0 or clang++ >= 10.0.0.
+  g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
   accordingly.

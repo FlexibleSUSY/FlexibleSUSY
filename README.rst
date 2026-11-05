@@ -102,7 +102,8 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++20 compiler (g++ >= 8.0.0 or clang++ >= 10.0.0 or icpc >= 18.0.0)
+* C++20 compiler (g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10
+  or icpc >= 18.0.0)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
