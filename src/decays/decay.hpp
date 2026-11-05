@@ -88,9 +88,10 @@ public:
    std::pair<std::string, std::complex<double>> ee {};
    std::pair<std::string, std::complex<double>> mumu {};
    std::pair<std::string, std::complex<double>> tautau {};
-   std::pair<std::string, std::complex<double>> emu {};
-   std::pair<std::string, std::complex<double>> etau {};
-   std::pair<std::string, std::complex<double>> mutau {};
+   // sums of the partial widths of both charge combinations, in GeV
+   double emu_width {0.};
+   double etau_width {0.};
+   double mutau_width {0.};
    std::pair<std::string, double> WW {};
    std::pair<std::string, double> ZZ {};
    std::pair<std::string, double> Zgam {};
