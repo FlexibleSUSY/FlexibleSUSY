@@ -168,7 +168,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                      const auto CSuu = HQQbarVertexDR_S/muqDR;
                      if (!is_zero(CSuu)) {
                         const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
-                        const auto CStu = Httbar_P/context.mass<Fu>({2});
+                        const auto CStu = Httbar_P/context.mass<UpTypeQuark>({2});
                         deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
                      }
                   }
