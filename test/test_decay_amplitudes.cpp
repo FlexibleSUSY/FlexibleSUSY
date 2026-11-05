@@ -5,6 +5,8 @@
 
 #include "decays/decay_amplitudes.hpp"
 
+#include <complex>
+
 using namespace flexiblesusy;
 
 namespace {
