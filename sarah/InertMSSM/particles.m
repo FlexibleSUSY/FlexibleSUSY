@@ -84,7 +84,7 @@ ParticleDefinitions[GaugeES] = {
                     ElectricCharge -> 0
                   }},
       {InertCha,  { Description -> "inert Charginos",
-                    PDG -> { 1000085, 1000086, 1000087, 1000088 },
+                    PDG -> { 1000085, 1000086 },
                     ElectricCharge -> -1
                   }},
       {InertHpm,  { Description -> "inert charged Higgs",
@@ -107,6 +107,8 @@ ParticleDefinitions[GaugeES] = {
        {L0,   { Description -> "Neutralino Weyl-Spinor"}},
        {Lm,   { Description -> "Negative Chargino Weyl-Spinor"}},
        {Lp,   { Description -> "Positive Chargino Weyl-Spinor"}},
+       {LHm,  { Description -> "Negative inert Chargino Weyl-Spinor"}},
+       {LHp,  { Description -> "Positive inert Chargino Weyl-Spinor"}},
        {fG,   { Description ->"Gluino Weyl-Spinor"}},
        {fWB,  { Description ->"Wino Weyl-Spinor"}},
        {fW0,  { Description ->"Neutral Wino" }},
