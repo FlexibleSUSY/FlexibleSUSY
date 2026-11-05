@@ -143,12 +143,9 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
 
       templateWrapperDecl =
          "template <typename Fj, typename Fi, typename V>\n" <>
-         "std::enable_if_t<\n" <>
-            IndentText[
-               "std::is_same_v<Fj, " <> CXXNameOfField[Fj, prefixNamespace->defPrefix] <> "> && std::is_same_v<Fi, " <> CXXNameOfField[Fi, prefixNamespace->defPrefix] <> "> && std::is_same_v<V, " <> CXXNameOfField[V, prefixNamespace->defPrefix] <> ">,\n" <>
-               "std::valarray<std::complex<double>>\n"
-            ] <> ">\n" <>
-            "calculate_form_factors(" <>
+         "requires (std::is_same_v<Fj, " <> CXXNameOfField[Fj, prefixNamespace->defPrefix] <> "> && std::is_same_v<Fi, " <> CXXNameOfField[Fi, prefixNamespace->defPrefix] <> "> && std::is_same_v<V, " <> CXXNameOfField[V, prefixNamespace->defPrefix] <> ">)\n" <>
+         "std::valarray<std::complex<double>>\n" <>
+         "calculate_form_factors(" <>
             IndentText[
                If[TreeMasses`GetDimension[Fj] =!= 1,
                   "int, ",
@@ -163,12 +160,9 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
 
       templateWrapperDef =
          "template <typename Fj, typename Fi, typename V>\n" <>
-         "std::enable_if_t<\n" <>
-            IndentText[
-               "std::is_same_v<Fj, " <> CXXNameOfField[Fj] <> "> && std::is_same_v<Fi, " <> CXXNameOfField[Fi] <> "> && std::is_same_v<V, " <> CXXNameOfField[V] <> ">,\n" <>
-               "std::valarray<std::complex<double>>\n"
-            ] <> ">\n" <>
-            "calculate_form_factors(" <>
+         "requires (std::is_same_v<Fj, " <> CXXNameOfField[Fj, prefixNamespace->defPrefix] <> "> && std::is_same_v<Fi, " <> CXXNameOfField[Fi, prefixNamespace->defPrefix] <> "> && std::is_same_v<V, " <> CXXNameOfField[V, prefixNamespace->defPrefix] <> ">)\n" <>
+         "std::valarray<std::complex<double>>\n" <>
+         "calculate_form_factors(" <>
             IndentText[
                If[TreeMasses`GetDimension[Fj] =!= 1,
                   "int generationIndex1, ",
