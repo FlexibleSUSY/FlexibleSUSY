@@ -2622,8 +2622,8 @@ double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 StringRiffle[
 (
 "template <typename Lepton>
-std::enable_if_t<std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">, double>
-lepton_pole_mass(const softsusy::QedQcd& qedqcd)
+requires std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">
+double lepton_pole_mass(const softsusy::QedQcd& qedqcd)
 {\n" <>
 TextFormatting`IndentText[
    Switch[#,
