@@ -413,12 +413,18 @@ std::optional<SignalResult> call_lilith(
    Physical_input const& physical_input,
    std::string const& lilith_db) {
 
-   // Lilith requires Higgs mass to be in range [123, 128]
+   // Lilith requires Higgs mass to be in range [123, 128].
+   // A state with a zero width has only vanishing couplings, so it gives no signal.
+   // It has to be left out, as Lilith's result would be NaN because of a division by
+   // its width, even if there are other Higgs bosons.
+   const auto use_in_lilith = [](NeutralHiggsEffectiveCouplings const& el) {
+      return el.mass >= 123.0 && el.mass <= 128.0 && el.width != 0.;
+   };
+
    bool higgs_in_range = false;
    bool cpEvenHiggs = false;
    for (auto const& el : bsm_input) {
-      const double mh = el.mass;
-      if (mh > 123.0 && mh < 128.0) {
+      if (use_in_lilith(el)) {
          higgs_in_range = true;
          cpEvenHiggs = (el.CP == 1);
       }
@@ -433,8 +439,9 @@ std::optional<SignalResult> call_lilith(
 
    for (auto const& el : bsm_input) {
 
+      if (!use_in_lilith(el)) continue;
+
       const double mh = el.mass;
-      if (mh < 123.0 || mh > 128.0) continue;
 
       XMLinputstring += "<reducedcouplings part=\"" + el.particle +  "\">\n";
       XMLinputstring += "<mass>" + std::to_string(mh) + "</mass>\n";
