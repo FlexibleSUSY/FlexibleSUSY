@@ -41,8 +41,8 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <random>
 #include <system_error>
 
@@ -386,11 +386,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
          );
          hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
       }
-   }
-   else if (higgsbounds_dataset.empty()) {
+   } else if (higgsbounds_dataset.empty()) {
       WARNING("Warning: no HiggsBounds database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsBounds database at " + higgsbounds_dataset);
    }
 
@@ -403,11 +401,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
       const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
       hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
-   }
-   else if (higgssignals_dataset.empty()) {
+   } else if (higgssignals_dataset.empty()) {
       WARNING("Warning: no HiggsSignals database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsSinglas database at " + higgssignals_dataset);
    }
 
