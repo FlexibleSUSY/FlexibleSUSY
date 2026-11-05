@@ -27,6 +27,12 @@ Fixed bugs
   numpy is linked to the system BLAS and LAPACK libraries, and on every later
   call in the same kernel.
 
+* [commit 465e7c5]: Fixed the charged inert higgsinos in the InertMSSM, which
+  were mixed across opposite electric charges into Majorana-type states. The
+  model now has 2 Dirac inert charginos with mass matrix
+  :math:`\mu'^T`, and SARAH no longer reports charge-violating vertices
+  (`#563 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/563>`_).
+
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
 
