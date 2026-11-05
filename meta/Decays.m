@@ -1596,13 +1596,15 @@ FeynArtsTopologyName[topology_] :=
       _, Print["Error: Cannot map topology to FeynArts name"]; Quit[1]
    ];
 
-WrapCodeInLoop[indices_, code_] :=
+(* checks[[i]] is placed at the top of the i-th loop, so that it skips all inner loops if it fails *)
+WrapCodeInLoop[indices_, checks_, code_] :=
    (
       "\n// loops over vertices' indices\n" <>
       StringJoin@@(MapIndexed[
       Nest[
          TextFormatting`IndentText,
          "for (const auto& index" <> ToString@#1 <> ": index_range<vertex" <> ToString@#1 <> ">()) {\n" <>
+            TextFormatting`IndentText[checks[[First@#2]]] <>
             If[First@#2===Length[indices], "\n" <> TextFormatting`IndentText[code], ""],
          First@#2 -1
       ]&,
@@ -1618,7 +1620,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    Module[{(*vertices, *)indices, cppVertices,
       mass = {}, translation, fieldAssociation,
       externalEdges,
-      matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
+      indexChecks, addIndexCheck, functionBody = "",
       verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
       verticesForFACp2,
       (* colour triplet fermions *)
@@ -1699,19 +1701,23 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
          ];
 
       verticesInFieldTypesForFACpCpSorted = MapIndexed[Permute[#1, FindPermutation[verticesForFACp[[First@#2]], verticesForFACp2[[First@#2]]]]&, verticesInFieldTypesForFACp];
-        matchExternalFieldIndicesCode = StringJoin@@(With[{
-          positions = Position[verticesInFieldTypesForFACpCpSorted /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
+      (* An index check is added to the loop over the last vertex it depends on *)
+      indexChecks = ConstantArray["", Length@indices];
+      addIndexCheck[vertex_Integer, check_String] :=
+         indexChecks[[vertex]] = indexChecks[[vertex]] <> "if (" <> check <> ")\n" <> TextFormatting`IndentText["continue;\n"];
+
+      (* skip indices that don't match external indices *)
+      With[{
+         positions = Position[verticesInFieldTypesForFACpCpSorted /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
         },
-If[Length@positions =!= 1, Quit[1]];
-                  "const auto externalFieldIndicesIn" <> ToString[#] <>
-                  " = vertex" <>
-                  ToString@indices[[ positions[[1,1]] ]] <>
-               "::template indices_of_field<" <>
-                  ToString@Utils`MathIndexToCPP@positions[[1,2]] <>
-                  ">(index" <>
-                  ToString@indices[[ positions[[1,1]]]] <> ");\n"
-                ]& /@ Range[3]
-        );
+        If[Length@positions =!= 1, Quit[1]];
+        addIndexCheck[
+           positions[[1,1]],
+           "vertex" <> ToString@indices[[positions[[1,1]]]] <> "::template indices_of_field<" <>
+              ToString@Utils`MathIndexToCPP@positions[[1,2]] <> ">(index" <> ToString@indices[[positions[[1,1]]]] <> ")" <>
+              " != idx_" <> ToString[#]
+        ]
+      ]& /@ Range[3];
 
       (* NOTE! Position has a weird feature that
          Position[{{x}}, x] = {{1, 1}} and
@@ -1735,22 +1741,19 @@ If[Length@positions =!= 1, Quit[1]];
             Range[4, Length@fieldAssociation]
          ];
 
+      (* connect internal particles in vertices *)
       With[{
         positions = Position[verticesInFieldTypesForFACpCpSorted/. -f_[n_] :> Field[n] /. f_[n_] :> Field[n], Field[#]]
          },
         If[Length@positions =!= 2, Quit[1]];
-            matchInternalFieldIndicesCode = matchInternalFieldIndicesCode <>
-                "if (vertex" <> ToString@indices[[positions[[1,1]]]] <> "::template indices_of_field<" <>
-
-                ToString@Utils`MathIndexToCPP@positions[[1,2]] <>
-
-                ">(index"<> ToString@indices[[positions[[1,1]]]] <> ")" <>
-
-                " != " <>
-                "vertex" <> ToString@indices[[positions[[2,1]]]] <> "::template indices_of_field<" <>
-                ToString@Utils`MathIndexToCPP@positions[[2,2]] <>
-
-                ">(index"<> ToString@indices[[positions[[2,1]]]] <> "))\n" <> TextFormatting`IndentText["continue;\n"] <> "\n"
+        addIndexCheck[
+           Max[positions[[1,1]], positions[[2,1]]],
+           "vertex" <> ToString@indices[[positions[[1,1]]]] <> "::template indices_of_field<" <>
+              ToString@Utils`MathIndexToCPP@positions[[1,2]] <> ">(index" <> ToString@indices[[positions[[1,1]]]] <> ")" <>
+              " != " <>
+              "vertex" <> ToString@indices[[positions[[2,1]]]] <> "::template indices_of_field<" <>
+              ToString@Utils`MathIndexToCPP@positions[[2,2]] <> ">(index" <> ToString@indices[[positions[[2,1]]]] <> ")"
+        ]
       ]& /@ Range[4, Length@fieldAssociation];
 
       (* body of nested loops over vertices indices *)
@@ -1777,15 +1780,6 @@ If[Length@positions =!= 1, Quit[1]];
 
                },
          functionBody =
-                  "// skip indices that don't match external indices\n" <>
-                  matchExternalFieldIndicesCode <>
-                     "\nif (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)\n" <>
-                     TextFormatting`IndentText["continue;"] <>
-                     "\n\n" <>
-
-                  "// connect internal particles in vertices\n" <>
-                  matchInternalFieldIndicesCode <>
-
                      StringJoin[(
                         "auto const vertex" <> # <> "Val = " <>
                         "vertex" <> # <> "::evaluate(index" <>
@@ -1941,7 +1935,7 @@ If[Length@positions =!= 1, Quit[1]];
                   ToString @ N[cf, 16] <> "}"
             ]
          ] <> ";\n" <>
-         WrapCodeInLoop[indices, functionBody]
+         WrapCodeInLoop[indices, indexChecks, functionBody]
                ] <>
          "}\n"
       }
