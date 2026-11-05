@@ -21,27 +21,9 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
    if ((x > 1.0 && offshell_VV_decays != 0) ||
        (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
-      // integrand
       static constexpr double GammaZ = 2.4952;
-      struct hVV_4body_params params = {mHOS, mZOS, GammaZ};
-      gsl_monte_function G = {&hVV_4body, 2, &params};
-
-      // setup integration
-      gsl_rng_env_setup ();
-      double xl[2] = {0, 0};
-      double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
-      // this gives relative error < 0.05%
-      static constexpr size_t calls = 1'000'000;
-      double err;
-      const gsl_rng_type *T = gsl_rng_default;
-      gsl_rng *r = gsl_rng_alloc (T);
-      gsl_monte_miser_state *s = gsl_monte_miser_alloc (2);
-      gsl_monte_miser_integrate (&G, xl, xu, 2, calls, r, s,
-                                 &res, &err);
-
-      // clean-up
-      gsl_monte_miser_free (s);
-      gsl_rng_free (r);
+      const auto integral = hVV_4body(mHOS, mZOS, GammaZ);
+      res = integral.value;
 
       // prefactor
       const auto indices = concatenate(indexIn, indexOut2, indexOut1);
@@ -49,8 +31,7 @@ double CLASSNAME::get_partial_width<Higgs,ZBoson,ZBoson>(
          Vertex<Higgs, ZBoson, ZBoson>::evaluate(indices, context).value();
       const double normalization = 1./(64.*Cube(Pi)) * std::norm(ghZZ) * Cube(mHOS)/Power4(mZOS)/2.;
       res *= normalization;
-      err *= normalization;
-      const double rel_err = err/res;
+      const double rel_err = integral.error*normalization/res;
       static constexpr double errorThresholdPerc = 0.1;
       if (rel_err*100 > errorThresholdPerc) {
          problems.add_warning(
