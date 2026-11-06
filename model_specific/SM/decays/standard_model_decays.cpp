@@ -37,7 +37,6 @@
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/list.hpp>
 #include <boost/hana/size.hpp>
-#include <gsl/gsl_monte_miser.h>
 
 #include "standard_model_decays.hpp"
 #include "standard_model.hpp"

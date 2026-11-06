@@ -22,7 +22,12 @@
 
 #include <boost/functional/hash.hpp>
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
+
 #include <algorithm>
+#include <cmath>
+#include <memory>
 #include <sstream>
 
 #include "string_utils.hpp"
@@ -139,18 +144,101 @@ std::string strip_field_namespace(std::string const& s) {
    }
 }
 
-double hVV_4body(double *q2, size_t /* dim */, void *params)
+namespace {
+
+constexpr double hVV_4body_rel_tolerance = 1e-3;
+constexpr std::size_t hVV_4body_max_intervals = 200;
+
+struct HVV_4body_parameters {
+   double mH{};
+   double mV_sq{};
+   double mV_GammaV{};
+   gsl_integration_workspace* inner_workspace{nullptr};
+   double q1_sq{};
+
+   double t_from_q_sq(double q_sq) const { return std::atan((q_sq - mV_sq)/mV_GammaV); }
+   double q_sq_from_t(double t) const { return mV_sq + mV_GammaV*std::tan(t); }
+};
+
+double hVV_4body_inner(double t2, void* params)
 {
-  struct hVV_4body_params * fp = static_cast<struct hVV_4body_params*>(params);
-  const double mHOS = fp->mHOS;
-  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
-  const double mVOS = fp->mVOS;
-  const double GammaV = fp->GammaV;
-  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
-  return
-     mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
-     * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
-     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
+   const auto* p = static_cast<const HVV_4body_parameters*>(params);
+   const double mH_sq = Sqr(p->mH);
+   const double q2_sq = p->q_sq_from_t(t2);
+   const double kl = KallenLambda(1., p->q1_sq/mH_sq, q2_sq/mH_sq);
+
+   return kl > 0. ? std::sqrt(kl)*(kl + 12.*p->q1_sq*q2_sq/Power4(p->mH)) : 0.;
+}
+
+double hVV_4body_outer(double t1, void* params)
+{
+   auto* p = static_cast<HVV_4body_parameters*>(params);
+   p->q1_sq = p->q_sq_from_t(t1);
+
+   if (p->q1_sq <= 0. || p->q1_sq >= Sqr(p->mH)) {
+      return 0.;
+   }
+
+   gsl_function inner;
+   inner.function = &hVV_4body_inner;
+   inner.params = params;
+
+   double result = 0.;
+   double error = 0.;
+   gsl_integration_qag(
+      &inner, p->t_from_q_sq(0.), p->t_from_q_sq(Sqr(p->mH - std::sqrt(p->q1_sq))),
+      0., hVV_4body_rel_tolerance/3., hVV_4body_max_intervals, GSL_INTEG_GAUSS21,
+      p->inner_workspace, &result, &error);
+
+   return result;
+}
+
+} // anonymous namespace
+
+/**
+ * Integral over the virtualities of both vector bosons in H -> V* V*.
+ *
+ * The substitution q^2 = mV^2 + mV GammaV tan(t) turns each Breit-Wigner
+ * factor times dq^2 into dt, which removes the resonance peaks from the
+ * integrand.
+ *
+ * @param mH mass of the decaying Higgs boson
+ * @param mV mass of the vector boson
+ * @param GammaV width of the vector boson
+ *
+ * @return value of the integral and estimate of its absolute error
+ */
+HVV_4body_result hVV_4body(double mH, double mV, double GammaV)
+{
+   using Workspace = std::unique_ptr<gsl_integration_workspace, decltype(&gsl_integration_workspace_free)>;
+
+   const Workspace outer_workspace(
+      gsl_integration_workspace_alloc(hVV_4body_max_intervals), &gsl_integration_workspace_free);
+   const Workspace inner_workspace(
+      gsl_integration_workspace_alloc(hVV_4body_max_intervals), &gsl_integration_workspace_free);
+
+   HVV_4body_parameters params{mH, Sqr(mV), mV*GammaV, inner_workspace.get()};
+
+   gsl_function outer;
+   outer.function = &hVV_4body_outer;
+   outer.params = &params;
+
+   HVV_4body_result result;
+
+   // By default, GSL aborts if the requested precision is not reached.
+   // The caller checks the error estimate instead.
+   gsl_error_handler_t* error_handler = gsl_set_error_handler_off();
+   const int status = gsl_integration_qag(
+      &outer, params.t_from_q_sq(0.), params.t_from_q_sq(Sqr(mH)),
+      0., hVV_4body_rel_tolerance, hVV_4body_max_intervals, GSL_INTEG_GAUSS21,
+      outer_workspace.get(), &result.value, &result.error);
+   gsl_set_error_handler(error_handler);
+
+   if (status != GSL_SUCCESS) {
+      result.error = std::max(result.error, std::abs(result.value));
+   }
+
+   return result;
 }
 
 void EffectiveCoupling_list::set_invisible_width(std::string const& p, double c) {
