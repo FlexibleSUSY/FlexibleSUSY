@@ -171,7 +171,7 @@ public:
 
       const auto pos = decays.find(decay_hash);
       if (pos != std::end(decays)) {
-         total_width -= pos->second.get_width();
+         total_width -= std::abs(pos->second.get_width());
          pos->second.set_width(width);
       } else {
          decays.insert(pos, std::make_pair(decay_hash, std::move(decay)));
