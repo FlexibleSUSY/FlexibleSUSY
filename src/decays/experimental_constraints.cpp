@@ -41,9 +41,10 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <random>
+#include <system_error>
 
 #ifdef ENABLE_HIGGSTOOLS
 #include "Higgs/Predictions.hpp"
@@ -55,6 +56,13 @@ namespace HP = Higgs::predictions;
 namespace flexiblesusy {
 
 namespace {
+
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
+}
 
 // Whether to calculate the X->gaga and X->gg decay widths in terms of the
 // effective tree-level couplings (calcHgamgam=calcggH=true) or by rescaling
@@ -368,7 +376,7 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
    }
 
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
-   if (std::filesystem::exists(higgsbounds_dataset)) {
+   if (path_exists(higgsbounds_dataset)) {
       auto bounds = Higgs::Bounds {higgsbounds_dataset};
       auto hbResult = bounds(pred);
       for (auto const& _hb: hbResult.selectedLimits) {
@@ -378,16 +386,14 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
          );
          hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
       }
-   }
-   else if (higgsbounds_dataset.empty()) {
+   } else if (higgsbounds_dataset.empty()) {
       WARNING("Warning: no HiggsBounds database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsBounds database at " + higgsbounds_dataset);
    }
 
    std::optional<SignalResult> hs_return;
-   if (std::filesystem::exists(higgssignals_dataset)) {
+   if (path_exists(higgssignals_dataset)) {
       const auto signals = Higgs::Signals {higgssignals_dataset};
       const double hs_chisq = signals(pred);
       const double mhSMref = physical_input.get(Physical_input::mh_pole);
@@ -395,11 +401,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
       const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
       hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
-   }
-   else if (higgssignals_dataset.empty()) {
+   } else if (higgssignals_dataset.empty()) {
       WARNING("Warning: no HiggsSignals database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsSinglas database at " + higgssignals_dataset);
    }
 

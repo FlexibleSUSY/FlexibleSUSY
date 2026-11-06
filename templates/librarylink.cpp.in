@@ -56,7 +56,9 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <exception>
 #include <filesystem>
+#include <system_error>
 #include <utility>
 
 #define INPUTPARAMETER(p) input.p
@@ -354,6 +356,15 @@ std::string get_string_from(MLINK link)
    MLReleaseString(link, str);
 
    return result;
+}
+
+/******************************************************************/
+
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
 }
 
 /******************************************************************/
@@ -1351,7 +1362,7 @@ DLLEXPORT int FS@ModelName@CallLilith(
    const auto hid = get_handle_from(link);
 
    const std::string llDbFile = get_string_from(link);
-   if (!std::filesystem::exists(llDbFile)) {
+   if (!path_exists(llDbFile)) {
       put_message(link, "FS@ModelName@CallLilith", "error", llDbFile + " is not a valid path");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
@@ -1363,6 +1374,9 @@ DLLEXPORT int FS@ModelName@CallLilith(
          call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), llDbFile);
       data.put_lilith_results(link, ll);
    } catch (const flexiblesusy::Error& e) {
+      put_message(link, "FS@ModelName@CallLilith", "error", e.what());
+      put_error_output(link);
+   } catch (const std::exception& e) {
       put_message(link, "FS@ModelName@CallLilith", "error", e.what());
       put_error_output(link);
    }
@@ -1385,7 +1399,7 @@ DLLEXPORT int FS@ModelName@CallHiggsTools(
    const std::string hsDatabasePath = get_string_from(link);
    const std::string hbDatabasePath = get_string_from(link);
 
-   if (!std::filesystem::exists(hsDatabasePath) && !std::filesystem::exists(hbDatabasePath)) {
+   if (!path_exists(hsDatabasePath) && !path_exists(hbDatabasePath)) {
       put_message(link, "FS@ModelName@CallHiggsTools", "error", hsDatabasePath + " and " + hbDatabasePath + " are not valid paths");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
@@ -1399,6 +1413,9 @@ DLLEXPORT int FS@ModelName@CallHiggsTools(
    } catch (const flexiblesusy::Error& e) {
       std::cerr << e.what_detailed() << std::endl;
       return LIBRARY_FUNCTION_ERROR;
+   } catch (const std::exception& e) {
+      put_message(link, "FS@ModelName@CallHiggsTools", "error", e.what());
+      put_error_output(link);
    }
 
    return LIBRARY_NO_ERROR;
