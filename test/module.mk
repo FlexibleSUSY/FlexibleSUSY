@@ -653,6 +653,11 @@ TEST_SRC += \
 		$(DIR)/test_NSM_low_scale_constraint.cpp
 endif
 
+ifeq ($(WITH_InertMSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_InertMSSM_inert_charginos.cpp
+endif
+
 ifeq ($(WITH_lowMSSM) $(WITH_CMSSM),yes yes)
 TEST_SH += \
 		$(DIR)/test_lowMSSM.sh
@@ -1304,6 +1309,8 @@ $(DIR)/test_SMHighPrecision_two_loop_spectrum.x: $(LIBSMHighPrecision)
 $(DIR)/test_SMSU3_low_scale_constraint.x: $(LIBSMSU3)
 
 $(DIR)/test_NSM_low_scale_constraint.x: $(LIBNSM)
+
+$(DIR)/test_InertMSSM_inert_charginos.x: $(LIBInertMSSM)
 
 $(DIR)/test_VCMSSM_ewsb.x: $(LIBVCMSSM) $(LIBCMSSM)
 
