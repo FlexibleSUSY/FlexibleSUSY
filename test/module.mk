@@ -50,6 +50,7 @@ endif
 TEST_SRC := \
 		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_array_view.cpp \
+		$(DIR)/test_decay_amplitudes.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_ckm.cpp \
 		$(DIR)/test_composite_root_finder.cpp \

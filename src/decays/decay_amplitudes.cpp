@@ -236,7 +236,7 @@ double Decay_amplitude_FFS::square() const
 
    return 0.5 * (m_in_sq + m_f_sq - m_s_sq) *
       (AbsSqr(form_factor_left) + AbsSqr(form_factor_right))
-      + 2. * m_fermion * m_scalar * Re(
+      + 2. * m_decay * m_fermion * Re(
          form_factor_left * Conj(form_factor_right));
 }
 
