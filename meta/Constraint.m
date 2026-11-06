@@ -274,9 +274,27 @@ ApplyConstraints[settings_List, modelPrefix_String:"MODEL->"] :=
            result = Parameters`CreateLocalConstRefs[(#[[2]])& /@ noMacros];
            result = result <> AddBetas[noMacros, modelPrefix];
            result = result <> "\n";
-           (result = result <> ApplyConstraint[#, modelPrefix])& /@ noTemp;
+           result = result <> StringJoin[
+               RemoveRepeatedYukawaCalculations[ApplyConstraint[#, modelPrefix]& /@ noTemp]];
            Return[result];
           ];
+
+(* Setting the elements of a Yukawa matrix one by one from the DR-bar
+   masses, e.g. {Yu[1,1], ... upQuarksDRbar[1,1] ...}, {Yu[2,2], ...},
+   gives one calculate_Yu_DRbar() call per element, although one call
+   sets all of them (issue #665).  Merge consecutive identical calls:
+   nothing happens between them, so this doesn't change the result.
+   Calls separated by other settings are kept, as these settings may
+   change or use the Yukawa couplings. *)
+RemoveRepeatedYukawaCalculations[code_List] :=
+    Module[{isYukawaCalculation},
+           isYukawaCalculation[s_String] :=
+               StringMatchQ[s, "calculate_" ~~ __ ~~ "_DRbar();\n"];
+           isYukawaCalculation[_] := False;
+           Join @@ (If[isYukawaCalculation[First[#]], {First[#]}, #]& /@ Split[code])
+          ];
+
+RemoveRepeatedYukawaCalculations // Utils`MakeUnknownInputDefinition;
 
 ContainsBetas[expr_] := !FreeQ[expr, FlexibleSUSY`BETA];
 

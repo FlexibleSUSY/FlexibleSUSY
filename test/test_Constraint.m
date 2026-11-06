@@ -96,6 +96,43 @@ TestEquality[Constraint`Private`CalculateScaleFromExprSymb[g1 == MZ],
              FullSimplify[currentScale*E^((-g1 + MZ)/(BETA[g1]))]
             ];
 
+Print["testing RemoveRepeatedYukawaCalculations[] ..."];
+
+(* consecutive identical calls are merged; separated calls and other
+   repeated code are kept *)
+TestEquality[Constraint`Private`RemoveRepeatedYukawaCalculations[
+                {"calculate_Yu_DRbar();\n", "calculate_Yu_DRbar();\n", "a = 1;\n",
+                 "a = 1;\n", "calculate_Yu_DRbar();\n", "calculate_Yd_DRbar();\n",
+                 "calculate_Yd_DRbar();\n"}],
+             {"calculate_Yu_DRbar();\n", "a = 1;\n", "a = 1;\n",
+              "calculate_Yu_DRbar();\n", "calculate_Yd_DRbar();\n"}
+            ];
+
+TestEquality[Constraint`Private`RemoveRepeatedYukawaCalculations[{}], {}];
+
+Print["testing ApplyConstraints[] with element-wise Yukawa settings (issue #665) ..."];
+
+SARAH`UpYukawa = Yu;
+SARAH`DownYukawa = Yd;
+
+elementWiseYu = {
+    {Yu[1,1], Sqrt[2] upQuarksDRbar[1,1] / vu},
+    {Yu[2,2], Sqrt[2] upQuarksDRbar[2,2] / vu},
+    {Yu[3,3], Sqrt[2] upQuarksDRbar[3,3] / vu}
+};
+
+TestEquality[StringCount[Constraint`ApplyConstraints[elementWiseYu], "calculate_Yu_DRbar();"], 1];
+
+TestEquality[StringCount[Constraint`ApplyConstraints[{{Yu, Automatic}}], "calculate_Yu_DRbar();"], 1];
+
+(* settings in between may use or change the Yukawas, so separated calls stay *)
+interleaved = Constraint`ApplyConstraints[
+    {elementWiseYu[[1]], elementWiseYu[[2]], {g1, g0}, elementWiseYu[[3]],
+     {Yd[3,3], Sqrt[2] downQuarksDRbar[3,3] / vd}}];
+
+TestEquality[StringCount[interleaved, "calculate_Yu_DRbar();"], 2];
+TestEquality[StringCount[interleaved, "calculate_Yd_DRbar();"], 1];
+
 (* Print["testing for Mathematica 9 bug where the GUT condition cannot be solved ..."]; *)
 (* TestEquality[Solve[(BETA[g1]-BETA[g2]) Log[x/a] == g1-g2, x, Reals], *)
 (*              {{x -> a*E^((g1 - g2)/(BETA[g1] - BETA[g2]))}} *)
