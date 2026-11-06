@@ -99,33 +99,49 @@ double self_energy_higgs_2loop_atau_atau_sm(
 /// SM Higgs tadpole 2-loop, only O(alpha_t alpha_s)
 double tadpole_higgs_2loop_at_as_sm(
    double scale, double mt, double yt, double g3);
+double tadpole_higgs_2loop_at_as_sm_full(
+   double scale, double mt, double yt, double g3);
 
 /// SM Higgs tadpole 2-loop, only O(alpha_b alpha_s)
 double tadpole_higgs_2loop_ab_as_sm(
+   double scale, double mb, double yb, double g3);
+double tadpole_higgs_2loop_ab_as_sm_full(
    double scale, double mb, double yb, double g3);
 
 /// SM Higgs tadpole 2-loop, only O((alpha_b + alpha_t)^2)
 double tadpole_higgs_2loop_at_at_sm(
    double scale, double mt, double yt, double mb);
+double tadpole_higgs_2loop_at_at_sm_full(
+   double scale, double mt, double yt, double mb);
 
 /// SM Higgs tadpole 2-loop, only O(alpha_tau^2)
 double tadpole_higgs_2loop_atau_atau_sm(
+   double scale, double mtau, double ytau);
+double tadpole_higgs_2loop_atau_atau_sm_full(
    double scale, double mtau, double ytau);
 
 /// SM Higgs 2-loop contribution, only O(alpha_t alpha_s)
 double delta_mh_2loop_at_as_sm(
    double p2, double scale, double mt, double yt, double g3);
+double delta_mh_2loop_at_as_sm_full(
+   double p2, double scale, double mt, double yt, double g3);
 
 /// SM Higgs 2-loop contribution, only O(alpha_t alpha_s)
 double delta_mh_2loop_ab_as_sm(
+   double p2, double scale, double mb, double yb, double g3);
+double delta_mh_2loop_ab_as_sm_full(
    double p2, double scale, double mb, double yb, double g3);
 
 /// SM Higgs 2-loop contribution, only O((alpha_b + alpha_t)^2)
 double delta_mh_2loop_at_at_sm(
    double p2, double scale, double mt, double yt, double mb);
+double delta_mh_2loop_at_at_sm_full(
+   double p2, double scale, double mt, double yt, double mb);
 
 /// SM Higgs 2-loop contribution, only O(alpha_tau^2)
 double delta_mh_2loop_atau_atau_sm(
+   double p2, double scale, double mtau, double ytau);
+double delta_mh_2loop_atau_atau_sm_full(
    double p2, double scale, double mtau, double ytau);
 
 /// SM Higgs 1-loop contribution from SUSYHD 1.0.2

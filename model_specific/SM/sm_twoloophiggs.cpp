@@ -18,6 +18,7 @@
 
 #include "sm_twoloophiggs.hpp"
 #include "loop_libraries/loop_library.hpp"
+#include "Li2.hpp"
 
 #include <cmath>
 
@@ -376,6 +377,21 @@ double self_energy_higgs_2loop_ab_as_sm(
  * @return real part of 2-loop self-energy \f$O(\alpha_t \alpha_s)\f$
  */
 double tadpole_higgs_2loop_at_as_sm(
+   double scale, double mt, double yt, double g3)
+{
+   const double yt2 = sqr(yt);
+   const double g32 = sqr(g3);
+   const double t = sqr(mt);
+   const double q = sqr(scale);
+   const double lnt = std::log(t/q);
+
+   const double result =
+      -16 * g32 * t * yt2 * (5 - 5*lnt + 3*sqr(lnt));
+
+   return result * twoLoop;
+}
+
+double tadpole_higgs_2loop_at_as_sm_full(
    double scale, double mt, double yt, double g3)
 {
    const double yt2 = sqr(yt);
