@@ -1,0 +1,57 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_mass_eigenstates_landau_gauge.cpp
+ * @brief implementation of the @ModelName@ model class with tree-level
+ *        masses and mixings in the Landau gauge
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_mass_eigenstates_landau_gauge.hpp"
+#include "config.h"
+#include "eigen_utils.hpp"
+#include "linalg2.hpp"
+#include "wrappers.hpp"
+
+namespace flexiblesusy {
+
+#define CLASSNAME @ModelName@_mass_eigenstates_landau_gauge
+
+CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
+   : @ModelName@_mass_eigenstates(model.get_input())
+{
+   // copy the running parameters only: the pole masses and problems of
+   // the given model may be written concurrently by other threads
+   // during the parallel pole mass calculation
+   @ModelName@_soft_parameters::operator=(model);
+
+   // the SARAH 2-loop diagrams are derived in the gaugeless limit
+@setGaugelessLimit@
+
+   // re-calculate all tree-level masses and mixings (at the
+   // tree-level minimum, as in the given model), now using the
+   // Landau gauge versions of the gauge dependent ones
+   calculate_DRbar_masses();
+}
+
+@massCalculationFunctions@
+
+} // namespace flexiblesusy

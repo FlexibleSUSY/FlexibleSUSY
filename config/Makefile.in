@@ -251,6 +251,9 @@ depend:  $(ALLDEP)
 %.d: %.f | $(DEPGEN)
 	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
+%.d: %.f90 | $(DEPGEN)
+	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+
 %.d: %.F | $(DEPGEN)
 	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
@@ -265,6 +268,9 @@ depend:  $(ALLDEP)
 %.o: %.F
 	@$(MSG)
 	$(Q)$(FC) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
+
+%.o: %.f90
+	$(FC) $(FFLAGS) -c -o $@ $^
 
 distclean::
 	$(Q)-rm -f Makefile

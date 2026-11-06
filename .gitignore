@@ -12,6 +12,8 @@ src/loop_libraries/libcollier_wrapper.mod
 src/loop_libraries/libcollier_wrapper.f90
 src/libfortran_utils.mod
 
+pole2lfunctions.mod
+
 config/config.h
 config/flexiblesusy-version
 config/git_commit

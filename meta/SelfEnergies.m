@@ -39,6 +39,8 @@ The first argument can be
 {particle1[gen1], particle2[gen2]}[lor] for dim>1 fermion multiplet
 ";
 
+FSSelfEnergyMassEigenstates::usage="head of self-energy in mass eigenstates, see FSSelfEnergy for argument list";
+
 FSSelfEnergyDerivative::usage="Head for derivative of self-energy w.r.t. p^2, see FSSelfEnergy for argument list";
 
 (* symbols for derivative of loop functions w.r.t. p^2 *)
@@ -64,6 +66,12 @@ given list of self-energies and tadpoles";
 
 CreateSelfEnergyFunctionName::usage="creates self-energy function name
 for a given field";
+
+CreateLandauGaugeModel::usage="creates a copy of the model with the
+tree-level masses and mixings in the Landau gauge";
+LandauGaugeModelName::usage="name of the Landau gauge copy of the model";
+CreateSelfEnergyMassEigenstateFunctionName::usage="creates function
+name of the self-energy in the mass eigenstate basis for a given field";
 
 CreateHeavySelfEnergyFunctionName::usage="creates heavy self-energy
 function name for a given field";
@@ -114,6 +122,16 @@ ReplaceGhosts::usage="";
 
 Begin["`Private`"];
 
+NPointFunctionQ[_SelfEnergies`Tadpole]                  := True;
+NPointFunctionQ[_SelfEnergies`TadpoleMassEigenstates]   := True;
+NPointFunctionQ[_SelfEnergies`FSSelfEnergy]             := True;
+NPointFunctionQ[_SelfEnergies`FSHeavySelfEnergy]        := True;
+NPointFunctionQ[_SelfEnergies`FSHeavyRotatedSelfEnergy] := True;
+NPointFunctionQ[_SelfEnergies`FSSelfEnergyMassEigenstates] := True;
+NPointFunctionQ[_]                                      := False;
+
+NumberOfLoops[(_[_, expr___])?NPointFunctionQ] := Length[{expr}];
+
 SetSystemOptions[
    "DifferentiationOptions" ->
       "ExcludedFunctions"-> DeleteDuplicates[
@@ -141,8 +159,8 @@ GetExpression[selfEnergy_SelfEnergies`FSSelfEnergyDerivative] :=
 GetExpression[selfEnergy_SelfEnergies`FSHeavySelfEnergy] :=
     selfEnergy[[2]];
 
-GetExpression[selfEnergy_SelfEnergies`FSHeavyRotatedSelfEnergy] :=
-    selfEnergy[[2]];
+GetExpression[s_?NPointFunctionQ, loops_:1] :=
+    s[[1 + loops]];
 
 GetExpression[tadpole_SelfEnergies`Tadpole] :=
     tadpole[[2]];
@@ -161,6 +179,9 @@ GetField[selfEnergy_SelfEnergies`FSHeavyRotatedSelfEnergy] :=
 
 GetField[tadpole_SelfEnergies`Tadpole] :=
     tadpole[[1]];
+
+GetField[s_?NPointFunctionQ] :=
+    s[[1]];
 
 GetField[sym_] :=
     Module[{},
@@ -193,8 +214,8 @@ RemoveParticle[head_[p_,expr_], particle_] :=
 RemoveSMParticles[SelfEnergies`FSSelfEnergy[p_,expr__], _] :=
     SelfEnergies`FSSelfEnergy[p,expr];
 
-RemoveSMParticles[SelfEnergies`Tadpole[p_,expr__], _] :=
-    SelfEnergies`Tadpole[p,expr];
+RemoveSMParticles[(h:(SelfEnergies`Tadpole | SelfEnergies`TadpoleMassEigenstates))[p_,expr__], _] :=
+    h[p,expr];
 
 ExprContainsNonOfTheseParticles[expr_, particles_List] :=
     And @@ (FreeQ[expr,#]& /@ particles);
@@ -248,24 +269,18 @@ CreateMassEigenstateReplacements[] :=
     ];
 
 AppendFieldIndices[lst_List, idx__] :=
-    Module[{k, field, result = lst},
-           For[k = 1, k <= Length[result], k++,
-               field = GetField[result[[k]]];
-               (* self energies or tadpoles *)
-               If[ListQ[field],
-                  If[GetDimension[field[[1]]] > 1,
-                     result[[k,1,1]] = field[[1]][(List@idx)[[1]]];
-                  ];
-                  If[GetDimension[field[[2]]] > 1,
-                     result[[k,1,2]] = field[[2]][(List@idx)[[2]]];
-                  ],
-                  If[GetDimension[field] > 1,
-                     result[[k,1]] = field[idx];
-                  ]
-               ]
-           ];
-           result
-          ];
+    AppendFieldIndicesTo[#,idx]& /@ lst;
+
+(* self energies *)
+AppendFieldIndicesTo[{{field1_, field2_}, ex___}, idx1_, idx2_] :=
+    { { AppendFieldIndexTo[field1, idx1], AppendFieldIndexTo[field2, idx2] }, ex };
+
+(* tadpoles *)
+AppendFieldIndicesTo[{field_, ex___}, idx__] :=
+    { AppendFieldIndexTo[field, idx], ex };
+
+AppendFieldIndexTo[field_, idx__] :=
+    If[GetDimension[field] > 1, field[idx], field];
 
 (* If the external field has dimension 1, remove it's indices.  For
    example in the Glu self-energy, terms appear of the form
@@ -276,12 +291,13 @@ AppendFieldIndices[lst_List, idx__] :=
    therefore not be accessed in the form Glu(gO2).
  *)
 Remove1DimensionalFieldIndices[lst_List] :=
-    Module[{k, fields, result = lst},
+    Module[{k, i, fields, result = lst},
            For[k = 1, k <= Length[result], k++,
                fields = GetField[result[[k]]] /. {f__}[_] :> {f};
                For[i = 1, i <= Length[fields], i++,
                    If[GetDimension[fields[[i]]] == 1,
-                      result[[k,2]] = result[[k,2]] /. fields[[i]][{__}] :> fields[[i]];
+                      (* remove indices from expressions of all loop orders *)
+                      result[[k]] = MapAt[(# /. fields[[i]][{__}] :> fields[[i]])&, result[[k]], 2;;];
                      ];
                   ]
               ];
@@ -290,21 +306,22 @@ Remove1DimensionalFieldIndices[lst_List] :=
 
 (* decompose fermionic self-energies into L,R,S parts *)
 SplitFermionSelfEnergies[lst_List] :=
-    Module[{result = lst, k, field, expr, fermionSE},
+    Module[{result = lst, k, field, exprs, fermionSE},
            (* filter out all fermionic self-energies *)
-           fermionSE = Cases[result, SelfEnergies`FSSelfEnergy[_, List[__]]];
+           fermionSE = Cases[result, SelfEnergies`FSSelfEnergy[_, List[__], ___]];
            result = Select[result, (Head[GetExpression[#]] =!= List)&];
            (* decompose fermionic self-energies into L,R,S parts *)
            For[k = 1, k <= Length[fermionSE], k++,
                field = GetField[fermionSE[[k]]];
-               expr = GetExpression[fermionSE[[k]]];
-               If[Length[expr] != 3,
+               (* expressions of all loop orders, Null = not available *)
+               exprs = List @@ Rest[fermionSE[[k]]] /. Null -> {Null, Null, Null};
+               If[!MatchQ[exprs, {{_, _, _}..}],
                   Print["Error: self-energy of ", field, " does not have 3 parts"];
                   Continue[];
                  ];
-               AppendTo[result, SelfEnergies`FSSelfEnergy[field[1]       , expr[[1]]]];
-               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PR], expr[[2]]]];
-               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PL], expr[[3]]]];
+               AppendTo[result, SelfEnergies`FSSelfEnergy[field[1]       , Sequence @@ exprs[[All,1]]]];
+               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PR], Sequence @@ exprs[[All,2]]]];
+               AppendTo[result, SelfEnergies`FSSelfEnergy[field[SARAH`PL], Sequence @@ exprs[[All,3]]]];
               ];
            result
           ];
@@ -312,20 +329,21 @@ SplitFermionSelfEnergies[lst_List] :=
 ConvertSarahTadpoles[DeleteLightFieldContrubtions[tadpoles_,_,_]] :=
     ConvertSarahTadpoles[tadpoles];
 
-ConvertSarahTadpoles[tadpoles_List] :=
-    Module[{result},
-           result = (SelfEnergies`Tadpole @@@ tadpoles) /. CreateMassEigenstateReplacements[];
-           result = AppendFieldIndices[result, SARAH`gO1];
-           result /. SARAH`Mass -> FlexibleSUSY`M
-          ];
+ConvertSarahTadpoles[tadpoles_List, tadpolesMassEigenstates_List] :=
+    Join[
+        SelfEnergies`Tadpole                @@@ (AppendFieldIndices[tadpoles, SARAH`gO1]),
+        SelfEnergies`TadpoleMassEigenstates @@@ (AppendFieldIndices[tadpolesMassEigenstates, SARAH`gE1])
+    ] /. SARAH`Mass -> FlexibleSUSY`M;
 
-ConvertSarahSelfEnergies[selfEnergies_List] :=
+ConvertSarahSelfEnergies[selfEnergies_List, selfEnergiesMassEigenstates_List] :=
     Module[{result, heavySE,
             tQuark = TreeMasses`GetSMTopQuarkMultiplet[],
             bQuark = TreeMasses`GetSMBottomQuarkMultiplet[]
            },
-           result = (SelfEnergies`FSSelfEnergy @@@ selfEnergies) /. CreateMassEigenstateReplacements[];
-           result = AppendFieldIndices[result, SARAH`gO1, SARAH`gO2];
+           result = Join[
+               SelfEnergies`FSSelfEnergy                @@@ (AppendFieldIndices[selfEnergies, SARAH`gO1, SARAH`gO2]),
+               SelfEnergies`FSSelfEnergyMassEigenstates @@@ (AppendFieldIndices[selfEnergiesMassEigenstates, SARAH`gE1, SARAH`gE2])
+               ] /. CreateMassEigenstateReplacements[];
            result = SplitFermionSelfEnergies[result];
            result = Remove1DimensionalFieldIndices[result];
            (* Create Bottom and lepton self-energy with only SUSY
@@ -428,7 +446,7 @@ CreateCouplingFunction[coupling_, expr_, inModelClass_] :=
            body = If[inModelClass,
                      Parameters`CreateLocalConstRefsForInputParameters[expr, "LOCALINPUT"],
                      Parameters`CreateLocalConstRefs[expr]
-                    ] <> "\n" <>
+                    ] <>
                   "const " <> typeStr <> " result = " <>
                   Parameters`ExpressionToString[expr] <> ";\n\n" <>
                   "return result;\n";
@@ -539,6 +557,9 @@ ExtractFieldName[field_] := (Print["Error: Cannot get the name of fields ", fiel
 CreateSelfEnergyFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
 
+CreateSelfEnergyMassEigenstateFunctionName[field_, loops_] :=
+    "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_mass_eigenstates";
+
 CreateSelfEnergyDerivativeFunctionName[field_, loops_] :=
     "self_energy_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field] <> "_deriv_p2";
 
@@ -551,8 +572,14 @@ CreateHeavyRotatedSelfEnergyFunctionName[field_, loops_] :=
 CreateTadpoleFunctionName[field_, loops_] :=
     "tadpole_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field];
 
+CreateTadpoleMassEigenstatesFunctionName[field_, loops_] :=
+    "tadpole_" <> ExtractFieldName[field] <> "_" <> ToString[loops] <> "loop" <> ExtractChiraility[field]; (* <> "_mass_eigenstates";*)
+
 CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergy, loops_] :=
     CreateSelfEnergyFunctionName[GetField[selfEnergy], loops];
+
+CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergyMassEigenstates, loops_] :=
+    CreateSelfEnergyMassEigenstateFunctionName[GetField[selfEnergy], loops];
 
 CreateFunctionName[selfEnergy_SelfEnergies`FSSelfEnergyDerivative, loops_] :=
     CreateSelfEnergyDerivativeFunctionName[GetField[selfEnergy], loops];
@@ -566,7 +593,10 @@ CreateFunctionName[selfEnergy_SelfEnergies`FSHeavyRotatedSelfEnergy, loops_] :=
 CreateFunctionName[tadpole_SelfEnergies`Tadpole, loops_] :=
     CreateTadpoleFunctionName[GetField[tadpole], loops];
 
-CreateFunctionPrototype[tadpole_SelfEnergies`Tadpole, loops_] :=
+CreateFunctionName[tadpole_SelfEnergies`TadpoleMassEigenstates, loops_] :=
+    CreateTadpoleMassEigenstatesFunctionName[GetField[tadpole], loops];
+
+CreateFunctionPrototype[tadpole:(SelfEnergies`Tadpole[__] | SelfEnergies`TadpoleMassEigenstates[__]), loops_] :=
     CreateFunctionName[tadpole, loops] <>
     "(" <> DeclareFieldIndices[GetField[tadpole]] <> ") const";
 
@@ -595,10 +625,11 @@ DecreaseLiteralCouplingIndices[expr_, num_:1] :=
            }
           ];
 
-CreateNPointFunction[nPointFunction_, vertexRules_List] :=
+CreateNPointFunction[nPointFunction_, vertexRules_List, loops_] :=
     Module[{decl, expr, prototype, body, functionName},
-           expr = GetExpression[nPointFunction];
-           functionName = CreateFunctionPrototype[nPointFunction, 1];
+           expr = GetExpression[nPointFunction, loops];
+           If[expr === Null, Return[{"",""}]];
+           functionName = CreateFunctionPrototype[nPointFunction, loops];
            type = CConversion`CreateCType[CConversion`ScalarType[CConversion`complexScalarCType]];
            prototype = type <> " " <> functionName <> ";\n";
            decl = "\n" <> type <> " CLASSNAME::" <> functionName <> "\n{\n";
@@ -610,23 +641,110 @@ CreateNPointFunction[nPointFunction_, vertexRules_List] :=
                                      ReplaceGhosts[FlexibleSUSY`FSEigenstates] /.
                                      C -> 1,
                                      TreeMasses`GetParticles[], "result"]  <>
-                  "\nreturn result * oneOver16PiSqr;";
+                  "\nreturn result * " <> CConversion`RValueToCFormString[CConversion`oneOver16PiSqr^loops] <> ";";
            body = IndentText[WrapLines[body]];
            decl = decl <> body <> "\n}\n";
            Return[{prototype, decl}];
           ];
 
-CreateNPointFunctionMatrix[_SelfEnergies`Tadpole] := { "", "" };
+(* Splits an expression into a list of {sums, body}, where sums is the
+   list of index sums {idx, start, stop} and body is free of sums, such
+   that expr == Total[sum over sums of body]. *)
+SplitSums[expr_ /; FreeQ[expr, SARAH`sum]] := {{{}, expr}};
+SplitSums[expr_Plus] := Join @@ (SplitSums /@ List @@ expr);
+SplitSums[SARAH`sum[idx_, start_, stop_, ex_]] :=
+    {Prepend[#[[1]], {idx, start, stop}], #[[2]]}& /@ SplitSums[ex];
+SplitSums[expr_Times] :=
+    {Join @@ (First /@ #), Times @@ (Last /@ #)}& /@ Tuples[SplitSums /@ List @@ expr];
+SplitSums[expr_] :=
+    (Print["Error: cannot split the index sums of ", expr]; Quit[1]);
 
-FillHermitianSelfEnergyMatrix[nPointFunction_, sym_String] :=
-    Module[{field = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}, dim, name},
+IsTwoLoopFunction[f_Symbol] := StringMatchQ[SymbolName[f], RegularExpression["[A-Z]f[SFVb]+"]];
+IsTwoLoopFunction[_] := False;
+
+(* Creates the C++ code that adds the contribution of one term
+   {sums, body} of a 2-loop self-energy to the matrix `result'.  The
+   body is linear in the loop functions, body = Sum_k c_k(gE1,gE2) f_k.
+   As in SPheno, each loop function f_k is evaluated once per set of
+   internal indices (instead of once per matrix element) and only if
+   its coefficient matrix c_k is non-zero. *)
+CreateTwoLoopSelfEnergyTerm[{sums_List, body_}, dim_Integer, heads_] :=
+    Module[{lfs, coeffs, rest, loopsBegin, loopsEnd, cs, code},
+           lfs = DeleteDuplicates @ Cases[body, f_[__] /; IsTwoLoopFunction[f], {0, Infinity}];
+           coeffs = (body /. Thread[lfs -> #])& /@ IdentityMatrix[Length[lfs]];
+           rest = body /. Thread[lfs -> 0];
+           If[rest =!= 0, AppendTo[lfs, 1]; AppendTo[coeffs, rest]];
+           cs = Table["c" <> ToString[k], {k, Length[lfs]}];
+           loopsBegin = StringJoin[
+               Module[{i = CConversion`ToValidCSymbolString[#[[1]]]},
+                      "for (int " <> i <> " = " <> Parameters`ExpressionToString[#[[2]] - 1] <>
+                      "; " <> i <> " <= " <> Parameters`ExpressionToString[#[[3]] - 1] <>
+                      "; ++" <> i <> ") {\n"]& /@ sums];
+           loopsEnd = StringJoin[Table["}\n", {Length[sums]}]];
+           code =
+               StringJoin[("Eigen::Matrix<std::complex<double>," <> ToString[dim] <> "," <>
+                           ToString[dim] <> "> " <> # <> ";\n")& /@ cs] <>
+               "for (int gE1 = 0; gE1 < " <> ToString[dim] <> "; ++gE1) {\n" <>
+               IndentText["for (int gE2 = 0; gE2 < " <> ToString[dim] <> "; ++gE2) {\n" <>
+                          IndentText[StringJoin[MapThread[
+                              (#1 <> "(gE1,gE2) = " <> Parameters`ExpressionToString[#2, heads] <> ";\n")&,
+                              {cs, coeffs}]]] <>
+                          "}\n"] <>
+               "}\n" <>
+               StringJoin[MapThread[
+                   ("if ((" <> #1 <> ".array() != 0.).any()) {\n" <>
+                    IndentText["result += " <> #1 <> If[#2 === 1, "", " * " <>
+                               Parameters`ExpressionToString[#2, heads]] <> ";\n"] <>
+                    "}\n")&,
+                   {cs, lfs}]];
+           "{\n" <> IndentText[loopsBegin <> IndentText[code] <> loopsEnd] <> "}\n"
+          ];
+
+(* Creates the matrix function of a 2-loop self-energy in the mass
+   eigenstate basis.  The matrix is symmetrized, (S + S^\dagger)/2,
+   because SARAH's diagram list contains diagrams with the external
+   legs at different vertices in one orientation only (as in SPheno). *)
+CreateTwoLoopSelfEnergyMatrix[nPointFunction_, vertexRules_List] :=
+    Module[{dim, expr, functionName, type, prototype, terms, body},
+           dim = GetDimension[GetField[nPointFunction] /. {a_, b_}[_] :> {a, b} /. {a_, b_} :> a];
+           expr = GetExpression[nPointFunction, 2];
+           If[dim == 1 || expr === Null, Return[{"", ""}]];
+           expr = DecreaseLiteralCouplingIndices[expr] /.
+                  vertexRules /.
+                  a_[List[i__]] :> a[i] /.
+                  ReplaceGhosts[FlexibleSUSY`FSEigenstates] /.
+                  C -> 1;
+           terms = SplitSums[expr];
+           functionName = CreateFunctionPrototypeMatrix[nPointFunction, 2];
+           type = CConversion`CreateCType[CConversion`MatrixType[CConversion`complexScalarCType, dim, dim]];
+           prototype = type <> " " <> functionName <> ";\n";
+           body = type <> " result(" <> type <> "::Zero());\n\n" <>
+                  StringJoin[CreateTwoLoopSelfEnergyTerm[#, dim, TreeMasses`GetParticles[]]& /@ terms] <>
+                  "\nreturn 0.5 * (result + result.adjoint()) * " <>
+                  CConversion`RValueToCFormString[CConversion`oneOver16PiSqr^2] <> ";\n";
+           { prototype, "\n" <> type <> " CLASSNAME::" <> functionName <> "\n{\n" <>
+                        IndentText[WrapLines[body]] <> "}\n" }
+          ];
+
+CreateNPointFunctionMatrix[(SelfEnergies`Tadpole | SelfEnergies`TadpoleMassEigenstates)[__], _] := { "", "" };
+
+(* The 2-loop expressions are not symmetric in the external indices
+   (SARAH's diagram list contains diagrams with the external legs at
+   different vertices in one orientation only), so the off-diagonal
+   elements are averaged over both orientations, as in SPheno. *)
+FillHermitianSelfEnergyMatrix[nPointFunction_, sym_String, loops_] :=
+    Module[{field = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}, dim1, dim2, name, element},
            dim1 = GetDimension[field[[1]]];
            dim2 = GetDimension[field[[2]]];
-           name = CreateFunctionName[nPointFunction, 1];
+           name = CreateFunctionName[nPointFunction, loops];
+           element = If[loops > 1,
+                        "i == k ? " <> name <> "(p, i, i) : 0.5*(" <>
+                        name <> "(p, i, k) + std::conj(" <> name <> "(p, k, i)))",
+                        name <> "(p, i, k)"];
            "\
 for (int i = 0; i < " <> ToString[dim1] <> "; i++) {
    for (int k = i; k < " <> ToString[dim2] <> "; k++) {
-      " <> sym <> "(i, k) = " <> name <> "(p, i, k);
+      " <> sym <> "(i, k) = " <> element <> ";
    }
 }
 
@@ -634,11 +752,11 @@ Hermitianize(" <> sym <> ");
 "
           ];
 
-FillGeneralSelfEnergyFunction[nPointFunction_, sym_String] :=
-    Module[{field = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}, dim, name},
+FillGeneralSelfEnergyFunction[nPointFunction_, sym_String, loops_] :=
+    Module[{field = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}, dim1, dim2, name},
            dim1 = GetDimension[field[[1]]];
            dim2 = GetDimension[field[[2]]];
-           name = CreateFunctionName[nPointFunction, 1];
+           name = CreateFunctionName[nPointFunction, loops];
            "\
 for (int i = 0; i < " <> ToString[dim1] <> "; i++) {
    for (int k = 0; k < " <> ToString[dim2] <> "; k++) {
@@ -648,20 +766,21 @@ for (int i = 0; i < " <> ToString[dim1] <> "; i++) {
 "
           ];
 
-FillSelfEnergyMatrix[nPointFunction_, sym_String] :=
+FillSelfEnergyMatrix[nPointFunction_, sym_String, loops_] :=
     Module[{particle = GetField[nPointFunction] /. {f1_, f2_}[_] :> {f1, f2}},
            Which[(IsScalar[particle[[1]]] || IsVector[particle[[1]]]) && SelfEnergyIsSymmetric[particle[[1]]],
-                 FillHermitianSelfEnergyMatrix[nPointFunction, sym],
+                 FillHermitianSelfEnergyMatrix[nPointFunction, sym, loops],
                  True,
-                 FillGeneralSelfEnergyFunction[nPointFunction, sym]
+                 FillGeneralSelfEnergyFunction[nPointFunction, sym, loops]
                 ]
           ];
 
-CreateNPointFunctionMatrix[nPointFunction_] :=
+CreateNPointFunctionMatrix[nPointFunction_, loops_] :=
     Module[{dim, functionName, type, prototype, def},
            dim = GetDimension[GetField[nPointFunction] /. {a_, b_}[_] :> {a, b} /. {a_, b_} :> a ];
            If[dim == 1, Return[{ "", "" }]];
-           functionName = CreateFunctionPrototypeMatrix[nPointFunction, 1];
+           If[GetExpression[nPointFunction, loops] === Null, Return[{"",""}]];
+           functionName = CreateFunctionPrototypeMatrix[nPointFunction, loops];
            type = CConversion`CreateCType[CConversion`MatrixType[CConversion`complexScalarCType, dim, dim]];
            prototype = type <> " " <> functionName <> ";\n";
            def = "
@@ -669,7 +788,7 @@ CreateNPointFunctionMatrix[nPointFunction_] :=
 {
    " <> type <> " self_energy;
 
-" <> IndentText[FillSelfEnergyMatrix[nPointFunction, "self_energy"]] <> "
+" <> IndentText[FillSelfEnergyMatrix[nPointFunction, "self_energy", loops]] <> "
    return self_energy;
 }
 ";
@@ -688,13 +807,18 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
            Print["Converting self energies ..."];
            Utils`StartProgressBar[Dynamic[k], Length[nPointFunctions]];
            For[k = 1, k <= Length[nPointFunctions], k++,
-               Utils`UpdateProgressBar[k, Length[nPointFunctions]];
-               {prototype,def} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames];
-               prototypes = prototypes <> prototype;
-               defs = defs <> def;
-               {prototype,def} = CreateNPointFunctionMatrix[nPointFunctions[[k]]];
-               prototypes = prototypes <> prototype;
-               defs = defs <> def;
+               For[loops = 1, loops <= NumberOfLoops[nPointFunctions[[k]]], loops++,
+                   Utils`UpdateProgressBar[k, Length[nPointFunctions]];
+                   If[loops == 2 && (FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True), Continue[]];
+                   {prototype,def} = CreateNPointFunction[nPointFunctions[[k]], vertexFunctionNames, loops];
+                   prototypes = prototypes <> prototype;
+                   defs = defs <> def;
+                   {prototype,def} = If[loops == 2 && Head[nPointFunctions[[k]]] === SelfEnergies`FSSelfEnergyMassEigenstates,
+                                        CreateTwoLoopSelfEnergyMatrix[nPointFunctions[[k]], vertexFunctionNames],
+                                        CreateNPointFunctionMatrix[nPointFunctions[[k]], loops]];
+                   prototypes = prototypes <> prototype;
+                   defs = defs <> def;
+                  ];
            ];
            (* create derivatives of Higgs boson self-energies w.r.t. p^2 *)
            If[ValueQ[SARAH`HiggsBoson],
@@ -707,12 +831,14 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
 
               Switch[Length[derivatives],
                      0, Print["Error: no Higgs boson self-energy found."],
-                     1, {prototype, def} = CreateNPointFunction[First[derivatives], vertexFunctionNames];
-                        prototypes = prototypes <> prototype;
-                        defs = defs <> def;
-                        {prototype, def} = CreateNPointFunctionMatrix[First[derivatives]];
-                        prototypes = prototypes <> prototype;
-                        defs = defs <> def;,
+                     1, For[loops = 1, loops <= NumberOfLoops[First[derivatives]], loops++,
+                           {prototype, def} = CreateNPointFunction[First[derivatives], vertexFunctionNames, loops];
+                           prototypes = prototypes <> prototype;
+                           defs = defs <> def;
+                           {prototype, def} = CreateNPointFunctionMatrix[First[derivatives], loops];
+                           prototypes = prototypes <> prototype;
+                           defs = defs <> def;
+                        ],
                      _, Print["Error: multiple Higgs boson self-energies found."]
               ];
            ];
@@ -721,22 +847,80 @@ CreateNPointFunctions[nPointFunctions_List, vertexRules_List] :=
           ];
 
 FillArrayWithLoopTadpoles[loopLevel_, higgsAndIdx_List, arrayName_String, sign_String:"-", struct_String:""] :=
-    Module[{body = "", v, field, idx, head, functionName},
+    Module[{body = "", v, field, idx, head, functionName, modelSpecifiTadpoles, isRotated, model = struct},
+           modelSpecifiTadpoles = FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True;
+           (* auto-generated 2-loop tadpoles are calculated in the Landau gauge *)
+           If[loopLevel >= 2 && !modelSpecifiTadpoles && higgsAndIdx =!= {},
+              body = CreateLandauGaugeModel[If[struct === "", "*this", StringDrop[struct, -1]]];
+              model = LandauGaugeModelName <> ".";
+             ];
+           (* auto-generated 2-loop tadpoles of multiplets are calculated
+              in the mass eigenstate basis and must be rotated to the
+              gauge eigenstate basis *)
+           isRotated[f_] := loopLevel >= 2 && !modelSpecifiTadpoles && TreeMasses`GetDimension[f] > 1;
+           body = body <> StringJoin[RotateTadpolesToGaugeEigenstates[#, loopLevel, model]& /@
+                                     Select[DeleteDuplicates[higgsAndIdx[[All,1]]], isRotated]];
            For[v = 1, v <= Length[higgsAndIdx], v++,
                field = higgsAndIdx[[v,1]];
                idx = higgsAndIdx[[v,2]];
                head = CConversion`ToValidCSymbolString[higgsAndIdx[[v,3]]];
-               functionName = CreateTadpoleFunctionName[field, loopLevel];
+               functionName =
+	          If[loopLevel < 2 || modelSpecifiTadpoles,
+		     CreateTadpoleFunctionName[field, loopLevel],
+		     CreateTadpoleMassEigenstatesFunctionName[field, loopLevel]
+		  ];
+               If[isRotated[field],
+                  body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
+                         head <> "(" <> CreateRotatedTadpoleName[field, loopLevel] <>
+                         "(" <> ToString[idx - 1] <> "));\n";
+                  Continue[];
+                 ];
                If[TreeMasses`GetDimension[field] == 1,
                   body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
-                         head <> "(" <> struct <> functionName <> "());\n";
+                         head <> "(" <> model <> functionName <> "());\n";
                   ,
                   body = body <> arrayName <> "[" <> ToString[v-1] <> "] " <> sign <> "= " <>
-                         head <> "(" <> struct <> functionName <>
+                         head <> "(" <> model <> functionName <>
                          "(" <> ToString[idx - 1] <> "));\n";
                  ];
               ];
            body
+          ];
+
+LandauGaugeModelName = "model_landau_gauge";
+
+(* Creates a copy of the model, where the tree-level masses and
+   mixings are calculated in the Landau gauge.  The auto-generated
+   2-loop tadpoles and self-energies must be evaluated with this copy,
+   because the underlying SARAH diagrams are derived in the Landau
+   gauge. *)
+CreateLandauGaugeModel[model_String:"*this"] :=
+    "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge " <>
+    LandauGaugeModelName <> "(" <> model <> ");\n";
+
+CreateRotatedTadpoleName[field_, loopLevel_] :=
+    "tadpole_" <> ToString[loopLevel] <> "l_" <> CConversion`ToValidCSymbolString[field];
+
+(* Creates a vector with the tadpoles of the multiplet field in the
+   gauge eigenstate basis from the tadpoles in the mass eigenstate
+   basis.  With field_i = Z_ij field^0_j one has
+
+     T^0_j = dV/d(field^0_j) = Z_ij T_i
+ *)
+RotateTadpolesToGaugeEigenstates[field_, loopLevel_, struct_String] :=
+    Module[{dimStr = ToString[TreeMasses`GetDimension[field]],
+            name = CreateRotatedTadpoleName[field, loopLevel],
+            functionName = CreateTadpoleMassEigenstatesFunctionName[field, loopLevel],
+            Z = struct <> "get_" <> CConversion`ToValidCSymbolString[FindMixingMatrixSymbolFor[field]] <> "()",
+            vectorType},
+           vectorType = "Eigen::Matrix<std::complex<double>," <> dimStr <> ",1>";
+           vectorType <> " " <> name <> "_mass_eigenstates;\n" <>
+           "for (int i = 0; i < " <> dimStr <> "; i++) {\n" <>
+           IndentText[name <> "_mass_eigenstates(i) = " <> struct <> functionName <> "(i);\n"] <>
+           "}\n" <>
+           "// rotate from the mass to the gauge eigenstate basis\n" <>
+           "const " <> vectorType <> " " <> name <> "(" <> Z <>
+           ".transpose().cast<std::complex<double>>() * " <> name <> "_mass_eigenstates);\n"
           ];
 
 FillArrayWithTwoLoopTadpoles[higgsBoson_, arrayName_String, sign_String:"-", struct_String:""] :=
