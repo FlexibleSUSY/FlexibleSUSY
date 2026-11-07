@@ -938,8 +938,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
                     "dm->fill_from(model);\n" <>
-                    "standard_model::Standard_model sm{};\n" <>
-                    "sm.initialise_from_input(qedqcd);\n" <>
+                    "auto sm = get_sm_at_mz();\n" <>
                     "// set loop level for RGE running to match RGE setting\n" <>
                     "// of BSM model\n" <>
                     "sm.set_loops(model.get_loops());\n" <>
