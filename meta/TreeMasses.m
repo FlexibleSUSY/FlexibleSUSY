@@ -68,7 +68,9 @@ CreateMassCalculationPrototype::usage="creates a C function prototype
 from a mass matrix";
 
 CreateMassCalculationFunction::usage="creates a C function that
-calculates the mass eigenstates by diagonalizing the mass matrix";
+calculates the mass eigenstates by diagonalizing the mass matrix.
+With a 2nd argument True, the masses of scalars are stored as
+SignedAbsSqrt of the eigenvalues, so tachyons get a negative mass.";
 
 CallMassCalculationFunctions::usage="creates C function calls of all
 mass matrix calcualtion functions";
@@ -1651,7 +1653,16 @@ AssignVectorBosonMassesFrom[eigenVector_List] :=
 
 AssignVectorBosonMassesFrom[eigenVector_] := "";
 
-CreateDiagonalizationFunction[matrix_List, eigenVector_, mixingMatrixSymbol_] :=
+(* C++ function that turns the mass squared eigenvalues into masses:
+   with signedScalarMasses, the masses of scalars keep the sign of the
+   mass squared (used for the auto-generated 2-loop corrections, which
+   need the negative mass squared of tachyonic Goldstone bosons in the
+   gaugeless limit) *)
+ScalarMassSqrt[particle_, True] /; IsScalar[particle] := "SignedAbsSqrt";
+ScalarMassSqrt[_, True | False] := "AbsSqrt";
+
+CreateDiagonalizationFunction[matrix_List, eigenVector_, mixingMatrixSymbol_,
+                              signedScalarMasses:(True|False):False] :=
     Module[{dim, body, result, U = "", V = "", dimStr = "", ev, evMap, particle, k,
             diagFunctionStr, matrixType, matrixElementType, vectorType,
             OneDimMappingPre = "", OneDimMappingPost = ""},
@@ -1710,7 +1721,8 @@ CreateDiagonalizationFunction[matrix_List, eigenVector_, mixingMatrixSymbol_] :=
                      IndentText[
                          If[ContainsMassless[eigenVector], "",
                             CheckRunningTachyon[eigenVector, ev] <> "\n"] <>
-                         ev <> " = AbsSqrt(" <> ev <> ");\n"
+                         ev <> " = " <> ScalarMassSqrt[eigenVector, signedScalarMasses] <>
+                         "(" <> ev <> ");\n"
                      ];
              ];
            If[IsVector[eigenVector],
@@ -1722,7 +1734,8 @@ CreateDiagonalizationFunction[matrix_List, eigenVector_, mixingMatrixSymbol_] :=
            Return[result <> body <> "}\n"];
           ];
 
-CreateMassCalculationFunction[m:TreeMasses`FSMassMatrix[mass_, massESSymbol_, Null]] :=
+CreateMassCalculationFunction[m:TreeMasses`FSMassMatrix[mass_, massESSymbol_, Null],
+                              signedScalarMasses:(True|False):False] :=
     Module[{result, ev = CConversion`ToValidCSymbolString[FlexibleSUSY`M[massESSymbol]], body,
             inputParsDecl, expr, particle, dim, dimStr, phase, massMatrix,
             massMatrixStr},
@@ -1778,7 +1791,8 @@ CreateMassCalculationFunction[m:TreeMasses`FSMassMatrix[mass_, massESSymbol_, Nu
               body = body <> "\n" <>
                      If[ContainsMassless[eigenVector], "",
                         CheckRunningTachyon[massESSymbol, ev] <> "\n"] <>
-                     ev <> " = AbsSqrt(" <> ev <> ");\n";
+                     ev <> " = " <> ScalarMassSqrt[massESSymbol, signedScalarMasses] <>
+                     "(" <> ev <> ");\n";
              ];
            body = IndentText[body];
            result = result <> body <> "}\n\n";
@@ -1788,7 +1802,8 @@ CreateMassCalculationFunction[m:TreeMasses`FSMassMatrix[mass_, massESSymbol_, Nu
            Return[result];
           ];
 
-CreateMassCalculationFunction[massMatrix_TreeMasses`FSMassMatrix] :=
+CreateMassCalculationFunction[massMatrix_TreeMasses`FSMassMatrix,
+                              signedScalarMasses:(True|False):False] :=
     Module[{result = "", massESSymbol, mixingMatrixSymbol, matrix},
            massESSymbol = GetMassEigenstate[massMatrix];
            mixingMatrixSymbol = GetMixingMatrixSymbol[massMatrix];
@@ -1796,7 +1811,8 @@ CreateMassCalculationFunction[massMatrix_TreeMasses`FSMassMatrix] :=
            result = result <>
                     CreateMassMatrixGetterFunction[massMatrix] <> "\n" <>
                     CreateDiagonalizationFunction[matrix, massESSymbol,
-                                                  mixingMatrixSymbol]
+                                                  mixingMatrixSymbol,
+                                                  signedScalarMasses]
                     <> "\n";
            Return[result];
           ];

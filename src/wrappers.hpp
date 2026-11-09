@@ -606,6 +606,11 @@ auto SignedAbsSqrt(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Deri
    return a.unaryExpr([](Scalar a) -> Scalar { return SignedAbsSqrt(a); });
 }
 
+// SignedSqr ///////////////////////////////////////////////////////////
+
+/// signed square a*|a|, the inverse of SignedAbsSqrt
+constexpr double SignedSqr(double a) noexcept { return a < 0 ? -a * a : a * a; }
+
 // Sqrt ////////////////////////////////////////////////////////////////
 
 std::floating_point auto Sqrt(std::floating_point auto a) noexcept

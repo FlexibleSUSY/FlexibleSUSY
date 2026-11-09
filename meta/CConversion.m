@@ -61,6 +61,7 @@ threeLoop::usage="";
 Sqr::usage="";
 AbsSqr::usage="";
 AbsSqrt::usage="";
+SignedSqr::usage="signed square x |x| (inverse of SignedAbsSqrt)";
 FSKroneckerDelta::usage="";
 TensorProd::usage="";
 ElementwiseProd::usage = "represents an elemen-wise product of

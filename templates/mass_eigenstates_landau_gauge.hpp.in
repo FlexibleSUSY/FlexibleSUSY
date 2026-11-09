@@ -46,9 +46,12 @@ namespace flexiblesusy {
  * gauge (xi = 0).  As in SARAH/SPheno, the tree-level EWSB equations
  * are solved with the full gauge couplings before the gaugeless limit
  * is taken, and are not solved again afterwards, so the Goldstone
- * bosons are not massless in general.  It is used to evaluate the
- * auto-generated 2-loop tadpoles and self-energies, which are derived
- * in the gaugeless limit and in the Landau gauge.
+ * bosons are not massless in general, but can be tachyonic.  The
+ * masses of scalars are therefore stored with the sign of their mass
+ * squared (SignedAbsSqrt), as the 2-loop functions need the negative
+ * mass squared.  It is used to evaluate the auto-generated 2-loop
+ * tadpoles and self-energies, which are derived in the gaugeless limit
+ * and in the Landau gauge.
  */
 class @ModelName@_mass_eigenstates_landau_gauge : public @ModelName@_mass_eigenstates
 {
@@ -60,7 +63,8 @@ public:
    @ModelName@_mass_eigenstates_landau_gauge& operator=(const @ModelName@_mass_eigenstates_landau_gauge&) = default;
    @ModelName@_mass_eigenstates_landau_gauge& operator=(@ModelName@_mass_eigenstates_landau_gauge&&) = default;
 
-   // gauge dependent tree-level masses and mixings
+   // gauge dependent tree-level masses and mixings, and scalar masses
+   // with the sign of the mass squared
 @massCalculationPrototypes@
 };
 

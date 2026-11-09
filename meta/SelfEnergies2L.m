@@ -97,7 +97,7 @@ SumTadpoleType[{type_, diags_List}] := Total[CreateTadpoleDiag /@ diags];
    1-loop self-energies and tadpoles, cf. SPheno:
    PiSf - Pi2S_EffPot and Tad1Loop - ti_ep2L *)
 ConvertSarah2LDiagramList[tad_List, head_:Total] :=
-    -head[SumTadpoleType /@ tad] //. {
+    SignedScalarMasses2[-head[SumTadpoleType /@ tad] //. {
         (m : (SARAH`Mass | SARAH`Mass2))[(SARAH`bar | Susyno`LieGroups`conj)[p_], idx___] :> m[p, idx],
         (m : (SARAH`Mass | SARAH`Mass2))[p_, idx__] :> m[p[{idx}]],
         C[p__] :> Cp[p]
@@ -106,7 +106,18 @@ ConvertSarah2LDiagramList[tad_List, head_:Total] :=
         (* SARAH`HiggsBoson[{SARAH`gE2}]   -> Symbol["U" <> ToString[SARAH`HiggsBoson]][{SARAH`gO2}], *)
         (* SARAH`PseudoScalar[{SARAH`gE1}] -> Symbol["U" <> ToString[SARAH`PseudoScalar]][{SARAH`gO1}], *)
         (* SARAH`PseudoScalar[{SARAH`gE2}] -> Symbol["U" <> ToString[SARAH`PseudoScalar]][{SARAH`gO2}] *)
-    };
+    }];
+
+(* The masses of the Landau gauge copy of the model, used for the 2-loop
+   diagrams, are calculated at the minimum of the full tree-level
+   potential, but in the gaugeless limit, so scalars can be tachyonic
+   (e.g. the Goldstone bosons in SUSY models).  As in SARAH/SPheno, the
+   loop functions are evaluated with the negative mass squared
+   [1411.4665, app. A]: the copy stores the scalar masses as
+   SignedAbsSqrt of the mass squared, and the squared masses of scalars
+   are SignedSqr of them. *)
+SignedScalarMasses2[expr_] :=
+    expr /. SARAH`Mass2[p_] /; TreeMasses`IsScalar[p] :> CConversion`SignedSqr[FlexibleSUSY`M[p]];
 
 End[];
 

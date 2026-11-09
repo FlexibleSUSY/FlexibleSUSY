@@ -1830,9 +1830,21 @@ Utils`MakeUnknownInputDefinition[CreateLandauGaugeTreeLevelEWSBSolution];
 
 WriteLandauGaugeModelClass[landauMassMatrices_List, massMatrices_List,
                            ewsbEquations_List, files_List] :=
-    Module[{massCalculationPrototypes, massCalculationFunctions, brokenGaugeCouplings},
-           massCalculationPrototypes = StringJoin[TreeMasses`CreateMassCalculationPrototype /@ landauMassMatrices];
-           massCalculationFunctions  = StringJoin[TreeMasses`CreateMassCalculationFunction /@ landauMassMatrices];
+    Module[{massCalculationPrototypes, massCalculationFunctions, brokenGaugeCouplings,
+            otherScalarMassMatrices, overriddenMassMatrices},
+           (* The masses of scalars are stored with the sign of the mass
+              squared (SignedAbsSqrt), because in the gaugeless limit
+              scalars can be tachyonic, and the 2-loop functions need
+              the negative mass squared, see SelfEnergies2L`. So the
+              mass functions of the scalars that are not gauge dependent
+              are overridden, too. *)
+           otherScalarMassMatrices = Select[massMatrices,
+              (TreeMasses`IsScalar[TreeMasses`GetMassEigenstate[#]] &&
+               !MemberQ[TreeMasses`GetMassEigenstate /@ landauMassMatrices,
+                        TreeMasses`GetMassEigenstate[#]])&];
+           overriddenMassMatrices = Join[landauMassMatrices, otherScalarMassMatrices];
+           massCalculationPrototypes = StringJoin[TreeMasses`CreateMassCalculationPrototype /@ overriddenMassMatrices];
+           massCalculationFunctions  = StringJoin[TreeMasses`CreateMassCalculationFunction[#, True]& /@ overriddenMassMatrices];
            brokenGaugeCouplings = GetBrokenGaugeCouplings[];
            Print["Gauge couplings set to zero in the 2-loop calculation (gaugeless limit): ", brokenGaugeCouplings];
            WriteOut`ReplaceInFiles[files,
