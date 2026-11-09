@@ -1786,9 +1786,24 @@ GetBrokenGaugeCouplings[] :=
      either.  The symbolic parts of SPheno2LPole.m do the same:
      ... /. SubSolutionsTadpolesLoop /. subZeroGaugeLess.
 
-   Consequence: the tree-level tadpoles don't vanish in the gaugeless
-   limit, so the Goldstone bosons aren't massless.  In the MSSM,
-   m^2(G0) = -(g1^2 + g2^2) v^2 cos^2(2 beta) / 8 < 0 (SARAH's g1).
+   Consequence: the tree-level tadpoles t_i = dV/dv_i of the gaugeless
+   potential don't vanish, so the Goldstone bosons aren't massless,
+   although the masses are calculated in the Landau gauge (the
+   Goldstone mass vanishes there only at a stationary point of the
+   potential used).  In the MSSM, the parameters fulfil t_i = 0 with
+   the D-term potential V_D = (gY^2 + g2^2) (vd^2 - vu^2)^2 / 32, so
+   in the gaugeless limit t_i = -dV_D/dv_i, and
+     m^2(G0) = cos^2(beta) t_d/vd + sin^2(beta) t_u/vu
+             = -(gY^2 + g2^2) v^2 cos^2(2 beta) / 8 < 0,
+   with gY the hypercharge coupling and v^2 = vd^2 + vu^2.  This is
+   -mZ^2 cos^2(2 beta) / 2 with the DR-bar mZ of the full model.  The
+   light CP-even Higgs gets the same tree-level mass, as without
+   D-terms the CP-even and CP-odd mass matrices have the same
+   eigenvalues.  This is intended: in [1411.4665] (appendix A, eq. A15)
+   the tachyonic Goldstone mass keeps the loop functions away from
+   m^2 = 0 (the Goldstone boson catastrophe), provided the loop
+   functions are evaluated for negative m^2.  [1706.05372] (sec. 2.1)
+   calls it the "D-term workaround" and keeps only the real parts.
    The difference to solving the EWSB eqs. again is of higher order
    (O(g^2) times the 2-loop corrections): in the MSSM with the
    auto-generated 2-loop corrections and LesHouches.in.MSSM, Mh
