@@ -2168,6 +2168,15 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                     (* don't pollute terminal with SARAH initialization message *)
                     Block[{Print,workingDirectory = Directory[]},
                        << SARAH`;
+                       (* load FlexibleSUSY before SARAH`Start[], as on the main
+                          kernel (cf. templates/start.m.in): some meta packages
+                          name model symbols in the SARAH` context (e.g. SARAH`vd
+                          in meta/Himalaya.m), so on the main kernel the model
+                          uses those, while Start[] alone would create Global`vd.
+                          The definitions distributed below would then create
+                          SARAH`vd next to Global`vd, giving General::shdw
+                          messages and two different symbols for vd. *)
+                       Needs["FlexibleSUSY`", FileNameJoin[{workingDirectory, "meta", "FlexibleSUSY.m"}]];
                        SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
                        SARAH`SARAH[InputDirectories] = {
                           FileNameJoin[{workingDirectory, "sarah"}],

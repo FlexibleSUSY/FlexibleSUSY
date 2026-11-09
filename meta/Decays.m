@@ -2219,6 +2219,13 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
            Print["Creating a C++ code for decay amplitudes..."];
            If[FlexibleSUSY`FSEnableParallelism,
               LaunchKernels[];
+              (* The subkernels get all definitions from the main kernel, which
+                 has symbols with the same name in different contexts, e.g.
+                 FlexibleSUSY`M and Susyno`LieGroups`M.  As both contexts are
+                 already on $ContextPath when the copies are created, each
+                 subkernel would report General::shdw, although it only gets
+                 the symbols that also exist on the main kernel. *)
+              ParallelEvaluate[Off[General::shdw], DistributedContexts->None];
               ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
               specializations =
                  AbsoluteTiming@ParallelMap[
