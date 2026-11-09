@@ -1757,15 +1757,49 @@ GetBrokenGaugeCouplings[] :=
            Complement[First /@ SARAH`BetaGauge, unbroken]
           ];
 
-(* As in SARAH/SPheno, the tree-level EWSB eqs. are solved with the
-   full gauge couplings, before the gaugeless limit is taken, and are
-   not solved again in the gaugeless limit (cf. SubSolutionsTadpolesLoop
-   /. subZeroGaugeLess in SARAH's SPheno2LPole.m, and GaugelessLimit in
-   SPhenoLoopMasses.m).  The tree-level EWSB eqs. are solved for the
-   same parameters as in calculate_DRbar_masses().  This requires the
-   analytic solution, because the copy of the model has no EWSB solver
-   (it would be shared between the threads of the pole mass
-   calculation). *)
+(* Tree-level EWSB in the Landau gauge copy of the model, used for the
+   auto-generated 2-loop tadpoles and self-energies.
+
+   Order: the tree-level EWSB eqs. are solved with the full gauge
+   couplings.  Only then are the broken gauge couplings set to zero
+   (gaugeless limit), and the EWSB eqs. are not solved again.
+
+   Why:
+
+   - The gaugeless limit is an approximation made in the 2-loop
+     diagrams, not a different model.  The parameters fixed by the
+     EWSB eqs. (e.g. the soft Higgs masses) are parameters of the full
+     model, and the tree-level masses and 1-loop corrections are
+     calculated with their values from the EWSB eqs. with the full
+     gauge couplings.  With this order, the 2-loop corrections use the
+     same values.  Solving the EWSB eqs. again with g = 0 would change
+     them, by the D-terms in SUSY models, i.e. it would evaluate the
+     2-loop part with different parameters from the rest of the
+     calculation.
+
+   - This is what SARAH/SPheno do, so the results can be compared with
+     SPheno's diagrammatic 2-loop Higgs masses.  SPheno solves the
+     tadpole eqs. in OneLoopMasses (WriteTadpoleSolution), then sets
+     the broken gauge couplings to zero (GaugelessLimit in
+     SPhenoLoopMasses.m), without solving the tadpole eqs. again (it is
+     commented out there), and TreeMassesEffPot doesn't solve them
+     either.  The symbolic parts of SPheno2LPole.m do the same:
+     ... /. SubSolutionsTadpolesLoop /. subZeroGaugeLess.
+
+   Consequence: the tree-level tadpoles don't vanish in the gaugeless
+   limit, so the Goldstone bosons aren't massless.  In the MSSM,
+   m^2(G0) = -(g1^2 + g2^2) v^2 cos^2(2 beta) / 8 < 0 (SARAH's g1).
+   The difference to solving the EWSB eqs. again is of higher order
+   (O(g^2) times the 2-loop corrections): in the MSSM with the
+   auto-generated 2-loop corrections and LesHouches.in.MSSM, Mh
+   changes by +0.04 GeV (tan(beta) = 10) and +0.02 GeV (tan(beta) = 2).
+   Without D-terms (SM, THDMs), both orders give the same result.
+
+   Implementation: the tree-level EWSB eqs. are solved for the same
+   parameters as in calculate_DRbar_masses().  This needs the analytic
+   solution (solve_ewsb_tree_level_custom()), because the copy has no
+   EWSB solver: the model's solver can't be shared, as the pole masses
+   are calculated in parallel threads. *)
 CreateLandauGaugeTreeLevelEWSBSolution[{}] :=
     "// no EWSB eqs.\n";
 

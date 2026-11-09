@@ -46,7 +46,10 @@ CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
 
    // As in SARAH/SPheno, the tree-level EWSB eqs. are solved with the
    // full gauge couplings (for the same parameters as in
-   // calculate_DRbar_masses() of the given model) ...
+   // calculate_DRbar_masses() of the given model), so the 2-loop
+   // corrections use the same parameters as the rest of the
+   // calculation (see CreateLandauGaugeTreeLevelEWSBSolution in
+   // meta/FlexibleSUSY.m for the reasons) ...
 @solveEWSBTreeLevel@
 
    // ... and only then the gaugeless limit is taken, in which the
