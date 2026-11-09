@@ -28,6 +28,7 @@
 #include "@ModelName@_mass_eigenstates_landau_gauge.hpp"
 #include "config.h"
 #include "eigen_utils.hpp"
+#include "error.hpp"
 #include "linalg2.hpp"
 #include "wrappers.hpp"
 
@@ -43,13 +44,21 @@ CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
    // during the parallel pole mass calculation
    @ModelName@_soft_parameters::operator=(model);
 
-   // the SARAH 2-loop diagrams are derived in the gaugeless limit
+   // As in SARAH/SPheno, the tree-level EWSB eqs. are solved with the
+   // full gauge couplings (for the same parameters as in
+   // calculate_DRbar_masses() of the given model) ...
+@solveEWSBTreeLevel@
+
+   // ... and only then the gaugeless limit is taken, in which the
+   // SARAH 2-loop diagrams are derived.  The EWSB eqs. are not solved
+   // again, so the tree-level tadpoles do not vanish in the gaugeless
+   // limit, and the Goldstone bosons are not massless in general.
 @setGaugelessLimit@
 
-   // re-calculate all tree-level masses and mixings (at the
-   // tree-level minimum, as in the given model), now using the
-   // Landau gauge versions of the gauge dependent ones
-   calculate_DRbar_masses();
+   // re-calculate all tree-level masses and mixings, now using the
+   // Landau gauge versions of the gauge dependent ones, without
+   // solving the EWSB eqs. (unlike calculate_DRbar_masses())
+@calculateAllMasses@
 }
 
 @massCalculationFunctions@

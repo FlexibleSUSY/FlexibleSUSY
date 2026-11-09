@@ -1723,6 +1723,31 @@ CreateDefaultEWSBSolverConstructor[solvers_List] :=
 ParameterAppearsExactlyOnceIn[eqs_List, par_] :=
     Length[Select[eqs, (!FreeQ[#, par])&]] === 1;
 
+(* returns the parameters for which the tree-level EWSB eqs. are
+   solved analytically (in solve_ewsb_tree_level_custom()) when the
+   tree-level masses are calculated: FSSolveEWSBTreeLevelFor or, if
+   it is not set, the soft Higgs masses that appear in exactly one
+   EWSB eq.  If the list is empty, the tree-level EWSB eqs. are solved
+   numerically. *)
+GetTreeLevelEWSBOutputParameters[ewsbEquations_List] :=
+    Module[{softScalarMasses},
+           softScalarMasses =
+               If[SARAH`SupersymmetricModel,
+                  DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses],
+                  Select[Parameters`GetModelParametersWithMassDimension[2], Parameters`IsRealParameter]
+                 ];
+           Parameters`DecreaseIndexLiterals @
+           Parameters`ExpandExpressions @
+           Parameters`AppendGenerationIndices @
+           If[MatchQ[FlexibleSUSY`FSSolveEWSBTreeLevelFor, {__}],
+              FlexibleSUSY`FSSolveEWSBTreeLevelFor,
+              (* each softScalarMasses should appear only in exactly 1 EWSB eq.! *)
+              Select[softScalarMasses, ParameterAppearsExactlyOnceIn[ewsbEquations, #]&]
+             ]
+          ];
+
+Utils`MakeUnknownInputDefinition[GetTreeLevelEWSBOutputParameters];
+
 (* returns the gauge couplings of the gauge groups broken by EWSB,
    cf. listBrokenGaugeCouplings in SARAH's TwoLoopPole.m *)
 GetBrokenGaugeCouplings[] :=
@@ -1732,7 +1757,30 @@ GetBrokenGaugeCouplings[] :=
            Complement[First /@ SARAH`BetaGauge, unbroken]
           ];
 
-WriteLandauGaugeModelClass[landauMassMatrices_List, files_List] :=
+(* As in SARAH/SPheno, the tree-level EWSB eqs. are solved with the
+   full gauge couplings, before the gaugeless limit is taken, and are
+   not solved again in the gaugeless limit (cf. SubSolutionsTadpolesLoop
+   /. subZeroGaugeLess in SARAH's SPheno2LPole.m, and GaugelessLimit in
+   SPhenoLoopMasses.m).  The tree-level EWSB eqs. are solved for the
+   same parameters as in calculate_DRbar_masses().  This requires the
+   analytic solution, because the copy of the model has no EWSB solver
+   (it would be shared between the threads of the pole mass
+   calculation). *)
+CreateLandauGaugeTreeLevelEWSBSolution[{}] :=
+    "// no EWSB eqs.\n";
+
+CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations_List] :=
+    If[MatchQ[GetTreeLevelEWSBOutputParameters[ewsbEquations], {__}],
+       "solve_ewsb_tree_level_custom();\n",
+       "throw SetupError(\"" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge: \"\n" <>
+       "                 \"the auto-generated 2-loop corrections need an analytic \"\n" <>
+       "                 \"solution of the tree-level EWSB eqs. (FSSolveEWSBTreeLevelFor)\");\n"
+      ];
+
+Utils`MakeUnknownInputDefinition[CreateLandauGaugeTreeLevelEWSBSolution];
+
+WriteLandauGaugeModelClass[landauMassMatrices_List, massMatrices_List,
+                           ewsbEquations_List, files_List] :=
     Module[{massCalculationPrototypes, massCalculationFunctions, brokenGaugeCouplings},
            massCalculationPrototypes = StringJoin[TreeMasses`CreateMassCalculationPrototype /@ landauMassMatrices];
            massCalculationFunctions  = StringJoin[TreeMasses`CreateMassCalculationFunction /@ landauMassMatrices];
@@ -1741,10 +1789,14 @@ WriteLandauGaugeModelClass[landauMassMatrices_List, files_List] :=
            WriteOut`ReplaceInFiles[files,
                           { "@massCalculationPrototypes@"  -> IndentText[FunctionModifiers`MakeOverride[massCalculationPrototypes]],
                             "@massCalculationFunctions@"   -> WrapLines[massCalculationFunctions],
+                            "@solveEWSBTreeLevel@"         -> IndentText[CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations]],
                             "@setGaugelessLimit@"          -> IndentText[StringJoin[Parameters`SetParameter[#, "0.", ""]& /@ brokenGaugeCouplings]],
+                            "@calculateAllMasses@"         -> IndentText[TreeMasses`CallMassCalculationFunctions[massMatrices]],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
+
+Utils`MakeUnknownInputDefinition[WriteLandauGaugeModelClass];
 
 WriteModelClass[massMatrices_List, ewsbEquations_List,
                 parametersFixedByEWSB_List, ewsbSubstitutions_List,
@@ -1785,7 +1837,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             dependencePrototypes, dependenceFunctions,
             clearOutputParameters = "",
             clearPhases = "", clearExtraParameters = "",
-            softScalarMasses, treeLevelEWSBOutputParameters,
+            treeLevelEWSBOutputParameters,
             parametersToSave, saveEWSBOutputParameters,
             solveTreeLevelEWSBviaSoftHiggsMasses,
             solveEWSBTemporarily,
@@ -1950,21 +2002,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            printMixingMatrices          = WriteOut`PrintParameters[mixingMatrices, "ostr"];
            dependencePrototypes         = TreeMasses`CreateDependencePrototypes[];
            dependenceFunctions          = TreeMasses`CreateDependenceFunctions[];
-           softScalarMasses =
-               If[SARAH`SupersymmetricModel,
-                  DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses],
-                  Select[Parameters`GetModelParametersWithMassDimension[2], Parameters`IsRealParameter]
-                 ];
-           (* find soft Higgs masses that appear in tree-level EWSB eqs. *)
-           treeLevelEWSBOutputParameters =
-               Parameters`DecreaseIndexLiterals @
-               Parameters`ExpandExpressions @
-               Parameters`AppendGenerationIndices @
-               If[MatchQ[FlexibleSUSY`FSSolveEWSBTreeLevelFor, {__}],
-                  FlexibleSUSY`FSSolveEWSBTreeLevelFor,
-                  (* each softScalarMasses should appear only in exactly 1 EWSB eq.! *)
-                  Select[softScalarMasses, ParameterAppearsExactlyOnceIn[ewsbEquations, #]&]
-                 ];
+           treeLevelEWSBOutputParameters = GetTreeLevelEWSBOutputParameters[ewsbEquations];
            If[MatchQ[treeLevelEWSBOutputParameters, {__}],
               parametersToSave = treeLevelEWSBOutputParameters;
               solveTreeLevelEWSBviaSoftHiggsMasses = First @ EWSB`FindSolutionAndFreePhases[independentEwsbEquationsTreeLevel,
@@ -5060,7 +5098,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            diagonalizationPrecision];
 
            Print["Creating class for model in the Landau gauge ..."];
-           WriteLandauGaugeModelClass[landauGaugeMassMatrices,
+           WriteLandauGaugeModelClass[landauGaugeMassMatrices, massMatrices, ewsbEquations,
                                       {{FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_landau_gauge.hpp.in"}],
                                         FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge.hpp"}]},
                                        {FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_landau_gauge.cpp.in"}],
