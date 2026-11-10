@@ -87,4 +87,20 @@ class SLHABackend:
 
     def calculate(self, point, timeout=None):
         output = self.run(self.input_text(point), timeout=timeout)
-        return result_module.from_slha(output, self.model.metadata)
+        return result_module.from_slha(output, self.model.metadata, backend=self, state=point)
+
+    def calculate_decays(self, result):
+        """Decays calculated in the same run; this backend can't add them later."""
+        point = result._state
+        if point is not None and point.decay_settings.calculate_decays:
+            data = result.blocks
+            return result_module.Decays([], problems=result_module._info_block(data, "DCINFO", 4),
+                                        warnings=result_module._info_block(data, "DCINFO", 3))
+        raise BackendError(
+            "decays were not calculated: with the SLHA backend, enable them before the "
+            "calculation (decay_settings=DecaySettings(calculate_decays=True)), or use the "
+            "compiled backend, which calculates them on demand")
+
+    def calculate_observables(self, result):
+        raise BackendError("observables are only available with the compiled backend "
+                           "(configure FlexibleSUSY with --with-python=<interpreter>)")

@@ -225,13 +225,29 @@ class ToyModelTest(unittest.TestCase):
         self.assertEqual(res.parameters.scale, 1000.0)
         self.assertEqual(res.parameters["Yd"][1][1], 0.02)
         self.assertEqual(res.parameters["Yd"][0][1], 0.0)
-        decay = res.decays["hh", 0]
-        self.assertIs(res.decays.by_pdg(25), decay)
+        self.assertEqual(self.model.backend.name, "slha")
+        decay = res.decays()["hh", 0]
+        self.assertIs(res.decays().by_pdg(25), decay)
         self.assertEqual(decay.width, 4e-3)
         self.assertEqual(decay.channels[0].pdg, (-5, 5))
         self.assertAlmostEqual(decay.channels[0].width, 3e-3)
         self.assertEqual(decay.channels[0].final_state, ("barFd(3)", "Fd(3)"))
         json.dumps(res.to_dict())
+
+    def test_slha_backend_on_demand(self):
+        (self.model_dir / "output.slha").write_text(OUTPUT.split("DECAY")[0])
+        res = self.model.calculate(self.model.point(self.inputs()))
+        with self.assertRaisesRegex(fs.BackendError, "decays were not calculated"):
+            res.decays()
+        with self.assertRaisesRegex(fs.BackendError, "only available with the compiled backend"):
+            res.observables()
+        point = self.model.point(self.inputs(),
+                                 decay_settings=fs.DecaySettings(calculate_decays=True))
+        self.assertEqual(len(self.model.calculate(point).decays()), 0)
+
+    def test_compiled_backend_missing(self):
+        with self.assertRaisesRegex(fs.BackendError, "is not built"):
+            fs.Model("Toy", root=self.root, backend="compiled")
 
     def test_raise_on_problems(self):
         with self.assertRaises(fs.CalculationError) as ctx:
@@ -269,6 +285,18 @@ class SLHATest(unittest.TestCase):
     def test_write_rejects_nan(self):
         with self.assertRaises(ValueError):
             slha.write({"MINPAR": {3: float("nan")}})
+
+
+class ObservablesTest(unittest.TestCase):
+    def test_complex_parts_are_combined(self):
+        obs = fs.Observables(
+            ["amm_Fe_1", "Re(c(0))", "Im(c(0))", "Re(c(1))", "Im(c(1))", "Re(z)", "Im(z)"],
+            [1e-9, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [])
+        self.assertTrue(obs.ok)
+        self.assertEqual(obs["amm_Fe_1"], 1e-9)
+        self.assertEqual(list(obs["c"]), [1 + 2j, 3 + 4j])
+        self.assertEqual(obs["z"], 5 + 6j)
+        self.assertEqual(sorted(obs), ["amm_Fe_1", "c", "z"])
 
 
 class ArraysTest(unittest.TestCase):

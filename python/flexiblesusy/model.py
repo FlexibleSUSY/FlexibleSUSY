@@ -219,7 +219,14 @@ class Model:
     """A model generated and built with FlexibleSUSY.
 
     Model("MSSM") finds models/MSSM in the FlexibleSUSY directory (see
-    find_root) and reads its metadata.  backend="slha" runs models/MSSM/run_MSSM.x.
+    find_root) and reads its metadata.  Backends:
+
+    - "compiled": the model's Python module (FlexibleSUSY configured with
+      --with-python); keeps the spectrum in memory, so that
+      Result.observables() and Result.decays() are calculated on demand.
+    - "slha": runs models/MSSM/run_MSSM.x.
+    - "auto" (default): "compiled" if the module is built for this
+      interpreter, "slha" otherwise.
     """
 
     def __init__(self, name: str, root: Union[str, os.PathLike, None] = None,
@@ -236,10 +243,13 @@ class Model:
         self.backend = self._make_backend(backend)
 
     def _make_backend(self, backend: str):
+        from .backends import compiled_backend
         from .backends.slha_backend import SLHABackend
+        if backend == "compiled" or (backend == "auto" and compiled_backend.module_path(self)):
+            return compiled_backend.CompiledBackend(self)
         if backend in ("auto", "slha"):
             return SLHABackend(self)
-        raise InputError(f"unknown backend {backend!r}; available: 'auto', 'slha'")
+        raise InputError(f"unknown backend {backend!r}; available: 'auto', 'compiled', 'slha'")
 
     def __repr__(self) -> str:
         return f"Model({self.name!r}, root={str(self.root)!r}, backend={self.backend.name!r})"

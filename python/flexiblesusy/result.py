@@ -54,8 +54,11 @@ class Decay:
 class Decays:
     """Decays by (particle name, 0-based index) or by PDG code."""
 
-    def __init__(self, decays: List[Decay]):
+    def __init__(self, decays: List[Decay], problems: Optional[List[str]] = None,
+                 warnings: Optional[List[str]] = None):
         self._list = decays
+        self.problems = list(problems or [])
+        self.warnings = list(warnings or [])
         self._by_name = {(d.particle, d.index): d for d in decays}
         self._by_pdg = {d.pdg: d for d in decays}
 
@@ -89,6 +92,54 @@ class RunningParameters:
         return name in self.values
 
 
+_COMPLEX_PART = re.compile(r"^(Re|Im)\((\w+)(?:\(([\d,]+)\))?\)$")
+
+
+class Observables:
+    """Observables by name, as in <M>_observables of the generated code.
+
+    Complex observables, which the C++ code lists as Re(name(i)) and
+    Im(name(i)), are combined into complex numbers or arrays.
+    """
+
+    def __init__(self, names: List[str], values: List[float], problems: List[str]):
+        self.problems = list(problems)
+        self.values: Dict[str, Any] = {}
+        parts: Dict[str, Dict[Tuple[int, ...], complex]] = {}
+        for name, value in zip(names, values):
+            m = _COMPLEX_PART.match(name)
+            if not m:
+                self.values[name] = value
+                continue
+            base = m.group(2)
+            idx = tuple(int(i) for i in m.group(3).split(",")) if m.group(3) else ()
+            entry = parts.setdefault(base, {})
+            z = entry.get(idx, 0j)
+            entry[idx] = complex(value, z.imag) if m.group(1) == "Re" else complex(z.real, value)
+        for base, entries in parts.items():
+            if list(entries) == [()]:
+                self.values[base] = entries[()]
+            else:
+                shape = tuple(max(i[k] for i in entries) + 1 for k in range(len(next(iter(entries)))))
+                self.values[base] = arrays.from_entries(shape, entries, 0j)
+
+    @property
+    def ok(self) -> bool:
+        return not self.problems
+
+    def __getitem__(self, name: str) -> Any:
+        return self.values[name]
+
+    def __contains__(self, name: str) -> bool:
+        return name in self.values
+
+    def __iter__(self):
+        return iter(self.values)
+
+    def __len__(self) -> int:
+        return len(self.values)
+
+
 @dataclass
 class Result:
     """Result of Model.calculate().
@@ -96,6 +147,11 @@ class Result:
     Masses and mixing matrices are those of the SLHA output: masses of
     Majorana fermions can be negative (with real mixing matrices), and
     indices are 0-based.
+
+    observables() and decays() are calculated on demand by the compiled
+    backend, from the spectrum kept in memory.  The SLHA backend returns
+    decays only if they were calculated in the same run (DecaySettings
+    calculate_decays) and has no observables.
     """
 
     model: str
@@ -104,15 +160,33 @@ class Result:
     pole_masses: Dict[str, Any]
     mixings: Dict[str, Any]
     parameters: RunningParameters
-    decays: Decays
-    decay_problems: List[str]
     slha: str
     blocks: slha.SLHA
+    _decays: Optional[Decays] = field(default=None, repr=False)
+    _observables: Optional[Observables] = field(default=None, repr=False)
+    _backend: Any = field(default=None, repr=False, compare=False)
+    _state: Any = field(default=None, repr=False, compare=False)
 
     @property
     def ok(self) -> bool:
         """True if FlexibleSUSY reported no problems."""
         return not self.problems
+
+    def decays(self) -> Decays:
+        """Decays, calculated on first call if the backend supports it."""
+        if self._decays is None:
+            self._decays = self._backend.calculate_decays(self)
+        return self._decays
+
+    def observables(self) -> Observables:
+        """Observables, calculated on first call if the backend supports it."""
+        if self._observables is None:
+            self._observables = self._backend.calculate_observables(self)
+        return self._observables
+
+    def release(self) -> None:
+        """Free the model kept in memory for on-demand calculations."""
+        self._state = None
 
     def to_dict(self) -> Dict[str, Any]:
         """JSON-serializable dictionary (complex numbers as [re, im])."""
@@ -125,13 +199,18 @@ class Result:
             "mixings": {k: arrays.to_list(v) for k, v in self.mixings.items()},
             "parameters": {"scale": self.parameters.scale,
                            **{k: arrays.to_list(v) for k, v in self.parameters.values.items()}},
-            "decays": [{"particle": d.particle, "index": d.index, "pdg": d.pdg,
-                        "width": d.width,
-                        "channels": [{"pdg": list(c.pdg), "width": c.width, "br": c.br,
-                                      "final_state": list(c.final_state)}
-                                     for c in d.channels]}
-                       for d in self.decays],
-            "decay_problems": self.decay_problems,
+            "decays": None if self._decays is None else {
+                "problems": self._decays.problems,
+                "warnings": self._decays.warnings,
+                "particles": [{"particle": d.particle, "index": d.index, "pdg": d.pdg,
+                               "width": d.width,
+                               "channels": [{"pdg": list(c.pdg), "width": c.width, "br": c.br,
+                                             "final_state": list(c.final_state)}
+                                            for c in d.channels]}
+                              for d in self._decays]},
+            "observables": None if self._observables is None else {
+                "problems": self._observables.problems,
+                **{k: arrays.to_list(v) for k, v in self._observables.values.items()}},
         }
 
 
@@ -200,7 +279,7 @@ _DECAY_COMMENT = re.compile(r"BR\((.+?)\s*->\s*(.+)\)\s*$")
 _PARTICLE_COMMENT = re.compile(r"^(\w+)(?:\((\d+)\))?\s+decays$")
 
 
-def _decays(data: slha.SLHA, metadata: Metadata) -> Decays:
+def decays_from_slha(data: slha.SLHA, metadata: Metadata) -> Decays:
     # PDG code -> (particle, 0-based index), from the metadata
     by_pdg = {}
     for p in metadata.particles:
@@ -228,10 +307,12 @@ def _decays(data: slha.SLHA, metadata: Metadata) -> Decays:
                                     final_state=final_state))
         result.append(Decay(particle=particle, index=index, pdg=code, width=d.width,
                             channels=channels))
-    return Decays(result)
+    return Decays(result, problems=_info_block(data, "DCINFO", 4),
+                  warnings=_info_block(data, "DCINFO", 3))
 
 
-def from_slha(text: str, metadata: Metadata) -> Result:
+def from_slha(text: str, metadata: Metadata, backend=None, state=None,
+              read_decays: bool = True) -> Result:
     data = slha.read(text)
     mixings = {}
     for info in metadata.mixing_matrices:
@@ -254,8 +335,9 @@ def from_slha(text: str, metadata: Metadata) -> Result:
         pole_masses=_pole_masses(data, metadata),
         mixings=mixings,
         parameters=RunningParameters(scale=scale, values=values),
-        decays=_decays(data, metadata),
-        decay_problems=_info_block(data, "DCINFO", 4),
         slha=text,
         blocks=data,
+        _decays=decays_from_slha(data, metadata) if read_decays and data.decays else None,
+        _backend=backend,
+        _state=state,
     )

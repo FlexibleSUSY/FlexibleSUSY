@@ -29,9 +29,23 @@ res.ok, res.problems, res.warnings
 res.pole_masses["hh"]                         # 0-based: [m_h1, m_h2]
 res.mixings["ZH"]
 res.parameters.scale, res.parameters["Yu"]    # running parameters
-res.decays["hh", 0].channels                  # needs decays enabled, see below
 res.to_dict()                                 # JSON-serializable
 ```
+
+With the compiled backend (see below), observables and decays are calculated
+on demand, from the spectrum kept in memory, without calculating it again:
+
+```python
+res = mssm.calculate(point)                   # spectrum only
+if res.ok and res.pole_masses["hh"][0] > 120:
+    obs = res.observables()                   # e.g. obs["amm_Fe_1"], obs.problems
+    dec = res.decays()                        # e.g. dec["hh", 0].channels, dec.by_pdg(25)
+```
+
+Both are cached in the result.  Decays need Collier or LoopTools
+(`Settings(loop_library=fs.LoopLibrary.COLLIER)`); the loop library is fixed
+by the first calculation in a Python process.  `res.release()` frees the
+model kept in memory.
 
 A point can also be created from scratch.  All input parameters of the
 model are required; settings and SM inputs that aren't given use the
@@ -65,9 +79,23 @@ found.  Otherwise pass `root=` to `fs.Model` or set `FLEXIBLESUSY_DIR`.
 
 ## Backends
 
-- `slha` (current): writes an SLHA input file, runs `models/<M>/run_<M>.x`
-  and reads its SLHA output.
-- A compiled backend with the same API is planned.
+`fs.Model(name, backend=...)`:
+
+- `compiled`: the model's Python module `models/<M>/flexiblesusy_<M>*.so`,
+  built when FlexibleSUSY is configured with `--with-python=<interpreter>`
+  (needs pybind11 for that interpreter, e.g. `--with-python=python3.14`).
+  Calculations run in the Python process, and observables and decays are
+  calculated on demand.  Calculations must not run in parallel threads of one
+  process (FlexibleSUSY has global state); use processes.
+- `slha`: writes an SLHA input file, runs `models/<M>/run_<M>.x` and reads
+  its SLHA output.  Decays are only available if enabled before the
+  calculation (`DecaySettings(calculate_decays=True)`), and observables not
+  at all.
+- `auto` (default): `compiled` if the module is built for the running
+  interpreter, `slha` otherwise.
+
+Both return the same `Result`: masses, mixings and parameters come from the
+SLHA output in both cases (9 significant digits).
 
 The model-specific information (input parameters and their SLHA blocks,
 particles, output blocks) comes from `models/<M>/<M>_metadata.json`, which the

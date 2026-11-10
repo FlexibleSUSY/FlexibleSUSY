@@ -49,11 +49,14 @@ BASE_TEMPLATES := \
 		$(DIR)/physical.cpp.in \
 		$(DIR)/plot_rgflow.gnuplot.in \
 		$(DIR)/plot_spectrum.gnuplot.in \
+		$(DIR)/python_module.cpp.in \
 		$(DIR)/run.cpp.in \
 		$(DIR)/run.m.in \
 		$(DIR)/run_cmd_line.cpp.in \
 		$(DIR)/run_decays.cpp.in \
 		$(DIR)/scan.cpp.in \
+		$(DIR)/session.hpp.in \
+		$(DIR)/session.cpp.in \
 		$(DIR)/slha_io.hpp.in \
 		$(DIR)/slha_io.cpp.in \
 		$(DIR)/soft_beta_.cpp.in \

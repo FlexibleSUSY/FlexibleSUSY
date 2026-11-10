@@ -1,0 +1,497 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#include "@ModelName@_session.hpp"
+
+#include "config.h"
+
+#include "@ModelName@_info.hpp"
+#include "@ModelName@_input_parameters.hpp"
+#include "@ModelName@_observables.hpp"
+#include "@ModelName@_slha_io.hpp"
+#include "@ModelName@_model_slha.hpp"
+#include "@ModelName@_unitarity.hpp"
+@solverIncludes@
+#include "error.hpp"
+#include "lowe.h"
+#include "observable_problems_format_slha.hpp"
+#include "physical_input.hpp"
+#include "slha_io.hpp"
+#include "spectrum_generator_problems.hpp"
+#include "spectrum_generator_settings.hpp"
+#include "standard_model_two_scale_model.hpp"
+#include "decays/flexibledecay_settings.hpp"
+#include "decays/experimental_constraints.hpp"
+#include "loop_libraries/loop_library.hpp"
+@decaysIncludes@
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
+namespace flexiblesusy {
+namespace @ModelName@_session_impl {
+
+// The classes below follow the calculation part of the LibraryLink
+// interface (templates/librarylink.cpp.in), without MathLink, so that the
+// same generated code snippets (decays, solvers) can be used.
+
+class @ModelName@_spectrum {
+public:
+   virtual ~@ModelName@_spectrum() = default;
+
+   virtual const Spectrum_generator_problems& get_problems() const = 0;
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const = 0;
+   virtual double get_model_scale() const = 0;
+   virtual const @ModelName@_observables& get_observables() const = 0;
+@getDecaysVirtualFunc@
+   virtual const UnitarityInfiniteS& get_unitarity() const = 0;
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const = 0;
+   virtual const SignalResult& get_higgssignals_output() const = 0;
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const = 0;
+   virtual void calculate_spectrum(
+      const Spectrum_generator_settings&, const SLHA_io::Modsel&,
+      const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
+   virtual void calculate_model_observables(
+      const softsusy::QedQcd&,
+      @LToLConversion_named_argument@
+      const Physical_input&,
+      const Spectrum_generator_settings&) = 0;
+@calculateDecaysVirtualFunc@
+@calculateDecaysEffCVirtualFunc@
+   virtual void calculate_unitarity() = 0;
+};
+
+template <typename Solver_type>
+class @ModelName@_spectrum_impl : public @ModelName@_spectrum
+{
+public:
+   virtual ~@ModelName@_spectrum_impl() = default;
+
+   virtual const Spectrum_generator_problems& get_problems() const override { return problems; }
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const override;
+   virtual double get_model_scale() const override { return std::get<0>(models).get_scale(); }
+   virtual const @ModelName@_observables& get_observables() const override { return observables; }
+@getSpectrumDecays@
+   virtual const UnitarityInfiniteS& get_unitarity() const override { return unitarityData; };
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const override { return normalized_higgs_effc; };
+   virtual const SignalResult& get_higgssignals_output() const override { return higgssignals; };
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const override { return higgsbounds; };
+   virtual void calculate_spectrum(
+      const Spectrum_generator_settings&, const SLHA_io::Modsel&,
+      const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
+   virtual void calculate_model_observables(
+      const softsusy::QedQcd&,
+      @LToLConversion_named_argument@
+      const Physical_input&,
+      const Spectrum_generator_settings&) override;
+@calculateSpectrumDecaysPrototype@
+@calculateSpectrumDecaysEffCPrototype@
+   virtual void calculate_unitarity() override;
+private:
+   std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
+   Spectrum_generator_problems problems{};   ///< spectrum generator problems
+   @ModelName@_scales scales{};              ///< scale information
+   @ModelName@_observables observables{};    ///< observables
+   UnitarityInfiniteS unitarityData = {};    ///< unitarity constraints
+   EffectiveCoupling_list normalized_higgs_effc {};
+   SignalResult higgssignals {};
+   std::vector<std::tuple<int, double, double, std::string>> higgsbounds {};
+@decaysData@
+};
+
+class Model_data {
+public:
+   void set_input_parameters(const @ModelName@_input_parameters& input_) { input = input_; }
+   void set_physical_input(const Physical_input& p) { physical_input = p; }
+   void set_sm_input_parameters(const softsusy::QedQcd& qedqcd_) { qedqcd = qedqcd_; }
+   void set_settings(const Spectrum_generator_settings& s) { settings = s; }
+   @LToLConversion_setter@
+   void set_fd_settings(const FlexibleDecay_settings& s) { flexibledecay_settings = s; }
+   void set_modsel(const SLHA_io::Modsel& m) { modsel = m; }
+
+   const Spectrum_generator_settings& get_settings() const { return settings; }
+   const FlexibleDecay_settings& get_fd_settings() const { return flexibledecay_settings; }
+   const Physical_input& get_physical_input() const { return physical_input; }
+   const EffectiveCoupling_list& get_normalized_higgs_effc() const {
+      check_spectrum_pointer();
+      return spectrum->get_normalized_higgs_effc();
+   }
+
+   const @ModelName@_spectrum& get_spectrum() const {
+      check_spectrum_pointer();
+      return *spectrum;
+   }
+
+   void calculate_spectrum();
+   void calculate_model_observables();
+@calculateModelDecaysPrototype@
+@calculateModelDecaysEffCPrototype@
+   void calculate_unitarity();
+   double get_model_scale() const {
+      check_spectrum_pointer();
+      return spectrum->get_model_scale();
+   }
+   @ModelName@_slha_io get_slha_io() const;
+
+private:
+   @ModelName@_input_parameters input{};                    ///< model input parameters
+   Physical_input physical_input{};                         ///< extra non-SLHA physical input
+   softsusy::QedQcd qedqcd{};                               ///< SLHA physical input
+   Spectrum_generator_settings settings{};                  ///< spectrum generator settings
+   FlexibleDecay_settings flexibledecay_settings {};        ///< FlexibleDecay settings
+   SLHA_io::Modsel modsel{};                                ///< MODSEL input
+   @LToLConversion_private@
+   std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr}; ///< spectrum information
+
+   void check_spectrum_pointer() const;
+};
+
+/******************************************************************/
+
+void Model_data::check_spectrum_pointer() const
+{
+   if (!spectrum) {
+      throw SetupError("No spectrum calculated yet.");
+   }
+}
+
+/******************************************************************/
+
+@ModelName@_slha_io Model_data::get_slha_io() const
+{
+   check_spectrum_pointer();
+   @ModelName@_slha_io slha_io;
+
+   slha_io.set_settings(settings);
+   slha_io.set_sminputs(qedqcd);
+   slha_io.set_physical_input(physical_input);
+   slha_io.set_modsel(modsel);
+   slha_io.set_FlexibleDecay_settings(flexibledecay_settings);
+   slha_io.set_input(input);
+   @LToLConversion_set_slha@
+   slha_io.set_print_imaginary_parts_of_majorana_mixings(
+      settings.get(Spectrum_generator_settings::force_positive_masses));
+
+   spectrum->fill_slha_io(slha_io, settings, flexibledecay_settings);
+
+   return slha_io;
+}
+
+/******************************************************************/
+
+template <typename Solver_type>
+void @ModelName@_spectrum_impl<Solver_type>::calculate_spectrum(
+   const Spectrum_generator_settings& settings,
+   const SLHA_io::Modsel& modsel,
+   const softsusy::QedQcd& qedqcd,
+   const @ModelName@_input_parameters& input
+)
+{
+   @ModelName@_spectrum_generator<Solver_type> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.set_parameter_output_scale(modsel.parameter_output_scale);
+   spectrum_generator.run(qedqcd, input);
+
+   models = spectrum_generator.get_models_slha();
+   problems = spectrum_generator.get_problems();
+   scales.HighScale = spectrum_generator.get_high_scale();
+   scales.SUSYScale = spectrum_generator.get_susy_scale();
+   scales.LowScale  = spectrum_generator.get_low_scale();
+   scales.pole_mass_scale = spectrum_generator.get_pole_mass_scale();
+}
+
+/******************************************************************/
+
+template <typename Solver_type>
+void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
+   const softsusy::QedQcd& qedqcd,
+   @LToLConversion_named_argument@
+   const Physical_input& physical_input,
+   const Spectrum_generator_settings& settings)
+{
+   observables = calculate_observables(
+      std::get<0>(models),
+      qedqcd,
+      @LToLConversion_class_name@
+      physical_input,
+      settings,
+      scales.pole_mass_scale);
+}
+@calculateSpectrumDecaysFunction@
+@calculateSpectrumDecaysEffCFunction@
+/******************************************************************/
+
+template <typename Solver_type>
+void @ModelName@_spectrum_impl<Solver_type>::calculate_unitarity() {
+   unitarityData = @ModelName@_unitarity::max_scattering_eigenvalue_infinite_s(std::get<0>(models));
+}
+
+/******************************************************************/
+
+template <typename Solver_type>
+void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& slha_io,
+       const Spectrum_generator_settings& settings, const FlexibleDecay_settings& flexibledecay_settings) const
+{
+   // problems of the spectrum generator (as in run_@ModelName@.x), which
+   // include those of the boundary value problem solver
+   const auto force_output = std::get<0>(models).do_force_output();
+
+   slha_io.set_spinfo(problems);
+   if (!problems.have_problem() || force_output) {
+      slha_io.set_spectrum(models);
+      slha_io.set_extra(std::get<0>(models), scales, observables, settings);
+   }
+
+   @setUnitarity@
+@fillDecaysSLHA@
+}
+
+/******************************************************************/
+
+void Model_data::calculate_spectrum()
+{
+   const int solver_type = static_cast<int>(settings.get(
+                                               Spectrum_generator_settings::solver));
+   switch (solver_type) {
+   case 0:
+@runEnabledSolvers@
+   default:
+      if (solver_type != 0) {
+         throw SetupError("invalid solver type");
+      }
+   }
+}
+
+/******************************************************************/
+
+void Model_data::calculate_model_observables()
+{
+   check_spectrum_pointer();
+   spectrum->calculate_model_observables(qedqcd,
+      @LToLConversion_class_name@
+      physical_input,
+      settings);
+}
+@calculateModelDecaysFunction@
+@calculateModelDecaysEffCFunction@
+/******************************************************************/
+
+void Model_data::calculate_unitarity()
+{
+   check_spectrum_pointer();
+   spectrum->calculate_unitarity();
+}
+
+} // namespace @ModelName@_session_impl
+
+/******************************************************************/
+/* @ModelName@_session                                            */
+/******************************************************************/
+
+using @ModelName@_session_impl::Model_data;
+
+@ModelName@_session::@ModelName@_session()
+   : data(std::make_unique<Model_data>())
+{
+}
+
+@ModelName@_session::~@ModelName@_session() = default;
+@ModelName@_session::@ModelName@_session(@ModelName@_session&&) noexcept = default;
+@ModelName@_session& @ModelName@_session::operator=(@ModelName@_session&&) noexcept = default;
+
+void @ModelName@_session::read_slha_input(const std::string& slha_input)
+{
+   std::istringstream istr(slha_input);
+   @ModelName@_slha_io slha_io;
+   slha_io.read_from_stream(istr);
+
+   Spectrum_generator_settings settings;
+   FlexibleDecay_settings flexibledecay_settings;
+   softsusy::QedQcd qedqcd;
+   Physical_input physical_input;
+   @ModelName@_input_parameters input;
+   @LToLConversion_init@
+
+   slha_io.fill(settings);
+   slha_io.fill(flexibledecay_settings);
+   slha_io.fill(qedqcd);
+   slha_io.fill(physical_input);
+   slha_io.fill(input);
+   @LToLConversion_fill@
+
+   auto new_data = std::make_unique<Model_data>();
+   {
+      // named data, as the generated snippet @ LToLConversion_set_data @ expects
+      Model_data& data = *new_data;
+      data.set_settings(settings);
+      data.set_fd_settings(flexibledecay_settings);
+      data.set_sm_input_parameters(qedqcd);
+      data.set_physical_input(physical_input);
+      data.set_input_parameters(input);
+      data.set_modsel(slha_io.get_modsel());
+      @LToLConversion_set_data@
+   }
+   data = std::move(new_data);
+
+   spectrum_calculated = false;
+   observables_calculated = false;
+   decays_calculated = false;
+}
+
+void @ModelName@_session::check_spectrum() const
+{
+   if (!spectrum_calculated) {
+      throw SetupError("No spectrum calculated yet.");
+   }
+}
+
+void @ModelName@_session::calculate_spectrum()
+{
+   data->calculate_spectrum();
+   spectrum_calculated = true;
+   observables_calculated = false;
+   decays_calculated = false;
+}
+
+bool @ModelName@_session::have_spectrum() const
+{
+   return spectrum_calculated;
+}
+
+std::vector<std::string> @ModelName@_session::get_problem_strings() const
+{
+   check_spectrum();
+   return data->get_spectrum().get_problems().get_problem_strings();
+}
+
+std::vector<std::string> @ModelName@_session::get_warning_strings() const
+{
+   check_spectrum();
+   return data->get_spectrum().get_problems().get_warning_strings();
+}
+
+void @ModelName@_session::calculate_observables()
+{
+   check_spectrum();
+   data->calculate_model_observables();
+   observables_calculated = true;
+}
+
+bool @ModelName@_session::have_observables() const
+{
+   return observables_calculated;
+}
+
+std::vector<std::string> @ModelName@_session::get_observable_names()
+{
+   return @ModelName@_observables::get_names();
+}
+
+std::vector<double> @ModelName@_session::get_observable_values() const
+{
+   check_spectrum();
+   const auto values = data->get_spectrum().get_observables().get();
+   return std::vector<double>(values.data(), values.data() + values.size());
+}
+
+std::vector<std::string> @ModelName@_session::get_observable_problem_strings() const
+{
+   check_spectrum();
+   std::vector<std::string> result;
+   slha_format_problems_and_warnings(data->get_spectrum().get_observables().problems,
+                                     std::back_inserter(result));
+   return result;
+}
+
+bool @ModelName@_session::has_decays()
+{
+   return @sessionHasDecays@;
+}
+
+void @ModelName@_session::calculate_decays()
+{
+   check_spectrum();
+   if (!has_decays()) {
+      throw SetupError("The model @ModelName@ was generated without decays "
+                       "(FSCalculateDecays = False).");
+   }
+   const auto loop_library = Loop_library::get_type();
+   if (loop_library != Loop_library::Library::Collier &&
+       loop_library != Loop_library::Library::Looptools) {
+      throw SetupError("Decays need Collier or LoopTools as loop library "
+                       "(FlexibleSUSY[31] = 1 or 2).  The loop library is fixed "
+                       "by the first calculation in a process.");
+   }
+   const auto& settings = data->get_settings();
+   if (!settings.get(Spectrum_generator_settings::calculate_sm_masses) ||
+       !settings.get(Spectrum_generator_settings::calculate_bsm_masses)) {
+      throw SetupError("Decays need SM and BSM pole masses: set FlexibleSUSY[3] = "
+                       "FlexibleSUSY[23] = 1 before calculating the spectrum.");
+   }
+   auto flexibledecay_settings = data->get_fd_settings();
+   flexibledecay_settings.set(FlexibleDecay_settings::calculate_decays, 1.0);
+   data->set_fd_settings(flexibledecay_settings);
+   @sessionCalculateDecays@
+   decays_calculated = true;
+}
+
+bool @ModelName@_session::have_decays() const
+{
+   return decays_calculated;
+}
+
+std::vector<std::string> @ModelName@_session::get_decay_problem_strings() const
+{
+   check_spectrum();
+   @sessionDecayProblems@
+}
+
+std::vector<std::string> @ModelName@_session::get_decay_warning_strings() const
+{
+   check_spectrum();
+   @sessionDecayWarnings@
+}
+
+std::string @ModelName@_session::get_slha_output() const
+{
+   check_spectrum();
+   std::ostringstream ostr;
+   data->get_slha_io().write_to_stream(ostr);
+   return ostr.str();
+}
+
+int @ModelName@_session::get_loop_library()
+{
+   // as in FlexibleSUSY[31]; -1: not set yet
+   switch (Loop_library::get_type()) {
+   case Loop_library::Library::Softsusy: return 0;
+   case Loop_library::Library::Collier: return 1;
+   case Loop_library::Library::Looptools: return 2;
+   case Loop_library::Library::Fflite: return 3;
+   default: break;
+   }
+   return -1;
+}
+
+} // namespace flexiblesusy

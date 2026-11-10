@@ -1,0 +1,65 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// Python module flexiblesusy_@ModelName@, used by the "compiled" backend of
+// the Python package in python/flexiblesusy.  It only binds
+// @ModelName@_session; the calculation is in @ModelName@_session.cpp.
+//
+// The interpreter lock is kept during calculations: FlexibleSUSY and the
+// loop libraries have global state, so calculations must not run in
+// parallel threads of one process.
+
+#include "config.h"
+#include "@ModelName@_session.hpp"
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+namespace py = pybind11;
+using flexiblesusy::@ModelName@_session;
+
+PYBIND11_MODULE(flexiblesusy_@ModelName@, m)
+{
+   m.doc() = "FlexibleSUSY spectrum generator for the model @ModelName@ "
+             "(used by the Python package flexiblesusy)";
+   m.attr("model_name") = "@ModelName@";
+   m.attr("flexiblesusy_version") = FLEXIBLESUSY_VERSION;
+
+   py::class_<@ModelName@_session>(m, "Session")
+      .def(py::init<>())
+      .def("read_slha_input", &@ModelName@_session::read_slha_input,
+           "Read settings and inputs from SLHA input text")
+      .def("calculate_spectrum", &@ModelName@_session::calculate_spectrum)
+      .def("have_spectrum", &@ModelName@_session::have_spectrum)
+      .def("problems", &@ModelName@_session::get_problem_strings)
+      .def("warnings", &@ModelName@_session::get_warning_strings)
+      .def("calculate_observables", &@ModelName@_session::calculate_observables)
+      .def("have_observables", &@ModelName@_session::have_observables)
+      .def_static("observable_names", &@ModelName@_session::get_observable_names)
+      .def("observable_values", &@ModelName@_session::get_observable_values)
+      .def("observable_problems", &@ModelName@_session::get_observable_problem_strings)
+      .def_static("has_decays", &@ModelName@_session::has_decays)
+      .def("calculate_decays", &@ModelName@_session::calculate_decays)
+      .def("have_decays", &@ModelName@_session::have_decays)
+      .def("decay_problems", &@ModelName@_session::get_decay_problem_strings)
+      .def("decay_warnings", &@ModelName@_session::get_decay_warning_strings)
+      .def("slha_output", &@ModelName@_session::get_slha_output,
+           "SLHA output of everything calculated so far")
+      .def_static("loop_library", &@ModelName@_session::get_loop_library,
+                  "Loop library of this process as in FlexibleSUSY[31] (-1: not set yet)");
+}

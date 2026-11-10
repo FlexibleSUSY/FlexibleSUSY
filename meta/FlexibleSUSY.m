@@ -3158,6 +3158,20 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
                             "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
                             "@setUnitarity@" -> setUnitarity,
+                            (* used by the language-neutral session (templates/session.cpp.in) *)
+                            "@sessionHasDecays@" -> If[FlexibleSUSY`FSCalculateDecays, "true", "false"],
+                            "@sessionCalculateDecays@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "data->calculate_model_decays();\n" <>
+                               "   if (data->get_fd_settings().get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
+                               "      data->calculate_normalized_effc();\n" <>
+                               "   }",
+                               ""],
+                            "@sessionDecayProblems@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "return data->get_spectrum().get_decays().get_problems().get_problem_strings();",
+                               "return {};"],
+                            "@sessionDecayWarnings@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "return data->get_spectrum().get_decays().get_problems().get_warning_strings();",
+                               "return {};"],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -5621,7 +5635,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                           {FileNameJoin[{$flexiblesusyTemplateDir, "librarylink.m.in"}],
                            FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_librarylink.m"}]},
                           {FileNameJoin[{$flexiblesusyTemplateDir, "run.m.in"}],
-                           FileNameJoin[{FSOutputDir, "run_" <> FlexibleSUSY`FSModelName <> ".m"}]}
+                           FileNameJoin[{FSOutputDir, "run_" <> FlexibleSUSY`FSModelName <> ".m"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "session.hpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session.hpp"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "session.cpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session.cpp"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "python_module.cpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_python_module.cpp"}]}
                          }];
 
            Utils`PrintHeadline["Creating user examples"];
