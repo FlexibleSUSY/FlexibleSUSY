@@ -46,6 +46,9 @@ LIB@CLASSNAME@_CXXQFT_VERTICES_SRC ?= ''
 @CLASSNAME@_REFERENCES := \
 		$(DIR)/@CLASSNAME@_references.tex
 
+@CLASSNAME@_METADATA := \
+		$(DIR)/@CLASSNAME@_metadata.json
+
 @CLASSNAME@_GNUPLOT := \
 		$(DIR)/@CLASSNAME@_plot_rgflow.gnuplot \
 		$(DIR)/@CLASSNAME@_plot_spectrum.gnuplot
@@ -242,6 +245,7 @@ ifneq ($(@CLASSNAME@_SLHA_INPUT),)
 		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_INSTALL_DIR)
 endif
 		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_REFERENCES) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_METADATA) $(@CLASSNAME@_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_GNUPLOT) $(@CLASSNAME@_INSTALL_DIR)
 endif
 
@@ -272,6 +276,7 @@ clean-$(MODNAME)-src:
 		$(Q)-rm -f $(@CLASSNAME@_CXXQFT_VERTICES_MK)
 		$(Q)-rm -f $(@CLASSNAME@_SLHA_INPUT)
 		$(Q)-rm -f $(@CLASSNAME@_REFERENCES)
+		$(Q)-rm -f $(@CLASSNAME@_METADATA)
 		$(Q)-rm -f $(@CLASSNAME@_GNUPLOT)
 
 distclean-$(MODNAME): clean-$(MODNAME)-src
@@ -298,7 +303,7 @@ pack-$(MODNAME)-src:
 		$(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
 		$(@CLASSNAME@_MK) $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_CXXQFT_VERTICES_MK) \
 		$(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_REFERENCES) \
-		$(@CLASSNAME@_GNUPLOT) \
+		$(@CLASSNAME@_METADATA) $(@CLASSNAME@_GNUPLOT) \
 		$(@CLASSNAME@_FlexibleDecay_MK)
 
 $(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) $(EXE@CLASSNAME@_SRC) $(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \

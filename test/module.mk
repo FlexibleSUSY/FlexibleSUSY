@@ -105,7 +105,8 @@ TEST_SH := \
 		$(DIR)/test_shell_completions.sh \
 		$(DIR)/test_space_dir.sh \
 		$(DIR)/test_wolframscript.sh \
-		$(DIR)/test_looplibrary_environment.sh
+		$(DIR)/test_looplibrary_environment.sh \
+		$(DIR)/test_python_interface.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
@@ -114,6 +115,7 @@ TEST_META := \
 		$(DIR)/test_EWSB.m \
 		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
+		$(DIR)/test_ModelMetadata.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
 		$(DIR)/test_MSSM_2L_mt.m \
 		$(DIR)/test_MSSM_2L_yb_softsusy.m \

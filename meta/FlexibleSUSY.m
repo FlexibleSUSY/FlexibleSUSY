@@ -61,7 +61,8 @@ BeginPackage["FlexibleSUSY`",
               "Wrappers`",
               "Himalaya`",
               "GM2Calc`",
-              "Unitarity`"
+              "Unitarity`",
+              "ModelMetadata`"
 }];
 
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
@@ -5640,6 +5641,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                               {{FileNameJoin[{$flexiblesusyTemplateDir, "LesHouches.in"}],
                                 FileNameJoin[{FSOutputDir, "LesHouches.in." <> FlexibleSUSY`FSModelName <> "_generated"}]}}
                              ];
+
+           Print["Creating model metadata for the Python interface ..."];
+           ModelMetadata`WriteModelMetadata[
+               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_metadata.json"}],
+               ModelMetadata`CreateModelMetadata[
+                   FlexibleSUSY`FSModelName, FS`Version, inputParameters,
+                   DeleteDuplicates @ Flatten[TreeMasses`GetMassEigenstate /@ massMatrices],
+                   FlexibleSUSY`FSLesHouchesList]];
 
            Utils`PrintHeadline["FlexibleSUSY has finished"];
           ];
