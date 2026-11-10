@@ -32,6 +32,8 @@ where the topology is encoded as the relevant adjacency matrix.
 ";
 
 IsSupportedDecayParticle::usage="returns True if decays for the given particle are supported.";
+GetMaxLoopOrderForDecay::usage="returns the maximum loop order of the amplitudes generated for decays
+of the given particle: 1 for scalars, 0 (tree level only) otherwise.";
 
 CreateCompleteParticleList::usage="";
 GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
@@ -414,11 +416,16 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
            {#[[1]], With[{toposAndDiags = #[[2]]}, {#[[1]], Select[#[[2]], IsSupportedDiagram]}& /@ toposAndDiags]}& /@ diagrams
           ];
 
-(* in the MRSSM this 1-loop decay amplitude for Fu crashes the code
-   {Fu, bar[Fd], conj[SRdp], {Fu, Chi, conj[Su]}, {bar[Fd], bar[Chi], Sd}, {conj[SRdp], Su, conj[Sd]}}
-   Temporarily disable 1-loop Fu decay *)
+(* The generic 1-loop decay diagrams in
+   meta/generic_loop_decay_diagram_classes.m exist only for decays of
+   scalars (S -> FF, SS, SV, VV).  Decays of other particles (fermions)
+   are therefore calculated at tree level only: their channels that
+   exist only at the loop level (e.g. Glu -> Chi VG) are not generated. *)
+GetMaxLoopOrderForDecay[initialParticle_] :=
+    If[TreeMasses`IsScalar[initialParticle], 1, 0];
+
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List] :=
-    GetContributingGraphsForDecay[initialParticle, finalParticles, If[initialParticle === First@TreeMasses`GetSMUpQuarks[], 0, 1]];
+    GetContributingGraphsForDecay[initialParticle, finalParticles, GetMaxLoopOrderForDecay[initialParticle]];
 
 (* defines a fixed ordering for final state particles  *)
 (* @todo decide on what this ordering actually will be *)
@@ -1388,6 +1395,11 @@ GenericTranslationForInsertion[topology_, insertion_] := Module[{
       ];
 
    (* there should be one-to-one correspondence *)
+   Utils`AssertWithMessage[res =!= {},
+      "No generic 1-loop decay diagram found for the insertion " <> ToString[insertion] <>
+      " with the field types " <> ToString[genericFieldTypesOnEdges] <>
+      " in meta/generic_loop_decay_diagram_classes.m"
+   ];
    Utils`AssertWithMessage[Length[res] === 1 || Plus@@Flatten[(Length/@Take[#,{-3}])& /@ res,1] === 0,
       "Couldn't identify the C++ translation for a needed diagram"
    ];

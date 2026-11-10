@@ -4851,6 +4851,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
               FlexibleSUSY`FSDecayParticles = Select[FlexibleSUSY`FSDecayParticles, Decays`IsSupportedDecayParticle];
 
+              With[{treeLevelOnly = Select[FlexibleSUSY`FSDecayParticles, Decays`GetMaxLoopOrderForDecay[#] === 0&]},
+                 If[treeLevelOnly =!= {},
+                    Utils`FSFancyWarning[
+                       "Only tree-level decays are calculated for ", treeLevelOnly,
+                       ": loop-induced decays are only supported for scalars."
+                    ];
+                 ];
+              ];
+
               If[FlexibleSUSY`FSDecayParticles === {},
                  Utils`FSFancyWarning[
                     "No supported particles to calculate decays for were found.",
