@@ -2219,13 +2219,15 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
            Print["Creating a C++ code for decay amplitudes..."];
            If[FlexibleSUSY`FSEnableParallelism,
               LaunchKernels[];
-              (* The subkernels get all definitions from the main kernel, which
-                 has symbols with the same name in different contexts, e.g.
-                 FlexibleSUSY`M and Susyno`LieGroups`M.  As both contexts are
-                 already on $ContextPath when the copies are created, each
-                 subkernel would report General::shdw, although it only gets
-                 the symbols that also exist on the main kernel. *)
-              ParallelEvaluate[Off[General::shdw], DistributedContexts->None];
+              (* FlexibleSUSY`M and Susyno`LieGroups`M (from SARAH) both exist
+                 on the main kernel, with both contexts on $ContextPath and
+                 FlexibleSUSY` first.  The subkernels get copies of both, with
+                 the same context order, so M resolves as on the main kernel,
+                 but each subkernel reports General::shdw for it.  Only this
+                 known clash is silenced: other General::shdw messages can
+                 point to a real problem, e.g. a model symbol created in
+                 Global` on a subkernel but in SARAH` on the main kernel. *)
+              ParallelEvaluate[Off[Susyno`LieGroups`M::shdw, FlexibleSUSY`M::shdw], DistributedContexts->None];
               ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
               specializations =
                  AbsoluteTiming@ParallelMap[
