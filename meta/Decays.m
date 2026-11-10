@@ -420,10 +420,7 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
    meta/generic_loop_decay_diagram_classes.m exist only for decays of
    scalars (S -> FF, SS, SV, VV).  Decays of other particles (fermions)
    are therefore calculated at tree level only: their channels that
-   exist only at the loop level (e.g. Glu -> Chi VG) are not generated.
-   This also covers the MRSSM decay
-   {Fu, bar[Fd], conj[SRdp], {Fu, Chi, conj[Su]}, {bar[Fd], bar[Chi], Sd}, {conj[SRdp], Su, conj[Sd]}},
-   for which 1-loop decays of Fu had been disabled before. *)
+   exist only at the loop level (e.g. Glu -> Chi VG) are not generated. *)
 GetMaxLoopOrderForDecay[initialParticle_] :=
     If[TreeMasses`IsScalar[initialParticle], 1, 0];
 
