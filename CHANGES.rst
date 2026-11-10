@@ -12,6 +12,59 @@ New features
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
+* Python interface: the package ``flexiblesusy`` in ``python/`` runs the
+  spectrum generators from Python 3 (>= 3.8, numpy optional). Masses, mixing
+  matrices, running parameters, observables, decays and the results of
+  HiggsTools and Lilith are returned as Python objects. There are two backends:
+
+  - ``compiled``: a Python module for each model
+    (``models/<M>/flexiblesusy_<M>*.so``, built with pybind11 when FlexibleSUSY
+    is configured with ``--with-python=<interpreter>``). The spectrum stays in
+    memory, so observables, decays, HiggsTools and Lilith are calculated on
+    demand, without calculating the spectrum again.
+  - ``slha``: runs ``run_<M>.x`` and reads its SLHA output; works without
+    pybind11.
+
+  The model-specific information comes from ``models/<M>/<M>_metadata.json``,
+  which the code generation now writes.
+
+  Example::
+
+      ./createmodel --name=MSSM
+      ./configure --with-models=MSSM \
+         --with-loop-libraries=collier \
+         --with-collier-incdir=/path/to/COLLIER/include \
+         --with-collier-libdir=/path/to/COLLIER/lib \
+         --with-python=python3
+      make
+
+      PYTHONPATH=$PWD/python python3
+
+  .. code-block:: python
+
+      import flexiblesusy as fs
+
+      mssm = fs.Model("MSSM")
+      point = mssm.default_point()        # models/MSSM/LesHouches.in.MSSM
+      point = mssm.updated(point, TanBeta=20,
+                           settings=fs.Settings(loop_library=fs.LoopLibrary.COLLIER,
+                                                calculate_sm_masses=True))
+      res = mssm.calculate(point)         # spectrum only
+      if res.ok and res.pole_masses["hh"][0] > 110:   # 0-based indices
+          obs = res.observables()         # e.g. obs["amm_Fe_1"]
+          dec = res.decays()              # e.g. dec["hh", 0].width
+          print(res.mixings["ZH"], res.parameters["Yu"])
+
+  All input parameters of the model are required (``mssm.input_parameters``
+  lists them); settings and SM inputs that aren't given keep the FlexibleSUSY
+  defaults. See ``python/README.md``.
+
+* The calculation part of the Mathematica interface is now shared with the
+  Python interface (``<M>_session``). ``FS<M>ToSLHA`` writes the problems of
+  the spectrum generator to Block ``SPINFO``, as ``run_<M>.x`` does, so it now
+  also reports problems of the boundary value problem solver (e.g. no
+  convergence).
+
 Fixed bugs
 ----------
 
