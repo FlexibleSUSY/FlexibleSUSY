@@ -119,9 +119,27 @@ only; numpy optional). See `python/README.md`.
 - **SLHA conventions:** values in `Block gauge` are written with the GUT normalization of
   `g1` (`slha_factor` in the metadata), and Majorana masses can be negative with real
   mixing matrices, as in the SLHA output.
-- **Backend:** `slha` runs `run_<M>.x` and parses its SLHA output. The executable exits
-  with a non-zero code when a point has problems but still writes the output, so only a
-  missing or unreadable output counts as a failure.
+- **Backends:**
+  - `slha` runs `run_<M>.x` and parses its SLHA output. The executable exits with a
+    non-zero code when a point has problems but still writes the output, so only a missing
+    or unreadable output counts as a failure.
+  - `compiled` loads `models/<M>/flexiblesusy_<M><suffix>`, a pybind11 module built with
+    `./configure --with-python=<interpreter>`. It binds `<M>_session`
+    (`templates/session.{hpp,cpp}.in`): the calculation part of the LibraryLink code without
+    MathLink, filled by `WriteMathLink`. The spectrum stays in memory, so
+    `Result.observables()` and `Result.decays()` are calculated on demand. The backend must
+    apply the same settings overrides as `run_<M>.x` (`templates/run.cpp.in`), or the two
+    backends give different spectra (e.g. SM masses missing from `MASS`).
+  - The session's SLHA output always contains the decay table, as zero-width `DECAY` blocks
+    if no decays were calculated, so don't read decays from the spectrum output.
+- **pybind11:** the module is built for one interpreter (suffix such as
+  `.cpython-314-x86_64-linux-gnu.so`); other Python versions fall back to `slha`. Some
+  distributions ship the C++ headers separately (e.g. `python3XX-pybind11-devel`): with only
+  the Python package, `python -m pybind11 --includes` points to a missing directory, which
+  `configure` checks.
+- **Changing `templates/module.mk.in`:** `models/<M>/module.mk` is written by `createmodel`,
+  not by the code generation, so run `./createmodel --name=<M> -f` and then `./configure`
+  again (`createmodel` leaves the top-level `Makefile` unconfigured).
 - **Tests:** `cd python && python3 -I -m unittest discover -s tests`, or
   `make test/test_python_interface.sh.xml`. `-I` matters: a package named `tests` in the
   user's site-packages can shadow `python/tests`. The MSSM tests are skipped unless the
