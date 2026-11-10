@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "@ModelName@_session.hpp"
+#include "@ModelName@_session_impl.hpp"
 
 #include "config.h"
 
@@ -51,121 +52,6 @@
 
 namespace flexiblesusy {
 namespace @ModelName@_session_impl {
-
-// The classes below follow the calculation part of the LibraryLink
-// interface (templates/librarylink.cpp.in), without MathLink, so that the
-// same generated code snippets (decays, solvers) can be used.
-
-class @ModelName@_spectrum {
-public:
-   virtual ~@ModelName@_spectrum() = default;
-
-   virtual const Spectrum_generator_problems& get_problems() const = 0;
-   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const = 0;
-   virtual double get_model_scale() const = 0;
-   virtual const @ModelName@_observables& get_observables() const = 0;
-@getDecaysVirtualFunc@
-   virtual const UnitarityInfiniteS& get_unitarity() const = 0;
-   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const = 0;
-   virtual const SignalResult& get_higgssignals_output() const = 0;
-   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const = 0;
-   virtual void calculate_spectrum(
-      const Spectrum_generator_settings&, const SLHA_io::Modsel&,
-      const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
-   virtual void calculate_model_observables(
-      const softsusy::QedQcd&,
-      @LToLConversion_named_argument@
-      const Physical_input&,
-      const Spectrum_generator_settings&) = 0;
-@calculateDecaysVirtualFunc@
-@calculateDecaysEffCVirtualFunc@
-   virtual void calculate_unitarity() = 0;
-};
-
-template <typename Solver_type>
-class @ModelName@_spectrum_impl : public @ModelName@_spectrum
-{
-public:
-   virtual ~@ModelName@_spectrum_impl() = default;
-
-   virtual const Spectrum_generator_problems& get_problems() const override { return problems; }
-   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const override;
-   virtual double get_model_scale() const override { return std::get<0>(models).get_scale(); }
-   virtual const @ModelName@_observables& get_observables() const override { return observables; }
-@getSpectrumDecays@
-   virtual const UnitarityInfiniteS& get_unitarity() const override { return unitarityData; };
-   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const override { return normalized_higgs_effc; };
-   virtual const SignalResult& get_higgssignals_output() const override { return higgssignals; };
-   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const override { return higgsbounds; };
-   virtual void calculate_spectrum(
-      const Spectrum_generator_settings&, const SLHA_io::Modsel&,
-      const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
-   virtual void calculate_model_observables(
-      const softsusy::QedQcd&,
-      @LToLConversion_named_argument@
-      const Physical_input&,
-      const Spectrum_generator_settings&) override;
-@calculateSpectrumDecaysPrototype@
-@calculateSpectrumDecaysEffCPrototype@
-   virtual void calculate_unitarity() override;
-private:
-   std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
-   Spectrum_generator_problems problems{};   ///< spectrum generator problems
-   @ModelName@_scales scales{};              ///< scale information
-   @ModelName@_observables observables{};    ///< observables
-   UnitarityInfiniteS unitarityData = {};    ///< unitarity constraints
-   EffectiveCoupling_list normalized_higgs_effc {};
-   SignalResult higgssignals {};
-   std::vector<std::tuple<int, double, double, std::string>> higgsbounds {};
-@decaysData@
-};
-
-class Model_data {
-public:
-   void set_input_parameters(const @ModelName@_input_parameters& input_) { input = input_; }
-   void set_physical_input(const Physical_input& p) { physical_input = p; }
-   void set_sm_input_parameters(const softsusy::QedQcd& qedqcd_) { qedqcd = qedqcd_; }
-   void set_settings(const Spectrum_generator_settings& s) { settings = s; }
-   @LToLConversion_setter@
-   void set_fd_settings(const FlexibleDecay_settings& s) { flexibledecay_settings = s; }
-   void set_modsel(const SLHA_io::Modsel& m) { modsel = m; }
-
-   const Spectrum_generator_settings& get_settings() const { return settings; }
-   const FlexibleDecay_settings& get_fd_settings() const { return flexibledecay_settings; }
-   const Physical_input& get_physical_input() const { return physical_input; }
-   const EffectiveCoupling_list& get_normalized_higgs_effc() const {
-      check_spectrum_pointer();
-      return spectrum->get_normalized_higgs_effc();
-   }
-
-   const @ModelName@_spectrum& get_spectrum() const {
-      check_spectrum_pointer();
-      return *spectrum;
-   }
-
-   void calculate_spectrum();
-   void calculate_model_observables();
-@calculateModelDecaysPrototype@
-@calculateModelDecaysEffCPrototype@
-   void calculate_unitarity();
-   double get_model_scale() const {
-      check_spectrum_pointer();
-      return spectrum->get_model_scale();
-   }
-   @ModelName@_slha_io get_slha_io() const;
-
-private:
-   @ModelName@_input_parameters input{};                    ///< model input parameters
-   Physical_input physical_input{};                         ///< extra non-SLHA physical input
-   softsusy::QedQcd qedqcd{};                               ///< SLHA physical input
-   Spectrum_generator_settings settings{};                  ///< spectrum generator settings
-   FlexibleDecay_settings flexibledecay_settings {};        ///< FlexibleDecay settings
-   SLHA_io::Modsel modsel{};                                ///< MODSEL input
-   @LToLConversion_private@
-   std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr}; ///< spectrum information
-
-   void check_spectrum_pointer() const;
-};
 
 /******************************************************************/
 

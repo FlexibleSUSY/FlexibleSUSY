@@ -119,6 +119,7 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_observables.hpp \
 		$(DIR)/@CLASSNAME@_physical.hpp \
 		$(DIR)/@CLASSNAME@_session.hpp \
+		$(DIR)/@CLASSNAME@_session_impl.hpp \
 		$(DIR)/@CLASSNAME@_slha_io.hpp \
 		$(DIR)/@CLASSNAME@_spectrum_generator.hpp \
 		$(DIR)/@CLASSNAME@_spectrum_generator_interface.hpp \

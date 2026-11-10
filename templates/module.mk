@@ -57,6 +57,7 @@ BASE_TEMPLATES := \
 		$(DIR)/scan.cpp.in \
 		$(DIR)/session.hpp.in \
 		$(DIR)/session.cpp.in \
+		$(DIR)/session_impl.hpp.in \
 		$(DIR)/slha_io.hpp.in \
 		$(DIR)/slha_io.cpp.in \
 		$(DIR)/soft_beta_.cpp.in \

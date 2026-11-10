@@ -3160,6 +3160,13 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@setUnitarity@" -> setUnitarity,
                             (* used by the language-neutral session (templates/session.cpp.in) *)
                             "@sessionHasDecays@" -> If[FlexibleSUSY`FSCalculateDecays, "true", "false"],
+                            (* solver-independent base types of @ModelTypes@ (cf. FlexibleTower`GetModelTypes[]) *)
+                            "@sessionModelRefTypes@" -> Utils`StringJoinWithSeparator[
+                               If[FlexibleSUSY`FlexibleEFTHiggs === True,
+                                  {"const " <> FlexibleSUSY`FSModelName <> "_slha&",
+                                   "const standard_model::StandardModel<Two_scale>&"},
+                                  {"const " <> FlexibleSUSY`FSModelName <> "_slha&"}],
+                               ", "],
                             "@sessionCalculateDecays@" -> If[FlexibleSUSY`FSCalculateDecays,
                                "data->calculate_model_decays();\n" <>
                                "   if (data->get_fd_settings().get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
@@ -5638,6 +5645,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            FileNameJoin[{FSOutputDir, "run_" <> FlexibleSUSY`FSModelName <> ".m"}]},
                           {FileNameJoin[{$flexiblesusyTemplateDir, "session.hpp.in"}],
                            FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session.hpp"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "session_impl.hpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session_impl.hpp"}]},
                           {FileNameJoin[{$flexiblesusyTemplateDir, "session.cpp.in"}],
                            FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session.cpp"}]},
                           {FileNameJoin[{$flexiblesusyTemplateDir, "python_module.cpp.in"}],

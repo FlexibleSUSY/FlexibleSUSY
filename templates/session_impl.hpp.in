@@ -1,0 +1,178 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// Internal classes of @ModelName@_session, shared with the LibraryLink
+// interface (@ModelName@_librarylink.cpp), which adds the MathLink output
+// to Model_data.  The member functions are defined in @ModelName@_session.cpp.
+
+#ifndef @ModelName@_SESSION_IMPL_H
+#define @ModelName@_SESSION_IMPL_H
+
+#include "@ModelName@_input_parameters.hpp"
+#include "@ModelName@_model.hpp"
+#include "@ModelName@_observables.hpp"
+#include "@ModelName@_slha_io.hpp"
+#include "@ModelName@_model_slha.hpp"
+#include "@ModelName@_unitarity.hpp"
+#include "lowe.h"
+#include "physical_input.hpp"
+#include "slha_io.hpp"
+#include "spectrum_generator_problems.hpp"
+#include "spectrum_generator_settings.hpp"
+#include "standard_model_two_scale_model.hpp"
+#include "decays/flexibledecay_settings.hpp"
+#include "decays/experimental_constraints.hpp"
+
+#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
+
+namespace flexiblesusy {
+namespace @ModelName@_session_impl {
+
+
+class @ModelName@_spectrum {
+public:
+   virtual ~@ModelName@_spectrum() = default;
+
+   virtual const Spectrum_generator_problems& get_problems() const = 0;
+   /// the models (BSM model and, for FlexibleEFTHiggs, the SM), independent of the solver
+   virtual std::tuple<@sessionModelRefTypes@> get_models() const = 0;
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const = 0;
+   virtual double get_model_scale() const = 0;
+   virtual const @ModelName@_observables& get_observables() const = 0;
+@getDecaysVirtualFunc@
+   virtual const UnitarityInfiniteS& get_unitarity() const = 0;
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const = 0;
+   virtual const SignalResult& get_higgssignals_output() const = 0;
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const = 0;
+   virtual void calculate_spectrum(
+      const Spectrum_generator_settings&, const SLHA_io::Modsel&,
+      const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
+   virtual void calculate_model_observables(
+      const softsusy::QedQcd&,
+      @LToLConversion_named_argument@
+      const Physical_input&,
+      const Spectrum_generator_settings&) = 0;
+@calculateDecaysVirtualFunc@
+@calculateDecaysEffCVirtualFunc@
+   virtual void calculate_unitarity() = 0;
+};
+
+template <typename Solver_type>
+class @ModelName@_spectrum_impl : public @ModelName@_spectrum
+{
+public:
+   virtual ~@ModelName@_spectrum_impl() = default;
+
+   virtual const Spectrum_generator_problems& get_problems() const override { return problems; }
+   virtual std::tuple<@sessionModelRefTypes@> get_models() const override {
+      return std::apply([] (const auto&... m) { return std::tuple<@sessionModelRefTypes@>(m...); }, models);
+   }
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const override;
+   virtual double get_model_scale() const override { return std::get<0>(models).get_scale(); }
+   virtual const @ModelName@_observables& get_observables() const override { return observables; }
+@getSpectrumDecays@
+   virtual const UnitarityInfiniteS& get_unitarity() const override { return unitarityData; };
+   virtual const EffectiveCoupling_list& get_normalized_higgs_effc() const override { return normalized_higgs_effc; };
+   virtual const SignalResult& get_higgssignals_output() const override { return higgssignals; };
+   virtual const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const override { return higgsbounds; };
+   virtual void calculate_spectrum(
+      const Spectrum_generator_settings&, const SLHA_io::Modsel&,
+      const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
+   virtual void calculate_model_observables(
+      const softsusy::QedQcd&,
+      @LToLConversion_named_argument@
+      const Physical_input&,
+      const Spectrum_generator_settings&) override;
+@calculateSpectrumDecaysPrototype@
+@calculateSpectrumDecaysEffCPrototype@
+   virtual void calculate_unitarity() override;
+private:
+   std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
+   Spectrum_generator_problems problems{};   ///< spectrum generator problems
+   @ModelName@_scales scales{};              ///< scale information
+   @ModelName@_observables observables{};    ///< observables
+   UnitarityInfiniteS unitarityData = {};    ///< unitarity constraints
+   EffectiveCoupling_list normalized_higgs_effc {};
+   SignalResult higgssignals {};
+   std::vector<std::tuple<int, double, double, std::string>> higgsbounds {};
+@decaysData@
+};
+
+class Model_data {
+public:
+   void set_input_parameters(const @ModelName@_input_parameters& input_) { input = input_; }
+   void set_physical_input(const Physical_input& p) { physical_input = p; }
+   void set_sm_input_parameters(const softsusy::QedQcd& qedqcd_) { qedqcd = qedqcd_; }
+   void set_settings(const Spectrum_generator_settings& s) { settings = s; }
+   @LToLConversion_setter@
+   void set_fd_settings(const FlexibleDecay_settings& s) { flexibledecay_settings = s; }
+   void set_modsel(const SLHA_io::Modsel& m) { modsel = m; }
+
+   const Spectrum_generator_settings& get_settings() const { return settings; }
+   const FlexibleDecay_settings& get_fd_settings() const { return flexibledecay_settings; }
+   const Physical_input& get_physical_input() const { return physical_input; }
+   const EffectiveCoupling_list& get_normalized_higgs_effc() const {
+      check_spectrum_pointer();
+      return spectrum->get_normalized_higgs_effc();
+   }
+   const SignalResult& get_higgssignals_output() const {
+      check_spectrum_pointer();
+      return spectrum->get_higgssignals_output();
+   }
+   const std::vector<std::tuple<int, double, double, std::string>>& get_higgsbounds_output() const {
+      check_spectrum_pointer();
+      return spectrum->get_higgsbounds_output();
+   }
+
+   const @ModelName@_spectrum& get_spectrum() const {
+      check_spectrum_pointer();
+      return *spectrum;
+   }
+
+   void calculate_spectrum();
+   void calculate_model_observables();
+@calculateModelDecaysPrototype@
+@calculateModelDecaysEffCPrototype@
+   void calculate_unitarity();
+   double get_model_scale() const {
+      check_spectrum_pointer();
+      return spectrum->get_model_scale();
+   }
+   @ModelName@_slha_io get_slha_io() const;
+
+protected:
+   // protected for front ends that output the data (LibraryLink)
+   @ModelName@_input_parameters input{};                    ///< model input parameters
+   Physical_input physical_input{};                         ///< extra non-SLHA physical input
+   softsusy::QedQcd qedqcd{};                               ///< SLHA physical input
+   Spectrum_generator_settings settings{};                  ///< spectrum generator settings
+   FlexibleDecay_settings flexibledecay_settings {};        ///< FlexibleDecay settings
+   SLHA_io::Modsel modsel{};                                ///< MODSEL input
+   @LToLConversion_private@
+   std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr}; ///< spectrum information
+
+   void check_spectrum_pointer() const;
+};
+
+} // namespace @ModelName@_session_impl
+} // namespace flexiblesusy
+
+#endif
