@@ -21,3 +21,30 @@
 Each backend has a name and a method calculate(point, timeout) that
 returns a flexiblesusy.result.Result.
 """
+
+from ..errors import InputError
+
+
+class Backend:
+    """Common part of the backends: default paths for HiggsTools and Lilith."""
+
+    name = ""
+
+    def __init__(self, model):
+        self.model = model
+
+    def higgstools_datasets(self, higgsbounds_dataset=None, higgssignals_dataset=None):
+        hb = str(higgsbounds_dataset) if higgsbounds_dataset else self.model.higgsbounds_dataset
+        hs = str(higgssignals_dataset) if higgssignals_dataset else self.model.higgssignals_dataset
+        if not hb or not hs:
+            raise InputError("HiggsTools needs the HiggsBounds and HiggsSignals datasets: pass "
+                             "them to Model(higgsbounds_dataset=..., higgssignals_dataset=...) "
+                             "or to Result.higgstools()")
+        return hb, hs
+
+    def lilith_database(self, database=None):
+        db = str(database) if database else self.model.lilith_database
+        if not db:
+            raise InputError("Lilith needs a database: pass it to Model(lilith_database=...) "
+                             "or to Result.lilith()")
+        return db

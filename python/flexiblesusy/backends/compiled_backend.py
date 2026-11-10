@@ -37,6 +37,7 @@ from .. import result as result_module
 from .. import slha
 from ..errors import BackendError, InputError
 from ..settings import LoopLibrary
+from . import Backend
 
 
 def module_path(model) -> Optional[Path]:
@@ -72,13 +73,18 @@ def _load_module(model):
     return module
 
 
-class CompiledBackend:
+def _signal_result(r):
+    return result_module.SignalResult(ndof=r.ndof, chi2=r.chi2, chi2_sm=r.chi2_sm,
+                                      mh_ref=r.mh_ref, pval_1d=r.pval_1d, pval_2d=r.pval_2d)
+
+
+class CompiledBackend(Backend):
     """Calculates with the model's Python module, keeping the model in memory."""
 
     name = "compiled"
 
     def __init__(self, model):
-        self.model = model
+        super().__init__(model)
         self.module = _load_module(model)
 
     @staticmethod
@@ -158,3 +164,31 @@ class CompiledBackend:
         decays.problems = list(session.decay_problems())
         decays.warnings = list(session.decay_warnings())
         return decays
+
+    def call_higgstools(self, result, higgsbounds_dataset, higgssignals_dataset):
+        if not self.module.Session.has_higgstools():
+            raise BackendError("FlexibleSUSY was configured without HiggsTools "
+                               "(--enable-higgstools)")
+        session = self._session(result)
+        result.decays()      # HiggsTools needs the normalized effective couplings
+        try:
+            r = session.call_higgstools(higgsbounds_dataset, higgssignals_dataset)
+        except RuntimeError as e:
+            raise BackendError(f"HiggsTools failed: {e}") from None
+        return result_module.HiggsToolsResult(
+            higgssignals=_signal_result(r.higgssignals) if r.have_higgssignals else None,
+            higgsbounds=[result_module.HiggsBoundsResult(pdg=b.pdg, obs_ratio=b.obs_ratio,
+                                                         exp_ratio=b.exp_ratio,
+                                                         analysis=b.analysis)
+                         for b in r.higgsbounds])
+
+    def call_lilith(self, result, database):
+        if not self.module.Session.has_lilith():
+            raise BackendError("FlexibleSUSY was configured without Lilith (--with-lilith)")
+        session = self._session(result)
+        result.decays()      # Lilith needs the normalized effective couplings
+        try:
+            found, r = session.call_lilith(database)
+        except RuntimeError as e:
+            raise BackendError(f"Lilith failed: {e}") from None
+        return _signal_result(r) if found else None

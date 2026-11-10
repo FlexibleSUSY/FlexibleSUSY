@@ -92,6 +92,36 @@ class RunningParameters:
         return name in self.values
 
 
+@dataclass
+class SignalResult:
+    """Result of HiggsSignals or Lilith: chi^2 of the model and of the SM
+    (with Higgs mass mh_ref), and p-values for 1 and 2 degrees of freedom."""
+
+    ndof: int
+    chi2: float
+    chi2_sm: float
+    mh_ref: float
+    pval_1d: float
+    pval_2d: float
+
+
+@dataclass
+class HiggsBoundsResult:
+    """HiggsBounds result for one particle: observed and expected ratio of
+    the most sensitive analysis (> 1: excluded)."""
+
+    pdg: int
+    obs_ratio: float
+    exp_ratio: float
+    analysis: str
+
+
+@dataclass
+class HiggsToolsResult:
+    higgssignals: Optional[SignalResult]
+    higgsbounds: List[HiggsBoundsResult]
+
+
 _COMPLEX_PART = re.compile(r"^(Re|Im)\((\w+)(?:\(([\d,]+)\))?\)$")
 
 
@@ -164,6 +194,8 @@ class Result:
     blocks: slha.SLHA
     _decays: Optional[Decays] = field(default=None, repr=False)
     _observables: Optional[Observables] = field(default=None, repr=False)
+    _higgstools: Dict[Tuple[str, str], HiggsToolsResult] = field(default_factory=dict, repr=False)
+    _lilith: Dict[str, Optional[SignalResult]] = field(default_factory=dict, repr=False)
     _backend: Any = field(default=None, repr=False, compare=False)
     _state: Any = field(default=None, repr=False, compare=False)
 
@@ -183,6 +215,26 @@ class Result:
         if self._observables is None:
             self._observables = self._backend.calculate_observables(self)
         return self._observables
+
+    def higgstools(self, higgsbounds_dataset: Optional[str] = None,
+                   higgssignals_dataset: Optional[str] = None) -> HiggsToolsResult:
+        """HiggsBounds and HiggsSignals results (needs FlexibleSUSY with HiggsTools).
+
+        The datasets default to those given to Model().  The compiled backend
+        calculates the decays first if needed."""
+        hb, hs = self._backend.higgstools_datasets(higgsbounds_dataset, higgssignals_dataset)
+        if (hb, hs) not in self._higgstools:
+            self._higgstools[(hb, hs)] = self._backend.call_higgstools(self, hb, hs)
+        return self._higgstools[(hb, hs)]
+
+    def lilith(self, database: Optional[str] = None) -> Optional[SignalResult]:
+        """Lilith result (needs FlexibleSUSY with Lilith); None if no Higgs
+        boson has a mass between 123 and 128 GeV.  The database defaults to
+        the one given to Model()."""
+        db = self._backend.lilith_database(database)
+        if db not in self._lilith:
+            self._lilith[db] = self._backend.call_lilith(self, db)
+        return self._lilith[db]
 
     def release(self) -> None:
         """Free the model kept in memory for on-demand calculations."""
@@ -309,6 +361,43 @@ def decays_from_slha(data: slha.SLHA, metadata: Metadata) -> Decays:
                             channels=channels))
     return Decays(result, problems=_info_block(data, "DCINFO", 4),
                   warnings=_info_block(data, "DCINFO", 3))
+
+
+_MH_REF = re.compile(r"mh\s*=\s*([0-9.eE+-]+)")
+
+
+def signal_result_from_slha(data: slha.SLHA, block_name: str) -> Optional[SignalResult]:
+    """Block HIGGSSIGNALS or LILITH of FlexibleSUSY's SLHA output."""
+    block = data.block(block_name)
+    if block is None or 2 not in block:
+        return None
+    mh_ref = math.nan
+    for (key, _), comment in zip(block.entries, block.comments):
+        m = _MH_REF.search(comment)
+        if key == 3 and m:
+            mh_ref = float(m.group(1))
+    return SignalResult(ndof=int(block.get(1, 0)), chi2=float(block[2]),
+                        chi2_sm=float(block.get(3, math.nan)), mh_ref=mh_ref,
+                        pval_1d=float(block.get(4, math.nan)),
+                        pval_2d=float(block.get(5, math.nan)))
+
+
+def higgsbounds_from_slha(data: slha.SLHA) -> List[HiggsBoundsResult]:
+    """Block HIGGSBOUNDS: entries (pdg, 1) observed ratio with the analysis as
+    comment, (pdg, 2) expected ratio."""
+    block = data.block("HIGGSBOUNDS")
+    if block is None:
+        return []
+    obs, exp, analysis = {}, {}, {}
+    for (key, value), comment in zip(block.entries, block.comments):
+        if isinstance(key, tuple) and len(key) == 2 and isinstance(value, float):
+            pdg, kind = key
+            if kind == 1:
+                obs[pdg], analysis[pdg] = value, comment
+            elif kind == 2:
+                exp[pdg] = value
+    return [HiggsBoundsResult(pdg=pdg, obs_ratio=obs[pdg], exp_ratio=exp.get(pdg, math.nan),
+                              analysis=analysis[pdg]) for pdg in obs]
 
 
 def from_slha(text: str, metadata: Metadata, backend=None, state=None,

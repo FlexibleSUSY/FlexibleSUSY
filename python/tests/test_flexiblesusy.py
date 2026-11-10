@@ -245,6 +245,20 @@ class ToyModelTest(unittest.TestCase):
                                  decay_settings=fs.DecaySettings(calculate_decays=True))
         self.assertEqual(len(self.model.calculate(point).decays()), 0)
 
+    def test_slha_backend_higgstools_not_called(self):
+        model = fs.Model("Toy", root=self.root, higgsbounds_dataset="hb",
+                         higgssignals_dataset="hs", lilith_database="db")
+        res = model.calculate(model.point(self.inputs()))
+        with self.assertRaisesRegex(fs.BackendError, "HiggsTools was not called"):
+            res.higgstools()
+        with self.assertRaisesRegex(fs.InputError, "needs a database"):
+            self.model.calculate(self.model.point(self.inputs())).lilith()
+        point = model.point(self.inputs(), decay_settings=fs.DecaySettings(call_lilith=True))
+        res = model.calculate(point)
+        self.assertIsNone(res.lilith())                      # no Block LILITH in the output
+        with self.assertRaisesRegex(fs.InputError, "can't call it again"):
+            res.lilith("other.list")
+
     def test_compiled_backend_missing(self):
         with self.assertRaisesRegex(fs.BackendError, "is not built"):
             fs.Model("Toy", root=self.root, backend="compiled")
@@ -285,6 +299,40 @@ class SLHATest(unittest.TestCase):
     def test_write_rejects_nan(self):
         with self.assertRaises(ValueError):
             slha.write({"MINPAR": {3: float("nan")}})
+
+
+HIGGSTOOLS_OUTPUT = textwrap.dedent("""\
+    Block HIGGSSIGNALS
+         1     1.59000000E+02   # number of degrees of freedom
+         2     1.53787720E+02   # chi2
+         3     1.52552773E+02   # SM chi2 for mh = 125.090000 GeV
+         4     2.66447195E-01   # p-value (1d)
+         5     5.39305381E-01   # p-value (2d)
+    Block HIGGSBOUNDS
+     25  1     6.44167889E-01   # LHC8 [HW,HZ]>[bb] from 1409.6212 (ATLAS 25fb-1, M=(110, 140))
+     25  2     1.10349794E+00   # expRatio
+    Block LILITH
+         1     6.60000000E+01   # number of degrees of freedom
+         2     5.88464012E+01   # chi2
+         3     5.47819557E+01   # SM chi2 for mh = 125.090000 GeV
+         4     4.37950616E-02   # p-value (1d)
+         5     1.31043920E-01   # p-value (2d)
+    """)
+
+
+class HiggsToolsSLHATest(unittest.TestCase):
+    def test_parse(self):
+        from flexiblesusy import result
+        data = slha.read(HIGGSTOOLS_OUTPUT)
+        hs = result.signal_result_from_slha(data, "HIGGSSIGNALS")
+        self.assertEqual((hs.ndof, hs.chi2, hs.mh_ref), (159, 153.78772, 125.09))
+        self.assertEqual(hs.pval_2d, 0.539305381)
+        hb = result.higgsbounds_from_slha(data)
+        self.assertEqual(len(hb), 1)
+        self.assertEqual((hb[0].pdg, hb[0].obs_ratio, hb[0].exp_ratio), (25, 0.644167889, 1.10349794))
+        self.assertTrue(hb[0].analysis.startswith("LHC8"))
+        self.assertEqual(result.signal_result_from_slha(data, "LILITH").ndof, 66)
+        self.assertIsNone(result.signal_result_from_slha(slha.read(""), "LILITH"))
 
 
 class ObservablesTest(unittest.TestCase):

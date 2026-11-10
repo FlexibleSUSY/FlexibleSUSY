@@ -37,7 +37,7 @@ on demand, from the spectrum kept in memory, without calculating it again:
 
 ```python
 res = mssm.calculate(point)                   # spectrum only
-if res.ok and res.pole_masses["hh"][0] > 120:
+if res.ok and res.pole_masses["hh"][0] > 110:
     obs = res.observables()                   # e.g. obs["amm_Fe_1"], obs.problems
     dec = res.decays()                        # e.g. dec["hh", 0].channels, dec.by_pdg(25)
 ```
@@ -46,6 +46,22 @@ Both are cached in the result.  Decays need Collier or LoopTools
 (`Settings(loop_library=fs.LoopLibrary.COLLIER)`); the loop library is fixed
 by the first calculation in a Python process.  `res.release()` frees the
 model kept in memory.
+
+HiggsBounds/HiggsSignals (HiggsTools) and Lilith work the same way, if
+FlexibleSUSY was configured with them (`--enable-higgstools`, `--with-lilith`):
+
+```python
+mssm = fs.Model("MSSM", higgsbounds_dataset=".../HBDataSet", higgssignals_dataset=".../HSDataSet",
+                lilith_database=".../Lilith/data/latest.list")
+res = mssm.calculate(point)
+ht = res.higgstools()        # ht.higgssignals.chi2, ht.higgsbounds[0].obs_ratio, ...
+ll = res.lilith()            # None if no Higgs boson has a mass between 123 and 128 GeV
+```
+
+Both use the normalized effective couplings, so the compiled backend calculates
+the decays first if needed.  With the SLHA backend they must be enabled before
+the calculation (`DecaySettings(calculate_decays=True, call_higgstools=True,
+call_lilith=True)`), and the paths are passed to `run_<M>.x`.
 
 A point can also be created from scratch.  All input parameters of the
 model are required; settings and SM inputs that aren't given use the
@@ -105,4 +121,6 @@ code generation writes.
 
     cd <FlexibleSUSY>/python && python3 -m unittest discover -s tests
 
-The MSSM tests are skipped unless `models/MSSM` is generated and built.
+The MSSM tests are skipped unless `models/MSSM` is generated and built; the
+HiggsTools and Lilith tests also need `HIGGSBOUNDS_DATASET`,
+`HIGGSSIGNALS_DATASET` and `LILITH_DATABASE` in the environment.

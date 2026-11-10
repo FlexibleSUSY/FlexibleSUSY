@@ -27,10 +27,11 @@ from pathlib import Path
 
 from .. import result as result_module
 from .. import slha
-from ..errors import BackendError
+from ..errors import BackendError, InputError
+from . import Backend
 
 
-class SLHABackend:
+class SLHABackend(Backend):
     """Writes an SLHA input file, runs run_<M>.x and reads its SLHA output.
 
     run_<M>.x exits with a non-zero code when the point has problems; it
@@ -42,7 +43,7 @@ class SLHABackend:
     name = "slha"
 
     def __init__(self, model):
-        self.model = model
+        super().__init__(model)
         self.executable = model.directory / f"run_{model.name}.x"
 
     def _check_executable(self) -> None:
@@ -52,6 +53,16 @@ class SLHABackend:
                                f"in {self.model.root}")
         if not os.access(self.executable, os.X_OK):
             raise BackendError(f"{self.executable} is not executable")
+
+    def _dataset_options(self):
+        options = []
+        if self.model.higgsbounds_dataset:
+            options.append(f"--higgsbounds-dataset={self.model.higgsbounds_dataset}")
+        if self.model.higgssignals_dataset:
+            options.append(f"--higgssignals-dataset={self.model.higgssignals_dataset}")
+        if self.model.lilith_database:
+            options.append(f"--lilith-db={self.model.lilith_database}")
+        return options
 
     def input_text(self, point) -> str:
         return slha.write(self.model.to_slha_blocks(point))
@@ -67,7 +78,7 @@ class SLHABackend:
                 proc = subprocess.run(
                     [str(self.executable),
                      f"--slha-input-file={input_file}",
-                     f"--slha-output-file={output_file}"],
+                     f"--slha-output-file={output_file}"] + self._dataset_options(),
                     cwd=str(self.model.root), capture_output=True, text=True,
                     timeout=timeout)
             except subprocess.TimeoutExpired as e:
@@ -104,3 +115,27 @@ class SLHABackend:
     def calculate_observables(self, result):
         raise BackendError("observables are only available with the compiled backend "
                            "(configure FlexibleSUSY with --with-python=<interpreter>)")
+
+    def _check_same_run(self, result, flag, what, given, used):
+        point = result._state
+        if point is None or not getattr(point.decay_settings, flag):
+            raise BackendError(
+                f"{what} was not called: with the SLHA backend, enable it before the "
+                f"calculation (DecaySettings({flag}=True)) and pass the paths to Model(), "
+                "or use the compiled backend")
+        if given != used:
+            raise InputError(f"{what} ran with {used} (from Model()); the SLHA backend can't "
+                             f"call it again with {given}")
+
+    def call_higgstools(self, result, higgsbounds_dataset, higgssignals_dataset):
+        self._check_same_run(result, "call_higgstools", "HiggsTools",
+                             (higgsbounds_dataset, higgssignals_dataset),
+                             (self.model.higgsbounds_dataset, self.model.higgssignals_dataset))
+        return result_module.HiggsToolsResult(
+            higgssignals=result_module.signal_result_from_slha(result.blocks, "HIGGSSIGNALS"),
+            higgsbounds=result_module.higgsbounds_from_slha(result.blocks))
+
+    def call_lilith(self, result, database):
+        self._check_same_run(result, "call_lilith", "Lilith", database,
+                             self.model.lilith_database)
+        return result_module.signal_result_from_slha(result.blocks, "LILITH")

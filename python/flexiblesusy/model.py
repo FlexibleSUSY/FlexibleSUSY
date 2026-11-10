@@ -230,8 +230,16 @@ class Model:
     """
 
     def __init__(self, name: str, root: Union[str, os.PathLike, None] = None,
-                 backend: str = "auto"):
+                 backend: str = "auto",
+                 higgsbounds_dataset: Union[str, os.PathLike, None] = None,
+                 higgssignals_dataset: Union[str, os.PathLike, None] = None,
+                 lilith_database: Union[str, os.PathLike, None] = None):
         self.name = name
+        # paths for HiggsTools and Lilith, used by Result.higgstools()/lilith()
+        # and passed to run_<M>.x by the SLHA backend
+        self.higgsbounds_dataset = str(higgsbounds_dataset) if higgsbounds_dataset else None
+        self.higgssignals_dataset = str(higgssignals_dataset) if higgssignals_dataset else None
+        self.lilith_database = str(lilith_database) if lilith_database else None
         self.root = find_root(root)
         self.directory = self.root / "models" / name
         if not self.directory.is_dir():

@@ -24,6 +24,7 @@ is built for this interpreter, with the compiled backend.
 
 import dataclasses
 import math
+import os
 import subprocess
 import sys
 import tempfile
@@ -219,6 +220,79 @@ class MSSMCompiledBackendTest(MSSMBackendTests, unittest.TestCase):
         res.release()
         with self.assertRaisesRegex(fs.BackendError, "released"):
             res.observables()
+
+
+HB = os.environ.get("HIGGSBOUNDS_DATASET")
+HS = os.environ.get("HIGGSSIGNALS_DATASET")
+LILITH = os.environ.get("LILITH_DATABASE")
+
+
+def point_125(model):
+    """MSSM point with mh = 124.8 GeV (Lilith needs a Higgs between 123 and 128 GeV)."""
+    import numpy as np
+    p = model.default_point()
+    ms = 3000
+    m2 = ms**2 * np.eye(3)
+    return model.updated(
+        p, TanBeta=20, mHd2IN=ms**2, mHu2IN=ms**2, mq2Input=m2, mu2Input=m2, md2Input=m2,
+        ml2Input=m2, me2Input=m2, Auij=np.zeros((3, 3)),
+        MassBInput=1000, MassWBInput=1000, MassGInput=3000,
+        settings=dataclasses.replace(p.settings, loop_library=fs.LoopLibrary.COLLIER,
+                                     calculate_sm_masses=True),
+        decay_settings=fs.DecaySettings(calculate_decays=True, call_higgstools=True,
+                                        call_lilith=True))
+
+
+@unittest.skipUnless(HB and HS and LILITH, "set HIGGSBOUNDS_DATASET, HIGGSSIGNALS_DATASET "
+                     "and LILITH_DATABASE to test HiggsTools and Lilith")
+@unittest.skipUnless(have_module(), "Python module of the MSSM not built for this interpreter")
+class MSSMHiggsToolsLilithTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        paths = dict(higgsbounds_dataset=HB, higgssignals_dataset=HS, lilith_database=LILITH)
+        cls.model = fs.Model("MSSM", root=ROOT, backend="compiled", **paths)
+        cls.slha_model = fs.Model("MSSM", root=ROOT, backend="slha", **paths)
+        if not cls.model.backend.module.Session.has_higgstools():
+            raise unittest.SkipTest("FlexibleSUSY configured without HiggsTools")
+        cls.point = point_125(cls.model)
+
+    def test_same_as_slha_backend(self):
+        # on demand: spectrum first, without decays or HiggsTools
+        point = self.model.updated(self.point, decay_settings=fs.DecaySettings())
+        res = self.model.calculate(point)
+        ht = res.higgstools()
+        ref = self.slha_model.calculate(self.point)
+        ref_ht = ref.higgstools()
+        self.assertAlmostEqual(ht.higgssignals.chi2, ref_ht.higgssignals.chi2, places=4)
+        self.assertEqual(ht.higgssignals.ndof, ref_ht.higgssignals.ndof)
+        self.assertEqual([b.pdg for b in ht.higgsbounds], [b.pdg for b in ref_ht.higgsbounds])
+        self.assertAlmostEqual(ht.higgsbounds[0].obs_ratio, ref_ht.higgsbounds[0].obs_ratio,
+                               places=6)
+        ll = res.lilith()
+        ref_ll = ref.lilith()
+        self.assertIsNotNone(ll)
+        self.assertEqual(ll.ndof, ref_ll.ndof)
+        self.assertAlmostEqual(ll.chi2, ref_ll.chi2, places=4)
+
+    def test_lilith_leaves_the_interpreter_alone(self):
+        import __main__
+        flags = sys.getdlopenflags()
+        names = set(vars(__main__))
+        res = self.model.calculate(self.model.updated(self.point, decay_settings=fs.DecaySettings()))
+        self.assertIsNotNone(res.lilith())
+        self.assertEqual(sys.getdlopenflags(), flags)
+        self.assertEqual(set(vars(__main__)), names)
+
+    def test_lilith_without_higgs_near_125(self):
+        res = self.model.calculate(dataclasses.replace(self.model.default_point(), settings=dataclasses.replace(
+            self.model.default_point().settings, loop_library=fs.LoopLibrary.COLLIER,
+            calculate_sm_masses=True)))
+        self.assertIsNone(res.lilith())
+
+    def test_bad_lilith_database(self):
+        res = self.model.calculate(self.model.updated(self.point, decay_settings=fs.DecaySettings()))
+        with self.assertRaisesRegex(fs.BackendError, "is not a file"):
+            res.lilith("/nonexistent/latest.list")
 
 
 if __name__ == "__main__":

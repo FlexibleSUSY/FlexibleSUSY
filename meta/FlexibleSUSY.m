@@ -3173,6 +3173,9 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                                "      data->calculate_normalized_effc();\n" <>
                                "   }",
                                ""],
+                            "@sessionCalculateEffC@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "data->calculate_normalized_effc();",
+                               "throw SetupError(\"The model was generated without decays.\");"],
                             "@sessionDecayProblems@" -> If[FlexibleSUSY`FSCalculateDecays,
                                "return data->get_spectrum().get_decays().get_problems().get_problem_strings();",
                                "return {};"],

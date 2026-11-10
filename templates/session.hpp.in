@@ -19,6 +19,7 @@
 #ifndef @ModelName@_SESSION_H
 #define @ModelName@_SESSION_H
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <utility>
@@ -73,6 +74,39 @@ public:
    std::vector<std::string> get_decay_problem_strings() const;
    std::vector<std::string> get_decay_warning_strings() const;
 
+   /// result of HiggsSignals or Lilith
+   struct Signal_result {
+      std::size_t ndof{};  ///< number of degrees of freedom
+      double chi2{};       ///< chi^2 of the model
+      double chi2_sm{};    ///< chi^2 of the SM with Higgs mass mh_ref
+      double mh_ref{};     ///< SM Higgs mass of the reference chi^2
+      double pval_1d{};    ///< p-value for 1 degree of freedom
+      double pval_2d{};    ///< p-value for 2 degrees of freedom
+   };
+   /// HiggsBounds result for one particle
+   struct HiggsBounds_result {
+      int pdg{};             ///< PDG code of the particle
+      double obs_ratio{};    ///< observed ratio of the most sensitive analysis
+      double exp_ratio{};    ///< expected ratio of the most sensitive analysis
+      std::string analysis;  ///< most sensitive analysis
+   };
+   struct HiggsTools_result {
+      bool have_higgssignals{false};
+      Signal_result higgssignals;
+      std::vector<HiggsBounds_result> higgsbounds;
+   };
+
+   /// whether FlexibleSUSY was configured with HiggsTools or Lilith
+   static bool has_higgstools();
+   static bool has_lilith();
+   /// HiggsBounds and HiggsSignals from the normalized effective couplings
+   /// (needs the decays)
+   HiggsTools_result call_higgstools(const std::string& higgsbounds_dataset,
+                                     const std::string& higgssignals_dataset);
+   /// Lilith from the normalized effective couplings (needs the decays);
+   /// first = false if there is no Higgs boson between 123 and 128 GeV
+   std::pair<bool, Signal_result> call_lilith(const std::string& database);
+
    /// SLHA output of everything calculated so far
    std::string get_slha_output() const;
 
@@ -87,6 +121,7 @@ private:
    bool decays_calculated{false};
 
    void check_spectrum() const;
+   void calculate_normalized_effc();
 };
 
 } // namespace flexiblesusy

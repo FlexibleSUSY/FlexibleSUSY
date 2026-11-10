@@ -41,6 +41,7 @@
 #include "loop_libraries/loop_library.hpp"
 @decaysIncludes@
 
+#include <filesystem>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -337,6 +338,10 @@ void @ModelName@_session::calculate_decays()
    }
    auto flexibledecay_settings = data->get_fd_settings();
    flexibledecay_settings.set(FlexibleDecay_settings::calculate_decays, 1.0);
+   // the decays fill the effective couplings of the neutral Higgs bosons (mass,
+   // width, CP, quartic coupling) only with this flag, and HiggsTools and
+   // Lilith, which may be called later, need them
+   flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, 1.0);
    data->set_fd_settings(flexibledecay_settings);
    @sessionCalculateDecays@
    decays_calculated = true;
@@ -357,6 +362,90 @@ std::vector<std::string> @ModelName@_session::get_decay_warning_strings() const
 {
    check_spectrum();
    @sessionDecayWarnings@
+}
+
+namespace {
+
+@ModelName@_session::Signal_result to_signal_result(const SignalResult& r)
+{
+   return {r.ndof, r.chi2BSM, r.chi2SM, r.mhRef, r.pval1d, r.pval2d};
+}
+
+} // anonymous namespace
+
+bool @ModelName@_session::has_higgstools()
+{
+#ifdef ENABLE_HIGGSTOOLS
+   return true;
+#else
+   return false;
+#endif
+}
+
+bool @ModelName@_session::has_lilith()
+{
+#ifdef ENABLE_LILITH
+   return true;
+#else
+   return false;
+#endif
+}
+
+void @ModelName@_session::calculate_normalized_effc()
+{
+   if (!decays_calculated) {
+      throw SetupError("HiggsTools and Lilith need the decays: calculate them first.");
+   }
+   @sessionCalculateEffC@
+}
+
+@ModelName@_session::HiggsTools_result @ModelName@_session::call_higgstools(
+   const std::string& higgsbounds_dataset, const std::string& higgssignals_dataset)
+{
+#ifdef ENABLE_HIGGSTOOLS
+   check_spectrum();
+   if (!std::filesystem::is_directory(higgsbounds_dataset) ||
+       !std::filesystem::is_directory(higgssignals_dataset)) {
+      throw SetupError("HiggsBounds dataset " + higgsbounds_dataset + " or HiggsSignals "
+                       "dataset " + higgssignals_dataset + " is not a directory.");
+   }
+   calculate_normalized_effc();
+   const auto [hs, hb] = flexiblesusy::call_higgstools(
+      data->get_normalized_higgs_effc(), data->get_physical_input(),
+      higgsbounds_dataset, higgssignals_dataset);
+   HiggsTools_result result;
+   if (hs.has_value()) {
+      result.have_higgssignals = true;
+      result.higgssignals = to_signal_result(hs.value());
+   }
+   for (const auto& [pdg, obs_ratio, exp_ratio, analysis] : hb) {
+      result.higgsbounds.push_back({pdg, obs_ratio, exp_ratio, analysis});
+   }
+   return result;
+#else
+   throw SetupError("FlexibleSUSY was configured without HiggsTools (--enable-higgstools).");
+#endif
+}
+
+std::pair<bool, @ModelName@_session::Signal_result> @ModelName@_session::call_lilith(
+   const std::string& database)
+{
+#ifdef ENABLE_LILITH
+   check_spectrum();
+   // Lilith exits the process if it can't read its database
+   if (!std::filesystem::is_regular_file(database)) {
+      throw SetupError("Lilith database " + database + " is not a file.");
+   }
+   calculate_normalized_effc();
+   const auto result = flexiblesusy::call_lilith(
+      data->get_normalized_higgs_effc(), data->get_physical_input(), database);
+   if (!result.has_value()) {
+      return {false, {}};
+   }
+   return {true, to_signal_result(result.value())};
+#else
+   throw SetupError("FlexibleSUSY was configured without Lilith (--with-lilith).");
+#endif
 }
 
 std::string @ModelName@_session::get_slha_output() const

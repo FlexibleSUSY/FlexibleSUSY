@@ -26,19 +26,21 @@ Example::
     point = mssm.default_point()                      # models/MSSM/LesHouches.in.MSSM
     point = mssm.updated(point, TanBeta=20)
     res = mssm.calculate(point)                       # spectrum only
-    if res.ok and res.pole_masses["hh"][0] > 120:
+    if res.ok and res.pole_masses["hh"][0] > 110:
         obs = res.observables()                       # on demand (compiled backend)
         dec = res.decays()
 """
 
 from .errors import BackendError, CalculationError, FlexibleSUSYError, InputError
 from .model import Metadata, Model, Point, find_root
-from .result import Channel, Decay, Decays, Observables, Result, RunningParameters
+from .result import (Channel, Decay, Decays, HiggsBoundsResult, HiggsToolsResult, Observables,
+                     Result, RunningParameters, SignalResult)
 from .settings import DecaySettings, LoopLibrary, PhysicalInputs, Settings, SMInputs
 
 __all__ = [
     "BackendError", "CalculationError", "FlexibleSUSYError", "InputError",
     "Metadata", "Model", "Point", "find_root",
-    "Channel", "Decay", "Decays", "Observables", "Result", "RunningParameters",
+    "Channel", "Decay", "Decays", "HiggsBoundsResult", "HiggsToolsResult", "Observables",
+    "Result", "RunningParameters", "SignalResult",
     "DecaySettings", "LoopLibrary", "PhysicalInputs", "Settings", "SMInputs",
 ]

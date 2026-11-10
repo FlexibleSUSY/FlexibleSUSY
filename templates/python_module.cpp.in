@@ -40,6 +40,29 @@ PYBIND11_MODULE(flexiblesusy_@ModelName@, m)
    m.attr("model_name") = "@ModelName@";
    m.attr("flexiblesusy_version") = FLEXIBLESUSY_VERSION;
 
+   using Signal_result = @ModelName@_session::Signal_result;
+   using HiggsBounds_result = @ModelName@_session::HiggsBounds_result;
+   using HiggsTools_result = @ModelName@_session::HiggsTools_result;
+
+   py::class_<Signal_result>(m, "SignalResult")
+      .def_readonly("ndof", &Signal_result::ndof)
+      .def_readonly("chi2", &Signal_result::chi2)
+      .def_readonly("chi2_sm", &Signal_result::chi2_sm)
+      .def_readonly("mh_ref", &Signal_result::mh_ref)
+      .def_readonly("pval_1d", &Signal_result::pval_1d)
+      .def_readonly("pval_2d", &Signal_result::pval_2d);
+
+   py::class_<HiggsBounds_result>(m, "HiggsBoundsResult")
+      .def_readonly("pdg", &HiggsBounds_result::pdg)
+      .def_readonly("obs_ratio", &HiggsBounds_result::obs_ratio)
+      .def_readonly("exp_ratio", &HiggsBounds_result::exp_ratio)
+      .def_readonly("analysis", &HiggsBounds_result::analysis);
+
+   py::class_<HiggsTools_result>(m, "HiggsToolsResult")
+      .def_readonly("have_higgssignals", &HiggsTools_result::have_higgssignals)
+      .def_readonly("higgssignals", &HiggsTools_result::higgssignals)
+      .def_readonly("higgsbounds", &HiggsTools_result::higgsbounds);
+
    py::class_<@ModelName@_session>(m, "Session")
       .def(py::init<>())
       .def("read_slha_input", &@ModelName@_session::read_slha_input,
@@ -58,6 +81,11 @@ PYBIND11_MODULE(flexiblesusy_@ModelName@, m)
       .def("have_decays", &@ModelName@_session::have_decays)
       .def("decay_problems", &@ModelName@_session::get_decay_problem_strings)
       .def("decay_warnings", &@ModelName@_session::get_decay_warning_strings)
+      .def_static("has_higgstools", &@ModelName@_session::has_higgstools)
+      .def_static("has_lilith", &@ModelName@_session::has_lilith)
+      .def("call_higgstools", &@ModelName@_session::call_higgstools,
+           py::arg("higgsbounds_dataset"), py::arg("higgssignals_dataset"))
+      .def("call_lilith", &@ModelName@_session::call_lilith, py::arg("database"))
       .def("slha_output", &@ModelName@_session::get_slha_output,
            "SLHA output of everything calculated so far")
       .def_static("loop_library", &@ModelName@_session::get_loop_library,
