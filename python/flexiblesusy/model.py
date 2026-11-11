@@ -146,14 +146,21 @@ def _is_imaginary_part(info: ParameterInfo) -> bool:
 
 
 class _InputMap:
-    """Maps input parameter names to the SLHA entries they are read from."""
+    """Maps input parameter names to the SLHA entries they are read from.
+
+    An entry in IMMINPAR or IMEXTPAR is the imaginary part of a complex input
+    only if the same parameter appeared before (in MINPAR or EXTPAR);
+    otherwise it is an input of its own (e.g. SinPhiMu in IMMINPAR of the
+    CMSSMCPV)."""
 
     def __init__(self, infos: Sequence[ParameterInfo]):
         self.real: Dict[str, ParameterInfo] = {}
         self.imag: Dict[str, ParameterInfo] = {}
         for info in infos:
-            target = self.imag if _is_imaginary_part(info) else self.real
-            target[info.name] = info
+            if info.name in self.real and _is_imaginary_part(info):
+                self.imag[info.name] = info
+            else:
+                self.real.setdefault(info.name, info)
 
     def names(self) -> List[str]:
         return list(self.real)
@@ -320,7 +327,10 @@ class Model:
         return self.point_from_slha(path.read_text())
 
     def point_from_slha(self, text: str) -> Point:
-        """Create a point from an SLHA input file (text)."""
+        """Create a point from an SLHA input file (text).
+
+        Input parameters that are not in the file get the FlexibleSUSY
+        default, zero, as with run_<M>.x."""
         data = slha.read(text)
         used = set()
         inputs = {}
@@ -333,8 +343,10 @@ class Model:
                 im = self._read_input(data, imag)
                 if im is not None:
                     value = value + 1j * im
-            if value is not None:
-                inputs[name] = value
+            if value is None:
+                value = arrays.from_entries(info.shape, {}, 0j if info.kind == "complex" else 0.0) \
+                    if info.shape else (0j if info.kind == "complex" else 0)
+            inputs[name] = value
             used.add(info.slha.block.upper())
             if imag is not None and imag.slha is not None:
                 used.add(imag.slha.block.upper())

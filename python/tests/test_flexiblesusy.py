@@ -43,6 +43,8 @@ METADATA = {
         {"name": "MuInput", "kind": "complex", "shape": [], "slha": {"block": "EXTPAR", "index": 23}},
         {"name": "MuInput", "kind": "complex", "shape": [], "slha": {"block": "IMEXTPAR", "index": 23}},
         {"name": "mq2Input", "kind": "real", "shape": [2, 2], "slha": {"block": "MSQ2IN", "index": None}},
+        {"name": "SinPhi", "kind": "real", "shape": [], "slha": {"block": "IMMINPAR", "index": 7}},
+        {"name": "Phase", "kind": "complex", "shape": [], "slha": {"block": "MINPAR", "index": 100}},
         {"name": "Internal", "kind": "real", "shape": [], "slha": None},
     ],
     "particles": [
@@ -110,6 +112,8 @@ class ToyModelTest(unittest.TestCase):
                 4   1
             Block EXTPAR
                23   500.0
+            Block IMMINPAR
+                7   0.25
             Block IMEXTPAR
                23   5.0
             Block MSQ2IN
@@ -141,7 +145,7 @@ class ToyModelTest(unittest.TestCase):
 
     def inputs(self, **changes):
         inputs = {"TanBeta": 10.0, "SignMu": 1, "MuInput": 500.0,
-                  "mq2Input": [[1e6, 0.0], [0.0, 2e6]]}
+                  "mq2Input": [[1e6, 0.0], [0.0, 2e6]], "SinPhi": 0.5, "Phase": 1.0}
         inputs.update(changes)
         return inputs
 
@@ -182,7 +186,7 @@ class ToyModelTest(unittest.TestCase):
         blocks = self.model.to_slha_blocks(point)
         self.assertEqual(blocks["FlexibleSUSY"], {31: 1.0, 4: 2.0})
         self.assertEqual(blocks["SMINPUTS"], {3: 0.118})
-        self.assertEqual(blocks["MINPAR"], {3: 10.0, 4: 1.0})
+        self.assertEqual(blocks["MINPAR"], {3: 10.0, 4: 1.0, 100: 1.0})
         self.assertEqual(blocks["EXTPAR"], {23: 500.0})
         self.assertEqual(blocks["IMEXTPAR"], {23: 5.0})
         self.assertEqual(blocks["MSQ2IN"], {(1, 1): 1e6, (1, 2): 0.0, (2, 1): 0.0, (2, 2): 2e6})
@@ -197,6 +201,22 @@ class ToyModelTest(unittest.TestCase):
         blocks = self.model.to_slha_blocks(point)
         self.assertEqual(blocks["MSQ2IN"][(2, 2)], 2e6)
         self.assertEqual(blocks["MODSEL"], {6: 0.0})
+
+    def test_separate_input_in_im_block(self):
+        # SinPhi is an input of its own in IMMINPAR, not an imaginary part
+        self.assertIn("SinPhi", [p.name for p in self.model.input_parameters])
+        blocks = self.model.to_slha_blocks(self.model.point(self.inputs()))
+        self.assertEqual(blocks["IMMINPAR"], {7: 0.5})
+        self.assertEqual(blocks["MINPAR"][100], 1.0)
+        self.assertEqual(self.model.default_point().inputs["SinPhi"], 0.25)
+
+    def test_default_point_missing_input_is_zero(self):
+        # Phase is not in LesHouches.in.Toy: zero, as with run_<M>.x
+        self.assertEqual(self.model.default_point().inputs["Phase"], 0j)
+        inputs = self.inputs()
+        del inputs["Phase"]
+        with self.assertRaisesRegex(fs.InputError, "missing input parameters: Phase"):
+            self.model.point(inputs)
 
     def test_updated(self):
         point = self.model.updated(self.model.default_point(), TanBeta=20,
