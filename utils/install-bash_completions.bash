@@ -225,6 +225,7 @@ _configure()
 --with-models=
 --with-optional-modules=
 --with-pthread-libdir=
+--with-python=
 --with-shared-ldflags=
 --with-shared-ldlibs=
 --with-shared-lib-cmd=
