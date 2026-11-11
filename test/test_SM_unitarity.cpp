@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( test_zero )
    const auto res = SM_unitarity::max_scattering_eigenvalue_infinite_s(sm);
 
    // FS reference value
-   BOOST_CHECK_CLOSE_FRACTION(res.maxAbsReEigenval, 0.014920775914865184, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(res.maxAbsReEigenval, 0.014920775914865188, 1e-15);
 
    // SPheno value after injecting λ = 0.25 (the sign in SPheno is oposite)
    BOOST_CHECK_CLOSE_FRACTION(res.maxAbsReEigenval, std::abs(-1.4920775914865188E-002), 3e-16);

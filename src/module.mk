@@ -64,6 +64,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
+		$(DIR)/unitarity.cpp \
 		$(DIR)/wrappers.cpp \
 		$(DIR)/zeta.cpp
 
