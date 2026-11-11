@@ -136,7 +136,12 @@ class CompiledBackend(Backend):
         if point.settings.calculate_observables and result.ok:
             result.observables()
         if point.decay_settings.calculate_decays and result.ok:
-            result.decays()
+            if self.module.Session.loop_library() in (LoopLibrary.COLLIER, LoopLibrary.LOOPTOOLS):
+                result.decays()
+            else:
+                # as run_<M>.x: no decays without Collier or LoopTools, only a warning
+                warnings.warn("decays not calculated: they need Collier or LoopTools as loop "
+                              "library (Settings(loop_library=...))", RuntimeWarning, stacklevel=3)
         return result
 
     def _session(self, result):

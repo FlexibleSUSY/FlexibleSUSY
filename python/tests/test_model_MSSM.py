@@ -215,6 +215,29 @@ class MSSMCompiledBackendTest(MSSMBackendTests, unittest.TestCase):
         with self.assertRaisesRegex(fs.BackendError, "SM and BSM pole masses"):
             self.model.calculate(point).decays()
 
+    def test_requested_decays_need_loop_library(self):
+        # run in a subprocess: the loop library is fixed per process
+        import subprocess
+        code = ("import warnings, sys; sys.path.insert(0, %r)\n"
+                "import flexiblesusy as fs\n"
+                "m = fs.Model('MSSM', root=%r, backend='compiled')\n"
+                "p = m.default_point()\n"
+                "import dataclasses\n"
+                "p = m.updated(p, settings=dataclasses.replace(p.settings, loop_library=0),\n"
+                "              decay_settings=fs.DecaySettings(calculate_decays=True))\n"
+                "with warnings.catch_warnings(record=True) as w:\n"
+                "    warnings.simplefilter('always')\n"
+                "    r = m.calculate(p)\n"
+                "assert r.ok and any('decays not calculated' in str(x.message) for x in w)\n"
+                "try:\n"
+                "    r.decays()\n"
+                "except fs.BackendError as e:\n"
+                "    assert 'Collier or LoopTools' in str(e)\n"
+                "else:\n"
+                "    raise AssertionError('no error')\n") % (str(ROOT / "python"), str(ROOT))
+        proc = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+
     def test_release(self):
         res = self.model.calculate(self.point)
         res.release()
