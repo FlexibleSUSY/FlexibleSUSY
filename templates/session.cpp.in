@@ -29,6 +29,7 @@
 #include "@ModelName@_unitarity.hpp"
 @solverIncludes@
 #include "error.hpp"
+#include "logger.hpp"
 #include "lowe.h"
 #include "observable_problems_format_slha.hpp"
 #include "physical_input.hpp"
@@ -226,6 +227,13 @@ void @ModelName@_session::read_slha_input(const std::string& slha_input)
    slha_io.fill(physical_input);
    slha_io.fill(input);
    @LToLConversion_fill@
+
+   // as run_@ModelName@.x (templates/run.cpp.in)
+   if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block) &&
+       @ModelName@_info::is_CP_violating_Higgs_sector) {
+      WARNING("Printing of EFFHIGGSCOUPLINGS block is disabled in models with CP-violating Higgs sector");
+      flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, 0.);
+   }
 
    auto new_data = std::make_unique<Model_data>();
    {
