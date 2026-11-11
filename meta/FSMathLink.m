@@ -543,7 +543,7 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
          if (settings.get(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses) == 0 ||
             settings.get(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses) == 0) {
             put_message(link,
-               \"FSSMCalculateDecays\", \"warning\", \"Need SM and BSM masses. Setting flags FlexlibleSUSY[3] = FlexlibleSUSY[23] = 1.\");
+               \"FS" <> modelName <> "CalculateDecays\", \"warning\", \"Need SM and BSM masses. Setting flags FlexibleSUSY[3] = FlexibleSUSY[23] = 1.\");
             settings.set(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses, 1.0);
             settings.set(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses, 1.0);
             data.set_settings(settings);

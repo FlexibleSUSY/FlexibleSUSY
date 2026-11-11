@@ -33,6 +33,10 @@ Fixed bugs
   :math:`\mu'^T`, and SARAH no longer reports charge-violating vertices
   (`#563 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/563>`_).
 
+* [commit 423caf0d5]: Fixed the name of the warning of
+  ``FS<M>CalculateDecays`` in the Mathematica interface, which was shown as
+  "Message text not found" in models other than the SM.
+
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
 
