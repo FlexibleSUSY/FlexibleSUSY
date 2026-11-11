@@ -49,7 +49,8 @@ make -j4                               # runs the meta code, then compiles
   with `-j` several code generations can run at once.
 - **Reconfiguring:** the first line of `config.status` holds the previous options, but
   without quotes, so an option with spaces (`--with-cxxflags="-O1 -g"`) must be quoted
-  again by hand.
+  again by hand. `configure` writes `config.status` before it parses its options, so even
+  `./configure --help` replaces it; `test/test_shell_completions.sh` does that.
 - **Sanitizers:** compile and link with them through `CXX`, as not every link rule uses
   `CXXFLAGS`: `make CXX="clang++ -fsanitize=address,undefined -fno-omit-frame-pointer"`,
   with `--with-cxxflags="-std=c++20 -O1 -g -fPIC -D_GLIBCXX_ASSERTIONS"`. The Fortran loop
@@ -64,7 +65,9 @@ make -j4                               # runs the meta code, then compiles
 - **Mathematica kernels:** depending on the licence, the number of concurrent kernels
   can be limited. When it's exhausted, code generation or a Mathematica test can fail
   with "Invalid password" or SARAH not loading. The meta code also starts parallel
-  subkernels (`FSEnableParallelism`).
+  subkernels (`FSEnableParallelism`). `configure` starts kernels too, to check FeynArts
+  and FormCalc: if none is free, the check crashes and FormCalc is silently disabled
+  (`ENABLE_FORMCALC` in the `Makefile`), so don't run `configure` during a code generation.
 - **Generating and compiling separately:** `./configure --disable-compile` only generates
   the code. `./configure --disable-meta` only compiles code that was generated before,
   without Mathematica or SARAH.
