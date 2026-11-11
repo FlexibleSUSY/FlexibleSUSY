@@ -11,8 +11,6 @@ MOD@CLASSNAME@_SUBMOD  := $(DIR)/cxx_qft
 MOD@CLASSNAME@_SUBMOD_INC := $(patsubst %,-I%,$(MOD@CLASSNAME@_SUBMOD))
 
 @CLASSNAME@_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
-@CLASSNAME@_INSTALL_CXXQFT_DIR := \
-		$(@CLASSNAME@_INSTALL_DIR)/cxx_qft
 
 @CLASSNAME@_MK     := \
 		$(DIR)/module.mk
@@ -226,23 +224,13 @@ all-$(MODNAME): $(LIB@CLASSNAME@) $(EXE@CLASSNAME@_EXE)
 ifneq ($(INSTALL_DIR),)
 install-src::
 		$(Q)install -d $(@CLASSNAME@_INSTALL_DIR)
-		$(Q)install -d $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_VERTICES_SRC) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_HDR) $(@CLASSNAME@_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_HDR) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(EXE@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LL@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LL@CLASSNAME@_MMA) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)$(INSTALL_FILES) $(INSTALL_DIR) u=rw,g=r,o=r \
+			$(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) \
+			$(EXE@CLASSNAME@_SRC) $(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
+			$(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_CXXQFT_VERTICES_MK) \
+			$(@CLASSNAME@_FlexibleDecay_MK) \
+			$(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_REFERENCES) $(@CLASSNAME@_GNUPLOT)
 		$(Q)$(INSTALL_STRIPPED) $(@CLASSNAME@_MK) $(@CLASSNAME@_INSTALL_DIR) -m u=rw,g=r,o=r
-		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_CXXQFT_VERTICES_MK) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
-
-ifneq ($(@CLASSNAME@_SLHA_INPUT),)
-		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_INSTALL_DIR)
-endif
-		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_REFERENCES) $(@CLASSNAME@_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_GNUPLOT) $(@CLASSNAME@_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
