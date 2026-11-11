@@ -2266,6 +2266,27 @@ check_python_module() {
     result "$("$python_module_cmd" -m pybind11 --version), module suffix $PYTHON_MODULE_SUFFIX"
 }
 
+check_python_module_with_lilith() {
+    # Lilith embeds the libpython of python3*-config (PYTHONLIBS).  A Python
+    # module loaded by another Python version would bring a second libpython
+    # into the process.
+    if [ "x$enable_python_module" != "xyes" ] || [ "x$enable_lilith" != "xyes" ] ; then
+        return
+    fi
+    checking_msg "Python versions of the Python module and of Lilith"
+    local module_version embed_version
+    module_version=$("$python_module_cmd" -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+    embed_version=$(echo "$PYTHONLIBS" | grep -oE -- '-lpython[0-9]+\.[0-9]+' | head -n 1 | sed 's/-lpython//')
+    if [ -n "$embed_version" ] && [ "$embed_version" != "$module_version" ] ; then
+        result "no"
+        message "Error: the Python module is built for Python $module_version ($python_module_cmd),"
+        message "       but Lilith uses Python $embed_version ($python3config_cmd)."
+        message "       Use --with-python=python$embed_version or configure without Lilith."
+        exit 1
+    fi
+    result "ok (Python $module_version)"
+}
+
 check_python() {
     checking_msg "C++ python embedding"
     path_split=$(echo "$PATH" | sed -e 's/:/ /g')
@@ -4061,6 +4082,7 @@ if test "x${enable_compile}" = "xyes"; then
     check_python
     check_python_module
     check_lilith
+    check_python_module_with_lilith
     check_looplibrary
     check_odeint
     check_sqlite

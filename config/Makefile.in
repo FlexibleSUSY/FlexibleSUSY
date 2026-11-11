@@ -40,7 +40,7 @@ ENABLE_VERBOSE        := @ENABLE_VERBOSE@
 # Makefile modules
 MODELS             := @MODELS@
 ADDONS             := @ADDONS@
-MODULES            := config src fflite slhaea doc nlohmann
+MODULES            := config src fflite slhaea doc nlohmann python
 # BEGIN: NOT EXPORTED ##########################################
 MODULES            += meta templates
 # END:   NOT EXPORTED ##########################################
