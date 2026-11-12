@@ -42,6 +42,13 @@ Fixed bugs
   neutrinos, is listed in ``FSDecayParticles``. Decays of a massless particle
   into massless particles are now skipped.
 
+* [commit 4cdcf1b2d]: Fixed the error handling of ``FS<M>CallHiggsTools``
+  in the Mathematica interface. Some errors (e.g. an empty HiggsBounds path)
+  returned ``LibraryFunctionError`` without a message, and its messages showed
+  "Message text not found". All errors of ``FS<M>CallHiggsTools`` and
+  ``FS<M>CallLilith`` now give a message and ``$Failed``, and a missing
+  HiggsSignals or HiggsBounds database gives a warning.
+
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
 
