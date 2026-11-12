@@ -100,7 +100,7 @@ public:
    double undetectedWidth {0.};
 
    double get_undetected_width() const { return undetectedWidth; }
-   void calculate_undetected_br(bool withTop) {
+   void calculate_undetected_br() {
       undetectedWidth += width - invWidth;
       if (undetectedWidth < 0 && std::abs(undetectedWidth)/width < 1e-10) {
          undetectedWidth = 0.;
@@ -349,12 +349,11 @@ double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>:
 }
 
 // utility functions for H->V*V*
-double hVV_4body(double *q2, size_t dim, void *params);
-struct hVV_4body_params {
-   double mHOS {};
-   double mVOS {};
-   double GammaV {};
+struct HVV_4body_result {
+   double value {};
+   double error {};
 };
+HVV_4body_result hVV_4body(double mH, double mV, double GammaV);
 
 enum PDG_id_pairs: int {
    dd = 0,

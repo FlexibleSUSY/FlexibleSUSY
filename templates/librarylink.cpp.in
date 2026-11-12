@@ -56,7 +56,9 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <exception>
 #include <filesystem>
+#include <system_error>
 #include <utility>
 
 #define INPUTPARAMETER(p) input.p
@@ -254,6 +256,7 @@ public:
    void put_warnings(MLINK link) const;
    void put_model_spectra(MLINK link) const;
    void put_higgstools_results(MLINK, std::optional<SignalResult> const&, std::vector<std::tuple<int, double, double, std::string>> const&) const;
+   void put_lilith_results(MLINK, std::optional<SignalResult> const&) const;
    void put_unitarity(MLINK link) const;
    void calculate_spectrum();
    void check_spectrum(MLINK link) const;
@@ -338,6 +341,30 @@ Handle get_handle_from(MLINK link)
 Handle get_handle_from(MArgument arg)
 {
    return MArgument_getInteger(arg);
+}
+
+/******************************************************************/
+
+std::string get_string_from(MLINK link)
+{
+   const char* str = nullptr;
+
+   if (!MLGetString(link, &str))
+      return {};
+
+   std::string result(str);
+   MLReleaseString(link, str);
+
+   return result;
+}
+
+/******************************************************************/
+
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
 }
 
 /******************************************************************/
@@ -772,6 +799,27 @@ void Model_data::put_observables(MLINK link) const
 @putDecaysFunction@
 @putEffCFunction@
 
+#ifdef ENABLE_LILITH
+void Model_data::put_lilith_results(MLINK link, std::optional<SignalResult> const& ll) const
+{
+   MLPutFunction(link, "List", 1);
+   MLPutRule(link, "@ModelName@");
+   if (ll.has_value()) {
+      SignalResult ll_ = ll.value();
+      MLPutFunction(link, "List", 5);
+      MLPutRuleTo(link, static_cast<int>(ll_.ndof), "ndof");
+      MLPutRuleTo(link, ll_.chi2BSM, "chi2");
+      MLPutRuleTo(link, ll_.chi2SM, "chi2SM");
+      MLPutRuleTo(link, ll_.pval1d, "pval1d");
+      MLPutRuleTo(link, ll_.pval2d, "pval2d");
+   }
+   else {
+      MLPutFunction(link, "List", 0);
+   }
+   MLEndPacket(link);
+}
+#endif
+
 #ifdef ENABLE_HIGGSTOOLS
 void Model_data::put_higgstools_results(MLINK link, std::optional<SignalResult> const& hs, std::vector<std::tuple<int, double, double, std::string>> const& hb) const
 {
@@ -780,7 +828,7 @@ void Model_data::put_higgstools_results(MLINK link, std::optional<SignalResult> 
    MLPutFunction(link, "List", 2);
    if (hs.has_value()) {
       SignalResult hs_ = hs.value();
-      MLPutFunction(link, "List", 4);
+      MLPutFunction(link, "List", 5);
       MLPutRuleTo(link, static_cast<int>(hs_.ndof), "ndof");
       MLPutRuleTo(link, hs_.chi2BSM, "chi2");
       MLPutRuleTo(link, hs_.chi2SM, "chi2SM");
@@ -1313,10 +1361,9 @@ DLLEXPORT int FS@ModelName@CallLilith(
 
    const auto hid = get_handle_from(link);
 
-   const char* llDbFile = "";
-   MLGetString(link, &llDbFile);
-   if (!std::filesystem::exists(llDbFile)) {
-      put_message(link, "FS@ModelName@CallLilith", "error", std::string(llDbFile) + " is not a valid path");
+   const std::string llDbFile = get_string_from(link);
+   if (!path_exists(llDbFile)) {
+      put_message(link, "FS@ModelName@CallLilith", "error", llDbFile + " is not a valid path");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
    }
@@ -1325,7 +1372,11 @@ DLLEXPORT int FS@ModelName@CallLilith(
       auto& data = find_data(hid);
       std::optional<flexiblesusy::SignalResult> ll =
          call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), llDbFile);
+      data.put_lilith_results(link, ll);
    } catch (const flexiblesusy::Error& e) {
+      put_message(link, "FS@ModelName@CallLilith", "error", e.what());
+      put_error_output(link);
+   } catch (const std::exception& e) {
       put_message(link, "FS@ModelName@CallLilith", "error", e.what());
       put_error_output(link);
    }
@@ -1345,13 +1396,11 @@ DLLEXPORT int FS@ModelName@CallHiggsTools(
 
    const auto hid = get_handle_from(link);
 
-   const char* hbDatabasePath = "";
-   MLGetString(link, &hbDatabasePath);
-   const char* hsDatabasePath = "";
-   MLGetString(link, &hsDatabasePath);
+   const std::string hsDatabasePath = get_string_from(link);
+   const std::string hbDatabasePath = get_string_from(link);
 
-   if (!std::filesystem::exists(hsDatabasePath) && !std::filesystem::exists(hbDatabasePath)) {
-      put_message(link, "FS@ModelName@CallHiggsTools", "error", std::string(hsDatabasePath) + " and " + std::string(hbDatabasePath) + " are not valid paths");
+   if (!path_exists(hsDatabasePath) && !path_exists(hbDatabasePath)) {
+      put_message(link, "FS@ModelName@CallHiggsTools", "error", hsDatabasePath + " and " + hbDatabasePath + " are not valid paths");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
    }
@@ -1359,11 +1408,14 @@ DLLEXPORT int FS@ModelName@CallHiggsTools(
    try {
       auto& data = find_data(hid);
       auto [hs, higgsbounds_v] =
-         call_higgstools(data.get_normalized_higgs_effc(), data.get_physical_input(), hsDatabasePath, hbDatabasePath);
+         call_higgstools(data.get_normalized_higgs_effc(), data.get_physical_input(), hbDatabasePath, hsDatabasePath);
       data.put_higgstools_results(link, hs, higgsbounds_v);
    } catch (const flexiblesusy::Error& e) {
       std::cerr << e.what_detailed() << std::endl;
       return LIBRARY_FUNCTION_ERROR;
+   } catch (const std::exception& e) {
+      put_message(link, "FS@ModelName@CallHiggsTools", "error", e.what());
+      put_error_output(link);
    }
 
    return LIBRARY_NO_ERROR;

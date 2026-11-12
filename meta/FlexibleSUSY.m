@@ -2307,6 +2307,15 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                     (* don't pollute terminal with SARAH initialization message *)
                     Block[{Print,workingDirectory = Directory[]},
                        << SARAH`;
+                       (* load FlexibleSUSY before SARAH`Start[], as on the main
+                          kernel (cf. templates/start.m.in): some meta packages
+                          name model symbols in the SARAH` context (e.g. SARAH`vd
+                          in meta/Himalaya.m), so on the main kernel the model
+                          uses those, while Start[] alone would create Global`vd.
+                          The definitions distributed below would then create
+                          SARAH`vd next to Global`vd, giving General::shdw
+                          messages and two different symbols for vd. *)
+                       Needs["FlexibleSUSY`", FileNameJoin[{workingDirectory, "meta", "FlexibleSUSY.m"}]];
                        SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
                        SARAH`SARAH[InputDirectories] = {
                           FileNameJoin[{workingDirectory, "sarah"}],
@@ -2761,8 +2770,8 @@ double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 StringRiffle[
 (
 "template <typename Lepton>
-std::enable_if_t<std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">, double>
-lepton_pole_mass(const softsusy::QedQcd& qedqcd)
+requires std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">
+double lepton_pole_mass(const softsusy::QedQcd& qedqcd)
 {\n" <>
 TextFormatting`IndentText[
    Switch[#,
@@ -5110,6 +5119,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[FlexibleSUSY`FSCalculateDecays,
 
               FlexibleSUSY`FSDecayParticles = Select[FlexibleSUSY`FSDecayParticles, Decays`IsSupportedDecayParticle];
+
+              With[{treeLevelOnly = Select[FlexibleSUSY`FSDecayParticles, Decays`GetMaxLoopOrderForDecay[#] === 0&]},
+                 If[treeLevelOnly =!= {},
+                    Utils`FSFancyWarning[
+                       "Only tree-level decays are calculated for ", treeLevelOnly,
+                       ": loop-induced decays are only supported for scalars."
+                    ];
+                 ];
+              ];
 
               If[FlexibleSUSY`FSDecayParticles === {},
                  Utils`FSFancyWarning[

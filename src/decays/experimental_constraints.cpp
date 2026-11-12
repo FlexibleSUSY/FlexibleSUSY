@@ -23,6 +23,14 @@
  * @brief contains interface to HiggsTools
  */
 
+#include "config.h"
+
+#ifdef ENABLE_LILITH
+#include <Python.h>
+#include "lilith.h"
+#include "lilith.c"
+#endif
+
 #include "experimental_constraints.hpp"
 #include "decays/standard_model_decays.hpp"
 
@@ -33,9 +41,10 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <random>
+#include <system_error>
 
 #ifdef ENABLE_HIGGSTOOLS
 #include "Higgs/Predictions.hpp"
@@ -44,15 +53,16 @@
 namespace HP = Higgs::predictions;
 #endif
 
-#ifdef ENABLE_LILITH
-#include <Python.h>
-#include "lilith.h"
-#include "lilith.c"
-#endif
-
 namespace flexiblesusy {
 
 namespace {
+
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
+}
 
 // Whether to calculate the X->gaga and X->gg decay widths in terms of the
 // effective tree-level couplings (calcHgamgam=calcggH=true) or by rescaling
@@ -113,13 +123,9 @@ double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& 
 </reducedcouplings>
 </lilithinput>)";
 
-   Py_Initialize();
-
    PyObject* lilithcalc2 = initialize_lilith(const_cast<char*>(lilithdb.c_str()));
    lilith_readuserinput(lilithcalc2, const_cast<char*>(XMLinputstring.c_str()));
    const double my_likelihood = lilith_computelikelihood(lilithcalc2);
-
-   Py_Finalize();
 
    return my_likelihood;
 }
@@ -157,7 +163,7 @@ void set_sm_lambda_to_match_bsm_mh(standard_model::Standard_model& sm, double ma
       // set SM λ such that mhSM == mass
       auto match_Higgs_mass = [&sm, mass](double x) {
          sm.set_Lambdax(x);
-         sm.calculate_DRbar_masses(); // internaly calls solve_ewsb_tree_level()
+         sm.calculate_DRbar_masses(); // internally calls solve_ewsb_tree_level()
          sm.solve_ewsb();
          sm.calculate_Mhh_pole();
          return std::abs(sm.get_physical().Mhh - mass);
@@ -256,7 +262,7 @@ EffectiveCoupling_list get_normalized_effective_couplings(
       const double mass = el.mass;
       // in the SM, λ = (mh/v)^2/2
       // for mh > 650 GeV this gives λ > 4
-      // it probably makes no sense to use coupling strengh modifiers in this case so we skip those particles
+      // it probably makes no sense to use coupling strength modifiers in this case so we skip those particles
       // On the other hand there's a problem with finding a SM equivalent of very light states
       if (mass > 650 || mass < 1) {
          VERBOSE_MSG("Cannot construct normalization for effective coupling of " + el.particle + " with mass of " + std::to_string(mass) + " GeV");
@@ -355,7 +361,7 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
 
       effectiveCouplingInput(s, effc, refModel, calcggH, calcHgamgam);
 
-      // Effective coupligs below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
+      // Effective couplings below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
       // (note that this is different than couplings like gg, WW etc)
       // so taking a norm gives a total partial width
       s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu.second));
@@ -370,7 +376,7 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
    }
 
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
-   if (std::filesystem::exists(higgsbounds_dataset)) {
+   if (path_exists(higgsbounds_dataset)) {
       auto bounds = Higgs::Bounds {higgsbounds_dataset};
       auto hbResult = bounds(pred);
       for (auto const& _hb: hbResult.selectedLimits) {
@@ -380,16 +386,14 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
          );
          hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
       }
-   }
-   else if (higgsbounds_dataset.empty()) {
+   } else if (higgsbounds_dataset.empty()) {
       WARNING("Warning: no HiggsBounds database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsBounds database at " + higgsbounds_dataset);
    }
 
    std::optional<SignalResult> hs_return;
-   if (std::filesystem::exists(higgssignals_dataset)) {
+   if (path_exists(higgssignals_dataset)) {
       const auto signals = Higgs::Signals {higgssignals_dataset};
       const double hs_chisq = signals(pred);
       const double mhSMref = physical_input.get(Physical_input::mh_pole);
@@ -397,11 +401,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
       const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
       hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
-   }
-   else if (higgssignals_dataset.empty()) {
+   } else if (higgssignals_dataset.empty()) {
       WARNING("Warning: no HiggsSignals database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsSinglas database at " + higgssignals_dataset);
    }
 
@@ -415,12 +417,18 @@ std::optional<SignalResult> call_lilith(
    Physical_input const& physical_input,
    std::string const& lilith_db) {
 
-   // Lilith requires Higgs mass to be in range [123, 128]
+   // Lilith requires Higgs mass to be in range [123, 128].
+   // A state with a zero width has only vanishing couplings, so it gives no signal.
+   // It has to be left out, as Lilith's result would be NaN because of a division by
+   // its width, even if there are other Higgs bosons.
+   const auto use_in_lilith = [](NeutralHiggsEffectiveCouplings const& el) {
+      return el.mass >= 123.0 && el.mass <= 128.0 && el.width != 0.;
+   };
+
    bool higgs_in_range = false;
    bool cpEvenHiggs = false;
    for (auto const& el : bsm_input) {
-      const double mh = el.mass;
-      if (mh > 123.0 && mh < 128.0) {
+      if (use_in_lilith(el)) {
          higgs_in_range = true;
          cpEvenHiggs = (el.CP == 1);
       }
@@ -435,8 +443,9 @@ std::optional<SignalResult> call_lilith(
 
    for (auto const& el : bsm_input) {
 
+      if (!use_in_lilith(el)) continue;
+
       const double mh = el.mass;
-      if (mh < 123.0 || mh > 128.0) continue;
 
       XMLinputstring += "<reducedcouplings part=\"" + el.particle +  "\">\n";
       XMLinputstring += "<mass>" + std::to_string(mh) + "</mass>\n";
@@ -485,7 +494,18 @@ std::optional<SignalResult> call_lilith(
     XMLinputstring += "</lilithinput>\n";
     VERBOSE_MSG("Lilith input: \n" << XMLinputstring);
 
+    // Python stays initialized for the lifetime of the process, because numpy
+    // can't be imported again after Py_Finalize. This function can be called
+    // repeatedly through the Mathematica interface.
     Py_Initialize();
+
+    // A Mathematica kernel exposes its ILP64 MKL under the standard BLAS and
+    // LAPACK names. Without RTLD_DEEPBIND, numpy can resolve these to MKL and
+    // crash, as it passes 32-bit integers.
+    PyRun_SimpleString(
+       "import os, sys\n"
+       "if hasattr(os, 'RTLD_DEEPBIND'):\n"
+       "    sys.setdlopenflags(os.RTLD_NOW | os.RTLD_DEEPBIND)\n");
 
     // Creating an object of the class Lilith: lilithcalc
     PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));
@@ -498,10 +518,8 @@ std::optional<SignalResult> call_lilith(
     const double mhSMref = physical_input.get(Physical_input::mh_pole);
     const double sm_likelihood = minChi2SM_lilith(mhSMref, cpEvenHiggs, lilith_db);
 
-    Py_Finalize();
-
-    const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
-    const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
+    const double pvalue1d = chi2_to_pval(my_likelihood, sm_likelihood, 1);
+    const double pvalue2d = chi2_to_pval(my_likelihood, sm_likelihood, 2);
     const SignalResult res {exp_ndf, mhSMref, my_likelihood, sm_likelihood, pvalue1d, pvalue2d};
 
     return res;

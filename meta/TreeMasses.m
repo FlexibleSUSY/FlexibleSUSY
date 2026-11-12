@@ -2159,7 +2159,7 @@ NiceGenNum[gen_] :=
 
 CreateGenerationHelperFunction[gen_, fermion_] :=
     Module[{},
-           Print["Error: ", fermion, " does not seem to be a", gen, "th"
+           Print["Error: ", fermion, " does not seem to be a ", NiceGenNum[gen],
                  " generation SM fermion."];
            "void CLASSNAME::calculate_" <>
            CConversion`ToValidCSymbolString[FlexibleSUSY`M[fermion]] <>

@@ -1,11 +1,16 @@
-FlexibleSUSY 2.9.1 [??, ?? 2025]
+FlexibleSUSY 2.9.1 [November, ?? 2026]
 ===================================
 
 New features
 ------------
 
 * Moved to C++20. This increased the minimal supported version of compilers to
-  g++ >= 8.0.0 or clang++ >= 10.0.0.
+  g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
+* Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
+  HiggsSignals and Lilith. Previously available 2D p-values are marked
+  accordingly.
+* Lilith is no longer accessible only via the command-line interface (see
+  footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
 Fixed bugs
 ----------
@@ -14,6 +19,23 @@ Fixed bugs
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
 
+* [commit 87728f8]: Fixed swapped up- and down-quark entries in the blocks
+  ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
+
+* [commit 580274c]: Fixed crashes of the Mathematica kernel when calling Lilith
+  through the Mathematica interface. This could happen on the first call, if
+  numpy is linked to the system BLAS and LAPACK libraries, and on every later
+  call in the same kernel.
+
+* [commit 465e7c5]: Fixed the charged inert higgsinos in the InertMSSM, which
+  were mixed across opposite electric charges into Majorana-type states. The
+  model now has 2 Dirac inert charginos with mass matrix
+  :math:`\mu'^T`, and SARAH no longer reports charge-violating vertices
+  (`#563 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/563>`_).
+
+* [commit 423caf0d5]: Fixed the name of the warning of
+  ``FS<M>CalculateDecays`` in the Mathematica interface, which was shown as
+  "Message text not found" in models other than the SM.
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================

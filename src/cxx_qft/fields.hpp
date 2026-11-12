@@ -97,8 +97,8 @@ namespace flexiblesusy::cxx_diagrams {
     * is not 1.
     */
    template <class Field>
-   std::enable_if_t<Field::numberOfGenerations != 1, bool>
-   isSMField(const typename field_indices<Field>::type& indices) {
+   requires (Field::numberOfGenerations != 1)
+   bool isSMField(const typename field_indices<Field>::type& indices) {
       boost::array<bool, Field::numberOfGenerations> sm_flags;
 
       #if BOOST_VERSION >= 105800
@@ -111,8 +111,8 @@ namespace flexiblesusy::cxx_diagrams {
    }
 
    template <class Field>
-   std::enable_if_t<Field::numberOfGenerations == 1, bool>
-   isSMField(const typename field_indices<Field>::type&) {
+   requires (Field::numberOfGenerations == 1)
+   bool isSMField(const typename field_indices<Field>::type&) {
       return boost::mpl::at_c<typename Field::sm_flags, 0>::type::value;
    }
 
