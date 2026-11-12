@@ -33,6 +33,7 @@ FS@ModelName@CalculateObservables::error = "`1`";
 FS@ModelName@CalculateObservables::warning = "`1`";
 @calculateDecaysMessages@
 @callLilithMessages@
+@callHiggsToolsMessages@
 @calculateUnitarityMessages@
 FS@ModelName@::info = "`1`";
 FS@ModelName@::nonum = "Error: `1` is not a numeric input value!";
