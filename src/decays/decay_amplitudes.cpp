@@ -134,6 +134,9 @@ double Decay_amplitude_SVV::square() const
       }
    }
 
+   // massive vectors: physical (on-shell) vector masses on purpose; this
+   // breaks the equivalence theorem for heavy scalars (see the note above
+   // Decay_amplitude_VSS::square())
    const double m_s_sq = Sqr(m_decay);
    const double m_s_4 = Power4(m_decay);
    const double m_1_sq = Sqr(m_vector_1);
@@ -313,6 +316,20 @@ double Decay_amplitude_FFV::square() const
 // As for Decay_amplitude_SSV, decays into a massless vector return 0:
 // gauge invariance forbids a tree-level coupling of a massless gauge boson
 // in these channels, so a non-zero form factor is numerical noise.
+//
+// Note on the masses: the final-state vectors are external on-shell
+// states, so their masses in the polarization sums are the physical
+// (1-loop) masses on purpose, while the couplings come from the model at
+// the scale of the decay.  The difference is of higher order, but the
+// longitudinal polarizations enhance it: V -> V V by (M/m_V)^4 and
+// V -> V S by (M/m_V)^2, which cancel against couplings proportional to
+// m_V^2 only if both use the same m_V.  This choice therefore breaks the
+// Goldstone boson equivalence theorem, Gamma(Z' -> W W) = Gamma(Z' -> Z h)
+// for M >> m_W.  Example: in BLSM with M_Z' = 3.7 TeV the couplings
+// correspond to m_W = 76.7 GeV, but m_W = 81.0 GeV is used, so
+// Gamma(Z' -> W W) is smaller by (76.7/81.0)^4 = 0.80 than in micrOMEGAs,
+// which uses the masses of its couplings.  Decay_amplitude_SVV makes the
+// same choice for heavy scalars.
 
 double Decay_amplitude_VSS::square() const
 {
