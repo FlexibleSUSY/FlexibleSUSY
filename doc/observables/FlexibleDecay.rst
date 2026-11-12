@@ -43,6 +43,19 @@ For example, to add squark decays in the SARAH's MSSM one would write
 
   FSDecayParticles = {hh, Ah, Hpm, Su, Sd};
 
+Decays of fermions and of massive vector bosons can be added in the same way.
+They are calculated at tree level only, so channels that exist only at the
+loop level are not included. Decays of a vector into a massless vector are
+set to zero. For example, to add the decays of the :math:`Z'` boson in
+``U1xMSSM3G`` one would write
+
+.. code-block:: mathematica
+
+  FSDecayParticles = {hh, Ah, Hpm, VZp};
+
+The SM gauge bosons can be added too, but their widths then lack the known
+QCD and electroweak corrections.
+
 Configuration
 +++++++++++++
 

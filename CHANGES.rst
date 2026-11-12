@@ -11,6 +11,10 @@ New features
   accordingly.
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
+* FlexibleDecay: added tree-level 2-body decays of massive vector bosons
+  into two scalars, two fermions, a vector and a scalar, or two vectors.
+  Add the vector to ``FSDecayParticles`` to enable them, e.g.
+  ``FSDecayParticles = {hh, Ah, Hpm, VZp}`` in ``U1xMSSM3G``.
 
 Fixed bugs
 ----------
