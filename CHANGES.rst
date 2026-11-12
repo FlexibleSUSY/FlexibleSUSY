@@ -37,6 +37,11 @@ Fixed bugs
   ``FS<M>CalculateDecays`` in the Mathematica interface, which was shown as
   "Message text not found" in models other than the SM.
 
+* [commit 60b35307e]: Fixed a NaN total width, which aborted the
+  calculation, when a particle with massless states, such as the light
+  neutrinos, is listed in ``FSDecayParticles``. Decays of a massless particle
+  into massless particles are now skipped.
+
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
 
