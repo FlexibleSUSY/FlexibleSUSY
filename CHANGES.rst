@@ -11,6 +11,9 @@ New features
   accordingly.
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
+* ``BLSM``: the Z-Z' mixing angle :math:`\theta'` is written to the SLHA
+  output as ``ANGLES 10``, where SARAH's CalcHEP model (used e.g. by
+  micrOMEGAs) reads it.
 
 Fixed bugs
 ----------
