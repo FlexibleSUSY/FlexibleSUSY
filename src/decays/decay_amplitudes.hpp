@@ -163,6 +163,101 @@ struct Decay_amplitude_FFV {
 Decay_amplitude_FFV operator*(std::complex<double>, Decay_amplitude_FFV const&);
 Decay_amplitude_FFV operator*(Decay_amplitude_FFV const&, std::complex<double>);
 
+/**
+ * @class Decay_amplitude_VSS
+ * @brief generic amplitude for the decay of a vector into two scalars
+ *
+ * Tree-level amplitude form_factor * epsilon.(p_1 - p_2).
+ */
+struct Decay_amplitude_VSS {
+   double m_decay{0.};
+   double m_scalar_1{0.};
+   double m_scalar_2{0.};
+   std::complex<double> form_factor{0.};
+
+   double square() const;
+   Decay_amplitude_VSS operator+=(Decay_amplitude_VSS const& amp)
+   {
+      form_factor += amp.form_factor;
+      return *this;
+   }
+};
+Decay_amplitude_VSS operator*(std::complex<double>, Decay_amplitude_VSS const&);
+Decay_amplitude_VSS operator*(Decay_amplitude_VSS const&, std::complex<double>);
+
+/**
+ * @class Decay_amplitude_VFF
+ * @brief generic amplitude for the decay of a vector into two fermions
+ *
+ * Tree-level amplitude
+ * ubar(p_1) epsilon.gamma (form_factor_left P_L + form_factor_right P_R)
+ * v(p_2).
+ */
+struct Decay_amplitude_VFF {
+   double m_decay{0.};
+   double m_fermion_1{0.};
+   double m_fermion_2{0.};
+   std::complex<double> form_factor_left{0.};
+   std::complex<double> form_factor_right{0.};
+
+   double square() const;
+   Decay_amplitude_VFF operator+=(Decay_amplitude_VFF const& amp)
+   {
+      form_factor_left += amp.form_factor_left;
+      form_factor_right += amp.form_factor_right;
+      return *this;
+   }
+};
+Decay_amplitude_VFF operator*(std::complex<double>, Decay_amplitude_VFF const&);
+Decay_amplitude_VFF operator*(Decay_amplitude_VFF const&, std::complex<double>);
+
+/**
+ * @class Decay_amplitude_VVS
+ * @brief generic amplitude for the decay of a vector into a vector and scalar
+ *
+ * Tree-level amplitude form_factor * epsilon.epsilon_1^*.
+ */
+struct Decay_amplitude_VVS {
+   double m_decay{0.};
+   double m_vector{0.};
+   double m_scalar{0.};
+   double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
+   std::complex<double> form_factor{0.};
+
+   double square() const;
+   Decay_amplitude_VVS operator+=(Decay_amplitude_VVS const& amp)
+   {
+      form_factor += amp.form_factor;
+      return *this;
+   }
+};
+Decay_amplitude_VVS operator*(std::complex<double>, Decay_amplitude_VVS const&);
+Decay_amplitude_VVS operator*(Decay_amplitude_VVS const&, std::complex<double>);
+
+/**
+ * @class Decay_amplitude_VVV
+ * @brief generic amplitude for the decay of a vector into two vectors
+ *
+ * Tree-level amplitude form_factor times the Lorentz structure of the
+ * triple gauge vertex, g^{mu nu} (k_0 - k_1)^rho + cyclic.
+ */
+struct Decay_amplitude_VVV {
+   double m_decay{0.};
+   double m_vector_1{0.};
+   double m_vector_2{0.};
+   double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
+   std::complex<double> form_factor{0.};
+
+   double square() const;
+   Decay_amplitude_VVV operator+=(Decay_amplitude_VVV const& amp)
+   {
+      form_factor += amp.form_factor;
+      return *this;
+   }
+};
+Decay_amplitude_VVV operator*(std::complex<double>, Decay_amplitude_VVV const&);
+Decay_amplitude_VVV operator*(Decay_amplitude_VVV const&, std::complex<double>);
+
 template <typename Amplitude>
 double square_amplitude(const Amplitude& a)
 {
@@ -244,6 +339,46 @@ requires (cxx_diagrams::fields::is_fermion<Field_in>::value &&
           cxx_diagrams::fields::is_fermion<Field_out_2>::value)
 struct Two_body_decay_amplitude_type<Field_in, Field_out_1, Field_out_2> {
    using type = Decay_amplitude_FFV;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+   requires(cxx_diagrams::fields::is_vector<Field_in>::value &&
+            cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
+            cxx_diagrams::fields::is_scalar<Field_out_2>::value)
+struct Two_body_decay_amplitude_type<Field_in, Field_out_1, Field_out_2> {
+   using type = Decay_amplitude_VSS;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+   requires(cxx_diagrams::fields::is_vector<Field_in>::value &&
+            cxx_diagrams::fields::is_fermion<Field_out_1>::value &&
+            cxx_diagrams::fields::is_fermion<Field_out_2>::value)
+struct Two_body_decay_amplitude_type<Field_in, Field_out_1, Field_out_2> {
+   using type = Decay_amplitude_VFF;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+   requires(cxx_diagrams::fields::is_vector<Field_in>::value &&
+            cxx_diagrams::fields::is_vector<Field_out_1>::value &&
+            cxx_diagrams::fields::is_scalar<Field_out_2>::value)
+struct Two_body_decay_amplitude_type<Field_in, Field_out_1, Field_out_2> {
+   using type = Decay_amplitude_VVS;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+   requires(cxx_diagrams::fields::is_vector<Field_in>::value &&
+            cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
+            cxx_diagrams::fields::is_vector<Field_out_2>::value)
+struct Two_body_decay_amplitude_type<Field_in, Field_out_1, Field_out_2> {
+   using type = Decay_amplitude_VVS;
+};
+
+template <class Field_in, class Field_out_1, class Field_out_2>
+   requires(cxx_diagrams::fields::is_vector<Field_in>::value &&
+            cxx_diagrams::fields::is_vector<Field_out_1>::value &&
+            cxx_diagrams::fields::is_vector<Field_out_2>::value)
+struct Two_body_decay_amplitude_type<Field_in, Field_out_1, Field_out_2> {
+   using type = Decay_amplitude_VVV;
 };
 
 } // namespace detail

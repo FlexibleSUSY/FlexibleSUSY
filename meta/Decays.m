@@ -278,7 +278,6 @@ GetFeynArtsTypeName[p_?TreeMasses`IsGhost] := U;
 IsSupportedDecayParticle[particle_] :=
     (
      !TreeMasses`IsGhost[particle] &&
-     !TreeMasses`IsVector[particle] &&
      !TreeMasses`IsMassless[particle] &&
      TreeMasses`GetDimensionWithoutGoldstones[particle] > 0
     );
@@ -418,9 +417,10 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
 
 (* The generic 1-loop decay diagrams in
    meta/generic_loop_decay_diagram_classes.m exist only for decays of
-   scalars (S -> FF, SS, SV, VV).  Decays of other particles (fermions)
-   are therefore calculated at tree level only: their channels that
-   exist only at the loop level (e.g. Glu -> Chi VG) are not generated. *)
+   scalars (S -> FF, SS, SV, VV).  Decays of other particles (fermions
+   and vectors) are therefore calculated at tree level only: their
+   channels that exist only at the loop level (e.g. Glu -> Chi VG or
+   VZp -> VP hh) are not generated. *)
 GetMaxLoopOrderForDecay[initialParticle_] :=
     If[TreeMasses`IsScalar[initialParticle], 1, 0];
 
@@ -1063,6 +1063,19 @@ GetDecayAmplitudeType[initialParticle_?TreeMasses`IsFermion, finalState_List] :=
                  ]
           ];
 
+GetDecayAmplitudeType[initialParticle_?TreeMasses`IsVector, finalState_List] :=
+    Module[{vertexType},
+           vertexType = CXXDiagrams`VertexTypeForFields[Join[{initialParticle}, finalState]];
+           Switch[{vertexType, Sort[GetFeynArtsTypeName /@ finalState]},
+                  {MomentumDifferenceVertex, {S, S}}, "Decay_amplitude_VSS",
+                  {ChiralVertex, {F, F}}, "Decay_amplitude_VFF",
+                  {InverseMetricVertex, {S, V}}, "Decay_amplitude_VVS",
+                  {TripleVectorVertex, {V, V}}, "Decay_amplitude_VVV",
+                  _, Utils`FSFancyWarning["decay " <> ToString[initialParticle] <> " -> " <> ToString[finalState] <> " is not supported."];
+                     "Unknown_amplitude_type"
+                 ]
+          ];
+
 GetDecayAmplitudeType[decay_FSParticleDecay] :=
     GetDecayAmplitudeType[GetInitialState[decay], GetFinalState[decay]];
 
@@ -1198,6 +1211,52 @@ FillFFVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments
           ];
 
+(* mass of a vector boson in the final state, as in FillSVVDecayAmplitudeMasses *)
+CreateVectorMassString[vector_, idx_String, paramsStruct_] :=
+    Which[TreeMasses`IsMassless[vector], "0.",
+          TreeMasses`IsZBoson[vector], "qedqcd.displayPoleMZ()",
+          True, paramsStruct <> ".physical_mass<" <> CXXDiagrams`CXXNameOfField[vector] <> ">(" <> idx <> ")"
+    ];
+
+(* decaying vector boson, idx_1; the same mass as in the phase space *)
+FillInitialVectorMass[decay_FSParticleDecay, structName_, paramsStruct_] :=
+    structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
+    CXXDiagrams`CXXNameOfField[GetInitialState[decay]] <> ">(idx_1);\n";
+
+FillVSSDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    FillInitialVectorMass[decay, structName, paramsStruct] <>
+    structName <> ".m_scalar_1 = " <> paramsStruct <> ".physical_mass<" <>
+    CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <> ">(idx_2);\n" <>
+    structName <> ".m_scalar_2 = " <> paramsStruct <> ".physical_mass<" <>
+    CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <> ">(idx_3);\n";
+
+FillVFFDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    FillInitialVectorMass[decay, structName, paramsStruct] <>
+    structName <> ".m_fermion_1 = " <> paramsStruct <> ".physical_mass<" <>
+    CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <> ">(idx_2);\n" <>
+    structName <> ".m_fermion_2 = " <> paramsStruct <> ".physical_mass<" <>
+    CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <> ">(idx_3);\n";
+
+FillVVSDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    Module[{finalState = GetFinalState[decay], scalar, scalarPos, vector, vectorPos},
+           scalar = First[Select[finalState, TreeMasses`IsScalar]];
+           scalarPos = First[First[Position[finalState, scalar]]];
+           vector = First[Select[finalState, TreeMasses`IsVector]];
+           vectorPos = First[First[Position[finalState, vector]]];
+           FillInitialVectorMass[decay, structName, paramsStruct] <>
+           structName <> ".m_vector = " <>
+           CreateVectorMassString[vector, "idx_" <> ToString[vectorPos + 1], paramsStruct] <> ";\n" <>
+           structName <> ".m_scalar = " <> paramsStruct <> ".physical_mass<" <>
+           CXXDiagrams`CXXNameOfField[scalar] <> ">(idx_" <> ToString[scalarPos + 1] <> ");\n"
+          ];
+
+FillVVVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    FillInitialVectorMass[decay, structName, paramsStruct] <>
+    structName <> ".m_vector_1 = " <>
+    CreateVectorMassString[First[GetFinalState[decay]], "idx_2", paramsStruct] <> ";\n" <>
+    structName <> ".m_vector_2 = " <>
+    CreateVectorMassString[Last[GetFinalState[decay]], "idx_3", paramsStruct] <> ";\n";
+
 FillDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Switch[GetDecayAmplitudeType[decay],
            "Decay_amplitude_SSS", FillSSSDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
@@ -1206,6 +1265,10 @@ FillDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsS
            "Decay_amplitude_SVV", FillSVVDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
            "Decay_amplitude_FFS", FillFFSDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
            "Decay_amplitude_FFV", FillFFVDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VSS", FillVSSDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VFF", FillVFFDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VVS", FillVVSDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VVV", FillVVVDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
            _, ""
           ];
 FillMasses[decay_FSParticleDecay] :=
@@ -1216,6 +1279,10 @@ FillMasses[decay_FSParticleDecay] :=
       "Decay_amplitude_SVV", "result.m_decay, result.m_vector_1, result.m_vector_2",
       "Decay_amplitude_FFS", "result.m_decay, result.m_fermion, result.m_scalar",
       "Decay_amplitude_FFV", "result.m_decay, result.m_fermion, result.m_vector",
+      "Decay_amplitude_VSS", "result.m_decay, result.m_scalar_1, result.m_scalar_2",
+      "Decay_amplitude_VFF", "result.m_decay, result.m_fermion_1, result.m_fermion_2",
+      "Decay_amplitude_VVS", "result.m_decay, result.m_vector, result.m_scalar",
+      "Decay_amplitude_VVV", "result.m_decay, result.m_vector_1, result.m_vector_2",
       _, ""
    ];
 
@@ -1340,6 +1407,39 @@ FillFFVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
            "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
           ];
 
+(* Tree-level form factors of decays of vector bosons.  Only the absolute
+   value of each coupling enters the squared amplitude, so the momentum
+   routing and the orientation of the vertex don't matter. *)
+FillVectorTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_, assignments_String] :=
+    Module[{fieldsList, indices, vertex, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
+           indices = "const auto indices = concatenate(" <>
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
+           vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
+           "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
+          ];
+
+FillVSSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    FillVectorTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct,
+       structName <> ".form_factor += vertex.value(vertex.incoming_index(), vertex.outgoing_index());\n"];
+
+FillVFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    FillVectorTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct,
+       structName <> ".form_factor_left += vertex.left();\n" <>
+       structName <> ".form_factor_right += vertex.right();\n"];
+
+FillVVSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    FillVectorTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct,
+       structName <> ".form_factor += vertex.value();\n"];
+
+FillVVVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
+    FillVectorTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct,
+       structName <> ".form_factor += vertex.value(cxx_diagrams::TripleVectorVertex::even_permutation{});\n"];
+
 FillTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Switch[GetDecayAmplitudeType[decay],
            "Decay_amplitude_SSS", FillSSSTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
@@ -1348,6 +1448,10 @@ FillTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, struct
            "Decay_amplitude_SVV", FillSVVTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
            "Decay_amplitude_FFS", FillFFSTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
            "Decay_amplitude_FFV", FillFFVTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VSS", FillVSSTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VFF", FillVFFTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VVS", FillVVSTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
+           "Decay_amplitude_VVV", FillVVVTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
            _, ""
           ];
 
