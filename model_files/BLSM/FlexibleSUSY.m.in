@@ -61,6 +61,8 @@ InitialGuessAtLowScale = {
 PotentialLSPParticles = {};
 
 ExtraSLHAOutputBlocks = {
+   (* Z-Z' mixing angle as defined by SARAH (ANGLES 10, read by SARAH's CalcHEP/micrOMEGAs model) *)
+   {ANGLES, {{10, ArcCos[Abs[ZZ[3,3]]]}}},
    {FlexibleSUSYLowEnergy,
                {{21, FlexibleSUSYObservable`AMM[Fe[2]]} } },
    {FlexibleSUSYOutput,
