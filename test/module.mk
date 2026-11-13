@@ -1383,9 +1383,10 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAt
 
 # test rule for files which depend on pv #######################################
 ifneq ($(OPERATING_SYSTEM),Darwin)
+# test_pv_crosschecks.cpp is built only as test_pv_{fflite,looptools,softsusy}.x
+# (see test_pv_crosschecks.sh), with their own rules.
 PV_DEP_EXE := \
-		$(DIR)/test_pv.x \
-		$(DIR)/test_pv_crosschecks.x
+		$(DIR)/test_pv.x
 
 PV_DEP_OBJ := $(patsubst %.x, %.o, $(PV_DEP_EXE))
 
