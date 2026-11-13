@@ -284,7 +284,7 @@ IsSupportedDecayParticle[particle_] :=
 
 (* returns False if state consists only of Goldstones or ghosts, for any set of generation indices *)
 IsPhysicalFinalState[finalState_List] :=
-    Module[{goldstones},
+    Module[{goldstones, isAlwaysGoldstone},
            goldstones = Select[finalState, TreeMasses`IsGoldstone];
            isAlwaysGoldstone = (TreeMasses`GetDimensionWithoutGoldstones[#] == 0)& /@ goldstones;
            (Select[finalState, TreeMasses`IsGhost] === {}) && !(Or @@ isAlwaysGoldstone)
@@ -525,7 +525,7 @@ GetDecaysForParticle[particle_, {minNumberOfProducts_Integer /; minNumberOfProdu
 (* Deletes diagrams from FSParticleDecay which are 0 because of color algebra.
    If all diagrams for a given topology are deleted, the topology is also removed *)
 DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay /; GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 0] === {} ]  :=
-    Module[{wrong, topoAndinsertions, emptyTopos = {}},
+    Module[{i, j, wrong, topoAndinsertions, emptyTopos = {}},
 
         topoAndinsertions = GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1];
 
@@ -637,7 +637,7 @@ NextMulticombination[n_, combination_] :=
           ];
 
 NextMulticombinationsList[setSizes_List, combinations_List] :=
-    Module[{numCombinations = Length[combinations], next},
+    Module[{i, numCombinations = Length[combinations], next, nextCombination},
            next = combinations;
            For[i = numCombinations, i > 0, i--,
                nextCombination = NextMulticombination[setSizes[[i]], combinations[[i]]];
@@ -1457,6 +1457,7 @@ FillTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, struct
 
 (* the order of lists a and b might be different *)
 Compare[aIn_List, bIn_List] := Module[{
+  i,
   a = SortBy[aIn, First],
   b = SortBy[bIn, First]
 },
@@ -1666,7 +1667,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
    @todo: There is an ambiguity whether Field[n] -> somefield or Field[n] -> AntiField[somefield]
 *)
 GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldTypes_, diagram_, verticesInFieldTypesForFACp_] :=
-   Module[{temp = {}, concreteFieldOnEdgeBetweenVerticesLocal},
+   Module[{i, temp = {}, concreteFieldOnEdgeBetweenVerticesLocal},
 
       concreteFieldOnEdgeBetweenVerticesLocal = concreteFieldOnEdgeBetweenVertices;
       temp = SortBy[Reverse /@ fieldNumberOnEdgeBetweenVertices, Last];
@@ -1738,7 +1739,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       externalEdges,
       indexChecks, addIndexCheck, functionBody = "",
       verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
-      verticesForFACp2,
+      verticesForFACp2, verticesInFieldTypesForFACpCpSorted,
       (* colour triplet fermions *)
       quarkLike = Select[GetColoredParticles[], IsFermion[#] && (GetColorRepresentation[#] == T || GetColorRepresentation[#] == -T) &]
    },
@@ -2681,7 +2682,7 @@ CreateDecayTableGetterFunctions[decayParticles_List, scope_:"CLASSNAME"] :=
           ];
 
 CreateDecayTableInitialization[decayParticles_List] :=
-    Module[{dims, dimsWithoutGoldstones, starts, pdgCodes, initializerList = ""},
+    Module[{i, dims, dimsWithoutGoldstones, starts, pdgCodes, initializerList = ""},
            dims = TreeMasses`GetDimension /@ decayParticles;
            dimsWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles;
            starts = TreeMasses`GetDimensionStartSkippingGoldstones /@ decayParticles;
