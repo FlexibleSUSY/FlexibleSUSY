@@ -1,5 +1,6 @@
 (* Invalid paths to the Lilith and HiggsTools databases must give an error
-   instead of aborting the kernel. *)
+   instead of aborting the kernel.  Every error must give a message with a
+   defined text and $Failed. *)
 
 Needs["TestSuite`", "TestSuite.m"];
 
@@ -22,6 +23,7 @@ If[Head[FSSMCallLilith] === LibraryFunction,
       TestEquality[FSSMCallLilith[handle, tooLong], $Failed];
       TestEquality[FSSMCallLilith[handle, missing], $Failed];
    ];
+   TestEquality[Head[FSSMCallLilith::error], String];
 ];
 
 If[Head[FSSMCallHiggsTools] === LibraryFunction,
@@ -31,7 +33,21 @@ If[Head[FSSMCallHiggsTools] === LibraryFunction,
       TestEquality[FSSMCallHiggsTools[handle, missing, missing], $Failed];
       TestEquality[FSSMCallHiggsTools[handle, notADataset, tooLong], $Failed];
       TestEquality[FSSMCallHiggsTools[handle, tooLong, notADataset], $Failed];
+      (* empty HiggsBounds path: flexiblesusy::Error from call_higgstools,
+         which used to give LibraryFunctionError without a message *)
+      TestEquality[FSSMCallHiggsTools[handle, notADataset, ""], $Failed];
    ];
+   TestEquality[Head[FSSMCallHiggsTools::error], String];
+   TestEquality[Head[FSSMCallHiggsTools::warning], String];
+   TestEquality[
+      Quiet[Check[FSSMCallHiggsTools[handle, notADataset, ""], "error",
+                  {FSSMCallHiggsTools::error}], {FSSMCallHiggsTools::warning}],
+      "error"];
+   (* only one of the two paths exists: warning about the other one *)
+   TestEquality[
+      Quiet[Check[FSSMCallHiggsTools[handle, notADataset, missing], "warning",
+                  {FSSMCallHiggsTools::warning}], {FSSMCallHiggsTools::error}],
+      "warning"];
 ];
 
 DeleteFile[notADataset];

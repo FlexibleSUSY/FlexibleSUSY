@@ -2990,7 +2990,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateSpectrumDecaysFunction = "", calculateModelDecaysPrototype = "", calculateModelDecaysEffCFunction = "",
             calculateSpectrumDecaysEffCFunction = "", calculateModelDecaysEffCPrototype = "",
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
-            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "", putEffCPrototype = "", putEffCFunction = "", callLilithMessages = "",
+            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "", putEffCPrototype = "", putEffCFunction = "", callLilithMessages = "", callHiggsToolsMessages = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
             mathlinkCalcNormalizedEffC = "", loadCalculateEffCFunction = "", loadCallHiggsToolsFunction = "", loadCallLilithFunction = "",
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
@@ -3061,6 +3061,8 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               callLilithMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::warning = \"`1`\";\n";
+              callHiggsToolsMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools::error = \"`1`\";\n" <>
+                                        "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
               decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"";
               mathlinkCalcNormalizedEffC = FSMathLink`CalculateNormalizedEffectiveCouplings[FlexibleSUSY`FSModelName];
@@ -3142,6 +3144,7 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@loadCalculateEffCFunction@" -> loadCalculateEffCFunction,
                             "@loadCallHiggsToolsFunction@" -> loadCallHiggsToolsFunction,
                             "@callLilithMessages@" -> callLilithMessages,
+                            "@callHiggsToolsMessages@" -> callHiggsToolsMessages,
                             "@loadCallLilithFunction@" -> loadCallLilithFunction,
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
