@@ -57,6 +57,7 @@ namespace flexiblesusy {
 
 namespace {
 
+#ifdef ENABLE_HIGGSTOOLS
 /// doesn't throw if the existence of the path can't be determined
 bool path_exists(const std::string& path) noexcept
 {
@@ -76,7 +77,6 @@ constexpr bool calcHgamgam = false;
 // example: 0.03 means 3% uncertainty
 constexpr double relMassError = 0.03;
 
-#ifdef ENABLE_HIGGSTOOLS
 // Ref. model for computing brs and xsections on the HiggsTools side
 constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
