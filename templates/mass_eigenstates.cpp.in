@@ -29,6 +29,7 @@
  */
 
 #include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_landau_gauge.hpp"
 #include "@ModelName@_ewsb_solver_interface.hpp"
 #include "config.h"
 #include "eigen_utils.hpp"
@@ -40,6 +41,8 @@
 #include "loop_libraries/loop_library.hpp"
 #include "numerics.h"
 #include "raii.hpp"
+#include "two_loop_functions.hpp"
+#include "functors.hpp"
 
 #ifdef ENABLE_THREADS
 #include "thread_pool.hpp"
@@ -51,6 +54,7 @@
 @fourLoopHiggsHeaders@
 @twoLoopThresholdHeaders@
 
+#include <array>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -461,6 +465,287 @@ double CLASSNAME::G0(double p, double m1, double m2) const noexcept
       - Loop_library::get().A0(m1, scl2) - Loop_library::get().A0(m2, scl2)
    ).real();
 }
+
+double CLASSNAME::TfSS(double x, double y, double z) const
+{
+   thread_local two_loop_functions::Memo<4> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, q2}, [&] { return two_loop_functions::TfSS(x, y, z, q2); });
+}
+
+double CLASSNAME::TfSSS(double x, double y, double z) const
+{
+   thread_local two_loop_functions::Memo<4> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, q2}, [&] { return two_loop_functions::TfSSS(x, y, z, q2); });
+}
+
+double CLASSNAME::TfSSSS(double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, u, q2}, [&] { return two_loop_functions::TfSSSS(x, y, z, u, q2); });
+}
+
+double CLASSNAME::TfSSFF(double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, u, q2}, [&] { return two_loop_functions::TfSSFF(x, y, z, u, q2); });
+}
+
+double CLASSNAME::TfSSFbFb(double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, u, q2}, [&] { return two_loop_functions::TfSSFbFb(x, y, z, u, q2); });
+}
+
+double CLASSNAME::TfFFFbS(double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, u, q2}, [&] { return two_loop_functions::TfFFFbS(x, y, z, u, q2); });
+}
+
+double CLASSNAME::TfFFbFS(double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, u, q2}, [&] { return two_loop_functions::TfFFbFS(x, y, z, u, q2); });
+}
+
+double CLASSNAME::TfFbFbFbS(double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, y, z, u, q2}, [&] { return two_loop_functions::TfFbFbFbS(x, y, z, u, q2); });
+}
+
+double CLASSNAME::TfSV(double x) const
+{
+   thread_local two_loop_functions::Memo<2> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, q2}, [&] { return two_loop_functions::TfSV(x, q2); });
+}
+
+double CLASSNAME::TfFV(double x) const
+{
+   thread_local two_loop_functions::Memo<2> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({x, q2}, [&] { return two_loop_functions::TfFV(x, q2, @twoLoopFunctionsScheme@); });
+}
+
+double CLASSNAME::WfSSSS(double p2, double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<6> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, q2}, [&] { return two_loop_functions::WfSSSS(p2, x, y, z, u, q2); });
+}
+
+double CLASSNAME::XfSSS(double p2, double x, double y, double z) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, q2}, [&] { return two_loop_functions::XfSSS(p2, x, y, z, q2); });
+}
+
+double CLASSNAME::YfSSSS(double p2, double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<6> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, q2}, [&] { return two_loop_functions::YfSSSS(p2, x, y, z, u, q2); });
+}
+
+double CLASSNAME::ZfSSSS(double p2, double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<6> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, q2}, [&] { return two_loop_functions::ZfSSSS(p2, x, y, z, u, q2); });
+}
+
+double CLASSNAME::SfSSS(double p2, double x, double y, double z) const
+{
+   thread_local two_loop_functions::Memo<5> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, q2}, [&] { return two_loop_functions::SfSSS(p2, x, y, z, q2); });
+}
+
+double CLASSNAME::UfSSSS(double p2, double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<6> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, q2}, [&] { return two_loop_functions::UfSSSS(p2, x, y, z, u, q2); });
+}
+
+double CLASSNAME::VfSSSSS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfSSSSS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfSSSSS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfSSSSS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::WfSSSV(double p2, double x) const
+{
+   thread_local two_loop_functions::Memo<3> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, q2}, [&] { return two_loop_functions::WfSSSV(p2, x, q2); });
+}
+
+double CLASSNAME::MfSSSSV(double p2, double x, double y) const
+{
+   thread_local two_loop_functions::Memo<4> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, q2}, [&] { return two_loop_functions::MfSSSSV(p2, x, y, q2); });
+}
+
+double CLASSNAME::WfSSFF(double p2, double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<6> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, q2}, [&] { return two_loop_functions::WfSSFF(p2, x, y, z, u, q2); });
+}
+
+double CLASSNAME::WfSSFbFb(double p2, double x, double y, double z, double u) const
+{
+   thread_local two_loop_functions::Memo<6> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, q2}, [&] { return two_loop_functions::WfSSFbFb(p2, x, y, z, u, q2); });
+}
+
+double CLASSNAME::MfFbFbFbFbS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfFbFbFbFbS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfFFbFbFS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfFFbFbFS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfFFbFFbS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfFFbFFbS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfFFFbFbS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfFFFbFbS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfFFFFS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfFFFFS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfSFbSFbFb(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfSFbSFbFb(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfSFSFbF(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfSFSFbF(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::MfSFSFFb(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::MfSFSFFb(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfSSSFbFb(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfSSSFbFb(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfSSSFF(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfSSSFF(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfFbFbFbFbS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfFbFbFbFbS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfFbFFbFS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfFbFFbFS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfFbFFFbS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfFbFFFbS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfFFbFbFS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfFFbFbFS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfFFFbFbS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfFFFbFbS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::VfFFFFS(double p2, double x, double y, double z, double u, double v) const
+{
+   thread_local two_loop_functions::Memo<7> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, z, u, v, q2}, [&] { return two_loop_functions::VfFFFFS(p2, x, y, z, u, v, q2); });
+}
+
+double CLASSNAME::GfFFV(double p2, double x, double y) const
+{
+   thread_local two_loop_functions::Memo<4> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, q2}, [&] { return two_loop_functions::GfFFV(p2, x, y, q2, @twoLoopFunctionsScheme@); });
+}
+
+double CLASSNAME::GfFbFbV(double p2, double x, double y) const
+{
+   thread_local two_loop_functions::Memo<4> memo;
+   const double q2 = Sqr(get_scale());
+   return memo({p2, x, y, q2}, [&] { return two_loop_functions::GfFbFbV(p2, x, y, q2, @twoLoopFunctionsScheme@); });
+}
+
 
 /// derivative of H0(p^2, m1^2, m2^2) w.r.t. p^2
 double CLASSNAME::DH0(double p, double m1, double m2) const noexcept

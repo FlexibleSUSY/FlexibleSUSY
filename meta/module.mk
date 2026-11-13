@@ -96,6 +96,7 @@ META_SRC     := \
 		$(DIR)/References.m \
 		$(DIR)/RGIntegrator.m \
 		$(DIR)/SelfEnergies.m \
+		$(DIR)/SelfEnergies2L.m \
 		$(DIR)/SemiAnalytic.m \
 		$(DIR)/TestSuite.m \
 		$(DIR)/TextFormatting.m \

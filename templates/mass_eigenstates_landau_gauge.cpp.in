@@ -1,0 +1,69 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_mass_eigenstates_landau_gauge.cpp
+ * @brief implementation of the @ModelName@ model class with tree-level
+ *        masses and mixings in the Landau gauge
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_mass_eigenstates_landau_gauge.hpp"
+#include "config.h"
+#include "eigen_utils.hpp"
+#include "error.hpp"
+#include "linalg2.hpp"
+#include "wrappers.hpp"
+
+namespace flexiblesusy {
+
+#define CLASSNAME @ModelName@_mass_eigenstates_landau_gauge
+
+CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
+   : @ModelName@_mass_eigenstates(model.get_input())
+{
+   // copy the running parameters only: the pole masses and problems of
+   // the given model may be written concurrently by other threads
+   // during the parallel pole mass calculation
+   @ModelName@_soft_parameters::operator=(model);
+
+   // As in SARAH/SPheno, the tree-level EWSB eqs. are solved with the
+   // full gauge couplings (for the same parameters as in
+   // calculate_DRbar_masses() of the given model), so the 2-loop
+   // corrections use the same parameters as the rest of the
+   // calculation (see CreateLandauGaugeTreeLevelEWSBSolution in
+   // meta/FlexibleSUSY.m for the reasons) ...
+@solveEWSBTreeLevel@
+
+   // ... and only then the gaugeless limit is taken, in which the
+   // SARAH 2-loop diagrams are derived.  The EWSB eqs. are not solved
+   // again, so the tree-level tadpoles do not vanish in the gaugeless
+   // limit, and the Goldstone bosons are not massless in general.
+@setGaugelessLimit@
+
+   // re-calculate all tree-level masses and mixings, now using the
+   // Landau gauge versions of the gauge dependent ones, without
+   // solving the EWSB eqs. (unlike calculate_DRbar_masses())
+@calculateAllMasses@
+}
+
+@massCalculationFunctions@
+
+} // namespace flexiblesusy

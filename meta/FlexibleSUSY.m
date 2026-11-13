@@ -33,6 +33,7 @@ BeginPackage["FlexibleSUSY`",
               "EWSB`",
               "Traces`",
               "SelfEnergies`",
+              "SelfEnergies2L`",
               "Vertices`",
               "Phases`",
               "LatticeUtils`",
@@ -184,6 +185,7 @@ ThetaWDRbar;
 SCALE;
 THRESHOLD;
 VEV::usage = "running SM-like VEV in the full model";
+UseHiggs2LoopMSSM = False;
 UseHiggs2LoopNMSSM = False;
 UseHiggs3LoopMSSM = False;
 UseHiggs3LoopNMSSM = False;
@@ -202,6 +204,7 @@ UseHiggs2LoopSM = False;
 UseHiggs3LoopSM = False;
 UseHiggs4LoopSM = False;
 UseHiggs3LoopSplit = False;
+UseHiggs2Loop = True;
 UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
@@ -567,6 +570,9 @@ CheckSARAHVersion[] :=
                     " or higher"];
               Quit[1];
              ];
+           (* @todo check SARAH version *)
+           Print["Applying SARAH 2-loop Higgs mass patch ..."];
+           Get[FileNameJoin[{$flexiblesusyMetaDir, "SARAH-Higgs_2L_patch.m"}]];
           ];
 
 CheckEWSBSolvers[solvers_List] :=
@@ -1525,11 +1531,11 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
               setGaugeLessLimit                 = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSGaugeLessLimit];
               setYukawaLessLimit                = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSYukawaLessLimit];
 	      setMSSMLimit                      = FlexibleEFTHiggsMatching`SetLimit["model.", Parameters`DecreaseIndexLiterals @ FlexibleSUSY`FSMSSMLimit];
-              If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True, 
+              If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
  		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs2LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs2LoopShift["model", SARAH`HiggsBoson, "idx"];
 	      ];
-              If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True, 
+              If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True,
  		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs3LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs3LoopShift["model", "sm", SARAH`HiggsBoson, "idx"];
 		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMtop2LoopFunction[];
@@ -1588,12 +1594,15 @@ WriteEWSBSolverClass[ewsbEquations_List, parametersFixedByEWSB_List, ewsbInitial
               Print["Error: There are ", numberOfIndependentEWSBEquations, " independent EWSB ",
                     "equations, but you want to fix ", Length[parametersFixedByEWSB],
                     " parameters: ", parametersFixedByEWSB];
-	      Quit[1];
+              Quit[1];
              ];
            higgsToEWSBEqAssociation     = CreateHiggsToEWSBEqAssociation[];
            calculateOneLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
-           If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               calculateTwoLoopTadpolesNoStruct = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "+", "model."];
+             ];
+           If[FlexibleSUSY`UseHiggs2Loop === True,
+              calculateTwoLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[2, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
              ];
            ewsbInitialGuess             = EWSB`FillInitialGuessArray[parametersFixedByEWSB, ewsbInitialGuessValues];
            solveEwsbTreeLevel           = EWSB`CreateTreeLevelEwsbSolver[ewsbSolution /. FlexibleSUSY`tadpole[_] -> 0];
@@ -1649,12 +1658,15 @@ WriteSemiAnalyticEWSBSolverClass[ewsbEquations_List, parametersFixedByEWSB_List,
               Print["Error: There are ", numberOfIndependentEWSBEquations, " independent EWSB ",
                     "equations, but you want to fix ", Length[parametersFixedByEWSB],
                     " parameters: ", parametersFixedByEWSB];
-	      Quit[1];
+              Quit[1];
              ];
            higgsToEWSBEqAssociation     = CreateHiggsToEWSBEqAssociation[];
            calculateOneLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
-           If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               calculateTwoLoopTadpolesNoStruct = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "+", "model."];
+             ];
+           If[FlexibleSUSY`UseHiggs2Loop === True,
+              calculateTwoLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[2, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
              ];
            ewsbInitialGuess             = EWSB`FillInitialGuessArray[parametersFixedByEWSB, ewsbInitialGuessValues];
            solveEwsbTreeLevel = EWSB`CreateTreeLevelEwsbSolver[ewsbSolution /. FlexibleSUSY`tadpole[_] -> 0];
@@ -1712,6 +1724,142 @@ CreateDefaultEWSBSolverConstructor[solvers_List] :=
 ParameterAppearsExactlyOnceIn[eqs_List, par_] :=
     Length[Select[eqs, (!FreeQ[#, par])&]] === 1;
 
+(* returns the parameters for which the tree-level EWSB eqs. are
+   solved analytically (in solve_ewsb_tree_level_custom()) when the
+   tree-level masses are calculated: FSSolveEWSBTreeLevelFor or, if
+   it is not set, the soft Higgs masses that appear in exactly one
+   EWSB eq.  If the list is empty, the tree-level EWSB eqs. are solved
+   numerically. *)
+GetTreeLevelEWSBOutputParameters[ewsbEquations_List] :=
+    Module[{softScalarMasses},
+           softScalarMasses =
+               If[SARAH`SupersymmetricModel,
+                  DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses],
+                  Select[Parameters`GetModelParametersWithMassDimension[2], Parameters`IsRealParameter]
+                 ];
+           Parameters`DecreaseIndexLiterals @
+           Parameters`ExpandExpressions @
+           Parameters`AppendGenerationIndices @
+           If[MatchQ[FlexibleSUSY`FSSolveEWSBTreeLevelFor, {__}],
+              FlexibleSUSY`FSSolveEWSBTreeLevelFor,
+              (* each softScalarMasses should appear only in exactly 1 EWSB eq.! *)
+              Select[softScalarMasses, ParameterAppearsExactlyOnceIn[ewsbEquations, #]&]
+             ]
+          ];
+
+Utils`MakeUnknownInputDefinition[GetTreeLevelEWSBOutputParameters];
+
+(* returns the gauge couplings of the gauge groups broken by EWSB,
+   cf. listBrokenGaugeCouplings in SARAH's TwoLoopPole.m *)
+GetBrokenGaugeCouplings[] :=
+    Module[{vectors = SARAH`SGauge /. a_[{__}] :> a, unbroken},
+           unbroken = SARAH`Gauge[[#, 4]]& /@
+                      Select[Range[Length[vectors]], !FreeQ[SARAH`Particles[FlexibleSUSY`FSEigenstates], vectors[[#]]]&];
+           Complement[First /@ SARAH`BetaGauge, unbroken]
+          ];
+
+(* Tree-level EWSB in the Landau gauge copy of the model, used for the
+   auto-generated 2-loop tadpoles and self-energies.
+
+   Order: the tree-level EWSB eqs. are solved with the full gauge
+   couplings.  Only then are the broken gauge couplings set to zero
+   (gaugeless limit), and the EWSB eqs. are not solved again.
+
+   Why:
+
+   - The gaugeless limit is an approximation made in the 2-loop
+     diagrams, not a different model.  The parameters fixed by the
+     EWSB eqs. (e.g. the soft Higgs masses) are parameters of the full
+     model, and the tree-level masses and 1-loop corrections are
+     calculated with their values from the EWSB eqs. with the full
+     gauge couplings.  With this order, the 2-loop corrections use the
+     same values.  Solving the EWSB eqs. again with g = 0 would change
+     them, by the D-terms in SUSY models, i.e. it would evaluate the
+     2-loop part with different parameters from the rest of the
+     calculation.
+
+   - This is what SARAH/SPheno do, so the results can be compared with
+     SPheno's diagrammatic 2-loop Higgs masses.  SPheno solves the
+     tadpole eqs. in OneLoopMasses (WriteTadpoleSolution), then sets
+     the broken gauge couplings to zero (GaugelessLimit in
+     SPhenoLoopMasses.m), without solving the tadpole eqs. again (it is
+     commented out there), and TreeMassesEffPot doesn't solve them
+     either.  The symbolic parts of SPheno2LPole.m do the same:
+     ... /. SubSolutionsTadpolesLoop /. subZeroGaugeLess.
+
+   Consequence: the tree-level tadpoles t_i = dV/dv_i of the gaugeless
+   potential don't vanish, so the Goldstone bosons aren't massless,
+   although the masses are calculated in the Landau gauge (the
+   Goldstone mass vanishes there only at a stationary point of the
+   potential used).  In the MSSM, the parameters fulfil t_i = 0 with
+   the D-term potential V_D = (gY^2 + g2^2) (vd^2 - vu^2)^2 / 32, so
+   in the gaugeless limit t_i = -dV_D/dv_i, and
+     m^2(G0) = cos^2(beta) t_d/vd + sin^2(beta) t_u/vu
+             = -(gY^2 + g2^2) v^2 cos^2(2 beta) / 8 < 0,
+   with gY the hypercharge coupling and v^2 = vd^2 + vu^2.  This is
+   -mZ^2 cos^2(2 beta) / 2 with the DR-bar mZ of the full model.  The
+   light CP-even Higgs gets the same tree-level mass, as without
+   D-terms the CP-even and CP-odd mass matrices have the same
+   eigenvalues.  This is intended: in [1411.4665] (appendix A, eq. A15)
+   the tachyonic Goldstone mass keeps the loop functions away from
+   m^2 = 0 (the Goldstone boson catastrophe), provided the loop
+   functions are evaluated for negative m^2.  [1706.05372] (sec. 2.1)
+   calls it the "D-term workaround" and keeps only the real parts.
+   The difference to solving the EWSB eqs. again is of higher order
+   (O(g^2) times the 2-loop corrections): in the MSSM with the
+   auto-generated 2-loop corrections and LesHouches.in.MSSM, Mh
+   changes by +0.04 GeV (tan(beta) = 10) and +0.02 GeV (tan(beta) = 2).
+   Without D-terms (SM, THDMs), both orders give the same result.
+
+   Implementation: the tree-level EWSB eqs. are solved for the same
+   parameters as in calculate_DRbar_masses().  This needs the analytic
+   solution (solve_ewsb_tree_level_custom()), because the copy has no
+   EWSB solver: the model's solver can't be shared, as the pole masses
+   are calculated in parallel threads. *)
+CreateLandauGaugeTreeLevelEWSBSolution[{}] :=
+    "// no EWSB eqs.\n";
+
+CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations_List] :=
+    If[MatchQ[GetTreeLevelEWSBOutputParameters[ewsbEquations], {__}],
+       "solve_ewsb_tree_level_custom();\n",
+       "throw SetupError(\"" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge: \"\n" <>
+       "                 \"the auto-generated 2-loop corrections need an analytic \"\n" <>
+       "                 \"solution of the tree-level EWSB eqs. (FSSolveEWSBTreeLevelFor)\");\n"
+      ];
+
+Utils`MakeUnknownInputDefinition[CreateLandauGaugeTreeLevelEWSBSolution];
+
+WriteLandauGaugeModelClass[landauMassMatrices_List, massMatrices_List,
+                           ewsbEquations_List, files_List] :=
+    Module[{massCalculationPrototypes, massCalculationFunctions, brokenGaugeCouplings,
+            otherScalarMassMatrices, overriddenMassMatrices},
+           (* The masses of scalars are stored with the sign of the mass
+              squared (SignedAbsSqrt), because in the gaugeless limit
+              scalars can be tachyonic, and the 2-loop functions need
+              the negative mass squared, see SelfEnergies2L`. So the
+              mass functions of the scalars that are not gauge dependent
+              are overridden, too. *)
+           otherScalarMassMatrices = Select[massMatrices,
+              (TreeMasses`IsScalar[TreeMasses`GetMassEigenstate[#]] &&
+               !MemberQ[TreeMasses`GetMassEigenstate /@ landauMassMatrices,
+                        TreeMasses`GetMassEigenstate[#]])&];
+           overriddenMassMatrices = Join[landauMassMatrices, otherScalarMassMatrices];
+           massCalculationPrototypes = StringJoin[TreeMasses`CreateMassCalculationPrototype /@ overriddenMassMatrices];
+           massCalculationFunctions  = StringJoin[TreeMasses`CreateMassCalculationFunction[#, True]& /@ overriddenMassMatrices];
+           brokenGaugeCouplings = GetBrokenGaugeCouplings[];
+           Print["Gauge couplings set to zero in the 2-loop calculation (gaugeless limit): ", brokenGaugeCouplings];
+           WriteOut`ReplaceInFiles[files,
+                          { "@massCalculationPrototypes@"  -> IndentText[FunctionModifiers`MakeOverride[massCalculationPrototypes]],
+                            "@massCalculationFunctions@"   -> WrapLines[massCalculationFunctions],
+                            "@solveEWSBTreeLevel@"         -> IndentText[CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations]],
+                            "@setGaugelessLimit@"          -> IndentText[StringJoin[Parameters`SetParameter[#, "0.", ""]& /@ brokenGaugeCouplings]],
+                            "@calculateAllMasses@"         -> IndentText[TreeMasses`CallMassCalculationFunctions[massMatrices]],
+                            Sequence @@ GeneralReplacementRules[]
+                          } ];
+          ];
+
+Utils`MakeUnknownInputDefinition[WriteLandauGaugeModelClass];
+
 WriteModelClass[massMatrices_List, ewsbEquations_List,
                 parametersFixedByEWSB_List, ewsbSubstitutions_List,
                 nPointFunctions_List, vertexRules_List, phases_List,
@@ -1751,7 +1899,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             dependencePrototypes, dependenceFunctions,
             clearOutputParameters = "",
             clearPhases = "", clearExtraParameters = "",
-            softScalarMasses, treeLevelEWSBOutputParameters,
+            treeLevelEWSBOutputParameters,
             parametersToSave, saveEWSBOutputParameters,
             solveTreeLevelEWSBviaSoftHiggsMasses,
             solveEWSBTemporarily,
@@ -1808,9 +1956,12 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            calculateTreeLevelTadpoles   = EWSB`FillArrayWithEWSBEqs[SARAH`HiggsBoson, "tadpole"];
            calculateOneLoopTadpoles     = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "-"];
            divideTadpoleByVEV           = SelfEnergies`DivideTadpoleByVEV[Parameters`DecreaseIndexLiterals @ CreateVEVToTadpoleAssociation[], "tadpole"];
-           If[SARAH`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
-              calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "-"];
-             ];
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+              calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "-"]
+	   ];
+           If[FlexibleSUSY`UseHiggs2Loop === True,
+	      calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithLoopTadpoles[2, higgsToEWSBEqAssociation, "tadpole", "-"]
+           ];
            If[FlexibleSUSY`UseHiggs2LoopSM === True,
               {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               twoLoopHiggsHeaders = "#include \"sm_twoloophiggs.hpp\"\n";
@@ -1827,7 +1978,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSplit[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = "#include \"splitmssm_threeloophiggs.hpp\"\n";
              ];
-           If[SARAH`UseHiggs2LoopMSSM === True,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesMSSM[SARAH`HiggsBoson];
               {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesMSSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}, {SARAH`PseudoScalar, SARAH`PseudoScalar}}];
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n";
@@ -1862,7 +2013,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n#include \"nmssm_twoloophiggs.hpp\"\n";
              ];
            twoLoopThresholdHeaders = ThresholdCorrections`GetTwoLoopThresholdHeaders[];
-           If[SARAH`UseHiggs2LoopMSSM === True ||
+           If[FlexibleSUSY`UseHiggs2LoopMSSM === True ||
               FlexibleSUSY`UseHiggs2LoopNMSSM === True ||
               FlexibleSUSY`UseMSSMYukawa2Loop === True ||
               FlexibleSUSY`UseMSSMAlphaS2Loop === True ||
@@ -1913,21 +2064,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            printMixingMatrices          = WriteOut`PrintParameters[mixingMatrices, "ostr"];
            dependencePrototypes         = TreeMasses`CreateDependencePrototypes[];
            dependenceFunctions          = TreeMasses`CreateDependenceFunctions[];
-           softScalarMasses =
-               If[SARAH`SupersymmetricModel,
-                  DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses],
-                  Select[Parameters`GetModelParametersWithMassDimension[2], Parameters`IsRealParameter]
-                 ];
-           (* find soft Higgs masses that appear in tree-level EWSB eqs. *)
-           treeLevelEWSBOutputParameters =
-               Parameters`DecreaseIndexLiterals @
-               Parameters`ExpandExpressions @
-               Parameters`AppendGenerationIndices @
-               If[MatchQ[FlexibleSUSY`FSSolveEWSBTreeLevelFor, {__}],
-                  FlexibleSUSY`FSSolveEWSBTreeLevelFor,
-                  (* each softScalarMasses should appear only in exactly 1 EWSB eq.! *)
-                  Select[softScalarMasses, ParameterAppearsExactlyOnceIn[ewsbEquations, #]&]
-                 ];
+           treeLevelEWSBOutputParameters = GetTreeLevelEWSBOutputParameters[ewsbEquations];
            If[MatchQ[treeLevelEWSBOutputParameters, {__}],
               parametersToSave = treeLevelEWSBOutputParameters;
               solveTreeLevelEWSBviaSoftHiggsMasses = First @ EWSB`FindSolutionAndFreePhases[independentEwsbEquationsTreeLevel,
@@ -2067,6 +2204,9 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@twoLoopSelfEnergyPrototypes@" -> IndentText[twoLoopSelfEnergyPrototypes],
                             "@twoLoopSelfEnergyFunctions@"  -> twoLoopSelfEnergyFunctions,
                             "@twoLoopHiggsHeaders@"       -> twoLoopHiggsHeaders,
+                            "@twoLoopFunctionsScheme@"    -> If[FlexibleSUSY`FSRenormalizationScheme === FlexibleSUSY`MSbar,
+                                                                "two_loop_functions::Scheme::MSbar",
+                                                                "two_loop_functions::Scheme::DRbar"],
                             "@twoLoopThresholdHeaders@"   -> twoLoopThresholdHeaders,
                             "@threeLoopSelfEnergyPrototypes@" -> IndentText[threeLoopSelfEnergyPrototypes],
                             "@threeLoopSelfEnergyFunctions@"  -> threeLoopSelfEnergyFunctions,
@@ -3442,6 +3582,8 @@ WriteSMParticlesAliases[files_List] := Module[{},
 FilesExist[fileNames_List] :=
     And @@ (FileExistsQ /@ fileNames);
 
+FilesExist[fileName_] := FilesExist[{fileName}];
+
 LatestModificationTimeInSeconds[file_String] :=
     If[FileExistsQ[file],
        AbsoluteTime[FileDate[file, "Modification"]], 0];
@@ -3473,9 +3615,31 @@ GetRGEFileNames[outputDir_String] :=
            FileNameJoin[{rgeDir, #}]& /@ fileNames
           ];
 
+Get1LSelfEnergyFileName[outputDir_String, eigenstates_] :=
+    FileNameJoin[{outputDir, ToString[eigenstates], "One-Loop", "SelfEnergy.m"}];
+
+Get2LDiagramFileName[outputDir_String, eigenstates_, field_String] :=
+    FileNameJoin[{outputDir, ToString[eigenstates], "Two-Loop", field <> ".m"}];
+
+Get2LSelfEnergyFileNames[outputDir_String, eigenstates_] :=
+    If[True || SARAH`SupersymmetricModel,
+       {
+           Get2LDiagramFileName[outputDir, eigenstates, "hh"],
+           Get2LDiagramFileName[outputDir, eigenstates, "Ah"]
+       },
+       {}
+      ];
+
+Get2LTadpoleFileNames[outputDir_String, eigenstates_] :=
+    If[True || SARAH`SupersymmetricModel,
+       { Get2LDiagramFileName[outputDir, eigenstates, "tadpoles"] },
+       {}
+      ];
+
 GetSelfEnergyFileNames[outputDir_String, eigenstates_] :=
-    FileNameJoin[{outputDir, ToString[eigenstates],
-                  "One-Loop", "SelfEnergy.m"}];
+    Join[{ Get1LSelfEnergyFileName[outputDir, eigenstates] },
+         Get2LSelfEnergyFileNames[outputDir, eigenstates]
+        ];
 
 NeedToCalculateSelfEnergies[eigenstates_] :=
     NeedToUpdateTarget[
@@ -3584,7 +3748,7 @@ FSPrepareRGEs[loopOrder_] :=
 
 FSCheckLoopCorrections[eigenstates_] :=
     Module[{needToCalculateLoopCorrections, selfEnergies,
-            fileName = GetSelfEnergyFileNames[$sarahCurrentOutputMainDir, eigenstates]},
+            fileName = Get1LSelfEnergyFileName[$sarahCurrentOutputMainDir, eigenstates]},
            needToCalculateLoopCorrections = Or[
                NeedToCalculateSelfEnergies[eigenstates],
                NeedToCalculateTadpoles[eigenstates],
@@ -3592,6 +3756,7 @@ FSCheckLoopCorrections[eigenstates_] :=
                                               ];
            If[needToCalculateLoopCorrections,
               SARAH`CalcLoopCorrections[eigenstates];
+              SARAH`Calc2LoopCorrections[eigenstates];
               selfEnergies = Get[fileName];
               selfEnergies = {{#1, #1}, #2}& @@@ selfEnergies;
               Get["createVPVZ.m"];
@@ -3600,24 +3765,86 @@ FSCheckLoopCorrections[eigenstates_] :=
              ];
           ];
 
+Get2LSelfEnergy[eigenstates_] :=
+    Module[{files},
+           files = Get2LSelfEnergyFileNames[$sarahCurrentOutputMainDir, eigenstates];
+           If[files === {}, {},
+              Print["Reading 2-loop self-energies from ", files, " ..."];
+              SARAH`twoloophiggsmassdiags = {0, 0};
+              Get /@ files;
+              {
+                  {{SARAH`HiggsBoson, SARAH`HiggsBoson}    , Null, SelfEnergies2L`ConvertSarah2LDiagramList[SARAH`twoloophiggsmassdiags[[1]]]},
+                  {{SARAH`PseudoScalar, SARAH`PseudoScalar}, Null, SelfEnergies2L`ConvertSarah2LDiagramList[SARAH`twoloophiggsmassdiags[[2]]]}
+              }
+             ]
+          ];
+
+Get2LTadpole[eigenstates_] :=
+    Module[{files},
+           files = Get2LTadpoleFileNames[$sarahCurrentOutputMainDir, eigenstates];
+           If[files === {}, {},
+              Print["Reading 2-loop tadpole from ", files, " ..."];
+              SARAH`twolooptadpolediags = { 0 };
+              Get /@ files;
+              {
+                  {SARAH`HiggsBoson, Null, SelfEnergies2L`ConvertSarah2LDiagramList[SARAH`twolooptadpolediags]}
+              }
+             ]
+          ];
+
+(* field is {h, h} for self-energies and h for tadpoles *)
+Append2LNPointFunctions[{field:(hh | SARAH`HiggsBoson | {hh | SARAH`HiggsBoson, hh | SARAH`HiggsBoson}), se1_}, se2L_] :=
+    Module[{se2 = Cases[se2L, {SARAH`HiggsBoson | {SARAH`HiggsBoson, SARAH`HiggsBoson}, _, ex_} :> ex]},
+           If[se2 === {},
+              {field, se1},
+              If[GetDimension[SARAH`HiggsBoson] > 1,
+                 {field, se1}, (* do not append since mass eigenstates != gauge eigenstates *)
+                 {field, se1, First[se2]} (* mass eigenstates == gauge eigenstates*)
+                ]
+             ]
+          ];
+
+Append2LNPointFunctions[{field:(Ah | SARAH`PseudoScalar | {Ah | SARAH`PseudoScalar, Ah | SARAH`PseudoScalar}), se1_}, se2L_List] :=
+    Module[{se2 = Cases[se2L, {SARAH`PseudoScalar | {SARAH`PseudoScalar, SARAH`PseudoScalar}, _, ex_} :> ex]},
+           If[se2 === {},
+              {field, se1},
+              If[GetDimension[SARAH`PseudoScalar] > 1,
+                 {field, se1}, (* do not append since mass eigenstates != gauge eigenstates *)
+                 {field, se1, First[se2]} (* mass eigenstates == gauge eigenstates*)
+                ]
+             ]
+          ];
+
+Append2LNPointFunctions[p:{_, _}, _] := p;
+
+RemoveDim1Fields[lst_List] := Select[lst, (GetDimension[First[Flatten[{First[#]}]]] > 1)&];
+
+(* assumes that se1L is in gauge eigenstates and se2L is in mass
+   eigenstates.  Returns a two-component list, where the 1st entry is
+   a list of self-energies in gauge eigenstates and the 2nd entry is a
+   list of self-energies in mass eigenstates.
+ *)
+MergeNPointFunctions[se1L_List, se2L_List] :=
+    { Append2LNPointFunctions[#, se2L]& /@ se1L, RemoveDim1Fields[se2L] };
+
 FSCheckFlags[] :=
     Module[{},
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
-              SARAH`UseHiggs2LoopMSSM = True;
+              FlexibleSUSY`UseHiggs2LoopMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
               FlexibleSUSY`UseMSSM3LoopRGEs = True;
              ];
 
            If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
-              FlexibleSUSY`UseHiggs2LoopNMSSM === True;
+              FlexibleSUSY`UseHiggs2LoopNMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
               FlexibleSUSY`UseMSSM3LoopRGEs = True;
              ];
 
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
-              FlexibleSUSY`UseHiggs2LoopSM = True;
+              If[!FlexibleSUSY`UseHiggs2Loop, FlexibleSUSY`UseHiggs2LoopSM = True];
               FlexibleSUSY`UseSMAlphaS3Loop = True;
               (* FlexibleSUSY`UseSMYukawa2Loop = True; *)
               FlexibleSUSY`UseYukawa3LoopQCD = True;
@@ -3625,7 +3852,7 @@ FSCheckFlags[] :=
              ];
 
            If[FlexibleSUSY`UseHiggs4LoopSM === True,
-              FlexibleSUSY`UseHiggs2LoopSM = True;
+              If[!FlexibleSUSY`UseHiggs2Loop, FlexibleSUSY`UseHiggs2LoopSM = True];
               FlexibleSUSY`UseHiggs3LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
               FlexibleSUSY`UseSMAlphaS4Loop = True;
@@ -3635,6 +3862,11 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
               FlexibleSUSY`UseSM5LoopRGEs = True;
+             ];
+
+           (* after the flags implied by the 3- and 4-loop corrections are set *)
+           If[FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+              FlexibleSUSY`UseHiggs2Loop = False;
              ];
 
            If[FlexibleSUSY`UseYukawa4LoopQCD === True,
@@ -3705,7 +3937,7 @@ FSCheckFlags[] :=
               References`AddReference["Martin:2014cxa"];
              ];
 
-           If[SARAH`UseHiggs2LoopMSSM,
+           If[FlexibleSUSY`UseHiggs2LoopMSSM,
               Print["Adding 2-loop MSSM Higgs mass contributions from ",
                     "[arxiv:hep-ph/0105096, arxiv:hep-ph/0112177, arxiv:hep-ph/0212132,",
                     " arxiv:hep-ph/0206101, arxiv:hep-ph/0305127]"];
@@ -3788,37 +4020,41 @@ FSCheckFlags[] :=
           ];
 
 PrepareSelfEnergies[eigenstates_] :=
-    Module[{selfEnergies = {}, selfEnergiesFile},
-           selfEnergiesFile = GetSelfEnergyFileNames[$sarahCurrentOutputMainDir, eigenstates];
+    Module[{selfEnergies, selfEnergies2L, selfEnergiesFile},
+           selfEnergiesFile = Get1LSelfEnergyFileName[$sarahCurrentOutputMainDir, eigenstates];
            If[!FileExistsQ[selfEnergiesFile],
-              Print["Error: self-energy files not found: ", selfEnergiesFile];
+              Print["Error: 1-loop self-energy file not found: ", selfEnergiesFile];
               Quit[1];
              ];
-           Print["Reading self-energies from file ", selfEnergiesFile, " ..."];
+           Print["Reading 1-loop self-energies from file ", selfEnergiesFile, " ..."];
            selfEnergies = Get[selfEnergiesFile];
            If[selfEnergies === Null,
               Print["Error: Could not read self-energies from ", selfEnergiesFile];
               Quit[1];
              ];
+           selfEnergies2L = Get2LSelfEnergy[eigenstates];
            Print["Converting self-energies ..."];
-           ConvertSarahSelfEnergies[ApplyFSSelfEnergyRules @ selfEnergies]
+           (* @todo(alex,wkotlarski): do we need to apply ApplyFSSelfEnergyRules also to selfEnergies2L ? *)
+           ConvertSarahSelfEnergies[Sequence @@ MergeNPointFunctions[ApplyFSSelfEnergyRules @ selfEnergies, selfEnergies2L]]
           ];
 
 PrepareTadpoles[eigenstates_] :=
-    Module[{tadpoles = {}, tadpolesFile},
+    Module[{tadpoles, tadpoles2L, tadpolesFile},
            tadpolesFile = GetTadpoleFileName[$sarahCurrentOutputMainDir, eigenstates];
            If[!FilesExist[tadpolesFile],
-              Print["Error: tadpole file not found: ", tadpolesFile];
+              Print["Error: 1-loop tadpole file not found: ", tadpolesFile];
               Quit[1];
              ];
-           Print["Reading tadpoles from file ", tadpolesFile, " ..."];
+           Print["Reading 1-loop tadpoles from file ", tadpolesFile, " ..."];
            tadpoles = Get[tadpolesFile];
            If[tadpoles === Null,
               Print["Error: Could not read tadpoles from ", tadpolesFile];
               Quit[1];
              ];
+           tadpoles2L = Get2LTadpole[eigenstates];
            Print["Converting tadpoles ..."];
-           ConvertSarahTadpoles[ApplyFSSelfEnergyRules @ tadpoles]
+           (* @todo(alex,wkotlarski): do we need to apply ApplyFSSelfEnergyRules also to tadpoles2L ? *)
+           ConvertSarahTadpoles[Sequence @@ MergeNPointFunctions[ApplyFSSelfEnergyRules @ tadpoles, tadpoles2L]]
           ];
 
 PrepareUnrotatedParticles[eigenstates_] :=
@@ -4445,6 +4681,31 @@ SetupMassMatrices[allParameters_] :=
 		       {massMatrices, Lat$massMatrices}
 		];
 
+(* returns the mass matrices of the gauge dependent particles
+   (e.g. the Goldstone bosons) in the Landau gauge (xi = 0) *)
+GetLandauGaugeMassMatrices[massMatrices_List, allParameters_] :=
+    Module[{landauMassMatrices, unrotatedParticles},
+           (* the masses of the unrotated particles are read from a
+              file, where they are stored in the Feynman gauge *)
+           unrotatedParticles = Get[GetUnrotatedParticlesFileName[$sarahCurrentOutputMainDir, FlexibleSUSY`FSEigenstates]];
+           landauMassMatrices = Block[{SARAH`RXi, SARAH`Xi = 0, SARAH`Xip = 0},
+                                      SARAH`RXi[_] = 0;
+                                      TreeMasses`SetUnrotatedParticles[
+                                          ReplacePart[#, 4 -> SARAH`TreeMass[First[#], FlexibleSUSY`FSEigenstates, False]]& /@
+                                          unrotatedParticles];
+                                      First[SetupMassMatrices[allParameters]]
+                                     ];
+           TreeMasses`SetUnrotatedParticles[unrotatedParticles];
+           If[Length[landauMassMatrices] =!= Length[massMatrices] ||
+              (TreeMasses`GetMassEigenstate /@ landauMassMatrices) =!= (TreeMasses`GetMassEigenstate /@ massMatrices),
+              Print["Error: mass eigenstates in the Landau gauge differ from those in the Feynman gauge."];
+              Quit[1];
+             ];
+           landauMassMatrices = Pick[landauMassMatrices, MapThread[UnsameQ, {landauMassMatrices, massMatrices}]];
+           Print["Gauge dependent tree-level masses: ", TreeMasses`GetMassEigenstate /@ landauMassMatrices];
+           landauMassMatrices
+          ];
+
 SetupOutputParameters[massMatrices_] :=
 		Module[{allParticles, allOutputParameters},
            allParticles = FlexibleSUSY`M[TreeMasses`GetMassEigenstate[#]]& /@ massMatrices;
@@ -4507,7 +4768,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             susyBetaFunctions, susyBreakingBetaFunctions,
             anomDim,
             inputParameters (* list of 3-component lists of the form {name, block, type} *),
-            massMatrices,
+            massMatrices, landauGaugeMassMatrices,
             diagonalizationPrecision,
             allInputParameterIndexReplacementRules = {},
             allExtraParameterIndexReplacementRules = {},
@@ -4667,6 +4928,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            On[Assert];
 
            {massMatrices, Lat$massMatrices} = SetupMassMatrices[allParameters];
+           landauGaugeMassMatrices = GetLandauGaugeMassMatrices[massMatrices, allParameters];
 
            allInputParameterIndexReplacementRules = Parameters`CreateIndexReplacementRules[
                Parameters`GetInputParameters[]
@@ -4918,6 +5180,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_physical.cpp"}]}
                            },
                            diagonalizationPrecision];
+
+           Print["Creating class for model in the Landau gauge ..."];
+           WriteLandauGaugeModelClass[landauGaugeMassMatrices, massMatrices, ewsbEquations,
+                                      {{FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_landau_gauge.hpp.in"}],
+                                        FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge.hpp"}]},
+                                       {FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_landau_gauge.cpp.in"}],
+                                        FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge.cpp"}]}
+                                      }];
 
            Utils`PrintHeadline["Creating SLHA model"];
            Print["Creating class for SLHA model ..."];
