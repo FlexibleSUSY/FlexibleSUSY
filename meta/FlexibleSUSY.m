@@ -185,6 +185,7 @@ ThetaWDRbar;
 SCALE;
 THRESHOLD;
 VEV::usage = "running SM-like VEV in the full model";
+UseHiggs2LoopMSSM = False;
 UseHiggs2LoopNMSSM = False;
 UseHiggs3LoopMSSM = False;
 UseHiggs3LoopNMSSM = False;
@@ -3825,10 +3826,6 @@ MergeNPointFunctions[se1L_List, se2L_List] :=
 
 FSCheckFlags[] :=
     Module[{},
-           If[FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
-              FlexibleSUSY`UseHiggs2Loop = False;
-           ];
-
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
               FlexibleSUSY`UseHiggs2LoopMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
@@ -3837,7 +3834,7 @@ FSCheckFlags[] :=
              ];
 
            If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
-              FlexibleSUSY`UseHiggs2LoopNMSSM === True;
+              FlexibleSUSY`UseHiggs2LoopNMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
               FlexibleSUSY`UseMSSM3LoopRGEs = True;
@@ -3862,6 +3859,11 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
               FlexibleSUSY`UseSM5LoopRGEs = True;
+             ];
+
+           (* after the flags implied by the 3- and 4-loop corrections are set *)
+           If[FlexibleSUSY`UseHiggs2LoopSM === True || FlexibleSUSY`UseHiggs2LoopMSSM === True || FlexibleSUSY`UseHiggs2LoopNMSSM === True,
+              FlexibleSUSY`UseHiggs2Loop = False;
              ];
 
            If[FlexibleSUSY`UseYukawa4LoopQCD === True,

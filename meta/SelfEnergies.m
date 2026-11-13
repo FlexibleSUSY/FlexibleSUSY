@@ -128,6 +128,7 @@ NPointFunctionQ[_SelfEnergies`FSSelfEnergy]             := True;
 NPointFunctionQ[_SelfEnergies`FSHeavySelfEnergy]        := True;
 NPointFunctionQ[_SelfEnergies`FSHeavyRotatedSelfEnergy] := True;
 NPointFunctionQ[_SelfEnergies`FSSelfEnergyMassEigenstates] := True;
+NPointFunctionQ[_SelfEnergies`FSSelfEnergyDerivative]  := True;
 NPointFunctionQ[_]                                      := False;
 
 NumberOfLoops[(_[_, expr___])?NPointFunctionQ] := Length[{expr}];
@@ -144,7 +145,8 @@ SetSystemOptions[
 
 SARAH`sum /: D[SARAH`sum[idx_, i_, j_, expr_], p2_] := SARAH`sum[idx, i, j, D[expr, p2]];
 
-D[SelfEnergies`FSSelfEnergy[particle_, expr_], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
+(* derivative of the 1-loop part only; 2-loop parts (3rd argument) are dropped *)
+D[SelfEnergies`FSSelfEnergy[particle_, expr_, ___], mom2_] ^:= SelfEnergies`FSSelfEnergyDerivative[particle, D[expr, mom2]];
 
 Derivative[1, 0, 0][B0][p2_, m12_, m22_] := DB0[p2, m12, m22];
 Derivative[1, 0, 0][F0][p2_, m12_, m22_] := DF0[p2, m12, m22];

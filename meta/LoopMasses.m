@@ -637,7 +637,7 @@ DoMediumDiagonalization[particle_Symbol /; IsScalar[particle], inputMomentum_, t
            massMatrixStr = "get_mass_matrix_" <> ToValidCSymbolString[particle];
            (* fill self-energy and do diagonalisation *)
            If[dim > 1,
-              If[(SARAH`UseHiggs2LoopMSSM === True ||
+              If[(FlexibleSUSY`UseHiggs2LoopMSSM === True ||
                   FlexibleSUSY`UseHiggs2LoopNMSSM === True ||
                   FlexibleSUSY`UseHiggs3LoopMSSM === True ||
                   FlexibleSUSY`UseHiggs3LoopNMSSM === True) &&
@@ -933,7 +933,7 @@ DoSlowDiagonalization[particle_Symbol, tadpole_] :=
            inputMomenta = "old_" <> massName;
            outputMomenta = "new_" <> massName;
            If[dim > 1 &&
-              (SARAH`UseHiggs2LoopMSSM === True ||
+              (FlexibleSUSY`UseHiggs2LoopMSSM === True ||
                FlexibleSUSY`UseHiggs2LoopNMSSM === True) &&
               MemberQ[{SARAH`HiggsBoson, SARAH`PseudoScalar}, particle],
               effPot = effPot <> CalcEffPot2L[particle];
