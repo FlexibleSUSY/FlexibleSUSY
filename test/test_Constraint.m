@@ -96,24 +96,34 @@ TestEquality[Constraint`Private`CalculateScaleFromExprSymb[g1 == MZ],
              FullSimplify[currentScale*E^((-g1 + MZ)/(BETA[g1]))]
             ];
 
-Print["testing RemoveRepeatedYukawaCalculations[] ..."];
-
-(* consecutive identical calls are merged; separated calls and other
-   repeated code are kept *)
-TestEquality[Constraint`Private`RemoveRepeatedYukawaCalculations[
-                {"calculate_Yu_DRbar();\n", "calculate_Yu_DRbar();\n", "a = 1;\n",
-                 "a = 1;\n", "calculate_Yu_DRbar();\n", "calculate_Yd_DRbar();\n",
-                 "calculate_Yd_DRbar();\n"}],
-             {"calculate_Yu_DRbar();\n", "a = 1;\n", "a = 1;\n",
-              "calculate_Yu_DRbar();\n", "calculate_Yd_DRbar();\n"}
-            ];
-
-TestEquality[Constraint`Private`RemoveRepeatedYukawaCalculations[{}], {}];
-
-Print["testing ApplyConstraints[] with element-wise Yukawa settings (issue #665) ..."];
-
 SARAH`UpYukawa = Yu;
 SARAH`DownYukawa = Yd;
+
+Print["testing GetYukawaFromDRbarMasses[] ..."];
+
+TestEquality[Constraint`Private`GetYukawaFromDRbarMasses[{Yu[3,3], Sqrt[2] upQuarksDRbar[3,3] / vu}], Yu];
+TestEquality[Constraint`Private`GetYukawaFromDRbarMasses[{Yu, Automatic}], Yu];
+TestEquality[Constraint`Private`GetYukawaFromDRbarMasses[{Yd[3,3], Sqrt[2] downQuarksDRbar[3,3] / vd}], Yd];
+TestEquality[Constraint`Private`GetYukawaFromDRbarMasses[{Yu[3,3], g1}], None];
+TestEquality[Constraint`Private`GetYukawaFromDRbarMasses[{g1, Sqrt[2] upQuarksDRbar[3,3] / vu}], None];
+TestEquality[Constraint`Private`GetYukawaFromDRbarMasses[{g1, g0}], None];
+
+Print["testing RemoveRepeatedYukawaSettings[] ..."];
+
+(* only the first of consecutive settings of the same Yukawa matrix from
+   the DR-bar masses is kept; separated settings and other repeated settings
+   are kept *)
+TestEquality[Constraint`Private`RemoveRepeatedYukawaSettings[
+                {{Yu[1,1], upQuarksDRbar[1,1]}, {Yu[2,2], upQuarksDRbar[2,2]}, {g1, g0},
+                 {g1, g0}, {Yu[3,3], upQuarksDRbar[3,3]}, {Yd[3,3], downQuarksDRbar[3,3]},
+                 {Yd, Automatic}, {Yu[1,1], g1}, {Yu[2,2], g1}}],
+             {{Yu[1,1], upQuarksDRbar[1,1]}, {g1, g0}, {g1, g0}, {Yu[3,3], upQuarksDRbar[3,3]},
+              {Yd[3,3], downQuarksDRbar[3,3]}, {Yu[1,1], g1}, {Yu[2,2], g1}}
+            ];
+
+TestEquality[Constraint`Private`RemoveRepeatedYukawaSettings[{}], {}];
+
+Print["testing ApplyConstraints[] with element-wise Yukawa settings (issue #665) ..."];
 
 elementWiseYu = {
     {Yu[1,1], Sqrt[2] upQuarksDRbar[1,1] / vu},

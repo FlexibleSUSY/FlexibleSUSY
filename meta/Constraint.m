@@ -67,20 +67,22 @@ ApplyConstraint[{parameter_, value_}, modelPrefix_String] :=
           ""
          ];
 
-ApplyConstraint[{parameter_ | parameter_[__] /; parameter === SARAH`UpYukawa,
-                 value_ /; (!FreeQ[value, Global`upQuarksDRbar] || value === Automatic)},
-                modelPrefix_String] :=
-    "calculate_" <> CConversion`ToValidCSymbolString[parameter] <> "_DRbar();\n";
+(* Returns the Yukawa matrix that a setting {Yf, value} or {Yf[i,j], value}
+   calculates from the DR-bar fermion masses, or None for other settings. *)
+GetYukawaFromDRbarMasses[{(parameter_ | parameter_[__]) /; parameter === SARAH`UpYukawa, value_}] :=
+    If[!FreeQ[value, Global`upQuarksDRbar] || value === Automatic, parameter, None];
 
-ApplyConstraint[{parameter_ | parameter_[__] /; parameter === SARAH`DownYukawa,
-                 value_ /; (!FreeQ[value, Global`downQuarksDRbar] || value === Automatic)},
-                modelPrefix_String] :=
-    "calculate_" <> CConversion`ToValidCSymbolString[parameter] <> "_DRbar();\n";
+GetYukawaFromDRbarMasses[{(parameter_ | parameter_[__]) /; parameter === SARAH`DownYukawa, value_}] :=
+    If[!FreeQ[value, Global`downQuarksDRbar] || value === Automatic, parameter, None];
 
-ApplyConstraint[{parameter_ | parameter_[__] /; parameter === SARAH`ElectronYukawa,
-                 value_ /; (!FreeQ[value, Global`downLeptonsDRbar] || value === Automatic)},
+GetYukawaFromDRbarMasses[{(parameter_ | parameter_[__]) /; parameter === SARAH`ElectronYukawa, value_}] :=
+    If[!FreeQ[value, Global`downLeptonsDRbar] || value === Automatic, parameter, None];
+
+GetYukawaFromDRbarMasses[_] := None;
+
+ApplyConstraint[setting:{_, _} /; GetYukawaFromDRbarMasses[setting] =!= None,
                 modelPrefix_String] :=
-    "calculate_" <> CConversion`ToValidCSymbolString[parameter] <> "_DRbar();\n";
+    "calculate_" <> CConversion`ToValidCSymbolString[GetYukawaFromDRbarMasses[setting]] <> "_DRbar();\n";
 
 ApplyConstraint[{parameter_,
                  value_ /; !FreeQ[value, Global`neutrinoDRbar]}, modelPrefix_String] :=
@@ -274,27 +276,26 @@ ApplyConstraints[settings_List, modelPrefix_String:"MODEL->"] :=
            result = Parameters`CreateLocalConstRefs[(#[[2]])& /@ noMacros];
            result = result <> AddBetas[noMacros, modelPrefix];
            result = result <> "\n";
-           result = result <> StringJoin[
-               RemoveRepeatedYukawaCalculations[ApplyConstraint[#, modelPrefix]& /@ noTemp]];
+           (result = result <> ApplyConstraint[#, modelPrefix])& /@ RemoveRepeatedYukawaSettings[noTemp];
            Return[result];
           ];
 
 (* Setting the elements of a Yukawa matrix one by one from the DR-bar
    masses, e.g. {Yu[1,1], ... upQuarksDRbar[1,1] ...}, {Yu[2,2], ...},
    gives one calculate_Yu_DRbar() call per element, although one call
-   sets all of them (issue #665).  Merge consecutive identical calls:
-   nothing happens between them, so this doesn't change the result.
-   Calls separated by other settings are kept, as these settings may
-   change or use the Yukawa couplings. *)
-RemoveRepeatedYukawaCalculations[code_List] :=
-    Module[{isYukawaCalculation},
-           isYukawaCalculation[s_String] :=
-               StringMatchQ[s, "calculate_" ~~ __ ~~ "_DRbar();\n"];
-           isYukawaCalculation[_] := False;
-           Join @@ (If[isYukawaCalculation[First[#]], {First[#]}, #]& /@ Split[code])
+   sets all of them (issue #665).  Keep only the first of consecutive
+   settings that calculate the same Yukawa matrix: nothing happens between
+   them, so this doesn't change the result.  Settings separated by other
+   settings are kept, as these may change or use the Yukawa couplings. *)
+RemoveRepeatedYukawaSettings[settings_List] :=
+    Module[{sameYukawa},
+           sameYukawa[a_, b_] :=
+               With[{yukawa = GetYukawaFromDRbarMasses[a]},
+                    yukawa =!= None && yukawa === GetYukawaFromDRbarMasses[b]];
+           First /@ Split[settings, sameYukawa]
           ];
 
-RemoveRepeatedYukawaCalculations // Utils`MakeUnknownInputDefinition;
+RemoveRepeatedYukawaSettings // Utils`MakeUnknownInputDefinition;
 
 ContainsBetas[expr_] := !FreeQ[expr, FlexibleSUSY`BETA];
 
