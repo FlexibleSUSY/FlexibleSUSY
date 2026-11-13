@@ -440,19 +440,22 @@ OrderFinalState[initialParticle_?TreeMasses`IsScalar, finalParticles_List] :=
                 ];
               (* re-order to S bar[F] F *)
               If[TreeMasses`IsFermion[orderedFinalState[[1]]] && TreeMasses`IsFermion[orderedFinalState[[2]]],
-                 If[Head[orderedFinalState[[2]]] === SARAH`bar && !Head[orderedFinalState[[1]]] === SARAH`bar,
+                 If[Head[orderedFinalState[[2]]] === SARAH`bar && Head[orderedFinalState[[1]]] =!= SARAH`bar,
                     orderedFinalState = Reverse[orderedFinalState];
                    ];
                 ];
+              (* re-order to conj[V] V, except for W+ W- *)
               If[TreeMasses`IsVector[orderedFinalState[[1]]] && TreeMasses`IsVector[orderedFinalState[[2]]],
-                 If[Head[orderedFinalState[[2]]] === Susyno`LieGroups`conj && !Head[orderedFinalState[[1]]] === Susyno`LieGroups`conj,
-                    If[
-                     {If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]],
-                        Susyno`LieGroups`conj[If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]} =!= orderedFinalState,
-                    orderedFinalState = Reverse[orderedFinalState];
-                    ]
-                 ];
-              ];
+                 If[Head[orderedFinalState[[2]]] === Susyno`LieGroups`conj && Head[orderedFinalState[[1]]] =!= Susyno`LieGroups`conj,
+                    With[{wPlus = If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0,
+                                     Susyno`LieGroups`conj[TreeMasses`GetWBoson[]],
+                                     TreeMasses`GetWBoson[]]},
+                         If[orderedFinalState =!= {wPlus, Susyno`LieGroups`conj[wPlus]},
+                            orderedFinalState = Reverse[orderedFinalState];
+                           ];
+                        ];
+                   ];
+                ];
            ];
             orderedFinalState
           ];
@@ -480,42 +483,13 @@ OrderFinalState[initialParticle_, finalParticles_List] :=
            Drop[orderedFinalState, First[Position[orderedFinalState, initialParticle]]]
           ];
 
-GetDecaysForParticle[particle_, Infinity, allowedFinalStateParticles_List] :=
-    (
-     Print["Error: number of final state particles must be finite."];
-     Quit[1];
-    );
-
-GetDecaysForParticle[particle_, {Infinity}, allowedFinalStateParticles_List] :=
-    (
-     Print["Error: number of final state particles must be finite."];
-     Quit[1];
-    );
-
-GetDecaysForParticle[particle_, {n_, Infinity}, allowedFinalStateParticles_List] :=
-    (
-     Print["Error: number of final state particles must be finite."];
-     Quit[1];
-    );
-
-GetDecaysForParticle[particle_, {Infinity, n_}, allowedFinalStateParticles_List] :=
-    (
-     Print["Error: number of final state particles must be finite."];
-     Quit[1];
-    );
-
-GetDecaysForParticle[particle_, {Infinity, Infinity}, allowedFinalStateParticles_List] :=
-    (
-     Print["Error: number of final state particles must be finite."];
-     Quit[1];
-    );
-
 GetDecaysForParticle[particle_, maxNumberOfProducts_Integer /; maxNumberOfProducts >= 2,
                      allowedFinalStateParticles_List] :=
     GetDecaysForParticle[particle, {2, maxNumberOfProducts}, allowedFinalStateParticles];
 
-GetDecaysForParticle[particle_, {minNumberOfProducts_Integer /; minNumberOfProducts >= 2,
-                                 maxNumberOfProducts_Integer /; maxNumberOfProducts >= 2},
+(* the condition is on the list: a condition on one element can't refer to another element *)
+GetDecaysForParticle[particle_, {minNumberOfProducts_Integer, maxNumberOfProducts_Integer} /;
+                                2 <= minNumberOfProducts <= maxNumberOfProducts,
                                 allowedFinalStateParticles_List] :=
     Module[{finalStateSizes},
            finalStateSizes = Table[{i}, {i, minNumberOfProducts, maxNumberOfProducts}];
@@ -597,7 +571,8 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
 
 GetDecaysForParticle[particle_, n_, allowedFinalStateParticles_List] :=
     (
-     Print["Error: invalid number of final state particles: ", n];
+     Print["Error: invalid number of final state particles: ", n,
+           ". Expected an integer n >= 2, {n} or {min, max} with 2 <= min <= max."];
      Quit[1];
     );
 
