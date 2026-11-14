@@ -81,9 +81,27 @@ void CLASSNAME::clear()
    decay_table.clear();
 }
 
+/**
+ * Returns the SM determined from the low-energy input.  The iterative
+ * determination is done once, because it depends only on qedqcd, which doesn't
+ * change after construction.
+ */
+standard_model::Standard_model const& CLASSNAME::get_sm_at_mz()
+{
+   if (!sm_at_mz) {
+      standard_model::Standard_model sm{};
+      sm.initialise_from_input(qedqcd);
+      sm_at_mz = std::move(sm);
+   }
+   return *sm_at_mz;
+}
+
 void CLASSNAME::calculate_decays()
 {
 try {
+   // determine it here, so that threaded tasks below only read it
+   get_sm_at_mz();
+
 #ifdef ENABLE_THREADS
 @callAllDecaysFunctionsInThreads@
 #else
