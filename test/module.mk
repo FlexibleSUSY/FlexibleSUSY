@@ -995,6 +995,12 @@ $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		Print[\"Error: test aborted\"]; Quit[1]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
 
+# run the Python tests with the interpreter the Python module is built for,
+# otherwise the tests with models are skipped (unless PYTHON is set)
+ifeq ($(ENABLE_PYTHON_MODULE),yes)
+$(DIR)/test_python_interface.sh.xml: export PYTHON ?= $(PYTHON_MODULE_CMD)
+endif
+
 $(DIR)/%.sh.xml: $(DIR)/%.sh
 		@rm -f $@ $(@:.xml=.log)
 		@$(PTR); \

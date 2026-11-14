@@ -3767,6 +3767,7 @@ replace_markers() {
 	-e "s|@ENABLE_PYTHON_MODULE@|$enable_python_module|" \
 	-e "s|@PYBIND11FLAGS@|$PYBIND11FLAGS|"    \
 	-e "s|@PYTHON_MODULE_SUFFIX@|$PYTHON_MODULE_SUFFIX|"    \
+	-e "s|@PYTHON_MODULE_CMD@|$python_module_cmd|"    \
 	-e "s|@ENABLE_LILITH@|$enable_lilith|" \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
