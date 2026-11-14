@@ -51,6 +51,7 @@ LIB_model_specific_SM_HDR := \
 LIB_model_specific_SM_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/standard_model_qft.hpp \
 		$(DIR)/cxx_qft/standard_model_fields.hpp \
+		$(DIR)/cxx_qft/standard_model_particle_aliases.hpp \
 		$(DIR)/cxx_qft/standard_model_vertices.hpp \
 		$(DIR)/cxx_qft/standard_model_context_base.hpp
 
@@ -61,8 +62,6 @@ LIB_model_specific_SM_DEP := $(LIB_model_specific_SM_OBJ:.o=.d)
 
 LIB_model_specific_SM     := $(DIR)/lib$(MODNAME)$(MODULE_LIBEXT)
 
-LIB_model_specific_SM_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
-
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) clean-$(MODNAME)-dep \
 		clean-$(MODNAME)-lib clean-$(MODNAME)-obj distclean-$(MODNAME)
 
@@ -71,11 +70,7 @@ all-$(MODNAME): $(LIB_model_specific_SM)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		$(Q)install -d $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_CXXQFT_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_MK) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(model_specific_SM_CXXQFT_VERTICES_MK) $(SM_INSTALL_CXXQFT_DIR)
+		$(Q)$(INSTALL_FILES) $(INSTALL_DIR) u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_CXXQFT_HDR) $(LIB_model_specific_SM_MK) $(model_specific_SM_CXXQFT_VERTICES_MK)
 endif
 
 clean-$(MODNAME)-dep:

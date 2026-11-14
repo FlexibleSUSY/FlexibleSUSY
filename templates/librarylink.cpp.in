@@ -57,7 +57,9 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <exception>
 #include <filesystem>
+#include <system_error>
 #include <utility>
 
 #define INPUTPARAMETER(p) input.p
@@ -241,6 +243,15 @@ std::string get_string_from(MLINK link)
 
 /******************************************************************/
 
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
+}
+
+/******************************************************************/
+
 long number_of_args(MLINK link, const std::string& head)
 {
    long argc;
@@ -288,6 +299,35 @@ void put_message(MLINK link,
    MLPutSymbol(link, function_name.c_str());
    MLPutString(link, message_tag.c_str());
    MLPutString(link, message_str.c_str());
+}
+
+/******************************************************************/
+
+/**
+ * Calls f(), which writes the result to the link.  If f() throws, an
+ * error message and $Failed are written instead, so no exception
+ * reaches the Mathematica kernel.  f() must throw before writing to
+ * the link.
+ *
+ * @return LIBRARY_NO_ERROR
+ */
+template <class F>
+int with_error_handling(MLINK link, const std::string& function_name, F&& f)
+{
+   try {
+      std::forward<F>(f)();
+   } catch (const flexiblesusy::Error& e) {
+      put_message(link, function_name, "error", e.what_detailed());
+      put_error_output(link);
+   } catch (const std::exception& e) {
+      put_message(link, function_name, "error", e.what());
+      put_error_output(link);
+   } catch (...) {
+      put_message(link, function_name, "error", "unknown exception");
+      put_error_output(link);
+   }
+
+   return LIBRARY_NO_ERROR;
 }
 
 /******************************************************************/
@@ -1090,23 +1130,18 @@ DLLEXPORT int FS@ModelName@CallLilith(
    const auto hid = get_handle_from(link);
 
    const std::string llDbFile = get_string_from(link);
-   if (!std::filesystem::exists(llDbFile)) {
+   if (!path_exists(llDbFile)) {
       put_message(link, "FS@ModelName@CallLilith", "error", llDbFile + " is not a valid path");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
    }
 
-   try {
+   return with_error_handling(link, "FS@ModelName@CallLilith", [&] {
       auto& data = find_data(hid);
       std::optional<flexiblesusy::SignalResult> ll =
          call_lilith(data.get_normalized_higgs_effc(), data.get_physical_input(), llDbFile);
       data.put_lilith_results(link, ll);
-   } catch (const flexiblesusy::Error& e) {
-      put_message(link, "FS@ModelName@CallLilith", "error", e.what());
-      put_error_output(link);
-   }
-
-   return LIBRARY_NO_ERROR;
+   });
 }
 #endif
 
@@ -1124,23 +1159,29 @@ DLLEXPORT int FS@ModelName@CallHiggsTools(
    const std::string hsDatabasePath = get_string_from(link);
    const std::string hbDatabasePath = get_string_from(link);
 
-   if (!std::filesystem::exists(hsDatabasePath) && !std::filesystem::exists(hbDatabasePath)) {
+   const bool hs_exists = path_exists(hsDatabasePath);
+   const bool hb_exists = path_exists(hbDatabasePath);
+
+   if (!hs_exists && !hb_exists) {
       put_message(link, "FS@ModelName@CallHiggsTools", "error", hsDatabasePath + " and " + hbDatabasePath + " are not valid paths");
       put_error_output(link);
       return LIBRARY_NO_ERROR;
    }
 
-   try {
+   // HiggsTools skips a tool whose database doesn't exist, so only warn
+   if (!hs_exists) {
+      put_message(link, "FS@ModelName@CallHiggsTools", "warning", "HiggsSignals database " + hsDatabasePath + " is not a valid path, HiggsSignals is skipped");
+   }
+   if (!hb_exists) {
+      put_message(link, "FS@ModelName@CallHiggsTools", "warning", "HiggsBounds database " + hbDatabasePath + " is not a valid path, HiggsBounds is skipped");
+   }
+
+   return with_error_handling(link, "FS@ModelName@CallHiggsTools", [&] {
       auto& data = find_data(hid);
       auto [hs, higgsbounds_v] =
          call_higgstools(data.get_normalized_higgs_effc(), data.get_physical_input(), hbDatabasePath, hsDatabasePath);
       data.put_higgstools_results(link, hs, higgsbounds_v);
-   } catch (const flexiblesusy::Error& e) {
-      std::cerr << e.what_detailed() << std::endl;
-      return LIBRARY_FUNCTION_ERROR;
-   }
-
-   return LIBRARY_NO_ERROR;
+   });
 }
 #endif
 

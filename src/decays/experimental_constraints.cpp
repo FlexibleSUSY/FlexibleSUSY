@@ -41,9 +41,10 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <random>
+#include <system_error>
 
 #ifdef ENABLE_HIGGSTOOLS
 #include "Higgs/Predictions.hpp"
@@ -55,6 +56,14 @@ namespace HP = Higgs::predictions;
 namespace flexiblesusy {
 
 namespace {
+
+#ifdef ENABLE_HIGGSTOOLS
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
+}
 
 // Whether to calculate the X->gaga and X->gg decay widths in terms of the
 // effective tree-level couplings (calcHgamgam=calcggH=true) or by rescaling
@@ -68,7 +77,6 @@ constexpr bool calcHgamgam = false;
 // example: 0.03 means 3% uncertainty
 constexpr double relMassError = 0.03;
 
-#ifdef ENABLE_HIGGSTOOLS
 // Ref. model for computing brs and xsections on the HiggsTools side
 constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
@@ -400,12 +408,10 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
 
       effectiveCouplingInput(s, effc, refModel, calcggH, calcHgamgam);
 
-      // Effective couplings below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
-      // (note that this is different than couplings like gg, WW etc)
-      // so taking a norm gives a total partial width
-      s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu.second));
-      s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau.second));
-      s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau.second));
+      // HiggsTools has no effective couplings for these channels, only widths
+      s.setDecayWidth(HP::Decay::emu,   el.emu_width);
+      s.setDecayWidth(HP::Decay::etau,  el.etau_width);
+      s.setDecayWidth(HP::Decay::mutau, el.mutau_width);
 
       // Higgs to LSP decay (if model contains one)
       s.setDecayWidth(HP::Decay::directInv, el.invWidth);
@@ -415,7 +421,7 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
    }
 
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
-   if (std::filesystem::exists(higgsbounds_dataset)) {
+   if (path_exists(higgsbounds_dataset)) {
       auto bounds = Higgs::Bounds {higgsbounds_dataset};
       auto hbResult = bounds(pred);
       for (auto const& _hb: hbResult.selectedLimits) {
@@ -425,16 +431,14 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
          );
          hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
       }
-   }
-   else if (higgsbounds_dataset.empty()) {
+   } else if (higgsbounds_dataset.empty()) {
       WARNING("Warning: no HiggsBounds database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsBounds database at " + higgsbounds_dataset);
    }
 
    std::optional<SignalResult> hs_return;
-   if (std::filesystem::exists(higgssignals_dataset)) {
+   if (path_exists(higgssignals_dataset)) {
       const auto signals = Higgs::Signals {higgssignals_dataset};
       const double hs_chisq = signals(pred);
       const double mhSMref = physical_input.get(Physical_input::mh_pole);
@@ -442,11 +446,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
       const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
       hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
-   }
-   else if (higgssignals_dataset.empty()) {
+   } else if (higgssignals_dataset.empty()) {
       WARNING("Warning: no HiggsSignals database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsSinglas database at " + higgssignals_dataset);
    }
 

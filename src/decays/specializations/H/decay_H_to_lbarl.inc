@@ -48,6 +48,8 @@ double CLASSNAME::get_partial_width<Higgs, bar<ChargedLepton>::type, ChargedLept
        flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
    ) {
       const double remove_normalization = flux*ps*2*Sqr(mHOS);
+      // for lepton flavour violating final states add_coupling uses only
+      // the partial width (last argument), not the coupling
       neutral_higgs_effc.add_coupling(
          field_as_string<Higgs>(indexIn),
             {

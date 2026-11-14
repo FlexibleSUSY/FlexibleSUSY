@@ -134,6 +134,9 @@ double Decay_amplitude_SVV::square() const
       }
    }
 
+   // massive vectors: physical (on-shell) vector masses on purpose; this
+   // breaks the equivalence theorem for heavy scalars (see the note above
+   // Decay_amplitude_VSS::square())
    const double m_s_sq = Sqr(m_decay);
    const double m_s_4 = Power4(m_decay);
    const double m_1_sq = Sqr(m_vector_1);
@@ -301,6 +304,139 @@ double Decay_amplitude_FFV::square() const
       + 2. * c5 * Re(form_factor_gam_left * Conj(form_factor_p_2)
                      + form_factor_gam_right * Conj(form_factor_p_1))
       + 2. * c6 * Re(form_factor_p_1 * Conj(form_factor_p_2));
+}
+
+// Squared amplitudes of tree-level decays of a massive vector boson,
+// summed over the spins and polarizations of the final state and
+// averaged over the 3 polarizations of the decaying vector.  They agree
+// with VectorBosonToTwoScalars, VectorBosonToTwoFermionsC,
+// VectorBosonToScalarAndVectorBoson and VectorBosonToTwoVectorBosons in
+// SPheno 4.0.7.
+//
+// As for Decay_amplitude_SSV, decays into a massless vector return 0:
+// gauge invariance forbids a tree-level coupling of a massless gauge boson
+// in these channels, so a non-zero form factor is numerical noise.
+//
+// Note on the masses: the final-state vectors are external on-shell
+// states, so their masses in the polarization sums are the physical
+// (1-loop) masses on purpose, while the couplings come from the model at
+// the scale of the decay.  The difference is of higher order, but the
+// longitudinal polarizations enhance it: V -> V V by (M/m_V)^4 and
+// V -> V S by (M/m_V)^2, which cancel against couplings proportional to
+// m_V^2 only if both use the same m_V.  This choice therefore breaks the
+// Goldstone boson equivalence theorem, Gamma(Z' -> W W) = Gamma(Z' -> Z h)
+// for M >> m_W.  Example: in BLSM with M_Z' = 3.7 TeV the couplings
+// correspond to m_W = 76.7 GeV, but m_W = 81.0 GeV is used, so
+// Gamma(Z' -> W W) is smaller by (76.7/81.0)^4 = 0.80 than in micrOMEGAs,
+// which uses the masses of its couplings.  Decay_amplitude_SVV makes the
+// same choice for heavy scalars.
+
+double Decay_amplitude_VSS::square() const
+{
+   const double m_in_sq = Sqr(m_decay);
+   const double lambda =
+      KallenLambda(m_in_sq, Sqr(m_scalar_1), Sqr(m_scalar_2));
+
+   return AbsSqr(form_factor) * lambda / (3. * m_in_sq);
+}
+
+double Decay_amplitude_VFF::square() const
+{
+   const double m_in_sq = Sqr(m_decay);
+   const double m_1_sq = Sqr(m_fermion_1);
+   const double m_2_sq = Sqr(m_fermion_2);
+
+   const double c1 =
+      2. * m_in_sq - m_1_sq - m_2_sq - Sqr(m_1_sq - m_2_sq) / m_in_sq;
+   const double c2 = 12. * m_fermion_1 * m_fermion_2;
+
+   return (c1 * (AbsSqr(form_factor_left) + AbsSqr(form_factor_right)) +
+           c2 * Re(form_factor_left * Conj(form_factor_right))) /
+          3.;
+}
+
+double Decay_amplitude_VVS::square() const
+{
+   if (m_vector <= massless_vector_threshold) {
+      return 0.;
+   }
+
+   const double m_in_sq = Sqr(m_decay);
+   const double m_v_sq = Sqr(m_vector);
+   const double p_dot_k = 0.5 * (m_in_sq + m_v_sq - Sqr(m_scalar));
+
+   return AbsSqr(form_factor) * (2. + Sqr(p_dot_k) / (m_in_sq * m_v_sq)) / 3.;
+}
+
+double Decay_amplitude_VVV::square() const
+{
+   if (m_vector_1 <= massless_vector_threshold ||
+       m_vector_2 <= massless_vector_threshold) {
+      return 0.;
+   }
+
+   const double m_in_sq = Sqr(m_decay);
+   const double m_1_sq = Sqr(m_vector_1);
+   const double m_2_sq = Sqr(m_vector_2);
+   const double lambda = KallenLambda(m_in_sq, m_1_sq, m_2_sq);
+
+   return AbsSqr(form_factor) * lambda *
+          (Sqr(m_in_sq) + Sqr(m_1_sq) + Sqr(m_2_sq) +
+           10. * (m_in_sq * m_1_sq + m_in_sq * m_2_sq + m_1_sq * m_2_sq)) /
+          (12. * m_in_sq * m_1_sq * m_2_sq);
+}
+
+Decay_amplitude_VSS operator*(std::complex<double> factor,
+                              Decay_amplitude_VSS const& amp2)
+{
+   Decay_amplitude_VSS amp = amp2;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+Decay_amplitude_VSS operator*(Decay_amplitude_VSS const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
+}
+
+Decay_amplitude_VFF operator*(std::complex<double> factor,
+                              Decay_amplitude_VFF const& amp2)
+{
+   Decay_amplitude_VFF amp = amp2;
+   amp.form_factor_left = factor * amp2.form_factor_left;
+   amp.form_factor_right = factor * amp2.form_factor_right;
+   return amp;
+}
+Decay_amplitude_VFF operator*(Decay_amplitude_VFF const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
+}
+
+Decay_amplitude_VVS operator*(std::complex<double> factor,
+                              Decay_amplitude_VVS const& amp2)
+{
+   Decay_amplitude_VVS amp = amp2;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+Decay_amplitude_VVS operator*(Decay_amplitude_VVS const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
+}
+
+Decay_amplitude_VVV operator*(std::complex<double> factor,
+                              Decay_amplitude_VVV const& amp2)
+{
+   Decay_amplitude_VVV amp = amp2;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+Decay_amplitude_VVV operator*(Decay_amplitude_VVV const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
 }
 
 } // namespace flexiblesusy

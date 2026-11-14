@@ -64,6 +64,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
+		$(DIR)/unitarity.cpp \
 		$(DIR)/wrappers.cpp \
 		$(DIR)/zeta.cpp
 
@@ -80,7 +81,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/ckm.hpp \
 		$(DIR)/Cl2.hpp \
 		$(DIR)/command_line_options.hpp \
-		$(DIR)/complex.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
 		$(DIR)/composite_root_finder.hpp \
 		$(DIR)/compound_constraint.hpp \
@@ -95,10 +95,11 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/decay.hpp \
 		$(DIR)/decays/decay_amplitudes.hpp \
 		$(DIR)/decays/decay_functions.hpp \
-		$(DIR)/decays/decay_problems.hpp \
+		$(DIR)/decays/flexibledecay_problems.hpp \
 		$(DIR)/decays/flexibledecay_settings.hpp \
 		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/decays/decay_corrections.hpp \
+		$(wildcard $(DIR)/decays/specializations/*/*.inc) \
 		$(DIR)/derivative.hpp \
 		$(DIR)/eigen_utils.hpp \
 		$(DIR)/eigen_tensor.hpp \
@@ -120,6 +121,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/gsl_utils.hpp \
 		$(DIR)/gsl_vector.hpp \
 		$(DIR)/harmonic.hpp \
+		$(DIR)/horner.hpp \
 		$(DIR)/loop_corrections.hpp \
 		$(DIR)/if.hpp \
 		$(DIR)/initial_guesser.hpp \
@@ -130,6 +132,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/Li5.hpp \
 		$(DIR)/Li6.hpp \
 		$(DIR)/linalg2.hpp \
+		$(DIR)/log.hpp \
 		$(DIR)/logger.hpp \
 		$(DIR)/lowe.h \
 		$(DIR)/loop_libraries/library_softsusy.hpp \
@@ -215,6 +218,7 @@ LIBFLEXI_SRC := $(sort $(LIBFLEXI_SRC))
 LIBFLEXI_HDR := $(sort $(LIBFLEXI_HDR))
 
 LIBAUX := ''
+LIBAUX_SRC := ''
 LIBAUX_AUTOGEN := ''
 
 # files which allow some useful things with fortran functions ##########
@@ -243,6 +247,9 @@ $(FUTI).mod : $(FUTI).f90 $(FUTI).o
 
 LIBAUX += \
 	$(FUTI).a
+
+LIBAUX_SRC += \
+	$(FUTI).f90
 
 endif
 
@@ -301,6 +308,9 @@ $(COLLWRAP).f90 : $(COLLWRAP).cpp
 LIBAUX += \
 	$(COLLWRAP).a
 
+LIBAUX_SRC += \
+	$(COLLWRAP).cpp
+
 LIBAUX_AUTOGEN += \
 	$(COLLWRAP).f90
 
@@ -320,8 +330,6 @@ LIBFLEXI_DEP := \
 
 LIBFLEXI     := $(DIR)/libflexisusy$(MODULE_LIBEXT)
 
-LIBFLEXI_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
-
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) clean-$(MODNAME)-dep \
 		clean-$(MODNAME)-lib clean-$(MODNAME)-obj distclean-$(MODNAME) \
 		clean-$(MODNAME)-autogen
@@ -331,10 +339,7 @@ all-$(MODNAME): $(LIBFLEXI)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		$(Q)install -d $(LIBFLEXI_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIBFLEXI_SRC) $(LIBFLEXI_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIBFLEXI_HDR) $(LIBFLEXI_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIBFLEXI_MK) $(LIBFLEXI_INSTALL_DIR)
+		$(Q)$(INSTALL_FILES) $(INSTALL_DIR) u=rw,g=r,o=r $(LIBFLEXI_SRC) $(LIBFLEXI_HDR) $(LIBAUX_SRC) $(LIBFLEXI_MK)
 endif
 
 clean-$(MODNAME)-dep:

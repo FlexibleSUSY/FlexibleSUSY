@@ -234,6 +234,21 @@ The code:
 - **Width form factors:** the width of S -> V V with massless vectors uses
   `form_factor_21` (and `form_factor_eps`). `form_factor_g` only enters through the
   Ward check.
+- **Decays of fermions and vectors** are tree level only (`GetMaxLoopOrderForDecay`).
+  Vector decays use `Decay_amplitude_{VSS,VFF,VVS,VVV}`; their `square()` matches
+  SPheno's `VectorBosonTo*` routines in `DecayFunctions.f90`.
+- **Decay scale:** each particle's decays are calculated after `model.run_to(mass)`
+  (`run_to_decay_particle_scale` in `templates/decays/decays.hpp.in`). Parameters fixed
+  only at the input scale, such as the triangular kinetic-mixing basis (gX1 = 0) of
+  U(1)xU(1) models, no longer hold there. Vertices written with mixing angles
+  (`ThetaWp`) then break, e.g. Z' -> W W. Check the equivalence theorem
+  (Γ(Z' -> WW) ≈ Γ(Z' -> Zh)) when changing Z' decays.
+- **Masses of external vectors:** final-state vectors are on-shell, so `SVV`, `VVS` and
+  `VVV` use their physical (1-loop) masses on purpose, while the couplings come from the
+  model at the decay scale. With heavy decaying particles this breaks the equivalence
+  theorem at the level of (m_V,run/m_V,phys)^4: in BLSM with M_Z' = 3.7 TeV,
+  Γ(Z' -> WW) is 0.80 of micrOMEGAs's value, while Z' -> f f agree to 1e-4. This is a
+  deliberate choice, not a bug; the deviation is of higher order.
 
 ## Conventions
 

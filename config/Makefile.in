@@ -149,6 +149,9 @@ SARAH_MODEL_DIR := @SARAH_MODEL_DIR@
 # script which installs a file without export markers
 INSTALL_STRIPPED := config/install_stripped.sh
 
+# script which installs files, keeping their relative paths
+INSTALL_FILES := config/install_files.sh
+
 # script which replaces path\like\this with path/like/this
 # thereby enabling FlexibleSUSY to run on Cygwin
 CONVERT_DOS_PATHS := config/convert_dos_paths.sh

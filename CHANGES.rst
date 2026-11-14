@@ -68,6 +68,14 @@ New features
 Fixed bugs
 ----------
 
+* [commit 62fb30778]: Fixed negative undetected widths of neutral Higgs bosons
+  being passed to HiggsTools and Lilith. They are now set to 0, with a
+  warning if they are larger than rounding errors.
+
+* [commit dd59eb297]: Fixed ``UseHiggs3LoopNMSSM = True``, which didn't switch on
+  the 2-loop NMSSM Higgs mass corrections (``UseHiggs2LoopNMSSM``), unlike
+  ``UseHiggs3LoopMSSM`` in the MSSM. The shipped models set both flags.
+
 * [commit 23011a7]: Fixed clean fall-back to 2-loop precision if an
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
@@ -85,6 +93,22 @@ Fixed bugs
   model now has 2 Dirac inert charginos with mass matrix
   :math:`\mu'^T`, and SARAH no longer reports charge-violating vertices
   (`#563 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/563>`_).
+
+* [commit 423caf0d5]: Fixed the name of the warning of
+  ``FS<M>CalculateDecays`` in the Mathematica interface, which was shown as
+  "Message text not found" in models other than the SM.
+
+* [commit 60b35307e]: Fixed a NaN total width, which aborted the
+  calculation, when a particle with massless states, such as the light
+  neutrinos, is listed in ``FSDecayParticles``. Decays of a massless particle
+  into massless particles are now skipped.
+
+* [commit 4cdcf1b2d]: Fixed the error handling of ``FS<M>CallHiggsTools``
+  in the Mathematica interface. Some errors (e.g. an empty HiggsBounds path)
+  returned ``LibraryFunctionError`` without a message, and its messages showed
+  "Message text not found". All errors of ``FS<M>CallHiggsTools`` and
+  ``FS<M>CallLilith`` now give a message and ``$Failed``, and a missing
+  HiggsSignals or HiggsBounds database gives a warning.
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
