@@ -15,6 +15,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit dd59eb297]: Fixed ``UseHiggs3LoopNMSSM = True``, which didn't switch on
+  the 2-loop NMSSM Higgs mass corrections (``UseHiggs2LoopNMSSM``), unlike
+  ``UseHiggs3LoopMSSM`` in the MSSM. The shipped models set both flags.
+
 * [commit 23011a7]: Fixed clean fall-back to 2-loop precision if an
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
