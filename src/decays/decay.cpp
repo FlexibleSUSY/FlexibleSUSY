@@ -367,18 +367,15 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
          effC.undetectedWidth -= partialW;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::emu]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::emu]))) {
-         effC.emu.first = c.first;
-         effC.emu.second += c.second;
+         effC.emu_width += partialW;
          effC.undetectedWidth -= partialW;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::etau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::etau]))) {
-         effC.etau.first = c.first;
-         effC.etau.second += c.second;
+         effC.etau_width += partialW;
          effC.undetectedWidth -= partialW;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::mutau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::mutau]))) {
-         effC.mutau.first = c.first;
-         effC.mutau.second = c.second;
+         effC.mutau_width += partialW;
          effC.undetectedWidth -= partialW;
       }
       else {
@@ -424,18 +421,15 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
          found->undetectedWidth -= partialW;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::emu]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::emu]))) {
-         found->emu.first = c.first;
-         found->emu.second += c.second;
+         found->emu_width += partialW;
          found->undetectedWidth -= partialW;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::etau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::etau]))) {
-         found->etau.first = c.first;
-         found->etau.second += c.second;
+         found->etau_width += partialW;
          found->undetectedWidth -= partialW;
       }
       else if (are_the_same(fs, pdg_id_pairs[PDG_id_pairs::mutau]) || are_the_same(fs, negate(pdg_id_pairs[PDG_id_pairs::mutau]))) {
-         found->mutau.first = c.first;
-         found->mutau.second += c.second;
+         found->mutau_width += partialW;
          found->undetectedWidth -= partialW;
       }
       else {

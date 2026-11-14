@@ -361,12 +361,10 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
 
       effectiveCouplingInput(s, effc, refModel, calcggH, calcHgamgam);
 
-      // Effective couplings below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
-      // (note that this is different than couplings like gg, WW etc)
-      // so taking a norm gives a total partial width
-      s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu.second));
-      s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau.second));
-      s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau.second));
+      // HiggsTools has no effective couplings for these channels, only widths
+      s.setDecayWidth(HP::Decay::emu,   el.emu_width);
+      s.setDecayWidth(HP::Decay::etau,  el.etau_width);
+      s.setDecayWidth(HP::Decay::mutau, el.mutau_width);
 
       // Higgs to LSP decay (if model contains one)
       s.setDecayWidth(HP::Decay::directInv, el.invWidth);

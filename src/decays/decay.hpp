@@ -88,9 +88,10 @@ public:
    std::pair<std::string, std::complex<double>> ee {};
    std::pair<std::string, std::complex<double>> mumu {};
    std::pair<std::string, std::complex<double>> tautau {};
-   std::pair<std::string, std::complex<double>> emu {};
-   std::pair<std::string, std::complex<double>> etau {};
-   std::pair<std::string, std::complex<double>> mutau {};
+   // sums of the partial widths of both charge combinations, in GeV
+   double emu_width {0.};
+   double etau_width {0.};
+   double mutau_width {0.};
    std::pair<std::string, double> WW {};
    std::pair<std::string, double> ZZ {};
    std::pair<std::string, double> Zgam {};
@@ -124,8 +125,15 @@ public:
       return effective_coupling_list[index];
    }
 
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, double> const&, double);
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, std::complex<double>> const&, double);
+   /// adds the effective coupling and the partial width of a decay of
+   /// particle p into the final state fs (PDG codes); for the lepton
+   /// flavour violating final states (e mu, e tau, mu tau) only the
+   /// partial width is used, as HiggsTools takes widths for them
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs,
+                     std::pair<std::string, double> const&, double partialW);
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs,
+                     std::pair<std::string, std::complex<double>> const&,
+                     double partialW);
    void set_invisible_width(std::string const& p, double);
    void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
 
