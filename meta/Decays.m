@@ -1708,6 +1708,39 @@ WrapCodeInLoop[indices_, checks_, code_] :=
          #-1
          ]& /@ Reverse@Range@Length[indices]));
 
+(* Symmetry factor S_gen/S_class of a diagram with the given internal lines.
+
+   The generic expressions contain 1/S_gen, the symmetry factor of the generic
+   diagram, which counts two lines between the same vertices, or a line that
+   closes on one vertex, as interchangeable. Whether they are depends on the
+   fields: S_class is 2 only if they are identical self-conjugate fields.
+   This reproduces RelativeCF of FeynArts.
+
+   edges            - list of {vertex1, vertex2} -> Field[n] of the generic diagram
+   fieldAssociation - list of Field[n] -> field rules of the insertion *)
+SymmetryFactorForInsertion[edges_List, fieldAssociation_List] :=
+   Module[{internal, baseField, selfConjugateQ, selfLoops, bubbles, l1, l2},
+      (* vertices 1, 2 and 3 are the external ones *)
+      internal = Cases[edges, ({a_, b_} -> f_) /; a > 3 && b > 3 :> {{a, b}, f}];
+      baseField[f_] := (f /. fieldAssociation) /. SARAH`bar | Susyno`LieGroups`conj -> Identity;
+      selfConjugateQ[f_] := SARAH`AntiField[baseField[f]] === baseField[f];
+      selfLoops = Cases[internal, {{a_, a_}, f_} :> f];
+      bubbles = Select[GatherBy[internal, Sort[First[#]]&], Length[#] === 2&];
+      Which[
+         selfLoops =!= {},
+            If[selfConjugateQ[First[selfLoops]], 1, 2],
+         bubbles =!= {},
+            l1 = bubbles[[1, 1, 2]];
+            l2 = bubbles[[1, 2, 2]];
+            Which[
+               GetFeynArtsTypeName[baseField[l1]] =!= GetFeynArtsTypeName[baseField[l2]], 1,
+               baseField[l1] === baseField[l2] && selfConjugateQ[l1], 1,
+               True, 2
+            ],
+         True, 1
+      ]
+   ];
+
 WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    Module[{(*vertices, *)indices, cppVertices,
       mass = {}, translation, fieldAssociation,
@@ -2002,15 +2035,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
          (* diagram symmetry factor *)
           "\nstatic constexpr double " <> ToString@symmetryFac <> " {" <>
              ToString @
-               N[With[{topoName = FeynArtsTopologyName[topology]},
-
-                (* weird FA factor *)
-                If[MemberQ[{"T2", "T3", "T4", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
-                If[topoName === "T9" || topoName === "T8",
-                   If[(Field[5] /. fieldAssociation) === (SARAH`AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
-                   1
-                ]
-               ],16] <>
+               N[SymmetryFactorForInsertion[translation[[3]], fieldAssociation], 16] <>
          "};\n" <>
 
          (* color factor *)
