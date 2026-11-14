@@ -2287,186 +2287,57 @@ CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
            {declaration, includeStatement}
           ];
 
-CreateHiggsToZZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectZZFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
+(* final states of the CP-even Higgs boson decays with hand-written
+   partial widths in src/decays/specializations/H/ *)
+higgsSpecializedFinalStates = {
+    SelectZZFinalState,
+    SelectWWFinalState,
+    SelectGluonGluonFinalState,
+    SelectAAFinalState,
+    SelectAZFinalState,
+    SelectUpQuarkUpQuarkFinalState,
+    SelectDownQuarkDownQuarkFinalState,
+    SelectChargedLeptonChargedLeptonFinalState
+};
+
+(* final states of the CP-odd Higgs boson decays with hand-written
+   partial widths in src/decays/specializations/Ah/ *)
+pseudoscalarHiggsSpecializedFinalStates = {
+    SelectDownQuarkDownQuarkFinalState,
+    SelectUpQuarkUpQuarkFinalState,
+    SelectGluonGluonFinalState,
+    SelectAAFinalState,
+    SelectAZFinalState,
+    SelectChargedLeptonChargedLeptonFinalState
+};
+
+(* returns {declaration, include statement} for the decay selected by
+   selectFinalState, or {"", ""} if there is no such decay *)
+CreateSelectedPartialWidthSpecialization[decaysList_List, selectFinalState_, modelName_] :=
+    Module[{decay = selectFinalState[decaysList]},
+           If[decay === {},
+              {"", ""},
+              CreateIncludedPartialWidthSpecialization[First[decay], modelName]
+             ]
           ];
 
-CreateHiggsToWWPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectWWFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectGluonGluonFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectAAFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToAZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectAZFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectGluonGluonFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreatePseudoscalarHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectAAFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreatePseudoscalarHiggsToAZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectAZFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectUpQuarkUpQuarkFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectUpQuarkUpQuarkFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToDownQuarkDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectDownQuarkDownQuarkFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectDownQuarkDownQuarkFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-       decay = SelectChargedLeptonChargedLeptonFinalState[decaysList];
-       If[decay =!= {},
-          decay = First[decay];
-          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-       ];
-       {declaration, function}
-    ];
-CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-       decay = SelectChargedLeptonChargedLeptonFinalState[decaysList];
-       If[decay =!= {},
-          decay = First[decay];
-          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-       ];
-       {declaration, function}
-    ];
-
-CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
-    Module[{higgsDecays, specializations = {}},
-           higgsDecays = GetHiggsBosonDecays[particleDecays];
-           If[higgsDecays =!= {},
-              higgsDecays = First[higgsDecays];
-              specializations = {CreateHiggsToZZPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToWWPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToAAPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToAZPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToUpQuarkUpQuarkPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToDownQuarkDownQuarkPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToChargedLeptonChargedLeptonPartialWidth[higgsDecays, modelName]};
-             ];
-           specializations
-          ];
-
-CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
-    Module[{pseudoscalarHiggsDecays, specializations = {}},
-           pseudoscalarHiggsDecays = GetPseudoscalarHiggsBosonDecays[particleDecays];
-           If[pseudoscalarHiggsDecays =!= {},
-              pseudoscalarHiggsDecays = First[pseudoscalarHiggsDecays];
-              specializations =
-                 {
-                     CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToAAPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToAZPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[pseudoscalarHiggsDecays, modelName]
-                 }
-              ];
-           specializations
+(* getParticleDecays returns {} or {{particle, decaysList}} *)
+CreateParticleDecayPartialWidthSpecializations[particleDecays_List, getParticleDecays_, selectors_List, modelName_] :=
+    Module[{decays = getParticleDecays[particleDecays]},
+           If[decays === {},
+              {},
+              CreateSelectedPartialWidthSpecialization[Last[First[decays]], #, modelName]& /@ selectors
+             ]
           ];
 
 CreatePartialWidthSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations},
-           specializations = CreateHiggsDecayPartialWidthSpecializations[particleDecays, modelName];
-           specializations = Join[specializations, CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays, modelName]];
+           specializations = Join[
+               CreateParticleDecayPartialWidthSpecializations[particleDecays, GetHiggsBosonDecays,
+                                                              higgsSpecializedFinalStates, modelName],
+               CreateParticleDecayPartialWidthSpecializations[particleDecays, GetPseudoscalarHiggsBosonDecays,
+                                                              pseudoscalarHiggsSpecializedFinalStates, modelName]
+           ];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            If[specializations =!= {}, specializations = Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]];
            specializations
