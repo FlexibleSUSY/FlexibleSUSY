@@ -147,31 +147,23 @@ std::complex<double> f(double tau) noexcept {
    }
 }
 
-std::complex<double> taum1fprime(double tau) noexcept {
-   if (is_zero(tau-1)) {
-      return 0.;
-   }
-   else if (tau < 1) {
-      return (tau-1.)*std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
-   }
-   else {
-      return
-(tau-1.)*(1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) +
-     2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
-   }
-}
-
+/// derivative of f(tau) w.r.t. tau
 std::complex<double> fprime(double tau) noexcept {
    if (tau < 1) {
       return std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
    }
    else {
-      return
-(1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) +
-     2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
+      const double beta = std::sqrt(1.-1./tau);
+      return -(std::log((1.+beta)/(1.-beta)) - 1i*Pi)/(2.*std::sqrt(tau*(tau-1.)));
    }
+}
+
+/// (tau - 1)*f'(tau), which is finite at tau = 1
+std::complex<double> taum1fprime(double tau) noexcept {
+   if (is_zero(tau-1)) {
+      return 0.;
+   }
+   return (tau-1.)*fprime(tau);
 }
 
 // eq. 2.5, 2.7 & 2.8 of https://arxiv.org/pdf/hep-ph/0509189.pdf
@@ -204,7 +196,7 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
    return (F0HC1H + F0HC2H*std::log(Sqr(mu/mq)))/F0H;
 }
 
-// eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+// eq. 2.19, 2.20 & 2.21 of https://arxiv.org/pdf/hep-ph/0509189.pdf
 std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept {
    const double tau = Sqr(mAh/(2.*mq));
    // know threshold singularity at mAh = 2*mq
@@ -227,7 +219,7 @@ std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, d
       - z*(1.+Sqr(z))/(Cube(1.-z)*(1.+z))*(72.*li4p + 96.*li4m - 128./3.*(li3p + li3m)*ln
             + 28./3.*li2p*Sqr(ln) + 16./3.*li2m*Sqr(ln) + 1./18.*Power4(ln)
             + 8./3.*zeta2*Sqr(ln) + 32./3.*zeta3*ln + 12.*zeta4)
-      + z/Sqr(1.-z)*(-56./.3*li3p - 64./3.*li3m + 16.*li2p*ln
+      + z/Sqr(1.-z)*(-56./3.*li3p - 64./3.*li3m + 16.*li2p*ln
             + 32./3*li2m*ln + 20./3.*std::log(1.-z)*Sqr(ln) - 8./3.*zeta2*ln + 8./3.*zeta3)
       + 2.*z*(1.+z)/(3.*Cube(1.-z))*Cube(ln);
    const std::complex<double> F0AC2A = 2./tau*(f(tau) - tau*fprime(tau));
@@ -247,7 +239,7 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
       const std::complex<double> F01l = -1./3. - 2./45*r - 1./140.*Sqr(r) - 2./1575*Cube(r) - 1./4158*Power4(r);
       const std::complex<double> F02la = -3./4. - 29./216.*r - 4973./226800.*Sqr(r) - 3137./882000.*Cube(r) - 1180367./2095632000.*Power4(r);
       const std::complex<double> F02lb = -1./4. - 1./15.*r - 9./560.*Sqr(r) - 2./525.*Cube(r) - 5./5544.*Power4(r);
-      const std::complex<double> F02lc = - 3/.4*F01l;
+      const std::complex<double> F02lc = - 3/4.*F01l;
       return (F02la + (F02lb + F02lc)*std::log(Sqr(msq/mu)))/F01l;
    }
    else if (std::abs(r) > 1.5) {
@@ -260,7 +252,7 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
             )/Sqr(r);
       const std::complex<double> F02lb =
          (6.*std::log(-r) - 3.*Sqr(std::log(-r)))/Sqr(r);
-      const std::complex<double> F02lc = - 3/.4*F01l;
+      const std::complex<double> F02lc = - 3/4.*F01l;
       return (F02la + (F02lb + F02lc)*std::log(Sqr(msq/mu)))/F01l;
    }
    else {

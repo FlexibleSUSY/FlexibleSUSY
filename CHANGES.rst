@@ -31,6 +31,19 @@ Fixed bugs
   error in the calculation of the 3-loop contributions occurs in
   FlexibleEFTHiggs.
 
+* [commit 198c82dd4]: Fixed wrong 2-loop QCD corrections from quark loops
+  to :math:`$A\to\gamma\gamma$`. This changes the partial width of
+  :math:`$A\to\gamma\gamma$`.
+
+* [commit 0c18a1b31]: Fixed wrong 2-loop QCD corrections from coloured
+  scalar loops to :math:`$H\to\gamma\gamma$`. This changes the partial width
+  of :math:`$H\to\gamma\gamma$` in models with such scalars.
+
+* [commit ceee684fc]: Fixed wrong 2-loop QCD corrections from quark loops to
+  :math:`$H\to\gamma\gamma$` and :math:`$A\to\gamma\gamma$` for Higgs masses
+  above twice the quark mass. This changes the partial widths of
+  :math:`$H\to\gamma\gamma$` and :math:`$A\to\gamma\gamma$`.
+
 * [commit 87728f8]: Fixed swapped up- and down-quark entries in the blocks
   ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
 
