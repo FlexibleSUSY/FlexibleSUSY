@@ -31,8 +31,9 @@
 #include "lilith.c"
 #endif
 
-#include "experimental_constraints.hpp"
 #include "decays/standard_model_decays.hpp"
+#include "experimental_constraints.hpp"
+#include "logger.hpp"
 
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
@@ -56,6 +57,51 @@ namespace HP = Higgs::predictions;
 namespace flexiblesusy {
 
 namespace {
+
+#ifdef ENABLE_LILITH
+/// Returns -2 log(L) from Lilith in double precision.
+///
+/// Same as lilith_computelikelihood from Lilith's C API, which returns
+/// the likelihood as a float, so that only about 7 digits are kept, and
+/// chi2 - chi2_SM loses precision when both are large and close.  Like
+/// that function, returns -1 if the user input couldn't be read or
+/// Lilith raised an error.
+double compute_lilith_likelihood(PyObject* lilithcalc)
+{
+   // set by lilith_readuserinput (lilith.c)
+   if (userread == 0) {
+      ERROR("Lilith couldn't read the user input, -2LogL is set to -1.");
+      return -1.;
+   }
+
+   PyObject* computelikelihood =
+      PyObject_GetAttrString(lilithcalc, "computelikelihood");
+   PyObject* result = computelikelihood != nullptr
+                         ? PyObject_CallObject(computelikelihood, nullptr)
+                         : nullptr;
+   Py_XDECREF(computelikelihood);
+   Py_XDECREF(result);
+
+   double likelihood = -1.;
+
+   if (result != nullptr) {
+      PyObject* l = PyObject_GetAttrString(lilithcalc, "l");
+      if (l != nullptr) {
+         likelihood = PyFloat_AsDouble(l);
+         Py_DECREF(l);
+      }
+   }
+
+   if (PyErr_Occurred()) {
+      ERROR("Error during the computation of the Lilith likelihood, -2LogL is "
+            "set to -1:");
+      PyErr_PrintEx(0);
+      return -1.;
+   }
+
+   return likelihood;
+}
+#endif
 
 #ifdef ENABLE_HIGGSTOOLS
 /// doesn't throw if the existence of the path can't be determined
@@ -125,7 +171,7 @@ double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& 
 
    PyObject* lilithcalc2 = initialize_lilith(const_cast<char*>(lilithdb.c_str()));
    lilith_readuserinput(lilithcalc2, const_cast<char*>(XMLinputstring.c_str()));
-   const double my_likelihood = lilith_computelikelihood(lilithcalc2);
+   const double my_likelihood = compute_lilith_likelihood(lilithcalc2);
 
    return my_likelihood;
 }
@@ -510,7 +556,7 @@ std::optional<SignalResult> call_lilith(
     // reading user input XML string
     lilith_readuserinput(lilithcalc, const_cast<char*>(XMLinputstring.c_str()));
     // getting -2*log(L)
-    const double my_likelihood = lilith_computelikelihood(lilithcalc);
+    const double my_likelihood = compute_lilith_likelihood(lilithcalc);
     // getting ndf
     const std::size_t exp_ndf = static_cast<std::size_t>(lilith_exp_ndf(lilithcalc));
     const double mhSMref = physical_input.get(Physical_input::mh_pole);
