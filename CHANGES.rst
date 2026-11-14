@@ -15,6 +15,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit 62fb30778]: Fixed negative undetected widths of neutral Higgs bosons
+  being passed to HiggsTools and Lilith. They are now set to 0, with a
+  warning if they are larger than rounding errors.
+
 * [commit dd59eb297]: Fixed ``UseHiggs3LoopNMSSM = True``, which didn't switch on
   the 2-loop NMSSM Higgs mass corrections (``UseHiggs2LoopNMSSM``), unlike
   ``UseHiggs3LoopMSSM`` in the MSSM. The shipped models set both flags.

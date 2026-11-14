@@ -101,12 +101,11 @@ public:
    double undetectedWidth {0.};
 
    double get_undetected_width() const { return undetectedWidth; }
-   void calculate_undetected_br() {
-      undetectedWidth += width - invWidth;
-      if (undetectedWidth < 0 && std::abs(undetectedWidth)/width < 1e-10) {
-         undetectedWidth = 0.;
-      }
-   }
+   /// adds the total width minus the invisible width to the
+   /// undetected width (from which the widths of the channels passed
+   /// to HiggsTools and Lilith were subtracted); a negative result is
+   /// set to 0, with a warning if it is larger than rounding errors
+   void calculate_undetected_br();
 };
 
 class EffectiveCoupling_list {

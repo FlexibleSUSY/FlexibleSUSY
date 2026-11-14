@@ -18,6 +18,7 @@
 
 #include "decay.hpp"
 #include "error.hpp"
+#include "logger.hpp"
 #include "wrappers.hpp"
 
 #include <boost/functional/hash.hpp>
@@ -239,6 +240,24 @@ HVV_4body_result hVV_4body(double mH, double mV, double GammaV)
    }
 
    return result;
+}
+
+void NeutralHiggsEffectiveCouplings::calculate_undetected_br()
+{
+   undetectedWidth += width - invWidth;
+
+   if (undetectedWidth < 0.) {
+      // The subtracted channels are part of the total width, so only
+      // rounding errors can make the undetected width negative.  A larger
+      // negative value points to an inconsistency in the bookkeeping;
+      // don't pass it on to HiggsTools or Lilith.
+      if (std::abs(undetectedWidth) > 1e-10 * std::abs(width)) {
+         WARNING("Negative undetected width " << undetectedWidth << " GeV of "
+                                              << particle << " (total width "
+                                              << width << " GeV), set to 0.");
+      }
+      undetectedWidth = 0.;
+   }
 }
 
 void EffectiveCoupling_list::set_invisible_width(std::string const& p, double c) {
