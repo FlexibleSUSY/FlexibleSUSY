@@ -1,0 +1,129 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#ifndef @ModelName@_SESSION_H
+#define @ModelName@_SESSION_H
+
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace flexiblesusy {
+
+namespace @ModelName@_session_impl {
+class Model_data;
+} // namespace @ModelName@_session_impl
+
+/**
+ * @class @ModelName@_session
+ * @brief Step-by-step calculation for one parameter point, independent of
+ * the front end (used by the Python module).
+ *
+ * The spectrum is calculated once and kept in memory, so that observables
+ * and decays can be calculated later, on demand, from the same model.
+ * Inputs and settings are read from SLHA input, as by run_@ModelName@.x.
+ */
+class @ModelName@_session {
+public:
+   @ModelName@_session();
+   ~@ModelName@_session();
+   @ModelName@_session(const @ModelName@_session&) = delete;
+   @ModelName@_session(@ModelName@_session&&) noexcept;
+   @ModelName@_session& operator=(const @ModelName@_session&) = delete;
+   @ModelName@_session& operator=(@ModelName@_session&&) noexcept;
+
+   /// reads settings, SM inputs and model inputs from SLHA input text
+   void read_slha_input(const std::string&);
+
+   /// calculates the spectrum (running parameters and pole masses)
+   void calculate_spectrum();
+   bool have_spectrum() const;
+   /// problems and warnings of the spectrum calculation
+   std::vector<std::string> get_problem_strings() const;
+   std::vector<std::string> get_warning_strings() const;
+
+   /// calculates the observables from the calculated spectrum
+   void calculate_observables();
+   bool have_observables() const;
+   static std::vector<std::string> get_observable_names();
+   std::vector<double> get_observable_values() const;
+   std::vector<std::string> get_observable_problem_strings() const;
+
+   /// whether the model was generated with decays
+   static bool has_decays();
+   /// calculates the decays from the calculated spectrum
+   void calculate_decays();
+   bool have_decays() const;
+   std::vector<std::string> get_decay_problem_strings() const;
+   std::vector<std::string> get_decay_warning_strings() const;
+
+   /// result of HiggsSignals or Lilith
+   struct Signal_result {
+      std::size_t ndof{};  ///< number of degrees of freedom
+      double chi2{};       ///< chi^2 of the model
+      double chi2_sm{};    ///< chi^2 of the SM with Higgs mass mh_ref
+      double mh_ref{};     ///< SM Higgs mass of the reference chi^2
+      double pval_1d{};    ///< p-value for 1 degree of freedom
+      double pval_2d{};    ///< p-value for 2 degrees of freedom
+   };
+   /// HiggsBounds result for one particle
+   struct HiggsBounds_result {
+      int pdg{};             ///< PDG code of the particle
+      double obs_ratio{};    ///< observed ratio of the most sensitive analysis
+      double exp_ratio{};    ///< expected ratio of the most sensitive analysis
+      std::string analysis;  ///< most sensitive analysis
+   };
+   struct HiggsTools_result {
+      bool have_higgssignals{false};
+      Signal_result higgssignals;
+      std::vector<HiggsBounds_result> higgsbounds;
+   };
+
+   /// whether FlexibleSUSY was configured with HiggsTools or Lilith
+   static bool has_higgstools();
+   static bool has_lilith();
+   /// HiggsBounds and HiggsSignals from the normalized effective couplings
+   /// (needs the decays)
+   HiggsTools_result call_higgstools(const std::string& higgsbounds_dataset,
+                                     const std::string& higgssignals_dataset);
+   /// Lilith from the normalized effective couplings (needs the decays);
+   /// first = false if there is no Higgs boson between 123 and 128 GeV
+   std::pair<bool, Signal_result> call_lilith(const std::string& database);
+
+   /// SLHA output of everything calculated so far
+   std::string get_slha_output() const;
+
+   /// loop library of this process as in FlexibleSUSY[31] (-1: not set yet);
+   /// it is fixed by the first calculation
+   static int get_loop_library();
+
+private:
+   std::unique_ptr<@ModelName@_session_impl::Model_data> data;
+   bool spectrum_calculated{false};
+   bool observables_calculated{false};
+   bool decays_calculated{false};
+
+   void check_spectrum() const;
+   void calculate_normalized_effc();
+};
+
+} // namespace flexiblesusy
+
+#endif

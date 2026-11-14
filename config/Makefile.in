@@ -40,7 +40,7 @@ ENABLE_VERBOSE        := @ENABLE_VERBOSE@
 # Makefile modules
 MODELS             := @MODELS@
 ADDONS             := @ADDONS@
-MODULES            := config src fflite slhaea doc nlohmann
+MODULES            := config src fflite slhaea doc nlohmann python
 # BEGIN: NOT EXPORTED ##########################################
 MODULES            += meta templates
 # END:   NOT EXPORTED ##########################################
@@ -94,6 +94,11 @@ THREADLIBS         := @THREADLIBS@
 TSILFLAGS          := @TSILFLAGS@
 TSILLIBS           := @TSILLIBS@
 PYTHONFLAGS        := @PYTHONFLAGS@
+ENABLE_PYTHON_MODULE := @ENABLE_PYTHON_MODULE@
+PYBIND11FLAGS      := @PYBIND11FLAGS@
+PYTHON_MODULE_SUFFIX := @PYTHON_MODULE_SUFFIX@
+# interpreter the Python module is built for (--with-python)
+PYTHON_MODULE_CMD  := @PYTHON_MODULE_CMD@
 PYTHONLIBS         := @PYTHONLIBS@
 
 ifeq ($(VERBOSE),1)
@@ -112,6 +117,8 @@ ALLLIB   :=
 ALLEXE   :=
 # the modules add LibraryLink libraries to this variable
 ALLLL    :=
+# the modules add Python modules to this variable
+ALLPYMOD :=
 # the modules add test executables to this variable
 ALLTST   :=
 # the addons add libraries to this variable to be linked against executables
@@ -160,7 +167,7 @@ AUTHORS_FILE   := AUTHORS
 COPYING_FILE   := COPYING
 ChangeLog_FILE := CHANGES.rst
 
-.PHONY:  all allsrc allexec alllib allll alltest clean clean-dep \
+.PHONY:  all allsrc allexec alllib allll allpymod alltest clean clean-dep \
 	 clean-executables clean-generated clean-lib clean-obj \
 	 depend distclean librarylink release-tag release-head \
 	 showbuild tag
@@ -174,6 +181,9 @@ all:     alllib allexec
 endif
 ifeq ($(ENABLE_LIBRARYLINK),yes)
 all:     allll
+endif
+ifeq ($(ENABLE_PYTHON_MODULE),yes)
+all:     allpymod
 endif
 
 ifeq ($(INSTALL_DIR),)
@@ -231,6 +241,7 @@ allsrc:   $(ALLSRC)
 allexec:  $(ALLEXE)
 alllib:   $(ALLLIB)
 allll:    $(ALLLL)
+allpymod: $(ALLPYMOD)
 alltest:  $(ALLTST)
 
 clean-dep:
@@ -240,7 +251,7 @@ clean-executables:
 	$(Q)-rm -f $(ALLEXE)
 
 clean-lib:
-	$(Q)-rm -f $(ALLLIB) $(ALLLL)
+	$(Q)-rm -f $(ALLLIB) $(ALLLL) $(ALLPYMOD)
 
 depend:  clean-dep
 depend:  $(ALLDEP)

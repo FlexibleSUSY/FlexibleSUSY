@@ -20,6 +20,7 @@ module, is part of it.
 | `test/` | Tests: Boost.Test `.cpp`, Mathematica `.m`, shell `.sh`; registered in `test/module.mk` |
 | `utils/loop_decays/` | FeynArts/FormCalc scripts that produced the generic 1-loop decay diagrams |
 | `doc/` | Documentation (see "Further documentation" below) |
+| `python/` | Python interface (`flexiblesusy` package, see "Python interface" below) |
 
 **Never edit the generated C++ files in `models/<M>/` to fix a bug.** They are
 overwritten when the code is regenerated. Fix the meta code, the template or `src/`,
@@ -48,7 +49,8 @@ make -j4                               # runs the meta code, then compiles
   with `-j` several code generations can run at once.
 - **Reconfiguring:** the first line of `config.status` holds the previous options, but
   without quotes, so an option with spaces (`--with-cxxflags="-O1 -g"`) must be quoted
-  again by hand.
+  again by hand. `configure` writes `config.status` before it parses its options, so even
+  `./configure --help` replaces it; `test/test_shell_completions.sh` does that.
 - **Sanitizers:** compile and link with them through `CXX`, as not every link rule uses
   `CXXFLAGS`: `make CXX="clang++ -fsanitize=address,undefined -fno-omit-frame-pointer"`,
   with `--with-cxxflags="-std=c++20 -O1 -g -fPIC -D_GLIBCXX_ASSERTIONS"`. The Fortran loop
@@ -63,7 +65,9 @@ make -j4                               # runs the meta code, then compiles
 - **Mathematica kernels:** depending on the licence, the number of concurrent kernels
   can be limited. When it's exhausted, code generation or a Mathematica test can fail
   with "Invalid password" or SARAH not loading. The meta code also starts parallel
-  subkernels (`FSEnableParallelism`).
+  subkernels (`FSEnableParallelism`). `configure` starts kernels too, to check FeynArts
+  and FormCalc: if none is free, the check crashes and FormCalc is silently disabled
+  (`ENABLE_FORMCALC` in the `Makefile`), so don't run `configure` during a code generation.
 - **Generating and compiling separately:** `./configure --disable-compile` only generates
   the code. `./configure --disable-meta` only compiles code that was generated before,
   without Mathematica or SARAH.
@@ -75,8 +79,10 @@ make -j4                               # runs the meta code, then compiles
   avoids recompiling unchanged files after the meta code rewrites them. With shared
   libraries, executables link them by absolute path, so after moving the tree run
   `make clean-executables && make allexec`.
-- **Each model gets** `models/<M>/run_<M>.x`, the command-line spectrum generator, and
-  `models/<M>/run_<M>.m` with the LibraryLink library, the Mathematica interface.
+- **Each model gets** `models/<M>/run_<M>.x`, the command-line spectrum generator,
+  `models/<M>/run_<M>.m` with the LibraryLink library, the Mathematica interface, and
+  `models/<M>/<M>_metadata.json` (written by `meta/ModelMetadata.m`), which describes the
+  model for the Python interface.
 
 ### Useful configure options
 - **Tests:** `--with-optional-modules=test` enables them (not `--with-addons`).
@@ -103,6 +109,44 @@ versions:
 - **Not usable yet:** `<ranges>` (fails with clang 10 on libstdc++ 10), and features
   that need g++ >= 11 or later: `std::format` (13), `std::to_chars` for `double`,
   `std::bit_cast`, `std::source_location`.
+
+## Python interface
+
+`python/flexiblesusy` runs generated models from Python 3 (>= 3.8, standard library
+only; numpy optional). See `python/README.md`.
+- **Model-specific information** comes only from `models/<M>/<M>_metadata.json`: input
+  parameters with their SLHA blocks, particles with PDG codes, and the SLHA output blocks
+  of mixing matrices and model parameters. Don't hard-code model details in Python; extend
+  the metadata (`meta/ModelMetadata.m`) instead, and increase `$formatVersion` there and
+  `SUPPORTED_METADATA_FORMAT` in `model.py` if the meaning of a field changes.
+- **SLHA conventions:** values in `Block gauge` are written with the GUT normalization of
+  `g1` (`slha_factor` in the metadata), and Majorana masses can be negative with real
+  mixing matrices, as in the SLHA output.
+- **Backends:**
+  - `slha` runs `run_<M>.x` and parses its SLHA output. The executable exits with a
+    non-zero code when a point has problems but still writes the output, so only a missing
+    or unreadable output counts as a failure.
+  - `compiled` loads `models/<M>/flexiblesusy_<M><suffix>`, a pybind11 module built with
+    `./configure --with-python=<interpreter>`. It binds `<M>_session`
+    (`templates/session.{hpp,cpp}.in`): the calculation part of the LibraryLink code without
+    MathLink, filled by `WriteMathLink`. The spectrum stays in memory, so
+    `Result.observables()` and `Result.decays()` are calculated on demand. The backend must
+    apply the same settings overrides as `run_<M>.x` (`templates/run.cpp.in`), or the two
+    backends give different spectra (e.g. SM masses missing from `MASS`).
+  - The session's SLHA output always contains the decay table, as zero-width `DECAY` blocks
+    if no decays were calculated, so don't read decays from the spectrum output.
+- **pybind11:** the module is built for one interpreter (suffix such as
+  `.cpython-314-x86_64-linux-gnu.so`); other Python versions fall back to `slha`. Some
+  distributions ship the C++ headers separately (e.g. `python3XX-pybind11-devel`): with only
+  the Python package, `python -m pybind11 --includes` points to a missing directory, which
+  `configure` checks.
+- **Changing `templates/module.mk.in`:** `models/<M>/module.mk` is written by `createmodel`,
+  not by the code generation, so run `./createmodel --name=<M> -f` and then `./configure`
+  again (`createmodel` leaves the top-level `Makefile` unconfigured).
+- **Tests:** `cd python && python3 -I -m unittest discover -s tests`, or
+  `make test/test_python_interface.sh.xml`. `-I` matters: a package named `tests` in the
+  user's site-packages can shadow `python/tests`. The MSSM tests are skipped unless the
+  MSSM is generated and built.
 
 ## Running a spectrum generator
 
@@ -287,6 +331,7 @@ SARAH/SPheno. When in doubt about a result or a model definition:
 | Model file variables (`FSModelName`, `EWSBOutputParameters`, boundary conditions, `FSDecayParticles`, ...) | `doc/model_file.rst` |
 | Every SLHA input entry | `doc/slha_input.rst` |
 | The Mathematica interface | `doc/librarylink.rst` |
+| The Python interface | `python/README.md` |
 | FlexibleEFTHiggs | `doc/FlexibleEFTHiggs.rst` |
 | Adding a loop library | `doc/add_loop_library.rst` |
 | Reusable meta code packages (loop functions, RGE integrator, SM/MSSM beta functions) | `doc/meta_code.rst` |

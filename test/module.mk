@@ -109,7 +109,8 @@ TEST_SH := \
 		$(DIR)/test_shell_completions.sh \
 		$(DIR)/test_space_dir.sh \
 		$(DIR)/test_wolframscript.sh \
-		$(DIR)/test_looplibrary_environment.sh
+		$(DIR)/test_looplibrary_environment.sh \
+		$(DIR)/test_python_interface.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
@@ -118,6 +119,7 @@ TEST_META := \
 		$(DIR)/test_EWSB.m \
 		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
+		$(DIR)/test_ModelMetadata.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
 		$(DIR)/test_MSSM_2L_mt.m \
 		$(DIR)/test_MSSM_2L_yb_softsusy.m \
@@ -992,6 +994,12 @@ $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		CheckAbort[Get[\"$<\"]; Quit[TestSuite\`GetNumberOfFailedTests[]], \
 		Print[\"Error: test aborted\"]; Quit[1]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
+
+# run the Python tests with the interpreter the Python module is built for,
+# otherwise the tests with models are skipped (unless PYTHON is set)
+ifeq ($(ENABLE_PYTHON_MODULE),yes)
+$(DIR)/test_python_interface.sh.xml: export PYTHON ?= $(PYTHON_MODULE_CMD)
+endif
 
 $(DIR)/%.sh.xml: $(DIR)/%.sh
 		@rm -f $@ $(@:.xml=.log)
