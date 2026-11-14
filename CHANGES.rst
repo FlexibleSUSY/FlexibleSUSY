@@ -15,6 +15,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit 607e22bf3]: Fixed the generated example ``run_<M>.m``, which set the
+  unknown option ``calculateDecays`` instead of ``calculateAMM``
+  (``FlexibleSUSY[32]``).
+
 * [commit 62fb30778]: Fixed negative undetected widths of neutral Higgs bosons
   being passed to HiggsTools and Lilith. They are now set to 0, with a
   warning if they are larger than rounding errors.
