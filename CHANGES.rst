@@ -15,6 +15,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit 86d785159]: The Lilith likelihood is now read in double precision.
+  Lilith's C API returns it as a float, which limited the precision of
+  :math:`\chi^2 - \chi^2_\text{SM}` to about 6 digits.
+
 * [commit 62fb30778]: Fixed negative undetected widths of neutral Higgs bosons
   being passed to HiggsTools and Lilith. They are now set to 0, with a
   warning if they are larger than rounding errors.
