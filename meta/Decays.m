@@ -971,15 +971,24 @@ CreateDecaysCalculationFunction[decaysList_] :=
                   TextFormatting`IndentText[
                   "auto found = std::find_if(std::begin(neutral_higgs_effc), std::end(neutral_higgs_effc), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
                   If[particleDim > 1, "gI1", ""] <> "});});\n" <>
+                  "if (found == std::end(neutral_higgs_effc)) {\n" <>
+                  TextFormatting`IndentText[
+                     "problems.add_warning(field_as_string<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "}) + \": no effective couplings available\");\n"
+                  ] <>
+                  "}\n" <>
+                  "else {\n" <>
+                  TextFormatting`IndentText[
                   "found->width = decays.get_total_width();\n" <>
                   "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});\n" <>
                   "found->calculate_undetected_br();\n" <>
                   (* 1 == even, -1 == odd, 0 == undefined - see test/test_HiggsTools_CP.cpp *)
                   "found->CP = " <> ToString@If[MemberQ[SA`ScalarsCPeven, particle], If[MemberQ[SA`ScalarsCPodd, particle], 0, 1], -1] <> ";\n" <>
-                  "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n"] <>
+                  "found->pdgid = boost::hana::unpack(" <> ToString@particle <> "::pdgids, _to_array<" <> ToString@particle <> "::numberOfGenerations>).at(" <> If[particleDim > 1, "gI1", "0"] <> ");\n" <>
                   "const auto _indices = concatenate(" <> StringRiffle[Table["typename cxx_diagrams::field_indices<" <> ToString@particle <> ">::type {" <> If[particleDim > 1, "gI1", ""] <> "}", {i, 4}], ", "] <> ");\n" <>
                   "const auto h4vertex = Vertex<" <> StringRiffle[Table[ToString@particle, {i, 4}], ", "] <> ">::evaluate(_indices, context);\n" <>
-                  "found->lam = std::real(h4vertex.value());\n" <>
+                  "found->lam = std::real(h4vertex.value());\n"
+                  ] <>
+                  "}\n"] <>
                   "}\n"],
                   ""
                   ];
