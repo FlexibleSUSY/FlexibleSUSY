@@ -58,46 +58,6 @@ namespace flexiblesusy {
 
 namespace {
 
-#ifdef ENABLE_HIGGSTOOLS
-/// doesn't throw if the existence of the path can't be determined
-bool path_exists(const std::string& path) noexcept
-{
-   std::error_code ec;
-   return std::filesystem::exists(path, ec);
-}
-
-// Whether to calculate the X->gaga and X->gg decay widths in terms of the
-// effective tree-level couplings (calcHgamgam=calcggH=true) or by rescaling
-// the X->gaga and X->gg decay by the squared of the effective gamgam and gg
-// couplings (calcHgamgam=calcggH=false). True would make sense only if we
-// would not compute those loop-induced decays ourself.
-constexpr bool calcggH     = false;
-constexpr bool calcHgamgam = false;
-
-// relative BSM Higgs-like state mass uncertainty
-// example: 0.03 means 3% uncertainty
-constexpr double relMassError = 0.03;
-
-// Ref. model for computing brs and xsections on the HiggsTools side
-constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
-
-double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) {
-   const auto signals = Higgs::Signals {higgssignals_dataset};
-
-   auto pred = Higgs::Predictions();
-   auto& s = pred.addParticle(HP::BsmParticle("hSM", HP::ECharge::neutral, HP::CP::even));
-   auto effc = HP::scaledSMlikeEffCouplings(1.0);
-   s.setMass(mhSM);
-   s.setMassUnc(0.);
-   effectiveCouplingInput(
-      s, effc,
-      refModel,
-      calcggH, calcHgamgam
-   );
-   return signals(pred);
-}
-#endif
-
 #ifdef ENABLE_LILITH
 /// Returns -2 log(L) from Lilith in double precision.
 ///
@@ -141,7 +101,49 @@ double compute_lilith_likelihood(PyObject* lilithcalc)
 
    return likelihood;
 }
+#endif
 
+#ifdef ENABLE_HIGGSTOOLS
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
+}
+
+// Whether to calculate the X->gaga and X->gg decay widths in terms of the
+// effective tree-level couplings (calcHgamgam=calcggH=true) or by rescaling
+// the X->gaga and X->gg decay by the squared of the effective gamgam and gg
+// couplings (calcHgamgam=calcggH=false). True would make sense only if we
+// would not compute those loop-induced decays ourself.
+constexpr bool calcggH     = false;
+constexpr bool calcHgamgam = false;
+
+// relative BSM Higgs-like state mass uncertainty
+// example: 0.03 means 3% uncertainty
+constexpr double relMassError = 0.03;
+
+// Ref. model for computing brs and xsections on the HiggsTools side
+constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
+
+double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) {
+   const auto signals = Higgs::Signals {higgssignals_dataset};
+
+   auto pred = Higgs::Predictions();
+   auto& s = pred.addParticle(HP::BsmParticle("hSM", HP::ECharge::neutral, HP::CP::even));
+   auto effc = HP::scaledSMlikeEffCouplings(1.0);
+   s.setMass(mhSM);
+   s.setMassUnc(0.);
+   effectiveCouplingInput(
+      s, effc,
+      refModel,
+      calcggH, calcHgamgam
+   );
+   return signals(pred);
+}
+#endif
+
+#ifdef ENABLE_LILITH
 double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& lilithdb) {
 
 // Lilith fails in LO precision when ZZ = 1
