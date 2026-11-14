@@ -124,7 +124,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
                   const auto CSuu = AhQQbarVertexDR_P/context.mass<UpTypeQuark>(indexOut1);
                   if (!is_zero(CSuu)) {
                      const auto Ahttbar_P = 0.5*(Ahttbar.right() - Ahttbar.left());
-                     const auto CStu = Ahttbar_P/context.mass<Fu>({2});
+                     const auto CStu = Ahttbar_P/context.mass<UpTypeQuark>({2});
                      deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
                   }
                }

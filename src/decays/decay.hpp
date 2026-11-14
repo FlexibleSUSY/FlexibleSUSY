@@ -88,9 +88,10 @@ public:
    std::pair<std::string, std::complex<double>> ee {};
    std::pair<std::string, std::complex<double>> mumu {};
    std::pair<std::string, std::complex<double>> tautau {};
-   std::pair<std::string, std::complex<double>> emu {};
-   std::pair<std::string, std::complex<double>> etau {};
-   std::pair<std::string, std::complex<double>> mutau {};
+   // sums of the partial widths of both charge combinations, in GeV
+   double emu_width {0.};
+   double etau_width {0.};
+   double mutau_width {0.};
    std::pair<std::string, double> WW {};
    std::pair<std::string, double> ZZ {};
    std::pair<std::string, double> Zgam {};
@@ -100,12 +101,11 @@ public:
    double undetectedWidth {0.};
 
    double get_undetected_width() const { return undetectedWidth; }
-   void calculate_undetected_br() {
-      undetectedWidth += width - invWidth;
-      if (undetectedWidth < 0 && std::abs(undetectedWidth)/width < 1e-10) {
-         undetectedWidth = 0.;
-      }
-   }
+   /// adds the total width minus the invisible width to the
+   /// undetected width (from which the widths of the channels passed
+   /// to HiggsTools and Lilith were subtracted); a negative result is
+   /// set to 0, with a warning if it is larger than rounding errors
+   void calculate_undetected_br();
 };
 
 class EffectiveCoupling_list {
@@ -124,8 +124,15 @@ public:
       return effective_coupling_list[index];
    }
 
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, double> const&, double);
-   void add_coupling(std::string const&, std::array<int, 2> const&, std::pair<std::string, std::complex<double>> const&, double);
+   /// adds the effective coupling and the partial width of a decay of
+   /// particle p into the final state fs (PDG codes); for the lepton
+   /// flavour violating final states (e mu, e tau, mu tau) only the
+   /// partial width is used, as HiggsTools takes widths for them
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs,
+                     std::pair<std::string, double> const&, double partialW);
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs,
+                     std::pair<std::string, std::complex<double>> const&,
+                     double partialW);
    void set_invisible_width(std::string const& p, double);
    void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
 
@@ -349,12 +356,11 @@ double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>:
 }
 
 // utility functions for H->V*V*
-double hVV_4body(double *q2, size_t dim, void *params);
-struct hVV_4body_params {
-   double mHOS {};
-   double mVOS {};
-   double GammaV {};
+struct HVV_4body_result {
+   double value {};
+   double error {};
 };
+HVV_4body_result hVV_4body(double mH, double mV, double GammaV);
 
 enum PDG_id_pairs: int {
    dd = 0,

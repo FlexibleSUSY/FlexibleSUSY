@@ -157,16 +157,15 @@ BOOST_AUTO_TEST_CASE( test_SM_vs_standard_model_FlexibleDecay )
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               decays_sm_HO.partial_width_hh_to_barFeFe(sm, 2, 2), 1e-16);
+   // These widths come from an adaptive numerical integration. A rounding
+   // difference in the masses can change how the integration range is split,
+   // so they only agree to the precision of the integration.
    // h -> W+ W-
-   // Monte Carlo integration with a relative error of a few 1e-4. A difference
-   // of the W mass at the level of rounding errors changes the result by a
-   // similar amount.
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VWpconjVWp(&m),
-                              decays_sm_HO.partial_width_hh_to_conjVWpVWp(sm), 1e-3);
+                              decays_sm_HO.partial_width_hh_to_conjVWpVWp(sm), 1e-6);
    // h -> Z Z
-   // Monte Carlo integration, see comment for h -> W+ W- above
    BOOST_CHECK_CLOSE_FRACTION(decays_SM_HO.partial_width_hh_to_VZVZ(&m),
-                              decays_sm_HO.partial_width_hh_to_VZVZ(sm), 1e-3);
+                              decays_sm_HO.partial_width_hh_to_VZVZ(sm), 1e-6);
 
    // ------------ loop-induces decays_HO ------------
 
@@ -252,7 +251,9 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
    BOOST_CHECK_CLOSE(effc[0].Zgam.second, 1, 0.02);
 
    BOOST_CHECK_CLOSE(effc[0].ZZ.second, 1, 0.04);
-   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 0.007);
+   // The SM equivalent is only tuned to the Higgs mass within 1e-4, and these
+   // widths are very sensitive to the Higgs mass.
+   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 0.04);
 
    BOOST_CHECK_CLOSE(std::real(effc[0].ee.second),     1, 0.002);
    BOOST_CHECK_CLOSE(std::real(effc[0].mumu.second),   1, 0.002);

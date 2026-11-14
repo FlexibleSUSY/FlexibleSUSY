@@ -50,9 +50,14 @@ endif
 TEST_SRC := \
 		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_array_view.cpp \
+		$(DIR)/test_decay_amplitudes.cpp \
+		$(DIR)/test_undetected_width.cpp \
 		$(DIR)/test_cast_model.cpp \
+		$(DIR)/test_effective_coupling_list.cpp \
 		$(DIR)/test_ckm.cpp \
+		$(DIR)/test_max_abs_re_eigenvalue.cpp \
 		$(DIR)/test_composite_root_finder.cpp \
+		$(DIR)/test_hVV_4body.cpp \
 		$(DIR)/test_logger.cpp \
 		$(DIR)/test_derivative.cpp \
 		$(DIR)/test_eigen_utils.cpp \
@@ -101,6 +106,7 @@ TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
+		$(DIR)/test_shell_completions.sh \
 		$(DIR)/test_space_dir.sh \
 		$(DIR)/test_wolframscript.sh \
 		$(DIR)/test_looplibrary_environment.sh
@@ -652,6 +658,11 @@ TEST_SRC += \
 		$(DIR)/test_NSM_low_scale_constraint.cpp
 endif
 
+ifeq ($(WITH_InertMSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_InertMSSM_inert_charginos.cpp
+endif
+
 ifeq ($(WITH_lowMSSM) $(WITH_CMSSM),yes yes)
 TEST_SH += \
 		$(DIR)/test_lowMSSM.sh
@@ -795,6 +806,7 @@ ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_SH += \
 		$(DIR)/test_flexiblesusy-config.sh
 TEST_META += \
+		$(DIR)/test_SM_librarylink_invalid_paths.m \
 		$(DIR)/test_SM_observable_problems.m
 endif
 
@@ -976,8 +988,9 @@ $(DIR)/%.x.xml: $(DIR)/%.x
 $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		@rm -f $@ $(@:.xml=.log)
 		@$(PTR); \
-		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
-		Quit[TestSuite\`GetNumberOfFailedTests[]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; \
+		CheckAbort[Get[\"$<\"]; Quit[TestSuite\`GetNumberOfFailedTests[]], \
+		Print[\"Error: test aborted\"]; Quit[1]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
 
 $(DIR)/%.sh.xml: $(DIR)/%.sh
@@ -1304,6 +1317,8 @@ $(DIR)/test_SMSU3_low_scale_constraint.x: $(LIBSMSU3)
 
 $(DIR)/test_NSM_low_scale_constraint.x: $(LIBNSM)
 
+$(DIR)/test_InertMSSM_inert_charginos.x: $(LIBInertMSSM)
+
 $(DIR)/test_VCMSSM_ewsb.x: $(LIBVCMSSM) $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_unitarity.x: $(LIBCMSSM)
@@ -1370,9 +1385,10 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAt
 
 # test rule for files which depend on pv #######################################
 ifneq ($(OPERATING_SYSTEM),Darwin)
+# test_pv_crosschecks.cpp is built only as test_pv_{fflite,looptools,softsusy}.x
+# (see test_pv_crosschecks.sh), with their own rules.
 PV_DEP_EXE := \
-		$(DIR)/test_pv.x \
-		$(DIR)/test_pv_crosschecks.x
+		$(DIR)/test_pv.x
 
 PV_DEP_OBJ := $(patsubst %.x, %.o, $(PV_DEP_EXE))
 

@@ -278,7 +278,7 @@ Block UERMIX
                               7.9645089645449552e-05, 1e-15);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.0008129948152050411, 1e-4);
+                              0.00081330177470713774, 1e-4);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
                               0.00010469488286769175, 1e-4);

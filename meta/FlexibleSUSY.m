@@ -2168,6 +2168,15 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                     (* don't pollute terminal with SARAH initialization message *)
                     Block[{Print,workingDirectory = Directory[]},
                        << SARAH`;
+                       (* load FlexibleSUSY before SARAH`Start[], as on the main
+                          kernel (cf. templates/start.m.in): some meta packages
+                          name model symbols in the SARAH` context (e.g. SARAH`vd
+                          in meta/Himalaya.m), so on the main kernel the model
+                          uses those, while Start[] alone would create Global`vd.
+                          The definitions distributed below would then create
+                          SARAH`vd next to Global`vd, giving General::shdw
+                          messages and two different symbols for vd. *)
+                       Needs["FlexibleSUSY`", FileNameJoin[{workingDirectory, "meta", "FlexibleSUSY.m"}]];
                        SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
                        SARAH`SARAH[InputDirectories] = {
                           FileNameJoin[{workingDirectory, "sarah"}],
@@ -2622,8 +2631,8 @@ double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 StringRiffle[
 (
 "template <typename Lepton>
-std::enable_if_t<std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">, double>
-lepton_pole_mass(const softsusy::QedQcd& qedqcd)
+requires std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">
+double lepton_pole_mass(const softsusy::QedQcd& qedqcd)
 {\n" <>
 TextFormatting`IndentText[
    Switch[#,
@@ -2981,7 +2990,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateSpectrumDecaysFunction = "", calculateModelDecaysPrototype = "", calculateModelDecaysEffCFunction = "",
             calculateSpectrumDecaysEffCFunction = "", calculateModelDecaysEffCPrototype = "",
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
-            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "", putEffCPrototype = "", putEffCFunction = "", callLilithMessages = "",
+            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "", putEffCPrototype = "", putEffCFunction = "", callLilithMessages = "", callHiggsToolsMessages = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
             mathlinkCalcNormalizedEffC = "", loadCalculateEffCFunction = "", loadCallHiggsToolsFunction = "", loadCallLilithFunction = "",
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
@@ -3052,6 +3061,8 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               callLilithMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::warning = \"`1`\";\n";
+              callHiggsToolsMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools::error = \"`1`\";\n" <>
+                                        "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
               decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"";
               mathlinkCalcNormalizedEffC = FSMathLink`CalculateNormalizedEffectiveCouplings[FlexibleSUSY`FSModelName];
@@ -3133,6 +3144,7 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@loadCalculateEffCFunction@" -> loadCalculateEffCFunction,
                             "@loadCallHiggsToolsFunction@" -> loadCallHiggsToolsFunction,
                             "@callLilithMessages@" -> callLilithMessages,
+                            "@callHiggsToolsMessages@" -> callHiggsToolsMessages,
                             "@loadCallLilithFunction@" -> loadCallLilithFunction,
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
@@ -3598,7 +3610,7 @@ FSCheckFlags[] :=
              ];
 
            If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
-              FlexibleSUSY`UseHiggs2LoopNMSSM === True;
+              FlexibleSUSY`UseHiggs2LoopNMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
               FlexibleSUSY`UseMSSM3LoopRGEs = True;
@@ -4850,6 +4862,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[FlexibleSUSY`FSCalculateDecays,
 
               FlexibleSUSY`FSDecayParticles = Select[FlexibleSUSY`FSDecayParticles, Decays`IsSupportedDecayParticle];
+
+              With[{treeLevelOnly = Select[FlexibleSUSY`FSDecayParticles, Decays`GetMaxLoopOrderForDecay[#] === 0&]},
+                 If[treeLevelOnly =!= {},
+                    Utils`FSFancyWarning[
+                       "Only tree-level decays are calculated for ", treeLevelOnly,
+                       ": loop-induced decays are only supported for scalars."
+                    ];
+                 ];
+              ];
 
               If[FlexibleSUSY`FSDecayParticles === {},
                  Utils`FSFancyWarning[

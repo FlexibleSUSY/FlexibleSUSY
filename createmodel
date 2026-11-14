@@ -535,7 +535,11 @@ sed -e "s|@DIR@|$targetdir|g"               \
     -e "s|@CLASSNAME@|$name|g"              \
     -e "s|FSModelName\([[:blank:]]*=[[:blank:]]*\)[^;][^;]*|FSModelName\1\"$name\"|g" \
     < $model_file_dir/FlexibleSUSY.m.in > $targetdir/FlexibleSUSY.m
-touch -d "1 min ago" "${targetdir}/FlexibleSUSY.m"
+# Set the time stamp one minute into the past, so that files generated
+# afterwards are newer, even on file systems with coarse time stamps.
+# "touch -d '1 min ago'" is GNU only; touch -t and the time zone offset
+# (UTC0:01 is one minute behind UTC) are POSIX and work on macOS too.
+TZ=UTC0 touch -t "$(TZ=UTC0:01 date +%Y%m%d%H%M.%S)" "${targetdir}/FlexibleSUSY.m"
 message "done"
 
 for slha_in in $SLHA_input_files; do

@@ -142,34 +142,50 @@ BOOST_AUTO_TEST_CASE( test_real_PMNS_pdg_convention )
    BOOST_CHECK(is_equal(mv, vv.transpose() * sv.matrix().asDiagonal() * vv,
                         1.e-10));
 
-   Eigen::Matrix<double,3,3> pmns(ve*vv.adjoint());
+   const Eigen::Matrix<double,3,3> pmns_start(ve*vv.adjoint());
 
-   // transpose in order to make (1, 2) negative
-   pmns.transposeInPlace();
-   BOOST_CHECK(is_unitary(pmns, 1.e-10));
+   // test all sign combinations of the (1,2) and (2,2) elements
+   for (const double sign_12 : {-1., 1.}) {
+      for (const double sign_22 : {-1., 1.}) {
+         Eigen::Matrix<double,3,3> ve_(ve), ue_(ue), vv_(vv);
 
-   PMNS_parameters::to_pdg_convention(pmns, vv, ve, ue);
+         // set signs by changing signs of mixing matrices
+         if (pmns_start(1,2)*sign_12 < 0.) {
+            ve_.row(1) *= -1.;
+            ue_.row(1) *= -1.;
+         }
+         if (pmns_start(2,2)*sign_22 < 0.) {
+            ve_.row(2) *= -1.;
+            ue_.row(2) *= -1.;
+         }
 
-   BOOST_CHECK(pmns(1,2) >= 0.);
-   BOOST_CHECK(pmns(2,2) >= 0.);
+         Eigen::Matrix<double,3,3> pmns(ve_*vv_.adjoint());
 
-   BOOST_CHECK(is_equal(me, ue.transpose() * se.matrix().asDiagonal() * ve,
-                        1.e-10));
-   BOOST_CHECK(is_equal(mv, vv.transpose() * sv.matrix().asDiagonal() * vv,
-                        1.e-10));
+         BOOST_REQUIRE(pmns(1,2)*sign_12 > 0.);
+         BOOST_REQUIRE(pmns(2,2)*sign_22 > 0.);
+         BOOST_CHECK(is_unitary(pmns, 1.e-10));
+         BOOST_CHECK(is_equal(me, ue_.transpose() * se.matrix().asDiagonal() * ve_,
+                              1.e-10));
 
-   {
-      // check that converted matrices are consistent
-      const Eigen::Matrix<double,3,3> pmns_check(ve*vv.adjoint());
-      for (int i = 0; i < 3; i++) {
-         for (int k = 0; k < 3; k++) {
-            // check for transposed equality here, because the PMNS
-            // matrix from above was transposed to generate a negative
-            // (1,2) element
-            BOOST_CHECK_CLOSE_FRACTION(Re(pmns(i,k)), Re(pmns_check(k,i)),
-                                       1.0e-10);
-            BOOST_CHECK_CLOSE_FRACTION(Im(pmns(i,k)), Im(pmns_check(k,i)),
-                                       1.0e-10);
+         PMNS_parameters::to_pdg_convention(pmns, vv_, ve_, ue_);
+
+         BOOST_CHECK(pmns(1,2) >= 0.);
+         BOOST_CHECK(pmns(2,2) >= 0.);
+
+         BOOST_CHECK(is_equal(me, ue_.transpose() * se.matrix().asDiagonal() * ve_,
+                              1.e-10));
+         BOOST_CHECK(is_equal(mv, vv_.transpose() * sv.matrix().asDiagonal() * vv_,
+                              1.e-10));
+
+         // check that converted matrices are consistent
+         const Eigen::Matrix<double,3,3> pmns_check(ve_*vv_.adjoint());
+         for (int i = 0; i < 3; i++) {
+            for (int k = 0; k < 3; k++) {
+               BOOST_CHECK_CLOSE_FRACTION(Re(pmns(i,k)), Re(pmns_check(i,k)),
+                                          1.0e-10);
+               BOOST_CHECK_CLOSE_FRACTION(Im(pmns(i,k)), Im(pmns_check(i,k)),
+                                          1.0e-10);
+            }
          }
       }
    }

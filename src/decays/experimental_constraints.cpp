@@ -23,6 +23,14 @@
  * @brief contains interface to HiggsTools
  */
 
+#include "config.h"
+
+#ifdef ENABLE_LILITH
+#include <Python.h>
+#include "lilith.h"
+#include "lilith.c"
+#endif
+
 #include "experimental_constraints.hpp"
 #include "decays/standard_model_decays.hpp"
 
@@ -33,9 +41,10 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <functional>
+#include <iostream>
 #include <random>
+#include <system_error>
 
 #ifdef ENABLE_HIGGSTOOLS
 #include "Higgs/Predictions.hpp"
@@ -44,15 +53,17 @@
 namespace HP = Higgs::predictions;
 #endif
 
-#ifdef ENABLE_LILITH
-#include <Python.h>
-#include "lilith.h"
-#include "lilith.c"
-#endif
-
 namespace flexiblesusy {
 
 namespace {
+
+#ifdef ENABLE_HIGGSTOOLS
+/// doesn't throw if the existence of the path can't be determined
+bool path_exists(const std::string& path) noexcept
+{
+   std::error_code ec;
+   return std::filesystem::exists(path, ec);
+}
 
 // Whether to calculate the X->gaga and X->gg decay widths in terms of the
 // effective tree-level couplings (calcHgamgam=calcggH=true) or by rescaling
@@ -66,7 +77,6 @@ constexpr bool calcHgamgam = false;
 // example: 0.03 means 3% uncertainty
 constexpr double relMassError = 0.03;
 
-#ifdef ENABLE_HIGGSTOOLS
 // Ref. model for computing brs and xsections on the HiggsTools side
 constexpr auto refModel = HP::ReferenceModel::SMHiggsInterp;
 
@@ -351,12 +361,10 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
 
       effectiveCouplingInput(s, effc, refModel, calcggH, calcHgamgam);
 
-      // Effective couplings below are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
-      // (note that this is different than couplings like gg, WW etc)
-      // so taking a norm gives a total partial width
-      s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu.second));
-      s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau.second));
-      s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau.second));
+      // HiggsTools has no effective couplings for these channels, only widths
+      s.setDecayWidth(HP::Decay::emu,   el.emu_width);
+      s.setDecayWidth(HP::Decay::etau,  el.etau_width);
+      s.setDecayWidth(HP::Decay::mutau, el.mutau_width);
 
       // Higgs to LSP decay (if model contains one)
       s.setDecayWidth(HP::Decay::directInv, el.invWidth);
@@ -366,7 +374,7 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
    }
 
    std::vector<std::tuple<int, double, double, std::string>> hb_return {};
-   if (std::filesystem::exists(higgsbounds_dataset)) {
+   if (path_exists(higgsbounds_dataset)) {
       auto bounds = Higgs::Bounds {higgsbounds_dataset};
       auto hbResult = bounds(pred);
       for (auto const& _hb: hbResult.selectedLimits) {
@@ -376,16 +384,14 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
          );
          hb_return.push_back({found->pdgid, _hb.second.obsRatio(), _hb.second.expRatio(), _hb.second.limit()->to_string()});
       }
-   }
-   else if (higgsbounds_dataset.empty()) {
+   } else if (higgsbounds_dataset.empty()) {
       WARNING("Warning: no HiggsBounds database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsBounds database at " + higgsbounds_dataset);
    }
 
    std::optional<SignalResult> hs_return;
-   if (std::filesystem::exists(higgssignals_dataset)) {
+   if (path_exists(higgssignals_dataset)) {
       const auto signals = Higgs::Signals {higgssignals_dataset};
       const double hs_chisq = signals(pred);
       const double mhSMref = physical_input.get(Physical_input::mh_pole);
@@ -393,11 +399,9 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
       const double pvalue1d = chi2_to_pval(hs_chisq, smChi2, 1);
       const double pvalue2d = chi2_to_pval(hs_chisq, smChi2, 2);
       hs_return = {signals.observableCount(), mhSMref, hs_chisq, smChi2, pvalue1d, pvalue2d};
-   }
-   else if (higgssignals_dataset.empty()) {
+   } else if (higgssignals_dataset.empty()) {
       WARNING("Warning: no HiggsSignals database provided");
-   }
-   else {
+   } else {
       WARNING("Warning: no HiggsSinglas database at " + higgssignals_dataset);
    }
 
@@ -411,12 +415,18 @@ std::optional<SignalResult> call_lilith(
    Physical_input const& physical_input,
    std::string const& lilith_db) {
 
-   // Lilith requires Higgs mass to be in range [123, 128]
+   // Lilith requires Higgs mass to be in range [123, 128].
+   // A state with a zero width has only vanishing couplings, so it gives no signal.
+   // It has to be left out, as Lilith's result would be NaN because of a division by
+   // its width, even if there are other Higgs bosons.
+   const auto use_in_lilith = [](NeutralHiggsEffectiveCouplings const& el) {
+      return el.mass >= 123.0 && el.mass <= 128.0 && el.width != 0.;
+   };
+
    bool higgs_in_range = false;
    bool cpEvenHiggs = false;
    for (auto const& el : bsm_input) {
-      const double mh = el.mass;
-      if (mh > 123.0 && mh < 128.0) {
+      if (use_in_lilith(el)) {
          higgs_in_range = true;
          cpEvenHiggs = (el.CP == 1);
       }
@@ -431,8 +441,9 @@ std::optional<SignalResult> call_lilith(
 
    for (auto const& el : bsm_input) {
 
+      if (!use_in_lilith(el)) continue;
+
       const double mh = el.mass;
-      if (mh < 123.0 || mh > 128.0) continue;
 
       XMLinputstring += "<reducedcouplings part=\"" + el.particle +  "\">\n";
       XMLinputstring += "<mass>" + std::to_string(mh) + "</mass>\n";

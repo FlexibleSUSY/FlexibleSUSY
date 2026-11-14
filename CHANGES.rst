@@ -5,13 +5,27 @@ New features
 ------------
 
 * Moved to C++20. This increased the minimal supported version of compilers to
-  g++ >= 8.0.0 or clang++ >= 10.0.0.
+  g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
   accordingly.
+* Lilith is no longer accessible only via the command-line interface (see
+  footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
 Fixed bugs
 ----------
+
+* [commit 607e22bf3]: Fixed the generated example ``run_<M>.m``, which set the
+  unknown option ``calculateDecays`` instead of ``calculateAMM``
+  (``FlexibleSUSY[32]``).
+
+* [commit 62fb30778]: Fixed negative undetected widths of neutral Higgs bosons
+  being passed to HiggsTools and Lilith. They are now set to 0, with a
+  warning if they are larger than rounding errors.
+
+* [commit dd59eb297]: Fixed ``UseHiggs3LoopNMSSM = True``, which didn't switch on
+  the 2-loop NMSSM Higgs mass corrections (``UseHiggs2LoopNMSSM``), unlike
+  ``UseHiggs3LoopMSSM`` in the MSSM. The shipped models set both flags.
 
 * [commit 23011a7]: Fixed clean fall-back to 2-loop precision if an
   error in the calculation of the 3-loop contributions occurs in
@@ -25,25 +39,40 @@ Fixed bugs
   scalar loops to :math:`$H\to\gamma\gamma$`. This changes the partial width
   of :math:`$H\to\gamma\gamma$` in models with such scalars.
 
-* [commit 8cb6814ce]: Fixed swapped up- and down-quark entries in the blocks
-  ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
-
 * [commit ceee684fc]: Fixed wrong 2-loop QCD corrections from quark loops to
   :math:`$H\to\gamma\gamma$` and :math:`$A\to\gamma\gamma$` for Higgs masses
   above twice the quark mass. This changes the partial widths of
   :math:`$H\to\gamma\gamma$` and :math:`$A\to\gamma\gamma$`.
 
-* [commit d05b47d34]: Fixed crashes of the Mathematica kernel when calling Lilith
+* [commit 87728f8]: Fixed swapped up- and down-quark entries in the blocks
+  ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
+
+* [commit 580274c]: Fixed crashes of the Mathematica kernel when calling Lilith
   through the Mathematica interface. This could happen on the first call, if
   numpy is linked to the system BLAS and LAPACK libraries, and on every later
   call in the same kernel.
 
-* [commit c053bce2f]: The Mathematica function ``FS<Model>CallLilith`` now returns
-  the result of the Lilith call. Together with the fix above, this lifts the
-  restriction stated in footnote 2 of
-  [`2603.12119 <https://arxiv.org/abs/2603.12119>`_], so Lilith is no longer
-  accessible only via the command-line interface.
+* [commit 465e7c5]: Fixed the charged inert higgsinos in the InertMSSM, which
+  were mixed across opposite electric charges into Majorana-type states. The
+  model now has 2 Dirac inert charginos with mass matrix
+  :math:`\mu'^T`, and SARAH no longer reports charge-violating vertices
+  (`#563 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/563>`_).
 
+* [commit 423caf0d5]: Fixed the name of the warning of
+  ``FS<M>CalculateDecays`` in the Mathematica interface, which was shown as
+  "Message text not found" in models other than the SM.
+
+* [commit 60b35307e]: Fixed a NaN total width, which aborted the
+  calculation, when a particle with massless states, such as the light
+  neutrinos, is listed in ``FSDecayParticles``. Decays of a massless particle
+  into massless particles are now skipped.
+
+* [commit 4cdcf1b2d]: Fixed the error handling of ``FS<M>CallHiggsTools``
+  in the Mathematica interface. Some errors (e.g. an empty HiggsBounds path)
+  returned ``LibraryFunctionError`` without a message, and its messages showed
+  "Message text not found". All errors of ``FS<M>CallHiggsTools`` and
+  ``FS<M>CallLilith`` now give a message and ``$Failed``, and a missing
+  HiggsSignals or HiggsBounds database gives a warning.
 
 FlexibleSUSY 2.9.0 [April, 06 2025]
 ===================================
