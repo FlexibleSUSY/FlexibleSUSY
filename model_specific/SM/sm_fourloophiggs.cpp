@@ -32,7 +32,8 @@ double sqr(double x) noexcept { return x*x; }
 
 /**
  * Standard Model Higgs mass 4-loop contribution, \f$O(\alpha_t
- * \alpha_s^3)\f$.  Taken from arxiv:1508.00912, Eq. (5.5).
+ * \alpha_s^3)\f$.  Obtained from the 4-loop effective potential in
+ * arxiv:1508.00912, Eq. (5.3), with Eq. (3.1) of arxiv:1407.4336.
  *
  * @note The result contains the 4-loop tadpole diagrams.  It is
  * therefore not 1-particle irreducible (1PI).
