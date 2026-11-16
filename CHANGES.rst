@@ -15,17 +15,17 @@ New features
 Fixed bugs
 ----------
 
-* [commit 888d2e6c3]: Fixed the 2-loop O(alpha_b alpha_s) NMSSM Higgs mass
-  corrections (``UseHiggs2LoopNMSSM``), where the exchange of the up- and
-  down-type Higgs doublets was applied to only one triangle of the
-  symmetric correction matrices. The singlet then coupled to the wrong
-  doublet, and at large tan(beta) a CP-odd singlet could mix with the
-  Goldstone boson.
+* [commit 888d2e6c3]: Fixed the 2-loop NMSSM Higgs mass corrections
+  (``UseHiggs2LoopNMSSM = True``) at large tan(beta). Higgs masses and
+  mixings of singlet-like states were wrong there, and a light CP-odd
+  singlet could get unphysical couplings to SM particles, which could
+  enhance e.g. its decays into photons and gluons by orders of magnitude.
 
 * [commit b4eac7cec]: Fixed the 2-loop NMSSM Higgs mass corrections
-  (``UseHiggs2LoopNMSSM``) for a negative singlet VEV (lambda < 0 with
-  mu_eff > 0), where the corrections were evaluated with the wrong sign of
-  the singlet VEV.
+  (``UseHiggs2LoopNMSSM = True``) for lambda < 0 (with mu_eff > 0). Such
+  points gave Higgs masses different from those of the physically
+  equivalent points with lambda > 0, by up to a few GeV for the heavy
+  doublet-like states.
 
 * [commit 607e22bf3]: Fixed the generated example ``run_<M>.m``, which set the
   unknown option ``calculateDecays`` instead of ``calculateAMM``
