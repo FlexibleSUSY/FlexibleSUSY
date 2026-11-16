@@ -15,6 +15,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit 30d7dfc16]: Updated the 3-loop O(alpha_t^3) contribution to the SM
+  Higgs mass to the corrected eq. (3.4) of arXiv:1407.4336v3. The Higgs mass
+  changes by a few MeV.
+
 * [commit 607e22bf3]: Fixed the generated example ``run_<M>.m``, which set the
   unknown option ``calculateDecays`` instead of ``calculateAMM``
   (``FlexibleSUSY[32]``).
