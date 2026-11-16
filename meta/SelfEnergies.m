@@ -919,7 +919,7 @@ const double cotbeta = 1.0 / tanb;
 const double rmbsq = Sqr(" <> mbStr <> ");
 const double rmtausq = Sqr(" <> mtauStr <> ");
 const double lam = Re(" <> lambdaStr <> ");
-const double svev = Abs(amu / lam);
+const double svev = -amu / lam; // vS/sqrt(2) with its sign, as amu = -EffectiveMu
 
 " <> GetTadpoleVectorCType[3] <> " tadpole_2l(" <> GetTadpoleVectorCType[3] <> "::Zero());
 
@@ -1356,7 +1356,7 @@ const double rmb = " <> mbStr <> ";
 const double rmbsq = Sqr(rmb);
 const double rmtausq = Sqr(" <> mtauStr <> ");
 const double lam = Re(" <> lambdaStr <> ");
-const double svev = Abs(amu / lam);
+const double svev = -amu / lam; // vS/sqrt(2) with its sign, as amu = -EffectiveMu
 
 " <> CConversion`CreateCType[TreeMasses`GetMassMatrixType[SARAH`HiggsBoson]] <> " self_energy_2l(" <> CConversion`CreateCType[TreeMasses`GetMassMatrixType[SARAH`HiggsBoson]] <> "::Zero());
 
@@ -1454,7 +1454,7 @@ const double rmb = " <> mbStr <> ";
 const double rmbsq = Sqr(rmb);
 const double rmtausq = Sqr(" <> mtauStr <> ");
 const double lam = Re(" <> lambdaStr <> ");
-const double svev = Abs(amu / lam);
+const double svev = -amu / lam; // vS/sqrt(2) with its sign, as amu = -EffectiveMu
 
 " <> CConversion`CreateCType[TreeMasses`GetMassMatrixType[SARAH`PseudoScalar]] <> " self_energy_2l(" <> CConversion`CreateCType[TreeMasses`GetMassMatrixType[SARAH`PseudoScalar]] <> "::Zero());
 
