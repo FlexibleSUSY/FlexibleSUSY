@@ -2996,7 +2996,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
-            decayIndex = "const Index_t n_fd_settings = 0;"},
+            decayIndex = "const std::ptrdiff_t n_fd_settings = 0;"},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -3093,17 +3093,17 @@ OptionValue[callLilith],
 OptionValue[usePoleHiggsMixings]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
-flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars.next());
 ";
-decayIndex = "const Index_t n_fd_settings = 9;";
+decayIndex = "const std::ptrdiff_t n_fd_settings = 9;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
              ];
            WriteOut`ReplaceInFiles[files,

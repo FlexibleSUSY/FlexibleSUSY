@@ -25,13 +25,14 @@
 
 @solverIncludes@
 #include "command_line_options.hpp"
-#include "array_view.hpp"
 #include "scan.hpp"
 #include "lowe.h"
 #include "logger.hpp"
 
-#include <iostream>
+#include <cstddef>
 #include <iomanip>
+#include <iostream>
+#include <span>
 #include <string>
 
 #define INPUTPARAMETER(p) input.p
@@ -52,12 +53,12 @@ void print_usage()
              << std::endl;
 }
 
-void set_command_line_parameters(const Dynamic_array_view<char*>& args,
+void set_command_line_parameters(std::span<char* const> args,
                                  @ModelName@_input_parameters& input,
                                  int& solver_type,
                                  int& loop_library)
 {
-   for (int i = 1; i < args.size(); ++i) {
+   for (std::size_t i = 1; i < args.size(); ++i) {
       const std::string option = args[i];
 
 @parseCmdLineOptions@
@@ -146,8 +147,9 @@ int main(int argc, char* argv[])
    @ModelName@_input_parameters input;
    int solver_type = @defaultSolverType@;
    int loop_library = 0;
-   set_command_line_parameters(make_dynamic_array_view(&argv[0], argc), input,
-                               solver_type, loop_library);
+   set_command_line_parameters(
+      std::span<char* const>(argv, static_cast<std::size_t>(argc)), input,
+      solver_type, loop_library);
 
    std::cout << "# "
              << std::setw(12) << std::left << "@InputParameter_1@" << ' '

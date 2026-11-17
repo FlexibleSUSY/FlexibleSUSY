@@ -71,7 +71,6 @@ LIBFLEXI_SRC := \
 LIBFLEXI_HDR := \
 		$(DIR)/always_false.hpp \
 		$(DIR)/amm_loop_functions.hpp \
-		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
 		$(DIR)/betafunction.hpp \
 		$(DIR)/build_info.hpp \

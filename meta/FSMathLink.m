@@ -58,11 +58,12 @@ PutInputParameter[{par_, _}, linkName_String] :=
 PutInputParameters[inputPars_List, linkName_String] :=
     StringJoin[PutInputParameter[#, linkName]& /@ inputPars];
 
-CreateComponent[CConversion`realScalarCType | CConversion`integerScalarCType, pars_String:"pars", count_String:"c"] :=
-    pars <> "[" <> count <> "++];\n";
-CreateComponent[CConversion`complexScalarCType, pars_String:"pars", count_String:"c"] :=
-    CConversion`CreateCType[CConversion`ScalarType[complexScalarCType]] <>
-    "(" <> pars <> "[" <> count <> "], " <> pars <> "[" <> count <> "+1]); " <> count <> " += 2;\n";
+(* pars is a Parameter_reader, see templates/librarylink.cpp.in *)
+CreateComponent[CConversion`realScalarCType | CConversion`integerScalarCType, pars_String:"pars"] :=
+    pars <> ".next();\n";
+CreateComponent[CConversion`complexScalarCType, pars_String:"pars"] :=
+    pars <> ".next_complex();\n";
+Utils`MakeUnknownInputDefinition[CreateComponent];
 
 SetInputParameterFromArguments[{par_, CConversion`ScalarType[st_]}] :=
     Module[{parStr = CConversion`ToValidCSymbolString[par]},
