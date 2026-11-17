@@ -6,14 +6,28 @@ New features
 
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
+
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
   accordingly.
+
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
 Fixed bugs
 ----------
+
+* [commit 888d2e6c3]: Fixed the 2-loop NMSSM Higgs mass corrections
+  (``UseHiggs2LoopNMSSM = True``) at large tan(beta). Higgs masses and
+  mixings of singlet-like states were wrong there, and a light CP-odd
+  singlet could get unphysical couplings to SM particles, which could
+  enhance e.g. its decays into photons and gluons by orders of magnitude.
+
+* [commit b4eac7cec]: Fixed the 2-loop NMSSM Higgs mass corrections
+  (``UseHiggs2LoopNMSSM = True``) for lambda < 0 (with mu_eff > 0). Such
+  points gave Higgs masses different from those of the physically
+  equivalent points with lambda > 0, by up to a few GeV for the heavy
+  doublet-like states.
 
 * [commit 30d7dfc16]: Updated the 3-loop O(alpha_t^3) contribution to the SM
   Higgs mass to the corrected result of arXiv:1407.4336v3. The Higgs mass

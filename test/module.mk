@@ -73,6 +73,7 @@ TEST_SRC := \
 		$(DIR)/test_mssm_twoloop_mt.cpp \
 		$(DIR)/test_mssm_twoloop_mtau.cpp \
 		$(DIR)/test_MSSM_2L_limits.cpp \
+		$(DIR)/test_NMSSM_twoloophiggs.cpp \
 		$(DIR)/test_multiindex.cpp \
 		$(DIR)/test_numerics.cpp \
 		$(DIR)/test_observable_problems.cpp \
@@ -672,6 +673,11 @@ endif
 ifeq ($(WITH_lowNMSSM) $(WITH_SOFTSUSY),yes yes)
 TEST_SH += \
 		$(DIR)/test_lowNMSSM_spectrum.sh
+endif
+
+ifeq ($(WITH_lowNMSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_lowNMSSM_2loop_singlet_sign.cpp
 endif
 
 ifeq ($(WITH_CMSSMGSLHybrid) $(WITH_CMSSMGSLHybridS) $(WITH_CMSSMGSLBroyden) $(WITH_CMSSMGSLNewton) $(WITH_CMSSMFPIRelative) $(WITH_CMSSMFPIAbsolute) $(WITH_CMSSMFPITadpole),yes yes yes yes yes yes yes)
@@ -1351,6 +1357,8 @@ $(DIR)/test_CE6SSM_semi_analytic_solutions.x: $(LIBCE6SSM)
 $(DIR)/test_CE6SSM_consistent_solutions.x: $(LIBCE6SSM) $(LIBE6SSM)
 
 $(DIR)/test_lowNMSSM_spectrum.sh: $(RUN_SOFTPOINT_EXE)
+
+$(DIR)/test_lowNMSSM_2loop_singlet_sign.x: $(LIBlowNMSSM)
 
 $(DIR)/test_lowNUHMSSMSemiAnalytic_ewsb.x: $(LIBlowNUHMSSMSemiAnalytic)
 

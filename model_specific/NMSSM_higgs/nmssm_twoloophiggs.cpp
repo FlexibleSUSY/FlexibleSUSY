@@ -182,6 +182,7 @@ Eigen::Matrix<double, 3, 3> self_energy_higgs_2loop_ab_as_nmssm_with_tadpoles(
    // bottom of page 9
    std::swap(result(0,0), result(1,1));
    std::swap(result(0,2), result(1,2));
+   std::swap(result(2, 0), result(2, 1));
 
    return result;
 }
@@ -220,6 +221,7 @@ Eigen::Matrix<double, 3, 3> self_energy_pseudoscalar_2loop_ab_as_nmssm_with_tadp
    // bottom of page 9
    std::swap(result(0,0), result(1,1));
    std::swap(result(0,2), result(1,2));
+   std::swap(result(2, 0), result(2, 1));
 
    return result;
 }
