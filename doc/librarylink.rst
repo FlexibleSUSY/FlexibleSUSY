@@ -287,7 +287,10 @@ FS<model>Set
 Using the ``FS<model>Set[]`` function, the input parameters and settings
 associated to a certain handle can be modified.  The ``FS<model>Set[]``
 function takes first as argument the handle, and as second argument
-the replacement list of new parameters / settings.
+the replacement list of new parameters / settings.  Parameters and
+settings that are not given keep their values.  In models with decays,
+the FlexibleDecay settings (``fdSettings``) can be changed in the same
+way, and the current ones are listed by ``FS<model>GetFDSettings[]``.
 
 Example
 
