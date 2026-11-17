@@ -114,12 +114,6 @@ std::string replace_extension(const std::string& str, const std::string& ext)
    return no_ext + '.' + ext;
 }
 
-/// tests whether `str' starts with `prefix'
-bool starts_with(const std::string& str, const std::string& prefix)
-{
-   return str.compare(0, prefix.size(), prefix) == 0;
-}
-
 /// print usage message
 void print_usage(const std::string& program_name)
 {
@@ -375,10 +369,10 @@ int main(int argc, char* argv[])
 
    for (int i = 1; i < argc; i++) {
       const std::string arg(argv[i]);
-      if (starts_with(arg, "-D")) {
+      if (arg.starts_with("-D")) {
          continue;
       }
-      if (starts_with(arg, "-I") && arg.length() > 2) {
+      if (arg.starts_with("-I") && arg.length() > 2) {
          config.search_paths.push_back(arg.substr(std::strlen("-I")));
          continue;
       }
@@ -414,9 +408,9 @@ int main(int argc, char* argv[])
       if (arg == "-MF" || arg == "-MMD" || arg == "-o") {
          // interpret next argument as output file name
          if (i + 1 < argc) {
-            const std::string of(argv[i + 1]);
-            if (!starts_with(of, "-I") && !starts_with(of, "-M") &&
-                !starts_with(of, "-D") && of != "-o") {
+            std::string of(argv[i + 1]);
+            if (!of.starts_with("-I") && !of.starts_with("-M") &&
+                !of.starts_with("-D") && of != "-o") {
                config.output_file = std::move(of);
                i++;
             } else {

@@ -71,7 +71,6 @@ public:
 
    static bool get_parameter_value(const std::string&, const std::string&, double&);
    static bool get_parameter_value(const std::string&, const std::string&, int&);
-   static bool starts_with(const std::string&, const std::string&);
 
 private:
    bool do_exit{false};

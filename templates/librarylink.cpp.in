@@ -59,7 +59,6 @@
 #include <exception>
 #include <filesystem>
 #include <system_error>
-#include <utility>
 
 #define INPUTPARAMETER(p) input.p
 #define MODELPARAMETER(p) model.get_##p()
@@ -301,7 +300,7 @@ Handle get_new_handle()
 
    Handle hid = 0;
 
-   while (handles.find(hid) != handles.end())
+   while (handles.contains(hid))
       hid++;
 
    return hid;
@@ -1183,7 +1182,7 @@ DLLEXPORT int FS@ModelName@OpenHandle(
 
       const auto hid = get_new_handle();
 
-      handles.insert(std::make_pair(hid, std::move(data)));
+      handles.emplace(hid, std::move(data));
 
       MArgument_setInteger(Res, hid);
    } catch (const flexiblesusy::Error& e) {
@@ -1204,11 +1203,7 @@ DLLEXPORT int FS@ModelName@CloseHandle(
    if (Argc != 1)
       return LIBRARY_TYPE_ERROR;
 
-   const auto hid = get_handle_from(Args[0]);
-   const auto handle = handles.find(hid);
-
-   if (handle != handles.end())
-      handles.erase(handle);
+   handles.erase(get_handle_from(Args[0]));
 
    return LIBRARY_NO_ERROR;
 }
