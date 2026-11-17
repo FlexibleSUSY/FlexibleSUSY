@@ -211,4 +211,32 @@ Mhh4 = CalcMh[handle];
 
 TestNonEquality[Mhh1, Mhh4];
 
+Print["Testing that Set[] keeps the FlexibleDecay settings"];
+
+handle = FSCMSSMOpenHandle[
+    fsSettings -> settings,
+    fsSMParameters -> smInputs,
+    fsModelParameters -> {
+        m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 },
+    fdSettings -> { minBRtoPrint -> 0.001, offShellVV -> 0 }
+];
+
+TestEquality[minBRtoPrint /. FSCMSSMGetFDSettings[handle], 0.001];
+TestEquality[offShellVV /. FSCMSSMGetFDSettings[handle], 0];
+TestEquality[usePoleHiggsMixings /. FSCMSSMGetFDSettings[handle], 1];
+
+FSCMSSMSet[handle, TanBeta -> 20];
+
+TestEquality[TanBeta /. FSCMSSMGetInputParameters[handle], 20.];
+TestEquality[minBRtoPrint /. FSCMSSMGetFDSettings[handle], 0.001];
+TestEquality[offShellVV /. FSCMSSMGetFDSettings[handle], 0];
+
+FSCMSSMSet[handle, fdSettings -> { offShellVV -> 2 }];
+
+TestEquality[offShellVV /. FSCMSSMGetFDSettings[handle], 2];
+TestEquality[minBRtoPrint /. FSCMSSMGetFDSettings[handle], 0.001];
+TestEquality[TanBeta /. FSCMSSMGetInputParameters[handle], 20.];
+
+FSCMSSMCloseHandle[handle];
+
 PrintTestSummary[];

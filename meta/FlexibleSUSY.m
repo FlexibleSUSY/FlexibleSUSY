@@ -2996,6 +2996,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
+            loadGetFDSettingsFunction = "", getFDSettingsInSet = "",
             decayIndex = "const Index_t n_fd_settings = 0;"},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
@@ -3054,6 +3055,11 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               loadCallHiggsToolsFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CallHiggsTools\", LinkObject, LinkObject];";
+              loadGetFDSettingsFunction = "FS" <> FlexibleSUSY`FSModelName <> "GetFDSettings = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "GetFDSettings\", LinkObject, LinkObject];\n";
+              (* FS<M>Set takes the FlexibleDecay settings that aren't given from the handle *)
+              getFDSettingsInSet = " /.\n        FS" <> FlexibleSUSY`FSModelName <> "GetFDSettings[handle]";
               loadCallLilithFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallLilith = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CallLilith\", LinkObject, LinkObject];";
@@ -3152,6 +3158,8 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@fdDefaultSettings@" -> fdDefaultSettings,
                             "@addFDOptions1@" -> IndentText[addFDOptions1],
                             "@addFDOptions2@" -> addFDOptions2,
+                            "@loadGetFDSettingsFunction@" -> loadGetFDSettingsFunction,
+                            "@getFDSettingsInSet@" -> getFDSettingsInSet,
                             "@setFDOptions@" -> IndentText @ IndentText @ IndentText @ IndentText @ setFDOptions,
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
                             "@fillFDSettings@" -> fillFDSettings,

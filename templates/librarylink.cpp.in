@@ -246,6 +246,7 @@ public:
    }
 
    void put_settings(MLINK link) const;
+   void put_fd_settings(MLINK link) const;
    void put_sm_input_parameters(MLINK link) const;
    void put_input_parameters(MLINK link) const;
    void put_observables(MLINK link) const;
@@ -496,6 +497,28 @@ void Model_data::put_settings(MLINK link) const
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::loop_library)), "loopLibrary");
    MLPutRuleTo(link, settings.get(Spectrum_generator_settings::calculate_amm), "calculateAMM");
    MLPutRuleTo(link, modsel.parameter_output_scale, "parameterOutputScale");
+
+   MLEndPacket(link);
+}
+
+/******************************************************************/
+
+void Model_data::put_fd_settings(MLINK link) const
+{
+   const auto& s = flexibledecay_settings;
+
+   // all settings except calculate_decays, which is not a LibraryLink option
+   MLPutFunction(link, "List", FlexibleDecay_settings::NUMBER_OF_OPTIONS - 1);
+
+   MLPutRuleTo(link, s.get(FlexibleDecay_settings::min_br_to_print), "minBRtoPrint");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::include_higher_order_corrections)), "maxHigherOrderCorrections");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ)), "alphaThomson");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::offshell_VV_decays)), "offShellVV");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::print_effc_block)), "printEffCBlock");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::calculate_normalized_effc)), "calcNormalizedEffC");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::call_higgstools)), "callHiggsTools");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::call_lilith)), "callLilith");
+   MLPutRuleTo(link, static_cast<int>(s.get(FlexibleDecay_settings::use_pole_higgs_mixings)), "usePoleHiggsMixings");
 
    MLEndPacket(link);
 }
@@ -1109,6 +1132,27 @@ DLLEXPORT int FS@ModelName@GetSettings(WolframLibraryData /* libData */, MLINK l
 
    try {
       find_data(hid).put_settings(link);
+   } catch (const flexiblesusy::Error& e) {
+      std::cerr << e.what_detailed() << std::endl;
+      put_error_output(link);
+   }
+
+   return LIBRARY_NO_ERROR;
+}
+
+/******************************************************************/
+
+DLLEXPORT int FS@ModelName@GetFDSettings(WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::@ModelName@_librarylink;
+
+   if (!check_number_of_args(link, 1, "FS@ModelName@GetFDSettings"))
+      return LIBRARY_TYPE_ERROR;
+
+   const auto hid = get_handle_from(link);
+
+   try {
+      find_data(hid).put_fd_settings(link);
    } catch (const flexiblesusy::Error& e) {
       std::cerr << e.what_detailed() << std::endl;
       put_error_output(link);
