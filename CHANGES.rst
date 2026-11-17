@@ -6,9 +6,11 @@ New features
 
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
+
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
   accordingly.
+
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
@@ -26,6 +28,10 @@ Fixed bugs
   points gave Higgs masses different from those of the physically
   equivalent points with lambda > 0, by up to a few GeV for the heavy
   doublet-like states.
+
+* [commit 30d7dfc16]: Updated the 3-loop O(alpha_t^3) contribution to the SM
+  Higgs mass to the corrected result of arXiv:1407.4336v3. The Higgs mass
+  changes by a few MeV.
 
 * [commit 607e22bf3]: Fixed the generated example ``run_<M>.m``, which set the
   unknown option ``calculateDecays`` instead of ``calculateAMM``
