@@ -107,6 +107,7 @@ _flexiblesusy_configure()
         '--with-models=-[Comma separated list of models to be build]:models:_flexiblesusy_created_models' \
         '--with-optional-modules=-[Load optional FlexibleSUSY modules]:modules:_values -s , module examples test' \
         '--with-pthread-libdir=-[Path to search for pthread library]:directory:_flexiblesusy_files -/' \
+        '--with-python=-[Python interpreter to build the Python modules of the models for]:command:_command_names -e' \
         '--with-shared-ldflags=-[Linker flags for shared library linking]:flags: ' \
         '--with-shared-ldlibs=-[Additional libraries to be linked during shared library linking]:libraries: ' \
         '--with-shared-lib-cmd=-[Command to make shared library]:command:_command_names -e' \

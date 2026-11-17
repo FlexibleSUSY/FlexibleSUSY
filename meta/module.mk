@@ -89,6 +89,7 @@ META_SRC     := \
 		$(DIR)/LoopFunctions.m \
 		$(DIR)/LoopFunctionsZeroMomentum.m \
 		$(DIR)/LoopMasses.m \
+		$(DIR)/ModelMetadata.m \
 		$(DIR)/Observables.m \
 		$(DIR)/Parameters.m \
 		$(DIR)/Phases.m \

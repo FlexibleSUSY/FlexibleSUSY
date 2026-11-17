@@ -98,6 +98,53 @@ double minChi2SM_hs(const double mhSM, std::string const& higgssignals_dataset) 
 #endif
 
 #ifdef ENABLE_LILITH
+/**
+ * Sets the dlopen flags RTLD_NOW | RTLD_DEEPBIND of the Python interpreter
+ * for the lifetime of the object and restores the previous flags afterwards.
+ * The Python code runs in a namespace of its own, not in __main__, which
+ * belongs to the user when FlexibleSUSY runs inside a Python interpreter.
+ */
+class Dlopen_flags_for_lilith
+{
+public:
+   Dlopen_flags_for_lilith() : globals(PyDict_New())
+   {
+      PyObject* builtins = PyImport_ImportModule("builtins");
+      if (globals != nullptr && builtins != nullptr) {
+         PyDict_SetItemString(globals, "__builtins__", builtins);
+      }
+      Py_XDECREF(builtins);
+      run("import os, sys\n"
+          "old_flags = sys.getdlopenflags()\n"
+          "if hasattr(os, 'RTLD_DEEPBIND'):\n"
+          "    sys.setdlopenflags(os.RTLD_NOW | os.RTLD_DEEPBIND)\n");
+   }
+   ~Dlopen_flags_for_lilith()
+   {
+      run("sys.setdlopenflags(old_flags)\n");
+      Py_XDECREF(globals);
+   }
+   Dlopen_flags_for_lilith(const Dlopen_flags_for_lilith&) = delete;
+   Dlopen_flags_for_lilith(Dlopen_flags_for_lilith&&) = delete;
+   Dlopen_flags_for_lilith& operator=(const Dlopen_flags_for_lilith&) = delete;
+   Dlopen_flags_for_lilith& operator=(Dlopen_flags_for_lilith&&) = delete;
+
+private:
+   PyObject* globals; ///< namespace in which the Python code runs
+
+   void run(const char* code) const
+   {
+      if (globals == nullptr) {
+         return;
+      }
+      PyObject* result = PyRun_String(code, Py_file_input, globals, globals);
+      if (result == nullptr) {
+         PyErr_Clear();
+      }
+      Py_XDECREF(result);
+   }
+};
+
 double minChi2SM_lilith(const double mhSM, bool cpEvenHiggs, const std::string& lilithdb) {
 
 // Lilith fails in LO precision when ZZ = 1
@@ -499,11 +546,10 @@ std::optional<SignalResult> call_lilith(
 
     // A Mathematica kernel exposes its ILP64 MKL under the standard BLAS and
     // LAPACK names. Without RTLD_DEEPBIND, numpy can resolve these to MKL and
-    // crash, as it passes 32-bit integers.
-    PyRun_SimpleString(
-       "import os, sys\n"
-       "if hasattr(os, 'RTLD_DEEPBIND'):\n"
-       "    sys.setdlopenflags(os.RTLD_NOW | os.RTLD_DEEPBIND)\n");
+    // crash, as it passes 32-bit integers.  The previous flags are restored
+    // at the end, as they belong to the user when FlexibleSUSY runs inside a
+    // Python interpreter (Python interface).
+    const Dlopen_flags_for_lilith dlopen_flags;
 
     // Creating an object of the class Lilith: lilithcalc
     PyObject* lilithcalc = initialize_lilith(const_cast<char*>(lilith_db.c_str()));

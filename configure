@@ -219,6 +219,10 @@ LDFLAGS="$SHARED_LDFLAGS"
 LDLIBS="$SHARED_LDLIBS"
 LLFLAGS=""
 LLLIBS=""
+python_module_cmd=""
+enable_python_module="no"
+PYBIND11FLAGS=""
+PYTHON_MODULE_SUFFIX=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
 HIGGSTOOLSFLAGS="-Imodel_specific/SM"
@@ -1792,7 +1796,7 @@ check_cxxflags() {
         fi
     fi
 
-    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] ; then
+    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] || [ -n "$python_module_cmd" ] ; then
         # check if -fPIC is in CXXFLAGS
         case "${CXX}" in
             g++*|clang++*|icpc*)
@@ -1967,7 +1971,7 @@ check_fflags() {
     esac
 
     # check if -fPIC is in FFLAGS
-    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] ; then
+    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] || [ -n "$python_module_cmd" ] ; then
         case "${FC}" in
             gfortran*|ifort*)
                 if contains_not "${FFLAGS}" "-fPIC" ; then
@@ -2228,6 +2232,59 @@ check_higgstools() {
     else
         enable_higgstools=no
     fi
+}
+
+check_python_module() {
+    if [ -z "$python_module_cmd" ] ; then
+        enable_python_module=no
+        return
+    fi
+    checking_msg "pybind11 for the Python module ($python_module_cmd)"
+    if ! command -v "$python_module_cmd" > /dev/null 2>&1 ; then
+        result "no"
+        message "Error: Python interpreter $python_module_cmd not found."
+        exit 1
+    fi
+    PYBIND11FLAGS=$("$python_module_cmd" -m pybind11 --includes 2>/dev/null) || {
+        result "no"
+        message "Error: pybind11 is not available for $python_module_cmd"
+        message "       (\`$python_module_cmd -m pybind11 --includes' failed)."
+        exit 1
+    }
+    # the Python package of pybind11 can be installed without its C++ headers
+    if ! printf '#include <pybind11/pybind11.h>\n' | \
+            $CXX $CXXFLAGS $PYBIND11FLAGS -x c++ -fsyntax-only - > /dev/null 2>&1 ; then
+        result "no"
+        message "Error: the C++ headers of pybind11 (pybind11/pybind11.h) are not found"
+        message "       with the flags $PYBIND11FLAGS"
+        message "       given by \`$python_module_cmd -m pybind11 --includes'."
+        message "       They may be in a separate package (e.g. pybind11-devel)."
+        exit 1
+    fi
+    PYTHON_MODULE_SUFFIX=$("$python_module_cmd" -c 'import sysconfig; print(sysconfig.get_config_var("EXT_SUFFIX"))')
+    enable_python_module=yes
+    result "$("$python_module_cmd" -m pybind11 --version), module suffix $PYTHON_MODULE_SUFFIX"
+}
+
+check_python_module_with_lilith() {
+    # Lilith embeds the libpython of python3*-config (PYTHONLIBS).  A Python
+    # module loaded by another Python version would bring a second libpython
+    # into the process.
+    if [ "x$enable_python_module" != "xyes" ] || [ "x$enable_lilith" != "xyes" ] ; then
+        return
+    fi
+    checking_msg "Python versions of the Python module and of Lilith"
+    local module_version embed_version
+    module_version=$("$python_module_cmd" -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+    embed_version=$(echo "$PYTHONLIBS" | grep -oE -- '-lpython[0-9]+\.[0-9]+' | head -n 1 | sed 's/-lpython//')
+    if [ -n "$embed_version" ] && [ "$embed_version" != "$module_version" ] ; then
+        result "no"
+        message "Error: the Python module is built for Python $module_version ($python_module_cmd),"
+        message "       but Lilith uses Python $embed_version ($python3config_cmd)."
+        message "       Use --with-python=python$embed_version or configure without Lilith."
+        exit 1
+    fi
+    result "ok (Python $module_version)"
 }
 
 check_python() {
@@ -3707,6 +3764,10 @@ replace_markers() {
 	-e "s|@LILITHFLAGS@|$LILITHFLAGS|"    \
 	-e "s|@PYTHONFLAGS@|$PYTHONFLAGS|"    \
 	-e "s|@PYTHONLIBS@|$PYTHONLIBS|"    \
+	-e "s|@ENABLE_PYTHON_MODULE@|$enable_python_module|" \
+	-e "s|@PYBIND11FLAGS@|$PYBIND11FLAGS|"    \
+	-e "s|@PYTHON_MODULE_SUFFIX@|$PYTHON_MODULE_SUFFIX|"    \
+	-e "s|@PYTHON_MODULE_CMD@|$python_module_cmd|"    \
 	-e "s|@ENABLE_LILITH@|$enable_lilith|" \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
@@ -3795,6 +3856,8 @@ Package directories, compilation settings and model selection
   --with-lilith=            Path to Lilith
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
+  --with-python=            Python interpreter to build the Python modules of the
+                            models for (needs pybind11 for it), e.g. python3.14
   --with-loop-libraries=    Comma separated list of loop libraries to be enabled
                             (for example \`collier', \`looptools', \`fflite')
   --with-looptools-libdir=  Path to search for LoopTools libraries
@@ -3926,6 +3989,7 @@ if test $# -gt 0 ; then
             --with-lilith=*)         lilith_dir=$optarg ;;
             --with-llflags=*)        LLFLAGS=$optarg ;;
             --with-lllibs=*)         LLLIBS=$optarg ;;
+            --with-python=*)         python_module_cmd=$optarg ;;
             --with-loop-libraries=*) LOOP_LIBRARIES=$optarg ;;
             --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
             --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
@@ -4017,7 +4081,9 @@ if test "x${enable_compile}" = "xyes"; then
         check_boost_thread_libs
     fi
     check_python
+    check_python_module
     check_lilith
+    check_python_module_with_lilith
     check_looplibrary
     check_odeint
     check_sqlite

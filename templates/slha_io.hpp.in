@@ -73,6 +73,7 @@ public:
    void fill(LToLConversion_settings&) const;
    void fill(FlexibleDecay_settings&) const;
    double get_parameter_output_scale() const;
+   const SLHA_io::Modsel& get_modsel() const { return slha_io.get_modsel(); }
    const SLHA_io& get_slha_io() const { return slha_io; }
    void read_from_file(const std::string&);
    void read_from_source(const std::string&);

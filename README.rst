@@ -119,6 +119,9 @@ Optional:
 * LoopTools_ (version 2.8 or higher)
 * HiggsTools_ (version 1.1.4 or higher)
 * Lilith_ (requires Python3 development files)
+* pybind11_ (for the Python module of each model, see `Python interface`_;
+  the C++ headers are needed, which some distributions ship separately,
+  e.g. as ``pybind11-devel``)
 * COLLIER_
 * Himalaya_
 * TSIL_
@@ -259,6 +262,8 @@ Building a FlexibleSUSY model
 
    * ``models/<model>/run_<model>.x``: command line spectrum generator
    * ``models/<model>/run_<model>.m``: Mathematica interface
+   * ``models/<model>/flexiblesusy_<model>*.so``: Python module, if
+     configured with ``--with-python=<interpreter>`` (see `Python interface`_)
 
 Example
 
@@ -417,6 +422,58 @@ Further details and examples can be found in the `LibraryLink
 documentation`_.
 
 .. _`LibraryLink documentation`: doc/librarylink.rst
+
+Python interface
+----------------
+
+The package ``flexiblesusy`` in ``python/`` runs the spectrum generators
+from Python 3 (version 3.8 or higher; numpy is optional).  It has two
+backends:
+
+* ``compiled``: a Python module for each model, built when FlexibleSUSY is
+  configured with ``--with-python=<interpreter>`` (needs pybind11_ for that
+  interpreter).  The spectrum stays in memory, so that observables,
+  decays, HiggsTools and Lilith can be calculated later, on demand.
+* ``slha``: runs ``models/<model>/run_<model>.x`` and reads its SLHA
+  output.  It needs no Python module.
+
+The model-specific information (input parameters, particles, SLHA blocks)
+is read from ``models/<model>/<model>_metadata.json``, which the code
+generation writes.
+
+Example
+
+.. code-block:: shell
+
+    ./createmodel --name=MSSM
+    ./configure --with-models=MSSM --with-python=python3 \
+       --with-loop-libraries=collier \
+       --with-collier-incdir=/path/to/COLLIER/include \
+       --with-collier-libdir=/path/to/COLLIER/lib
+    make
+
+    PYTHONPATH=$PWD/python python3
+
+.. code-block:: python
+
+    import flexiblesusy as fs
+
+    mssm = fs.Model("MSSM")                # finds models/MSSM
+    point = mssm.default_point()           # models/MSSM/LesHouches.in.MSSM
+    point = mssm.updated(point, TanBeta=20,
+                         settings=fs.Settings(loop_library=fs.LoopLibrary.COLLIER,
+                                              calculate_sm_masses=True))
+    res = mssm.calculate(point)            # spectrum only
+    if res.ok and res.pole_masses["hh"][0] > 110:   # 0-based indices
+        obs = res.observables()            # calculated now, e.g. obs["amm_Fe_1"]
+        dec = res.decays()                 # calculated now, e.g. dec["hh", 0].width
+
+All input parameters of a model are required; settings and SM inputs that
+are not given keep the FlexibleSUSY defaults.  The package can also be
+installed into a virtual environment with ``pip install -e python/``.
+Further details can be found in the `Python interface documentation`_.
+
+.. _`Python interface documentation`: python/README.md
 
 Parameter scans
 ---------------
@@ -1033,6 +1090,8 @@ are listed:
 
 * ``Output/`` contains SARAHs model-specific output files
 
+* ``python/`` contains the Python interface (package ``flexiblesusy``)
+
 * ``sarah/`` contains SARAH model files shipped with FlexibleSUSY
 
 * ``slhaea/`` contains the slhaea_ SLHA reader library
@@ -1053,6 +1112,7 @@ Further reading
 * `FlexibleSUSY model file`_
 * `FlexibleEFTHiggs`_
 * `LibraryLink documentation`_
+* `Python interface documentation`_
 * `meta code documentation`_
 * `SLHA input parameters`_
 * `Observables`_
@@ -1073,6 +1133,7 @@ References
 .. _GNU scientific library: http://www.gnu.org/software/gsl
 .. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
 .. _Lilith: https://github.com/sabinekraml/Lilith-2
+.. _pybind11: https://github.com/pybind/pybind11
 .. _`Mathematica/Wolfram Engine`: https://www.wolfram.com
 .. _LoopTools: http://www.feynarts.de/looptools
 .. _COLLIER: https://collier.hepforge.org

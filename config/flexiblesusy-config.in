@@ -223,6 +223,8 @@ Options:
   --enable-looptools    Test if LoopTools is enabled
   --enable-mass-error-check
                         Test if mass error check is enabled
+  --enable-python-module
+                        Test if the Python modules of the models are built
   --enable-silent       Test if silet mode is enabled
   --enable-shared-libs  Test if shared libraries are build
   --enable-sqlite       Test if SQLite is enabled
@@ -346,6 +348,7 @@ while test $# -gt 0; do
         --enable-librarylink)         out="$out @ENABLE_LIBRARYLINK@" ;;
         --enable-looptools)           out="$out @ENABLE_LOOPTOOLS@" ;;
         --enable-mass-error-check)    out="$out @ENABLE_CHECK_EIGENVALUE_ERROR@" ;;
+        --enable-python-module)       out="$out @ENABLE_PYTHON_MODULE@" ;;
         --enable-silent)              out="$out @ENABLE_SILENT@" ;;
         --enable-shared-libs)         out="$out @ENABLE_SHARED_LIBS@" ;;
         --enable-sqlite)              out="$out @ENABLE_SQLITE@" ;;

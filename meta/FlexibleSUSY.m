@@ -61,7 +61,8 @@ BeginPackage["FlexibleSUSY`",
               "Wrappers`",
               "Himalaya`",
               "GM2Calc`",
-              "Unitarity`"
+              "Unitarity`",
+              "ModelMetadata`"
 }];
 
 $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
@@ -3160,6 +3161,30 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
                             "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
                             "@setUnitarity@" -> setUnitarity,
+                            (* used by the language-neutral session (templates/session.cpp.in) *)
+                            "@sessionHasDecays@" -> If[FlexibleSUSY`FSCalculateDecays, "true", "false"],
+                            (* solver-independent base types of @ModelTypes@ (cf. FlexibleTower`GetModelTypes[]) *)
+                            "@sessionModelRefTypes@" -> Utils`StringJoinWithSeparator[
+                               If[FlexibleSUSY`FlexibleEFTHiggs === True,
+                                  {"const " <> FlexibleSUSY`FSModelName <> "_slha&",
+                                   "const standard_model::StandardModel<Two_scale>&"},
+                                  {"const " <> FlexibleSUSY`FSModelName <> "_slha&"}],
+                               ", "],
+                            "@sessionCalculateDecays@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "data->calculate_model_decays();\n" <>
+                               "   if (data->get_fd_settings().get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
+                               "      data->calculate_normalized_effc();\n" <>
+                               "   }",
+                               ""],
+                            "@sessionCalculateEffC@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "data->calculate_normalized_effc();",
+                               "throw SetupError(\"The model was generated without decays.\");"],
+                            "@sessionDecayProblems@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "return data->get_spectrum().get_decays().get_problems().get_problem_strings();",
+                               "return {};"],
+                            "@sessionDecayWarnings@" -> If[FlexibleSUSY`FSCalculateDecays,
+                               "return data->get_spectrum().get_decays().get_problems().get_warning_strings();",
+                               "return {};"],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -5623,7 +5648,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                           {FileNameJoin[{$flexiblesusyTemplateDir, "librarylink.m.in"}],
                            FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_librarylink.m"}]},
                           {FileNameJoin[{$flexiblesusyTemplateDir, "run.m.in"}],
-                           FileNameJoin[{FSOutputDir, "run_" <> FlexibleSUSY`FSModelName <> ".m"}]}
+                           FileNameJoin[{FSOutputDir, "run_" <> FlexibleSUSY`FSModelName <> ".m"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "session.hpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session.hpp"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "session_impl.hpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session_impl.hpp"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "session.cpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_session.cpp"}]},
+                          {FileNameJoin[{$flexiblesusyTemplateDir, "python_module.cpp.in"}],
+                           FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_python_module.cpp"}]}
                          }];
 
            Utils`PrintHeadline["Creating user examples"];
@@ -5643,6 +5676,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                               {{FileNameJoin[{$flexiblesusyTemplateDir, "LesHouches.in"}],
                                 FileNameJoin[{FSOutputDir, "LesHouches.in." <> FlexibleSUSY`FSModelName <> "_generated"}]}}
                              ];
+
+           Print["Creating model metadata for the Python interface ..."];
+           ModelMetadata`WriteModelMetadata[
+               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_metadata.json"}],
+               ModelMetadata`CreateModelMetadata[
+                   FlexibleSUSY`FSModelName, FS`Version, inputParameters,
+                   DeleteDuplicates @ Flatten[TreeMasses`GetMassEigenstate /@ massMatrices],
+                   FlexibleSUSY`FSLesHouchesList]];
 
            Utils`PrintHeadline["FlexibleSUSY has finished"];
           ];
