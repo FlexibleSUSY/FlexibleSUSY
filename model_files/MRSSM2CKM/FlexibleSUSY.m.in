@@ -96,7 +96,8 @@ ExtraSLHAOutputBlocks = {
          {26, FlexibleSUSYObservable`BrLToLGamma[Fe, 2 -> 1]},
          {27, FlexibleSUSYObservable`bsgamma}
       }
-   }
+   },
+   {FWCOEF, {{1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Boxes}, 1]}}}
 };
 
 FSCalculateDecays = True;
