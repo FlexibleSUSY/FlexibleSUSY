@@ -14,8 +14,21 @@ New features
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
+* ``configure`` stops each Mathematica kernel it starts (to check
+  Mathematica, SARAH, FeynArts, FormCalc and the model files) after
+  300 s, so that a hanging kernel no longer blocks it.  The time limit
+  is set with ``--with-math-timeout=<seconds>`` (0 = no limit).  It
+  needs the ``timeout`` command (``gtimeout`` from GNU coreutils on
+  macOS); without it, there is no limit.
+
 Fixed bugs
 ----------
+
+* [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
+  code is enabled and the Mathematica kernel is not found or is older
+  than the required version.  Since FlexibleSUSY 2.6.2 it continued and
+  failed later with the misleading message "SARAH is not installed
+  correctly".
 
 * [commit 888d2e6c3]: Fixed the 2-loop NMSSM Higgs mass corrections
   (``UseHiggs2LoopNMSSM = True``) at large tan(beta). Higgs masses and
