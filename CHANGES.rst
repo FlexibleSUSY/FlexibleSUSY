@@ -24,6 +24,12 @@ New features
 Fixed bugs
 ----------
 
+* [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
+  code is enabled and the Mathematica kernel is not found or is older
+  than the required version.  Since FlexibleSUSY 2.6.2 it continued and
+  failed later with the misleading message "SARAH is not installed
+  correctly".
+
 * [commit 888d2e6c3]: Fixed the 2-loop NMSSM Higgs mass corrections
   (``UseHiggs2LoopNMSSM = True``) at large tan(beta). Higgs masses and
   mixings of singlet-like states were wrong there, and a light CP-odd
