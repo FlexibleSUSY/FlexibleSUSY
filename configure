@@ -197,6 +197,9 @@ FC="gfortran"
 GSLLIBS=""
 INSTALL_DIR=""
 MATH="math"
+# time limit in seconds for each Mathematica kernel started by
+# configure (0 = no limit)
+MATH_TIMEOUT=300
 OPTIONAL_MODULES=""
 pthread_lib_dir=""
 STATIC_LIB_EXT=".a"
@@ -345,6 +348,47 @@ logmsg() {
     else
        echo "$*" >> $logfile
     fi
+}
+
+#_____________________________________________________________________
+run_math() {
+    # Runs the Mathematica kernel given as first argument with the
+    # remaining arguments (reading from stdin), with the time limit
+    # MATH_TIMEOUT if the timeout (or gtimeout) command is available,
+    # so that a hanging kernel does not stop configure.  Returns 124 if
+    # the time limit is reached, otherwise the exit status of the kernel.
+    local math_cmd="$1"
+    shift
+    local timeout_cmd=""
+    if [ "${MATH_TIMEOUT}" -gt 0 ] ; then
+        if command -v timeout > /dev/null 2>&1 ; then
+            timeout_cmd="timeout"
+        elif command -v gtimeout > /dev/null 2>&1 ; then
+            timeout_cmd="gtimeout"
+        fi
+    fi
+    if [ -z "${timeout_cmd}" ] ; then
+        "${math_cmd}" "$@"
+        return
+    fi
+    local _status
+    "${timeout_cmd}" -k 10 "${MATH_TIMEOUT}" "${math_cmd}" "$@"
+    _status="$?"
+    # 124: stopped by SIGTERM, 137: killed by SIGKILL after -k 10
+    if [ "${_status}" = 124 ] || [ "${_status}" = 137 ] ; then
+        logmsg "Error: the Mathematica kernel ${math_cmd} was stopped after ${MATH_TIMEOUT} s"
+        return 124
+    fi
+    return "${_status}"
+}
+
+#_____________________________________________________________________
+report_math_timeout() {
+    # Writes the result of a check whose Mathematica kernel was stopped
+    # by run_math because of the time limit.  The first argument is the
+    # result ("not ok" or "no").
+    result "$1 (the Mathematica kernel did not finish within ${MATH_TIMEOUT} s)"
+    message "   Use --with-math-timeout= to change the time limit (0 = no limit)."
 }
 
 #_____________________________________________________________________
@@ -2386,7 +2430,7 @@ check_required_libs() {
                 enable_himalaya=yes
             }
 
-            cat <<EOF | "${MATH}" > /dev/null 2>&1
+            cat <<EOF | run_math "${MATH}" > /dev/null 2>&1
 Get["${model_file}"]
 
 If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
@@ -2397,9 +2441,14 @@ If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
 ]
 EOF
 
-            [ "x$?" = "x0" ] && {
+            local _status="$?"
+            [ "x${_status}" = "x0" ] && {
                 message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
+            }
+            [ "x${_status}" = "x124" ] && {
+                message "   Warning: the Mathematica kernel did not finish within ${MATH_TIMEOUT} s"
+                message "   when checking whether $model_name uses FSHimalayaMh23L."
             }
 
         done
@@ -2869,6 +2918,11 @@ check_shared_lib_cmd() {
 
 #_____________________________________________________________________
 check_math_cmd() {
+    case "${MATH_TIMEOUT}" in
+        ''|*[!0-9]*)
+            message "Error: --with-math-timeout=${MATH_TIMEOUT} is not a non-negative integer."
+            exit 1 ;;
+    esac
     checking_msg "Mathematica kernel $MATH"
     exists_in_path "$MATH"
     if [ -z "$cmd" ] ; then
@@ -2916,7 +2970,7 @@ Quit[error];
 EOF
 
     checking_msg "Mathematica version >= ${required_mathematica_version}"
-    echo "Get[\"${_math_info_check_progr}\"]" | "$MATH" > /dev/null 2>&1 &&
+    echo "Get[\"${_math_info_check_progr}\"]" | run_math "$MATH" > /dev/null 2>&1 &&
 	_ok=true
     local _exit_status="$?"
     if test -r "${mathconfig}"; then
@@ -2932,6 +2986,8 @@ EOF
     else
         if [ "$_exit_status" = 2 ]; then
             result "not ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
+        elif [ "$_exit_status" = 124 ]; then
+            report_math_timeout "not ok"
         else
             result "not ok"
         fi
@@ -2965,13 +3021,17 @@ check_random_number_generator() {
 check_sarah() {
     checking_msg "SARAH installation"
     rm -f ${sarahconfig}
-    "$MATH" <<EOF > /dev/null
+    run_math "$MATH" <<EOF > /dev/null
 Needs["SARAH\`"];
 If[!ValueQ[SA\`Version] || !StringQ[\$sarahDir], Quit[1]];
 Export["${sarahconfig}", SA\`Version, "String"];
 Quit[0];
 EOF
     local _sarah_is_available="$?"
+    if test "x${_sarah_is_available}" = "x124" ; then
+        report_math_timeout "not ok"
+        exit 1
+    fi
     if test "x${_sarah_is_available}" = "x0" ; then
         if test -r "${sarahconfig}" ; then
             SARAH_VERSION=$(cat "${sarahconfig}")
@@ -2998,7 +3058,7 @@ EOF
         exit 1
     fi
 
-    SARAH_MODEL_DIR=$(cat <<EOF | ("$MATH" 2> /dev/stdout 1> /dev/null)
+    SARAH_MODEL_DIR=$(cat <<EOF | (run_math "$MATH" 2> /dev/stdout 1> /dev/null)
 If[Needs["SARAH\`"] === \$Failed || !ValueQ[\$sarahModelDir],
    Quit[1];
   ];
@@ -3028,7 +3088,7 @@ check_feynarts() {
     local oldVersion=""
     [ -f "${feynartsconfig}" ] && oldVersion=$(cat "${feynartsconfig}")
     rm -f ${feynartsconfig}
-    "$MATH" <<EOF > /dev/null
+    run_math "$MATH" <<EOF > /dev/null
 Needs["FeynArts\`"];
 If[!MemberQ[\$Packages, "FeynArts\`"], Quit[1]];
 If[Head[FeynArts\`\$FeynArts] === List,
@@ -3038,6 +3098,16 @@ If[Head[FeynArts\`\$FeynArts] === List,
 Quit[0];
 EOF
     local _feynarts_is_available="$?"
+    if test "x${_feynarts_is_available}" = "x124" ; then
+        if test "x$enable_feynarts" = "xautomatic"; then
+            enable_feynarts="no"
+            report_math_timeout "no"
+            message "   FeynArts support is disabled."
+            return
+        fi
+        report_math_timeout "not ok"
+        exit 1
+    fi
     if test "x${_feynarts_is_available}" = "x0" ; then
         if test -r "${feynartsconfig}" ; then
             FEYNARTS_VERSION=$(cat "${feynartsconfig}")
@@ -3106,7 +3176,7 @@ check_formcalc() {
     local oldVersion=""
     [ -f "${formcalcconfig}" ] && oldVersion=$(cat "${formcalcconfig}")
     rm -f ${formcalcconfig}
-    "$MATH" <<EOF > /dev/null
+    run_math "$MATH" <<EOF > /dev/null
 Needs["FormCalc\`"];
 If[!MemberQ[\$Packages, "FormCalc\`"], Quit[1]];
 If[Head[FormCalc\`\$FormCalc] === List,
@@ -3116,6 +3186,16 @@ If[Head[FormCalc\`\$FormCalc] === List,
 Quit[0];
 EOF
     local _formcalc_is_available="$?"
+    if test "x${_formcalc_is_available}" = "x124" ; then
+        if test "x$enable_formcalc" = "xautomatic"; then
+            enable_formcalc="no"
+            report_math_timeout "no"
+            message "   FormCalc support is disabled."
+            return
+        fi
+        report_math_timeout "not ok"
+        exit 1
+    fi
     if test "x${_formcalc_is_available}" = "x0" ; then
         if test -r "${formcalcconfig}" ; then
             FORMCALC_VERSION=$(cat "${formcalcconfig}")
@@ -3185,7 +3265,7 @@ EOF
                 result "yes (cannot perform test calculation because FeynArts support is disabled)"
             fi
         else
-            "$MATH" <<EOF > /dev/null
+            run_math "$MATH" <<EOF > /dev/null
 Needs["FeynArts\`"];
 Needs["FormCalc\`"];
 SetDirectory[CreateDirectory[]];
@@ -3204,7 +3284,16 @@ If[MatchQ[Head[fcFeynAmp], Amp[{{FeynArts\`S[1], __}} -> {{FeynArts\`S[1], __}}]
 Quit[1];
 EOF
             local _formcalc_is_working="$?"
-            if test "x${_formcalc_is_working}" = "x0" ; then
+            if test "x${_formcalc_is_working}" = "x124" ; then
+                if test "x$enable_formcalc" = "xautomatic"; then
+                    enable_formcalc="no"
+                    report_math_timeout "no"
+                    message "   FormCalc support is disabled."
+                else
+                    report_math_timeout "not ok"
+                    exit 1
+                fi
+            elif test "x${_formcalc_is_working}" = "x0" ; then
                 enable_formcalc="yes"
                 result "yes (performed test calculation of S[1] -> S[1] in the SM)"
             elif test "x$enable_formcalc" = "xautomatic"; then
@@ -3259,9 +3348,13 @@ mma_symbol_is() {
         return 1
     }
 
-    echo "Get[\"${model_file}\"]; Quit[Boole[!(${symbol} === ${value})]]" | "${math_cmd}" > /dev/null 2>&1
-
-    return $?
+    echo "Get[\"${model_file}\"]; Quit[Boole[!(${symbol} === ${value})]]" | run_math "${math_cmd}" > /dev/null 2>&1
+    local _status="$?"
+    if [ "${_status}" = 124 ] ; then
+        >&2 echo "Warning: the Mathematica kernel did not finish within ${MATH_TIMEOUT} s"
+        >&2 echo "   when checking ${symbol} in ${model_file}; assuming it is not ${value}."
+    fi
+    return "${_status}"
 }
 
 #_____________________________________________________________________
@@ -3805,6 +3898,8 @@ EOF
 # BEGIN: NOT EXPORTED ##########################################
 cat <<EOF
   --with-math-cmd=          Mathematic kernel (default: $MATH)
+  --with-math-timeout=      Time limit in seconds for each Mathematica kernel
+                            started by configure, 0 = no limit (default: $MATH_TIMEOUT)
 EOF
 # END:   NOT EXPORTED ##########################################
 cat <<EOF
@@ -3930,6 +4025,7 @@ if test $# -gt 0 ; then
             --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
             --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
             --with-math-cmd=*)       MATH=$optarg ;;
+            --with-math-timeout=*)   MATH_TIMEOUT=$optarg ;;
             --with-models=*)         MODELS=$optarg ;;
             --with-optional-modules=*) OPTIONAL_MODULES="$(echo $optarg | tr ',' ' ')" ;;
             --with-pthread-libdir=*) pthread_lib_dir=$optarg ;;

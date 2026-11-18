@@ -14,6 +14,13 @@ New features
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
 
+* ``configure`` stops each Mathematica kernel it starts (to check
+  Mathematica, SARAH, FeynArts, FormCalc and the model files) after
+  300 s, so that a hanging kernel no longer blocks it.  The time limit
+  is set with ``--with-math-timeout=<seconds>`` (0 = no limit).  It
+  needs the ``timeout`` command (``gtimeout`` from GNU coreutils on
+  macOS); without it, there is no limit.
+
 Fixed bugs
 ----------
 
