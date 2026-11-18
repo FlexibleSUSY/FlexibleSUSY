@@ -264,9 +264,17 @@ Do1DimScalar[particle_, particleName_String, massName_String, massMatrixName_Str
        If[FlexibleSUSY`UseHiggs2Loop === True,
           (* auto-generated 2-loop self-energy is calculated in the Landau gauge *)
           IndentText[SelfEnergies`CreateLandauGaugeModel[] <>
-                     "self_energy += Re(" <> SelfEnergies`LandauGaugeModelName <> ".self_energy_" <> particleName <> "_2loop(p));\n"],
-          IndentText["self_energy += Re(self_energy_" <> particleName <> "_2loop(p));\n"]
-         ] <> "}\n", ""] <>
+                     "const double self_energy_2l = Re(" <> SelfEnergies`LandauGaugeModelName <> ".self_energy_" <> particleName <> "_2loop(p));\n"],
+          IndentText["const double self_energy_2l = Re(self_energy_" <> particleName <> "_2loop(p));\n"]
+         ] <>
+       (* as in CalcEffPot2L: a non-finite 2-loop self-energy is dropped and flagged *)
+       IndentText["if (std::isfinite(self_energy_2l)) {\n" <>
+                  IndentText["self_energy += self_energy_2l;\n"] <>
+                  "} else {\n" <>
+                  IndentText["problems.flag_bad_mass(" <> FlexibleSUSY`FSModelName <> "_info::" <>
+                             CConversion`ToValidCSymbolString[particle] <> ");\n"] <>
+                  "}\n"] <>
+       "}\n", ""] <>
     If[FlexibleSUSY`UseHiggs3LoopSM === True && particle === SARAH`HiggsBoson,
        "if (pole_mass_loop_order > 2)\n" <>
        IndentText["self_energy += self_energy_" <> particleName <> "_3loop();\n"], ""] <>

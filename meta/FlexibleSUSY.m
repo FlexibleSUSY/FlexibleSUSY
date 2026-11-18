@@ -1812,26 +1812,83 @@ GetBrokenGaugeCouplings[] :=
    Without D-terms (SM, THDMs), both orders give the same result.
 
    Implementation: the tree-level EWSB eqs. are solved for the same
-   parameters as in calculate_DRbar_masses().  This needs the analytic
-   solution (solve_ewsb_tree_level_custom()), because the copy has no
-   EWSB solver: the model's solver can't be shared, as the pole masses
-   are calculated in parallel threads. *)
-CreateLandauGaugeTreeLevelEWSBSolution[{}] :=
+   parameters and in the same way as in calculate_DRbar_masses(): for
+   the soft Higgs masses (solve_ewsb_tree_level_custom()) if possible,
+   otherwise with the analytic tree-level solution of the EWSB solver
+   (from Mathematica or TreeLevelEWSBSolution), copied into
+   solve_ewsb_tree_level_analytic().  The loop tadpoles are not part
+   of this tree-level solution; they enter through the EWSB solution
+   of the model.  A numerical solution isn't possible, because the
+   copy has no EWSB solver: the model's solver can't be shared, as the
+   pole masses are calculated in parallel threads.  Without an analytic
+   solution, UseHiggs2Loop is switched off at code generation. *)
+(* returns {solution, substitutions} of the tree-level EWSB eqs. used by
+   the EWSB solver of the two-scale (or else the shooting) solver, i.e.
+   the solution used by calculate_DRbar_masses() when no soft Higgs mass
+   can be solved for (solve_ewsb_tree_level()).  The solution is {} if
+   the EWSB eqs. are only solved numerically. *)
+GetLandauGaugeEWSBSolution[solverEwsbSolutions_List, solverEwsbSubstitutions_List] :=
+    Module[{solvers = Select[{FlexibleSUSY`TwoScaleSolver, FlexibleSUSY`ShootingSolver}, HaveBVPSolver]},
+           If[solvers === {},
+              {{}, {}},
+              {First[solvers] /. solverEwsbSolutions, First[solvers] /. solverEwsbSubstitutions}
+             ]
+          ];
+
+Utils`MakeUnknownInputDefinition[GetLandauGaugeEWSBSolution];
+
+(* the call that solves the tree-level EWSB eqs. in the constructor *)
+CreateLandauGaugeTreeLevelEWSBSolution[{}, _List] :=
     "// no EWSB eqs.\n";
 
-CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations_List] :=
-    If[MatchQ[GetTreeLevelEWSBOutputParameters[ewsbEquations], {__}],
-       "solve_ewsb_tree_level_custom();\n",
-       "throw SetupError(\"" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge: \"\n" <>
-       "                 \"the auto-generated 2-loop corrections need an analytic \"\n" <>
-       "                 \"solution of the tree-level EWSB eqs. (FSSolveEWSBTreeLevelFor)\");\n"
-      ];
+CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations_List, {ewsbSolution_List, _List}] :=
+    Which[MatchQ[GetTreeLevelEWSBOutputParameters[ewsbEquations], {__}],
+          "solve_ewsb_tree_level_custom();\n",
+          ewsbSolution =!= {},
+          "solve_ewsb_tree_level_analytic(*this);\n",
+          True,
+          (* not reached if UseHiggs2Loop is switched off at code generation *)
+          "throw SetupError(\"" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge: \"\n" <>
+          "                 \"the auto-generated 2-loop corrections need an analytic \"\n" <>
+          "                 \"solution of the tree-level EWSB eqs.\");\n"
+         ];
 
 Utils`MakeUnknownInputDefinition[CreateLandauGaugeTreeLevelEWSBSolution];
 
+(* the function solve_ewsb_tree_level_analytic(), with the same code as
+   solve_tree_level() of the EWSB solver *)
+CreateLandauGaugeTreeLevelEWSBFunction[ewsbEquations_List, {ewsbSolution_List, ewsbSubstitutions_List}] :=
+    If[ewsbEquations =!= {} &&
+       !MatchQ[GetTreeLevelEWSBOutputParameters[ewsbEquations], {__}] &&
+       ewsbSolution =!= {},
+       "namespace {\n\n" <>
+       "#define INPUT(parameter) model.get_input().parameter\n" <>
+       "#define LOCALINPUT(parameter) INPUT(parameter)\n" <>
+       "#define INPUTPARAMETER(parameter) LOCALINPUT(parameter)\n" <>
+       "#define MODELPARAMETER(parameter) model.get_##parameter()\n" <>
+       "#define EXTRAPARAMETER(parameter) model.get_##parameter()\n" <>
+       "#define DERIVEDPARAMETER(parameter) model.parameter()\n" <>
+       "#define PHASE(p) MODELPARAMETER(p)\n" <>
+       "#define LowEnergyConstant(p) Electroweak_constants::p\n\n" <>
+       "/// solves the tree-level EWSB eqs. as solve_tree_level() of the EWSB solver\n" <>
+       "int solve_ewsb_tree_level_analytic(" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model)\n{\n" <>
+       IndentText["int error = EWSB_solver::SUCCESS;\n\n" <>
+                  WrapLines[EWSB`CreateTreeLevelEwsbSolver[ewsbSolution /. FlexibleSUSY`tadpole[_] -> 0]] <>
+                  EWSB`SetTreeLevelSolution[ewsbSolution, ewsbSubstitutions] <>
+                  "\nreturn error;\n"] <>
+       "}\n\n" <>
+       "#undef INPUT\n#undef LOCALINPUT\n#undef INPUTPARAMETER\n#undef MODELPARAMETER\n" <>
+       "#undef EXTRAPARAMETER\n#undef DERIVEDPARAMETER\n#undef PHASE\n#undef LowEnergyConstant\n\n" <>
+       "} // anonymous namespace\n",
+       ""
+      ];
+
+Utils`MakeUnknownInputDefinition[CreateLandauGaugeTreeLevelEWSBFunction];
+
 WriteLandauGaugeModelClass[landauMassMatrices_List, massMatrices_List,
-                           ewsbEquations_List, files_List] :=
+                           ewsbEquations_List, ewsbSolution:{_List, _List}, files_List] :=
     Module[{massCalculationPrototypes, massCalculationFunctions, brokenGaugeCouplings,
+            copyPhasesAndExtraParameters,
             otherScalarMassMatrices, overriddenMassMatrices},
            (* The masses of scalars are stored with the sign of the mass
               squared (SignedAbsSqrt), because in the gaugeless limit
@@ -1848,11 +1905,18 @@ WriteLandauGaugeModelClass[landauMassMatrices_List, massMatrices_List,
            massCalculationFunctions  = StringJoin[TreeMasses`CreateMassCalculationFunction[#, True]& /@ overriddenMassMatrices];
            brokenGaugeCouplings = GetBrokenGaugeCouplings[];
            Print["Gauge couplings set to zero in the 2-loop calculation (gaugeless limit): ", brokenGaugeCouplings];
+           copyPhasesAndExtraParameters =
+              StringJoin[("set_" <> # <> "(model.get_" <> # <> "());\n")& /@
+                         (Phases`CreatePhaseName /@ Parameters`GetPhases[])] <>
+              If[Parameters`GetExtraParameters[] =!= {},
+                 "set_extra_parameters(model.get_extra_parameters());\n", ""];
            WriteOut`ReplaceInFiles[files,
                           { "@massCalculationPrototypes@"  -> IndentText[FunctionModifiers`MakeOverride[massCalculationPrototypes]],
                             "@massCalculationFunctions@"   -> WrapLines[massCalculationFunctions],
-                            "@solveEWSBTreeLevel@"         -> IndentText[CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations]],
+                            "@solveEWSBTreeLevel@"         -> IndentText[CreateLandauGaugeTreeLevelEWSBSolution[ewsbEquations, ewsbSolution]],
+                            "@solveEWSBTreeLevelFunction@" -> CreateLandauGaugeTreeLevelEWSBFunction[ewsbEquations, ewsbSolution],
                             "@setGaugelessLimit@"          -> IndentText[StringJoin[Parameters`SetParameter[#, "0.", ""]& /@ brokenGaugeCouplings]],
+                            "@copyPhasesAndExtraParameters@" -> IndentText[copyPhasesAndExtraParameters],
                             "@calculateAllMasses@"         -> IndentText[TreeMasses`CallMassCalculationFunctions[massMatrices]],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
@@ -4765,7 +4829,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             susyBetaFunctions, susyBreakingBetaFunctions,
             anomDim,
             inputParameters (* list of 3-component lists of the form {name, block, type} *),
-            massMatrices, landauGaugeMassMatrices,
+            massMatrices, landauGaugeMassMatrices, landauGaugeEWSBSolution,
             diagonalizationPrecision,
             allInputParameterIndexReplacementRules = {},
             allExtraParameterIndexReplacementRules = {},
@@ -5022,6 +5086,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            (********************* EWSB *********************)
            ewsbEquations = PrepareEWSBEquations[allIndexReplacementRules];
 
+
            If[FlexibleSUSY`EWSBInitialGuess =!= {},
               FlexibleSUSY`EWSBInitialGuess = EWSB`GetValidEWSBInitialGuesses[FlexibleSUSY`EWSBInitialGuess];
              ];
@@ -5061,6 +5126,24 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               solverFreePhases = Rule[#, {}]& /@ FlexibleSUSY`FSBVPSolvers;
              ];
            freePhases = GetAllFreePhases[solverFreePhases];
+
+           (* The auto-generated 2-loop Higgs corrections are evaluated in a
+              Landau-gauge copy of the model, which solves the tree-level EWSB
+              eqs. like calculate_DRbar_masses(), but has no numerical EWSB
+              solver (see CreateLandauGaugeTreeLevelEWSBSolution).  If there is
+              no analytic solution, switch them off here, at code generation,
+              instead of generating a model that fails at run time. *)
+           landauGaugeEWSBSolution = GetLandauGaugeEWSBSolution[solverEwsbSolutions, solverEwsbSubstitutions];
+           If[FlexibleSUSY`UseHiggs2Loop === True && ewsbEquations =!= {} &&
+              !MatchQ[GetTreeLevelEWSBOutputParameters[ewsbEquations], {__}] &&
+              landauGaugeEWSBSolution[[1]] === {},
+              Utils`FSFancyWarning["The auto-generated 2-loop Higgs mass corrections ",
+                 "(UseHiggs2Loop) need an analytic solution of the tree-level EWSB ",
+                 "equations, which was not found for ", FlexibleSUSY`FSModelName,
+                 ". They are switched off. To use them, give the solution in ",
+                 "TreeLevelEWSBSolution or set FSSolveEWSBTreeLevelFor in the model file."];
+              FlexibleSUSY`UseHiggs2Loop = False;
+             ];
            If[freePhases =!= {},
               Print["Note: the following phases are free: ", freePhases];
               missingPhases = Select[freePhases, !MemberQ[#[[1]]& /@ inputParameters, #]&];
@@ -5179,7 +5262,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            diagonalizationPrecision];
 
            Print["Creating class for model in the Landau gauge ..."];
-           WriteLandauGaugeModelClass[landauGaugeMassMatrices, massMatrices, ewsbEquations,
+           WriteLandauGaugeModelClass[landauGaugeMassMatrices, massMatrices, ewsbEquations, landauGaugeEWSBSolution,
                                       {{FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_landau_gauge.hpp.in"}],
                                         FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates_landau_gauge.hpp"}]},
                                        {FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates_landau_gauge.cpp.in"}],

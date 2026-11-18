@@ -29,11 +29,14 @@
 #include "config.h"
 #include "eigen_utils.hpp"
 #include "error.hpp"
+#include "ew_input.hpp"
+#include "ewsb_solver.hpp"
 #include "linalg2.hpp"
 #include "wrappers.hpp"
 
 namespace flexiblesusy {
 
+@solveEWSBTreeLevelFunction@
 #define CLASSNAME @ModelName@_mass_eigenstates_landau_gauge
 
 CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
@@ -43,6 +46,10 @@ CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
    // the given model may be written concurrently by other threads
    // during the parallel pole mass calculation
    @ModelName@_soft_parameters::operator=(model);
+
+   // phases and extra parameters are members of the mass eigenstates
+   // class, not of the soft parameters, so they are copied separately
+@copyPhasesAndExtraParameters@
 
    // As in SARAH/SPheno, the tree-level EWSB eqs. are solved with the
    // full gauge couplings (for the same parameters as in

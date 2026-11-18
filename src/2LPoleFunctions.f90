@@ -3,7 +3,10 @@
 
 Module Pole2LFunctions
 
-Integer, Parameter :: dp = Selected_real_kind(15,300)
+Use, Intrinsic :: iso_c_binding, only: c_double
+
+! double precision; c_double so that the bind(C) wrappers below take C doubles
+Integer, Parameter :: dp = c_double
 Real(dp), parameter :: epsD = 1E-8_dp, epsM = 1E-10_dp
 Real(dp), Parameter :: Pi = 3.1415926535897932384626433832795029_dp           &
    & , Pi2 = Pi**2, Pi3 = Pi2*Pi                                              &
@@ -25,247 +28,247 @@ Contains
 
 !!!!!!!!!!! subroutine wrappers to interface with C/C++
 
-Subroutine CTfSS(out,x,y,z,Q2)
+Subroutine CTfSS(out,x,y,z,Q2) bind(C, name='pole2l_ctfss')
 Implicit None
 real(dp), intent(in):: x,y,z,q2
 real(dp) :: out
 out = TfSS(x,y,z,Q2)
 End Subroutine CTfSS
-Subroutine CTfSSS(out,x,y,z,Q2)
+Subroutine CTfSSS(out,x,y,z,Q2) bind(C, name='pole2l_ctfsss')
 Implicit None
 real(dp), intent(in):: x,y,z,q2
 real(dp) :: out
 out = TfSSS(x,y,z,Q2)
 End Subroutine CTfSSS
-Subroutine CTfSSSS(out,x,y,z,u,Q2)
+Subroutine CTfSSSS(out,x,y,z,u,Q2) bind(C, name='pole2l_ctfssss')
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfSSSS(x,y,z,u,Q2)
 End Subroutine CTfSSSS
-Subroutine CTfSSFF(out,x,y,z,u,Q2)
+Subroutine CTfSSFF(out,x,y,z,u,Q2) bind(C, name='pole2l_ctfssff')
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfSSFF(x,y,z,u,Q2)
 End Subroutine CTfSSFF
-Subroutine CTfSSFbFb(out,x,y,z,u,Q2)
+Subroutine CTfSSFbFb(out,x,y,z,u,Q2) bind(C, name='pole2l_ctfssfbfb')
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfSSFbFb(x,y,z,u,Q2)
 End Subroutine CTfSSFbFb
-Subroutine CTfFFFbS(out,x,y,z,u,Q2)
+Subroutine CTfFFFbS(out,x,y,z,u,Q2) bind(C, name='pole2l_ctffffbs')
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfFFFbS(x,y,z,u,Q2)
 End Subroutine CTfFFFbS
-Subroutine CTfFFbFS(out,x,y,z,u,Q2)
+Subroutine CTfFFbFS(out,x,y,z,u,Q2) bind(C, name='pole2l_ctfffbfs')
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfFFbFS(x,y,z,u,Q2)
 End Subroutine CTfFFbFS
-Subroutine CTfFbFbFbS(out,x,y,z,u,Q2)
+Subroutine CTfFbFbFbS(out,x,y,z,u,Q2) bind(C, name='pole2l_ctffbfbfbs')
 Implicit None
 real(dp), intent(in):: x,y,z,u,q2
 real(dp) :: out
 out = TfFbFbFbS(x,y,z,u,Q2)
 End Subroutine CTfFbFbFbS
-Subroutine CTfSV(out,x,Q2)
+Subroutine CTfSV(out,x,Q2) bind(C, name='pole2l_ctfsv')
 Implicit None
 real(dp), intent(in):: x,q2
 real(dp) :: out
 out = TfSV(x,Q2)
 End Subroutine CTfSV
-Subroutine CTfFV(out,x,Q2)
+Subroutine CTfFV(out,x,Q2) bind(C, name='pole2l_ctffv')
 Implicit None
 real(dp), intent(in):: x,q2
 real(dp) :: out
 out = TfFV(x,Q2)
 End Subroutine CTfFV
-Subroutine CWfSSSS (out,p2,x,y,z,u,Q2)
+Subroutine CWfSSSS(out,p2,x,y,z,u,Q2) bind(C, name='pole2l_cwfssss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: out
 out = WfSSSS(p2,x,y,z,u,Q2)
 end Subroutine CWfSSSS
-Subroutine CXfSSS(out,p2,x,y,z,Q2)
+Subroutine CXfSSS(out,p2,x,y,z,Q2) bind(C, name='pole2l_cxfsss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,q2
 real(dp) :: out
 out = XfSSS(p2,x,y,z,Q2)
 end Subroutine CXfSSS
-Subroutine CYfSSSS(out,p2,x,y,z,u,Q2)
+Subroutine CYfSSSS(out,p2,x,y,z,u,Q2) bind(C, name='pole2l_cyfssss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: out
 out = YfSSSS(p2,x,y,z,u,Q2)
 end Subroutine CYfSSSS
-Subroutine CZfSSSS(out,p2,x,y,z,u,Q2)
+Subroutine CZfSSSS(out,p2,x,y,z,u,Q2) bind(C, name='pole2l_czfssss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: out
 out = ZfSSSS(p2,x,y,z,u,Q2)
 end Subroutine CZfSSSS
-Subroutine CSfSSS(out,p2,x,y,z,Q2)
+Subroutine CSfSSS(out,p2,x,y,z,Q2) bind(C, name='pole2l_csfsss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,q2
 real(dp) :: out
 out = SfSSS(p2,x,y,z,Q2)
 end Subroutine CSfSSS
-Subroutine CUfSSSS(out,p2,x,y,z,u,Q2)
+Subroutine CUfSSSS(out,p2,x,y,z,u,Q2) bind(C, name='pole2l_cufssss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: out
 out = UfSSSS(p2,x,y,z,u,Q2)
 end Subroutine CUfSSSS
-Subroutine CVfSSSSS(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfSSSSS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvfsssss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfSSSSS(p2,x,y,z,u,v,Q2)
 end Subroutine CVfSSSSS
-Subroutine CMfSSSSS(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfSSSSS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmfsssss')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfSSSSS(p2,x,y,z,u,v,Q2)
 end Subroutine CMfSSSSS
-Subroutine CWfSSSV(out,p2,x,Q2)
+Subroutine CWfSSSV(out,p2,x,Q2) bind(C, name='pole2l_cwfsssv')
 Implicit None
 real(dp), intent(in):: p2,x,q2
 real(dp) :: out
 out = WfSSSV(p2,x,Q2)
 end Subroutine CWfSSSV
-Subroutine CMfSSSSV(out,p2,x,y,Q2)
+Subroutine CMfSSSSV(out,p2,x,y,Q2) bind(C, name='pole2l_cmfssssv')
 Implicit None
 real(dp), intent(in):: p2,x,y,q2
 real(dp) :: out
 out = MfSSSSV(p2,x,y,Q2)
 end Subroutine CMfSSSSV
-Subroutine CWfSSFF (out,p2,x,y,z,u,Q2)
+Subroutine CWfSSFF(out,p2,x,y,z,u,Q2) bind(C, name='pole2l_cwfssff')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: out
 out = WfSSFF(p2,x,y,z,u,Q2)
 end Subroutine CWfSSFF
-Subroutine CWfSSFbFb (out,p2,x,y,z,u,Q2)
+Subroutine CWfSSFbFb(out,p2,x,y,z,u,Q2) bind(C, name='pole2l_cwfssfbfb')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,q2
 real(dp) :: out
 out = WfSSFbFb(p2,x,y,z,u,Q2)
 end Subroutine CWfSSFbFb
-Subroutine CMfFbFbFbFbS(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfFbFbFbFbS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmffbfbfbfbs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfFbFbFbFbS(p2,x,y,z,u,v,Q2)
 end Subroutine CMfFbFbFbFbS
-Subroutine CMfFFbFbFS(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfFFbFbFS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmfffbfbfs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfFFbFbFS(p2,x,y,z,u,v,Q2)
 end Subroutine CMfFFbFbFS
-Subroutine CMfFFbFFbS(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfFFbFFbS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmfffbffbs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfFFbFFbS(p2,x,y,z,u,v,Q2)
 end Subroutine CMfFFbFFbS
-Subroutine CMfFFFbFbS(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfFFFbFbS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmffffbfbs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfFFFbFbS(p2,x,y,z,u,v,Q2)
 end Subroutine CMfFFFbFbS
-Subroutine CMfFFFFS(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfFFFFS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmfffffs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfFFFFS(p2,x,y,z,u,v,Q2)
 end Subroutine CMfFFFFS
-Subroutine CMfSFbSFbFb(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfSFbSFbFb(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmfsfbsfbfb')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfSFbSFbFb(p2,x,y,z,u,v,Q2)
 end Subroutine CMfSFbSFbFb
-Subroutine CMfSFSFbF(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfSFSFbF(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmfsfsfbf')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfSFSFbF(p2,x,y,z,u,v,Q2)
 end Subroutine CMfSFSFbF
-Subroutine CMfSFSFFb(out,p2,x,y,z,u,v,Q2)
+Subroutine CMfSFSFFb(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cmfsfsffb')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = MfSFSFFb(p2,x,y,z,u,v,Q2)
 end Subroutine CMfSFSFFb
-Subroutine CVfSSSFbFb(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfSSSFbFb(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvfsssfbfb')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfSSSFbFb(p2,x,y,z,u,v,Q2)
 end Subroutine CVfSSSFbFb
-Subroutine CVfSSSFF(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfSSSFF(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvfsssff')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfSSSFF(p2,x,y,z,u,v,Q2)
 end Subroutine CVfSSSFF
-Subroutine CVfFbFbFbFbS(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfFbFbFbFbS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvffbfbfbfbs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfFbFbFbFbS(p2,x,y,z,u,v,Q2)
 end Subroutine CVfFbFbFbFbS
-Subroutine CVfFbFFbFS(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfFbFFbFS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvffbffbfs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfFbFFbFS(p2,x,y,z,u,v,Q2)
 end Subroutine CVfFbFFbFS
-Subroutine CVfFbFFFbS(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfFbFFFbS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvffbfffbs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfFbFFFbS(p2,x,y,z,u,v,Q2)
 end Subroutine CVfFbFFFbS
-Subroutine CVfFFbFbFS(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfFFbFbFS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvfffbfbfs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfFFbFbFS(p2,x,y,z,u,v,Q2)
 end Subroutine CVfFFbFbFS
-Subroutine CVfFFFbFbS(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfFFFbFbS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvffffbfbs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfFFFbFbS(p2,x,y,z,u,v,Q2)
 end Subroutine CVfFFFbFbS
-Subroutine CVfFFFFS(out,p2,x,y,z,u,v,Q2)
+Subroutine CVfFFFFS(out,p2,x,y,z,u,v,Q2) bind(C, name='pole2l_cvfffffs')
 Implicit None
 real(dp), intent(in):: p2,x,y,z,u,v,q2
 real(dp) :: out
 out = VfFFFFS(p2,x,y,z,u,v,Q2)
 end Subroutine CVfFFFFS
-Subroutine CGfFFV(out,p2,x,y,Q2)
+Subroutine CGfFFV(out,p2,x,y,Q2) bind(C, name='pole2l_cgfffv')
 Implicit None
 real(dp), intent(in) :: p2,x,y,q2
 real(dp) :: out
 out = GfFFV(p2,x,y,Q2)
 end Subroutine CGfFFV
-Subroutine CGfFbFbV(out,p2,x,y,Q2)
+Subroutine CGfFbFbV(out,p2,x,y,Q2) bind(C, name='pole2l_cgffbfbv')
 Implicit None
 real(dp), intent(in) :: p2,x,y,q2
 real(dp) :: out
 out = GfFbFbV(p2,x,y,Q2)
 end Subroutine CGfFbFbV
-Subroutine CTfFVMSbar(out,x,Q2)
+Subroutine CTfFVMSbar(out,x,Q2) bind(C, name='pole2l_ctffvmsbar')
 Implicit None
 real(dp), intent(in):: x,q2
 real(dp) :: out
@@ -274,7 +277,7 @@ if (.not. smallc(x/q2)) then
    out = out + real(4._dp*x*(2._dp*log(x/q2)-1._dp),dp)
 end if
 End Subroutine CTfFVMSbar
-Subroutine CGfFFVMSbar(out,p2,x_in,y_in,Q2)
+Subroutine CGfFFVMSbar(out,p2,x_in,y_in,Q2) bind(C, name='pole2l_cgfffvmsbar')
 Implicit None
 real(dp), intent(in) :: p2,x_in,y_in,q2
 real(dp) :: out,x,y,z,u,v
@@ -284,7 +287,7 @@ if (.not. (smalldp(x,y) .and. smallc(x/q2,y/q2))) then
    out = out + real(4._dp*(x+y+J0(x,q2)+J0(y,q2)-(x+y)*BB(x,y,q2)),dp)
 end if
 end Subroutine CGfFFVMSbar
-Subroutine CGfFbFbVMSbar(out,p2,x_in,y_in,Q2)
+Subroutine CGfFbFbVMSbar(out,p2,x_in,y_in,Q2) bind(C, name='pole2l_cgffbfbvmsbar')
 Implicit None
 real(dp), intent(in) :: p2,x_in,y_in,q2
 real(dp) :: out,x,y,z,u,v
