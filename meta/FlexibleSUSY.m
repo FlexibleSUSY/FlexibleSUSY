@@ -3682,14 +3682,25 @@ Get1LSelfEnergyFileName[outputDir_String, eigenstates_] :=
 Get2LDiagramFileName[outputDir_String, eigenstates_, field_String] :=
     FileNameJoin[{outputDir, ToString[eigenstates], "Two-Loop", field <> ".m"}];
 
+(* True if SARAH calculates 2-loop diagrams for the pseudoscalar Higgs,
+   which it does only if the model has one (see SPheno2LPole.m) *)
+Has2LPseudoScalarDiagrams[eigenstates_] :=
+    !FreeQ[SARAH`ParticleDefinitions[eigenstates], "Pseudo-Scalar Higgs"];
+
 Get2LSelfEnergyFileNames[outputDir_String, eigenstates_] :=
     If[True || SARAH`SupersymmetricModel,
-       {
-           Get2LDiagramFileName[outputDir, eigenstates, "hh"],
-           Get2LDiagramFileName[outputDir, eigenstates, "Ah"]
-       },
+       Join[
+           { Get2LDiagramFileName[outputDir, eigenstates, "hh"] },
+           If[Has2LPseudoScalarDiagrams[eigenstates],
+              { Get2LDiagramFileName[outputDir, eigenstates, "Ah"] },
+              {}
+             ]
+       ],
        {}
       ];
+
+Get2LSelfEnergy::missing = "SARAH's 2-loop self-energy file(s) `1` not found.";
+Get2LTadpole::missing = "SARAH's 2-loop tadpole file(s) `1` not found.";
 
 Get2LTadpoleFileNames[outputDir_String, eigenstates_] :=
     If[True || SARAH`SupersymmetricModel,
@@ -3831,12 +3842,17 @@ Get2LSelfEnergy[eigenstates_] :=
            files = Get2LSelfEnergyFileNames[$sarahCurrentOutputMainDir, eigenstates];
            If[files === {}, {},
               Print["Reading 2-loop self-energies from ", files, " ..."];
+              Utils`AssertOrQuit[And @@ (FileExistsQ /@ files), Get2LSelfEnergy::missing,
+                                 Select[files, !FileExistsQ[#]&]];
               SARAH`twoloophiggsmassdiags = {0, 0};
               Get /@ files;
-              {
-                  {{SARAH`HiggsBoson, SARAH`HiggsBoson}    , Null, SelfEnergies2L`ConvertSarah2LDiagramList[SARAH`twoloophiggsmassdiags[[1]]]},
-                  {{SARAH`PseudoScalar, SARAH`PseudoScalar}, Null, SelfEnergies2L`ConvertSarah2LDiagramList[SARAH`twoloophiggsmassdiags[[2]]]}
-              }
+              Join[
+                  {{{SARAH`HiggsBoson, SARAH`HiggsBoson}, Null, SelfEnergies2L`ConvertSarah2LDiagramList[SARAH`twoloophiggsmassdiags[[1]]]}},
+                  If[Has2LPseudoScalarDiagrams[eigenstates],
+                     {{{SARAH`PseudoScalar, SARAH`PseudoScalar}, Null, SelfEnergies2L`ConvertSarah2LDiagramList[SARAH`twoloophiggsmassdiags[[2]]]}},
+                     {}
+                    ]
+              ]
              ]
           ];
 
@@ -3845,6 +3861,8 @@ Get2LTadpole[eigenstates_] :=
            files = Get2LTadpoleFileNames[$sarahCurrentOutputMainDir, eigenstates];
            If[files === {}, {},
               Print["Reading 2-loop tadpole from ", files, " ..."];
+              Utils`AssertOrQuit[And @@ (FileExistsQ /@ files), Get2LTadpole::missing,
+                                 Select[files, !FileExistsQ[#]&]];
               SARAH`twolooptadpolediags = { 0 };
               Get /@ files;
               {

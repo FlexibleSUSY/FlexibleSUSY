@@ -83,7 +83,8 @@ temp2 = SPhenoCouplingList4ptPOLE[temp];
 CouplingUsedFor2LPole = False;
 SPhenoCouplings4Pole = temp2[[1]];
 
-$sarahCurrentOutputDir = ToFileName[{$sarahOutputDir, $sarahModelNameMain, sstates}];
+(* as in SARAH's TwoLoopPole.m: $sarahCurrentOutputMainDir includes the submodel, e.g. MSSM-CPV *)
+$sarahCurrentOutputDir = ToFileName[{$sarahCurrentOutputMainDir, sstates}];
 $sarahCurrentSPhenoDir = ToFileName[{$sarahCurrentOutputDir,"SPheno"}];
 $sarahStoreTwoLoopDir = ToFileName[{$sarahCurrentOutputDir,"Two-Loop"}];
 
