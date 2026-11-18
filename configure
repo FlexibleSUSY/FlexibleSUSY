@@ -2927,12 +2927,15 @@ check_math_cmd() {
     exists_in_path "$MATH"
     if [ -z "$cmd" ] ; then
         result "not found"
+        local _math_cmd="$MATH"
         MATH=""
-        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+        # Mathematica is needed only for the meta code and for an
+        # explicitly enabled LibraryLink
+        if [ ! "${enable_meta}" = "yes" ] && [ ! "$enable_librarylink" = "yes" ]; then
             return
         fi
 
-        message "Error: Mathematica kernel ${MATH} was not found or is not executable or is an alias."
+        message "Error: Mathematica kernel ${_math_cmd} was not found or is not executable or is an alias."
         message "   Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
         message "   You can use the --with-math-cmd= option to specify the location of"
         message "   the math kernel.  It is usually installed in "
@@ -2992,7 +2995,9 @@ EOF
             result "not ok"
         fi
         MATH=""
-        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+        # Mathematica is needed only for the meta code and for an
+        # explicitly enabled LibraryLink
+        if [ ! "${enable_meta}" = "yes" ] && [ ! "$enable_librarylink" = "yes" ]; then
             return
         fi
 
