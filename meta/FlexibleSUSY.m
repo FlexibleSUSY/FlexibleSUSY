@@ -3687,8 +3687,12 @@ Get2LDiagramFileName[outputDir_String, eigenstates_, field_String] :=
 Has2LPseudoScalarDiagrams[eigenstates_] :=
     !FreeQ[SARAH`ParticleDefinitions[eigenstates], "Pseudo-Scalar Higgs"];
 
+(* the auto-generated 2-loop Higgs corrections are calculated (by SARAH),
+   read and generated only if they are used *)
+Use2LoopHiggsFromSARAH[] := FlexibleSUSY`UseHiggs2Loop === True;
+
 Get2LSelfEnergyFileNames[outputDir_String, eigenstates_] :=
-    If[True || SARAH`SupersymmetricModel,
+    If[Use2LoopHiggsFromSARAH[],
        Join[
            { Get2LDiagramFileName[outputDir, eigenstates, "hh"] },
            If[Has2LPseudoScalarDiagrams[eigenstates],
@@ -3703,7 +3707,7 @@ Get2LSelfEnergy::missing = "SARAH's 2-loop self-energy file(s) `1` not found.";
 Get2LTadpole::missing = "SARAH's 2-loop tadpole file(s) `1` not found.";
 
 Get2LTadpoleFileNames[outputDir_String, eigenstates_] :=
-    If[True || SARAH`SupersymmetricModel,
+    If[Use2LoopHiggsFromSARAH[],
        { Get2LDiagramFileName[outputDir, eigenstates, "tadpoles"] },
        {}
       ];
@@ -3828,7 +3832,7 @@ FSCheckLoopCorrections[eigenstates_] :=
                                               ];
            If[needToCalculateLoopCorrections,
               SARAH`CalcLoopCorrections[eigenstates];
-              SARAH`Calc2LoopCorrections[eigenstates];
+              If[Use2LoopHiggsFromSARAH[], SARAH`Calc2LoopCorrections[eigenstates]];
               selfEnergies = Get[fileName];
               selfEnergies = {{#1, #1}, #2}& @@@ selfEnergies;
               Get["createVPVZ.m"];
@@ -5245,13 +5249,23 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            vertexRuleFileName =
               GetVertexRuleFileName[$sarahCurrentOutputMainDir, FSEigenstates];
-           If[NeedToCalculateVertices[FSEigenstates],
-              Put[vertexRules =
-                      Vertices`VertexRules[Join[nPointFunctions,
-                                                deltaVBwave, deltaVBvertex, deltaVBbox],
-                                           Lat$massMatrices],
-                                           vertexRuleFileName],
-              vertexRules = Get[vertexRuleFileName];
+           With[{npfs = Join[nPointFunctions, deltaVBwave, deltaVBvertex, deltaVBbox]},
+              If[NeedToCalculateVertices[FSEigenstates],
+                 Put[vertexRules = Vertices`VertexRules[npfs, Lat$massMatrices],
+                     vertexRuleFileName],
+                 vertexRules = Get[vertexRuleFileName];
+                 (* The cached rules contain only the couplings of the n-point
+                    functions of the run that created them, e.g. without the
+                    couplings of the 2-loop diagrams if UseHiggs2Loop was off. *)
+                 With[{missing = Vertices`MissingVertexRules[npfs, vertexRules]},
+                    If[missing =!= {},
+                       Print["The vertex file has no rules for ", Length[missing],
+                             " couplings (e.g. ", InputForm[First[missing]], "), updating it ..."];
+                       Put[vertexRules = Vertices`VertexRules[npfs, Lat$massMatrices],
+                           vertexRuleFileName];
+                      ];
+                   ];
+              ];
            ];
 
            (* apply user-defined rules *)

@@ -32,6 +32,9 @@ BeginPackage["Vertices`", {
 ]
 
 VertexRules::usage;
+MissingVertexRules::usage="MissingVertexRules[nPointFunctions, vertexRules] returns the
+couplings needed by nPointFunctions (as in VertexRules) that match no rule in
+vertexRules, e.g. because vertexRules were cached before new n-point functions were added.";
 ToCpPattern::usage="ToCpPattern[cp] converts field indices inside cp to patterns, e.g. ToCpPattern[Cp[bar[UFd[{gO1}]], Sd[{gI1}], Glu[{1}]][PL]] === Cp[bar[UFd[{gO1_}]], Sd[{gI1_}], Glu[{1}]][PL].";
 ToCp::usage="ToCp[cpPattern] converts field index patterns inside cpPattern to symbols, e.g. ToCp@Cp[bar[UFd[{gO1_}]], Sd[{gI1_}], Glu[{1}]][PL] === Cp[bar[UFd[{gO1}]], Sd[{gI1}], Glu[{1}]][PL].";
 FieldIndexList::usage;
@@ -131,12 +134,26 @@ ClearCachedVertices[] :=
    SARAH`Vertex[] with the indices gI2 and gI1 omitted, so that the
    mapping is determined to be {Sd -> S1, conj[Sd] -> S2}. *)
 
+(* the coupling patterns for which VertexRules creates rules *)
+RequiredCpPatterns[nPointFunctions_] :=
+    DeleteRedundantCpPatterns[
+	ToCpPattern /@ RenumberCpIndices /@ Cases[
+	    nPointFunctions, _SARAH`Cp|_SARAH`Cp[_], {0, Infinity}]];
+
+(* Compares the couplings themselves, not their patterns, because
+   DeleteRedundantCpPatterns may choose other representative patterns
+   for other sets of couplings. *)
+MissingVertexRules[nPointFunctions_, vertexRules_List] :=
+    Module[{covered = Dispatch[Append[(# -> True)& /@ (First /@ vertexRules), _ -> False]]},
+           Select[DeleteDuplicates[RenumberCpIndices /@ Cases[
+                      nPointFunctions, _SARAH`Cp|_SARAH`Cp[_], {0, Infinity}]],
+                  !Replace[#, covered]&]
+          ];
+
 VertexRules[nPointFunctions_, massMatrices_] := Block[{
 	UnitaryMatrixQ,
 	nCpPatterns,
-	cpPatterns = DeleteRedundantCpPatterns[
-	    ToCpPattern /@ RenumberCpIndices /@ Cases[
-		nPointFunctions, _SARAH`Cp|_SARAH`Cp[_], {0, Infinity}]]
+	cpPatterns = RequiredCpPatterns[nPointFunctions]
     },
     (UnitaryMatrixQ[#] = True)& /@
         Flatten@DeleteCases[massMatrices[[All,3]], Null];
