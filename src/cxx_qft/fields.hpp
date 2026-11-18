@@ -69,7 +69,7 @@ namespace flexiblesusy::cxx_diagrams {
       template <class Field>
       struct number_of_field_indices {
          static constexpr int value =
-            std::tuple_size<typename field_indices<Field>::type>::value;
+            std::tuple_size_v<typename field_indices<Field>::type>;
          using type = boost::mpl::int_<value>;
       };
       /*

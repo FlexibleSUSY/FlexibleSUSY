@@ -435,8 +435,8 @@ T Max(T&&t) noexcept
    return std::forward<T>(t);
 }
 
-template<typename T0, typename T1, typename... Ts>
-typename std::common_type<T0, T1, Ts...>::type Max(T0&& val1, T1&& val2, Ts&&... vs) noexcept
+template <typename T0, typename T1, typename... Ts>
+std::common_type_t<T0, T1, Ts...> Max(T0&& val1, T1&& val2, Ts&&... vs) noexcept
 {
    if (val2 < val1)
       return Max(val1, std::forward<Ts>(vs)...);
@@ -450,8 +450,8 @@ T Min(T&&t) noexcept
    return std::forward<T>(t);
 }
 
-template<typename T0, typename T1, typename... Ts>
-typename std::common_type<T0, T1, Ts...>::type Min(T0&& val1, T1&& val2, Ts&&... vs) noexcept
+template <typename T0, typename T1, typename... Ts>
+std::common_type_t<T0, T1, Ts...> Min(T0&& val1, T1&& val2, Ts&&... vs) noexcept
 {
    if (val2 < val1)
       return Min(val2, std::forward<Ts>(vs)...);

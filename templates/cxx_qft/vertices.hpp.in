@@ -97,7 +97,7 @@ struct Vertex {
 
       constexpr int offset =
          cxx_diagrams::detail::total_number_of_field_indices<preceeding_fields>::value;
-      constexpr int length = std::tuple_size<result_type>::value;
+      constexpr int length = std::tuple_size_v<result_type>;
 
       result_type result_indices;
       std::copy(indices.begin() + offset,

@@ -757,7 +757,7 @@ void put_spectrum(const @ModelName@_slha& model, MLINK link)
 template<typename... Ts>
 void put_spectra(const std::tuple<Ts...>& models, MLINK link)
 {
-   MLPutFunction(link, "List", std::tuple_size<std::tuple<Ts...>>::value);
+   MLPutFunction(link, "List", sizeof...(Ts));
 
    const auto ps = [link] (const auto& model) { put_spectrum(model, link); };
    for_each_in_tuple(models, ps);
