@@ -52,7 +52,7 @@ bool find_if_impl(State&& state, std::false_type)
 
    return find_if_impl<NextIterator, End, Predicate, F>(
       std::forward<State>(state),
-      typename std::is_same<NextIterator, End>::type{});
+      std::bool_constant<std::is_same_v<NextIterator, End>>{});
 }
 } // namespace detail
 
@@ -64,8 +64,9 @@ bool find_if(State&& state)
                                typename boost::mpl::end<Sequence>::type,
                                Predicate, F>(
       std::forward<State>(state),
-      typename std::is_same<typename boost::mpl::begin<Sequence>::type,
-                            typename boost::mpl::end<Sequence>::type>::type{});
+      std::bool_constant<
+         std::is_same_v<typename boost::mpl::begin<Sequence>::type,
+                        typename boost::mpl::end<Sequence>::type>>{});
 }
 } // namespace meta
 } // namespace flexiblesusy
