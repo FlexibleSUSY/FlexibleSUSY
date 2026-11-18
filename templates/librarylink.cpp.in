@@ -27,7 +27,6 @@
 #include "@ModelName@_model_slha.hpp"
 
 @solverIncludes@
-#include "array_view.hpp"
 #include "bvp_solver_problems_format_mathlink.hpp"
 #include "error.hpp"
 #include "for_each.hpp"
@@ -48,10 +47,13 @@
 #include <WolframLibrary.h>
 
 #include <cmath>
+#include <complex>
+#include <cstddef>
 #include <iostream>
 #include <limits>
 #include <map>
 #include <memory>
+#include <span>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -136,6 +138,43 @@ public:
          + ".  Expected: " + ToString(expected);
    }
    mint pars, expected;
+};
+
+/**
+ * @class Parameter_reader
+ * @brief reads the parameters passed from Mathematica one after another
+ *
+ * Throws an exception if more parameters are read than were passed.
+ */
+class Parameter_reader {
+public:
+   explicit Parameter_reader(std::span<const double> pars_) : pars(pars_) {}
+
+   /// returns the next parameter
+   double next()
+   {
+      if (pos >= pars.size()) {
+         throw OutOfBoundsError(
+            "Parameter index " + std::to_string(pos) + " out of range [0, "
+            + std::to_string(pars.size()) + ").");
+      }
+      return pars[pos++];
+   }
+
+   /// returns the next two parameters as real and imaginary part
+   std::complex<double> next_complex()
+   {
+      const double re = next();
+      const double im = next();
+      return {re, im};
+   }
+
+   /// returns the number of parameters not read yet
+   std::size_t number_of_unread() const { return pars.size() - pos; }
+
+private:
+   std::span<const double> pars;
+   std::size_t pos{0};
 };
 
 class EInvalidSpectrum : public Error {
@@ -952,107 +991,115 @@ void Model_data::calculate_unitarity()
 
 /******************************************************************/
 
-template <typename Element_t>
-Model_data make_data(const Dynamic_array_view<Element_t>& pars)
+Model_data make_data(std::span<const double> values)
 {
-   using Index_t = typename Dynamic_array_view<Element_t>::Index_t;
-
-   const Index_t n_settings = Spectrum_generator_settings::NUMBER_OF_OPTIONS,
+   const std::ptrdiff_t n_settings = Spectrum_generator_settings::NUMBER_OF_OPTIONS,
       n_sm_parameters = static_cast<int>(softsusy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS)
                         + static_cast<int>(Physical_input::NUMBER_OF_INPUT_PARAMETERS),
       n_input_pars = @numberOfInputParameters@;
    @decayIndex@
-   const Index_t n_total = n_settings + n_sm_parameters + n_input_pars + n_fd_settings;
+   const std::ptrdiff_t n_total = n_settings + n_sm_parameters + n_input_pars + n_fd_settings;
 
-   if (pars.size() != n_total)
-      throw EWrongNumberOfParameters(pars.size(), n_total);
+   if (std::ssize(values) != n_total)
+      throw EWrongNumberOfParameters(std::ssize(values), n_total);
 
-   Index_t c = 0; // counter
+   Parameter_reader pars(values);
 
    Spectrum_generator_settings settings;
-   settings.set(Spectrum_generator_settings::precision, pars[c++]);
-   settings.set(Spectrum_generator_settings::max_iterations, pars[c++]);
-   settings.set(Spectrum_generator_settings::solver, pars[c++]);
-   settings.set(Spectrum_generator_settings::calculate_sm_masses, pars[c++]);
-   settings.set(Spectrum_generator_settings::pole_mass_loop_order, pars[c++]);
-   settings.set(Spectrum_generator_settings::ewsb_loop_order, pars[c++]);
-   settings.set(Spectrum_generator_settings::beta_loop_order, pars[c++]);
-   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, pars[c++]);
-   settings.set(Spectrum_generator_settings::force_output, pars[c++]);
-   settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, pars[c++]);
-   settings.set(Spectrum_generator_settings::beta_zero_threshold, pars[c++]);
-   settings.set(Spectrum_generator_settings::force_positive_masses, pars[c++]);
-   settings.set(Spectrum_generator_settings::pole_mass_scale, pars[c++]);
-   settings.set(Spectrum_generator_settings::eft_pole_mass_scale, pars[c++]);
-   settings.set(Spectrum_generator_settings::eft_matching_scale, pars[c++]);
-   settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, pars[c++]);
-   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, pars[c++]);
-   settings.set(Spectrum_generator_settings::eft_higgs_index, pars[c++]);
-   settings.set(Spectrum_generator_settings::calculate_bsm_masses, pars[c++]);
-   settings.set(Spectrum_generator_settings::threshold_corrections, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_3loop_ren_scheme_atb_as2, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_3loop_correction_at_as2, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_3loop_correction_ab_as2, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_3loop_correction_at2_as, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_3loop_correction_at3, pars[c++]);
-   settings.set(Spectrum_generator_settings::higgs_4loop_correction_at_as3, pars[c++]);
-   settings.set(Spectrum_generator_settings::loop_library, pars[c++]);
-   settings.set(Spectrum_generator_settings::calculate_amm, pars[c++]);
+   settings.set(Spectrum_generator_settings::precision, pars.next());
+   settings.set(Spectrum_generator_settings::max_iterations, pars.next());
+   settings.set(Spectrum_generator_settings::solver, pars.next());
+   settings.set(Spectrum_generator_settings::calculate_sm_masses, pars.next());
+   settings.set(Spectrum_generator_settings::pole_mass_loop_order, pars.next());
+   settings.set(Spectrum_generator_settings::ewsb_loop_order, pars.next());
+   settings.set(Spectrum_generator_settings::beta_loop_order, pars.next());
+   settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, pars.next());
+   settings.set(Spectrum_generator_settings::force_output, pars.next());
+   settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, pars.next());
+   settings.set(Spectrum_generator_settings::beta_zero_threshold, pars.next());
+   settings.set(Spectrum_generator_settings::force_positive_masses, pars.next());
+   settings.set(Spectrum_generator_settings::pole_mass_scale, pars.next());
+   settings.set(Spectrum_generator_settings::eft_pole_mass_scale, pars.next());
+   settings.set(Spectrum_generator_settings::eft_matching_scale, pars.next());
+   settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, pars.next());
+   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, pars.next());
+   settings.set(Spectrum_generator_settings::eft_higgs_index, pars.next());
+   settings.set(Spectrum_generator_settings::calculate_bsm_masses, pars.next());
+   settings.set(Spectrum_generator_settings::threshold_corrections, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_3loop_ren_scheme_atb_as2, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_3loop_correction_at_as2, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_3loop_correction_ab_as2, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_3loop_correction_at2_as, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_3loop_correction_at3, pars.next());
+   settings.set(Spectrum_generator_settings::higgs_4loop_correction_at_as3, pars.next());
+   settings.set(Spectrum_generator_settings::loop_library, pars.next());
+   settings.set(Spectrum_generator_settings::calculate_amm, pars.next());
 
    SLHA_io::Modsel modsel;
-   modsel.parameter_output_scale = pars[c++];
+   modsel.parameter_output_scale = pars.next();
 
    softsusy::QedQcd qedqcd;
-   qedqcd.setAlpha(softsusy::ALPHA, pars[c]);
-   qedqcd.setAlphaEmInput(pars[c++]);
-   qedqcd.setFermiConstant(pars[c++]);
-   qedqcd.setAlpha(softsusy::ALPHAS, pars[c]);
-   qedqcd.setAlphaSInput(pars[c++]);
-   qedqcd.setPoleMZ(pars[c]);
-   qedqcd.set_scale(pars[c++]);
-   qedqcd.setMass(softsusy::mBottom, pars[c]);
-   qedqcd.setMbMb(pars[c++]);
-   qedqcd.setPoleMt(pars[c++]);
-   qedqcd.setMass(softsusy::mTau, pars[c]);
-   qedqcd.setPoleMtau(pars[c++]);
-   qedqcd.setNeutrinoPoleMass(3, pars[c++]);
-   qedqcd.setPoleMW(pars[c++]);
-   qedqcd.setMass(softsusy::mElectron, pars[c]);
-   qedqcd.setPoleMel(pars[c++]);
-   qedqcd.setNeutrinoPoleMass(1, pars[c++]);
-   qedqcd.setMass(softsusy::mMuon, pars[c]);
-   qedqcd.setPoleMmuon(pars[c++]);
-   qedqcd.setNeutrinoPoleMass(2, pars[c++]);
-   qedqcd.setMass(softsusy::mDown, pars[c]);
-   qedqcd.setMd2GeV(pars[c++]);
-   qedqcd.setMass(softsusy::mUp, pars[c]);
-   qedqcd.setMu2GeV(pars[c++]);
-   qedqcd.setMass(softsusy::mStrange, pars[c]);
-   qedqcd.setMs2GeV(pars[c++]);
-   qedqcd.setMass(softsusy::mCharm, pars[c]);
-   qedqcd.setMcMc(pars[c++]);
+   const double alpha_em_input = pars.next();
+   qedqcd.setAlpha(softsusy::ALPHA, alpha_em_input);
+   qedqcd.setAlphaEmInput(alpha_em_input);
+   qedqcd.setFermiConstant(pars.next());
+   const double alpha_s_input = pars.next();
+   qedqcd.setAlpha(softsusy::ALPHAS, alpha_s_input);
+   qedqcd.setAlphaSInput(alpha_s_input);
+   const double mz_pole = pars.next();
+   qedqcd.setPoleMZ(mz_pole);
+   qedqcd.set_scale(mz_pole);
+   const double mb_mb = pars.next();
+   qedqcd.setMass(softsusy::mBottom, mb_mb);
+   qedqcd.setMbMb(mb_mb);
+   qedqcd.setPoleMt(pars.next());
+   const double mtau_pole = pars.next();
+   qedqcd.setMass(softsusy::mTau, mtau_pole);
+   qedqcd.setPoleMtau(mtau_pole);
+   qedqcd.setNeutrinoPoleMass(3, pars.next());
+   qedqcd.setPoleMW(pars.next());
+   const double me_pole = pars.next();
+   qedqcd.setMass(softsusy::mElectron, me_pole);
+   qedqcd.setPoleMel(me_pole);
+   qedqcd.setNeutrinoPoleMass(1, pars.next());
+   const double mmu_pole = pars.next();
+   qedqcd.setMass(softsusy::mMuon, mmu_pole);
+   qedqcd.setPoleMmuon(mmu_pole);
+   qedqcd.setNeutrinoPoleMass(2, pars.next());
+   const double md_2gev = pars.next();
+   qedqcd.setMass(softsusy::mDown, md_2gev);
+   qedqcd.setMd2GeV(md_2gev);
+   const double mu_2gev = pars.next();
+   qedqcd.setMass(softsusy::mUp, mu_2gev);
+   qedqcd.setMu2GeV(mu_2gev);
+   const double ms_2gev = pars.next();
+   qedqcd.setMass(softsusy::mStrange, ms_2gev);
+   qedqcd.setMs2GeV(ms_2gev);
+   const double mc_mc = pars.next();
+   qedqcd.setMass(softsusy::mCharm, mc_mc);
+   qedqcd.setMcMc(mc_mc);
 
    {
       flexiblesusy::CKM_parameters ckm;
-      ckm.theta_12 = pars[c++];
-      ckm.theta_13 = pars[c++];
-      ckm.theta_23 = pars[c++];
-      ckm.delta    = pars[c++];
+      ckm.theta_12 = pars.next();
+      ckm.theta_13 = pars.next();
+      ckm.theta_23 = pars.next();
+      ckm.delta    = pars.next();
       qedqcd.setCKM(ckm);
    }
 
    {
       flexiblesusy::PMNS_parameters pmns;
-      pmns.theta_12 = pars[c++];
-      pmns.theta_13 = pars[c++];
-      pmns.theta_23 = pars[c++];
-      pmns.delta    = pars[c++];
-      pmns.alpha_1  = pars[c++];
-      pmns.alpha_2  = pars[c++];
+      pmns.theta_12 = pars.next();
+      pmns.theta_13 = pars.next();
+      pmns.theta_23 = pars.next();
+      pmns.delta    = pars.next();
+      pmns.alpha_1  = pars.next();
+      pmns.alpha_2  = pars.next();
       qedqcd.setPMNS(pmns);
    }
 
@@ -1060,12 +1107,17 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    @LToLConversion_reset@
 
    Physical_input physical_input;
-   physical_input.set(Physical_input::alpha_em_0, pars[c++]);
-   physical_input.set(Physical_input::mh_pole, pars[c++]);
+   physical_input.set(Physical_input::alpha_em_0, pars.next());
+   physical_input.set(Physical_input::mh_pole, pars.next());
 
    @ModelName@_input_parameters input;
 @setInputParameters@
 @setDecayOptions@
+   if (pars.number_of_unread() != 0) {
+      throw SetupError(std::to_string(pars.number_of_unread())
+                       + " parameters were not read.");
+   }
+
    Model_data data;
    data.set_settings(settings);
    data.set_modsel(modsel);
@@ -1177,7 +1229,7 @@ DLLEXPORT int FS@ModelName@OpenHandle(
       return LIBRARY_TYPE_ERROR;
 
    try {
-      auto data = make_data(make_dynamic_array_view(
+      auto data = make_data(std::span<const double>(
                           libData->MTensor_getRealData(pars),
                           libData->MTensor_getDimensions(pars)[0]));
 
@@ -1233,7 +1285,7 @@ DLLEXPORT int FS@ModelName@Set(
 
    try {
       find_data(hid) =
-         make_data(make_dynamic_array_view(
+         make_data(std::span<const double>(
                       libData->MTensor_getRealData(pars),
                       libData->MTensor_getDimensions(pars)[0]));
    } catch (const flexiblesusy::Error& e) {
