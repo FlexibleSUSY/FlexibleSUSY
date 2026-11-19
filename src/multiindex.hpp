@@ -23,6 +23,7 @@
 
 #include <array>
 #include <iterator>
+#include <type_traits>
 
 #include <boost/array.hpp>
 
@@ -63,7 +64,7 @@ struct increment_multiindex {
       template <class Indices>
       void operator()(Indices& indices)
       {
-         boost::array<int, std::tuple_size<Indices>::value> boost_temp;
+         boost::array<int, std::tuple_size_v<Indices>> boost_temp;
          boost::fusion::copy(Begin(), boost_temp);
          std::copy(boost_temp.begin(), boost_temp.begin() + Location::value,
                    indices.begin());
@@ -200,11 +201,9 @@ public:
 
 template <class Begin, class End>
 class multiindex
-   : public detail::multiindex_impl<Begin, End,
-                                    std::is_same<Begin, End>::type::value>
+   : public detail::multiindex_impl<Begin, End, std::is_same_v<Begin, End>>
 {
-   using impl = detail::multiindex_impl<Begin, End,
-                                        std::is_same<Begin, End>::type::value>;
+   using impl = detail::multiindex_impl<Begin, End, std::is_same_v<Begin, End>>;
 
    multiindex(impl&& index) : impl(std::move(index)) {}
 
@@ -220,8 +219,8 @@ namespace std
 template <class Begin, class End>
 struct iterator_traits<flexiblesusy::multiindex<Begin, End>> {
    using difference_type = std::ptrdiff_t;
-   using value_type = typename std::decay<decltype(
-      *std::declval<flexiblesusy::multiindex<Begin, End>>())>::type;
+   using value_type = std::remove_cvref_t<
+      decltype(*std::declval<flexiblesusy::multiindex<Begin, End>>())>;
    using pointer = const value_type*;
    using reference = const value_type&;
    using iterator_category = std::forward_iterator_tag;

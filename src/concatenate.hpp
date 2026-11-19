@@ -33,8 +33,7 @@ struct value_type {
 
 template <class... Args>
 struct common_value_type {
-   using type =
-      typename std::common_type<typename value_type<Args>::type...>::type;
+   using type = std::common_type_t<typename value_type<Args>::type...>;
 };
 
 template <int... Args>
@@ -54,9 +53,9 @@ namespace result_of
 {
 template <class... Args>
 struct concatenate {
-   using type = std::array<
-      typename common_value_type<typename std::decay<Args>::type...>::type,
-      sum<std::tuple_size<typename std::decay<Args>::type>::value...>::value>;
+   using type =
+      std::array<typename common_value_type<std::remove_cvref_t<Args>...>::type,
+                 sum<std::tuple_size_v<std::remove_cvref_t<Args>>...>::value>;
 };
 } // namespace result_of
 

@@ -17,20 +17,24 @@
 // ====================================================================
 
 #include "command_line_options.hpp"
-#include "array_view.hpp"
 #include "build_info.hpp"
 #include "logger.hpp"
 
 #include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <span>
+#include <string>
 
 namespace flexiblesusy {
 
 Command_line_options::Command_line_options(int argc, char* argv[])
-   : Command_line_options(make_dynamic_array_view(&argv[0], argc))
+   : Command_line_options(
+        std::span<char* const>(argv, static_cast<std::size_t>(argc)))
 {
 }
 
-Command_line_options::Command_line_options(const Dynamic_array_view<char*>& args)
+Command_line_options::Command_line_options(std::span<char* const> args)
 {
    parse(args);
 }
@@ -41,7 +45,7 @@ Command_line_options::Command_line_options(const Dynamic_array_view<char*>& args
  *
  * @param args command line arguments
  */
-void Command_line_options::parse(const Dynamic_array_view<char*>& args)
+void Command_line_options::parse(std::span<char* const> args)
 {
    reset();
 
@@ -50,8 +54,7 @@ void Command_line_options::parse(const Dynamic_array_view<char*>& args)
 
    program = args[0];
 
-   for (int i = 1; i < args.size(); ++i) {
-      const std::string option(args[i]);
+   for (const std::string option : args.subspan(1)) {
       if (option.starts_with("--slha-input-file=")) {
          slha_input_file = option.substr(18);
       } else if (option.starts_with("--slha-output-file=")) {

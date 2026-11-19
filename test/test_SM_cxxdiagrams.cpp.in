@@ -60,7 +60,7 @@ public:
 	using vertex_type = typename Vertex<Fields...>::vertex_type;
 private:
 	using boost_indices_type = boost::array<int,
-		std::tuple_size<indices_type>::value
+		std::tuple_size_v<indices_type>
 	>;
 	using model_type = SM_mass_eigenstates;
 	
