@@ -24,6 +24,12 @@ New features
 Fixed bugs
 ----------
 
+* [commit 7cca3f74a]: Loading the Mathematica interface no longer prints
+  ``LibraryFunction::libload`` messages for ``FS<M>CallLilith`` and
+  ``FS<M>CallHiggsTools`` when FlexibleSUSY is configured without Lilith or
+  HiggsTools. Calling them then gives an error message saying so, and
+  ``$Failed``.
+
 * [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
   code is enabled and the Mathematica kernel is not found or is older
   than the required version.  Since FlexibleSUSY 2.6.2 it continued and
