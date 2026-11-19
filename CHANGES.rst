@@ -28,6 +28,11 @@ Fixed bugs
   include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
   didn't use the GSL include path from ``gsl-config``.
 
+* [commit 21cdd8732]: The code generation of models that use NPointFunctions
+  could hang forever when no Wolfram subkernel was free, e.g. while
+  another code generation ran.  It now waits up to 5 minutes for a
+  subkernel and otherwise stops with an error message.
+
 * [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
   code is enabled and the Mathematica kernel is not found or is older
   than the required version.  Since FlexibleSUSY 2.6.2 it continued and
