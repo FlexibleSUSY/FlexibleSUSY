@@ -15,6 +15,7 @@
 #include <string>
 
 #define private public
+#define protected public
 
 #include "CMSSM_two_scale_ewsb_solver.hpp"
 #include "CMSSM_two_scale_model.hpp"

@@ -692,6 +692,20 @@ BOOST_AUTO_TEST_CASE(test_SignedAbsSqrt)
    }
 }
 
+BOOST_AUTO_TEST_CASE(test_SignedSqr)
+{
+   static_assert(SignedSqr(3.) == 9.);
+   static_assert(SignedSqr(-3.) == -9.);
+   BOOST_CHECK_EQUAL(SignedSqr(0.), 0.);
+   BOOST_CHECK_EQUAL(SignedSqr(2.5), 6.25);
+   BOOST_CHECK_EQUAL(SignedSqr(-2.5), -6.25);
+
+   // inverse of SignedAbsSqrt
+   for (const double x : {-3890.25, -1e-8, 0., 1e-8, 125.5, 4.2e6}) {
+      BOOST_CHECK_CLOSE_FRACTION(SignedSqr(SignedAbsSqrt(x)), x, 1e-14);
+   }
+}
+
 BOOST_AUTO_TEST_CASE(test_Total)
 {
    {
