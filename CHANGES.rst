@@ -24,6 +24,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit 3d27e1f6a]: FlexibleSUSY didn't compile if GSL was not in a default
+  include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
+  didn't use the GSL include path from ``gsl-config``.
+
 * [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
   code is enabled and the Mathematica kernel is not found or is older
   than the required version.  Since FlexibleSUSY 2.6.2 it continued and
