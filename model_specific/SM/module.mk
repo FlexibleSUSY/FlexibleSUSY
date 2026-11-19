@@ -93,7 +93,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(EIGENFLAGS) $(BOOSTFLAGS) -Imodel_specific/SM
+$(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) -Imodel_specific/SM
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
