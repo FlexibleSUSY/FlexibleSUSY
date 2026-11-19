@@ -1609,6 +1609,16 @@ check_thread_libs() {
 	    ;;
     esac
 
+    # on macOS, libpthread is a .tbd file in the SDK, which the linker
+    # of newer Xcode versions doesn't list in its search paths
+    case "$operating_system" in
+        Darwin)
+            local sdk_path
+            sdk_path=$(xcrun --show-sdk-path 2>/dev/null)
+            [ -n "$sdk_path" ] && cc_lib_search_paths="$cc_lib_search_paths:$sdk_path/usr/lib"
+            ;;
+    esac
+
     check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths:$cc_lib_search_paths"
     if [ -z "$found_lib" ]; then
         message "Error: libpthread must be installed to enable multithreading!"
