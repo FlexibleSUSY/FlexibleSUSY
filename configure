@@ -2487,8 +2487,10 @@ check_looptools_libs() {
    fi
    case "$operating_system" in
       Darwin)
+         # libgcc belongs to the GCC that compiled LoopTools, i.e. to the
+         # Fortran compiler; Apple clang (CXX) has none.
          local gcc_
-         gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+         gcc_=$(${FC} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
          check_library "libgcc" "$gcc_" "$default_lib_paths"
          if test "x$found_lib" = "x" ; then
             message "Error: libgcc not found in $gcc_ $default_lib_paths"
