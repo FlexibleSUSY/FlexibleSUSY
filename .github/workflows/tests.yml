@@ -116,6 +116,116 @@ jobs:
             config.*
             test/test_*.log
 
+  # The no-meta tests on macOS with Apple clang (libc++), gfortran and the
+  # libraries from Homebrew.  COLLIER and LoopTools aren't in Homebrew, so
+  # they are built from source and cached.
+  no-meta-macos:
+
+    runs-on: macos-15
+
+    env:
+      COLLIER_VERSION: '1.2.10'
+      LOOPTOOLS_VERSION: '2.16'
+      DEPS_DIR: ${{ github.workspace }}/.fs_dependencies
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install dependencies from Homebrew
+        run: |
+          brew install gcc boost eigen gsl
+          clang++ --version
+          gfortran --version
+
+      - name: Restore COLLIER and LoopTools
+        id: cache-deps
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.DEPS_DIR }}
+          key: macos-15-collier-${{ env.COLLIER_VERSION }}-looptools-${{ env.LOOPTOOLS_VERSION }}-v1
+
+      - name: Build COLLIER and LoopTools
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$DEPS_DIR/src"
+          cd "$DEPS_DIR/src"
+          curl -sSfLO "https://collier.hepforge.org/downloads/collier-${COLLIER_VERSION}.tar.gz"
+          curl -sSfLO "https://www.feynarts.de/looptools/LoopTools-${LOOPTOOLS_VERSION}.tar.gz"
+          tar -xzf "collier-${COLLIER_VERSION}.tar.gz"
+          cmake -S "collier-COLLIER-${COLLIER_VERSION}" -B collier-build -Dstatic=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_Fortran_COMPILER=gfortran \
+            -DCMAKE_INSTALL_PREFIX="$DEPS_DIR/COLLIER"
+          cmake --build collier-build -j3
+          cmake --install collier-build
+          tar -xzf "LoopTools-${LOOPTOOLS_VERSION}.tar.gz"
+          cd "LoopTools-${LOOPTOOLS_VERSION}"
+          FC=gfortran FFLAGS="-O2 -fPIC" CFLAGS="-O2 -fPIC" CXXFLAGS="-O2 -fPIC" \
+            ./configure --prefix="$DEPS_DIR/LoopTools"
+          make -j3
+          make install
+          cd "$DEPS_DIR"
+          rm -rf src
+          ls -R "$DEPS_DIR"
+
+      - name: Configure
+        run: |
+          # LoopTools installs into lib or lib64
+          looptools_libdir=$(dirname "$(find "$DEPS_DIR/LoopTools" -name 'libooptools.a' | head -n 1)")
+          ./configure \
+            --with-cxx=clang++ \
+            --with-fc=gfortran \
+            --with-loop-libraries=collier,looptools \
+            --with-looptools-incdir="$DEPS_DIR/LoopTools/include" \
+            --with-looptools-libdir="$looptools_libdir" \
+            --with-collier-incdir="$DEPS_DIR/COLLIER/include" \
+            --with-collier-libdir="$DEPS_DIR/COLLIER/lib" \
+            --with-boost-incdir="$(brew --prefix boost)/include" \
+            --with-boost-libdir="$(brew --prefix boost)/lib" \
+            --with-eigen-incdir="$(brew --prefix eigen)/include/eigen3" \
+            --with-gsl-config="$(brew --prefix gsl)/bin/gsl-config" \
+            --with-optional-modules=test \
+            --disable-meta
+          make showbuild
+
+      - name: Make
+        run: make -j3
+
+      - name: Build compiled tests
+        run: make -j3 alltest
+
+      - name: Run compiled and shell script (Softsusy)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=0 make -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (Collier)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=1 make -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (LoopTools)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=2 make -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (fflite)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=3 make -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: (Optional) Save logs in case of an error
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: no-meta-macos_test-logs
+          path: |
+            config.*
+            test/test_*.log
+
   with-meta:
 
     # Pull requests don't share secrets with a fork so we run tests only on PRs
