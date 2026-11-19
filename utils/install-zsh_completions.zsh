@@ -104,6 +104,7 @@ _flexiblesusy_configure()
         '--with-looptools-libdir=-[Path to search for LoopTools libraries]:directory:_flexiblesusy_files -/' \
         '--with-looptools-incdir=-[Path to search for LoopTools headers]:directory:_flexiblesusy_files -/' \
         '--with-math-cmd=-[Mathematica kernel]:command:_command_names -e' \
+        '--with-math-timeout=-[Time limit in seconds for each Mathematica kernel started by configure]:seconds: ' \
         '--with-models=-[Comma separated list of models to be build]:models:_flexiblesusy_created_models' \
         '--with-optional-modules=-[Load optional FlexibleSUSY modules]:modules:_values -s , module examples test' \
         '--with-pthread-libdir=-[Path to search for pthread library]:directory:_flexiblesusy_files -/' \

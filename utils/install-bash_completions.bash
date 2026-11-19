@@ -222,6 +222,7 @@ _configure()
 --with-looptools-libdir=
 --with-looptools-incdir=
 --with-math-cmd=
+--with-math-timeout=
 --with-models=
 --with-optional-modules=
 --with-pthread-libdir=
