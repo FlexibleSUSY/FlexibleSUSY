@@ -102,14 +102,15 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++20 compiler (g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10
-  or icpc >= 18.0.0)
+* C++20 compiler (g++ >= 10.1.0, or clang++ >= 10.0.0 with libstdc++ >= 10;
+  Intel's icpx is LLVM-based and counts as clang++, the classic icpc is not
+  supported)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
-* Boost_ (version 1.37.0 or higher)
-* `Eigen 3`_ (version 3.1 or higher)
-* `GNU scientific library`_
+* Boost_ (version 1.62.0 or higher, except 1.64)
+* `Eigen 3`_ (version 3.3 or higher)
+* `GNU scientific library`_ (version 2.0 or higher)
 
 Optional:
 
@@ -120,7 +121,7 @@ Optional:
 * HiggsTools_ (version 1.1.4 or higher)
 * Lilith_ (requires Python3 development files)
 * COLLIER_
-* Himalaya_
+* Himalaya_ (version 2.0.0 or higher)
 * TSIL_
 
 Installation of required/optional libraries
@@ -633,7 +634,7 @@ libraries, which is the default) you need to pass the
 name extension for the shared libraries as well as the command to
 build them can be overwritten using the ``--with-shared-lib-ext=``
 ``--with-shared-lib-cmd=``.  parameters.  For example, when Intel
-compilers should be used, replace gcc by icc or icpc
+compilers should be used, replace gcc by icx or icpx
 
 .. code-block:: shell
 

@@ -93,7 +93,12 @@ make -j4                               # runs the meta code, then compiles
 
 ### Compiler requirements
 The code uses C++20 (concepts). It needs g++ >= 10.1, or clang++ >= 10 with
-libstdc++ >= 10. `configure` checks only the version numbers.
+libstdc++ >= 10. `configure` checks the compiler version and, with a test program, that
+the standard library has `<concepts>`, `<span>` and `<numbers>`
+(`check_cxx_std_library`). The classic Intel compiler icpc isn't supported (only a
+warning); Intel's icpx is detected as clang. Libraries: Boost >= 1.62 except 1.64
+(Hana, Boost.Math with C++20; 1.64's odeint doesn't compile), Eigen >= 3.3
+(`Eigen::Index`), GSL >= 2.0, all checked by `configure`.
 
 Before using a newer standard library feature, check it against these minimum
 versions:
@@ -103,6 +108,13 @@ versions:
 - **Not usable yet:** `<ranges>` (fails with clang 10 on libstdc++ 10), and features
   that need g++ >= 11 or later: `std::format` (13), `std::to_chars` for `double`,
   `std::bit_cast`, `std::source_location`.
+
+**Raising the requirements:** when a change (e.g. replacing Boost by a std feature) needs
+a newer compiler or standard library, update both places that state the requirement in
+the same change: the minimum versions in `configure` (`required_*_compiler_version`, or a
+feature test with `try_compile_cpp_program` for things the version number doesn't
+show, such as the standard library) and the "Requirements" list in `README.rst`. Also
+update this section and mention the new requirement in `CHANGES.rst`.
 
 ## Running a spectrum generator
 
