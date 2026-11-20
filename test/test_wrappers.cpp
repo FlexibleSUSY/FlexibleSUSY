@@ -26,6 +26,7 @@
 #include <boost/math/special_functions/zeta.hpp>
 #include <boost/test/unit_test.hpp>
 #include <complex>
+#include <numbers>
 
 #if defined(__CYGWIN__) || defined(__FreeBSD__)
 // std::to_string is missing on Cygwin and FreeBSD
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE( test_Constants )
    // boost::math::zeta, because libc++ (macOS) has no std::riemann_zeta
    BOOST_CHECK_CLOSE_FRACTION(zeta4, boost::math::zeta(4.), 3e-16);
    BOOST_CHECK_EQUAL(zeta5, boost::math::zeta(5.));
-   BOOST_CHECK_EQUAL(ln2           , boost::math::constants::ln_two<double>());
+   BOOST_CHECK_EQUAL(ln2, std::numbers::ln2);
    BOOST_CHECK_CLOSE_FRACTION(oneOverSqrt2, 1/std::sqrt(2.), 3e-16);
 }
 

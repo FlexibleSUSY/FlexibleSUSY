@@ -17,14 +17,19 @@
 // ====================================================================
 
 #include "string_format.hpp"
-#include <boost/lexical_cast.hpp>
+#include <limits>
+#include <sstream>
+#include <string>
 
 namespace flexiblesusy {
 
-#define DEFINE_TO_STRING(type)                     \
-   std::string to_string(type a)                   \
-   {                                               \
-      return boost::lexical_cast<std::string>(a);  \
+#define DEFINE_TO_STRING(type)                                                 \
+   std::string to_string(type a)                                               \
+   {                                                                           \
+      std::ostringstream ostr;                                                 \
+      ostr.precision(std::numeric_limits<double>::max_digits10);               \
+      ostr << a;                                                               \
+      return ostr.str();                                                       \
    }
 
 DEFINE_TO_STRING(char              );

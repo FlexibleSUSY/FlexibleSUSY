@@ -16,7 +16,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 
    static constexpr double color_factor = squared_color_generator<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
-   if(!boost::range::equal(indexOut1, indexOut2)) {
+   if (indexOut1 != indexOut2) {
       const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
       const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
       if (mHOS > muqOS1 + muqOS2 && (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right()))) {

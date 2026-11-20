@@ -28,6 +28,20 @@ Fixed bugs
   include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
   didn't use the GSL include path from ``gsl-config``.
 
+* [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
+  "cannot find model_specific/SM/libmodel_specific_SM.a", and executables
+  only started from the FlexibleSUSY directory.
+
+* [commit 31fc4bc48]: With the tests enabled (``--with-optional-modules=test``),
+  a parallel ``make`` could fail to link ``test/SOFTSUSY/run_softpoint.x``
+  or ``run_softsusy.x`` with "no such file:
+  model_specific/SM/libmodel_specific_SM.a".
+
+* [commit c5c8f62ab]: ``./configure --help`` (also ``--version`` or an
+  invalid option) overwrote ``config.status``, which records the options
+  of the last configuration, e.g. for ``./configure $(head -1
+  config.status)``.  Running the tests did this too.
+
 * [commit 21cdd8732]: The code generation of models that use NPointFunctions
   could hang forever when no Wolfram subkernel was free, e.g. while
   another code generation ran.  It now waits up to 5 minutes for a
