@@ -37,6 +37,12 @@ New features
 Fixed bugs
 ----------
 
+* [commit 7cca3f74a]: Loading the Mathematica interface no longer prints
+  ``LibraryFunction::libload`` messages for ``FS<M>CallLilith`` and
+  ``FS<M>CallHiggsTools`` when FlexibleSUSY is configured without Lilith or
+  HiggsTools. Calling them then gives an error message saying so, and
+  ``$Failed``.
+  
 * [commit 3d27e1f6a]: FlexibleSUSY didn't compile if GSL was not in a default
   include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
   didn't use the GSL include path from ``gsl-config``.

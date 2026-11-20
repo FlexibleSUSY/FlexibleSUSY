@@ -1451,6 +1451,26 @@ DLLEXPORT int FS@ModelName@CallLilith(
       data.put_lilith_results(link, ll);
    });
 }
+#else
+// exported also without Lilith, so that loading the Mathematica interface
+// doesn't fail, and a call says why it doesn't work
+DLLEXPORT int FS@ModelName@CallLilith(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::@ModelName@_librarylink;
+
+   if (!check_number_of_args(link, 2, "FS@ModelName@CallLilith"))
+      return LIBRARY_TYPE_ERROR;
+
+   get_handle_from(link);
+   get_string_from(link);
+
+   put_message(link, "FS@ModelName@CallLilith", "error",
+               "FlexibleSUSY was configured without Lilith (use --enable-lilith)");
+   put_error_output(link);
+
+   return LIBRARY_NO_ERROR;
+}
 #endif
 
 #ifdef ENABLE_HIGGSTOOLS
@@ -1490,6 +1510,27 @@ DLLEXPORT int FS@ModelName@CallHiggsTools(
          call_higgstools(data.get_normalized_higgs_effc(), data.get_physical_input(), hbDatabasePath, hsDatabasePath);
       data.put_higgstools_results(link, hs, higgsbounds_v);
    });
+}
+#else
+// exported also without HiggsTools, so that loading the Mathematica interface
+// doesn't fail, and a call says why it doesn't work
+DLLEXPORT int FS@ModelName@CallHiggsTools(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::@ModelName@_librarylink;
+
+   if (!check_number_of_args(link, 3, "FS@ModelName@CallHiggsTools"))
+      return LIBRARY_TYPE_ERROR;
+
+   get_handle_from(link);
+   get_string_from(link);
+   get_string_from(link);
+
+   put_message(link, "FS@ModelName@CallHiggsTools", "error",
+               "FlexibleSUSY was configured without HiggsTools (use --enable-higgstools)");
+   put_error_output(link);
+
+   return LIBRARY_NO_ERROR;
 }
 #endif
 
