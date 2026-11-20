@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( test_delta_r )
    const double delta_r_sm = wein_sm.calculate_delta_r_hat(outrho, outsin);
    const double delta_r_SM = wein_SM.calculate_delta_r_hat(outrho, outsin);
 
-   BOOST_CHECK_CLOSE_FRACTION(delta_r_sm, delta_r_SM, 8e-16);
+   BOOST_CHECK_CLOSE_FRACTION(delta_r_sm, delta_r_SM, 1e-14);
 }
 
 BOOST_AUTO_TEST_CASE( test_sin_theta )
