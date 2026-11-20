@@ -225,7 +225,7 @@ LLLIBS=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
 HIGGSTOOLSFLAGS="-Imodel_specific/SM"
-HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
+HIGGSTOOLSLIBS=""
 lilith_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
@@ -2213,7 +2213,6 @@ check_higgstools_libs() {
               HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
            fi
         fi
-        HIGGSTOOLSLIBS="${HIGGSTOOLSLIBS} model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
     fi
     return 0
 }
@@ -2224,6 +2223,11 @@ check_higgstools() {
     else
         enable_higgstools=no
     fi
+    # libflexisusy uses code from model_specific/SM (also without
+    # HiggsTools).  MODULE_LIBEXT is known here (check_linking).  The
+    # absolute path is needed for shared libraries, which executables
+    # record by the path given on the link line.
+    HIGGSTOOLSLIBS="${HIGGSTOOLSLIBS:+$HIGGSTOOLSLIBS }$ABSBASEDIR/model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
 }
 
 check_python() {

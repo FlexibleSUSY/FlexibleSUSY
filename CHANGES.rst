@@ -28,6 +28,15 @@ Fixed bugs
   ``libboost_system`` was missing, which is common with recent Boost
   versions.  The library was never used.
 
+* [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
+  "cannot find model_specific/SM/libmodel_specific_SM.a", and executables
+  only started from the FlexibleSUSY directory.
+
+* [commit 31fc4bc48]: With the tests enabled (``--with-optional-modules=test``),
+  a parallel ``make`` could fail to link ``test/SOFTSUSY/run_softpoint.x``
+  or ``run_softsusy.x`` with "no such file:
+  model_specific/SM/libmodel_specific_SM.a".
+
 * [commit c5c8f62ab]: ``./configure --help`` (also ``--version`` or an
   invalid option) overwrote ``config.status``, which records the options
   of the last configuration, e.g. for ``./configure $(head -1
