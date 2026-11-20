@@ -198,23 +198,24 @@ jobs:
         run: make -j3 alltest
 
       - name: Run compiled and shell script (Softsusy)
+        # -k: run all tests, so that one failure doesn't hide others
         run: |
-          FLEXIBLESUSY_LOOP_LIBRARY=0 make -j3 execute-compiled-tests execute-shell-tests
+          FLEXIBLESUSY_LOOP_LIBRARY=0 make -k -j3 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (Collier)
         run: |
-          FLEXIBLESUSY_LOOP_LIBRARY=1 make -j3 execute-compiled-tests execute-shell-tests
+          FLEXIBLESUSY_LOOP_LIBRARY=1 make -k -j3 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (LoopTools)
         run: |
-          FLEXIBLESUSY_LOOP_LIBRARY=2 make -j3 execute-compiled-tests execute-shell-tests
+          FLEXIBLESUSY_LOOP_LIBRARY=2 make -k -j3 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (fflite)
         run: |
-          FLEXIBLESUSY_LOOP_LIBRARY=3 make -j3 execute-compiled-tests execute-shell-tests
+          FLEXIBLESUSY_LOOP_LIBRARY=3 make -k -j3 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: (Optional) Save logs in case of an error
