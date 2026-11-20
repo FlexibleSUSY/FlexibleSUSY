@@ -24,6 +24,11 @@ New features
 Fixed bugs
 ----------
 
+* [commit 31fc4bc48]: With the tests enabled (``--with-optional-modules=test``),
+  a parallel ``make`` could fail to link ``test/SOFTSUSY/run_softpoint.x``
+  or ``run_softsusy.x`` with "no such file:
+  model_specific/SM/libmodel_specific_SM.a".
+
 * [commit 21cdd8732]: The code generation of models that use NPointFunctions
   could hang forever when no Wolfram subkernel was free, e.g. while
   another code generation ran.  It now waits up to 5 minutes for a
