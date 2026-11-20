@@ -118,6 +118,21 @@ InfiniteS[a0Input_, generationSizes_, FSScatteringPairs_] := Module[{params = Pa
    TextFormatting`IndentText[paramsCPP <> inputPars <> resultInfinite]
 ];
 
+(* Limit s -> infinity of a full 2 -> 2 amplitude a0 from
+   SARAH`GetScatteringDiagrams[] (which is kept complete for a finite-s
+   calculation, see 1805.07306).  Only the contact diagrams (qChan)
+   survive.  Their s dependence is the kinematic factor
+   (KL[s,m1^2,m2^2] KL[s,m3^2,m4^2])^(1/4)/s with KL = s^2 + O(s),
+   which goes to 1, so the fourth root is replaced by its leading term
+   s.  This gives the same result as Limit[], which takes seconds per
+   element in larger models.  If s remains, Limit[] is used. *)
+InfiniteSLimit[amplitude_] :=
+   Module[{s = Susyno`LieGroups`s,
+           a = amplitude /. qChan -> 1 /. sChan|tChan|uChan -> 0},
+      a = a /. Power[x_ /; !FreeQ[x, s], 1/4] :> s;
+      If[FreeQ[a, s], Simplify[a], Limit[a, s -> Infinity]]
+   ];
+
 GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringPairs, FSScatteringPairsSizes},
    InitUnitarity[];
 
@@ -126,7 +141,7 @@ GetScatteringMatrix[] := Module[{generationSizes, a0, a0InfiniteS, FSScatteringP
 
    a0 = Outer[GetScatteringDiagrams[#1 -> #2]&, FSScatteringPairs, FSScatteringPairs, 1];
    (* obviously 's' lives in Susyno`LieGroups` *)
-   a0InfiniteS = Map[Limit[# /. qChan -> 1 /. sChan|tChan|uChan -> 0, Susyno`LieGroups`s->Infinity]&, a0, {2}];
+   a0InfiniteS = Map[InfiniteSLimit, a0, {2}];
 
    generationSizes = Table[{i, j}, {i, Length[FSScatteringPairs]}, {j, Length[FSScatteringPairs]}];
    generationSizes = Apply[Join[TreeMasses`GetDimension /@ FSScatteringPairs[[#1]], TreeMasses`GetDimension /@ FSScatteringPairs[[#2]]]&, generationSizes, {2}];
