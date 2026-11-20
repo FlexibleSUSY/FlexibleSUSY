@@ -113,11 +113,16 @@ $(LIBSOFTSUSY): $(LIBSOFTSUSY_OBJ)
 		@$(MSG)
 		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
-$(RUN_SOFTSUSY_EXE): $(RUN_SOFTSUSY_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+# HIGGSTOOLSLIBS contains libmodel_specific_SM (by its absolute path), which
+# libflexisusy needs.  It stays at the end of the link command (order of
+# static libraries), so it is an order-only prerequisite, to be built before
+# linking.  (Models and the tests get it through their model_specific
+# libraries.)
+$(RUN_SOFTSUSY_EXE): $(RUN_SOFTSUSY_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS) | model_specific/SM/libmodel_specific_SM$(MODULE_LIBEXT)
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS) $(PYTHONLIBS) $(GSLLIBS) $(HIGGSTOOLSLIBS)
 
-$(RUN_SOFTPOINT_EXE): $(RUN_SOFTPOINT_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+$(RUN_SOFTPOINT_EXE): $(RUN_SOFTPOINT_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS) | model_specific/SM/libmodel_specific_SM$(MODULE_LIBEXT)
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS) $(PYTHONLIBS) $(GSLLIBS) $(HIGGSTOOLSLIBS)
 

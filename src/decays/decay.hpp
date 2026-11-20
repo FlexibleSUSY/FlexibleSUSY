@@ -346,7 +346,7 @@ double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>:
       return 1.;
    }
    else {
-      if (boost::range::equal(idx1, idx2)) {
+      if (idx1 == idx2) {
          return 0.5;
       }
       else {

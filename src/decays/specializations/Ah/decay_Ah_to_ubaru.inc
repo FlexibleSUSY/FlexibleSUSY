@@ -21,7 +21,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
    static constexpr double color_factor = squared_color_generator<PseudoscalarHiggs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
    // flavour-violating decay
-   if(!boost::range::equal(indexOut1, indexOut2)) {
+   if (indexOut1 != indexOut2) {
       const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
       const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
       if (mAhOS > muqOS1 + muqOS2 && (!is_zero(AhQQbarVertexDR.left()) || !is_zero(AhQQbarVertexDR.right()))) {
