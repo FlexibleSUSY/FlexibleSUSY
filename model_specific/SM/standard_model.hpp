@@ -294,6 +294,7 @@ public:
    double CpconjHpVZHp() const;
    double CpHpconjHpconjVWpVWp() const;
    std::complex<double> CpHpconjHpVZVZ() const;
+   std::complex<double> CpHpconjHpVPVZ() const;
    std::complex<double> CpconjHpbarFdFuPR(int gI1, int gI2) const;
    std::complex<double> CpconjHpbarFdFuPL(int gI1, int gI2) const;
    double CpconjHpbarFeFvPR(int , int ) const;
@@ -340,7 +341,11 @@ public:
    double CpVZbargWpgWp() const;
    double CpVZbargWpCgWpC() const;
    double CpVZconjHpHp() const;
+   double CpHpconjHpVP() const;
+   double CpHpconjHpVZ() const;
    double CpVZconjVWpHp() const;
+   double CpbargWpgWpVP() const;
+   double CpbargWpCgWpCVP() const;
    std::complex<double> CpVZVZAhAh() const;
    std::complex<double> CpVZVZhhhh() const;
    std::complex<double> CpVZVZconjHpHp() const;
@@ -361,6 +366,10 @@ public:
    double CpconjVWpVPHp() const;
    double CpconjVWpVWphh() const;
    double CpconjVWpVZHp() const;
+   double CpconjHpVWpVZ() const;
+   double CpHpconjVWpVP() const;
+   double CpconjHpVPVWp() const;
+   double CpHpconjVWpVZ() const;
    double CpconjVWpbargPgWp() const;
    double CpconjVWpbargWpCgP() const;
    double CpconjVWpbargWpCgZ() const;
@@ -380,6 +389,11 @@ public:
    double CpVWpconjVWpVZVZ1() const;
    double CpVWpconjVWpVZVZ2() const;
    double CpVWpconjVWpVZVZ3() const;
+   double CpconjVWpVPVWpVZ2() const;
+   double CpconjVWpVPVWpVZ1() const;
+   double CpconjVWpVPVWpVZ3() const;
+   double CpconjVWpVPVWp(int , int ) const;
+   double CpconjVWpVZVWp(int , int ) const;
    double CpVWpconjVWpconjVWpVWp1() const;
    double CpVWpconjVWpconjVWpVWp2() const;
    double CpVWpconjVWpconjVWpVWp3() const;
@@ -439,6 +453,12 @@ public:
    std::complex<double> CpbarFehhFePR(int gO1, int gI2) const;
    double CpbarFeVZFePR(int gO2, int gI2) const;
    double CpbarFeVZFePL(int gO1, int gI2) const;
+   double CpbarFdFdVPPL(int gI1, int gI2) const;
+   double CpbarFdFdVPPR(int gI1, int gI2) const;
+   double CpbarFeFeVPPL(int gI1, int gI2) const;
+   double CpbarFeFeVPPR(int gI1, int gI2) const;
+   double CpbarFuFuVPPL(int gI1, int gI2) const;
+   double CpbarFuFuVPPR(int gI1, int gI2) const;
    std::complex<double> CpbarFeconjHpFvPL(int gO2, int gI2) const;
    double CpbarFeconjHpFvPR(int , int ) const;
    double CpbarFeconjVWpFvPR(int , int ) const;
@@ -460,6 +480,7 @@ public:
    std::complex<double> self_energy_hh_1loop(double p ) const;
    std::complex<double> self_energy_VZ_1loop(double p ) const;
    std::complex<double> self_energy_VWp_1loop(double p ) const;
+   std::complex<double> self_energy_VPVZ_1loop(double p) const;
    std::complex<double> self_energy_Fd_1loop_1(double p , int gO1, int gO2) const;
    std::complex<double> self_energy_Fd_1loop_PR(double p , int gO1, int gO2) const;
    std::complex<double> self_energy_Fd_1loop_PL(double p , int gO1, int gO2) const;
