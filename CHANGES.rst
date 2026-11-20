@@ -33,6 +33,11 @@ Fixed bugs
   or ``run_softsusy.x`` with "no such file:
   model_specific/SM/libmodel_specific_SM.a".
 
+* [commit c5c8f62ab]: ``./configure --help`` (also ``--version`` or an
+  invalid option) overwrote ``config.status``, which records the options
+  of the last configuration, e.g. for ``./configure $(head -1
+  config.status)``.  Running the tests did this too.
+
 * [commit 21cdd8732]: The code generation of models that use NPointFunctions
   could hang forever when no Wolfram subkernel was free, e.g. while
   another code generation ran.  It now waits up to 5 minutes for a
