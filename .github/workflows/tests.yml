@@ -35,45 +35,34 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
 
 jobs:
+  # Compiled and shell script tests that need neither Mathematica nor a
+  # model, so they run even when the Wolfram Engine can't be activated.
+  # No secrets are used, so this job also runs on pull requests from forks.
   no-meta:
+
+    runs-on: ubuntu-latest
+    container:
+      image: navir/opensuseleap-for-flexiblesusy:0.18.10
+
     strategy:
+      fail-fast: false
       matrix:
-        OS: [macos-10.15, ubuntu-latest]
         CXXCOMPILER: [g++, clang++]
-    runs-on: ${{ matrix.OS }}
-    if: false
 
     steps:
-      - name: Homebrew
-        if: runner.os == 'macOS'
-        run: |
-          brew update
-          brew upgrade
-          brew reinstall gcc
-          brew install gsl
 
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install conan
-        run: |
-          pip3 install --user conan
-          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-          conan profile new default --detect
-
-      - name: Setup conan
-        run: |
-          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-          conan profile update settings.compiler.libcxx=libstdc++11 default
+      - name: "Set FS dependency directory"
         env:
-          CXX: ${{ matrix.CXXCOMPILER }}
-        if: ${{ runner.os == 'Linux' }}
-
-      - name: Install dependencies
+          compiler: ${{ matrix.CXXCOMPILER }}
         run: |
-          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-          conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
-          conan install . --build=missing
+          case "$compiler" in
+            "g++")    echo "FS_DEPENDENCIES_DIR=/fs_dependencies/gcc" >> $GITHUB_ENV ;;
+            "clang++")  echo "FS_DEPENDENCIES_DIR=/fs_dependencies/clang" >> $GITHUB_ENV ;;
+            *) exit 1 ;;
+          esac
 
       - name: Configure
         env:
@@ -81,9 +70,12 @@ jobs:
         run: |
           ./configure \
             --with-cxx=$CXXCOMPILER \
-            --with-optional-modules=test \
             --with-loop-libraries=collier,looptools \
-            --with-install-dir=install \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --with-optional-modules=test \
             --disable-meta
           make showbuild
 
@@ -115,8 +107,14 @@ jobs:
           FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
-      - name: Install
-        run: make install-src
+      - name: (Optional) Save logs in case of an error
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: no-meta-${{matrix.CXXCOMPILER}}_test-logs
+          path: |
+            config.*
+            test/test_*.log
 
   with-meta:
 
