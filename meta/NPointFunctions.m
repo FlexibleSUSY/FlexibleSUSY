@@ -189,7 +189,29 @@ CheckOptionValues[opts___] := (
    True
 );
 
+LaunchSubkernel::errKernel = "No subkernel could be launched within `1` s. \
+NPointFunctions needs one free subkernel, because FeynArts and FormCalc run in a \
+separate kernel. Check the licence ($MaxLicenseSubprocesses) and other running \
+Wolfram kernels.";
+LaunchSubkernel[] :=
+Module[{kernels = {}, attempt = 0, maxAttempts = 30, wait = 10},
+   (* Subkernels can be taken by another code generation or by a
+      ParallelMap of this one, so wait for one to become free. *)
+   While[!MatchQ[kernels, {_}] && attempt < maxAttempts,
+      If[attempt > 0,
+         Print["NPointFunctions: no free subkernel, trying again in ", wait, " s ..."];
+         Pause@wait;
+      ];
+      kernels = Quiet@LaunchKernels@1;
+      attempt++;
+   ];
+   Utils`AssertOrQuit[MatchQ[kernels, {_}], LaunchSubkernel::errKernel, maxAttempts*wait];
+   First@kernels
+];
+LaunchSubkernel // secure;
+
 NPointFunction::errOption = "Value `1` for `2` option must match any from `3`.";
+NPointFunction::errModelFile = "The FeynArts model file `1` was not created.";
 NPointFunction[
    inFields: {__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# || TreeMasses`IsVector@# &)},
    outFields:{__?(TreeMasses`IsScalar@# || TreeMasses`IsFermion@# || TreeMasses`IsVector@# &)},
@@ -207,13 +229,14 @@ Module[{
       If[npf =!= Null, Return@npf];
    ];
    If[FileExistsQ[faModel <> ".mod"] === False,
-      {kernel} = LaunchKernels@1;
+      kernel = LaunchSubkernel[];
       WriteModelFile@kernel;
-      WriteNamespaceFile@particleNamespaceFile;
       CloseKernels@kernel;
+      Utils`AssertOrQuit[FileExistsQ[faModel <> ".mod"], NPointFunction::errModelFile, faModel <> ".mod"];
+      WriteNamespaceFile@particleNamespaceFile;
    ];
 
-   {kernel} = LaunchKernels@1;
+   kernel = LaunchSubkernel[];
    SetSharedFunction[subWrite, Print];
    With[{path = $Path,
          data = {fcDir, faModel, particleNamesFile, particleNamespaceFile,

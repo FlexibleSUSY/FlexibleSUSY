@@ -7,6 +7,19 @@ New features
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
 
+* ``configure`` now checks all stated requirements, and the README states
+  what ``configure`` checks:
+
+  * the C++ standard library must support C++20 (``<concepts>``, ``<span>``,
+    ``<numbers>``), which catches clang++ used with the libstdc++ of g++ < 10;
+  * Boost >= 1.62 (was 1.37), except 1.64, whose odeint doesn't compile;
+  * Eigen >= 3.3 (was a warning, older versions don't compile);
+  * GM2Calc >= 2.1.0 also when found via ``pkg-config``.
+
+  The classic Intel compiler icpc (stated as icpc >= 18.0.0) is no longer
+  supported, as it lacks the needed C++20 features; Intel's LLVM-based icpx
+  is treated as clang++.
+
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
   accordingly.
@@ -29,6 +42,29 @@ Fixed bugs
   ``FS<M>CallHiggsTools`` when FlexibleSUSY is configured without Lilith or
   HiggsTools. Calling them then gives an error message saying so, and
   ``$Failed``.
+  
+* [commit 3d27e1f6a]: FlexibleSUSY didn't compile if GSL was not in a default
+  include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
+  didn't use the GSL include path from ``gsl-config``.
+
+* [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
+  "cannot find model_specific/SM/libmodel_specific_SM.a", and executables
+  only started from the FlexibleSUSY directory.
+
+* [commit 31fc4bc48]: With the tests enabled (``--with-optional-modules=test``),
+  a parallel ``make`` could fail to link ``test/SOFTSUSY/run_softpoint.x``
+  or ``run_softsusy.x`` with "no such file:
+  model_specific/SM/libmodel_specific_SM.a".
+
+* [commit c5c8f62ab]: ``./configure --help`` (also ``--version`` or an
+  invalid option) overwrote ``config.status``, which records the options
+  of the last configuration, e.g. for ``./configure $(head -1
+  config.status)``.  Running the tests did this too.
+
+* [commit 21cdd8732]: The code generation of models that use NPointFunctions
+  could hang forever when no Wolfram subkernel was free, e.g. while
+  another code generation ran.  It now waits up to 5 minutes for a
+  subkernel and otherwise stops with an error message.
 
 * [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
   code is enabled and the Mathematica kernel is not found or is older
