@@ -204,16 +204,19 @@ jobs:
           make clean-test-log
 
       - name: Run compiled and shell script (Collier)
+        if: ${{ !cancelled() }}
         run: |
           FLEXIBLESUSY_LOOP_LIBRARY=1 make -k -j3 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (LoopTools)
+        if: ${{ !cancelled() }}
         run: |
           FLEXIBLESUSY_LOOP_LIBRARY=2 make -k -j3 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (fflite)
+        if: ${{ !cancelled() }}
         run: |
           FLEXIBLESUSY_LOOP_LIBRARY=3 make -k -j3 execute-compiled-tests execute-shell-tests
           make clean-test-log
