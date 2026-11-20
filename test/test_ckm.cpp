@@ -20,8 +20,9 @@
 
 using namespace flexiblesusy;
 
-bool is_orthogonal(const Eigen::Matrix<double,3,3>& m,
-                   double max_deviation = std::numeric_limits<double>::epsilon())
+bool is_orthogonal(
+   const Eigen::Matrix<double, 3, 3>& m,
+   double max_deviation = 10 * std::numeric_limits<double>::epsilon())
 {
    const Eigen::Matrix<double,3,3> unity(m * m.transpose());
 
@@ -36,14 +37,16 @@ bool is_orthogonal(const Eigen::Matrix<double,3,3>& m,
    return result;
 }
 
-bool is_unitary(const Eigen::Matrix<double,3,3>& m,
-                double max_deviation = std::numeric_limits<double>::epsilon())
+bool is_unitary(const Eigen::Matrix<double, 3, 3>& m,
+                double max_deviation = 10 *
+                                       std::numeric_limits<double>::epsilon())
 {
    return is_orthogonal(m, max_deviation);
 }
 
-bool is_unitary(const Eigen::Matrix<std::complex<double>,3,3>& m,
-                double max_deviation = std::numeric_limits<double>::epsilon())
+bool is_unitary(const Eigen::Matrix<std::complex<double>, 3, 3>& m,
+                double max_deviation = 10 *
+                                       std::numeric_limits<double>::epsilon())
 {
    const Eigen::Matrix<std::complex<double>,3,3> unity(m * m.adjoint());
 

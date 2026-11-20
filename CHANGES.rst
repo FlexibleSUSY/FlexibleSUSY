@@ -24,6 +24,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit 3d27e1f6a]: FlexibleSUSY didn't compile if GSL was not in a default
+  include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
+  didn't use the GSL include path from ``gsl-config``.
+
 * [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
   "cannot find model_specific/SM/libmodel_specific_SM.a", and executables
   only started from the FlexibleSUSY directory.

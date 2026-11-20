@@ -25,8 +25,9 @@ run_depgens() {
 
     rm -f ${OUTPUT}.1 ${OUTPUT}.2
 
-    $cmd1 $file | awk "${awk_join_lines}" | sed 's/ \+/ /g' | sed '/^$/d;G' > ${OUTPUT}.1
-    $cmd2 $file | awk "${awk_join_lines}" | sed 's/ \+/ /g' | sed '/^$/d;G' > ${OUTPUT}.2
+    # tr -s instead of sed 's/ \+/ /g': BSD sed (macOS) has no \+
+    $cmd1 $file | awk "${awk_join_lines}" | tr -s ' ' | sed '/^$/d;G' > ${OUTPUT}.1
+    $cmd2 $file | awk "${awk_join_lines}" | tr -s ' ' | sed '/^$/d;G' > ${OUTPUT}.2
 
     diff=$(diff -u ${OUTPUT}.1 ${OUTPUT}.2)
 
