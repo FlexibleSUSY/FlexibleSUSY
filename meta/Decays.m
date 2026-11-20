@@ -37,6 +37,12 @@ of the given particle: 1 for scalars, 0 (tree level only) otherwise.";
 
 CreateCompleteParticleList::usage="";
 GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
+GetFinalStatesForParticle::usage = "GetFinalStatesForParticle[particle, n, allowedFinalStateParticles]
+returns the possible final states of the decays of particle, ordered as in GetDecaysForParticle
+(n as in GetDecaysForParticle).";
+CreateParticleDecay::usage = "CreateParticleDecay[particle, finalState] returns {decay} with the
+FSParticleDecay of particle -> finalState, or {} if no diagram contributes.  GetDecaysForParticle
+calls it for every final state; the code generation calls it in parallel, one task per decay.";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
 CreateBSMParticleAliasList::usage="";
@@ -524,10 +530,18 @@ DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay /; GetDecayTopologiesAnd
     ];
 DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay/; GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 0] =!= {}] := decay;
 
-(* outputs list of FSParticleDecay objects *)
-GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
-    Module[{genericFinalStates,
-            isPossibleDecay, concreteFinalStates, decays, temp},
+GetFinalStatesForParticle[particle_, maxNumberOfProducts_Integer /; maxNumberOfProducts >= 2,
+                          allowedFinalStateParticles_List] :=
+    GetFinalStatesForParticle[particle, {2, maxNumberOfProducts}, allowedFinalStateParticles];
+
+GetFinalStatesForParticle[particle_, {minNumberOfProducts_Integer, maxNumberOfProducts_Integer} /;
+                                     2 <= minNumberOfProducts <= maxNumberOfProducts,
+                          allowedFinalStateParticles_List] :=
+    Join @@ (GetFinalStatesForParticle[particle, {#}, allowedFinalStateParticles]& /@
+                Range[minNumberOfProducts, maxNumberOfProducts]);
+
+GetFinalStatesForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
+    Module[{genericFinalStates, isPossibleDecay, concreteFinalStates},
 
            Utils`AssertWithMessage[exactNumberOfProducts === 2,
               "decays with " <> ToString@exactNumberOfProducts <>
@@ -543,7 +557,25 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
                                             IsColorInvariantDecay[particle, finalState] &&
                                             !FinalStateContainsInitialState[particle, finalState]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
-           concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
+           OrderFinalState[particle, #] & /@ concreteFinalStates
+    ];
+
+Utils`MakeUnknownInputDefinition[GetFinalStatesForParticle];
+
+CreateParticleDecay[particle_, finalState_List] :=
+    Module[{decay = FSParticleDecay[particle, finalState, GetContributingGraphsForDecay[particle, finalState]]},
+           If[GetDecayTopologiesAndDiagrams[decay] === {},
+              {},
+              {DeleteDiagramsVanishingDueToColor[decay]}
+           ]
+    ];
+
+Utils`MakeUnknownInputDefinition[CreateParticleDecay];
+
+(* outputs list of FSParticleDecay objects *)
+GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
+    Module[{concreteFinalStates, decays},
+           concreteFinalStates = GetFinalStatesForParticle[particle, {exactNumberOfProducts}, allowedFinalStateParticles];
 
            If[!FlexibleSUSY`FSEnableParallelism,
               Print[""];
@@ -555,15 +587,14 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
                     If[!FlexibleSUSY`FSEnableParallelism,
                        WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
                     ];
-                    temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
-                    If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
-                    temp
+                    With[{decay = CreateParticleDecay[particle, #]},
+                       If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
+                       decay
+                    ]
                  )&,
                  concreteFinalStates
               ];
-
-           decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
-           DeleteDiagramsVanishingDueToColor /@ decays
+           Join @@ decays
     ];
 
 GetDecaysForParticle[particle_, n_, allowedFinalStateParticles_List] :=
