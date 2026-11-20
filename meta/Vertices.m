@@ -811,8 +811,10 @@ ViolatesElectricChargeQ[fields_List] :=
    SARAH puts it there only if it doesn't vanish with dependences, so
    it counts as non-zero without recalculating it.  This matters with
    dependences: SARAH`Vertex[] is then slow for large vertices
-   (seconds for 4-squark vertices). *)
+   (seconds for 4-squark vertices).  The result is remembered, as the
+   decays ask for the same vertices in thousands of diagrams. *)
 IsNonZeroVertex[fields_List, useDependences:(True|False):False] :=
+    IsNonZeroVertex[fields, useDependences] =
     Module[{sortedFields = SortFieldsInCp[fields]},
            Which[
               CachedVertex[sortedFields] =!= {}, True,

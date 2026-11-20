@@ -1305,10 +1305,12 @@ CreateVertex[fields_List] :=
   ];
 
 (** \brief Returns the Lorentz structure of a given vertex.
+ * The result is remembered: the decays ask for the same vertices in
+ * thousands of diagrams.
  * param fields a vertex given as a list of fields
  * \returns the Lorentz structure of a given vertex.
  **)
-VertexTypeForFields[fields_List] :=
+VertexTypeForFields[fields_List] := VertexTypeForFields[fields] =
 	AtomHead[GaugeStructureOfVertex[SortedVertex[fields]][[3]]];
 
 (** \brief Creates the c++ code containing the actual numerical

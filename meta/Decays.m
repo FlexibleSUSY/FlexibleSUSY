@@ -1532,6 +1532,13 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
 ];
 
 (* returns vertex needed by FA generated routines, but in terms of SortCp'ed vertex *)
+(* IsParticle builds the list of particles on every call, which takes
+   about 1 ms.  ConvertCouplingToCPP asks it for every field of every
+   coupling of every diagram (most of the time of writing the decay
+   C++ code), and the particles don't change during the decay code
+   generation, so remember the result. *)
+IsParticleCached[f_] := IsParticleCached[f] = IsParticle[f];
+
 ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, vertices_, indices_] :=
    Module[{vertexEdges, res, pos, globalMinus = 1, vertex, lorSorted, temp},
 
@@ -1547,7 +1554,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
       not LorentzProduct[gamma[lt], PL|PR] *)
    lorSorted = lorSorted /. LorentzProduct[gamma[_], lr_:PL|PR] :> lr;
    vertex =
-      SARAH`Cp[Sequence@@(vertexEdges /. -f_[n_] /; !IsParticle[f] :> SARAH`AntiField[Field[n] /. fieldAssociation] /. f_[n_] /; !IsParticle[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> (Field[n] /. fieldAssociation))][lorSorted];
+      SARAH`Cp[Sequence@@(vertexEdges /. -f_[n_] /; !IsParticleCached[f] :> SARAH`AntiField[Field[n] /. fieldAssociation] /. f_[n_] /; !IsParticleCached[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> (Field[n] /. fieldAssociation))][lorSorted];
    temp =
       SortCp[vertex];
    temp = temp /. -SARAH`Cp[y___][x___] :> (globalMinus*=-1;{{y}, x}) /. SARAH`Cp[y___][x___] :> {{y}, x};
