@@ -93,7 +93,7 @@ make -j4                               # runs the meta code, then compiles
 
 ### Compiler requirements
 The code uses C++20 (concepts). It needs g++ >= 10.1, or clang++ >= 10 with
-libstdc++ >= 10. `configure` checks the compiler version and, with a test program, that
+libstdc++ >= 10; on macOS Apple clang with libc++ (CI job `no-meta-macos`, #748). `configure` checks the compiler version and, with a test program, that
 the standard library has `<concepts>`, `<span>` and `<numbers>`
 (`check_cxx_std_library`). The classic Intel compiler icpc isn't supported (only a
 warning); Intel's icpx is detected as clang. Libraries: Boost >= 1.62 except 1.64

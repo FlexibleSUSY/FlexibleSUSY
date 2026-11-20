@@ -1646,7 +1646,8 @@ check_cxx_std_library() {
         result "not ok"
         message "Error: the C++ standard library used by $CXX lacks C++20 features"
         message "   needed by FlexibleSUSY (<concepts>, <span>, <numbers>)."
-        message "   With clang++, please install libstdc++ 10 or higher (from g++ 10 or higher)."
+        message "   With clang++ on Linux, please install libstdc++ 10 or higher (from g++ 10"
+        message "   or higher); on macOS, use Apple clang with its libc++."
         exit 1
     fi
 }

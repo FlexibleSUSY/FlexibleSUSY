@@ -103,8 +103,9 @@ Requirements
 ------------
 
 * C++20 compiler (g++ >= 10.1.0, or clang++ >= 10.0.0 with libstdc++ >= 10;
-  Intel's icpx is LLVM-based and counts as clang++, the classic icpc is not
-  supported)
+  on macOS Apple clang with its libc++, tested with Xcode 16 on Apple
+  Silicon; Intel's icpx is LLVM-based and counts as clang++, the classic
+  icpc is not supported)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
@@ -135,6 +136,19 @@ On Debian/Ubuntu one may run for example
 .. code-block:: shell
 
     sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev python3-dev
+
+On macOS, the libraries and the Fortran compiler (from GCC) can be
+installed with Homebrew_.  Homebrew's directories are not searched by
+default, so they are passed to ``configure``:
+
+.. code-block:: shell
+
+    brew install gcc boost eigen gsl
+    ./configure --with-cxx=clang++ --with-fc=gfortran \
+       --with-boost-incdir="$(brew --prefix boost)/include" \
+       --with-boost-libdir="$(brew --prefix boost)/lib" \
+       --with-eigen-incdir="$(brew --prefix eigen)/include/eigen3" \
+       --with-gsl-config="$(brew --prefix gsl)/bin/gsl-config"
 
 The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
 LoopTools_, Himalaya_ and TSIL_ can be also installed using the Conan_
@@ -1068,6 +1082,7 @@ References
 .. _SOFTSUSY: http://softsusy.hepforge.org
 .. _Boost: http://www.boost.org
 .. _Conan: https://conan.io/
+.. _Homebrew: https://brew.sh/
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
