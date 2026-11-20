@@ -29,7 +29,6 @@
 
 #include <cmath>
 
-#include <boost/range/algorithm.hpp>
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
 #define BOOST_MPL_LIMIT_LIST_SIZE 50
 #include <boost/mpl/for_each.hpp>
