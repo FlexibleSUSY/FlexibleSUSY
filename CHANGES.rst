@@ -24,6 +24,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
+  "cannot find model_specific/SM/libmodel_specific_SM.a", and executables
+  only started from the FlexibleSUSY directory.
+
 * [commit 31fc4bc48]: With the tests enabled (``--with-optional-modules=test``),
   a parallel ``make`` could fail to link ``test/SOFTSUSY/run_softpoint.x``
   or ``run_softsusy.x`` with "no such file:
