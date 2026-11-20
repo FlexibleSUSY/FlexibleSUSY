@@ -331,6 +331,33 @@ FinalStateContainsInitialState[initialParticle_, finalState_List] :=
             False
          ]
 
+(* Returns True for the decay of a scalar into a scalar and a massless
+   vector, such as S -> S' gamma or S -> S' g.  Its width is 0 at every
+   order of perturbation theory, for two equivalent reasons:
+
+   - Angular momentum: the initial state has J = 0 and the final
+     scalar has no spin, so along the decay axis the vector must have
+     helicity 0.  A massless vector has only the helicities +1 and -1.
+
+   - Gauge invariance: for S(p) -> S'(k) V(q) with p = k + q, the
+     amplitude is M = eps*_mu(q) M^mu with M^mu = A p^mu + B q^mu.
+     Since eps*.q = 0, only M = A eps*.p contributes.  The Ward identity
+     q_mu M^mu = 0 with q^2 = 0 gives A p.q = A (m_S^2 - m_S'^2)/2 = 0,
+     so A = 0 whenever there is phase space.
+
+   At tree level the photon and gluon couple diagonally (no gamma S S'
+   vertex for S != S'), and at 1 loop the diagrams cancel in the sum,
+   but not one by one.  Decay_amplitude_SSV::square() returns 0 for a
+   massless vector, so these amplitudes would only be dead code.  The
+   decay into a massive vector (S -> S' Z, S -> S' W) is allowed through
+   its longitudinal polarization, and the decay through a virtual photon
+   (S -> S' f fbar) is a 3-body decay. *)
+IsScalarToScalarAndMasslessVector[initialParticle_, finalState_List] :=
+    TreeMasses`IsScalar[initialParticle] &&
+    Length[finalState] === 2 &&
+    Count[finalState, _?TreeMasses`IsScalar] === 1 &&
+    Count[finalState, _?(TreeMasses`IsVector[#] && TreeMasses`IsMassless[#]&)] === 1;
+
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
     Vertices`IsNonZeroVertex[fields, useDependences];
 
@@ -555,7 +582,8 @@ GetFinalStatesForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFin
            isPossibleDecay[finalState_] := (IsPhysicalFinalState[finalState] &&
                                             IsElectricChargeConservingDecay[particle, finalState] &&
                                             IsColorInvariantDecay[particle, finalState] &&
-                                            !FinalStateContainsInitialState[particle, finalState]);
+                                            !FinalStateContainsInitialState[particle, finalState] &&
+                                            !IsScalarToScalarAndMasslessVector[particle, finalState]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            OrderFinalState[particle, #] & /@ concreteFinalStates
     ];
