@@ -799,6 +799,14 @@ ReplaceUnrotatedFields[SARAH`Cp[p__]] :=
 ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
     ReplaceUnrotatedFields[SARAH`Cp[p]][lorentz];
 
+(* True if the electric charges of the fields are known and don't add
+   up to zero.  Such a vertex vanishes, and checking this is much
+   faster than SARAH`Vertex[] (about 40 ms per vertex in the MSSM). *)
+ViolatesElectricChargeQ[fields_List] :=
+    With[{charge = Simplify[Plus @@ (SARAH`getElectricCharge /@ fields)]},
+         NumericQ[charge] && charge != 0
+    ];
+
 (* A vertex in SARAH's lists is non-zero without dependences, and
    SARAH puts it there only if it doesn't vanish with dependences, so
    it counts as non-zero without recalculating it.  This matters with
@@ -806,9 +814,10 @@ ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
    (seconds for 4-squark vertices). *)
 IsNonZeroVertex[fields_List, useDependences:(True|False):False] :=
     Module[{sortedFields = SortFieldsInCp[fields]},
-           If[CachedVertex[sortedFields] =!= {},
-              True,
-              MemberQ[FSVertex[sortedFields, useDependences][[2 ;;, 1]], Except[0]]
+           Which[
+              CachedVertex[sortedFields] =!= {}, True,
+              ViolatesElectricChargeQ[sortedFields], False,
+              True, MemberQ[FSVertex[sortedFields, useDependences][[2 ;;, 1]], Except[0]]
            ]
           ];
 

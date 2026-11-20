@@ -116,6 +116,23 @@ TestEquality[Vertices`IsNonZeroVertex[{hh, Fu, bar[Fu]}, True], True];
 TestEquality[Vertices`IsNonZeroVertex[{VWp, VP, conj[VWp]}, True], True];
 TestEquality[Vertices`IsNonZeroVertex[{VP, conj[VWp], VWp, VZ}, True], True];
 
+(* charge-violating vertices are zero without asking SARAH *)
+numberOfFSVertexResults[] := Length[DownValues[Vertices`FSVertex]];
+Module[{n = numberOfFSVertexResults[]},
+   TestEquality[Vertices`IsNonZeroVertex[{VZ, bar[Fd], Fu}, #], False]& /@ {False, True};
+   TestEquality[Vertices`IsNonZeroVertex[{VWp, Hp, hh}, #], False]& /@ {False, True};
+   TestEquality[Vertices`IsNonZeroVertex[{VP, Hp, Hp, hh}, #], False]& /@ {False, True};
+   TestEquality[numberOfFSVertexResults[], n];
+];
+
+(* the charge check never rejects a vertex of SARAH's lists, also with
+   conjugated fields *)
+TestEquality[
+    Select[StripVertexFields /@ Join[SARAH`VertexList3, SARAH`VertexList4],
+           Vertices`Private`ViolatesElectricChargeQ],
+    {}];
+TestEquality[Vertices`IsNonZeroVertex[{conj[VWp], Hp, hh}, True], True];
+
 (* vertices that vanish without dependences *)
 TestEquality[Vertices`IsNonZeroVertex[{hh, VG, VG}, #], False]& /@ {False, True};
 TestEquality[Vertices`IsNonZeroVertex[{bar[Fe], Fu, hh}, #], False]& /@ {False, True};
