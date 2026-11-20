@@ -34,6 +34,12 @@ New features
   needs the ``timeout`` command (``gtimeout`` from GNU coreutils on
   macOS); without it, there is no limit.
 
+* FlexibleDecay no longer generates decays of a scalar into a scalar and
+  a photon or gluon (e.g. H -> h gamma, A -> h gamma, squark -> squark
+  gluon, sneutrino -> sneutrino gamma).  These widths vanish at every
+  order and were always 0 in the output.  This makes the generated decay
+  code smaller (about 17% in the THDM-II, 14% in the MSSM).
+
 Fixed bugs
 ----------
 
