@@ -108,7 +108,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/ewsb_solver.hpp \
 		$(DIR)/factorial.hpp \
 		$(DIR)/ffv_loop_functions.hpp \
-		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/for_each.hpp \
 		$(DIR)/functors.hpp \
