@@ -48,11 +48,21 @@ ReplaceUnrotatedFields::usage;
 StripGroupStructure::usage="Removes group generators and Kronecker deltas.";
 StripFieldIndices::usage;
 
-IsNonZeroVertex::usage="Checks if a vertex may be non-zero.";
-
-SetCachedVertices::usage="";
-GetCachedVertices::usage="";
-ClearCachedVertices::usage="";
+IsNonZeroVertex::usage="IsNonZeroVertex[fields, useDependences] checks if the vertex of the given
+fields (without indices, in any order) may be non-zero.  With useDependences = True (default:
+False), SARAH's parameter dependences (e.g. for ThetaW) are imposed.  A vertex in SARAH's vertex
+lists always counts as non-zero, as SARAH puts a vertex there only if it doesn't vanish with the
+dependences.  (SARAH doesn't simplify some vertex types for this check, so a few of them vanish
+with the dependences, e.g. bar[gZ]-gP-hh in the SM.)";
+FSVertex::usage="FSVertex[sortedFields, useDependences] returns SARAH`Vertex[sortedFields,
+UseDependences -> useDependences] for fields without indices in SARAH's order (see
+SortFieldsInCp).  Without dependences (the default) the vertex is taken from SARAH's vertex
+lists if they are loaded (see LoadVerticesIfNecessary): their entries are the vertices without
+dependences, but vertices that vanish with dependences are left out.  The results are
+remembered.";
+LoadVerticesIfNecessary::usage="LoadVerticesIfNecessary[] reads SARAH's vertex lists
+SARAH`VertexList3 and SARAH`VertexList4 from SARAH's output directory for
+FlexibleSUSY`FSEigenstates, if they are not loaded yet.";
 SarahColorIndexQ::usage="Checks if an index is a color index. Returns True for indices starting with ct and followed by a number.";
 SarahLorentzIndexQ::usage="Checks if an index is a Lorentz index. Returns True for indices starting with lt and followed by a number.";
 SarahDummyIndexQ::usage="Checks if an index is a dummy index. Returns True for indices starting with j and followed by a number.";
@@ -61,53 +71,41 @@ SortFieldsInCp::usage="";
 
 Begin["`Private`"]
 
-FSVertex[sortedFields_, UseDependences_:False] := FSVertex[sortedFields, UseDependences] =
-Module[{vertexList, vertex},
+LoadVerticesIfNecessary[] :=
+   If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
+      SA`CurrentStates = FlexibleSUSY`FSEigenstates;
+      SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
+      SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
+      SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
+      SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
+      SARAH`MakeCouplingLists;
+   ];
 
-   vertexList =
-      Switch[Length[sortedFields],
-         3, SARAH`VertexList3,
-         4, SARAH`VertexList4,
-         _, Print["Only three- and four-point vertices are supported"]; Quit[1]
-      ];
+(* SARAH's vertex lists, if loaded *)
+LoadedVertexList[3] := If[ListQ[SARAH`VertexList3], SARAH`VertexList3, {}];
+LoadedVertexList[4] := If[ListQ[SARAH`VertexList4], SARAH`VertexList4, {}];
+LoadedVertexList[_] := {};
 
-   vertex = Select[vertexList, Vertices`StripFieldIndices[#[[1]]] === sortedFields &, 1];
+(* the entry of SARAH's vertex lists for the given fields, or {} *)
+CachedVertex[sortedFields_List] :=
+   Select[LoadedVertexList[Length[sortedFields]],
+          StripFieldIndices[#[[1]]] === sortedFields &, 1];
 
-   If[vertex =!= {},
-      First@vertex,
-      SARAH`Vertex[sortedFields, UseDependences -> useDependences]
-   ]
-];
+(* The entries of SARAH's vertex lists are equal to SARAH`Vertex[]
+   without dependences.  With dependences, SARAH`Vertex[] gives
+   different expressions, and a vertex in the list may vanish
+   (e.g. bar[gZ]-gP-hh in the SM), so the lists are only used without
+   dependences. *)
+FSVertex[sortedFields_List, useDependences:(True|False):False] :=
+   FSVertex[sortedFields, useDependences] =
+   Module[{vertex = If[useDependences, {}, CachedVertex[sortedFields]]},
+      If[vertex =!= {},
+         First[vertex],
+         SARAH`Vertex[sortedFields, SARAH`UseDependences -> useDependences]
+      ]
+   ];
 
-(* cached 3-point vertices, with and without dependencies imposed *)
-cachedVertices[3, False] = {};
-cacjedVertices[3, True] = {};
-(* cached 4-point vertices, with and without dependences imposed *)
-cachedVertices[4, False] = {};
-cachedVertices[4, True] = {};
-cachedVertices[numFields_, useDependences_] := {};
-
-SetCachedVertices[numFields_Integer, vertices_List, useDependences_:False] := cachedVertices[numFields, useDependences] = vertices;
-
-GetCachedVertices[] := Flatten[cachedVertices[#[[1]], #[[2]]]& /@ Cases[DownValues[cachedVertices], (HoldPattern[_[_[l_, u_]]] :> _) /; IntegerQ[l] :> {l, u}]];
-GetCachedVertices[numFields_Integer, useDependences_:False] := cachedVertices[numFields, useDependences];
-
-AddToCachedVertices[sarahVertex_, useDependences_:False] :=
-    Module[{numFields, cached},
-           numFields = Length[sarahVertex[[1]]];
-           cached = cachedVertices[numFields, useDependences];
-           If[cached === {},
-              cachedVertices[numFields, useDependences] = {sarahVertex};,
-              cachedVertices[numFields, useDependences] = Append[cached, sarahVertex];
-             ];
-          ];
-
-ClearCachedVertices[numFields_Integer, useDependences_:False] := cachedVertices[numFields, useDependences] = {};
-ClearCachedVertices[] :=
-    (
-     DownValues[cachedVertices] = DeleteCases[DownValues[cachedVertices], (HoldPattern[_[_[l_, _]]] :> _) /; IntegerQ[l]];
-     cachedVertices[_, _] := {};
-    )
+Utils`MakeUnknownInputDefinition[FSVertex];
 
 (* There is a sign ambiguity when SARAH`Vertex[] factors an SSV-type
    vertex into a coefficient and a Lorentz part even though the
@@ -801,12 +799,20 @@ ReplaceUnrotatedFields[SARAH`Cp[p__]] :=
 ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
     ReplaceUnrotatedFields[SARAH`Cp[p]][lorentz];
 
-IsNonZeroVertex[fields_List, vertexList_:{}, useDependences_:False] :=
-    Module[{sortedFields, cached, vertex},
-           sortedFields = SortFieldsInCp[fields];
-           vertex = FSVertex[sortedFields, UseDependences -> useDependences];
-           MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]]
+(* A vertex in SARAH's lists is non-zero without dependences, and
+   SARAH puts it there only if it doesn't vanish with dependences, so
+   it counts as non-zero without recalculating it.  This matters with
+   dependences: SARAH`Vertex[] is then slow for large vertices
+   (seconds for 4-squark vertices). *)
+IsNonZeroVertex[fields_List, useDependences:(True|False):False] :=
+    Module[{sortedFields = SortFieldsInCp[fields]},
+           If[CachedVertex[sortedFields] =!= {},
+              True,
+              MemberQ[FSVertex[sortedFields, useDependences][[2 ;;, 1]], Except[0]]
+           ]
           ];
+
+Utils`MakeUnknownInputDefinition[IsNonZeroVertex];
 
 End[] (* `Private` *)
 
