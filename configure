@@ -255,10 +255,9 @@ cxx_compiler_version="unknown"
 required_cxx_compiler_version="unknown"
 required_gpp_compiler_version="10.1.0"
 required_clang_compiler_version="10.0.0"
-required_icpc_compiler_version="18.0.0"
 
-# required boost version
-required_boost_version="1.37.0"
+# required boost version (1.62.0: Boost.Hana and Boost.Math with C++20)
+required_boost_version="1.62.0"
 
 # required Mathematica version
 required_mathematica_version="11.0"
@@ -1488,6 +1487,14 @@ int main() {
         message "   to use a boost installation from a non-default location."
         exit 1
     }
+    case "$boost_version" in
+    1.64.*)
+        result "not ok (version ${boost_version})"
+        message "Error: boost 1.64 can't be used: its odeint doesn't compile"
+        message "   (boost::serialization::make_array is missing)."
+        message "   Please install another boost version."
+        exit 1 ;;
+    esac
     result "ok (version ${boost_version})"
     logmsg "   Required boost version: ${required_boost_version}"
     logmsg "   Boost version found: ${boost_version}"
@@ -1635,6 +1642,27 @@ check_thread_libs() {
 }
 
 #_____________________________________________________________________
+check_cxx_std_library() {
+    # The compiler version alone doesn't show whether the standard library
+    # supports C++20: e.g. clang++ can use the libstdc++ of an older g++.
+    checking_msg "C++20 support of the standard library"
+    if try_compile_cpp_program "#include <concepts>
+#include <numbers>
+#include <span>
+#include <string>" "std::span<const double> s; (void)std::ssize(s); (void)std::numbers::pi; (void)std::string(\"ab\").starts_with(\"a\")";
+    then
+        result "ok"
+    else
+        result "not ok"
+        message "Error: the C++ standard library used by $CXX lacks C++20 features"
+        message "   needed by FlexibleSUSY (<concepts>, <span>, <numbers>)."
+        message "   With clang++ on Linux, please install libstdc++ 10 or higher (from g++ 10"
+        message "   or higher); on macOS, use Apple clang with its libc++."
+        exit 1
+    fi
+}
+
+#_____________________________________________________________________
 check_cxx_compiler_type() {
     checking_msg "type of C++ compiler ${CXX}"
 
@@ -1645,8 +1673,7 @@ check_cxx_compiler_type() {
 	   required_cxx_compiler_version="$required_gpp_compiler_version" ;;
     clang) result "Clang"
 	   required_cxx_compiler_version="$required_clang_compiler_version" ;;
-    intel) result "Intel"
-	   required_cxx_compiler_version="$required_icpc_compiler_version" ;;
+    intel) result "Intel" ;;
     *)     result "unknown" ;;
     esac
 
@@ -1660,7 +1687,11 @@ check_cxx_compiler_version() {
     case "$cxx_compiler_type" in
     gnu)   get_gpp_version   "$CXX" cxx_compiler_version || return 1 ;;
     clang) get_clang_version "$CXX" cxx_compiler_version || return 1 ;;
-    intel) get_icpc_version  "$CXX" cxx_compiler_version || return 1 ;;
+    intel) result "not supported"
+           message "Warning: the classic Intel C++ compiler (icpc) is not supported,"
+           message "   because it lacks the C++20 features FlexibleSUSY needs."
+           message "   Please use g++, clang++ or Intel's icpx."
+           return 1 ;;
     *)     message "Warning: could not check C++ compiler version because"
            message "   its type is unknown."
 	   return 1 ;;
@@ -1676,27 +1707,6 @@ check_cxx_compiler_version() {
     result "ok (version $cxx_compiler_version)"
     logmsg "   Required $CXX version: $required_cxx_compiler_version"
     logmsg "   $CXX version found: $cxx_compiler_version"
-}
-
-#_____________________________________________________________________
-check_icpc_features() {
-    local compiler="$1"
-    local version="$2"
-
-    checking_msg "$compiler compiler features"
-
-    local major minor patch
-    split_version "$version" major minor patch
-
-    # disable multi-threading for versions < 14.0.0
-    if ! major_minor_patch_at_least $major $minor $patch "14" "0" "0" &&
-       { [ "$enable_threads" = "yes" ] || [ "$enable_threads" = "automatic" ] ;} ; then
-	message ""
-	message "   Warning: multi-threading support requires $compiler 14.0.0 or newer."
-	enable_threads="no"
-    else
-	result "ok"
-    fi
 }
 
 #_____________________________________________________________________
@@ -1758,36 +1768,6 @@ get_gpp_version() {
     sed 's/^.*__GNUC_PATCHLEVEL__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
 
     eval "$ret_var=\"$major.$minor.$patch\""
-}
-
-#_____________________________________________________________________
-get_icpc_version() {
-    if test $# -ne 2; then
-        message "get_icpc_version(): too few arguments"
-        exit 1
-    fi
-
-    local compiler="$1"
-    local ret_var="$2"
-
-    local output
-    output=$($compiler -dM -E -x c++ /dev/null) || {
-        message "Warning: could not determine $compiler version because"
-        message "   execution of $compiler failed."
-        return 1
-    }
-    local version
-    version=$(printf "%s" "$output" |
-        sed 's/^.*__INTEL_COMPILER[[:space:]]*\([[:digit:]]*\)\([[:digit:]]\)\([[:digit:]]\).*$/\1.\2.\3/p;d')
-
-    eval "$ret_var=\"$version\""
-}
-
-#_____________________________________________________________________
-check_cxx_compiler_features() {
-    case "$cxx_compiler_type" in
-    intel) check_icpc_features "$CXX" "$cxx_compiler_version" ;;
-    esac
 }
 
 #_____________________________________________________________________
@@ -1923,14 +1903,15 @@ int main() {
 
     local eigen_version="$cpp_output"
 
-    result "ok (version ${eigen_version})"
     logmsg "   Eigen version found: ${eigen_version}"
 
     version_at_least "$eigen_version" "3.3.0" || {
-        message "Warning: You are using Eigen ${eigen_version}."
-        message "   Compilation errors can occur with this Eigen version in models with"
-        message "   complex parameters. We recommend to upgrade to Eigen 3.3.0 at least."
+        result "not ok (version ${eigen_version})"
+        message "Error: An old version of Eigen has been detected (${eigen_version})."
+        message "   Please upgrade to version 3.3.0 (or higher)."
+        exit 1
     }
+    result "ok (version ${eigen_version})"
 }
 
 #_____________________________________________________________________
@@ -2177,12 +2158,14 @@ check_gm2calc() {
             GM2CALCFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --cflags)
             GM2CALCLIBS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --libs)
             GM2CALC_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --modversion)
+            version_at_least "$GM2CALC_VERSION" "2.1.0" || {
+                message "not ok (version ${GM2CALC_VERSION})"
+                message "Error: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+                message "   Please upgrade to version 2.1.0 (or higher)."
+                exit 1
+            }
             enable_gm2calc=yes
             message "ok (version ${GM2CALC_VERSION})"
-            version_at_least "$GM2CALC_VERSION" "1.7.0" || {
-                message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
-                message "   Please consider upgrading to version 1.7.0 (or higher)."
-            }
             return
         }
 
@@ -4118,8 +4101,8 @@ if test "x${enable_compile}" = "xyes"; then
     check_cxx
     check_cxx_compiler_type
     check_cxx_compiler_version
-    check_cxx_compiler_features
     check_cxxflags
+    check_cxx_std_library
     check_fc
     check_fflags
     check_fmod
