@@ -3947,7 +3947,9 @@ trap do_actions_at_exit 0
 trap "exit 1" INT QUIT TERM
 
 rm -f $logfile
-write_configure_parameters "$*"
+# written to config.status after the options are parsed, so that --help,
+# --version and invalid options don't overwrite it
+configure_parameters="$*"
 reset_default_static_linker_cmd
 
 if test $# -gt 0 ; then
@@ -4053,6 +4055,8 @@ if test $# -gt 0 ; then
         shift
     done
 fi
+
+write_configure_parameters "$configure_parameters"
 
 log_package_information
 guess_machine_word_size
