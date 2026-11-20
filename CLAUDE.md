@@ -254,6 +254,14 @@ The code:
 
 - **SARAH:** `conj` isn't mapped over `sum`: `conj[sum[i, 1, 2, a[i]]]` stays
   `sum[i, 1, 2, a[i]]`.
+- **SARAH's vertex lists (`SARAH`VertexList3/4`):** each entry equals `SARAH`Vertex[]`
+  **without** dependences, but SARAH keeps a vertex only if it doesn't vanish **with** the
+  dependences (`subDependences`, e.g. `g1 -> e Sec[ThetaW]`), so h-γ-γ, χ-χ-γ etc. are missing
+  although `SARAH`Vertex[]` without dependences gives them non-zero. A missing vertex is zero
+  with dependences (checked for all SM vertices). `Vertices`FSVertex` and
+  `Vertices`IsNonZeroVertex` (used by the decays, always with dependences) are built on this.
+  `SARAH`Vertex[..., UseDependences -> True]` is slow for large vertices (seconds for 4-squark
+  vertices).
 - **Eigen comma initialization:** it assigns in order, so `a << a[0] + a[1], a[0];` uses
   the new `a[0]` for the second element.
 - **Shell scripts:** prefer `bash` for scripts with variable expansion. Some interactive
