@@ -2147,7 +2147,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct];
 
            If[IsPossibleTreeLevelDecay[decay, True],
-              body = body <> "\n// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
+              body = body <> "\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
 
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
