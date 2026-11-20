@@ -152,6 +152,7 @@ TEST_META := \
 		$(DIR)/test_Utils.m \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
+		$(DIR)/test_Vertices_FSVertex.m \
 		$(DIR)/test_Vertices_colorsum.m
 
 ifeq ($(WITH_E6SSM), yes)

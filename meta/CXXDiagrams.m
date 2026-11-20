@@ -405,7 +405,7 @@ FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List, bothLoopOrientat
 	Utils`AssertWithMessage[adjacencyMatrix === Transpose[adjacencyMatrix],
 		"CXXDiagrams`FeynmanDiagramsOfType[]: The given adjacency matrix is \
 not symmetric"];
-	LoadVerticesIfNecessary[];
+	Vertices`LoadVerticesIfNecessary[];
 
 	internalVertices = Complement[Table[k,{k,Length[adjacencyMatrix]}],externalVertices];
 	externalRules = Flatten @ ({{_,#,_} :> (# /. externalFields)} & /@
@@ -774,7 +774,7 @@ SortedVertex[fields_List, OptionsPattern[{ApplyGUTNormalization -> False}]] :=
 	Module[{sortedFields, indexedSortedFields, vertexList, vertex, types,
 			similarVertexList, similarVertex, fieldReplacementRules,
 			indexReplacementRules},
-    LoadVerticesIfNecessary[];
+    Vertices`LoadVerticesIfNecessary[];
 	 sortedFields = Vertices`SortFieldsInCp[fields];
 
     vertexList = Switch[Length[fields],
@@ -1630,19 +1630,6 @@ IndexBoundsForField[field_] :=
        Transpose[Prepend[
          {1,#[[2]]} & /@ DeleteCases[fieldInfo[[5]],{SARAH`generation,_}],
          {fieldInfo[[2]],fieldInfo[[3]]}]]]]
-
-(** \brief If the SARAH vertices are not yet available, force SARAH to
- * reread its vertex files.
- **)
-LoadVerticesIfNecessary[] :=
-   If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
-        SA`CurrentStates = FlexibleSUSY`FSEigenstates;
-        SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
-        SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
-        SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
-        SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
-        SARAH`MakeCouplingLists;
-   ]
 
 (** \brief Remove any Lorentz and colour indices of a given field
  * \param p the given field

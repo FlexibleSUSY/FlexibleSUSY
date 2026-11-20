@@ -2151,14 +2151,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            Block[{FlexibleSUSY`FSEnableParallelism = If[Length[decayParticles] < 2, False, FlexibleSUSY`FSEnableParallelism]},
               (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
               If[FlexibleSUSY`FSEnableParallelism,
-                 If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
-                    SA`CurrentStates = FlexibleSUSY`FSEigenstates;
-                    SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
-                    SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
-                    SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
-                    SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
-                    SARAH`MakeCouplingLists;
-                 ];
+                 Vertices`LoadVerticesIfNecessary[];
                  LaunchKernels[];
                  DistributeDefinitions[contentOfPath, modelName];
                  ParallelEvaluate[

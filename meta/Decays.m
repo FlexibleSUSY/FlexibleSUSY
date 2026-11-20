@@ -326,10 +326,7 @@ FinalStateContainsInitialState[initialParticle_, finalState_List] :=
          ]
 
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
-    Module[{numFields},
-           numFields = Length[fields];
-           Vertices`IsNonZeroVertex[fields, Vertices`GetCachedVertices[numFields, useDependences], useDependences]
-         ];
+    Vertices`IsNonZeroVertex[fields, useDependences];
 
 IsPossibleNonZeroDiagram[diagram_, useDependences_:False] :=
     Module[{vertices},
