@@ -2124,7 +2124,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
           ];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
-    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, numberOfDecayParticles = 0,
+    Module[{maxFinalStateParticles = 2, decaysLists = {}, decayTasks = {}, decaysVertices, numberOfDecayParticles = 0,
             enableDecaysCalculationThreads,
             callAllDecaysFunctions = "", callAllDecaysFunctionsInThreads = "",
             decaysListGettersPrototypes = "", decaysListGettersFunctions = "",
@@ -2188,13 +2188,25 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                     DistributedContexts -> None
                  ];
                  DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4];
+                 (* one task per decay, not per decaying particle: the
+                    decays of the Higgs bosons take most of the time *)
+                 decayTasks = Join @@ (
+                    Function[particle, {particle, #}& /@
+                       Decays`GetFinalStatesForParticle[particle, maxFinalStateParticles, finalStateParticles]] /@
+                    decayParticles);
                  decaysLists =
                     AbsoluteTiming @ ParallelMap[
-                       {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
-                       decayParticles,
+                       Decays`CreateParticleDecay @@ #&,
+                       decayTasks,
                        DistributedContexts -> All,
                        Method -> "FinestGrained"
                     ];
+                 (* regroup the decays by decaying particle, in the order of the tasks *)
+                 decaysLists = {
+                    First[decaysLists],
+                    Function[particle,
+                       {particle, Join @@ Pick[Last[decaysLists], decayTasks[[All, 1]], particle]}] /@ decayParticles
+                 };
                  Needs["Parallel`Developer`"];
                  Parallel`Developer`ClearDistributedDefinitions[];
                  Parallel`Developer`ClearKernels[];
