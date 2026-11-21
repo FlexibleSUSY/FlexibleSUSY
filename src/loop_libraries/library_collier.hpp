@@ -21,6 +21,10 @@
 
 #include "loop_library_interface.hpp"
 
+#include <array>
+#include <cstddef>
+#include <unordered_map>
+
 #define REDEFINE(R, ARGS, NAME)                                                \
    std::complex<double> NAME ARGS noexcept override;
 
@@ -28,10 +32,43 @@ namespace flexiblesusy
 {
 namespace looplibrary
 {
+
+/**
+ * Remembers tensor coefficients by the arguments passed to COLLIER
+ * (momenta, masses and the renormalization scale).  The generated 1-loop
+ * decay amplitudes ask for the same B and C tensors many times (MSSM:
+ * 80% of the B and 30% of the C calls repeat).  COLLIER's own global
+ * cache doesn't fit: it identifies integrals by their position in a fixed
+ * sequence of calls.  The cache is cleared when it is full.  Like COLLIER
+ * itself, it isn't thread-safe.
+ */
+template <std::size_t N, typename Coeff>
+class Tensor_cache
+{
+public:
+   using Key = std::array<double, N>;
+
+   /// returns the cached coefficients, or nullptr
+   const Coeff* find(const Key&) const noexcept;
+   /// stores the coefficients; does nothing if memory can't be allocated
+   void insert(const Key&, const Coeff&) noexcept;
+
+private:
+   static constexpr std::size_t max_size = 10000;
+
+   struct Hash {
+      std::size_t operator()(const Key&) const noexcept;
+   };
+   std::unordered_map<Key, Coeff, Hash> map{};
+};
+
 class Collier : public Loop_library_interface
 {
 private:
    double current_mu2_uv;
+   Tensor_cache<6, Bcoeff_t> b_cache{};
+   Tensor_cache<10, Ccoeff_t> c_cache{};
+   Tensor_cache<15, Dcoeff_t> d_cache{};
    void initialize() noexcept;
    void set_mu2_uv(double) noexcept;
 
