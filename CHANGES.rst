@@ -43,6 +43,13 @@ New features
 Fixed bugs
 ----------
 
+* [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
+  photons) of a particle lighter than the Z boson evaluated the loop
+  functions at the mass of the particle, while its couplings are taken at
+  the Z mass.  Both are now at the Z mass.  Example: in the shipped MRSSM2
+  input, the width of the 66 GeV Higgs boson into two photons increases by
+  0.2%.  Decays of heavier particles are unchanged.
+
 * [commit dedac5462]: FlexibleDecay: the decays of a particle lighter than
   the Z boson used the BSM parameters at an arbitrary scale (the scale of
   the spectrum, or the mass of the particle whose decays were calculated
