@@ -1525,54 +1525,6 @@ check_boost_test_incl() {
 }
 
 #_____________________________________________________________________
-check_boost_thread_libs() {
-    check_library "libboost_thread libboost_thread-mt" \
-	"$boost_lib_dir" "$default_lib_paths"
-    if [ -z "$found_lib" ]; then
-        message "Error: libboost_thread or libboost_thread-mt must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    fi
-    local BOOSTTHREADLIBS_
-    BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-
-    check_library "libboost_system libboost_system-mt" \
-	"$boost_lib_dir" "$default_lib_paths"
-    if [ -z "$found_lib" ]; then
-        message "Error: libboost_system or libboost_system-mt must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    fi
-    BOOSTTHREADLIBS_="$BOOSTTHREADLIBS_ "-l$(
-	echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-
-    if [ -z "$boost_lib_dir" ]; then
-        # assume that the linker will look in the default paths
-        BOOSTTHREADLIBS="$BOOSTTHREADLIBS_"
-    else
-        BOOSTTHREADLIBS="-L$boost_lib_dir $BOOSTTHREADLIBS_"
-    fi
-}
-
-#_____________________________________________________________________
-check_boost_thread_incl() {
-    check_header "boost/thread/thread.hpp" "$boost_inc_dir" \
-	"$default_inc_paths"
-    if test "x$found_hdr" = "x" ; then
-        message "Error: boost/thread/thread.hpp must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    else
-        if contains_not "${BOOSTFLAGS}" "-I$found_dir"; then
-            BOOSTFLAGS="${BOOSTFLAGS} -I$found_dir"
-        fi
-    fi
-}
-
-#_____________________________________________________________________
 check_std_threads() {
     # check for C++ std::thread and std::mutex
     if test "x${enable_threads}" = "xyes" -o  "x${enable_threads}" = "xautomatic" ; then
@@ -4109,10 +4061,6 @@ if test "x${enable_compile}" = "xyes"; then
     check_gm2calc
     check_himalaya
     check_higgstools
-    if use_solver "lattice"; then
-        check_boost_thread_incl
-        check_boost_thread_libs
-    fi
     check_python
     check_lilith
     check_looplibrary
