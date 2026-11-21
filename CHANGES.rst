@@ -43,6 +43,12 @@ New features
 Fixed bugs
 ----------
 
+* [commit ab1a6bc4b]: In models with CP-violating (complex) parameters, the
+  anomalous magnetic moments (e.g. a_mu) could come out as NaN, together
+  with the error "Form factor F2 should be real", depending on rounding.
+  The calculation now accepts imaginary parts of the form factor at the
+  level of rounding errors.
+
 * [commit 65e84fdf7]: If FlexibleDecay calculated a negative partial width
   that was not just a rounding error (an unphysical result, e.g. from an
   inconsistent coupling), the spectrum generator aborted without writing
