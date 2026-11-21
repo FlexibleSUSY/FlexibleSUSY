@@ -27,7 +27,9 @@
  * masses unchanged.  The gluino and squark pole masses and the top and
  * bottom DR-bar masses (whose SUSY corrections contain the gluino) must
  * therefore be the same before and after the rotation.  This tests the
- * phase of the gluino field (PhaseGlu) for complex M3.
+ * phase of the gluino field (PhaseGlu) for complex M3 and the order of
+ * the external indices in the four-squark contact terms of the squark
+ * self-energies.
  */
 
 #define BOOST_TEST_DYN_LINK
@@ -145,17 +147,13 @@ BOOST_AUTO_TEST_CASE(test_MSSMCPV_gluino_rephasing)
    BOOST_TEST_MESSAGE("MGlu: " << pA.MGlu << " vs " << pB.MGlu);
    BOOST_CHECK_CLOSE_FRACTION(pA.MGlu, pB.MGlu, 1e-9);
 
-   // The squark self-energies contain the four-squark contact terms
-   // with the external indices interchanged, which is not invariant
-   // either, but only at the 1e-6 level here (the gluino phase gave
-   // 3e-3).
    for (int i = 0; i < 6; i++) {
       BOOST_TEST_MESSAGE("MSu(" << i << "): " << pA.MSu(i) << " vs "
                                 << pB.MSu(i));
-      BOOST_CHECK_CLOSE_FRACTION(pA.MSu(i), pB.MSu(i), 1e-5);
+      BOOST_CHECK_CLOSE_FRACTION(pA.MSu(i), pB.MSu(i), 1e-9);
       BOOST_TEST_MESSAGE("MSd(" << i << "): " << pA.MSd(i) << " vs "
                                 << pB.MSd(i));
-      BOOST_CHECK_CLOSE_FRACTION(pA.MSd(i), pB.MSd(i), 1e-5);
+      BOOST_CHECK_CLOSE_FRACTION(pA.MSd(i), pB.MSd(i), 1e-9);
    }
 
    // top and bottom DR-bar masses from the SUSY threshold corrections
