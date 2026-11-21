@@ -424,6 +424,11 @@ TEST_SRC += \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.cpp
 endif
 
+ifeq ($(WITH_GrimusNeufeld), yes)
+TEST_SRC += \
+		$(DIR)/test_GrimusNeufeld_Fv_masses.cpp
+endif
+
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 ifeq ($(WITH_CMSSM) $(WITH_CMSSMSemiAnalytic), yes yes)
 TEST_SH += \
@@ -718,6 +723,8 @@ TEST_META += \
 endif
 
 ifeq ($(WITH_MSSMCPV),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSMCPV_rephasing_invariance.cpp
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
@@ -1157,11 +1164,15 @@ $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
 
+$(DIR)/test_MSSMCPV_rephasing_invariance.x: $(LIBMSSMCPV)
+
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
+
+$(DIR)/test_GrimusNeufeld_Fv_masses.x: $(LIBGrimusNeufeld)
 
 $(DIR)/test_MRSSM2_normalized_effc.x: $(LIBMRSSM2)
 
