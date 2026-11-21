@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-
 /**
  * @file @ModelName@_edm.cpp
  *
@@ -24,14 +23,13 @@
  */
 
 #include "@ModelName@_edm.hpp"
-
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
-using namespace flexiblesusy;
+namespace flexiblesusy {
+
 using namespace @ModelName@_cxx_diagrams;
 
-namespace flexiblesusy {
 namespace @ModelName@_edm {
 
 // spliting templated function into header and cpp
@@ -55,5 +53,6 @@ double calculate_edm(const @ModelName@_mass_eigenstates& model, const softsusy::
 
    return val;
 }
+
 } // @ModelName@_edm
 } // namespace flexiblesusy

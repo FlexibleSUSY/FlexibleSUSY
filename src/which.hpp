@@ -35,9 +35,9 @@ auto lazy_which(If&& cif, Then&& cthen) -> decltype(cthen())
     return cif() ? cthen() : decltype(cthen()){};
 }
 
-template<typename If, typename Then, typename... Elses>
+template <typename If, typename Then, typename... Elses>
 auto lazy_which(If&& cif, Then&& cthen, Elses&&... celses)
-   -> typename std::common_type<decltype(cthen()), decltype(celses())...>::type
+   -> std::common_type_t<decltype(cthen()), decltype(celses())...>
 {
     return cif() ? cthen() : lazy_which(std::forward<Elses>(celses)...);
 }

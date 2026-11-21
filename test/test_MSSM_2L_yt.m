@@ -59,9 +59,11 @@ diff =
    }, {Xt, g3}, 
    Simplify[#, MSUSY > 0 && Q > 0 && mt > 0] &];
 
-(* diff still contains power-suppressed terms O(mt^2/MSUSY^2) *)
+(* ignore power-suppressed terms O(mt^2/MSUSY^2) *)
 
-diff = Normal[Series[diff /. mt -> x MSUSY, {x,0,0}]];
+diff = Expand[diff /. mt -> x MSUSY /. Xt -> xt MSUSY]
+
+diff = Normal[Series[diff, {x,0,0}]] /. x -> 0;
 
 TestEquality[diff, 0];
 

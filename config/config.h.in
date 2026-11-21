@@ -43,6 +43,8 @@
 #define FUTILIBS              "@FUTILIBS@"
 #define GM2CALCFLAGS          "@GM2CALCFLAGS@"
 #define GM2CALCLIBS           "@GM2CALCLIBS@"
+#define HIGGSTOOLSFLAGS       "@HIGGSTOOLSFLAGS@"
+#define HIGGSTOOLSLIBS        "@HIGGSTOOLSLIBS@"
 #define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
 #define HIMALAYALIBS          "@HIMALAYALIBS@"
 #define GSLFLAGS              "@GSLFLAGS@"
@@ -84,6 +86,12 @@
 /* Enable GM2Calc */
 @DEFINE_ENABLE_GM2CALC@
 
+/* Enable HiggsTools */
+@DEFINE_ENABLE_HIGGSTOOLS@
+
+/* Enable Lilith */
+@DEFINE_ENABLE_LILITH@
+
 /* Enable Himalaya */
 @DEFINE_ENABLE_HIMALAYA@
 
@@ -120,7 +128,16 @@
 /* Enable semi-analytic BVP solver */
 @DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@
 
+/* Enable shooting BVP solver */
+@DEFINE_ENABLE_SHOOTING_SOLVER@
+
 /* Enable statements for addons */
 @DEFINE_ENABLE_ADDONS@
+
+/* Enable FeynArts */
+@DEFINE_ENABLE_FEYNARTS@
+
+/* Enable FormCalc */
+@DEFINE_ENABLE_FORMCALC@
 
 #endif

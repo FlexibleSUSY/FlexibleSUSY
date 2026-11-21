@@ -1,12 +1,296 @@
-FlexibleSUSY 2.X.X [X, X X]
-==================================
+FlexibleSUSY 2.9.1 [November, ?? 2026]
+===================================
 
 New features
 ------------
 
+* Moved to C++20. This increased the minimal supported version of compilers to
+  g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
+
+* ``configure`` now checks all stated requirements, and the README states
+  what ``configure`` checks:
+
+  * the C++ standard library must support C++20 (``<concepts>``, ``<span>``,
+    ``<numbers>``), which catches clang++ used with the libstdc++ of g++ < 10;
+  * Boost >= 1.62 (was 1.37), except 1.64, whose odeint doesn't compile;
+  * Eigen >= 3.3 (was a warning, older versions don't compile);
+  * GM2Calc >= 2.1.0 also when found via ``pkg-config``.
+
+  The classic Intel compiler icpc (stated as icpc >= 18.0.0) is no longer
+  supported, as it lacks the needed C++20 features; Intel's LLVM-based icpx
+  is treated as clang++.
+
+* Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
+  HiggsSignals and Lilith. Previously available 2D p-values are marked
+  accordingly.
+
+* Lilith is no longer accessible only via the command-line interface (see
+  footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
+
+* ``configure`` stops each Mathematica kernel it starts (to check
+  Mathematica, SARAH, FeynArts, FormCalc and the model files) after
+  300 s, so that a hanging kernel no longer blocks it.  The time limit
+  is set with ``--with-math-timeout=<seconds>`` (0 = no limit).  It
+  needs the ``timeout`` command (``gtimeout`` from GNU coreutils on
+  macOS); without it, there is no limit.
+
+* FlexibleDecay no longer generates decays of a scalar into a scalar and
+  a photon or gluon (e.g. H -> h gamma, A -> h gamma, squark -> squark
+  gluon, sneutrino -> sneutrino gamma).  These widths vanish at every
+  order and were always 0 in the output.  This makes the generated decay
+  code smaller (about 17% in the THDM-II, 14% in the MSSM).
+
+Fixed bugs
+----------
+
+* [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
+  photons) of a particle lighter than the Z boson evaluated the loop
+  functions at the mass of the particle, while its couplings are taken at
+  the Z mass.  Both are now at the Z mass.  Example: in the shipped MRSSM2
+  input, the width of the 66 GeV Higgs boson into two photons increases by
+  0.2%.  Decays of heavier particles are unchanged.
+
+* [commit 5257d970c]: The static libraries of FlexibleSUSY and the models
+  could keep an outdated object file, without any message, when it was
+  recompiled within the same second as the previous version (e.g. with
+  ``ccache`` or after switching branches).  Executables then used the old
+  code.  The libraries are now always updated (``ar cr`` instead of
+  ``ar cruU``).
+
+* [commit 33347f593]: ``configure --with-solvers=lattice`` failed if
+  ``libboost_system`` was missing, which is common with recent Boost
+  versions.  The library was never used.
+
+* [commit dedac5462]: FlexibleDecay: the decays of a particle lighter than
+  the Z boson used the BSM parameters at an arbitrary scale (the scale of
+  the spectrum, or the mass of the particle whose decays were calculated
+  before), while the SM parameters were taken at the Z mass.  Now all
+  parameters are at the Z mass for such particles, and at the mass of the
+  decaying particle otherwise.  The decays of all particles also no longer
+  depend on the order in which they are calculated.  Example: in the shipped
+  MRSSM2 input, the width of the 66 GeV Higgs boson into two photons changes
+  by 0.03%; in the MSSM and NMSSM inputs the decays change by less than
+  1e-7.
+
+* [commit 7cca3f74a]: Loading the Mathematica interface no longer prints
+  ``LibraryFunction::libload`` messages for ``FS<M>CallLilith`` and
+  ``FS<M>CallHiggsTools`` when FlexibleSUSY is configured without Lilith or
+  HiggsTools. Calling them then gives an error message saying so, and
+  ``$Failed``.
+  
+* [commit 3d27e1f6a]: FlexibleSUSY didn't compile if GSL was not in a default
+  include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
+  didn't use the GSL include path from ``gsl-config``.
+
+* [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
+  "cannot find model_specific/SM/libmodel_specific_SM.a", and executables
+  only started from the FlexibleSUSY directory.
+
+* [commit 31fc4bc48]: With the tests enabled (``--with-optional-modules=test``),
+  a parallel ``make`` could fail to link ``test/SOFTSUSY/run_softpoint.x``
+  or ``run_softsusy.x`` with "no such file:
+  model_specific/SM/libmodel_specific_SM.a".
+
+* [commit c5c8f62ab]: ``./configure --help`` (also ``--version`` or an
+  invalid option) overwrote ``config.status``, which records the options
+  of the last configuration, e.g. for ``./configure $(head -1
+  config.status)``.  Running the tests did this too.
+
+* [commit 21cdd8732]: The code generation of models that use NPointFunctions
+  could hang forever when no Wolfram subkernel was free, e.g. while
+  another code generation ran.  It now waits up to 5 minutes for a
+  subkernel and otherwise stops with an error message.
+
+* [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
+  code is enabled and the Mathematica kernel is not found or is older
+  than the required version.  Since FlexibleSUSY 2.6.2 it continued and
+  failed later with the misleading message "SARAH is not installed
+  correctly".
+
+* [commit 888d2e6c3]: Fixed the 2-loop NMSSM Higgs mass corrections
+  (``UseHiggs2LoopNMSSM = True``) at large tan(beta). Higgs masses and
+  mixings of singlet-like states were wrong there, and a light CP-odd
+  singlet could get unphysical couplings to SM particles, which could
+  enhance e.g. its decays into photons and gluons by orders of magnitude.
+
+* [commit b4eac7cec]: Fixed the 2-loop NMSSM Higgs mass corrections
+  (``UseHiggs2LoopNMSSM = True``) for lambda < 0 (with mu_eff > 0). Such
+  points gave Higgs masses different from those of the physically
+  equivalent points with lambda > 0, by up to a few GeV for the heavy
+  doublet-like states.
+
+* [commit 30d7dfc16]: Updated the 3-loop O(alpha_t^3) contribution to the SM
+  Higgs mass to the corrected result of arXiv:1407.4336v3. The Higgs mass
+  changes by a few MeV.
+
+* [commit 607e22bf3]: Fixed the generated example ``run_<M>.m``, which set the
+  unknown option ``calculateDecays`` instead of ``calculateAMM``
+  (``FlexibleSUSY[32]``).
+
+* [commit 62fb30778]: Fixed negative undetected widths of neutral Higgs bosons
+  being passed to HiggsTools and Lilith. They are now set to 0, with a
+  warning if they are larger than rounding errors.
+
+* [commit dd59eb297]: Fixed ``UseHiggs3LoopNMSSM = True``, which didn't switch on
+  the 2-loop NMSSM Higgs mass corrections (``UseHiggs2LoopNMSSM``), unlike
+  ``UseHiggs3LoopMSSM`` in the MSSM. The shipped models set both flags.
+
+* [commit 23011a7]: Fixed clean fall-back to 2-loop precision if an
+  error in the calculation of the 3-loop contributions occurs in
+  FlexibleEFTHiggs.
+
+* [commit 87728f8]: Fixed swapped up- and down-quark entries in the blocks
+  ``NORMALIZEDEFFHIGGSCOUPLINGS`` and ``IMNORMALIZEDEFFHIGGSCOUPLINGS``.
+
+* [commit 580274c]: Fixed crashes of the Mathematica kernel when calling Lilith
+  through the Mathematica interface. This could happen on the first call, if
+  numpy is linked to the system BLAS and LAPACK libraries, and on every later
+  call in the same kernel.
+
+* [commit 465e7c5]: Fixed the charged inert higgsinos in the InertMSSM, which
+  were mixed across opposite electric charges into Majorana-type states. The
+  model now has 2 Dirac inert charginos with mass matrix
+  :math:`\mu'^T`, and SARAH no longer reports charge-violating vertices
+  (`#563 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/563>`_).
+
+* [commit 423caf0d5]: Fixed the name of the warning of
+  ``FS<M>CalculateDecays`` in the Mathematica interface, which was shown as
+  "Message text not found" in models other than the SM.
+
+* [commit 60b35307e]: Fixed a NaN total width, which aborted the
+  calculation, when a particle with massless states, such as the light
+  neutrinos, is listed in ``FSDecayParticles``. Decays of a massless particle
+  into massless particles are now skipped.
+
+* [commit 4cdcf1b2d]: Fixed the error handling of ``FS<M>CallHiggsTools``
+  in the Mathematica interface. Some errors (e.g. an empty HiggsBounds path)
+  returned ``LibraryFunctionError`` without a message, and its messages showed
+  "Message text not found". All errors of ``FS<M>CallHiggsTools`` and
+  ``FS<M>CallLilith`` now give a message and ``$Failed``, and a missing
+  HiggsSignals or HiggsBounds database gives a warning.
+
+FlexibleSUSY 2.9.0 [April, 06 2025]
+===================================
+
+New features
+------------
+
+* Option to validate a neutral Higgs sector of the model by linking
+  FlexibleSUSY with HiggsTools_ or Lilith_.
+
+  Example in ``THDMII``::
+
+      HIGGSTOOLS_DIR=/path/to/HiggsTools
+      LILITH_DIR=/path/to/Lilith
+      HSDATABASE_DIR=/path/to/HiggsSignals/Database
+      HBDATABASE_DIR=/path/to/HiggsBounds/Database
+
+      ./createmodel --name=THDMII -f
+
+      ./configure --with-models=THDMII \
+         --enable-himalaya \
+         --with-higgstools-incdir=${HIGGSTOOLS_DIR}/include \
+         --with-higgstools-libdir=${HIGGSTOOLS_DIR}/lib64 \
+         --with-lilith=${LILITH_DIR}
+
+      make
+
+      models/THDMII/run_THDMII.x \
+         --slha-input-file=models/THDMII/LesHouches.in.THDMII \
+         --higgssignals-dataset=${HSDATABASE_DIR} \
+         --higgsbounds-dataset=${HBDATABASE_DIR}
+
+  Decays computation requires use of a dedicated loop library (here Collier).
+  HiggsTools and Lilith are called only if appropriate flags in FlexibleDecay
+  block have been turned on. By default we use a default Lilith database file.
+  This can be changed by using the ``--lilith-db`` option of ``run_${MODEL}.x``
+  and providing the full path to Lilith's ``.list`` file (e.g. ``run_THDMII.x
+  --lilith-db=/path/latestRun2.list``).
+
+* Calculate unitarity constraints in :math:`$s\to \infty$` limit. This is a wrapper
+  over SARAH results [`1805.07306 <https://arxiv.org/abs/1805.07306>`_].
+
+* Added shooting algorithm to solve the boundary value problem for
+  FlexibleEFTHiggs models. The shooting algorithm allows for
+  resummation of certain higher-order contributions (such as
+  :math:`$x_t$` in the MSSM) and for the inclusion of 2- and 3-loop
+  contributions to the Higgs pole mass in FlexibleEFTHiggs models,
+  leading to an improved precision of the lightest Higgs pole mass
+  prediction in supersymmetric models such as the MSSM or NMSSM
+  [`arXiv:2003.04639 <https://arxiv.org/abs/2003.04639>`_].
+
+  To enable the shooting algorithm for a FlexibleEFTHiggs model, add
+  to the FlexibleSUSY model file (see
+  e.g. ``NUHMSSMNoFVHimalayaEFTHiggs``)::
+
+      FSBVPSolvers = { ShootingSolver };
+
+  To use 2- and 3-loop contributions to the Higgs boson pole mass in
+  the MSSM-limit (in non-minimal supersymmetric models such as the
+  NMSSM), add the following lines to the FlexibleSUSY model file (see
+  e.g. ``NMSSMEFThiggs``)::
+
+      FSMSSMLimit = {
+         {\[Kappa], FSGaugeLess},
+         {\[Lambda], FSGaugeLess},
+         {vS, Sqrt[2] MuInput/FSGaugeLess},
+         {T[\[Lambda]], ALambdaInput FSGaugeLess},
+         {T[\[Kappa]], AKappaInput FSGaugeLess}
+      };
+
+  Supported models: ``NUHMSSMNoFVHimalayaEFTHiggs`` (3-loop precision,
+  requires Himalaya) and ``NMSSMEFTHiggs`` (3-loop precision).
+
+  Example (``NUHMSSMNoFVHimalayaEFTHiggs``)::
+
+      HIMALAYA_DIR=/path/to/Himalaya-4.2.3
+
+      ./createmodel --name=NUHMSSMNoFVHimalayaEFTHiggs -f
+
+      ./configure --with-models=NUHMSSMNoFVHimalayaEFTHiggs \
+         --enable-himalaya \
+         --with-himalaya-incdir=${HIMALAYA_DIR}/include \
+         --with-himalaya-libdir=${HIMALAYA_DIR}/build
+
+      make
+
+      models/NUHMSSMNoFVHimalayaEFTHiggs/run_NUHMSSMNoFVHimalayaEFTHiggs.x \
+         --slha-input-file=models/NUHMSSMNoFVHimalayaEFTHiggs/LesHouches.in.NUHMSSMNoFVHimalayaEFTHiggs
+
+  Thanks to Thomas Kwasnitza, Dominik Stöckinger and Alexander Voigt.
+
+Fixed bugs
+----------
+
+* Fixed wrong colour factor in decays with an external color octet, triplet,
+  anti-triplet combination, e.g. squark to quark and gluino or sgluon to squark
+  anti-squark.
+
+* Fixed problem with linking with python3 library if it was installed in
+  a non-standard location.
+
+FlexibleSUSY 2.8.0 [February, 23 2024]
+======================================
+
+New features
+------------
+
+* Added an option to calculate new, user defined observables using
+  NPointFunctions module [`2402.14630 <https://arxiv.org/abs/2402.14630>`_].
+  Example application is the calculation of leptonic processes :math:`$l \to
+  l'$` conversion in the nuclei and :math:`$l \to 3l'$` decay, which now can be
+  trivially enabled in all supported models. In general, NPointFunctions allows
+  to compute tree-level and loop amplitudes from within FlexibleSUSY and employ
+  them in the calculation of a user-requested observable. Potential further
+  applications include calculation of amplitudes relevant to :math:`$B_s \to
+  \mu^+ \mu^-$` or Higgs boson decays.
+
+* Moved to C++17. This increased the minimal supported version of compilers to
+  g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0.
+
 * Allow user to calculate the anomalous magnetic moment of the muon
   :math:`$a_\mu$` in 2HDM-like models with `GM2Calc 2`_
-  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_].  See the
+  [`2110.13238 <https://arxiv.org/abs/2110.13238>`_]. See the
   FlexibleSUSY model `THDMII` (`model_files/THDMII/FlexibleSUSY.m.in`)
   for an example.
 
@@ -31,10 +315,19 @@ New features
         }
      };
 
-* Added calculation of vector diagram contributions to leptons
+* Added 1-loop vector diagram contributions to leptons
   :math:`$(g-2)/2$`, EDMs and to :math:`$b \to s \gamma$`.
 
   Thanks to Douglas Jacob.
+
+* Added 2-loop Barr-Zee contributions to leptons :math:`$(g-2)/2$`.
+
+  Thanks to Felix Reichenbach and Alexander Voigt.
+
+* SLHA output now includes the `EFFHIGGSCOUPLINGS` block containing
+  loop-induced couplings of neutral Higgses. This block can be used by a SARAH
+  generated UFO and CalcHEP models (the latter one being also used by
+  micrOMEGAs).
 
 Fixed bugs
 ----------
@@ -46,7 +339,10 @@ Fixed bugs
   (see Eq. 20 of `2106.05038 <https://arxiv.org/abs/2106.05038>`_). Numerical
   impact negligible.
 
-* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` where not applied.
+* [commit d5911ca7a]: Higher order corrections to :math:`$A\to gg$` were not applied.
+
+* [commit 626fdf5]: Widths of pseudoscalar and singly charged Higgses were computed
+  incorectly for Higgses lighter than respective Goldstone bosons.
 
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
@@ -2408,3 +2704,5 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _LoopTools: http://www.feynarts.de/looptools/
 .. _TSIL: https://www.niu.edu/spmartin/tsil/
+.. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
+.. _Lilith: https://github.com/sabinekraml/Lilith-2

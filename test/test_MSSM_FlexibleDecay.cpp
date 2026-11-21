@@ -39,7 +39,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   0                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -682,7 +682,7 @@ Block MSOFT Q= 8.64566212E+02
    // with 2L QCD for squark
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 7.2710487609165856e-06, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198087946884208e-06, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2113230909166481e-06, 2e-10);
 
    // pseudoscalar Higgs
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378061307989104, 4e-13);
@@ -703,7 +703,7 @@ Block MSOFT Q= 8.64566212E+02
                               3.926795985114403e-05, 2e-12);
    // Ah -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VZVZ(&m, 1),
-                              1.0275363930925979e-05, 2e-12);
+                              1.0274815333495026e-05, 2e-12);
 
    // ------------ loop-induces decays ------------
 
@@ -733,17 +733,17 @@ Block MSOFT Q= 8.64566212E+02
    // h -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 9.3812245440699979e-05, 2e-10);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198087946884208e-06, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2113230909166481e-06, 2e-10);
 
    // Ah -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378061307989104, 4e-13);
    // Ah -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVP(&m, 1), 4.0630569784682124e-06, 4e-12);
    // Ah -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 9.3179926421364644e-06, 2e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 9.3178040068865728e-06, 2e-11);
 
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198087946884208e-06, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2113230909166481e-06, 2e-10);
 
    // Sd5 -> Chi d
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Sd_to_ChiFd(&m, 5, 0, 0),
@@ -763,4 +763,118 @@ Block MSOFT Q= 8.64566212E+02
    // hh(2) -> hh(1) hh(1)
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_hhhh(&m, 1, 0, 0),
                               0.0055271603394791615, 5e-13);
+
+   // -----------------------------------------------------
+   // tree-level decays of fermions
+
+   // gluino
+   // Glu -> t-bar Su(1) and its charge conjugate
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Glu_to_barFuSu(&m, 2, 0),
+      1.7684265998673594, 1e-12);
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Glu_to_FuconjSu(&m, 2, 0),
+      1.7684265998673594, 1e-12);
+   // Glu -> b-bar Sd(1) and its charge conjugate
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Glu_to_barFdSd(&m, 2, 0),
+      1.1729901682782882, 1e-12);
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Glu_to_FdconjSd(&m, 2, 0),
+      1.1729901682782882, 1e-12);
+   // Glu -> d-bar Sd(4)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Glu_to_barFdSd(&m, 0, 3),
+      0.74198693055431875, 1e-12);
+
+   // neutralinos
+   // Chi(2) -> nu_tau-bar Sv(1) and its charge conjugate
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_barFvSv(&m, 1, 2, 0),
+      0.020278512109889561, 1e-12);
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_FvconjSv(&m, 1, 2, 0),
+      0.020278512109889561, 1e-12);
+   // Chi(2) -> tau+ Se(1) and its charge conjugate
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_barFeSe(&m, 1, 2, 0),
+      0.012506943733706056, 1e-12);
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_FeconjSe(&m, 1, 2, 0),
+      0.012506943733706056, 1e-12);
+   // Chi(2) -> h Chi(1)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_Chihh(&m, 1, 0, 0),
+      0.016404035182129708, 1e-12);
+   // Chi(2) -> Z Chi(1)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_ChiVZ(&m, 1, 0),
+      0.0012599782589675554, 1e-12);
+   // Chi(3) -> W- Cha(1)+ and its charge conjugate
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_barChaVWm(&m, 2, 0),
+      0.97529922315808615, 1e-12);
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_ChaconjVWm(&m, 2, 0),
+      0.97529922315808615, 1e-12);
+   // Chi(3) -> Z Chi(2)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_ChiVZ(&m, 2, 1),
+      0.86826935652836634, 1e-12);
+   // Chi(4) -> h Chi(2)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Chi_to_Chihh(&m, 3, 1, 0),
+      0.87878973627627588, 1e-12);
+
+   // charginos
+   // Cha(1) -> tau Sv(1)*
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Cha_to_FeconjSv(&m, 0, 2, 0),
+      0.043785338592730171, 1e-12);
+   // Cha(1) -> nu_tau-bar Se(1)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Cha_to_barFvSe(&m, 0, 2, 0),
+      0.023009581466498469, 1e-12);
+   // Cha(1) -> W Chi(1)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Cha_to_ChiVWm(&m, 0, 0),
+      0.01836988640311818, 1e-12);
+   // Cha(2) -> Z Cha(1)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Cha_to_ChaVZ(&m, 1, 0),
+      1.0457497420856385, 1e-12);
+   // Cha(2) -> h Cha(1)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Cha_to_Chahh(&m, 1, 0, 0),
+      0.95056130707702591, 1e-12);
+   // Cha(2) -> W Chi(2)
+   BOOST_CHECK_CLOSE_FRACTION(
+      decays_without_HO.partial_width_Cha_to_ChiVWm(&m, 1, 1),
+      1.1131589058961608, 1e-12);
+
+   // -----------------------------------------------------
+   // The decays of a particle don't depend on the decays calculated
+   // before: each particle runs its own copy of the model to its
+   // scale.  (The model used to be run from particle to particle.)
+   // The model above has no RG running (loop order 0), so use the loop
+   // order of the input.
+
+   MSSM_slha m_running(m);
+   m_running.set_loops(static_cast<int>(
+      settings.get(Spectrum_generator_settings::beta_loop_order)));
+
+   MSSM_decays decays_hh_only(m_running, qedqcd, physical_input,
+                              flexibledecay_settings);
+   decays_hh_only.calculate_hh_decays();
+
+   MSSM_decays decays_Su_first(m_running, qedqcd, physical_input,
+                               flexibledecay_settings);
+   decays_Su_first.calculate_Su_decays();
+   decays_Su_first.calculate_hh_decays();
+
+   for (int i = 0; i < 2; ++i) {
+      BOOST_CHECK_EQUAL(
+         decays_hh_only.get_decay_table().get_hh_decays(i).get_total_width(),
+         decays_Su_first.get_decay_table().get_hh_decays(i).get_total_width());
+   }
 }

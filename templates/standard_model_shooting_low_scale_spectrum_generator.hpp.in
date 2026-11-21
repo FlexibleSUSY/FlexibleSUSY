@@ -1,0 +1,85 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+#ifndef @ModelName@_STANDARD_MODEL_SHOOTING_SPECTRUM_GENERATOR_H
+#define @ModelName@_STANDARD_MODEL_SHOOTING_SPECTRUM_GENERATOR_H
+
+#include "@ModelName@_spectrum_generator_interface.hpp"
+#include "@ModelName@_spectrum_generator.hpp"
+#include "@ModelName@_shooting_model.hpp"
+#include "@ModelName@_model_slha.hpp"
+#include "standard_model_shooting_model.hpp"
+
+namespace softsusy { class QedQcd; }
+
+namespace flexiblesusy {
+
+class Shooting;
+class Single_scale_constraint;
+
+template <>
+class @ModelName@_spectrum_generator<Shooting>
+   : public @ModelName@_spectrum_generator_interface<Shooting> {
+public:
+   @ModelName@_spectrum_generator() = default;
+   virtual ~@ModelName@_spectrum_generator() = default;
+
+   double get_high_scale() const { return 0.; }
+   double get_susy_scale() const { return susy_scale; }
+   double get_low_scale()  const { return low_scale;  }
+   double get_pole_mass_scale() const { return get_pole_mass_scale(susy_scale); }
+
+   void write_running_couplings(const std::string& filename = "@ModelName@_rgflow.dat") const;
+
+protected:
+   virtual void run_except(const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
+
+private:
+   static const int N = 7; ///< number of relevant SM parameters
+   using Vec_t = Eigen::Matrix<double, N, 1>;
+
+   double susy_scale{0.};
+   double low_scale{0.};
+
+   /// calculate pole mass spectrum
+   void calculate_spectrum(double);
+   /// calculate deviation of SM parameters from input observables
+   Vec_t calculate_deviation(const softsusy::QedQcd&);
+   /// returns pole mass scale in the EFT
+   double get_eft_pole_mass_scale(double, double) const;
+   /// returns matching scale
+   double get_matching_scale(const Single_scale_constraint&) const;
+   /// returns pole mass scale of the BSM model
+   double get_pole_mass_scale(double) const;
+   /// initialize BSM model
+   void init(@ModelName@<Shooting>&, const @ModelName@_input_parameters&) const;
+   /// initialize SM
+   void init(standard_model::StandardModel<Shooting>&) const;
+   /// perform initial guess
+   Vec_t initial_guess(const softsusy::QedQcd&);
+   /// run whole tower down
+   void match(const softsusy::QedQcd&, const Single_scale_constraint&);
+   /// overwrite SM-like BSM parameters
+   void set_BSM_parameters(const Vec_t&);
+};
+
+} // namespace flexiblesusy
+
+#endif

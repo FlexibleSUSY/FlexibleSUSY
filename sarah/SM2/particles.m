@@ -70,6 +70,7 @@ ParticleDefinitions[GaugeES] = {
                  PDG.IX ->{0},
                  Width -> {0}, 
                  Mass -> {0},
+                 ElectricCharge->1,
                  LaTeX -> {"H^+","H^-"},
                  OutputName -> {"Hp","Hm"}
                  }},                                                   

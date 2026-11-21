@@ -26,6 +26,7 @@
 #include "pmns.hpp"
 #include "slhaea.h"
 #include "spectrum_generator_settings.hpp"
+#include "observables/l_to_l_conversion/settings.hpp"
 #include "decays/flexibledecay_settings.hpp"
 #include "string_conversion.hpp"
 #include "string_format.hpp"
@@ -175,6 +176,16 @@ void process_flexiblesusy_tuple(Spectrum_generator_settings& settings,
    }
 }
 
+void process_ltolconversion_tuple(LToLConversion_settings& settings,
+                                int key, double value)
+{
+   if (0 <= key && key < static_cast<int>(LToLConversion_settings::NUMBER_OF_OPTIONS)) {
+      settings.set(static_cast<LToLConversion_settings::Settings>(key), value);
+   } else {
+      WARNING("Unrecognized entry in block LToLConversion: " << key);
+   }
+}
+
 void process_flexibledecay_tuple(FlexibleDecay_settings& settings,
                                 int key, double value)
 {
@@ -184,7 +195,6 @@ void process_flexibledecay_tuple(FlexibleDecay_settings& settings,
       WARNING("Unrecognized entry in block FlexibleDecay: " << key);
    }
 }
-
 
 void process_flexiblesusyinput_tuple(
    Physical_input& input,
@@ -622,6 +632,21 @@ void SLHA_io::fill(Physical_input& input) const
 
 /**
  * Fill struct of decay settings from SLHA object
+ * (LToLConversion block)
+ *
+ * @param settings struct of decay settings
+ */
+void SLHA_io::fill(LToLConversion_settings& settings) const
+{
+   Tuple_processor processor = [&settings] (int key, double value) {
+      return process_ltolconversion_tuple(settings, key, value);
+   };
+
+   read_block("LToLConversion", processor);
+}
+
+/**
+ * Fill struct of decay settings from SLHA object
  * (FlexibleDecay block)
  *
  * @param settings struct of decay settings
@@ -843,6 +868,19 @@ void SLHA_io::set_settings(const Spectrum_generator_settings& settings)
    set_block(ss);
 }
 
+void SLHA_io::set_LToLConversion_settings(const LToLConversion_settings& settings)
+{
+   std::ostringstream ss;
+   ss << block_head("LToLConversion", 0.0);
+
+   for (int i = 0; i < LToLConversion_settings::NUMBER_OF_OPTIONS; i++) {
+      ss << FORMAT_ELEMENT(i, settings.get(static_cast<LToLConversion_settings::Settings>(i)),
+                           settings.get_description(static_cast<LToLConversion_settings::Settings>(i)));
+   }
+
+   set_block(ss);
+}
+
 void SLHA_io::set_FlexibleDecay_settings(const FlexibleDecay_settings& settings)
 {
    std::ostringstream ss;
@@ -880,6 +918,18 @@ void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd)
    ss << FORMAT_ELEMENT(24, qedqcd.displayMcMc()             , "mc(mc) SM(4) MSbar");
 
    set_block(ss);
+}
+
+void SLHA_io::set_unitarity_infinite_s(
+   Spectrum_generator_settings const& spectrum_generator_settings, UnitarityInfiniteS const& unitarity)
+{
+   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
+      std::ostringstream block;
+      block << "Block FlexibleSUSYUnitarity Q= " << FORMAT_SCALE(unitarity.renScale) << '\n'
+            << FORMAT_ELEMENT(0, unitarity.allowed, "Tree-level unitarity limits fulfilled or not")
+            << FORMAT_ELEMENT(1, unitarity.maxAbsReEigenval, "max(|re(eigenvalues(a0))|)");
+      set_block(block);
+   }
 }
 
 void SLHA_io::write_to_file(const std::string& file_name) const
@@ -975,5 +1025,96 @@ void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double
    set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
+void SLHA_io::set_hs_or_lilith(std::string const& block_name, const std::size_t ndof, const double chi2, const double chi2SMmin, const double mhSM, const double pval1d, const double pval2d)
+{
+   std::ostringstream ss;
+
+   ss << block_head(block_name, 0.0);
+   ss << FORMAT_ELEMENT(1, ndof, "number of degrees of freedom");
+   ss << FORMAT_ELEMENT(2, chi2, "𝜒²");
+   ss << FORMAT_ELEMENT(3, chi2SMmin, "SM 𝜒² for mh = " + std::to_string(mhSM) + " GeV");
+   // SLHA doesn't print nicely numbers with 3 digit exponent
+   ss << FORMAT_ELEMENT(4, pval1d > 1e-99 ? pval1d : 0., "p-value (1d)");
+   ss << FORMAT_ELEMENT(5, pval2d > 1e-99 ? pval2d : 0., "p-value (2d)");
+
+   set_block(ss);
+}
+
+void SLHA_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& v)
+{
+   std::ostringstream ss;
+
+   ss << block_head("HIGGSBOUNDS", 0.0);
+   for (auto const& el : v) {
+      ss << FORMAT_MIXING_MATRIX(std::get<0>(el), 1, std::get<1>(el), std::get<3>(el));
+      ss << FORMAT_MIXING_MATRIX(std::get<0>(el), 2, std::get<2>(el), "expRatio");
+   }
+
+   set_block(ss);
+}
+
+void SLHA_io::set_effectivecouplings_block(const std::vector<std::tuple<int, int, int, double, std::string>>& effCouplings)
+{
+   std::ostringstream decay;
+   decay << "Block EFFHIGGSCOUPLINGS\n";
+
+   for (auto const& effC : effCouplings) {
+      decay << FORMAT_EFFECTIVECOUPLINGS(std::get<0>(effC),  std::get<1>(effC), std::get<2>(effC), std::get<3>(effC), std::get<4>(effC));
+   }
+
+   set_block(decay);
+}
+
+#define DECAY_FERMION_RE(PDG1, PDG2, CHANNEL) (ss << (!effC.CHANNEL.first.empty() ? FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, std::real(effC.CHANNEL.second), effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle) : ""))
+#define DECAY_VBOSON(PDG1, PDG2, CHANNEL) (ss << (!effC.CHANNEL.first.empty() ? FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, effC.CHANNEL.second, effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle) : ""))
+
+void SLHA_io::set_normalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   std::ostringstream ss;
+   ss << "Block NORMALIZEDEFFHIGGSCOUPLINGS\n";
+   for (auto const& effC : effCouplings) {
+      ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "SM Higgs width for mhSM = m" + effC.particle);
+      if (effC.CP != -1) {
+         DECAY_FERMION_RE(-1, 1, dd);
+         DECAY_FERMION_RE(-2, 2, uu);
+         DECAY_FERMION_RE(-3, 3, ss);
+         DECAY_FERMION_RE(-4, 4, cc);
+         DECAY_FERMION_RE(-5, 5, bb);
+         DECAY_FERMION_RE(-6, 6, tt);
+         DECAY_FERMION_RE(-11, 11, ee);
+         DECAY_FERMION_RE(-13, 13, mumu);
+         DECAY_FERMION_RE(-15, 15, tautau);
+
+         DECAY_VBOSON(-24, 24, WW);
+         DECAY_VBOSON(23, 23, ZZ);
+      }
+
+      DECAY_VBOSON(21, 21, gg);
+      DECAY_VBOSON(22, 22, gamgam);
+      DECAY_VBOSON(23, 22, Zgam);
+   }
+
+   set_block(ss);
+}
+
+#define DECAY_FERMION_IM(PDG1, PDG2, CHANNEL) (ss << (!effC.CHANNEL.first.empty() ? FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, PDG1,  PDG2, std::imag(effC.CHANNEL.second), effC.CHANNEL.first + "/SM with mhSM = m" + effC.particle) : ""))
+
+void SLHA_io::set_imnormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   std::ostringstream ss;
+   ss << "Block IMNORMALIZEDEFFHIGGSCOUPLINGS\n";
+   for (auto const& effC : effCouplings) {
+      if (effC.CP == 1) continue;
+      DECAY_FERMION_IM(-1, 1, dd);
+      DECAY_FERMION_IM(-2, 2, uu);
+      DECAY_FERMION_IM(-3, 3, ss);
+      DECAY_FERMION_IM(-4, 4, cc);
+      DECAY_FERMION_IM(-5, 5, bb);
+      DECAY_FERMION_IM(-6, 6, tt);
+      DECAY_FERMION_IM(-11, 11, ee);
+      DECAY_FERMION_IM(-13, 13, mumu);
+      DECAY_FERMION_IM(-15, 15, tautau);
+   }
+
+   set_block(ss);
+}
 
 } // namespace flexiblesusy

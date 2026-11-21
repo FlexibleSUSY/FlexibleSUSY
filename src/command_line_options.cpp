@@ -17,20 +17,24 @@
 // ====================================================================
 
 #include "command_line_options.hpp"
-#include "array_view.hpp"
 #include "build_info.hpp"
 #include "logger.hpp"
 
 #include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <span>
+#include <string>
 
 namespace flexiblesusy {
 
 Command_line_options::Command_line_options(int argc, char* argv[])
-   : Command_line_options(make_dynamic_array_view(&argv[0], argc))
+   : Command_line_options(
+        std::span<char* const>(argv, static_cast<std::size_t>(argc)))
 {
 }
 
-Command_line_options::Command_line_options(const Dynamic_array_view<char*>& args)
+Command_line_options::Command_line_options(std::span<char* const> args)
 {
    parse(args);
 }
@@ -41,7 +45,7 @@ Command_line_options::Command_line_options(const Dynamic_array_view<char*>& args
  *
  * @param args command line arguments
  */
-void Command_line_options::parse(const Dynamic_array_view<char*>& args)
+void Command_line_options::parse(std::span<char* const> args)
 {
    reset();
 
@@ -50,17 +54,16 @@ void Command_line_options::parse(const Dynamic_array_view<char*>& args)
 
    program = args[0];
 
-   for (int i = 1; i < args.size(); ++i) {
-      const std::string option(args[i]);
-      if (starts_with(option,"--slha-input-file=")) {
+   for (const std::string option : args.subspan(1)) {
+      if (option.starts_with("--slha-input-file=")) {
          slha_input_file = option.substr(18);
-      } else if (starts_with(option,"--slha-output-file=")) {
+      } else if (option.starts_with("--slha-output-file=")) {
          slha_output_file = option.substr(19);
-      } else if (starts_with(option,"--spectrum-output-file=")) {
+      } else if (option.starts_with("--spectrum-output-file=")) {
          spectrum_file = option.substr(23);
-      } else if (starts_with(option,"--database-output-file=")) {
+      } else if (option.starts_with("--database-output-file=")) {
          database_output_file = option.substr(23);
-      } else if (starts_with(option,"--rgflow-output-file=")) {
+      } else if (option.starts_with("--rgflow-output-file=")) {
          rgflow_file = option.substr(21);
       } else if (option == "--help" || option == "-h") {
          print_usage(std::cout);
@@ -71,6 +74,12 @@ void Command_line_options::parse(const Dynamic_array_view<char*>& args)
       } else if (option == "--model-info") {
          do_print_model_info = true;
          do_exit = true;
+      } else if (option.starts_with("--higgssignals-dataset=")) {
+         higgssignals_dataset = option.substr(23);
+      } else if (option.starts_with("--higgsbounds-dataset=")) {
+         higgsbounds_dataset = option.substr(22);
+      } else if (option.starts_with("--lilith-db=")) {
+         lilith_db = option.substr(12);
       } else if (option == "--version" || option == "-v") {
          print_version(std::cout);
          do_exit = true;
@@ -98,23 +107,26 @@ void Command_line_options::print_usage(std::ostream& ostr) const
 {
    ostr << "Usage: " << program << " [options]\n"
            "Options:\n"
-           "  --slha-input-file=<filename>      SLHA input file (default: )\n"
-           "                                    If <filename> is - then the"
-                                                " SLHA input\n"
-           "                                    is read from stdin.\n"
-           "  --slha-output-file=<filename>     SLHA output file (default: -)\n"
-           "                                    If <filename> is the empty string, then\n"
-           "                                    no SLHA output is written.\n"
-           "                                    If <filename> is - then the output is\n"
-           "                                    printed to stdout.\n"
-           "  --spectrum-output-file=<filename> file to write spectrum to\n"
-           "  --database-output-file=<filename> SQLite database file to write\n"
-           "                                    parameter point to\n"
-           "  --rgflow-output-file=<filename>   file to write rgflow to\n"
-           "  --build-info                      print build information\n"
-           "  --model-info                      print model information\n"
-           "  --help,-h                         print this help message\n"
-           "  --version,-v                      print program version"
+           "  --slha-input-file=<filename>       SLHA input file (default: )\n"
+           "                                     If <filename> is - then the"
+                                                 " SLHA input\n"
+           "                                     is read from stdin.\n"
+           "  --slha-output-file=<filename>      SLHA output file (default: -)\n"
+           "                                     If <filename> is the empty string, then\n"
+           "                                     no SLHA output is written.\n"
+           "                                     If <filename> is - then the output is\n"
+           "                                     printed to stdout.\n"
+           "  --spectrum-output-file=<filename>  File to write spectrum to\n"
+           "  --database-output-file=<filename>  SQLite database file to write\n"
+           "                                     parameter point to\n"
+           "  --higgsbounds-dataset=<directory>  Location of HiggsBounds dataset\n"
+           "  --higgssignals-dataset=<directory> Location of HiggsSignals dataset\n"
+           "  --lilith-db=<filename>             Lilith database\n"
+           "  --rgflow-output-file=<filename>    File to write rgflow to\n"
+           "  --build-info                       Print build information\n"
+           "  --model-info                       Print model information\n"
+           "  --help,-h                          Print this help message\n"
+           "  --version,-v                       Print program version"
         << std::endl;
 }
 
@@ -124,20 +136,6 @@ void Command_line_options::print_usage(std::ostream& ostr) const
 void Command_line_options::reset()
 {
    *this = Command_line_options();
-}
-
-/**
- * Returns true if the string str starts with prefix, false otherwise.
- *
- * @param str string to search in
- * @param prefix string to search for
- *
- * @return true if the string str starts with prefix, false otherwise
- */
-bool Command_line_options::starts_with(const std::string& str,
-                                       const std::string& prefix)
-{
-   return !str.compare(0, prefix.size(), prefix);
 }
 
 /**
@@ -154,7 +152,7 @@ bool Command_line_options::get_parameter_value(const std::string& str,
                                                const std::string& prefix,
                                                double& parameter)
 {
-   if (starts_with(str, prefix)) {
+   if (str.starts_with(prefix)) {
       parameter = std::stod(str.substr(prefix.length()));
       return true;
    }
@@ -175,7 +173,7 @@ bool Command_line_options::get_parameter_value(const std::string& str,
                                                const std::string& prefix,
                                                int& parameter)
 {
-   if (starts_with(str, prefix)) {
+   if (str.starts_with(prefix)) {
       parameter = std::stoi(str.substr(prefix.length()));
       return true;
    }

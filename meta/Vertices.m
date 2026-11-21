@@ -48,11 +48,30 @@ ReplaceUnrotatedFields::usage;
 StripGroupStructure::usage="Removes group generators and Kronecker deltas.";
 StripFieldIndices::usage;
 
-IsNonZeroVertex::usage="Checks if a vertex may be non-zero.";
-
-SetCachedVertices::usage="";
-GetCachedVertices::usage="";
-ClearCachedVertices::usage="";
+IsNonZeroVertex::usage="IsNonZeroVertex[fields, useDependences] checks if the vertex of the given
+fields (without indices, in any order) may be non-zero.  With useDependences = True (default:
+False), SARAH's parameter dependences (e.g. for ThetaW) are imposed.  A vertex in SARAH's vertex
+lists always counts as non-zero, as SARAH puts a vertex there only if it doesn't vanish with the
+dependences.  (SARAH doesn't simplify some vertex types for this check, so a few of them vanish
+with the dependences, e.g. bar[gZ]-gP-hh in the SM.)";
+FSVertex::usage="FSVertex[sortedFields, useDependences] returns SARAH`Vertex[sortedFields,
+UseDependences -> useDependences] for fields without indices in SARAH's order (see
+SortFieldsInCp).  Without dependences (the default) the vertex is taken from SARAH's vertex
+lists if they are loaded (see LoadVerticesIfNecessary): their entries are the vertices without
+dependences, but vertices that vanish with dependences are left out.  The results are
+remembered.";
+GetExactGlobalSymmetries::usage="GetExactGlobalSymmetries[] returns the names of the global
+symmetries of the model (SARAH`Global) that hold exactly for FlexibleSUSY`FSEigenstates: a U(1) or
+Z[N] symmetry that no term of the superpotential or of the non-supersymmetric Lagrangian
+violates (even if its parameter is set to zero later, as mu in the MRSSM), under which every
+particle has a definite charge, every field with a VEV is neutral, and which no vertex of SARAH's
+vertex lists violates.  The result is remembered.";
+ViolatesGlobalSymmetryQ::usage="ViolatesGlobalSymmetryQ[fields] is True if the fields (with or
+without indices) violate one of the exact global symmetries (see GetExactGlobalSymmetries), so
+that their vertex vanishes.";
+LoadVerticesIfNecessary::usage="LoadVerticesIfNecessary[] reads SARAH's vertex lists
+SARAH`VertexList3 and SARAH`VertexList4 from SARAH's output directory for
+FlexibleSUSY`FSEigenstates, if they are not loaded yet.";
 SarahColorIndexQ::usage="Checks if an index is a color index. Returns True for indices starting with ct and followed by a number.";
 SarahLorentzIndexQ::usage="Checks if an index is a Lorentz index. Returns True for indices starting with lt and followed by a number.";
 SarahDummyIndexQ::usage="Checks if an index is a dummy index. Returns True for indices starting with j and followed by a number.";
@@ -61,53 +80,41 @@ SortFieldsInCp::usage="";
 
 Begin["`Private`"]
 
-FSVertex[sortedFields_, UseDependences_:False] := FSVertex[sortedFields, UseDependences] =
-Module[{vertexList, vertex},
+LoadVerticesIfNecessary[] :=
+   If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
+      SA`CurrentStates = FlexibleSUSY`FSEigenstates;
+      SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
+      SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
+      SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
+      SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
+      SARAH`MakeCouplingLists;
+   ];
 
-   vertexList =
-      Switch[Length[sortedFields],
-         3, SARAH`VertexList3,
-         4, SARAH`VertexList4,
-         _, Print["Only three- and four-point vertices are supported"]; Quit[1]
-      ];
+(* SARAH's vertex lists, if loaded *)
+LoadedVertexList[3] := If[ListQ[SARAH`VertexList3], SARAH`VertexList3, {}];
+LoadedVertexList[4] := If[ListQ[SARAH`VertexList4], SARAH`VertexList4, {}];
+LoadedVertexList[_] := {};
 
-   vertex = Select[vertexList, Vertices`StripFieldIndices[#[[1]]] === sortedFields &, 1];
+(* the entry of SARAH's vertex lists for the given fields, or {} *)
+CachedVertex[sortedFields_List] :=
+   Select[LoadedVertexList[Length[sortedFields]],
+          StripFieldIndices[#[[1]]] === sortedFields &, 1];
 
-   If[vertex =!= {},
-      First@vertex,
-      SARAH`Vertex[sortedFields, UseDependences -> useDependences]
-   ]
-];
+(* The entries of SARAH's vertex lists are equal to SARAH`Vertex[]
+   without dependences.  With dependences, SARAH`Vertex[] gives
+   different expressions, and a vertex in the list may vanish
+   (e.g. bar[gZ]-gP-hh in the SM), so the lists are only used without
+   dependences. *)
+FSVertex[sortedFields_List, useDependences:(True|False):False] :=
+   FSVertex[sortedFields, useDependences] =
+   Module[{vertex = If[useDependences, {}, CachedVertex[sortedFields]]},
+      If[vertex =!= {},
+         First[vertex],
+         SARAH`Vertex[sortedFields, SARAH`UseDependences -> useDependences]
+      ]
+   ];
 
-(* cached 3-point vertices, with and without dependencies imposed *)
-cachedVertices[3, False] = {};
-cacjedVertices[3, True] = {};
-(* cached 4-point vertices, with and without dependences imposed *)
-cachedVertices[4, False] = {};
-cachedVertices[4, True] = {};
-cachedVertices[numFields_, useDependences_] := {};
-
-SetCachedVertices[numFields_Integer, vertices_List, useDependences_:False] := cachedVertices[numFields, useDependences] = vertices;
-
-GetCachedVertices[] := Flatten[cachedVertices[#[[1]], #[[2]]]& /@ Cases[DownValues[cachedVertices], (HoldPattern[_[_[l_, u_]]] :> _) /; IntegerQ[l] :> {l, u}]];
-GetCachedVertices[numFields_Integer, useDependences_:False] := cachedVertices[numFields, useDependences];
-
-AddToCachedVertices[sarahVertex_, useDependences_:False] :=
-    Module[{numFields, cached},
-           numFields = Length[sarahVertex[[1]]];
-           cached = cachedVertices[numFields, useDependences];
-           If[cached === {},
-              cachedVertices[numFields, useDependences] = {sarahVertex};,
-              cachedVertices[numFields, useDependences] = Append[cached, sarahVertex];
-             ];
-          ];
-
-ClearCachedVertices[numFields_Integer, useDependences_:False] := cachedVertices[numFields, useDependences] = {};
-ClearCachedVertices[] :=
-    (
-     DownValues[cachedVertices] = DeleteCases[DownValues[cachedVertices], (HoldPattern[_[_[l_, _]]] :> _) /; IntegerQ[l]];
-     cachedVertices[_, _] := {};
-    )
+Utils`MakeUnknownInputDefinition[FSVertex];
 
 (* There is a sign ambiguity when SARAH`Vertex[] factors an SSV-type
    vertex into a coefficient and a Lorentz part even though the
@@ -294,7 +301,7 @@ EnforceCpColorStructures[nPointFunctions_List] :=
     EnforceCpColorStructures /@ nPointFunctions;
 
 EnforceCpColorStructures[
-    SelfEnergies`FSSelfEnergy[p : f_Symbol[__] | f_Symbol, expr__]] :=
+    SelfEnergies`FSSelfEnergy[p : {f_Symbol[_], f_Symbol[_]}[_] | {f_Symbol[_], f_Symbol[_]} | {f_Symbol, f_Symbol} | {f_Symbol, f_Symbol}[_] , expr__]] :=
     SelfEnergies`FSSelfEnergy@@Prepend[EnforceCpColorStructures[f, {expr}], p];
 
 EnforceCpColorStructures[nPointFunction_] := nPointFunction;
@@ -801,12 +808,132 @@ ReplaceUnrotatedFields[SARAH`Cp[p__]] :=
 ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
     ReplaceUnrotatedFields[SARAH`Cp[p]][lorentz];
 
-IsNonZeroVertex[fields_List, vertexList_:{}, useDependences_:False] :=
-    Module[{sortedFields, cached, vertex},
-           sortedFields = SortFieldsInCp[fields];
-           vertex = FSVertex[sortedFields, UseDependences -> useDependences];
-           MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]]
+(* True if the electric charges of the fields are known and don't add
+   up to zero.  Such a vertex vanishes, and checking this is much
+   faster than SARAH`Vertex[] (about 40 ms per vertex in the MSSM). *)
+ViolatesElectricChargeQ[fields_List] :=
+    With[{charge = Simplify[Plus @@ (SARAH`getElectricCharge /@ fields)]},
+         NumericQ[charge] && charge != 0
+    ];
+
+(* Global symmetries (SARAH`Global), e.g. {{Z[2], RParity}} in the
+   MSSM.  The symbols U and Z are created by the model file, so the
+   group is recognized by the name of its head. *)
+GlobalSymmetryGroup[sym_] :=
+    Module[{group = Cases[SARAH`Global, {g_, sym} :> g, {1}, 1]},
+           Which[
+              MatchQ[group, {_[1]}] && SymbolName[Head[First[group]]] === "U", "U1",
+              MatchQ[group, {_[_Integer?Positive]}] && SymbolName[Head[First[group]]] === "Z", "ZN",
+              True, None
+           ]
+    ];
+
+(* SARAH's charge of a field: additive for U(1), a phase (e.g. -1 or
+   Exp[2 Pi I/3]) for Z[N].  SA`ChargeGlobal gives conj[f] the same
+   charge as f for every Z[N], which is only correct for Z[2], so the
+   charge of an antiparticle is inverted here. *)
+GlobalCharge[f_, sym_] := GlobalChargeOfField[StripFieldIndices[f], sym];
+
+GlobalChargeOfField[(SARAH`bar | Susyno`LieGroups`conj)[f_], sym_] :=
+    With[{q = GlobalChargeOfField[f, sym]},
+         Which[
+            !NumericQ[q], q,
+            GlobalSymmetryGroup[sym] === "U1", -q,
+            GlobalSymmetryGroup[sym] === "ZN", 1/q,
+            True, q
+         ]
+    ];
+
+GlobalChargeOfField[f_, sym_] := SA`ChargeGlobal[f, sym];
+
+IsNeutralGlobalCharge[q_, sym_] :=
+    Switch[GlobalSymmetryGroup[sym],
+           "U1", PossibleZeroQ[q],
+           "ZN", PossibleZeroQ[q - 1],
+           _, False
+    ];
+
+(* True unless the charges of the fields are known and don't add up
+   to a neutral one *)
+ConservesGlobalSymmetryQ[fields_List, sym_] :=
+    Module[{charges = GlobalCharge[#, sym]& /@ fields},
+           Which[
+              !VectorQ[charges, NumericQ], True,
+              GlobalSymmetryGroup[sym] === "U1", IsNeutralGlobalCharge[Plus @@ charges, sym],
+              GlobalSymmetryGroup[sym] === "ZN", IsNeutralGlobalCharge[Times @@ charges, sym],
+              True, True
+           ]
+    ];
+
+(* SARAH reports violating terms (Superpotential::ViolationGlobal,
+   Lagrange::ViolationGlobal) when the model is loaded, but doesn't
+   store them, so the terms are checked again here, with SARAH's
+   criterion.  This is the only check that depends on the name of the
+   symmetry: SARAH requires a total charge of 2 for superpotential terms
+   only for a symmetry named RSymmetry, and 0 otherwise.  An R-symmetry
+   under another name (or a non-R U(1) named RSymmetry) therefore fails
+   for its allowed terms and isn't used, which only loses the speed-up.
+   All other checks use the charges of the components, which add up to
+   0 (U(1)) or 1 (Z[N]) for an R-symmetry as well. *)
+ModelTermsConserveGlobalSymmetryQ[sym_] :=
+    And[
+       If[ListQ[SARAH`SuperPotential],
+          FreeQ[SARAH`CheckChargeConservationGlobal[#[[2]], sym]& /@ SARAH`SuperPotential, False],
+          True],
+       If[ListQ[SA`LagTermsNonSUSY],
+          Block[{SA`CheckGlobalLagLevel = True},
+                FreeQ[SARAH`CheckChargeConservationGlobal[List @@ #, sym]& /@ SA`LagTermsNonSUSY, False]],
+          True]
+    ];
+
+ExactGlobalSymmetryQ[sym_] :=
+    Module[{vevFields},
+           vevFields = Cases[SARAH`DEFINITION[FlexibleSUSY`FSEigenstates][SARAH`VEVs], {f_, __} :> f];
+           (* the cheap checks first; the vertex lists are a cross-check *)
+           GlobalSymmetryGroup[sym] =!= None &&
+           ModelTermsConserveGlobalSymmetryQ[sym] &&
+           VectorQ[GlobalCharge[#, sym]& /@ TreeMasses`GetParticles[], NumericQ] &&
+           And @@ (IsNeutralGlobalCharge[GlobalCharge[#, sym], sym]& /@ vevFields) &&
+           (LoadVerticesIfNecessary[];
+            And @@ (ConservesGlobalSymmetryQ[StripFieldIndices[#[[1]]], sym]& /@
+                       Join[LoadedVertexList[3], LoadedVertexList[4]]))
+    ];
+
+GetExactGlobalSymmetries[] :=
+    GetExactGlobalSymmetries[] =
+    Module[{exact = {}},
+           If[ListQ[SARAH`Global] && SARAH`Global =!= {},
+              exact = Select[SARAH`Global[[All, 2]], ExactGlobalSymmetryQ];
+           ];
+           If[exact =!= {},
+              Print["Exact global symmetries: ", ToString[exact]];
+           ];
+           exact
+    ];
+
+ViolatesGlobalSymmetryQ[fields_List] :=
+    !And @@ (ConservesGlobalSymmetryQ[fields, #]& /@ GetExactGlobalSymmetries[]);
+
+Utils`MakeUnknownInputDefinition[ViolatesGlobalSymmetryQ];
+
+(* A vertex in SARAH's lists is non-zero without dependences, and
+   SARAH puts it there only if it doesn't vanish with dependences, so
+   it counts as non-zero without recalculating it.  This matters with
+   dependences: SARAH`Vertex[] is then slow for large vertices
+   (seconds for 4-squark vertices).  The result is remembered, as the
+   decays ask for the same vertices in thousands of diagrams. *)
+IsNonZeroVertex[fields_List, useDependences:(True|False):False] :=
+    IsNonZeroVertex[fields, useDependences] =
+    Module[{sortedFields = SortFieldsInCp[fields]},
+           Which[
+              CachedVertex[sortedFields] =!= {}, True,
+              ViolatesElectricChargeQ[sortedFields], False,
+              ViolatesGlobalSymmetryQ[sortedFields], False,
+              True, MemberQ[FSVertex[sortedFields, useDependences][[2 ;;, 1]], Except[0]]
+           ]
           ];
+
+Utils`MakeUnknownInputDefinition[IsNonZeroVertex];
 
 End[] (* `Private` *)
 

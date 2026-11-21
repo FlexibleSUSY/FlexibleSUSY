@@ -97,7 +97,7 @@ struct Vertex {
 
       constexpr int offset =
          cxx_diagrams::detail::total_number_of_field_indices<preceeding_fields>::value;
-      constexpr int length = std::tuple_size<result_type>::value;
+      constexpr int length = std::tuple_size_v<result_type>;
 
       result_type result_indices;
       std::copy(indices.begin() + offset,
@@ -126,7 +126,7 @@ cxx_diagrams::ChiralVertex unit_charge(const context_base& context);
 inline double unit_charge(const context_base& context)
 {
    return -(detail::unit_charge(context).left().real() /
-            fields::Electron::electric_charge);
+            fields::Electron::electricCharge);
 }
 
 } // namespace @ModelName@_cxx_diagrams

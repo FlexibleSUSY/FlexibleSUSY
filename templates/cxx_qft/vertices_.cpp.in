@@ -35,12 +35,8 @@
 #define DERIVEDPARAMETER(p) context.model.p()
 #define PHASE(p) context.model.get_##p()
 
-namespace flexiblesusy {
-namespace @ModelName@_cxx_diagrams {
-namespace detail {
+namespace flexiblesusy::@ModelName@_cxx_diagrams::detail {
 
 @CXXDiagrams_VertexDefinitions@
 
-} // namespace detail
-} // namespace @ModelName@_cxx_diagrams
-} // namespace flexiblesusy
+} // namespace flexiblesusy::@ModelName@_cxx_diagrams::detail

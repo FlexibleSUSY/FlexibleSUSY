@@ -11,8 +11,8 @@ List of observables computed by ``FlexibleSUSY``
 
 - `lepton flavour violation <observables/LFV.rst>`_:
 
-  - LFV decays of leptons :math:`$l \to l' \gamma$`
-  - :math:`$\mu \to e$` conversion in nucleus *(in preparation)*
+  - LFV decays of leptons: :math:`$l \to l' \gamma$` and :math:`$l \to 3l'$`
+  - :math:`$l \to l'$` conversion in nucleus
 
 - `b-physics <observables/b_physics.rst>`_:
 
@@ -24,3 +24,4 @@ List of observables computed by ``FlexibleSUSY``
   - LO order (tree-level or loop-induced) decays of Higgs scalars into non-SM state
   - LO order (tree-level or loop-induced) decays of non-Higgs scalars
 
+- Unitarity constraints

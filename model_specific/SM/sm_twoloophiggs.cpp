@@ -121,6 +121,197 @@ double delta_mh_1loop_at_sm(
    return result * oneLoop;
 }
 
+
+double delta_mh_1loop_ab_sm(
+   double p, double scale, double mb, double yb)
+{
+   const double yb2 = sqr(yb);
+   const double mb2 = sqr(mb);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+
+   const double result =
+      3*yb2*(4.*mb2 - p2)*Loop_library::get().B0(p2,mb2,mb2,Q2).real();
+
+   return result * oneLoop;
+}
+
+double delta_mh_1loop_atau_sm(
+   double p, double scale, double mtau, double ytau)
+{
+   const double yt2 = sqr(ytau);
+   const double mt2 = sqr(mtau);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+
+   const double result =
+      yt2*(4.*mt2 - p2)*Loop_library::get().B0(p2,mt2,mt2,Q2).real();
+
+   return result * oneLoop;
+}
+
+/*
+ * Derivatives w.r.t. to y_{t,b,tau}, v, p
+ *
+ * Note: Because 2L-Se are evaluated from the effective potential
+ * all formal two-loop contr must be derived for p=0.
+ *
+ */
+
+double delta_mh_1loop_at_sm_deriv_yt(
+   double p, double scale, double mt, double yt)
+{
+   const double yt2 = sqr(yt);
+   const double mt2 = sqr(mt);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogT = std::log(mt2 / Q2);
+
+
+   const double result =
+      -24. * yt * mt2 * (2. * LogT + 1.);
+
+   return  result * oneLoop;
+}
+
+double delta_mh_1loop_ab_sm_deriv_yb(
+   double p, double scale, double mb, double yb)
+{
+
+   const double yb2 = sqr(yb);
+   const double mb2 = sqr(mb);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogB = std::log(mb2 / Q2);
+
+
+   const double result =
+      -24. * yb * mb2 *(2 * LogB + 1.);
+
+   return  result * oneLoop;
+}
+
+double delta_mh_1loop_atau_sm_deriv_ytau(
+   double p, double scale, double mtau, double ytau)
+{
+
+   const double ytau2 = sqr(ytau);
+   const double mtau2 = sqr(mtau);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogT = std::log(mtau2 / Q2);
+
+
+   const double result =
+      -8. * ytau * mtau2 * (2. * LogT + 1.);
+
+   return  result * oneLoop;
+}
+
+double delta_mh_1loop_at_sm_deriv_v(
+   double p, double scale, double mt, double yt)
+{
+
+   const double yt2 = sqr(yt);
+   const double mt2 = sqr(mt);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogT = std::log(mt2 / Q2);
+
+
+   const double result =
+      - 12. * 1.41421356237 * yt * yt2 * mt * ( LogT + 1.);
+
+   return  result * oneLoop;
+}
+
+double delta_mh_1loop_ab_sm_deriv_v(
+   double p, double scale, double mb, double yb)
+{
+
+   const double yb2 = sqr(yb);
+   const double mb2 = sqr(mb);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogB = std::log(mb2 / Q2);
+
+
+   const double result =
+      - 12. * 1.41421356237 * yb * yb2 * mb * ( LogB + 1.);
+
+   return  result * oneLoop;
+}
+
+double delta_mh_1loop_atau_sm_deriv_v(
+   double p, double scale, double mtau, double ytau)
+{
+
+   const double ytau2 = sqr(ytau);
+   const double mtau2 = sqr(mtau);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogTau = std::log(mtau2 / Q2);
+
+
+   const double result =
+      - 4. * 1.41421356237 * ytau * ytau2 * mtau * ( LogTau + 1.);
+
+   return  result * oneLoop;
+}
+
+
+double delta_mh_1loop_at_sm_deriv_p2(
+   double p, double scale, double mt, double yt)
+{
+
+   const double yt2 = sqr(yt);
+   const double mt2 = sqr(mt);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogT = std::log(mt2 / Q2);
+
+
+   const double result =
+       yt2 * (3.* LogT + 2.);
+
+   return  result * oneLoop;
+}
+
+double delta_mh_1loop_ab_sm_deriv_p2(
+   double p, double scale, double mb, double yb)
+{
+
+   const double yb2 = sqr(yb);
+   const double mb2 = sqr(mb);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogB = std::log(mb2 / Q2);
+
+
+   const double result =
+       yb2 * (3.* LogB + 2.);
+
+   return  result * oneLoop;
+}
+
+
+double delta_mh_1loop_atau_sm_deriv_p2(
+   double p, double scale, double mtau, double ytau)
+{
+
+   const double ytau2 = sqr(ytau);
+   const double mtau2 = sqr(mtau);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double LogTau = std::log(mtau2 / Q2);
+
+
+   const double result =
+       ytau2 * ( LogTau + 2./3.);
+
+   return  result * oneLoop;
+}
+
 /**
  * Standard Model Higgs self-energy 2-loop, \f$O(\alpha_t
  * \alpha_s)\f$, including momentum dependence.

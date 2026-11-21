@@ -1,0 +1,65 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = SM;
+OnlyLowEnergyFlexibleSUSY = True;
+FlexibleEFTHiggs = True;
+FSBVPSolvers = { ShootingSolver };
+
+(* SM input parameters *)
+
+MINPAR = { {1, LambdaIN} };
+EXTPAR = { {0, Qin} };
+
+EWSBOutputParameters = { mu2 };
+
+SUSYScale = Qin;
+
+SUSYScaleFirstGuess = Qin;
+
+SUSYScaleInput = {
+    {\[Lambda], LambdaIN}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic},
+   FSSolveEWSBFor[EWSBOutputParameters]
+};
+
+InitialGuessAtSUSYScale = {
+   {v, VEV},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+}
+
+MatchingScaleInput = {
+   {v, VEV}
+};
+
+UseSM3LoopRGEs = True;
+UseSM4LoopRGEs = True;
+UseSM5LoopRGEs = True;
+UseHiggs2LoopSM = True;
+UseHiggs3LoopSM = True;
+UseHiggs4LoopSM = True;
+UseYukawa3LoopQCD = True;
+UseYukawa4LoopQCD = True;
+UseSMAlphaS3Loop = True;
+UseSMAlphaS4Loop = True;
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+SARAH`ParameterDefinitions = Append[
+    Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
+    {SARAH`\[Lambda], { Description -> "SM Higgs Selfcouplings" } }
+];

@@ -18,10 +18,8 @@ BASE_TEMPLATES := \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
 		$(DIR)/FFV_form_factors.cpp.in \
-		$(DIR)/l_to_lgamma.hpp.in \
-		$(DIR)/l_to_lgamma.cpp.in \
-		$(DIR)/f_to_f_conversion.hpp.in \
-		$(DIR)/f_to_f_conversion.cpp.in \
+		$(wildcard $(DIR)/observables/*.hpp.in) \
+		$(wildcard $(DIR)/observables/*.cpp.in) \
 		$(DIR)/b_to_s_gamma.cpp.in \
 		$(DIR)/b_to_s_gamma.hpp.in \
 		$(DIR)/convergence_tester.hpp.in \
@@ -43,8 +41,8 @@ BASE_TEMPLATES := \
 		$(DIR)/mass_eigenstates_decoupling_scheme.cpp.in \
 		$(DIR)/model.hpp.in \
 		$(DIR)/model_slha.hpp.in \
-		$(DIR)/lepton_gm2_wrapper.hpp.in \
-		$(DIR)/lepton_gm2_wrapper.cpp.in \
+		$(DIR)/lepton_amm_wrapper.hpp.in \
+		$(DIR)/lepton_amm_wrapper.cpp.in \
 		$(DIR)/observables.hpp.in \
 		$(DIR)/observables.cpp.in \
 		$(DIR)/physical.hpp.in \
@@ -64,12 +62,12 @@ BASE_TEMPLATES := \
 		$(DIR)/spectrum_generator.hpp.in \
 		$(DIR)/spectrum_generator_interface.hpp.in \
 		$(DIR)/standard_model_spectrum_generator_interface.hpp.in \
-		$(DIR)/standard_model_matching.hpp.in \
-		$(DIR)/standard_model_matching.cpp.in \
 		$(DIR)/susy_beta_.cpp.in \
 		$(DIR)/susy_parameters.hpp.in \
 		$(DIR)/susy_parameters.cpp.in \
 		$(DIR)/susy_scale_constraint.hpp.in \
+		$(DIR)/unitarity.hpp.in \
+		$(DIR)/unitarity.cpp.in \
 		$(DIR)/utilities.hpp.in \
 		$(DIR)/utilities.cpp.in
 
@@ -84,6 +82,8 @@ TWO_SCALE_TEMPLATES := \
 		$(DIR)/standard_model_two_scale_low_scale_spectrum_generator.cpp.in \
 		$(DIR)/standard_model_two_scale_matching.hpp.in \
 		$(DIR)/standard_model_two_scale_matching.cpp.in \
+		$(DIR)/standard_model_two_scale_matching_interface.hpp.in \
+		$(DIR)/standard_model_two_scale_matching_interface.cpp.in \
 		$(DIR)/two_scale_convergence_tester.hpp.in \
 		$(DIR)/two_scale_convergence_tester.cpp.in \
 		$(DIR)/two_scale_ewsb_solver.hpp.in \
@@ -137,10 +137,29 @@ SEMI_ANALYTIC_TEMPLATES := \
 		$(DIR)/soft_parameters_constraint.hpp.in \
 		$(DIR)/susy_convergence_tester.hpp.in
 
+SHOOTING_TEMPLATES := \
+		$(DIR)/shooting_ewsb_solver.hpp.in \
+		$(DIR)/shooting_ewsb_solver.cpp.in \
+		$(DIR)/shooting_high_scale_constraint.hpp.in \
+		$(DIR)/shooting_high_scale_constraint.cpp.in \
+		$(DIR)/shooting_low_scale_constraint.hpp.in \
+		$(DIR)/shooting_low_scale_constraint.cpp.in \
+		$(DIR)/shooting_model.hpp.in \
+		$(DIR)/shooting_model.cpp.in \
+		$(DIR)/shooting_susy_scale_constraint.hpp.in \
+		$(DIR)/shooting_susy_scale_constraint.cpp.in \
+		$(DIR)/standard_model_shooting_initial_guesser.hpp.in \
+		$(DIR)/standard_model_shooting_initial_guesser.cpp.in \
+		$(DIR)/standard_model_shooting_matching.hpp.in \
+		$(DIR)/standard_model_shooting_matching.cpp.in \
+		$(DIR)/standard_model_shooting_low_scale_spectrum_generator.hpp.in \
+		$(DIR)/standard_model_shooting_low_scale_spectrum_generator.cpp.in
+
 TEMPLATES    := \
 		$(BASE_TEMPLATES) \
 		$(TWO_SCALE_TEMPLATES) \
 		$(SEMI_ANALYTIC_TEMPLATES) \
+		$(SHOOTING_TEMPLATES) \
 		$(MODULE_MK_TEMPLATES)
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME)

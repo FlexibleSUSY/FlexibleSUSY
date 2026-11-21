@@ -99,7 +99,7 @@ void Loop_library::set(int new_type)
          break;
 #endif // ENABLE_FFLITE
       default:
-         ERROR("Warning: Check FlexibleSUSY[31]:\n"
+         ERROR("Warning: Check FlexibleSUSY[31] or FLEXIBLESUSY_LOOP_LIBRARY:\n"
                "Currently configured values are 0 (=softsusy)" COLLIER_INFO
                   LOOPTOOLS_INFO FFLITE_INFO ".\n"
                "Setting default library.");
@@ -118,7 +118,7 @@ looplibrary::Loop_library_interface& Loop_library::get()
 {
    if (Loop_library::type_ == Loop_library::Library::Undefined) {
       ERROR("Loop library should be initialized before first usage.\n"
-            "Setting default library.");
+            "Setting the library according to the FLEXIBLESUSY_LOOP_LIBRARY env variable.");
       Loop_library::set(-1);
    }
    return *Loop_library::lib_;

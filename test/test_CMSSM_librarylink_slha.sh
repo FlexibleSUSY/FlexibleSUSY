@@ -33,7 +33,8 @@ settings = {
     poleMassScale -> 0.,
     thresholdCorrections -> 123111321,
     parameterOutputScale -> 1000,
-    loopLibrary -> -1
+    loopLibrary -> -1,
+    calculateAMM -> 2
 };
 
 smInputs = {
@@ -71,13 +72,16 @@ smInputs = {
 handle = FSCMSSMOpenHandle[
     fsSettings -> settings,
     fsSMParameters -> smInputs,
+    fdSettings -> {calcNormalizedEffC->1},
     fsModelParameters -> {
         m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 }
 ];
 
 FSCMSSMCalculateSpectrum[handle];
 FSCMSSMCalculateObservables[handle];
+FSCMSSMCalculateUnitarity[handle];
 FSCMSSMCalculateDecays[handle];
+FSCMSSMCalculateNormalizedEffectiveCouplings[handle];
 Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];
 EOF

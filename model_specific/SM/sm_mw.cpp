@@ -83,7 +83,7 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
    if (mh < 50) {
       VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " < 50 GeV is outside the fit range");
    }
-   if (mh > 540) {
+   if (mh > 450) {
       VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " > 450 GeV is outside the fit range");
    }
    if (mt <= 0) {

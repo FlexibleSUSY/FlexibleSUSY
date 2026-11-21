@@ -20,6 +20,7 @@
 #define CXXQFT_FIELDS_H
 
 #include <array> /**< Only for field_indices and isSMField*/
+#include <concepts>
 
 #include <boost/array.hpp>
 #include <boost/version.hpp>
@@ -33,14 +34,17 @@
 #include <boost/fusion/adapted/boost_array.hpp>
 #include <boost/fusion/adapted/mpl.hpp>
 
+#include <boost/hana/config.hpp>
+#include <boost/hana/equal.hpp>
+#include <boost/hana/fwd/transform.hpp>
+
 #if BOOST_VERSION >= 105800
 #include <boost/fusion/include/move.hpp>
 #else
 #include <boost/fusion/include/copy.hpp>
 #endif
 
-namespace flexiblesusy {
-namespace cxx_diagrams {
+namespace flexiblesusy::cxx_diagrams {
    /** @brief Declare a type that can hold the field indices for any given field.
     * @todo Field should have nested numberOfFieldIndices.
     * @returns `::type` evaluates to `std::array<int,int N>`.
@@ -65,7 +69,7 @@ namespace cxx_diagrams {
       template <class Field>
       struct number_of_field_indices {
          static constexpr int value =
-            std::tuple_size<typename field_indices<Field>::type>::value;
+            std::tuple_size_v<typename field_indices<Field>::type>;
          using type = boost::mpl::int_<value>;
       };
       /*
@@ -93,8 +97,8 @@ namespace cxx_diagrams {
     * is not 1.
     */
    template <class Field>
-   std::enable_if_t<Field::numberOfGenerations != 1, bool>
-   isSMField(const typename field_indices<Field>::type& indices) {
+   requires (Field::numberOfGenerations != 1)
+   bool isSMField(const typename field_indices<Field>::type& indices) {
       boost::array<bool, Field::numberOfGenerations> sm_flags;
 
       #if BOOST_VERSION >= 105800
@@ -107,8 +111,8 @@ namespace cxx_diagrams {
    }
 
    template <class Field>
-   std::enable_if_t<Field::numberOfGenerations == 1, bool>
-   isSMField(const typename field_indices<Field>::type&) {
+   requires (Field::numberOfGenerations == 1)
+   bool isSMField(const typename field_indices<Field>::type&) {
       return boost::mpl::at_c<typename Field::sm_flags, 0>::type::value;
    }
 
@@ -122,11 +126,7 @@ namespace cxx_diagrams {
    };
 
    template<typename Field>
-   struct is_massless {
-      static constexpr bool value = Field::massless;
-   };
-   template<typename Field>
-   constexpr bool is_massless_v = is_massless<Field>::value;
+   concept is_massless = Field::massless;
 
    enum class ParticleColorRep {
       singlet,
@@ -136,56 +136,26 @@ namespace cxx_diagrams {
       octet
    };
 
-   template<typename Field>
-   struct is_singlet {
-      static constexpr bool value =
-         Field::color_rep == ParticleColorRep::singlet;
-   };
-   template<typename Field>
-   constexpr bool is_singlet_v = is_singlet<Field>::value;
+   template <typename Field>
+   concept is_singlet = Field::colorRep == ParticleColorRep::singlet;
+   template <typename Field>
+   concept is_triplet = Field::colorRep == ParticleColorRep::triplet;
+   template <typename Field>
+   concept is_anti_triplet = Field::colorRep == ParticleColorRep::anti_triplet;
+   template <typename Field>
+   concept is_octet = Field::colorRep == ParticleColorRep::octet;
 
    template<typename Field>
-   struct is_triplet {
-      static constexpr bool value = Field::color_rep == ParticleColorRep::triplet;
-   };
-   template<typename Field>
-   constexpr bool is_triplet_v = is_triplet<Field>::value;
-
-   template<typename Field>
-   struct is_anti_triplet {
-      static constexpr bool value =
-         Field::color_rep == ParticleColorRep::anti_triplet;
-   };
-   template<typename Field>
-   constexpr bool is_anti_triplet_v = is_anti_triplet<Field>::value;
-
-   template<typename Field>
-   struct is_octet {
-      static constexpr bool value = Field::color_rep == ParticleColorRep::octet;
-   };
-   template<typename Field>
-   constexpr bool is_octet_v = is_octet<Field>::value;
-
-   template<typename Field>
-   constexpr std::enable_if_t<
-      is_triplet<Field>::value, ParticleColorRep
-      >
-   color_conj() {
-      return ParticleColorRep::anti_triplet;
-   }
-   template<typename Field>
-   constexpr std::enable_if_t<
-      is_anti_triplet<Field>::value, ParticleColorRep
-      >
-   color_conj() {
-      return ParticleColorRep::triplet;
-   }
-   template<typename Field>
-   constexpr std::enable_if_t<
-      !is_triplet<Field>::value && !is_anti_triplet<Field>::value, ParticleColorRep
-      >
-   color_conj() {
-      return Field::color_rep;
+   constexpr ParticleColorRep color_conj() {
+      if constexpr (is_triplet<Field>) {
+         return ParticleColorRep::anti_triplet;
+      }
+      else if (is_anti_triplet<Field>) {
+         return ParticleColorRep::triplet;
+      }
+      else {
+         return Field::colorRep;
+      }
    }
 
    template<class Field>
@@ -197,10 +167,11 @@ namespace cxx_diagrams {
 
       static constexpr int numberOfGenerations = Field::numberOfGenerations;
       static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      static constexpr auto particle_type = Field::particle_type;
-      static constexpr auto color_rep = color_conj<Field>();
+      static constexpr double electricCharge = -Field::electricCharge;
+      static constexpr auto particleType = Field::particleType;
+      static constexpr auto colorRep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };
 
    template<class Field>
@@ -212,10 +183,11 @@ namespace cxx_diagrams {
 
       static constexpr int numberOfGenerations = Field::numberOfGenerations;
       static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      static constexpr auto particle_type = Field::particle_type;
-      static constexpr auto color_rep = color_conj<Field>();
+      static constexpr double electricCharge = -Field::electricCharge;
+      static constexpr auto particleType = Field::particleType;
+      static constexpr auto colorRep = color_conj<Field>();
       static constexpr auto massless = Field::massless;
+      static constexpr auto pdgids = boost::hana::transform(Field::pdgids, [](int x) {return -x;});
    };
 
    // Double Lorentz conjugation
@@ -286,8 +258,6 @@ namespace cxx_diagrams {
    using fields::conj;
    using fields::remove_lorentz_conjugation;
 
-} // namespace cxx_diagrams
-
-} // namespace flexiblesusy
+} // namespace flexiblesusy::cxx_diagrams
 
 #endif

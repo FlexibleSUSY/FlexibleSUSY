@@ -42,7 +42,9 @@ BOOST_AUTO_TEST_CASE(test_non_universal)
       { g3, mt, 1000., 1200., 1300., 1400.,  std::sqrt(6.)*1300, 1000. },
       { g3, mt, 1000., 1200., 1300., 1400.,  std::sqrt(6.)*1300, 1100. },
       { g3, mt, 1000., 1200., 1300., 1400., -std::sqrt(6.)*1300, 1000. },
-      { g3, mt, 1000., 1200., 1300., 1400., -std::sqrt(6.)*1300, 1100. }
+      { g3, mt, 1000., 1200., 1300., 1400., -std::sqrt(6.)*1300, 1100. },
+      // point with spurious divergence where mst1 ~ mst2 ~ mgl
+      { 8.94089558333791001e-01, 1.24508809875228764e+02, 5.03178313333475744e+04, 5.03256625668697379e+04, 5.02223490880230747e+04, 5.03094126766551562e+04, -7.01584437036636359e+02, 4e+04 }
    };
 
    std::cout << "# non-universal SUSY masses" << std::endl;
@@ -56,6 +58,11 @@ BOOST_AUTO_TEST_CASE(test_non_universal)
       BOOST_CHECK(std::isfinite(dmt_1L_sqcd));
       BOOST_CHECK(std::isfinite(dmt_2L_qcd));
       BOOST_CHECK(std::isfinite(dmt_2L_sqcd));
+
+      BOOST_CHECK_LT(std::abs(dmt_1L_qcd) , 1.0);
+      BOOST_CHECK_LT(std::abs(dmt_1L_sqcd), 1.0);
+      BOOST_CHECK_LT(std::abs(dmt_2L_qcd) , 1.0);
+      BOOST_CHECK_LT(std::abs(dmt_2L_sqcd), 1.0);
 
       std::cout << dmt_1L_qcd << ' '
                 << dmt_1L_sqcd << ' '
@@ -74,22 +81,22 @@ struct Results {
 
 Parameters make_point()
 {
-   Parameters pars;
-
    const double mt = 173.0;
    const double mst1 = 200.0;
    const double mst2 = 300.0;
    const double SX = 0.5;
    const double xt = SX / (2.0 * mt);
 
-   pars.g3    = 2.0;
-   pars.mt    = mt;
-   pars.mg    = 400.0;
-   pars.mst1  = mst1;
-   pars.mst2  = mst2;
-   pars.msusy = 500.0;
-   pars.xt    = xt;
-   pars.Q     = 100.0;
+   const Parameters pars{
+      .g3    = 2.0,
+      .mt    = mt,
+      .mg    = 400.0,
+      .mst1  = mst1,
+      .mst2  = mst2,
+      .msusy = 500.0,
+      .xt    = xt,
+      .Q     = 100.0
+   };
 
    return pars;
 }

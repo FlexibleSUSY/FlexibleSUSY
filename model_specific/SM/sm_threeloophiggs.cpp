@@ -96,7 +96,8 @@ double delta_mh_3loop_at_at_as_sm(
 
 /**
  * Standard Model Higgs self-energy 3-loop, \f$O(\alpha_t^3)\f$.
- * Taken from arxiv:1407.4336, Eq. (3.4).
+ * Taken from arxiv:1407.4336v3, Eq. (3.4), with the constants from
+ * Eqs. (3.9) and (3.10) (corrected in v3).
  *
  * @note The result contains the 3-loop tadpole diagrams.  It is
  * therefore not 1-particle irreducible (1PI).
@@ -121,8 +122,10 @@ double delta_mh_3loop_at_at_at_sm(
    const double LogT3 = LogT2*LogT;
 
    const double result =
-      yt6*mt2*(-3199.016554815089 + 36*LogH - 2653.510765697467*LogT
-               + 756*LogH*LogT + 27.*0.5*LogT2 + 324*LogH*LogT2 - 225*LogT3);
+      yt6 * mt2 *
+      (-3433.7235040695304 + 36 * LogH - 2437.5107656974666 * LogT +
+       756 * LogH * LogT - 513. * 0.5 * LogT2 + 324 * LogH * LogT2 -
+       333 * LogT3);
 
    return result * threeLoop;
 }

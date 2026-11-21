@@ -1,0 +1,100 @@
+#!/bin/sh
+
+# directory of this script
+BASEDIR=$(dirname $0)
+
+if [ -z "$2" ]; then
+   MODELNAME="SM"
+else
+   MODELNAME="$2"
+fi
+
+# absolute path to this script
+DIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
+
+setvariables() {
+   TEMPLATES=$(echo ${DIR}/${EXAMPLEDIR}/*hpp.in)
+   TEMPLATES=${TEMPLATES#"${DIR}/${EXAMPLEDIR}/"}
+   TEMPLATES=${TEMPLATES%.hpp.in}
+
+   META=$(echo ${DIR}/${EXAMPLEDIR}/*/)
+   META=${META#"${DIR}/${EXAMPLEDIR}/"}
+   META=${META%/}
+
+   FSMETA=${DIR}/../../meta/Observables/${META}
+}
+
+clean() {
+   setvariables
+
+   for FILE in ${DIR}/../../templates/observables/${TEMPLATES}.*.in; do
+      if [ -f ${FILE} ]; then
+         rm ${FILE}
+      fi
+   done
+
+   for FILE in ${DIR}/../../models/${MODELNAME}/observables/${MODELNAME}_${TEMPLATES}.*; do
+      if [ -f ${FILE} ]; then
+         rm ${FILE}
+      fi
+   done
+
+   if [ -d ${FSMETA} ]; then
+      rm -rf ${FSMETA}
+   fi
+}
+
+copythings(){
+   setvariables
+   cp ${DIR}/${EXAMPLEDIR}/${TEMPLATES}* ${DIR}/../../templates/observables
+   mkdir ${FSMETA}
+   cp ${DIR}/${EXAMPLEDIR}/${META}/*.m ${FSMETA}
+}
+
+cleanall() {
+   for _dir in ${DIR}/*; do
+      if [ -d ${_dir} ]; then
+         EXAMPLEDIR=$(echo ${_dir#"${DIR}/"})
+         clean
+      fi
+   done
+
+   sed -i "s/(\*RESTORE \(.*\)\*)/\1/g" ${DIR}/../../meta/NPointFunctions/Topologies.m
+   sed -i '/(\*REMOVE\*)/d' ${DIR}/../../meta/NPointFunctions/Topologies.m
+   sed -i '/(\*REMOVE\*)/d' ${DIR}/../../models/${MODELNAME}/FlexibleSUSY.m
+}
+
+# MAIN begin
+FSMODELDIR=${DIR}/../../models/${MODELNAME}/FlexibleSUSY.m
+cleanall
+case $1
+in
+   SM-example-1) EXAMPLEDIR=constant-observable
+              copythings
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleConstantObservable[3]},{2, FlexibleSUSYObservable`ExampleConstantObservable[4]}}}};' >> ${FSMODELDIR}
+              ;;
+   SM-example-2) EXAMPLEDIR=fermion-mass-observable
+              copythings
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}},{ExampleLeptonMass,{{1, FlexibleSUSYObservable`ExampleFermionMass[Fe@2]},{2, FlexibleSUSYObservable`ExampleFermionMass[Fd@2]}}}};' >> ${FSMODELDIR}
+              ;;
+   SM-example-3) EXAMPLEDIR=lepton-se
+              copythings
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`ExampleLeptonSE[Fe@1, {Sunsets}]}}}};' >> ${FSMODELDIR}
+              cd ${DIR}/../../meta/NPointFunctions
+              sed -i 's/End\[\];/(*RESTORE End\[\];*)/g' Topologies.m
+              sed -i 's/EndPackage\[\];/(*RESTORE EndPackage\[\];*)/g' Topologies.m
+              echo '(*REMOVE*)AllTopologies[{1, 1}] = {sunset->{1,0,0,1,0,2,0},tadpole->{1,0,1,0,0,1,1},fermi->{tadpole,sunset}};End[];EndPackage[];' >> Topologies.m
+              ;;
+   example-4) EXAMPLEDIR=post-processing
+              copythings
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`HiggsTo2Gluons[hh -> {VG, VG}, All]}}}};' >> ${FSMODELDIR}
+              ;;
+   example-5) EXAMPLEDIR=btosmumu
+              copythings
+              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Boxes}, 1]}}}};' >> ${FSMODELDIR}
+              ;;
+   clean-all) cleanall
+              ;;
+   *) exit 0;
+esac
+# MAIN end

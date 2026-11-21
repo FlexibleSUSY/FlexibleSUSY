@@ -20,23 +20,13 @@
 
 *)
 
-WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
-Global`time = AbsoluteTime[];
-Off[Susyno`LieGroups`dims];(*hide complainings from Susyno`LieGroups`dims*)
-Needs["FlexibleSUSY`"];
-
 (*INITIALIZATION***************************************************************)
-workingDirectory = Directory[];
-SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
-SARAH`SARAH[InputDirectories] =
-{
-   FileNameJoin@{workingDirectory, "sarah"},
-   ToFileName@{$sarahDir, "Models"}
-};
+Global`time = AbsoluteTime[];
+Get@"utils/load-FlexibleSUSY.m";
 
 Start@"SM";
 
-modelFile = FileNameJoin@{workingDirectory, "models", "SM", "FlexibleSUSY.m"};
+modelFile = FileNameJoin@{Directory[], "models", "SM", "FlexibleSUSY.m"};
 
 FlexibleSUSY`LoadModelFile@modelFile;
 FlexibleSUSY`Private`PrepareUnrotatedParticles@FSEigenstates;
@@ -53,7 +43,14 @@ hhSelfenergy = NPointFunctions`NPointFunction[
    {SARAH`HiggsBoson}, {SARAH`HiggsBoson},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
+   NPointFunctions`KeepProcesses -> {NPointFunctions`Irreducible},
+   NPointFunctions`LoopLevel -> 1,
+   NPointFunctions`Regularize -> FlexibleSUSY`FSRenormalizationScheme,
+   NPointFunctions`OnShellFlag -> True,
+   NPointFunctions`Observable -> None
+];
+
+hhSelfenergy = hhSelfenergy /. LoopTools`A0[args__] :> LoopTools`A0i[LoopTools`aa0, args];
 
 hhSelfenergyCode = NPointFunctions`CreateCXXFunctions[
    hhSelfenergy,
@@ -86,7 +83,7 @@ If[newVertices==={},
 
 (*CODE REPLACEMENTS************************************************************)
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
-   FileNameJoin@{workingDirectory, "test", "test_SM_npointfunctions.cpp.in"}],
+   FileNameJoin@{Directory[], "test", "test_SM_npointfunctions.cpp.in"}],
    "\n"];
 code = StringReplace[templateCode,
    {
@@ -96,7 +93,7 @@ code = StringReplace[templateCode,
    "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
    }];
 
-fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_SM_npointfunctions.cpp"};
+fileHandle = OpenWrite@FileNameJoin@{Directory[], "test", "test_SM_npointfunctions.cpp"};
 fileHandle ~ WriteString ~ code;
 Close@fileHandle;
 WriteString[OutputStream["stdout",1],#]&@StringJoin[

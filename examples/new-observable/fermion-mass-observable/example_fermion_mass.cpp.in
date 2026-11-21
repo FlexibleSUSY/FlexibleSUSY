@@ -1,0 +1,57 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+/**
+ * @file @ModelName@_@filename@.cpp
+ *
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
+ */
+
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "cxx_qft/@ModelName@_qft.hpp"
+#include "@ModelName@_@filename@.hpp"
+#include "error.hpp"
+
+namespace flexiblesusy {
+using namespace @ModelName@_cxx_diagrams;
+namespace @namespace@ {
+
+template <typename RTYPE, typename FIELD>
+auto forge(int idx, const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+   context_base context {model};
+   auto context_mass = context.mass<FIELD>({idx});
+
+   std::complex<double> lepton_mass;
+   switch (idx) {
+      case 0: lepton_mass = qedqcd.displayPoleMel();
+              break;
+      case 1: lepton_mass = qedqcd.displayPoleMmuon();
+              break;
+      case 2: lepton_mass = qedqcd.displayPoleMtau();
+              break;
+      default: throw OutOfBoundsError("fermion index out of bounds");
+   }
+   RTYPE res {context_mass, lepton_mass};
+   return res;
+}
+
+@calculate_definitions@
+
+} // namespace @namespace@
+} // namespace flexiblesusy

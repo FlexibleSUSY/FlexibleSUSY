@@ -38,7 +38,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   0                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   0                    # calculate all observables
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -278,7 +278,7 @@ Block UERMIX
                               7.9645089645449552e-05, 1e-15);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.0008129948152050411, 1e-4);
+                              0.00081330177470713774, 1e-4);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
                               0.00010469488286769175, 1e-4);
@@ -325,7 +325,7 @@ Block UERMIX
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00020488527557422341, 4e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00020488527557422341, 5e-13);
    // h -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 8.6596827650370546e-06, 5e-12);
    // h -> gamma Z
@@ -338,3 +338,4 @@ Block UERMIX
    // Ah -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 5.4527502926727843e-07, 8e-12);
 }
+

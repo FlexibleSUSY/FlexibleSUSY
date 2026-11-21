@@ -231,9 +231,8 @@ ParticleTypeAsString[part_] := Module[
 ];
 
 (** \brief Creates c++ code that makes all fields and their properties
- * available as c++ types. Also creates two using declarations for
- * the following fields:
- * - Photon
+ * available as c++ types. Also creates one using declaration for
+ * the following field:
  * - Electron
  * Furthermore create the necessary boilerplate code to conjugate any
  * given c++ field as well as convenience `boost::mpl::vector<>`
@@ -256,7 +255,7 @@ ParticleColorRepAsString[part_] :=
       ]
    ];
 
-CreateFields[] :=
+CreateFields[potentialLSPParticles_List] :=
   Module[{fields, scalars, fermions, vectors, ghosts},
        fields = TreeMasses`GetParticles[];
        scalars = Select[fields, TreeMasses`IsScalar];
@@ -268,8 +267,8 @@ CreateFields[] :=
        StringRiffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
-              "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
-              "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
+              "static constexpr auto particleType = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
+              "static constexpr auto colorRep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
               "static constexpr auto massless = " <> CConversion`CreateCBoolValue @ TreeMasses`IsMassless[#] <> ";\n" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
@@ -290,14 +289,16 @@ CreateFields[] :=
                    ] <> ">;\n" <>
               "static constexpr int numberOfFieldIndices = " <>
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
-              "static constexpr double electric_charge = " <>
+              "static constexpr double electricCharge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
+              "static constexpr auto pdgids = boost::hana::make_tuple(" <>
+                   (* in SARAH particles.m PDG is sometimes a list of integers, and sometimes just an integer *)
+                   ToString@If[IntegerQ[SARAH`getPDGList[#]], SARAH`getPDGList[#], StringRiffle[SARAH`getPDGList[#], ","]] <> ");\n" <>
               "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
-              "};" &) /@ fields, "\n\n"] <> "\n\n" <>
+              "};")& /@ fields, "\n\n"] <> "\n\n" <>
 
        "// Named fields\n" <>
-       "using Photon = " <> CXXNameOfField[SARAH`Photon] <> ";\n" <>
        "using Electron = " <> CXXNameOfField[AtomHead @ TreeMasses`GetSMElectronLepton[]] <> ";\n\n" <>
 
        "using scalars = boost::mpl::vector<" <>
@@ -307,7 +308,8 @@ CreateFields[] :=
        "using vectors = boost::mpl::vector<" <>
          StringRiffle[CXXNameOfField /@ vectors, ", "] <> ">;\n" <>
        "using ghosts = boost::mpl::vector<" <>
-         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;",
+         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;\n" <>
+       "using potentialLSPparticles = boost::mpl::vector<" <> StringRiffle[CXXNameOfField /@ potentialLSPParticles, ", "] <> ">;",
        "// Fields that are their own Lorentz conjugates.\n" <>
        StringRiffle[
          ("template<> struct " <> LorentzConjugateOperation[#] <> "<" <> CXXNameOfField[#, prefixNamespace -> "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">" <>
@@ -403,7 +405,7 @@ FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List, bothLoopOrientat
 	Utils`AssertWithMessage[adjacencyMatrix === Transpose[adjacencyMatrix],
 		"CXXDiagrams`FeynmanDiagramsOfType[]: The given adjacency matrix is \
 not symmetric"];
-	LoadVerticesIfNecessary[];
+	Vertices`LoadVerticesIfNecessary[];
 
 	internalVertices = Complement[Table[k,{k,Length[adjacencyMatrix]}],externalVertices];
 	externalRules = Flatten @ ({{_,#,_} :> (# /. externalFields)} & /@
@@ -772,7 +774,7 @@ SortedVertex[fields_List, OptionsPattern[{ApplyGUTNormalization -> False}]] :=
 	Module[{sortedFields, indexedSortedFields, vertexList, vertex, types,
 			similarVertexList, similarVertex, fieldReplacementRules,
 			indexReplacementRules},
-    LoadVerticesIfNecessary[];
+    Vertices`LoadVerticesIfNecessary[];
 	 sortedFields = Vertices`SortFieldsInCp[fields];
 
     vertexList = Switch[Length[fields],
@@ -1236,25 +1238,27 @@ Module[{cxxVertices, vertexPartition,
          ,
          DistributedContexts->None
       ];
-      cxxVertices =
-         AbsoluteTiming@ParallelMap[
-            CreateVertex,
-            DeleteDuplicates[vertices]
-         ];
+      Off[Part::pkspec1];
+      cxxVertices = AbsoluteTiming@ParallelMap[
+         CreateVertex,
+         DeleteDuplicates[vertices]
+      ];
+      On[Part::pkspec1];
       Needs["Parallel`Developer`"];
       Parallel`Developer`ClearDistributedDefinitions[];
       Parallel`Developer`ClearKernels[];
       CloseKernels[]
       ,
-      cxxVertices =
-         AbsoluteTiming@Map[
-            CreateVertex,
-            DeleteDuplicates[vertices]
-         ],
+      Off[Part::pkspec1];
+      cxxVertices = AbsoluteTiming@Map[
+         CreateVertex,
+         DeleteDuplicates[vertices]
+      ];
+      On[Part::pkspec1];,
       Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
    ];
    Print[""];
-   Print["The creation of C++ vertices took ", Round[First@cxxVertices, 0.1], "s"];
+   Print["The creation of C++ vertices took", FSRound[First@cxxVertices, 1], "s"];
    cxxVertices = Last@cxxVertices;
 
    (* Mathematica 7 does not support the `UpTo[n]` notation *)
@@ -1298,13 +1302,15 @@ CreateVertex[fields_List] :=
 				VertexFunctionBodyForFields[fields] <> "\n"] <>
 		"}"
 		}
-  ]
+  ];
 
 (** \brief Returns the Lorentz structure of a given vertex.
+ * The result is remembered: the decays ask for the same vertices in
+ * thousands of diagrams.
  * param fields a vertex given as a list of fields
  * \returns the Lorentz structure of a given vertex.
  **)
-VertexTypeForFields[fields_List] :=
+VertexTypeForFields[fields_List] := VertexTypeForFields[fields] =
 	AtomHead[GaugeStructureOfVertex[SortedVertex[fields]][[3]]];
 
 (** \brief Creates the c++ code containing the actual numerical
@@ -1626,19 +1632,6 @@ IndexBoundsForField[field_] :=
        Transpose[Prepend[
          {1,#[[2]]} & /@ DeleteCases[fieldInfo[[5]],{SARAH`generation,_}],
          {fieldInfo[[2]],fieldInfo[[3]]}]]]]
-
-(** \brief If the SARAH vertices are not yet available, force SARAH to
- * reread its vertex files.
- **)
-LoadVerticesIfNecessary[] :=
-   If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
-        SA`CurrentStates = FlexibleSUSY`FSEigenstates;
-        SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
-        SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
-        SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
-        SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
-        SARAH`MakeCouplingLists;
-   ]
 
 (** \brief Remove any Lorentz and colour indices of a given field
  * \param p the given field

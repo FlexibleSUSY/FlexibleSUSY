@@ -24,7 +24,7 @@
 #include "@ModelName@_two_scale_high_scale_constraint.hpp"
 #include "@ModelName@_two_scale_susy_scale_constraint.hpp"
 #include "@ModelName@_standard_model_matching.hpp"
-#include "@ModelName@_standard_model_two_scale_matching.hpp"
+#include "@ModelName@_standard_model_two_scale_matching_interface.hpp"
 #include "standard_model_two_scale_convergence_tester.hpp"
 #include "standard_model_two_scale_low_scale_constraint.hpp"
 

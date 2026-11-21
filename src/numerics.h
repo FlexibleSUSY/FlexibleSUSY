@@ -32,6 +32,7 @@ namespace softsusy {
 
 double a0(double m, double q) noexcept;
 double b0(double p, double m1, double m2, double q) noexcept;
+double db0(double p2, double m2a, double m2b) noexcept;
 double b1(double p, double m1, double m2, double q) noexcept;
 double b22(double p,  double m1, double m2, double q) noexcept;
 double c0(double m1, double m2, double m3) noexcept;

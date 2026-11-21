@@ -93,7 +93,7 @@ threshold corrections in FlexibleSUSY.
 EWSB scale
 ``````````
 
-The Higgs and W boson pole masses, :math:`M_h` and :math:`M_Z` are
+The Higgs and W boson pole masses, :math:`M_h` and :math:`M_W` are
 calculated at the scale :math:`M_{\text{EWSB}}`, which is an input
 parameter.  We recommend to set :math:`M_{\text{EWSB}} = M_t`.
 
@@ -189,7 +189,7 @@ an SLHA input file we recommend to use::
        12   0            # force output
        13   3            # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
        14   1.0e-11      # beta-function zero threshold
-       15   0            # calculate observables (a_muon, ...)
+       15   0            # calculate all observables
        16   0            # force positive majorana masses
        17   0            # pole mass renormalization scale (0 = SUSY scale)
        18   0            # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))

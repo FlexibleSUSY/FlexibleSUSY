@@ -53,9 +53,6 @@ double calc_mw_SM(double mh)
 
 BOOST_AUTO_TEST_CASE( test_decoupling )
 {
-   double mw1, mw2, mw5, mw10;
-   double mh1, mh2, mh5, mh10;
-
    CMSSM_input_parameters input;
    input.TanBeta = 10.;
    input.SignMu  = 1;
@@ -63,19 +60,19 @@ BOOST_AUTO_TEST_CASE( test_decoupling )
 
    input.m0  = 1000.;
    input.m12 = 1000.;
-   std::tie(mw1, mh1) = calc_mw_mh_CMSSM(input);
+   const auto [mw1, mh1] = calc_mw_mh_CMSSM(input);
 
    input.m0  = 2000.;
    input.m12 = 2000.;
-   std::tie(mw2, mh2) = calc_mw_mh_CMSSM(input);
+   const auto [mw2, mh2] = calc_mw_mh_CMSSM(input);
 
    input.m0  = 5000.;
    input.m12 = 5000.;
-   std::tie(mw5, mh5) = calc_mw_mh_CMSSM(input);
+   const auto [mw5, mh5] = calc_mw_mh_CMSSM(input);
 
    input.m0  = 10000.;
    input.m12 = 10000.;
-   std::tie(mw10, mh10) = calc_mw_mh_CMSSM(input);
+   const auto [mw10, mh10] = calc_mw_mh_CMSSM(input);
 
    BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 1.0e-5);
    BOOST_CHECK_CLOSE_FRACTION(mw1, calc_mw_SM(mh1), 1.0e-4);

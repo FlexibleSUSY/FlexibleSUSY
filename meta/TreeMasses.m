@@ -1956,13 +1956,13 @@ GetSMVEVExpr[symbIfUndefined_:Undefined] :=
               If[vexp === {},
                  If[Parameters`IsParameter[SARAH`VEVSM],
                     SARAH`VEVSM,
-                    DebugPrint["Warning: SM-like Higgs vev is not define in the SARAH model file!"];
+                    FSDebugPrint["TreeMasses", "Warning: SM-like Higgs vev is not define in the SARAH model file!"];
                     symbIfUndefined]
                  ,
                  First[vexp]
               ]
               ,
-              DebugPrint["Warning: SM-like Higgs vev is not define in the SARAH model file!"];
+              FSDebugPrint["TreeMasses", "Warning: SM-like Higgs vev is not define in the SARAH model file!"];
               symbIfUndefined
            ]
     ];
@@ -2143,7 +2143,7 @@ NiceGenNum[gen_] :=
 
 CreateGenerationHelperFunction[gen_, fermion_] :=
     Module[{},
-           Print["Error: ", fermion, " does not seem to be a", gen, "th"
+           Print["Error: ", fermion, " does not seem to be a ", NiceGenNum[gen],
                  " generation SM fermion."];
            "void CLASSNAME::calculate_" <>
            CConversion`ToValidCSymbolString[FlexibleSUSY`M[fermion]] <>

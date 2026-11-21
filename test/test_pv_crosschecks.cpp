@@ -190,11 +190,15 @@ void generate_points(map<string, LoopFunc<T, U>*>& funcs, size_t n)
 	    if (args.size() > 1) args[i++] = random_p2<T, U>(order);
 	    for (; i < args.size(); i++) args[i] = random_m2<T, U>(order);
 	    double s2 = random_m2<double, double>(order);
+	    // FF writes its banner and warnings to stdout, so the value
+	    // must be calculated before writing the point and the point
+	    // must be flushed to keep it from being split by FF's output
+	    const U value = f->second->eval(args, s2);
 	    cout << "CHECK " << f->first;
 	    for (size_t i = 0; i < args.size(); i++)
 		cout << ' ' << args[i];
 	    cout << ' ' << s2;
-	    cout << ' ' << f->second->eval(args, s2) << '\n';
+	    cout << ' ' << value << endl;
 	}
     }
 }
@@ -220,9 +224,23 @@ template<>
 void check_close_fraction<complex<double> >
 (complex<double> a, complex<double> b, double tol, double)
 {
-    double scale = sqrt(norm(a) + norm(b));
-    check_close_fraction(a.real(), b.real(), tol, scale);
-    check_close_fraction(a.imag(), b.imag(), tol, scale);
+    // Compare the complex numbers as a whole.  Comparing real and
+    // imaginary parts separately would turn rounding errors in a part
+    // that is negligible w.r.t. the other one into large differences.
+    const double scale = max(abs(a), abs(b));
+    if (scale != 0) {
+       BOOST_CHECK_SMALL(abs(a - b) / scale, tol);
+    }
+}
+
+// returns true if the line is a point for a function from the given list
+template<class T, class U>
+bool is_point_for(const map<string, LoopFunc<T, U>*>& funcs, const string& line)
+{
+    istringstream ls(line);
+    string word, name;
+    ls >> word >> name;
+    return word == "CHECK" && funcs.find(name) != funcs.end();
 }
 
 template<class T, class U>
@@ -267,11 +285,19 @@ BOOST_AUTO_TEST_CASE(fflite_generate_points)
 
 BOOST_AUTO_TEST_CASE(looptools_check_points)
 {
+   static constexpr double tol = 1e-9;
    string line;
-   while (getline(cin, line))
-      check_point(rrfuncs, line, 1e-15) ||
-      check_point(rcfuncs, line, 1e-15) ||
-      check_point(ccfuncs, line, 1e-15);
+   while (getline(cin, line)) {
+      const bool checked =
+         check_point(rrfuncs, line, tol) ||
+         check_point(rcfuncs, line, tol) ||
+         check_point(ccfuncs, line, tol);
+      if (!checked && (is_point_for(rrfuncs, line) ||
+                       is_point_for(rcfuncs, line) ||
+                       is_point_for(ccfuncs, line))) {
+         BOOST_ERROR("could not read point: " + line);
+      }
+   }
 }
 
 #else
@@ -279,8 +305,11 @@ BOOST_AUTO_TEST_CASE(looptools_check_points)
 BOOST_AUTO_TEST_CASE(softsusy_check_points)
 {
     string line;
-    while (getline(cin, line))
-	check_point(rrfuncs, line, 3e-7);
+    while (getline(cin, line)) {
+	if (!check_point(rrfuncs, line, 3e-7) && is_point_for(rrfuncs, line)) {
+	    BOOST_ERROR("could not read point: " + line);
+	}
+    }
 }
 
 #endif

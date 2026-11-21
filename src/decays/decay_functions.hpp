@@ -20,14 +20,14 @@
 #define DECAY_FUNCTIONS_H
 
 #include <complex>
-#include "src/lowe.h"
+#include "lowe.h"
 #include "flexibledecay_settings.hpp"
-#include "src/wrappers.hpp"
+#include "wrappers.hpp"
 
 namespace flexiblesusy {
 
 // Eq.(2.6) of hep-ph/0503173
-double calc_DeltaAH(double b) noexcept;
+double calc_DeltaAh(double b) noexcept;
 
 /// Eq.(2.6) of hep-ph/0503173
 double calc_DeltaH(double b) noexcept;
@@ -44,7 +44,7 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
 // eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
 std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept;
 
-std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAH, double msq, double mu) noexcept;
+std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAh, double msq, double mu) noexcept;
 
 /* 2-loop QCD corrections to H->gamma gamma amplitude through scalar color triplet loop
  * from hep-ph/0611266 */
@@ -59,6 +59,7 @@ std::complex<double> f(double x) noexcept;
 unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexcept;
 
 static constexpr double deltaqq_QCDxQED = 691/24. - 6*zeta3 - Sqr(Pi);
+
 } // namespace flexiblesusy
 
 #endif

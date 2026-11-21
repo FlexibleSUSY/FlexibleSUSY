@@ -1,0 +1,75 @@
+Block FlexibleSUSY
+    0   1.000000000e-04      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
+    3   1                    # calculate SM pole masses
+    4   2                    # pole mass loop order
+    5   2                    # EWSB loop order
+    6   2                    # beta-functions loop order
+    7   2                    # threshold corrections loop order
+    8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
+   13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
+   14   1.000000000e-11      # beta-function zero threshold
+   15   0                    # calculate observables (a_muon, ...)
+   16   0                    # force positive majorana masses
+   17   0                    # pole mass renormalization scale (0 = SUSY scale)
+   18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
+   19   0                    # EFT matching scale (0 = SUSY scale)
+   20   2                    # EFT loop order for upwards matching
+   21   1                    # EFT loop order for downwards matching
+   22   1                    # EFT index of SM-like Higgs in the BSM model
+BLOCK SMINPUTS
+    1   128.962
+    2   0.000011663900000000002
+    3   0.1172
+    4   91.1876
+    5   4.2
+    6   172.9
+    7   1.777
+    9   80.385
+   11   0.00051099891
+   13   1.10565836
+   21   0.00495
+   22   0.0025
+   23   0.1
+   24   1.42
+Block MINPAR                 # Input parameters
+    4   1                    # SignMu
+Block EXTPAR
+    0   1000                 # Ms
+    1   200                  # M1(MSUSY)
+    2   400                  # M2(MSUSY)
+    3   2000                 # M3(MSUSY)
+    4   200                  # Mu(MSUSY) CHECK factor SQRT[2]
+   25   3                    # tan(beta) at Ms
+   61   0.67                 # Lambda
+   62   0.1                  # Kappa
+   63   650                  # ALambda
+   64  -10                   # AKappa
+Block MSQ2IN
+  1  1     2250000          # mq2(1,1)
+  2  2     2250000          # mq2(2,2)
+  3  3     1.00000000E+06   # mq2(3,3)
+Block MSE2IN
+  1  1     2250000          # me2(1,1)
+  2  2     2250000          # me2(2,2)
+  3  3     2250000          # me2(3,3)
+Block MSL2IN
+  1  1     2250000          # ml2(1,1)
+  2  2     2250000          # ml2(2,2)
+  3  3     2250000          # ml2(3,3)
+Block MSU2IN
+  1  1     2250000          # mu2(1,1)
+  2  2     2250000          # mu2(2,2)
+  3  3     1.00000000E+06   # mu2(3,3)
+Block MSD2IN
+  1  1     2250000          # md2(1,1)
+  2  2     2250000          # md2(2,2)
+  3  3     2250000          # md2(3,3)
+Block AUIN
+  3  3     1000             # Au(3,3)
+Block ADIN
+  3  3     1000             # Ad(3,3)

@@ -84,7 +84,8 @@ model_files/TensorCoupling      export-ignore
 model_files/THDMIIMSSMBCApprox  export-ignore
 model_files/THDMIIEWSBAtMZSemiAnalytic export-ignore
 model_files/HGTHDMIIMSSMBCApprox export-ignore
-model_files/SMtower             export-ignore
+model_files/SMEFTHiggs          export-ignore
+model_files/SMEFTHiggsTopDown   export-ignore
 
 models/fmssm                    export-ignore
 models/fmssmn                   export-ignore

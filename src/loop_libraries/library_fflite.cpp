@@ -83,6 +83,7 @@ std::complex<double> Fflite::B00(B_ARGS) noexcept
    return cb2i[1];
 }
 
+BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (DB_ARGS), DB_SEQ)
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (C_ARGS), C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (D_ARGS), D_SEQ)
 
@@ -96,6 +97,11 @@ void Fflite::B(Bcoeff_t& b, B_ARGS) noexcept
    b.at(0) = B0(p10_in, m02_in, m12_in, scl2_in);
    b.at(1) = B1(p10_in, m02_in, m12_in, scl2_in);
    b.at(2) = B00(p10_in, m02_in, m12_in, scl2_in);
+}
+
+void Fflite::DB(DBcoeff_t& db, DB_ARGS) noexcept
+{
+   BOOST_PP_REPEAT(DB_N, SET_TO_NAN, db)
 }
 
 void Fflite::C(Ccoeff_t& c, C_ARGS) noexcept

@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef FS_LI4_H
-#define FS_LI4_H
+#ifndef LI4_H
+#define LI4_H
 
 #include <complex>
 

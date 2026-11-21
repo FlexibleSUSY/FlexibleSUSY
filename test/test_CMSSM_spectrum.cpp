@@ -185,6 +185,7 @@ public:
       low_constraint->apply();
       mssm.run_to(susy_constraint->get_scale());
       mssm.solve_ewsb();
+      mssm.do_calculate_sm_pole_masses(true);
       mssm.calculate_spectrum();
       mssm.run_to(Electroweak_constants::MZ);
 
@@ -395,6 +396,10 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_spectrum )
    const double mA0_1l  = ss.displayPhys().mA0(1);
    const double mh0_1l  = ss.displayPhys().mh0(1);
    const double mH0_1l  = ss.displayPhys().mh0(2);
+
+   // gauge bosons
+   BOOST_CHECK_CLOSE_FRACTION(fs.get_physical().MVWm, ss.displayMw(), 4e-4);
+   BOOST_CHECK_CLOSE_FRACTION(fs.get_physical().MVZ,  sqrt(ss.displayPredMzSq()), 7e-4);
 
    // charginos
    BOOST_CHECK_CLOSE_FRACTION(MCha_1l(1), mch_1l(1), 0.0011);

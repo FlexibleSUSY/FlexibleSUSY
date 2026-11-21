@@ -28,7 +28,7 @@ FlexibleSUSY configuration block (FlexibleSUSY)
        12   0         # force output
        13   3         # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)
        14   1.0e-11   # beta-function zero threshold
-       15   0         # calculate observables (a_muon, effective couplings)
+       15   0         # calculate all observables
        16   0         # force positive majorana masses
        17   0         # pole mass scale
        18   0         # pole mass scale in the EFT (0 = min(SUSY scale, Mt))
@@ -45,6 +45,7 @@ FlexibleSUSY configuration block (FlexibleSUSY)
        29   1         # Higgs 3-loop corrections O(alpha_t^3)
        30   1         # Higgs 4-loop corrections O(alpha_t alpha_s^3)
        31   0         # Loop library to use (0 = softsusy, 1 = COLLIER, 2 = LoopTools, 3 = fflite)
+       32   2         # anomalous magnetic moments (0 = no, 1 = 1L, 1.5 = 1L + 2L QED logs, 2 = 1L + 2L QED logs + 2L Barr-Zee)
 
 **Description**:
 
@@ -88,6 +89,7 @@ or the loop order of the pole mass calculation can be selected.
  29      higgs 3-loop correction O(at^3)          0, 1                                                  1 (= enabled)
  30      higgs 4-loop correction O(at as^3)       0, 1                                                  1 (= enabled)
  31      Loop library to use                      0 (softsusy), 1 (COLLIER), 2 (LoopTools), 3 (fflite)  0 (= softsusy)
+ 32      anomalous magnetic moments               0 (no), 1 (1L), 1.5 (+ 2L QED), 2 (+ 2L Barr-Zee)     2 (= 1L + 2L QED + 2L Barr-Zee)
 ======= ======================================== ===================================================== ======================================
 
 Precision goal (``FlexibleSUSY[0]``)
@@ -574,14 +576,14 @@ loop Passarino-Veltman integrals via the following command::
 Where ``<desired libraries>`` is a list of comma separated names for desired libraries.
 Currently the following set is available for usage:
 
-======= =========== =========== ============== =================================
+======= =========== ============ ============== ============================================
  index   name        library     thread-safety   commentary
-======= =========== =========== ============== =================================
-  0      softsusy    SOFTSUSY_   yes            default value; always enabled
-  1      collier     COLLIER_    no             optional; see **specific** below
-  2      looptools   LoopTools_  no             optional; see **specific** below
-  3      fflite      FFlite      yes            optional; build in; see **specific** below
-======= =========== =========== ============== =================================
+======= =========== ============ ============== ============================================
+  0      softsusy    SOFTSUSY_    yes            default value; always enabled
+  1      collier     COLLIER_     no             optional; see **specific** below
+  2      looptools   LoopTools_   no             optional; see **specific** below
+  3      fflite      FFlite       yes            optional; build in; see **specific** below
+======= =========== ============ ============== ============================================
 
 If the entry ``FlexibleSUSY[31]`` is absent, the loop functions from
 SOFTSUSY are used.  If the entry ``FlexibleSUSY[31]`` is set to
@@ -614,6 +616,20 @@ As a replacement of ``--with-loop-libraries=<libraries and looptools>`` one can 
 To use fflite library one can also (as a replacement of ``--with-loop-libraries=<libraries and fflite>``) use::
 
     ./configure --with-loop-libraries=<libraries> --enable-fflite
+
+Anomalous magnetic moments (``FlexibleSUSY[32]``)
+`````````````````````````````````````````````````
+
+Loop order of the anomalous magnetic moments of the leptons,
+calculated if the model file requests them as observables:
+
+- ``0``: not calculated,
+- ``1``: 1-loop contributions,
+- ``1.5``: in addition the 2-loop QED logarithms,
+- ``2``: in addition the 2-loop Barr-Zee contributions (default).
+
+The contributions that are not included enter the estimate of the
+theory uncertainty.
 
 
 Additional physical input parameters (FlexibleSUSYInput)

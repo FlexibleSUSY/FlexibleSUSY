@@ -52,6 +52,15 @@
                               BOOST_PP_SEQ_FOR_EACH(REAL, , LT_ARGS(PAIR)));   \
    }
 
+#define LT_ONE_DERIVATIVE(_, PAIR, I, INDEX)                                              \
+   std::complex<double> Looptools::CAT(D, LIB_NAME(PAIR, INDEX))(LIB_ARGS(PAIR)) noexcept    \
+   {                                                                           \
+      set_mu2_uv(scl2_in);                                                     \
+      return LT_NAME(PAIR)(CAT(CAT(d, LT(PAIR)), INDEX)                                 \
+                              BOOST_PP_SEQ_FOR_EACH(REAL, , LT_ARGS(PAIR)));   \
+   } \
+
+
 #define LT_ALL(PAIR)                                                           \
    void Looptools::LIB(PAIR)(CAT(LIB(PAIR), coeff_t) & \
                                 arr,                                           \
@@ -65,6 +74,23 @@
       CAT(LIB(PAIR), put)                                                      \
       (res BOOST_PP_SEQ_FOR_EACH(REAL, , CAT(LIB(PAIR), _ARGS_SEQ)));          \
       for (int i = 0; i < CAT(LIB(PAIR), _N); ++i) {                           \
+         arr.at(i) = res[coeffs[i]];                                           \
+      }                                                                        \
+   }
+
+#define LT_ALL_DERIVATIVE(PAIR)                                                           \
+   void Looptools::CAT(D, LIB(PAIR))(CAT(LIB(PAIR), coeff_t) & \
+                                arr,                                           \
+                             CAT(LIB(PAIR), _ARGS)) noexcept                   \
+   {                                                                           \
+      const int coeffs[] = {BOOST_PP_SEQ_ENUM(                                 \
+         BOOST_PP_SEQ_TRANSFORM(APPEND, CAT(d, LT(PAIR)), CAT(LIB(PAIR), _CSEQ)))};    \
+      ComplexType res[CAT(N, LT(PAIR))];                                       \
+      set_mu2_uv(scl2_in);                                                     \
+                                                                               \
+      CAT(LIB(PAIR), put)                                                      \
+      (res BOOST_PP_SEQ_FOR_EACH(REAL, , CAT(LIB(PAIR), _ARGS_SEQ)));          \
+      for (int i = 0; i < CAT(CAT(D, LIB(PAIR)), _N); ++i) {                           \
          arr.at(i) = res[coeffs[i]];                                           \
       }                                                                        \
    }
@@ -93,11 +119,13 @@ void Looptools::set_mu2_uv(double scl2_in) noexcept
 
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, A_PAIR, A_CSEQ)
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, B_PAIR, B_CSEQ)
+BOOST_PP_SEQ_FOR_EACH_I(LT_ONE_DERIVATIVE, B_PAIR, DB_CSEQ)
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, C_PAIR, C_CSEQ)
 BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, D_PAIR, D_CSEQ)
 
 LT_ALL(A_PAIR)
 LT_ALL(B_PAIR)
+LT_ALL_DERIVATIVE(B_PAIR)
 LT_ALL(C_PAIR)
 LT_ALL(D_PAIR)
 

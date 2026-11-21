@@ -44,12 +44,14 @@
 #include "sm_threeloophiggs.hpp"
 #include "sm_fourloophiggs.hpp"
 #include "sm_fourloop_as.hpp"
+#include "sm_mw.hpp"
 
 #include <cmath>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <algorithm>
+#include <optional>
 
 namespace flexiblesusy {
 
@@ -102,6 +104,102 @@ namespace standard_model_info {
       "Re(Ue(2,2))", "Im(Ue(2,2))"};
 
    const std::string model_name = "SM";
+
+int get_pdg_code_for_particle(Particles p)
+{
+   if (particle_multiplicities[p] > 1) {
+      throw OutOfBoundsError(particle_names[p] + " must have a generation index");
+   }
+
+   int pdg = 0;
+   switch (p) {
+
+   case VG: pdg = 21; break;
+   case Hp: pdg = 0; break;
+   case Ah: pdg = 0; break;
+   case hh: pdg = 25; break;
+   case VWp: pdg = 24; break;
+   case VP: pdg = 22; break;
+   case VZ: pdg = 23; break;
+
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   return pdg;
+}
+
+int get_pdg_code_for_particle(Particles p, int index)
+{
+   if (particle_multiplicities[p] == 1) {
+      throw OutOfBoundsError(particle_names[p] + " does not carry an index");
+   }
+
+   std::vector<int> pdg_codes;
+   switch (p) {
+
+   case Fv: pdg_codes = {12, 14, 16}; break;
+   case Fd: pdg_codes = {1, 3, 5}; break;
+   case Fu: pdg_codes = {2, 4, 6}; break;
+   case Fe: pdg_codes = {11, 13, 15}; break;
+
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   if (index < 0 || index >= pdg_codes.size()) {
+      throw OutOfBoundsError("index " + std::to_string(index) + " out of bounds");
+   }
+
+   return pdg_codes[index];
+}
+
+std::pair<std::string, std::optional<unsigned int>> get_multiplet_and_index_from_pdg(int pdg)
+{
+   std::pair<std::string, std::optional<unsigned int>> name;
+
+   switch (pdg) {
+
+   case 21: name = {"VG", {}}; break;
+   case 12: name = {"Fv", 1}; break;
+   case 14: name = {"Fv", 2}; break;
+   case 16: name = {"Fv", 3}; break;
+   case 25: name = {"hh", {}}; break;
+   case 1: name = {"Fd", 1}; break;
+   case 3: name = {"Fd", 2}; break;
+   case 5: name = {"Fd", 3}; break;
+   case 2: name = {"Fu", 1}; break;
+   case 4: name = {"Fu", 2}; break;
+   case 6: name = {"Fu", 3}; break;
+   case 11: name = {"Fe", 1}; break;
+   case 13: name = {"Fe", 2}; break;
+   case 15: name = {"Fe", 3}; break;
+   case 24: name = {"VWp", {}}; break;
+   case 22: name = {"VP", {}}; break;
+   case 23: name = {"VZ", {}}; break;
+   case -12: name = {"barFv", 1}; break;
+   case -14: name = {"barFv", 2}; break;
+   case -16: name = {"barFv", 3}; break;
+   case -1: name = {"barFd", 1}; break;
+   case -3: name = {"barFd", 2}; break;
+   case -5: name = {"barFd", 3}; break;
+   case -2: name = {"barFu", 1}; break;
+   case -4: name = {"barFu", 2}; break;
+   case -6: name = {"barFu", 3}; break;
+   case -11: name = {"barFe", 1}; break;
+   case -13: name = {"barFe", 2}; break;
+   case -15: name = {"barFe", 3}; break;
+   case -24: name = {"conjVWp", {}}; break;
+
+   default: name = {"", {}};
+   }
+
+   return name;
+}
+
+std::string get_particle_name_from_pdg(int pdg)
+{
+   std::pair<std::string, std::optional<unsigned int>> const pair = get_multiplet_and_index_from_pdg(pdg);
+   return pair.first + (pair.second.has_value() ? "(" + std::to_string(pair.second.value()) + ")" : "");
+}
 
 void print(std::ostream& ostr)
 {
@@ -158,7 +256,7 @@ const int Standard_model::numberOfParameters;
 Standard_model::Standard_model()
 {
    set_number_of_parameters(numberOfParameters);
-   set_thresholds(3);
+   set_thresholds(4);
 }
 
 Standard_model::Standard_model(double scale_, double loops_, double thresholds_
@@ -419,8 +517,9 @@ int Standard_model::solve_ewsb()
 {
    VERBOSE_MSG("\t\tSolving Standard model EWSB at " << ewsb_loop_order << "-loop order");
 
-   if (ewsb_loop_order == 0)
+   if (ewsb_loop_order == 0) {
       return solve_ewsb_tree_level();
+   }
 
    return solve_ewsb_iteratively(ewsb_loop_order);
 }
@@ -603,20 +702,19 @@ void Standard_model::calculate_DRbar_masses()
 void Standard_model::calculate_pole_masses()
 {
 #ifdef ENABLE_THREADS
-   Thread_pool tp(std::min(std::thread::hardware_concurrency(), 9u));
+   {
+      Thread_pool tp(std::min(std::thread::hardware_concurrency(), 9u));
 
-   tp.run_task([this] () { calculate_MVG_pole(); });
-   tp.run_task([this] () { calculate_MFv_pole(); });
-   tp.run_task([this] () { calculate_Mhh_pole(); });
-   tp.run_task([this] () { calculate_MVP_pole(); });
-   tp.run_task([this] () { calculate_MVZ_pole(); });
-   tp.run_task([this] () { calculate_MFd_pole(); });
-   tp.run_task([this] () { calculate_MFu_pole(); });
-   tp.run_task([this] () { calculate_MFe_pole(); });
-   tp.run_task([this] () { calculate_MVWp_pole(); });
-
+      tp.run_task([this] () { calculate_MVG_pole(); });
+      tp.run_task([this] () { calculate_MFv_pole(); });
+      tp.run_task([this] () { calculate_Mhh_pole(); });
+      tp.run_task([this] () { calculate_MVP_pole(); });
+      tp.run_task([this] () { calculate_MVZ_pole(); });
+      tp.run_task([this] () { calculate_MFd_pole(); });
+      tp.run_task([this] () { calculate_MFu_pole(); });
+      tp.run_task([this] () { calculate_MFe_pole(); });
+   }
 #else
-
    calculate_MVG_pole();
    calculate_MFv_pole();
    calculate_Mhh_pole();
@@ -625,9 +723,18 @@ void Standard_model::calculate_pole_masses()
    calculate_MFd_pole();
    calculate_MFu_pole();
    calculate_MFe_pole();
-   calculate_MVWp_pole();
-
 #endif
+
+   // If mW == 0 it means that the SM was not initialized via matching to the SM.
+   // -> Compute mW using an ordinary 1-loop calculation.
+   if (PHYSICAL(MVWp) == 0. || this->get_physical().Mhh == 0.) {
+      calculate_MVWp_pole();
+   }
+   // If mW != 0 it means it was computed as part of the matching to the SM.
+   // -> Recompute it with the predicted value of mh_pole.
+   else {
+      calculate_MVWp_pole_fit(this->get_physical().Mhh);
+   }
 }
 
 void Standard_model::copy_DRbar_masses_to_pole_masses()
@@ -651,7 +758,6 @@ void Standard_model::copy_DRbar_masses_to_pole_masses()
    PHYSICAL(MVWp) = MVWp;
    PHYSICAL(MVPVZ) = MVPVZ;
    PHYSICAL(ZZ) = ZZ;
-
 }
 
 /**
@@ -660,7 +766,6 @@ void Standard_model::copy_DRbar_masses_to_pole_masses()
 void Standard_model::check_pole_masses_for_tachyons()
 {
    if (PHYSICAL(Mhh) < 0.) problems.flag_pole_tachyon(standard_model_info::hh);
-
 }
 
 /**
@@ -670,8 +775,10 @@ void Standard_model::check_pole_masses_for_tachyons()
 void Standard_model::calculate_spectrum()
 {
    calculate_DRbar_masses();
-   if (pole_mass_loop_order > 0)
+
+   if (pole_mass_loop_order > 0) {
       calculate_pole_masses();
+   }
 
    if (pole_mass_loop_order == 0) {
       copy_DRbar_masses_to_pole_masses();
@@ -743,7 +850,7 @@ std::string Standard_model::name() const
 void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
 {
    const double scale = get_scale();
-   auto qedqcd = qedqcd_;
+   qedqcd = qedqcd_;
 
    // initial guess
    qedqcd.to(qedqcd.displayPoleMZ());
@@ -770,18 +877,18 @@ void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
       double delta_alpha_em = 0.;
       double delta_alpha_s  = 0.;
 
-      if (get_thresholds() && threshold_corrections.alpha_em > 0)
+      if (get_thresholds() > 0 && threshold_corrections.alpha_em > 0) {
          delta_alpha_em = calculate_delta_alpha_em(alpha_em);
+      }
 
-      if (get_thresholds() && threshold_corrections.alpha_s > 0)
+      if (get_thresholds() > 0 && threshold_corrections.alpha_s > 0) {
          delta_alpha_s  = calculate_delta_alpha_s(alpha_s);
+      }
 
       const double alpha_em_drbar = alpha_em / (1.0 - delta_alpha_em);
       const double alpha_s_drbar  = alpha_s / (1.0 - delta_alpha_s);
       const double e_drbar        = Sqrt(4.0 * Pi * alpha_em_drbar);
-      const auto theta_w_mw_pole  = calculate_theta_w(qedqcd, alpha_em_drbar);
-      const double theta_w_drbar  = theta_w_mw_pole.first;
-      const double mw_pole        = theta_w_mw_pole.second;
+      const auto theta_w_drbar = calculate_theta_w();
 
       v = Re((2 * mz_run) / Sqrt(0.6 * Sqr(g1) + Sqr(g2)));
 
@@ -811,9 +918,6 @@ void Standard_model::initialise_from_input(const softsusy::QedQcd& qedqcd_)
             standard_model_info::g2, g2, get_scale());
          g2 = Electroweak_constants::g2;
       }
-
-      if (get_thresholds() && threshold_corrections.sin_theta_w > 0)
-         qedqcd.setPoleMW(mw_pole);
 
       converged = check_convergence(old);
       old = *this;
@@ -860,19 +964,19 @@ void Standard_model::initial_guess_for_parameters(const softsusy::QedQcd& qedqcd
    upQuarksDRbar(0,0) = mu_guess;
    upQuarksDRbar(1,1) = mc_guess;
    upQuarksDRbar(2,2) = mt_guess;
-   Yu = -((1.4142135623730951*upQuarksDRbar) / v).transpose();
+   Yu = -(sqrt2*upQuarksDRbar/v).transpose();
 
    Eigen::Matrix<double,3,3> downQuarksDRbar(Eigen::Matrix<double,3,3>::Zero());
    downQuarksDRbar(0,0) = md_guess;
    downQuarksDRbar(1,1) = ms_guess;
    downQuarksDRbar(2,2) = mb_guess;
-   Yd = ((1.4142135623730951*downQuarksDRbar)/v).transpose();
+   Yd = (sqrt2*downQuarksDRbar/v).transpose();
 
    Eigen::Matrix<double,3,3> downLeptonsDRbar(Eigen::Matrix<double,3,3>::Zero());
    downLeptonsDRbar(0,0) = me_guess;
    downLeptonsDRbar(1,1) = mm_guess;
    downLeptonsDRbar(2,2) = mtau_guess;
-   Ye = ((1.4142135623730951*downLeptonsDRbar)/v).transpose();
+   Ye = (sqrt2*downLeptonsDRbar/v).transpose();
 
    Lambdax = Sqr(MH) / Sqr(v);
 
@@ -881,20 +985,31 @@ void Standard_model::initial_guess_for_parameters(const softsusy::QedQcd& qedqcd
 
 double Standard_model::calculate_delta_alpha_em(double alphaEm) const
 {
-   const double delta_alpha_em_SM = -0.28294212105225836*alphaEm*
-      FiniteLog(Abs(MFu(2) / get_scale()));
+   double delta_alpha_em_1loop = 0.;
 
-   return delta_alpha_em_SM;
+   if (get_thresholds() > 0 && threshold_corrections.alpha_em > 0) {
+      delta_alpha_em_1loop = -0.28294212105225836*alphaEm*
+         FiniteLog(Abs(MFu(2) / get_scale()));
+   }
+
+   return delta_alpha_em_1loop;
 }
 
 double Standard_model::calculate_delta_alpha_s(double alphaS) const
 {
-   const double delta_alpha_s_1loop = -0.1061032953945969*alphaS*
-      FiniteLog(Abs(MFu(2) / get_scale()));
-
+   double delta_alpha_s_1loop = 0.;
    double delta_alpha_s_2loop = 0.;
    double delta_alpha_s_3loop = 0.;
    double delta_alpha_s_4loop = 0.;
+
+   if (get_thresholds() > 0 && threshold_corrections.alpha_s > 0) {
+      sm_fourloop_as::Parameters pars;
+      pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
+      pars.mt   = MFu(2);
+      pars.Q    = get_scale();
+
+      delta_alpha_s_1loop = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+   }
 
    if (get_thresholds() > 1 && threshold_corrections.alpha_s > 1) {
       sm_fourloop_as::Parameters pars;
@@ -941,91 +1056,86 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 }
 
-std::pair<double,double> Standard_model::calculate_theta_w(const softsusy::QedQcd& qedqcd, double alpha_em_drbar)
+double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 {
-   double theta_w = 0.;
-
-   using namespace weinberg_angle;
-
-   const double scale               = get_scale();
-   const double mw_pole             = qedqcd.displayPoleMW();
-   const double mz_pole             = qedqcd.displayPoleMZ();
-   const double mt_pole             = qedqcd.displayPoleMt();
-   const double mt_drbar            = MFu(2);
-   const double mb_drbar            = MFd(2);
-   const double mh_drbar            = Mhh;
-   const double gY                  = g1 * 0.7745966692414834;
-   const double pizztMZ             = Re(self_energy_VZ_1loop(mz_pole));
-   const double piwwt0              = Re(self_energy_VWp_1loop(0.));
-   const double self_energy_w_at_mw = Re(self_energy_VWp_1loop(mw_pole));
-
-   Weinberg_angle::Self_energy_data se_data;
-   se_data.scale    = scale;
-   se_data.mt_pole  = mt_pole;
-   se_data.mt_drbar = mt_drbar;
-   se_data.mb_drbar = mb_drbar;
-   se_data.gY       = gY;
-   se_data.g2       = g2;
-
-   double pizztMZ_corrected = pizztMZ;
-   double piwwtMW_corrected = self_energy_w_at_mw;
-   double piwwt0_corrected  = piwwt0;
-
-   if (get_thresholds() > 1 && threshold_corrections.sin_theta_w > 1) {
-      pizztMZ_corrected =
-         Weinberg_angle::replace_mtop_in_self_energy_z(pizztMZ, mz_pole,
-            se_data);
-      piwwtMW_corrected =
-         Weinberg_angle::replace_mtop_in_self_energy_w(
-            self_energy_w_at_mw, mw_pole, se_data);
-      piwwt0_corrected =
-         Weinberg_angle::replace_mtop_in_self_energy_w(piwwt0, 0.,
-            se_data);
-   }
-
-   const auto get_mh_pole = [&] () {
-      double mh_pole = get_physical().Mhh;
-      if (mh_pole == 0) {
-         mh_pole = input.get(Physical_input::mh_pole);
-      }
+   const double mh_pole = [&] () {
+      double mh_pole = this->get_physical().Mhh;
       if (mh_pole == 0) {
          mh_pole = Electroweak_constants::MH;
       }
       return mh_pole;
-   };
+   }();
 
-   Weinberg_angle::Data data;
-   data.scale               = scale;
-   data.alpha_em_drbar      = alpha_em_drbar;
-   data.alpha_s_mz          = qedqcd.displayAlphaSInput();
-   data.fermi_contant       = qedqcd.displayFermiConstant();
-   data.self_energy_z_at_mz = pizztMZ_corrected;
-   data.self_energy_w_at_mw = piwwtMW_corrected;
-   data.self_energy_w_at_0  = piwwt0_corrected;
-   data.mw_pole             = mw_pole;
-   data.mz_pole             = mz_pole;
-   data.mt_pole             = mt_pole;
-   data.mh_drbar            = mh_drbar;
-   data.mh_pole             = get_mh_pole();
-   data.gY                  = gY;
-   data.g2                  = g2;
-   data.g3                  = g3;
+   calculate_MVWp_pole_fit(mh_pole);
 
-   Weinberg_angle weinberg;
-   weinberg.disable_susy_contributions();
-   weinberg.set_number_of_loops(threshold_corrections.sin_theta_w);
-   weinberg.set_data(data);
+   weinberg_angle::Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = qedqcd.displayFermiConstant();
+   parameters.mz_pole = qedqcd.displayPoleMZ();
+   parameters.mt_pole = qedqcd.displayPoleMt();
+   parameters.mh_pole = mh_pole;
+   parameters.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   parameters.alpha_s_mz = qedqcd.displayAlphaSInput();
+   parameters.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   parameters.mw_pole = this->get_physical().MVWp;
 
-   const int error = weinberg.calculate();
+   const int number_of_iterations = std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)));
 
-   theta_w = ArcSin(weinberg.get_sin_theta());
+   weinberg_angle::Weinberg_angle weinberg(this, parameters);
+   weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
+   weinberg.set_number_of_iterations(number_of_iterations);
 
-   if (error)
-      problems.flag_no_sinThetaW_convergence();
-   else
-      problems.unflag_no_sinThetaW_convergence();
+   double g_fermi = qedqcd.displayFermiConstant();
 
-   return std::make_pair(theta_w, weinberg.get_mw_pole());
+   try {
+      g_fermi = weinberg.calculate_G_fermi();
+   } catch (const Error& e) {
+      VERBOSE_MSG(e.what_detailed());
+      this->get_problems().flag_no_GFermi_convergence();
+   }
+
+   return g_fermi;
+}
+
+double Standard_model::calculate_theta_w()
+{
+   const double mh_pole = [&] () {
+      double mh_pole = this->get_physical().Mhh;
+      if (mh_pole == 0) {
+         mh_pole = Electroweak_constants::MH;
+      }
+      return mh_pole;
+   }();
+
+   calculate_MVWp_pole_fit(mh_pole);
+
+   weinberg_angle::Weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = qedqcd.displayFermiConstant();
+   parameters.mz_pole = qedqcd.displayPoleMZ();
+   parameters.mt_pole = qedqcd.displayPoleMt();
+   parameters.mh_pole = mh_pole;
+   parameters.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   parameters.alpha_s_mz = qedqcd.displayAlphaSInput();
+   parameters.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   parameters.mw_pole = this->get_physical().MVWp;
+
+   const int number_of_iterations =
+       std::max(20, static_cast<int>(std::abs(-log10(this->get_precision()) * 10)
+          ));
+
+   using namespace weinberg_angle;
+   Weinberg_angle weinberg(this, parameters);
+   weinberg.set_number_of_loops(this->get_threshold_corrections().sin_theta_w);
+   weinberg.set_number_of_iterations(number_of_iterations);
+
+   double theta_w = std::asin(Electroweak_constants::sinThetaW);
+   try {
+      theta_w = ArcSin(weinberg.calculate_sin_theta_w());
+   } catch (const Error& e) {
+      VERBOSE_MSG(e.what_detailed());
+      this->get_problems().flag_no_sinThetaW_convergence();
+   }
+
+   return theta_w;
 }
 
 void Standard_model::calculate_Yu_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1038,7 +1148,7 @@ void Standard_model::calculate_Yu_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mt > 0)
       upQuarksDRbar(2,2) = calculate_MFu_DRbar(qedqcd.displayPoleMt(), 2);
 
-   Yu = -((1.4142135623730951*upQuarksDRbar)/v).transpose();
+   Yu = -(sqrt2*upQuarksDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Yd_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1051,7 +1161,7 @@ void Standard_model::calculate_Yd_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mb > 0)
       downQuarksDRbar(2,2) = calculate_MFd_DRbar(qedqcd.displayMass(softsusy::mBottom), 2);
 
-   Yd = ((1.4142135623730951*downQuarksDRbar)/v).transpose();
+   Yd = (sqrt2*downQuarksDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Ye_DRbar(const softsusy::QedQcd& qedqcd)
@@ -1069,7 +1179,7 @@ void Standard_model::calculate_Ye_DRbar(const softsusy::QedQcd& qedqcd)
    if (get_thresholds() && threshold_corrections.mtau > 0)
       downLeptonsDRbar(2,2) = calculate_MFe_DRbar(qedqcd.displayMass(softsusy::mTau), 2);
 
-   Ye = ((1.4142135623730951*downLeptonsDRbar)/v).transpose();
+   Ye = (sqrt2*downLeptonsDRbar/v).transpose();
 }
 
 void Standard_model::calculate_Lambdax_DRbar()
@@ -2278,6 +2388,9 @@ void Standard_model::calculate_MVPVZ()
 
 
    MVPVZ = AbsSqrt(MVPVZ);
+
+   MVP = 0.;
+   MVZ = MVPVZ(1);
 }
 
 
@@ -4547,7 +4660,7 @@ void Standard_model::calculate_MVZ_pole()
       return;
 
    // diagonalization with medium precision
-   const double M_tree(get_mass_matrix_VZ());
+   const double M_tree(Sqr(MVZ));
    const double p = MVZ;
    const double self_energy = Re(self_energy_VZ_1loop(p));
    const double mass_sqr = M_tree - self_energy;
@@ -4762,6 +4875,10 @@ double Standard_model::calculate_MFv_DRbar(double, int) const
 
 double Standard_model::calculate_MFe_DRbar(double m_sm_msbar, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mtau == 0) {
+      return m_sm_msbar;
+   }
+
    const double p = m_sm_msbar;
    const double self_energy_1  = Re(self_energy_Fe_1loop_1_heavy_rotated(p, idx
       , idx));
@@ -4780,6 +4897,10 @@ double Standard_model::calculate_MFe_DRbar(double m_sm_msbar, int idx) const
 
 double Standard_model::calculate_MFu_DRbar(double m_pole, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mt == 0) {
+      return m_pole;
+   }
+
    const double p = m_pole;
    const double self_energy_1  = Re(self_energy_Fu_1loop_1_heavy_rotated(p, idx
       , idx));
@@ -4824,6 +4945,10 @@ double Standard_model::calculate_MFu_DRbar(double m_pole, int idx) const
 
 double Standard_model::calculate_MFd_DRbar(double m_sm_msbar, int idx) const
 {
+   if (get_thresholds() == 0 || threshold_corrections.mb == 0) {
+      return m_sm_msbar;
+   }
+
    const double p = m_sm_msbar;
    const double self_energy_1  = Re(self_energy_Fd_1loop_1_heavy_rotated(p, idx
       , idx));
@@ -4898,6 +5023,24 @@ std::ostream& operator<<(std::ostream& ostr, const Standard_model& model)
 {
    model.print(ostr);
    return ostr;
+}
+
+double Standard_model::calculate_alpha_s_SM5_at(
+   softsusy::QedQcd qedqcd_tmp, double scale) const
+{
+   qedqcd_tmp.run_to(scale); // running in SM(5)
+   return qedqcd_tmp.displayAlpha(softsusy::ALPHAS);
+}
+
+void Standard_model::calculate_MVWp_pole_fit(const double mh_pole) {
+   const double mt_pole = qedqcd.displayPoleMt();
+   const double alpha_s_mz = qedqcd.displayAlphaSInput();
+   const double dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+
+   const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
+      mh_pole, mt_pole, alpha_s_mz, dalpha_s_5_had);
+
+   this->get_physical().MVWp = sm_mw.first;
 }
 
 } // namespace standard_model

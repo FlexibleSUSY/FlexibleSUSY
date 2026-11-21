@@ -95,16 +95,37 @@ ExtraSLHAOutputBlocks = {
          {23, FlexibleSUSYObservable`EDM[Fe[1]]},
          {24, FlexibleSUSYObservable`EDM[Fe[2]]},
          {25, FlexibleSUSYObservable`EDM[Fe[3]]},
-         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe, 2 -> 1]},
+         {31, FlexibleSUSYObservable`BrLTo3L[Fe, 2 -> {1, 1, 1}, All, 1]},
+         {41, FlexibleSUSYObservable`LToLConversion[Fe, 2 -> 1, Al, All, 1]},
          {27, FlexibleSUSYObservable`AMMUncertainty[Fe[2]]}
+      }
+   },
+   {HMIX, {
+         {1,   \[Mu]},
+         {10,  ArcTan[vu/vd]},
+         {101, B[\[Mu]]},
+         {102, vd},
+         {103, vu},
+         {310, vT},
+         {201, MuD},
+         {202, MuU},
+         {203, B[MuD]},
+         {204, B[MuU]},
+         {301, LamSD},
+         {302, LamSU},
+         {303, LamTD},
+         {304, LamTU}
       }
    }
 };
 
 FSCalculateDecays = True;
-FSDecayParticles = {hh, Ah, Hpm, sigmaO, phiO, Fu};
+FSDecayParticles = {hh, Ah, Hpm, sigmaO, phiO, Su};
 
-DefaultPoleMassPrecision = HighPrecision;
+PotentialLSPParticles = {Chi, Su, Sd, Se, Cha1, Cha2};
+
+DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};

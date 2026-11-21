@@ -21,12 +21,10 @@
 
 #include <cstdlib>
 #include <iosfwd>
+#include <span>
 #include <string>
 
 namespace flexiblesusy {
-
-template <class T>
-class Dynamic_array_view;
 
 /**
  * @class Command_line_options
@@ -48,12 +46,12 @@ class Command_line_options {
 public:
    Command_line_options() = default;
    Command_line_options(int, char*[]);
-   Command_line_options(const Dynamic_array_view<char*>&);
+   explicit Command_line_options(std::span<char* const>);
 
    bool must_exit() const { return do_exit; }
    bool must_print_model_info() const { return do_print_model_info; }
    int status() const { return exit_status; }
-   void parse(const Dynamic_array_view<char*>&);
+   void parse(std::span<char* const>);
    void print_build_info(std::ostream&) const;
    void print_usage(std::ostream&) const;
    void print_version(std::ostream&) const;
@@ -65,10 +63,12 @@ public:
    const std::string& get_program_name() const { return program; }
    const std::string& get_rgflow_file() const { return rgflow_file; }
    const std::string& get_spectrum_file() const { return spectrum_file; }
+   const std::string& get_higgsbounds_dataset() const { return higgsbounds_dataset; }
+   const std::string& get_higgssignals_dataset() const { return higgssignals_dataset; }
+   const std::string& get_lilith_db() const { return lilith_db; }
 
    static bool get_parameter_value(const std::string&, const std::string&, double&);
    static bool get_parameter_value(const std::string&, const std::string&, int&);
-   static bool starts_with(const std::string&, const std::string&);
 
 private:
    bool do_exit{false};
@@ -76,6 +76,9 @@ private:
    int exit_status{EXIT_SUCCESS};
    std::string program{};
    std::string database_output_file{};
+   std::string higgssignals_dataset{};
+   std::string higgsbounds_dataset{};
+   std::string lilith_db{};
    std::string rgflow_file{};
    std::string slha_input_file{};
    std::string slha_output_file{"-"};

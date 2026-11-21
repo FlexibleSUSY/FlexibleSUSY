@@ -25,7 +25,7 @@
 
 #include "wrappers.hpp"
 #include "cxx_qft/MRSSM2_qft.hpp"
-#include "MRSSM2_l_to_lgamma.hpp"
+#include "observables/MRSSM2_br_l_to_l_gamma.hpp"
 #include "physical_input.hpp"
 
 using namespace flexiblesusy;
@@ -65,7 +65,8 @@ BOOST_AUTO_TEST_CASE( test_l_to_lgamma )
 
    Physical_input physical_inputs;
 
-   auto brMuEGamma = MRSSM2_l_to_lgamma::calculate_Fe_to_Fe_VP(1, 0, m, qedqcd, physical_inputs);
+   auto brMuEGamma = MRSSM2_br_l_to_l_gamma::calculate_Fe_to_Fe_VP(1, 0, m, qedqcd, physical_inputs);
 
-   BOOST_CHECK_CLOSE_FRACTION(brMuEGamma, 1.3147385103144814e-15, 1e-4);
+   // BOOST_CHECK_CLOSE_FRACTION(brMuEGamma, 1.3147385103144814e-15, 1e-4); // older way: we calculated Gamma_total ourselves
+   BOOST_CHECK_CLOSE_FRACTION(brMuEGamma, 1.2033365585046252e-15, 1e-4); // current way: we use PDF Gamma_total
 }

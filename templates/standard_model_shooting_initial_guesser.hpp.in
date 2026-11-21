@@ -1,0 +1,64 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+#ifndef @ModelName@_STANDARD_MODEL_SHOOTING_INITIAL_GUESSER_H
+#define @ModelName@_STANDARD_MODEL_SHOOTING_INITIAL_GUESSER_H
+
+#include "initial_guesser.hpp"
+#include "lowe.h"
+#include <Eigen/Core>
+
+namespace softsusy {
+class QedQcd;
+}
+
+namespace flexiblesusy {
+
+class Shooting;
+
+template <class T>
+class @ModelName@;
+
+template <class T>
+class @ModelName@_standard_model_initial_guesser;
+
+template<>
+class @ModelName@_standard_model_initial_guesser<Shooting> : public Initial_guesser {
+public:
+   @ModelName@_standard_model_initial_guesser(
+      @ModelName@<Shooting>*, const softsusy::QedQcd&);
+
+   virtual void guess() override; ///< initial guess
+
+private:
+   @ModelName@<Shooting>* model{nullptr}; ///< pointer to model class
+   softsusy::QedQcd qedqcd{}; ///< Standard Model low-energy data
+
+   Eigen::Matrix<std::complex<double>,3,3> upQuarksDRbar{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> downQuarksDRbar{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> downLeptonsDRbar{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   void calculate_@UpYukawa@_DRbar();
+   void calculate_@DownYukawa@_DRbar();
+   void calculate_@ElectronYukawa@_DRbar();
+};
+
+} // namespace flexiblesusy
+
+#endif

@@ -63,7 +63,7 @@ If[FreeQ[SARAH`Particles[EWSB], phiO | sigmaO] (* SARAH version < 4.5 *),
 (* external fields are at wrong positions in following Cp[]'s *)
 
 selfEnergySOc = {
-    FSSelfEnergy[SOc,
+    FSSelfEnergy[{SOc, SOc},
      -C A0[Mass2[SOc]] Cp[conj[SOc], conj[SOc], SOc, SOc] -
       C sum[gI1, 1, 6,
         A0[Mass2[Sd[{gI1}]]] Cp[conj[Sd[{gI1}]], SOc, conj[SOc], Sd[{gI1}]]] -
@@ -72,7 +72,7 @@ selfEnergySOc = {
     ]};
 
 selfEnergySd = {
-    FSSelfEnergy[Sd[gO1, gO2],
+    FSSelfEnergy[{Sd[gO1], Sd[gO2]},
      -C A0[Mass2[SOc]]
 	Cp[USd[{gO1}], conj[SOc], conj[USd[{gO2}]], SOc] -
       C sum[gI1, 1, 6,
@@ -84,7 +84,7 @@ selfEnergySd = {
     ]};
 
 selfEnergySu = {
-    FSSelfEnergy[Su[gO1, gO2],
+    FSSelfEnergy[{Su[gO1], Su[gO2]},
      -C A0[Mass2[SOc]]
 	Cp[conj[SOc], USu[{gO1}], conj[USu[{gO2}]], SOc] -
       C sum[gI1, 1, 6,
@@ -138,17 +138,17 @@ TestEquality[Cp[USu[{gO1}], conj[USu[{gO2}]], conj[SOc], SOc] /. vertexRulesSu,
  *)
 
 selfEnergyPhiO = {
-    FSSelfEnergy[phiO,
+    FSSelfEnergy[{phiO, phiO},
      -(C*A0[Mass2[sigmaO]]*Cp[phiO, sigmaO, phiO, sigmaO])/2
     ]};
 
 selfEnergySigmaO = {
-    FSSelfEnergy[sigmaO,
+    FSSelfEnergy[{sigmaO, sigmaO},
      -(C*A0[Mass2[phiO]]*Cp[phiO, phiO, sigmaO, sigmaO])/2
     ]};
 
 selfEnergySd = {
-    FSSelfEnergy[Sd[gO1, gO2],
+    FSSelfEnergy[{Sd[gO1], Sd[gO2]},
      -C sum[gI1, 1, 6,
         A0[Mass2[Sd[{gI1}]]]
 	Cp[USd[{gO1}], conj[Sd[{gI1}]], Sd[{gI1}], conj[USd[{gO2}]]]] -
@@ -158,7 +158,7 @@ selfEnergySd = {
     ]};
 
 selfEnergySu = {
-    FSSelfEnergy[Su[gO1, gO2],
+    FSSelfEnergy[{Su[gO1], Su[gO2]},
      -C sum[gI1, 1, 6,
         A0[Mass2[Sd[{gI1}]]]
 	Cp[Sd[{gI1}], conj[USu[{gO2}]], USu[{gO1}], conj[Sd[{gI1}]]]] -

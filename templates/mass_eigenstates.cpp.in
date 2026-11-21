@@ -38,6 +38,7 @@
 #include "logger.hpp"
 #include "error.hpp"
 #include "loop_libraries/loop_library.hpp"
+#include "numerics.h"
 #include "raii.hpp"
 
 #ifdef ENABLE_THREADS
@@ -461,6 +462,40 @@ double CLASSNAME::G0(double p, double m1, double m2) const noexcept
    ).real();
 }
 
+/// derivative of H0(p^2, m1^2, m2^2) w.r.t. p^2
+double CLASSNAME::DH0(double p, double m1, double m2) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return 4.0*Loop_library::get().DB00(p, m1, m2, scl2).real() + CLASSNAME::DG0(p, m1, m2);
+}
+
+/// derivative of F0(p^2, m1^2, m2^2) w.r.t. p^2
+double CLASSNAME::DF0(double p, double m1, double m2) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return (
+      - 2.0 * Loop_library::get().B0(p, m1, m2, scl2)
+      - (2.0*p + 2.0*m1 - m2) * Loop_library::get().DB0(p, m1, m2, scl2)
+   ).real();
+}
+
+/// derivative of G0(p^2, m1^2, m2^2) w.r.t. p^2
+double CLASSNAME::DG0(double p, double m1, double m2) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return (
+      Loop_library::get().B0(p, m1, m2, scl2)
+      + (p - m1 - m2) * Loop_library::get().DB0(p, m1, m2, scl2)
+   ).real();
+}
+
+/// derivative of B0(p^2, ma^2, mb^2) w.r.t. p^2
+double CLASSNAME::DB0(double p2, double m2a, double m2b) const noexcept
+{
+   const double scl2 = Sqr(get_scale());
+   return Loop_library::get().DB0(p2, m2a, m2b, scl2).real();
+}
+
 /**
  * routine which finds the @RenScheme@ mass eigenstates and mixings.
  */
@@ -676,6 +711,8 @@ void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
 @tadpoleEqFunctions@
 
 @selfEnergyFunctions@
+
+@selfEnergyDerivFunctions@
 
 @secondGenerationHelperFunctions@
 @thirdGenerationHelperFunctions@

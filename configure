@@ -5,8 +5,8 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=7
-FLEXIBLESUSY_PATCH=1
+FLEXIBLESUSY_MINOR=9
+FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -95,8 +95,10 @@ options="                    \
    enable_debug              \
    enable_fflite             \
    enable_gm2calc            \
+   enable_higgstools         \
    enable_himalaya           \
    enable_librarylink        \
+   enable_lilith             \
    enable_looptools          \
    enable_mass_error_check   \
    enable_shared_libs        \
@@ -123,8 +125,10 @@ enable_debug=""
 enable_mass_error_check="no"
 enable_fflite="no"
 enable_gm2calc="automatic"
+enable_higgstools="automatic"
 enable_himalaya="automatic"
 enable_librarylink="automatic"
+enable_lilith="automatic"
 enable_looptools="no"
 enable_collier="no"
 enable_meta="no"
@@ -147,6 +151,7 @@ DEFINE_ENABLE_DEBUG="#undef ENABLE_DEBUG"
 DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR="#undef CHECK_EIGENVALUE_ERROR"
 DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
 DEFINE_ENABLE_GM2CALC="#undef ENABLE_GM2CALC"
+DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
 DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
@@ -161,7 +166,10 @@ DEFINE_ENABLE_VERBOSE="#undef ENABLE_VERBOSE"
 DEFINE_ENABLE_TWO_SCALE_SOLVER="#undef ENABLE_TWO_SCALE_SOLVER"
 DEFINE_ENABLE_LATTICE_SOLVER="#undef ENABLE_LATTICE_SOLVER"
 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#undef ENABLE_SEMI_ANALYTIC_SOLVER"
+DEFINE_ENABLE_SHOOTING_SOLVER="#undef ENABLE_SHOOTING_SOLVER"
 DEFINE_ENABLE_ADDONS=""
+DEFINE_ENABLE_FEYNARTS="#undef ENABLE_FEYNARTS"
+DEFINE_ENABLE_FORMCALC="#undef ENABLE_FORMCALC"
 
 boost_lib_dir=""
 boost_inc_dir=""
@@ -174,7 +182,7 @@ collier_lib_dir=""
 collier_inc_dir=""
 GSLFLAGS=""
 CPPFLAGS=""
-CXXFLAGS="-std=c++14 -O2 -fPIC"
+CXXFLAGS="-std=c++20 -O2 -fPIC"
 FFLAGS="-O2 -fPIC"
 FLIBS=""
 FMOD=""
@@ -189,10 +197,17 @@ FC="gfortran"
 GSLLIBS=""
 INSTALL_DIR=""
 MATH="math"
+# time limit in seconds for each Mathematica kernel started by
+# configure (0 = no limit)
+MATH_TIMEOUT=300
 OPTIONAL_MODULES=""
 pthread_lib_dir=""
 STATIC_LIB_EXT=".a"
-STATIC_LIB_CMD="ar cru"
+# Without the u modifier, ar always replaces the given members.  With u,
+# a member is only replaced if the object file is newer, to the second, so
+# an object rebuilt within the same second as the archived one would be
+# kept outdated in the library.
+STATIC_LIB_CMD="ar cr"
 STATIC_LDFLAGS="-static"
 STATIC_LDLIBS="-lquadmath -ldl"
 SHARED_LIB_EXT=".so"
@@ -211,6 +226,11 @@ LDFLAGS="$SHARED_LDFLAGS"
 LDLIBS="$SHARED_LDLIBS"
 LLFLAGS=""
 LLLIBS=""
+higgstools_inc_dir=""
+higgstools_lib_dir=""
+HIGGSTOOLSFLAGS="-Imodel_specific/SM"
+HIGGSTOOLSLIBS=""
+lilith_dir=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
 sqlite_lib_dir=""
@@ -218,8 +238,8 @@ sqlite_inc_dir=""
 tsil_lib_dir=""
 tsil_inc_dir=""
 # available RG solvers
-SOLVERS="two_scale semi_analytic"
-available_solvers="two_scale lattice semi_analytic"
+SOLVERS="two_scale semi_analytic shooting"
+available_solvers="two_scale lattice semi_analytic shooting"
 # models that will be compiled
 MODELS="all"
 # BEGIN: NOT EXPORTED ##########################################
@@ -237,12 +257,11 @@ cxx_compiler_version="unknown"
 
 # required C++ compiler versions
 required_cxx_compiler_version="unknown"
-required_gpp_compiler_version="5.0.0"
-required_clang_compiler_version="3.8.1"
-required_icpc_compiler_version="17.0.0"
+required_gpp_compiler_version="10.1.0"
+required_clang_compiler_version="10.0.0"
 
-# required boost version
-required_boost_version="1.37.0"
+# required boost version (1.62.0: Boost.Hana and Boost.Math with C++20)
+required_boost_version="1.62.0"
 
 # required Mathematica version
 required_mathematica_version="11.0"
@@ -258,11 +277,11 @@ SARAH_MINOR="0"
 SARAH_PATCH="0"
 
 # required FeynArts version
-required_feynarts_version="3.9.0"
+required_feynarts_version="3.10.0"
 FEYNARTS_VERSION="unknown"
 
 # required FormCalc version
-required_formcalc_version="9.5.0"
+required_formcalc_version="9.8.0"
 FORMCALC_VERSION="unknown"
 
 # Mathematica version (0 = unknown)
@@ -332,6 +351,47 @@ logmsg() {
     else
        echo "$*" >> $logfile
     fi
+}
+
+#_____________________________________________________________________
+run_math() {
+    # Runs the Mathematica kernel given as first argument with the
+    # remaining arguments (reading from stdin), with the time limit
+    # MATH_TIMEOUT if the timeout (or gtimeout) command is available,
+    # so that a hanging kernel does not stop configure.  Returns 124 if
+    # the time limit is reached, otherwise the exit status of the kernel.
+    local math_cmd="$1"
+    shift
+    local timeout_cmd=""
+    if [ "${MATH_TIMEOUT}" -gt 0 ] ; then
+        if command -v timeout > /dev/null 2>&1 ; then
+            timeout_cmd="timeout"
+        elif command -v gtimeout > /dev/null 2>&1 ; then
+            timeout_cmd="gtimeout"
+        fi
+    fi
+    if [ -z "${timeout_cmd}" ] ; then
+        "${math_cmd}" "$@"
+        return
+    fi
+    local _status
+    "${timeout_cmd}" -k 10 "${MATH_TIMEOUT}" "${math_cmd}" "$@"
+    _status="$?"
+    # 124: stopped by SIGTERM, 137: killed by SIGKILL after -k 10
+    if [ "${_status}" = 124 ] || [ "${_status}" = 137 ] ; then
+        logmsg "Error: the Mathematica kernel ${math_cmd} was stopped after ${MATH_TIMEOUT} s"
+        return 124
+    fi
+    return "${_status}"
+}
+
+#_____________________________________________________________________
+report_math_timeout() {
+    # Writes the result of a check whose Mathematica kernel was stopped
+    # by run_math because of the time limit.  The first argument is the
+    # result ("not ok" or "no").
+    result "$1 (the Mathematica kernel did not finish within ${MATH_TIMEOUT} s)"
+    message "   Use --with-math-timeout= to change the time limit (0 = no limit)."
 }
 
 #_____________________________________________________________________
@@ -872,6 +932,7 @@ exists_in_path () {
     fi
 
     cmd=$(command -v -- "$1")
+    logmsg "(command -v -- $1 gave: $cmd)"
     case "$cmd" in
 	/*) return 0 ;;
 	alias\ *) return 1 ;; # alias
@@ -968,7 +1029,7 @@ check_solvers() {
         case "$a" in
             all)
                 SOLVERS="$available_solvers"; break ;;
-            two_scale|lattice|semi_analytic)
+            two_scale|lattice|semi_analytic|shooting)
                 SOLVERS="$SOLVERS $a"
                 continue ;;
             *)
@@ -1321,16 +1382,6 @@ check_platform() {
 }
 
 #_____________________________________________________________________
-reset_default_static_linker_cmd() {
-    local os_
-    os_=$( (uname -s) 2>/dev/null || echo unknown)
-    case "$os_" in
-        Linux)
-            STATIC_LIB_CMD="ar cruU";;
-    esac
-}
-
-#_____________________________________________________________________
 check_multiarch() {
     local linuxdist=""
     debmultiarch=""
@@ -1430,6 +1481,14 @@ int main() {
         message "   to use a boost installation from a non-default location."
         exit 1
     }
+    case "$boost_version" in
+    1.64.*)
+        result "not ok (version ${boost_version})"
+        message "Error: boost 1.64 can't be used: its odeint doesn't compile"
+        message "   (boost::serialization::make_array is missing)."
+        message "   Please install another boost version."
+        exit 1 ;;
+    esac
     result "ok (version ${boost_version})"
     logmsg "   Required boost version: ${required_boost_version}"
     logmsg "   Boost version found: ${boost_version}"
@@ -1462,54 +1521,6 @@ check_boost_test_incl() {
     if test "x$found_hdr" = "x" ; then
         message "Warning: boost/test/unit_test.hpp must be installed"
         message "  to compile and run the tests, see http://www.boost.org"
-    fi
-}
-
-#_____________________________________________________________________
-check_boost_thread_libs() {
-    check_library "libboost_thread libboost_thread-mt" \
-	"$boost_lib_dir" "$default_lib_paths"
-    if [ -z "$found_lib" ]; then
-        message "Error: libboost_thread or libboost_thread-mt must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    fi
-    local BOOSTTHREADLIBS_
-    BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-
-    check_library "libboost_system libboost_system-mt" \
-	"$boost_lib_dir" "$default_lib_paths"
-    if [ -z "$found_lib" ]; then
-        message "Error: libboost_system or libboost_system-mt must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    fi
-    BOOSTTHREADLIBS_="$BOOSTTHREADLIBS_ "-l$(
-	echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-
-    if [ -z "$boost_lib_dir" ]; then
-        # assume that the linker will look in the default paths
-        BOOSTTHREADLIBS="$BOOSTTHREADLIBS_"
-    else
-        BOOSTTHREADLIBS="-L$boost_lib_dir $BOOSTTHREADLIBS_"
-    fi
-}
-
-#_____________________________________________________________________
-check_boost_thread_incl() {
-    check_header "boost/thread/thread.hpp" "$boost_inc_dir" \
-	"$default_inc_paths"
-    if test "x$found_hdr" = "x" ; then
-        message "Error: boost/thread/thread.hpp must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    else
-        if contains_not "${BOOSTFLAGS}" "-I$found_dir"; then
-            BOOSTFLAGS="${BOOSTFLAGS} -I$found_dir"
-        fi
     fi
 }
 
@@ -1551,6 +1562,16 @@ check_thread_libs() {
 	    ;;
     esac
 
+    # on macOS, libpthread is a .tbd file in the SDK, which the linker
+    # of newer Xcode versions doesn't list in its search paths
+    case "$operating_system" in
+        Darwin)
+            local sdk_path
+            sdk_path=$(xcrun --show-sdk-path 2>/dev/null)
+            [ -n "$sdk_path" ] && cc_lib_search_paths="$cc_lib_search_paths:$sdk_path/usr/lib"
+            ;;
+    esac
+
     check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths:$cc_lib_search_paths"
     if [ -z "$found_lib" ]; then
         message "Error: libpthread must be installed to enable multithreading!"
@@ -1567,6 +1588,27 @@ check_thread_libs() {
 }
 
 #_____________________________________________________________________
+check_cxx_std_library() {
+    # The compiler version alone doesn't show whether the standard library
+    # supports C++20: e.g. clang++ can use the libstdc++ of an older g++.
+    checking_msg "C++20 support of the standard library"
+    if try_compile_cpp_program "#include <concepts>
+#include <numbers>
+#include <span>
+#include <string>" "std::span<const double> s; (void)std::ssize(s); (void)std::numbers::pi; (void)std::string(\"ab\").starts_with(\"a\")";
+    then
+        result "ok"
+    else
+        result "not ok"
+        message "Error: the C++ standard library used by $CXX lacks C++20 features"
+        message "   needed by FlexibleSUSY (<concepts>, <span>, <numbers>)."
+        message "   With clang++ on Linux, please install libstdc++ 10 or higher (from g++ 10"
+        message "   or higher); on macOS, use Apple clang with its libc++."
+        exit 1
+    fi
+}
+
+#_____________________________________________________________________
 check_cxx_compiler_type() {
     checking_msg "type of C++ compiler ${CXX}"
 
@@ -1577,8 +1619,7 @@ check_cxx_compiler_type() {
 	   required_cxx_compiler_version="$required_gpp_compiler_version" ;;
     clang) result "Clang"
 	   required_cxx_compiler_version="$required_clang_compiler_version" ;;
-    intel) result "Intel"
-	   required_cxx_compiler_version="$required_icpc_compiler_version" ;;
+    intel) result "Intel" ;;
     *)     result "unknown" ;;
     esac
 
@@ -1592,7 +1633,11 @@ check_cxx_compiler_version() {
     case "$cxx_compiler_type" in
     gnu)   get_gpp_version   "$CXX" cxx_compiler_version || return 1 ;;
     clang) get_clang_version "$CXX" cxx_compiler_version || return 1 ;;
-    intel) get_icpc_version  "$CXX" cxx_compiler_version || return 1 ;;
+    intel) result "not supported"
+           message "Warning: the classic Intel C++ compiler (icpc) is not supported,"
+           message "   because it lacks the C++20 features FlexibleSUSY needs."
+           message "   Please use g++, clang++ or Intel's icpx."
+           return 1 ;;
     *)     message "Warning: could not check C++ compiler version because"
            message "   its type is unknown."
 	   return 1 ;;
@@ -1608,27 +1653,6 @@ check_cxx_compiler_version() {
     result "ok (version $cxx_compiler_version)"
     logmsg "   Required $CXX version: $required_cxx_compiler_version"
     logmsg "   $CXX version found: $cxx_compiler_version"
-}
-
-#_____________________________________________________________________
-check_icpc_features() {
-    local compiler="$1"
-    local version="$2"
-
-    checking_msg "$compiler compiler features"
-
-    local major minor patch
-    split_version "$version" major minor patch
-
-    # disable multi-threading for versions < 14.0.0
-    if ! major_minor_patch_at_least $major $minor $patch "14" "0" "0" &&
-       { [ "$enable_threads" = "yes" ] || [ "$enable_threads" = "automatic" ] ;} ; then
-	message ""
-	message "   Warning: multi-threading support requires $compiler 14.0.0 or newer."
-	enable_threads="no"
-    else
-	result "ok"
-    fi
 }
 
 #_____________________________________________________________________
@@ -1693,36 +1717,6 @@ get_gpp_version() {
 }
 
 #_____________________________________________________________________
-get_icpc_version() {
-    if test $# -ne 2; then
-        message "get_icpc_version(): too few arguments"
-        exit 1
-    fi
-
-    local compiler="$1"
-    local ret_var="$2"
-
-    local output
-    output=$($compiler -dM -E -x c++ /dev/null) || {
-        message "Warning: could not determine $compiler version because"
-        message "   execution of $compiler failed."
-        return 1
-    }
-    local version
-    version=$(printf "%s" "$output" |
-        sed 's/^.*__INTEL_COMPILER[[:space:]]*\([[:digit:]]*\)\([[:digit:]]\)\([[:digit:]]\).*$/\1.\2.\3/p;d')
-
-    eval "$ret_var=\"$version\""
-}
-
-#_____________________________________________________________________
-check_cxx_compiler_features() {
-    case "$cxx_compiler_type" in
-    intel) check_icpc_features "$CXX" "$cxx_compiler_version" ;;
-    esac
-}
-
-#_____________________________________________________________________
 get_clang_version() {
     if test $# -ne 2; then
         message "get_clang_version(): too few arguments"
@@ -1770,6 +1764,9 @@ check_cxxflags() {
             CXXFLAGS="${CXXFLAGS} -Wall -pedantic -Wextra\
  -Wcast-align -Woverloaded-virtual -Wnon-virtual-dtor\
  -Wno-unused-local-typedefs"
+        elif test "x${cxx_compiler_type}" = "xclang"; then
+            CXXFLAGS="${CXXFLAGS} -Wall -pedantic -Wextra\
+ -Wcast-align -Woverloaded-virtual -Wnon-virtual-dtor"
         elif test "x${cxx_compiler_type}" = "xintel"; then
             CXXFLAGS="${CXXFLAGS} -w3 -Wnon-virtual-dtor"
         fi
@@ -1852,14 +1849,15 @@ int main() {
 
     local eigen_version="$cpp_output"
 
-    result "ok (version ${eigen_version})"
     logmsg "   Eigen version found: ${eigen_version}"
 
     version_at_least "$eigen_version" "3.3.0" || {
-        message "Warning: You are using Eigen ${eigen_version}."
-        message "   Compilation errors can occur with this Eigen version in models with"
-        message "   complex parameters. We recommend to upgrade to Eigen 3.3.0 at least."
+        result "not ok (version ${eigen_version})"
+        message "Error: An old version of Eigen has been detected (${eigen_version})."
+        message "   Please upgrade to version 3.3.0 (or higher)."
+        exit 1
     }
+    result "ok (version ${eigen_version})"
 }
 
 #_____________________________________________________________________
@@ -2106,12 +2104,14 @@ check_gm2calc() {
             GM2CALCFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --cflags)
             GM2CALCLIBS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --libs)
             GM2CALC_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --modversion)
+            version_at_least "$GM2CALC_VERSION" "2.1.0" || {
+                message "not ok (version ${GM2CALC_VERSION})"
+                message "Error: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+                message "   Please upgrade to version 2.1.0 (or higher)."
+                exit 1
+            }
             enable_gm2calc=yes
             message "ok (version ${GM2CALC_VERSION})"
-            version_at_least "$GM2CALC_VERSION" "1.7.0" || {
-                message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
-                message "   Please consider upgrading to version 1.7.0 (or higher)."
-            }
             return
         }
 
@@ -2148,6 +2148,107 @@ int main() {
         message "Warning: An old version of Himalaya has been detected ($HIMALAYA_VERSION)."
         message "   Please consider upgrading to version 2.0.0 (or higher)."
     }
+}
+
+check_higgstools_incl() {
+    check_header "Higgs/Predictions.hpp" "$higgstools_inc_dir"
+    if test "x$found_hdr" = "x" ; then
+        if test "x$enable_higgstools" = "xyes" ; then
+            message "Error: HiggsTools's Predictions.hpp must be installed if you want"
+            message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
+            message "   You can use the --with-higgstools-incdir= option to specify the"
+            message "   location of Higgs/Predictions.hpp and the other headers."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        HIGGSTOOLSFLAGS="$HIGGSTOOLSFLAGS -I$higgstools_inc_dir"
+        return 0
+    fi
+    return 0
+}
+
+check_higgstools_libs() {
+    check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
+    if test "x$found_lib" = "x" ; then
+        if test "x$enable_higgstools" = "xyes" ; then
+            message "Error: The HiggsTools library must be installed if you want"
+            message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
+            message "   You can use the --with-higgstools-libdir option to specify the"
+            message "   location of the HiggsTools library."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        local filename
+        filename=$(basename -- "$found_lib")
+        local extension="${filename##*.}"
+        local HIGGSTOOLSLIBS_="-lHiggsTools"
+        if [ ! "$extension" = "a" ] && [ ! "$extension" = "so" ] && [ ! "$extension" = "dylib" ]; then
+	         message "Error: Cannot identify the type (static or shared) of"
+	         message "       HiggsTools library."
+	         exit 1
+	     fi
+        if [ -z "$higgstools_lib_dir" ]; then
+           HIGGSTOOLSLIBS="-L$higgstools_lib_dir ${HIGGSTOOLSLIBS_}"
+        else
+           if [ "x$enable_static" = xyes ]; then
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-Bstatic $HIGGSTOOLSLIBS_ -Wl,-Bdynamic"
+           else
+              HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir,-Bdynamic $HIGGSTOOLSLIBS_"
+           fi
+        fi
+    fi
+    return 0
+}
+
+check_higgstools() {
+    if check_higgstools_incl && check_higgstools_libs ; then
+        enable_higgstools=yes
+    else
+        enable_higgstools=no
+    fi
+    # libflexisusy uses code from model_specific/SM (also without
+    # HiggsTools).  MODULE_LIBEXT is known here (check_linking).  The
+    # absolute path is needed for shared libraries, which executables
+    # record by the path given on the link line.
+    HIGGSTOOLSLIBS="${HIGGSTOOLSLIBS:+$HIGGSTOOLSLIBS }$ABSBASEDIR/model_specific/SM/libmodel_specific_SM${MODULE_LIBEXT}"
+}
+
+check_python() {
+    checking_msg "C++ python embedding"
+    path_split=$(echo "$PATH" | sed -e 's/:/ /g')
+    python3config_cmd=$(find $path_split -name "python3*-config" 2>/dev/null)
+    if test -z "$python3config_cmd" ; then
+        result "no"
+        message "Warning! Cannot find python3*-config. Some features (like the Lilith interface)"
+        message "         will be disabled."
+        enable_lilith=no
+    else
+        # pick 1st one that was found
+        python3config_cmd=$(echo $python3config_cmd | cut -d ' ' -f 1)
+        # on my system python3-includes returns -I/usr/include/python3.11 -I/usr/include/python3.11
+        # remove duplicates
+        PYTHONFLAGS=$(echo "$(${python3config_cmd} --includes)" | xargs -n1 | sort -u)
+        PYTHONLIBS="$(${python3config_cmd} --ldflags --embed)"
+        result "found $python3config_cmd"
+    fi
+}
+
+check_lilith() {
+   if test -n "$lilith_dir" && test ! "x$enable_lilith" = "xno" ; then
+       check_header "lilith/c-api/lilith.h" "$lilith_dir"
+       if test "x$found_dir" = "x" ; then
+           enable_lilith=no
+       else
+           LILITHFLAGS="-I$lilith_dir/lilith/c-api"
+           enable_lilith=yes
+       fi
+   else
+       enable_lilith=no
+   fi
 }
 
 #_____________________________________________________________________
@@ -2245,7 +2346,7 @@ check_required_libs() {
 
             # early continue to skip expensive Mathematica kernel
             # calls, if possible
-            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
+            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
 
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
                 message "   TSIL is required to build $model_name"
@@ -2267,7 +2368,12 @@ check_required_libs() {
                 enable_himalaya=yes
             }
 
-            cat <<EOF | "${MATH}" > /dev/null 2>&1
+            mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopNMSSM" "True" && {
+                message "   Himalaya is required to build $model_name";
+                enable_himalaya=yes
+            }
+
+            cat <<EOF | run_math "${MATH}" > /dev/null 2>&1
 Get["${model_file}"]
 
 If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
@@ -2278,9 +2384,14 @@ If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
 ]
 EOF
 
-            [ "x$?" = "x0" ] && {
+            local _status="$?"
+            [ "x${_status}" = "x0" ] && {
                 message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
+            }
+            [ "x${_status}" = "x124" ] && {
+                message "   Warning: the Mathematica kernel did not finish within ${MATH_TIMEOUT} s"
+                message "   when checking whether $model_name uses FSHimalayaMh23L."
             }
 
         done
@@ -2319,8 +2430,10 @@ check_looptools_libs() {
    fi
    case "$operating_system" in
       Darwin)
+         # libgcc belongs to the GCC that compiled LoopTools, i.e. to the
+         # Fortran compiler; Apple clang (CXX) has none.
          local gcc_
-         gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+         gcc_=$(${FC} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
          check_library "libgcc" "$gcc_" "$default_lib_paths"
          if test "x$found_lib" = "x" ; then
             message "Error: libgcc not found in $gcc_ $default_lib_paths"
@@ -2750,16 +2863,25 @@ check_shared_lib_cmd() {
 
 #_____________________________________________________________________
 check_math_cmd() {
+    case "${MATH_TIMEOUT}" in
+        ''|*[!0-9]*)
+            message "Error: --with-math-timeout=${MATH_TIMEOUT} is not a non-negative integer."
+            exit 1 ;;
+    esac
     checking_msg "Mathematica kernel $MATH"
     exists_in_path "$MATH"
     if [ -z "$cmd" ] ; then
         result "not found"
+        local _math_cmd="$MATH"
         MATH=""
-        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+        # Mathematica is needed only for the meta code and for an
+        # explicitly enabled LibraryLink
+        if [ ! "${enable_meta}" = "yes" ] && [ ! "$enable_librarylink" = "yes" ]; then
             return
         fi
 
-        message "Error: Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
+        message "Error: Mathematica kernel ${_math_cmd} was not found or is not executable or is an alias."
+        message "   Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
         message "   You can use the --with-math-cmd= option to specify the location of"
         message "   the math kernel.  It is usually installed in "
         case "$operating_system" in
@@ -2796,7 +2918,7 @@ Quit[error];
 EOF
 
     checking_msg "Mathematica version >= ${required_mathematica_version}"
-    echo "Get[\"${_math_info_check_progr}\"]" | "$MATH" > /dev/null 2>&1 &&
+    echo "Get[\"${_math_info_check_progr}\"]" | run_math "$MATH" > /dev/null 2>&1 &&
 	_ok=true
     local _exit_status="$?"
     if test -r "${mathconfig}"; then
@@ -2812,11 +2934,15 @@ EOF
     else
         if [ "$_exit_status" = 2 ]; then
             result "not ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
+        elif [ "$_exit_status" = 124 ]; then
+            report_math_timeout "not ok"
         else
             result "not ok"
         fi
         MATH=""
-        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+        # Mathematica is needed only for the meta code and for an
+        # explicitly enabled LibraryLink
+        if [ ! "${enable_meta}" = "yes" ] && [ ! "$enable_librarylink" = "yes" ]; then
             return
         fi
 
@@ -2845,13 +2971,17 @@ check_random_number_generator() {
 check_sarah() {
     checking_msg "SARAH installation"
     rm -f ${sarahconfig}
-    "$MATH" <<EOF > /dev/null
+    run_math "$MATH" <<EOF > /dev/null
 Needs["SARAH\`"];
 If[!ValueQ[SA\`Version] || !StringQ[\$sarahDir], Quit[1]];
 Export["${sarahconfig}", SA\`Version, "String"];
 Quit[0];
 EOF
     local _sarah_is_available="$?"
+    if test "x${_sarah_is_available}" = "x124" ; then
+        report_math_timeout "not ok"
+        exit 1
+    fi
     if test "x${_sarah_is_available}" = "x0" ; then
         if test -r "${sarahconfig}" ; then
             SARAH_VERSION=$(cat "${sarahconfig}")
@@ -2878,7 +3008,7 @@ EOF
         exit 1
     fi
 
-    SARAH_MODEL_DIR=$(cat <<EOF | ("$MATH" 2> /dev/stdout 1> /dev/null)
+    SARAH_MODEL_DIR=$(cat <<EOF | (run_math "$MATH" 2> /dev/stdout 1> /dev/null)
 If[Needs["SARAH\`"] === \$Failed || !ValueQ[\$sarahModelDir],
    Quit[1];
   ];
@@ -2908,7 +3038,7 @@ check_feynarts() {
     local oldVersion=""
     [ -f "${feynartsconfig}" ] && oldVersion=$(cat "${feynartsconfig}")
     rm -f ${feynartsconfig}
-    "$MATH" <<EOF > /dev/null
+    run_math "$MATH" <<EOF > /dev/null
 Needs["FeynArts\`"];
 If[!MemberQ[\$Packages, "FeynArts\`"], Quit[1]];
 If[Head[FeynArts\`\$FeynArts] === List,
@@ -2918,6 +3048,16 @@ If[Head[FeynArts\`\$FeynArts] === List,
 Quit[0];
 EOF
     local _feynarts_is_available="$?"
+    if test "x${_feynarts_is_available}" = "x124" ; then
+        if test "x$enable_feynarts" = "xautomatic"; then
+            enable_feynarts="no"
+            report_math_timeout "no"
+            message "   FeynArts support is disabled."
+            return
+        fi
+        report_math_timeout "not ok"
+        exit 1
+    fi
     if test "x${_feynarts_is_available}" = "x0" ; then
         if test -r "${feynartsconfig}" ; then
             FEYNARTS_VERSION=$(cat "${feynartsconfig}")
@@ -2925,6 +3065,7 @@ EOF
             if version_at_least $FEYNARTS_VERSION "${required_feynarts_version}"; then
                 enable_feynarts="yes"
                 result "ok (version ${FEYNARTS_VERSION})"
+                DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"
             elif test "x$enable_feynarts" = "xautomatic"; then
                 enable_feynarts="no"
                 result "ok (version ${FEYNARTS_VERSION} too old -- support disabled)"
@@ -2985,7 +3126,7 @@ check_formcalc() {
     local oldVersion=""
     [ -f "${formcalcconfig}" ] && oldVersion=$(cat "${formcalcconfig}")
     rm -f ${formcalcconfig}
-    "$MATH" <<EOF > /dev/null
+    run_math "$MATH" <<EOF > /dev/null
 Needs["FormCalc\`"];
 If[!MemberQ[\$Packages, "FormCalc\`"], Quit[1]];
 If[Head[FormCalc\`\$FormCalc] === List,
@@ -2995,12 +3136,23 @@ If[Head[FormCalc\`\$FormCalc] === List,
 Quit[0];
 EOF
     local _formcalc_is_available="$?"
+    if test "x${_formcalc_is_available}" = "x124" ; then
+        if test "x$enable_formcalc" = "xautomatic"; then
+            enable_formcalc="no"
+            report_math_timeout "no"
+            message "   FormCalc support is disabled."
+            return
+        fi
+        report_math_timeout "not ok"
+        exit 1
+    fi
     if test "x${_formcalc_is_available}" = "x0" ; then
         if test -r "${formcalcconfig}" ; then
             FORMCALC_VERSION=$(cat "${formcalcconfig}")
 
             if version_at_least $FORMCALC_VERSION "${required_formcalc_version}"; then
                 result "ok (version ${FORMCALC_VERSION})"
+                DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"
             elif test "x$enable_formcalc" = "xautomatic"; then
                 enable_formcalc="no"
                 result "ok (version ${FORMCALC_VERSION} too old -- support disabled)"
@@ -3063,7 +3215,7 @@ EOF
                 result "yes (cannot perform test calculation because FeynArts support is disabled)"
             fi
         else
-            "$MATH" <<EOF > /dev/null
+            run_math "$MATH" <<EOF > /dev/null
 Needs["FeynArts\`"];
 Needs["FormCalc\`"];
 SetDirectory[CreateDirectory[]];
@@ -3082,7 +3234,16 @@ If[MatchQ[Head[fcFeynAmp], Amp[{{FeynArts\`S[1], __}} -> {{FeynArts\`S[1], __}}]
 Quit[1];
 EOF
             local _formcalc_is_working="$?"
-            if test "x${_formcalc_is_working}" = "x0" ; then
+            if test "x${_formcalc_is_working}" = "x124" ; then
+                if test "x$enable_formcalc" = "xautomatic"; then
+                    enable_formcalc="no"
+                    report_math_timeout "no"
+                    message "   FormCalc support is disabled."
+                else
+                    report_math_timeout "not ok"
+                    exit 1
+                fi
+            elif test "x${_formcalc_is_working}" = "x0" ; then
                 enable_formcalc="yes"
                 result "yes (performed test calculation of S[1] -> S[1] in the SM)"
             elif test "x$enable_formcalc" = "xautomatic"; then
@@ -3137,9 +3298,13 @@ mma_symbol_is() {
         return 1
     }
 
-    echo "Get[\"${model_file}\"]; Quit[Boole[!(${symbol} === ${value})]]" | "${math_cmd}" > /dev/null 2>&1
-
-    return $?
+    echo "Get[\"${model_file}\"]; Quit[Boole[!(${symbol} === ${value})]]" | run_math "${math_cmd}" > /dev/null 2>&1
+    local _status="$?"
+    if [ "${_status}" = 124 ] ; then
+        >&2 echo "Warning: the Mathematica kernel did not finish within ${MATH_TIMEOUT} s"
+        >&2 echo "   when checking ${symbol} in ${model_file}; assuming it is not ${value}."
+    fi
+    return "${_status}"
 }
 
 #_____________________________________________________________________
@@ -3187,6 +3352,10 @@ get_model_specific_corrections() {
         mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && \
         ho="${ho} MSSM_higgs NMSSM_higgs"
 
+    grep -q 'UseHiggs3LoopNMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopNMSSM" "True" && \
+        ho="${ho} MSSM_higgs NMSSM_higgs"
+
     grep -q 'UseHiggs3LoopSplit' "${model_file}" && \
         mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && \
         ho="${ho} SplitMSSM"
@@ -3204,15 +3373,6 @@ update_module_mk() {
     local math_cmd="${4:-math}"
 
     [ -e "$model_file" ] || return
-
-    local mk_date model_date date_tolerance
-    mk_date="$(date -r "${mkfile}" +%s)"
-    model_date="$(date -r "${model_file}" +%s)"
-    date_tolerance="5" # Seconds
-    if [ "0" = "$(( $mk_date + $date_tolerance < $model_date ))" ] && \
-       [ "0" = "$(( $model_date < $mk_date - $date_tolerance ))" ]; then
-       return
-    fi
 
     message -n "   Updating model-specific modules in $mkfile ... "
     local ho
@@ -3311,6 +3471,24 @@ enable_defines() {
     fi
     logmsg "   ${DEFINE_ENABLE_HIMALAYA}"
 
+    if test "x$enable_higgstools" = "xyes" ; then
+        DEFINE_ENABLE_HIGGSTOOLS="#define ENABLE_HIGGSTOOLS 1"
+        message "Enabling HiggsTools"
+    else
+        DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
+        message "Disabling HiggsTools"
+    fi
+    logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
+
+    if test "x$enable_lilith" = "xyes" ; then
+        DEFINE_ENABLE_LILITH="#define ENABLE_LILITH 1"
+        message "Enabling Lilith"
+    else
+        DEFINE_ENABLE_LILITH="#undef ENABLE_LILITH"
+        message "Disabling Lilith"
+    fi
+    logmsg "   ${DEFINE_ENABLE_LILITH}"
+
     if test "x$enable_librarylink" = "xyes" ; then
         DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
         logmsg "Enabling LibraryLink"
@@ -3408,9 +3586,11 @@ enable_defines() {
 		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1"
 		DEFINE_ENABLE_LATTICE_SOLVER="#define ENABLE_LATTICE_SOLVER 1"
                 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1"
+                DEFINE_ENABLE_SHOOTING_SOLVER="#define ENABLE_SHOOTING_SOLVER 1"
 		logmsg "   ${DEFINE_ENABLE_TWO_SCALE_SOLVER}"
 		logmsg "   ${DEFINE_ENABLE_LATTICE_SOLVER}"
                 logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+                logmsg "   ${DEFINE_ENABLE_SHOOTING_SOLVER}"
 		break ;;
 	    two_scale)
 		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1";
@@ -3423,6 +3603,10 @@ enable_defines() {
             semi_analytic)
                 DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1";
                 logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+                continue ;;
+            shooting)
+                DEFINE_ENABLE_SHOOTING_SOLVER="#define ENABLE_SHOOTING_SOLVER 1";
+                logmsg "   ${DEFINE_ENABLE_SHOOTING_SOLVER}"
                 continue ;;
 	    *)
 		message "Error: unknown solver: $a";
@@ -3460,6 +3644,10 @@ add_metaflags() {
    tcol_='FSEnableColors = '
    col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
+   local tcom_ com_
+   tcom_='FSEnableCompile = '
+   com_="${tcom_}$(test ${enable_compile} = 'yes' && echo 'True' || echo 'False');"
+
    local c_=''
    local fs_=''
    for m in ${MODELS}; do
@@ -3484,9 +3672,12 @@ add_metaflags() {
 
       c_=$(grep "$tcol_" $fs_)
       if [ "$c_" != "$col_" ]; then
-         [ "$c_" != '' ] && \
-            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
-            echo "$col_" >> $fs_
+         [ "$c_" != '' ] && sed -i "s/${tcol_}.*/${col_}/g" $fs_ || echo "$col_" >> $fs_
+      fi
+
+      c_=$(grep "$tcom_" $fs_)
+      if [ "$c_" != "$com_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tcom_}.*/${com_}/g" $fs_ || echo "$com_" >> $fs_
       fi
 
    done
@@ -3537,6 +3728,7 @@ replace_markers() {
 	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
 	-e "s|@ENABLE_GM2CALC@|$enable_gm2calc|" \
+	-e "s|@ENABLE_HIGGSTOOLS@|$enable_higgstools|" \
 	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
@@ -3547,20 +3739,26 @@ replace_markers() {
 	-e "s|@ENABLE_THREADS@|$enable_threads|"  \
 	-e "s|@ENABLE_TSIL@|$enable_tsil|"        \
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
-        -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
-        -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
-        -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
-        -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
+	-e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
+	-e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
+	-e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
+	-e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
+	-e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
+	-e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
 	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
+	-e "s|@LILITHFLAGS@|$LILITHFLAGS|"    \
+	-e "s|@PYTHONFLAGS@|$PYTHONFLAGS|"    \
+	-e "s|@PYTHONLIBS@|$PYTHONLIBS|"    \
+	-e "s|@ENABLE_LILITH@|$enable_lilith|" \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
 	-e "s|@LOOPTOOLSFLAGS@|$LOOPTOOLSFLAGS|"  \
 	-e "s|@OPTIONAL_MODULES@|$OPTIONAL_MODULES|" \
 	-e "s|@SARAH_DEP_GEN@|$SARAH_DEP_GEN|"    \
 	-e "s|@SARAH_MODEL_DIR@|$SARAH_MODEL_DIR|" \
-        -e "s|@SHARED_LIB_CMD@|$SHARED_LIB_CMD|"  \
-        -e "s|@STATIC_LIB_CMD@|$STATIC_LIB_CMD|"  \
+	-e "s|@SHARED_LIB_CMD@|$SHARED_LIB_CMD|"  \
+	-e "s|@STATIC_LIB_CMD@|$STATIC_LIB_CMD|"  \
 	-e "s|@SQLITELIBS@|$SQLITELIBS|"          \
 	-e "s|@SQLITEFLAGS@|$SQLITEFLAGS|"        \
 	-e "s|@TSILLIBS@|$TSILLIBS|"              \
@@ -3592,7 +3790,9 @@ enable/disable options, prefix with either --enable- or --disable-
   debug             Debug messages and assertions (no default)
   fflite            Use fflite to compute the loop functions (default: $enable_fflite)
   gm2calc           Enable GM2Calc (default: $enable_gm2calc)
+  higgstools        Enable HiggsTools (default: $enable_higgstools)
   himalaya          Enable Himalaya (default: $enable_himalaya)
+  lilith            Enable Lilith (default: $enable_lilith)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
@@ -3619,7 +3819,7 @@ Package directories, compilation settings and model selection
                             (default: $ADDONS)
   --with-boost-libdir=      Path to search for BOOST libraries
   --with-boost-incdir=      Path to search for BOOST headers
-  --with-cppflags           C preprocessor flags (default: $CPPFLAGS)
+  --with-cppflags=          C preprocessor flags (default: $CPPFLAGS)
   --with-cxx=               C++ compiler (default: $CXX)
   --with-cxxflags=          C++ compiler flags (default: $CXXFLAGS)
   --with-eigen-incdir=      Path to search for Eigen headers
@@ -3632,7 +3832,10 @@ Package directories, compilation settings and model selection
   --with-gsl-config=        Path to gsl-config (default: $gsl_config)
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
+  --with-higgstools-libdir= Path to search for HiggsTools library
+  --with-higgstools-incdir= Path to search for HiggsTools header
   --with-install-dir=       Path to source code installation directory
+  --with-lilith=            Path to Lilith
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
   --with-loop-libraries=    Comma separated list of loop libraries to be enabled
@@ -3645,6 +3848,8 @@ EOF
 # BEGIN: NOT EXPORTED ##########################################
 cat <<EOF
   --with-math-cmd=          Mathematic kernel (default: $MATH)
+  --with-math-timeout=      Time limit in seconds for each Mathematica kernel
+                            started by configure, 0 = no limit (default: $MATH_TIMEOUT)
 EOF
 # END:   NOT EXPORTED ##########################################
 cat <<EOF
@@ -3687,8 +3892,9 @@ trap do_actions_at_exit 0
 trap "exit 1" INT QUIT TERM
 
 rm -f $logfile
-write_configure_parameters "$*"
-reset_default_static_linker_cmd
+# written to config.status after the options are parsed, so that --help,
+# --version and invalid options don't overwrite it
+configure_parameters="$*"
 
 if test $# -gt 0 ; then
     while test ! "x$1" = "x" ; do
@@ -3758,15 +3964,19 @@ if test $# -gt 0 ; then
             --with-gm2calc-incdir=*) gm2calc_inc_dir=$optarg ;;
             --with-gm2calc-libdir=*) gm2calc_lib_dir=$optarg ;;
             --with-gsl-config=*)     gsl_config=$optarg ;;
+            --with-higgstools-incdir=*) higgstools_inc_dir=$optarg ;;
+            --with-higgstools-libdir=*) higgstools_lib_dir=$optarg ;;
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
+            --with-lilith=*)         lilith_dir=$optarg ;;
             --with-llflags=*)        LLFLAGS=$optarg ;;
             --with-lllibs=*)         LLLIBS=$optarg ;;
             --with-loop-libraries=*) LOOP_LIBRARIES=$optarg ;;
             --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
             --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
             --with-math-cmd=*)       MATH=$optarg ;;
+            --with-math-timeout=*)   MATH_TIMEOUT=$optarg ;;
             --with-models=*)         MODELS=$optarg ;;
             --with-optional-modules=*) OPTIONAL_MODULES="$(echo $optarg | tr ',' ' ')" ;;
             --with-pthread-libdir=*) pthread_lib_dir=$optarg ;;
@@ -3789,6 +3999,8 @@ if test $# -gt 0 ; then
         shift
     done
 fi
+
+write_configure_parameters "$configure_parameters"
 
 log_package_information
 guess_machine_word_size
@@ -3815,6 +4027,8 @@ if test "x${enable_meta}" = "xyes"; then
     check_feynarts
     check_formcalc
 else
+    if [ ! "${enable_feynarts}" = "no" ]; then DEFINE_ENABLE_FEYNARTS="#define ENABLE_FEYNARTS 1"; fi
+    if [ ! "${enable_formcalc}" = "no" ]; then DEFINE_ENABLE_FORMCALC="#define ENABLE_FORMCALC 1"; fi
     enable_feynarts=no
     enable_formcalc=no
 fi
@@ -3832,8 +4046,8 @@ if test "x${enable_compile}" = "xyes"; then
     check_cxx
     check_cxx_compiler_type
     check_cxx_compiler_version
-    check_cxx_compiler_features
     check_cxxflags
+    check_cxx_std_library
     check_fc
     check_fflags
     check_fmod
@@ -3846,10 +4060,9 @@ if test "x${enable_compile}" = "xyes"; then
     check_gsl_config
     check_gm2calc
     check_himalaya
-    if use_solver "lattice"; then
-        check_boost_thread_incl
-        check_boost_thread_libs
-    fi
+    check_higgstools
+    check_python
+    check_lilith
     check_looplibrary
     check_odeint
     check_sqlite
@@ -3911,6 +4124,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
     -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"               \
     -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"             \
+    -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"         \
+    -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"       \
     -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
     -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
@@ -3939,7 +4154,9 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_FFLITE@|$DEFINE_ENABLE_FFLITE|" \
     -e "s|@DEFINE_ENABLE_GM2CALC@|$DEFINE_ENABLE_GM2CALC|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
+    -e "s|@DEFINE_ENABLE_HIGGSTOOLS@|$DEFINE_ENABLE_HIGGSTOOLS|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
+    -e "s|@DEFINE_ENABLE_LILITH@|$DEFINE_ENABLE_LILITH|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \
@@ -3952,7 +4169,10 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_TWO_SCALE_SOLVER@|$DEFINE_ENABLE_TWO_SCALE_SOLVER|" \
     -e "s|@DEFINE_ENABLE_LATTICE_SOLVER@|$DEFINE_ENABLE_LATTICE_SOLVER|" \
     -e "s|@DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@|$DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER|" \
+    -e "s|@DEFINE_ENABLE_SHOOTING_SOLVER@|$DEFINE_ENABLE_SHOOTING_SOLVER|" \
     -e "s|@DEFINE_ENABLE_ADDONS@|$DEFINE_ENABLE_ADDONS|"       \
+    -e "s|@DEFINE_ENABLE_FEYNARTS@|$DEFINE_ENABLE_FEYNARTS|"       \
+    -e "s|@DEFINE_ENABLE_FORMCALC@|$DEFINE_ENABLE_FORMCALC|"       \
     -e 's|@n@|\
 |g' \
     < $CONFIGHDR_TMPL > $CONFIGHDR

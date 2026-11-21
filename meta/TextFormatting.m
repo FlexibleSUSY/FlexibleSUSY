@@ -28,7 +28,27 @@ WrapLines::usage="Breaks long text lines.  This function is a wrapper around Wra
 WrapText::usage="WrapText[text, maxWidth, indentation] breaks text lines.  It tries to wrap a line at a blank or a special character that maximizes the line length within maxWidth characters.";
 IndentText::usage="indents text by a given number of spaces";
 
+ReplaceCXXTokens::usage="Replaces C++ tokens in a string";
+
 Begin["`Private`"];
+
+IsCXXToken[str_] := MatchQ[str, _String?(StringMatchQ[#, RegularExpression@"@[^@\n]+@"]&)];
+
+IsCXXRules[list_] := MatchQ[list, {Rule[_?IsCXXToken, _String]..}];
+
+getIndent[obj:_String] :=
+   First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+getIndent[obj:{__String}] :=
+   First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+
+removeIndent[obj:_String] :=
+   StringReplace[obj, StartOfLine~~getIndent[obj]->""];
+
+ReplaceCXXTokens[code_String, rules_?IsCXXRules] :=
+StringJoin[
+   StringReplace[#, "\n"->StringJoin["\n", getIndent@#]] &/@
+      Riffle[StringReplace[StringSplit[removeIndent@code,"\n"],rules], "\n"]
+];
 
 WrapLines[text_String, maxWidth_:79, offset_:"   "] :=
     WrapText[text, maxWidth, StringLength[offset]];

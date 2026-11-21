@@ -110,7 +110,7 @@ lamPhi = (lamPhi //. quarks) + (lamPhi //. leptons);
 
 Print["testing THDM threshold corrections[] ..."];
 
-Get["model_files/THDMIIMSSMBC/FlexibleSUSY.m.in"];
+Get["test/model_files/THDMIIMSSMBC/FlexibleSUSY.m.in"];
 
 renameRules = {
     AtauInput -> Atau,
@@ -141,6 +141,8 @@ lamPhiDiff = Simplify[lamPhi - deltaLambdaPhi //. gRules];
 TestEquality[lamThDiff , Table[0, {i,1,7}]];
 TestEquality[lamPhiDiff, Table[0, {i,1,7}]];
 
+Print["testing HTHDM threshold corrections[] ..."];
+
 Get["model_files/HTHDMIIMSSMBC/FlexibleSUSY.m.in"];
 
 deltaLambdaTh = {
@@ -160,6 +162,8 @@ lamPhiDiff = Simplify[lamPhi - deltaLambdaPhi //. gRules];
 
 TestEquality[lamThDiff , Table[0, {i,1,7}]];
 TestEquality[lamPhiDiff, Table[0, {i,1,7}]];
+
+Print["testing HGTHDM threshold corrections[] ..."];
 
 Get["model_files/HGTHDMIIMSSMBC/FlexibleSUSY.m.in"];
 

@@ -45,7 +45,7 @@ constexpr double TOL = 1e-4;
 constexpr double dabs(double a) noexcept { return a >= 0. ? a : -a; }
 constexpr double sqr(double a) noexcept { return a*a; }
 constexpr double pow3(double a) noexcept { return a*a*a; }
-constexpr double pow6(double a) noexcept { return a*a*a*a*a*a; }
+constexpr double pow6(double a) noexcept { return sqr(pow3(a)); }
 
 constexpr bool is_zero(double m, double tol) noexcept
 {
@@ -146,7 +146,7 @@ double rea0(double x, double q) noexcept
       return 0;
    }
 
-   return x * (1 - std::log(std::abs(x)/q));
+   return x * (1 - 2*std::log(std::sqrt(std::abs(x/q))));
 }
 
 double ffn(double p, double m1, double m2, double q) noexcept {
@@ -217,6 +217,29 @@ double b0(double p, double m1, double m2, double q) noexcept
 
    return 1.0 - 2.0 * std::log(m2/q)
         + 2.0 * m12 * std::log(m2/m1) / (m12 - m22);
+}
+
+/**
+ * derivative of B0(p^2, m1^2, m2^2) w.r.t. p^2
+ *
+ * @note Currently the function is evaluated at p^2 = 0.
+ *
+ * @param s squared momentum
+ * @param x squared mass
+ * @param y squared mass
+ *
+ * @return d B0(p^2, m1^2, m2^2) / d p^2
+ */
+double db0(double /* s */, double x, double y) noexcept
+{
+   if ((std::abs(x) < 0.0001) != (std::abs(y) < 0.0001)) {
+      return (x + y)/(2*sqr(x - y));
+   } else if ((std::abs(x) < 0.0001) && (std::abs(y) < 0.0001)) {
+      return 0;
+   } else if (std::abs(y - x) < 0.001) {
+      return (1./12*(1 - y/x) + 1./6)/x;
+   }
+   return ((x - y)*(x + y) + 2*x*y*std::log(y/x))/(2*pow3(x - y));
 }
 
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!

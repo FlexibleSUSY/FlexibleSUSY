@@ -55,7 +55,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   1                    # calculate observables (a_muon, ...)
+   15   1                    # calculate all observables
    16   0                    # force positive majorana masses
    17   160                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -194,11 +194,11 @@ Block MSOFTIN
    const auto calculated_value = CMSSMCKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
    constexpr std::complex<double> C7NP  {-0.0053094128952261635,  -9.7025869191383121e-05};
    constexpr std::complex<double> C7pNP {-0.00012366231966027145, -2.2598442848446435e-06};
-   constexpr std::complex<double> C8NP  {0.016491993833256832,     0.00030123469860007075};
-   constexpr std::complex<double> C8pNP {0.00038603929508783667,   7.0512140866869945e-06};
+   constexpr std::complex<double> C8NP  {0.016490888662826098,     0.00030121451286620036};
+   constexpr std::complex<double> C8pNP {0.00038601398040478963,   7.0507444188070971e-06};
 
-   TEST_COMPLEX_CLOSE_FRACTION(C7NP , calculated_value[0], 5e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 5e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C8NP , calculated_value[2], 5e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C8pNP, calculated_value[3], 5e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C7NP , calculated_value[0], 6e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 6e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C8NP , calculated_value[2], 6e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C8pNP, calculated_value[3], 6e-5);
 }

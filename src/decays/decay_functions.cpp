@@ -70,7 +70,7 @@ double calc_DeltaH(double b) noexcept
 }
 
 // Eq.(2.6 of) hep-ph/0503173
-double calc_DeltaAH(double b) noexcept
+double calc_DeltaAh(double b) noexcept
 {
    const double b2 = b*b;
 
@@ -84,21 +84,25 @@ double calc_Deltaqq(double alpha_s_red, double Nf, FlexibleDecay_settings const&
    constexpr double Pi2 = Sqr(Pi);
 
    double result = 0.;
-   switch (static_cast<int>(settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+   switch (settings.get_decay_corrections().sm) {
       case 4:
          result += alpha_s_red * (39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf)));
+         [[fallthrough]];
       case 3:
          result +=
             6163613/5184. - 3535/72.*Pi2 - 109735/216.*zeta3 + 815/12.*zeta5
             + (- 46147/486. + 277/72.*Pi2 + 262/9.*zeta3 - 5/6.*zeta4 - 25/9.*zeta5)*Nf
             + (15511/11664. - 11/162.*Pi2 - 1/3.*zeta3)*Sqr(Nf);
          result *= alpha_s_red;
+         [[fallthrough]];
       case 2:
          result +=
             10801/144. - 19/12.*Pi2 - 39/2.*zeta3 + (- 65/24. + 1/18.*Pi2 + 2/3.*zeta3)*Nf;
          result *= alpha_s_red;
+         [[fallthrough]];
       case 1:
          result *= alpha_s_red;
+         [[fallthrough]];
       case 0:
          break;
       default:
@@ -153,7 +157,7 @@ std::complex<double> taum1fprime(double tau) noexcept {
    else {
       return
 (tau-1.)*(1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) + 
+   (-2i*std::sqrt((-1. + tau)*tau) +
      2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
    }
 }
@@ -165,7 +169,7 @@ std::complex<double> fprime(double tau) noexcept {
    else {
       return
 (1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) + 
+   (-2i*std::sqrt((-1. + tau)*tau) +
      2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
    }
 }
@@ -264,8 +268,8 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
    }
 }
 
-std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAH, double msq, double mu) noexcept {
-   const double r = Sqr(mAH/msq);
+std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAh, double msq, double mu) noexcept {
+   const double r = Sqr(mAh/msq);
    if (r < 0.7) {
       return 0.;
    }
