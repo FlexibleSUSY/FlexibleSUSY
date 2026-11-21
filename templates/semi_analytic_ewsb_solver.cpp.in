@@ -47,7 +47,7 @@ namespace flexiblesusy {
 #define EXTRAPARAMETER(parameter) model.get_##parameter()
 #define DERIVEDPARAMETER(parameter) model.parameter()
 #define PHASE(p) MODELPARAMETER(p)
-#define SEMIANALYTICPARAMETER(p) solutions->get_##p()
+#define SEMIANALYTICPARAMETER(p) solutions.get_##p()
 #define LowEnergyConstant(p) Electroweak_constants::p
 #define CLASSNAME @ModelName@_ewsb_solver<Semi_analytic>
 
@@ -63,7 +63,7 @@ int CLASSNAME::solve_iteratively(@ModelName@_mass_eigenstates& model_to_solve)
    auto ewsb_stepper = [this, model](const EWSB_vector_t& ewsb_pars) mutable -> EWSB_vector_t {
 @getEWSBParametersFromVector@
 @setEWSBParametersFromLocalCopies@
-      solutions->evaluate_solutions(model);
+      solutions.evaluate_solutions(model);
 @applyEWSBSubstitutions@
       if (this->loop_order > 0)
          model.calculate_DRbar_masses();
@@ -74,7 +74,7 @@ int CLASSNAME::solve_iteratively(@ModelName@_mass_eigenstates& model_to_solve)
    auto tadpole_stepper = [this, model](const EWSB_vector_t& ewsb_pars) mutable -> EWSB_vector_t {
 @getEWSBParametersFromVector@
 @setEWSBParametersFromLocalCopies@
-      solutions->evaluate_solutions(model);
+      solutions.evaluate_solutions(model);
 @applyEWSBSubstitutions@
       if (this->loop_order > 0)
          model.calculate_DRbar_masses();
@@ -151,7 +151,7 @@ void CLASSNAME::set_ewsb_solution(@ModelName@_mass_eigenstates& model, const EWS
    const auto solution = solver->get_solution();
 
 @setEWSBSolution@
-   solutions->evaluate_solutions(model);
+   solutions.evaluate_solutions(model);
 @setModelParametersFromEWSB@
    model.calculate_DRbar_masses();
 }
@@ -193,11 +193,6 @@ int CLASSNAME::solve_iteratively_at(@ModelName@_mass_eigenstates& model_to_solve
 
 int CLASSNAME::solve(@ModelName@_mass_eigenstates& model_to_solve)
 {
-   if (!solutions) {
-      throw SetupError("@ModelName@_ewsb_solver<Semi_analytic>:solve: "
-                       "pointer to semi-analytic solutions is zero!");
-   }
-
    if (loop_order == 0) {
       return solve_tree_level(model_to_solve);
    }
@@ -263,7 +258,9 @@ CLASSNAME::EWSB_vector_t CLASSNAME::ewsb_step(
 void CLASSNAME::set_semi_analytic_solutions(
    @ModelName@_semi_analytic_solutions* s)
 {
-   solutions = s;
+   if (s != nullptr) {
+      solutions = *s;
+   }
 }
 
 } // namespace flexiblesusy

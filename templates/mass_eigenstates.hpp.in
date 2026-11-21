@@ -98,6 +98,7 @@ public:
    double get_ewsb_iteration_precision() const;
    double get_ewsb_loop_order() const;
    void set_ewsb_solver(const std::shared_ptr<@ModelName@_ewsb_solver_interface>&);
+   std::shared_ptr<@ModelName@_ewsb_solver_interface> get_ewsb_solver() const;
    int solve_ewsb_tree_level();
    int solve_ewsb_one_loop();
    int solve_ewsb();            ///< solve EWSB at ewsb_loop_order level
