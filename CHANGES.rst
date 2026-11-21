@@ -43,6 +43,14 @@ New features
 Fixed bugs
 ----------
 
+* [commit 65e84fdf7]: If FlexibleDecay calculated a negative partial width
+  that was not just a rounding error (an unphysical result, e.g. from an
+  inconsistent coupling), the spectrum generator aborted without writing
+  any output.  Now such a channel is set to zero (also in the total width,
+  the branching ratios and the input to HiggsTools and Lilith), a warning
+  is written to the ``DCINFO`` block, and the spectrum and all other decays
+  are written as usual.
+
 * [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
   photons) of a particle lighter than the Z boson evaluated the loop
   functions at the mass of the particle, while its couplings are taken at
