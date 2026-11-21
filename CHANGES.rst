@@ -50,6 +50,17 @@ Fixed bugs
   input, the width of the 66 GeV Higgs boson into two photons increases by
   0.2%.  Decays of heavier particles are unchanged.
 
+* [commit 5257d970c]: The static libraries of FlexibleSUSY and the models
+  could keep an outdated object file, without any message, when it was
+  recompiled within the same second as the previous version (e.g. with
+  ``ccache`` or after switching branches).  Executables then used the old
+  code.  The libraries are now always updated (``ar cr`` instead of
+  ``ar cruU``).
+
+* [commit 33347f593]: ``configure --with-solvers=lattice`` failed if
+  ``libboost_system`` was missing, which is common with recent Boost
+  versions.  The library was never used.
+
 * [commit dedac5462]: FlexibleDecay: the decays of a particle lighter than
   the Z boson used the BSM parameters at an arbitrary scale (the scale of
   the spectrum, or the mass of the particle whose decays were calculated

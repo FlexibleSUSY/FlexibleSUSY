@@ -203,7 +203,11 @@ MATH_TIMEOUT=300
 OPTIONAL_MODULES=""
 pthread_lib_dir=""
 STATIC_LIB_EXT=".a"
-STATIC_LIB_CMD="ar cru"
+# Without the u modifier, ar always replaces the given members.  With u,
+# a member is only replaced if the object file is newer, to the second, so
+# an object rebuilt within the same second as the archived one would be
+# kept outdated in the library.
+STATIC_LIB_CMD="ar cr"
 STATIC_LDFLAGS="-static"
 STATIC_LDLIBS="-lquadmath -ldl"
 SHARED_LIB_EXT=".so"
@@ -1378,16 +1382,6 @@ check_platform() {
 }
 
 #_____________________________________________________________________
-reset_default_static_linker_cmd() {
-    local os_
-    os_=$( (uname -s) 2>/dev/null || echo unknown)
-    case "$os_" in
-        Linux)
-            STATIC_LIB_CMD="ar cruU";;
-    esac
-}
-
-#_____________________________________________________________________
 check_multiarch() {
     local linuxdist=""
     debmultiarch=""
@@ -1527,54 +1521,6 @@ check_boost_test_incl() {
     if test "x$found_hdr" = "x" ; then
         message "Warning: boost/test/unit_test.hpp must be installed"
         message "  to compile and run the tests, see http://www.boost.org"
-    fi
-}
-
-#_____________________________________________________________________
-check_boost_thread_libs() {
-    check_library "libboost_thread libboost_thread-mt" \
-	"$boost_lib_dir" "$default_lib_paths"
-    if [ -z "$found_lib" ]; then
-        message "Error: libboost_thread or libboost_thread-mt must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    fi
-    local BOOSTTHREADLIBS_
-    BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-
-    check_library "libboost_system libboost_system-mt" \
-	"$boost_lib_dir" "$default_lib_paths"
-    if [ -z "$found_lib" ]; then
-        message "Error: libboost_system or libboost_system-mt must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    fi
-    BOOSTTHREADLIBS_="$BOOSTTHREADLIBS_ "-l$(
-	echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-
-    if [ -z "$boost_lib_dir" ]; then
-        # assume that the linker will look in the default paths
-        BOOSTTHREADLIBS="$BOOSTTHREADLIBS_"
-    else
-        BOOSTTHREADLIBS="-L$boost_lib_dir $BOOSTTHREADLIBS_"
-    fi
-}
-
-#_____________________________________________________________________
-check_boost_thread_incl() {
-    check_header "boost/thread/thread.hpp" "$boost_inc_dir" \
-	"$default_inc_paths"
-    if test "x$found_hdr" = "x" ; then
-        message "Error: boost/thread/thread.hpp must be installed"
-        message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-solvers= flag."
-        exit 1
-    else
-        if contains_not "${BOOSTFLAGS}" "-I$found_dir"; then
-            BOOSTFLAGS="${BOOSTFLAGS} -I$found_dir"
-        fi
     fi
 }
 
@@ -3949,7 +3895,6 @@ rm -f $logfile
 # written to config.status after the options are parsed, so that --help,
 # --version and invalid options don't overwrite it
 configure_parameters="$*"
-reset_default_static_linker_cmd
 
 if test $# -gt 0 ; then
     while test ! "x$1" = "x" ; do
@@ -4116,10 +4061,6 @@ if test "x${enable_compile}" = "xyes"; then
     check_gm2calc
     check_himalaya
     check_higgstools
-    if use_solver "lattice"; then
-        check_boost_thread_incl
-        check_boost_thread_libs
-    fi
     check_python
     check_lilith
     check_looplibrary
