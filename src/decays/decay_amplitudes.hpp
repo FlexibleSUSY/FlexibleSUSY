@@ -140,6 +140,11 @@ Decay_amplitude_FFS operator*(Decay_amplitude_FFS const&, std::complex<double>);
 /**
  * @class Decay_amplitude_FFV
  * @brief generic amplitude for the decay of a fermion into a fermion and vector
+ *
+ * Amplitude ubar(p_f) Gamma^mu u(p) epsilon^*_mu with
+ * Gamma^mu = gamma^mu (form_factor_gam_left P_L + form_factor_gam_right P_R)
+ *          + p^mu (form_factor_p_1 P_L + form_factor_p_2 P_R),
+ * where p is the momentum of the decaying fermion.
  */
 struct Decay_amplitude_FFV {
    double m_decay {0.};

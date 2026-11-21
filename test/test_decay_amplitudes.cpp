@@ -111,3 +111,102 @@ BOOST_AUTO_TEST_CASE(test_VVV_square)
    amp.m_vector_2 = 0.;
    BOOST_CHECK_EQUAL(amp.square(), 0.);
 }
+
+// F(M) -> F(m) V(mV) with the vertex gamma^mu (L P_L + R P_R): the
+// spin-averaged |M|^2 is the bracket of FermionToFermionVectorBoson in
+// SPheno 4.0.5 (width = sqrt(lambda)/(16 Pi M^3) |M|^2),
+//
+//    (|L|^2 + |R|^2) ((M^2 - m^2)^2/mV^2 + M^2 + m^2 - 2 mV^2)/2
+//    - 6 M m Re(L^* R)
+BOOST_AUTO_TEST_CASE(test_FFV_square_massive)
+{
+   Decay_amplitude_FFV amp;
+   amp.m_decay = 500.;
+   amp.m_fermion = 100.;
+   amp.m_vector = 80.;
+   amp.form_factor_gam_left = {0.3, 0.1};
+   amp.form_factor_gam_right = {-0.7, 0.2};
+
+   BOOST_CHECK_CLOSE_FRACTION(amp.square(), 2969868., 1e-14);
+}
+
+// F -> F gamma with an amplitude that fulfils the Ward identity: the
+// p-form factors are fixed by k_mu Gamma^mu = 0.  The value follows from the
+// trace with the polarization sum -g_{mu nu}, and is the mV -> 0 limit of
+// the massive result.
+BOOST_AUTO_TEST_CASE(test_FFV_square_massless_gauge_invariant)
+{
+   const double m_decay = 500.;
+   const double m_fermion = 100.;
+   const std::complex<double> left{0.3, 0.1};
+   const std::complex<double> right{-0.2, 0.05};
+   const double p_dot_k = 0.5 * (m_decay * m_decay - m_fermion * m_fermion);
+
+   Decay_amplitude_FFV amp;
+   amp.m_decay = m_decay;
+   amp.m_fermion = m_fermion;
+   amp.m_vector = 0.;
+   amp.form_factor_gam_left = left;
+   amp.form_factor_gam_right = right;
+   amp.form_factor_p_1 = (left * m_fermion - right * m_decay) / p_dot_k;
+   amp.form_factor_p_2 = (right * m_fermion - left * m_decay) / p_dot_k;
+
+   BOOST_CHECK_CLOSE_FRACTION(amp.square(), 48050., 1e-13);
+
+   // massive result for a tiny vector mass, with the p-form factors
+   // fixed for that mass
+   const double m_vector = 1e-2;
+   const double p_dot_k_massive = p_dot_k + 0.5 * m_vector * m_vector;
+   Decay_amplitude_FFV amp_massive = amp;
+   amp_massive.m_vector = m_vector;
+   amp_massive.form_factor_p_1 =
+      (left * m_fermion - right * m_decay) / p_dot_k_massive;
+   amp_massive.form_factor_p_2 =
+      (right * m_fermion - left * m_decay) / p_dot_k_massive;
+
+   BOOST_CHECK_CLOSE_FRACTION(amp_massive.square(), amp.square(), 1e-6);
+}
+
+// multiplying an amplitude by a factor multiplies |M|^2 by |factor|^2 and
+// keeps the masses and the threshold for massless vectors
+BOOST_AUTO_TEST_CASE(test_amplitude_times_factor)
+{
+   const std::complex<double> factor{0.6, -0.8}; // |factor| = 1
+   const std::complex<double> factor2{1.5, 2.};  // |factor2|^2 = 6.25
+
+   Decay_amplitude_SSV ssv;
+   ssv.m_decay = 500.;
+   ssv.m_scalar = 100.;
+   ssv.m_vector = 80.;
+   ssv.massless_vector_threshold = 1.;
+   ssv.form_factor = 0.3;
+   BOOST_CHECK_EQUAL((factor * ssv).massless_vector_threshold, 1.);
+   BOOST_CHECK_EQUAL((ssv * factor).massless_vector_threshold, 1.);
+   BOOST_CHECK_CLOSE_FRACTION((factor2 * ssv).square(), 6.25 * ssv.square(),
+                              1e-14);
+
+   const Decay_amplitude_FFS ffs{.m_decay = 500.,
+                                 .m_fermion = 100.,
+                                 .m_scalar = 50.,
+                                 .form_factor_left = {0.3, 0.1},
+                                 .form_factor_right = {-0.7, 0.2}};
+   BOOST_CHECK_CLOSE_FRACTION((factor2 * ffs).square(), 6.25 * ffs.square(),
+                              1e-14);
+   BOOST_CHECK_CLOSE_FRACTION((ffs * factor2).square(), 6.25 * ffs.square(),
+                              1e-14);
+
+   Decay_amplitude_FFV ffv;
+   ffv.m_decay = 500.;
+   ffv.m_fermion = 100.;
+   ffv.m_vector = 80.;
+   ffv.massless_vector_threshold = 1.;
+   ffv.form_factor_gam_left = {0.3, 0.1};
+   ffv.form_factor_gam_right = {-0.7, 0.2};
+   ffv.form_factor_p_1 = {1e-3, 2e-4};
+   ffv.form_factor_p_2 = {-5e-4, 1e-3};
+   BOOST_CHECK_EQUAL((factor * ffv).massless_vector_threshold, 1.);
+   BOOST_CHECK_CLOSE_FRACTION((factor2 * ffv).square(), 6.25 * ffv.square(),
+                              1e-14);
+   BOOST_CHECK_CLOSE_FRACTION((ffv * factor2).square(), 6.25 * ffv.square(),
+                              1e-14);
+}
