@@ -948,13 +948,14 @@ CreateDecaysCalculationFunction[decaysList_] :=
            particleDim = TreeMasses`GetDimension[particle];
            particleStart = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
 
+           (* The decays of each particle use their own copy of the model, run
+              from the scale of the spectrum to the scale of the particle (not
+              below MZ, like the SM part), so that the result doesn't depend on
+              the order of the decaying particles. *)
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
-                 "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
-                 TextFormatting`IndentText[
-                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
-                 ] <> "}\n";
+                 "particle_model.run_to(std::max(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ", qedqcd.displayPoleMZ()));\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
@@ -966,7 +967,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "switch (flag) {\n" <> TextFormatting`IndentText[
                  "case 1: {\n" <>
                  TextFormatting`IndentText[
-                    "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(model.get_input());\n" <>
+                    "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(particle_model.get_input());\n" <>
                     If[
                        MemberQ[
                           DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[] /. Susyno`LieGroups`conj->Identity}, Null],
@@ -977,11 +978,11 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     ] <>
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
-                    "dm->fill_from(model);\n" <>
+                    "dm->fill_from(particle_model);\n" <>
                     "standard_model::Standard_model sm = get_initialised_sm();\n" <>
                     "// set loop level for RGE running to match RGE setting\n" <>
                     "// of BSM model\n" <>
-                    "sm.set_loops(model.get_loops());\n" <>
+                    "sm.set_loops(particle_model.get_loops());\n" <>
                     "if (run_to_decay_particle_scale) {\n" <>
                     TextFormatting`IndentText[
                        "auto decay_mass = PHYSICAL(" <>
@@ -1001,13 +1002,13 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "}\n" <>
                  "case 2: {\n" <>
                  TextFormatting`IndentText[
-                    "model.solve_ewsb_tree_level();\n" <>
-                    "model.calculate_DRbar_masses();\n" <>
+                    "particle_model.solve_ewsb_tree_level();\n" <>
+                    "particle_model.calculate_DRbar_masses();\n" <>
                     "// decoupling scheme automatically reorders Goldstones to first\n" <>
                     "// positions in tree-level mass and mixing matrices. The\n" <>
                     "// non-decoupled model does not.\n" <>
-                    "model.reorder_DRbar_masses();\n" <>
-                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
+                    "particle_model.reorder_DRbar_masses();\n" <>
+                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(particle_model);\n" <>
                     "break;\n"
                   ] <>
                   "}\ndefault:\n" <>
@@ -1021,7 +1022,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
               "context_base context {dec_model.get()};\n" <>
               body;
 
-           body = IndentText["\nif (run_to_decay_particle_scale) {\n" <>
+           body = IndentText["\nauto particle_model = model;\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body ]<>
                   If[MemberQ[Join[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}], particle],
                   TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) || flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) || flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
