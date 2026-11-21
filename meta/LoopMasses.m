@@ -402,6 +402,16 @@ DoFastDiagonalization[particle_Symbol /; IsScalar[particle], tadpoles_List] :=
            Return[result];
           ];
 
+(* 1-loop fermion mass matrix: SARAH's mass matrix M is defined by
+   L = -psiL_i M_ij psiR^c_j + h.c., so in Dirac notation
+   L = -bar(Psi) (M^T P_L + M^* P_R) Psi.  self_energy_1(i,j) is the
+   coefficient of bar(Psi)_i P_R Psi_j, i.e. it corrects M^*, and
+   self_energy_PR (PL) renormalizes the fields of the rows (columns)
+   of M as (self_energy_PR)^T = (self_energy_PR)^*.  Hence
+
+     delta_M = -self_energy_PR^* M - M self_energy_PL^* - self_energy_1^*
+
+   For real couplings the conjugations don't matter. *)
 DoFastDiagonalization[particle_Symbol /; IsFermion[particle], _] :=
     Module[{result, dim, dimStr, massName, mixingMatrix, U, V,
             massNameReordered, reorderMasses,
@@ -702,12 +712,12 @@ DoMediumDiagonalization[particle_Symbol /; IsFermion[particle], inputMomentum_, 
                                      "const " <> selfEnergyMatrixCType <> " self_energy_PR = " <> CastIfReal[selfEnergyFunctionPR <> "(p)", selfEnergyMatrixType] <> ";\n"
                                     ] <>
                                   If[topTwoLoop,
-                                     selfEnergyMatrixCType <> " delta_M(- self_energy_PR * M_tree " <>
-                                     "- M_tree * self_energy_PL - self_energy_1);\n" <>
+                                     selfEnergyMatrixCType <> " delta_M(- self_energy_PR.conjugate() * M_tree " <>
+                                     "- M_tree * self_energy_PL.conjugate() - self_energy_1.conjugate());\n" <>
                                      "delta_M(2,2) -= M_tree(2,2) * (qcd_1l + qcd_2l + qcd_3l + qcd_4l);\n"
                                      ,
-                                     "const " <> selfEnergyMatrixCType <> " delta_M(- self_energy_PR * M_tree " <>
-                                     "- M_tree * self_energy_PL - self_energy_1);\n"
+                                     "const " <> selfEnergyMatrixCType <> " delta_M(- self_energy_PR.conjugate() * M_tree " <>
+                                     "- M_tree * self_energy_PL.conjugate() - self_energy_1.conjugate());\n"
                                     ]
                                  ];
               If[IsMajoranaFermion[particle],
