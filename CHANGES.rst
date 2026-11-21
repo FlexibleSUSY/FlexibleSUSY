@@ -43,6 +43,10 @@ New features
 Fixed bugs
 ----------
 
+* [commit 33347f593]: ``configure --with-solvers=lattice`` failed if
+  ``libboost_system`` was missing, which is common with recent Boost
+  versions.  The library was never used.
+
 * [commit dedac5462]: FlexibleDecay: the decays of a particle lighter than
   the Z boson used the BSM parameters at an arbitrary scale (the scale of
   the spectrum, or the mass of the particle whose decays were calculated
