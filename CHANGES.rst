@@ -43,6 +43,17 @@ New features
 Fixed bugs
 ----------
 
+* [commit dedac5462]: FlexibleDecay: the decays of a particle lighter than
+  the Z boson used the BSM parameters at an arbitrary scale (the scale of
+  the spectrum, or the mass of the particle whose decays were calculated
+  before), while the SM parameters were taken at the Z mass.  Now all
+  parameters are at the Z mass for such particles, and at the mass of the
+  decaying particle otherwise.  The decays of all particles also no longer
+  depend on the order in which they are calculated.  Example: in the shipped
+  MRSSM2 input, the width of the 66 GeV Higgs boson into two photons changes
+  by 0.03%; in the MSSM and NMSSM inputs the decays change by less than
+  1e-7.
+
 * [commit 7cca3f74a]: Loading the Mathematica interface no longer prints
   ``LibraryFunction::libload`` messages for ``FS<M>CallLilith`` and
   ``FS<M>CallHiggsTools`` when FlexibleSUSY is configured without Lilith or
