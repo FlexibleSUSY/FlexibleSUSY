@@ -203,7 +203,11 @@ MATH_TIMEOUT=300
 OPTIONAL_MODULES=""
 pthread_lib_dir=""
 STATIC_LIB_EXT=".a"
-STATIC_LIB_CMD="ar cru"
+# Without the u modifier, ar always replaces the given members.  With u,
+# a member is only replaced if the object file is newer, to the second, so
+# an object rebuilt within the same second as the archived one would be
+# kept outdated in the library.
+STATIC_LIB_CMD="ar cr"
 STATIC_LDFLAGS="-static"
 STATIC_LDLIBS="-lquadmath -ldl"
 SHARED_LIB_EXT=".so"
@@ -1375,16 +1379,6 @@ check_platform() {
 
     operating_system=$( (uname -s) 2>/dev/null || echo unknown)
     kernel_version=$( (uname -r) 2>/dev/null || echo unknown)
-}
-
-#_____________________________________________________________________
-reset_default_static_linker_cmd() {
-    local os_
-    os_=$( (uname -s) 2>/dev/null || echo unknown)
-    case "$os_" in
-        Linux)
-            STATIC_LIB_CMD="ar cruU";;
-    esac
 }
 
 #_____________________________________________________________________
@@ -3901,7 +3895,6 @@ rm -f $logfile
 # written to config.status after the options are parsed, so that --help,
 # --version and invalid options don't overwrite it
 configure_parameters="$*"
-reset_default_static_linker_cmd
 
 if test $# -gt 0 ; then
     while test ! "x$1" = "x" ; do

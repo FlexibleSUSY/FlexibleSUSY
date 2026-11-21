@@ -43,6 +43,13 @@ New features
 Fixed bugs
 ----------
 
+* [commit 5257d970c]: The static libraries of FlexibleSUSY and the models
+  could keep an outdated object file, without any message, when it was
+  recompiled within the same second as the previous version (e.g. with
+  ``ccache`` or after switching branches).  Executables then used the old
+  code.  The libraries are now always updated (``ar cr`` instead of
+  ``ar cruU``).
+
 * [commit 33347f593]: ``configure --with-solvers=lattice`` failed if
   ``libboost_system`` was missing, which is common with recent Boost
   versions.  The library was never used.
