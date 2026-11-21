@@ -43,6 +43,15 @@ New features
 Fixed bugs
 ----------
 
+* [commit 56f41d834]: The 1-loop self-energies of complex scalars (e.g. squarks
+  and charged Higgs bosons) contained the contributions of four-scalar and
+  scalar-scalar-vector-vector interactions with the indices of the external
+  fields interchanged.  With complex parameters (CP violation) these
+  contributions entered complex conjugated, so the pole masses depended on
+  the unphysical phase convention.  The effect is small: in MSSMCPV with a
+  phase of 60 degrees on M1, M2, M3 and the A-terms, the stop masses
+  changed by up to 4 MeV.  With real parameters the masses are unchanged.
+
 * [commit b74feccc6]: In models with a complex gluino mass parameter M3 (e.g.
   MSSMCPV, CMSSMCPV with a complex m12, NMSSMCPV), all couplings of the
   gluino had the wrong phase, so the results depended on the unphysical
