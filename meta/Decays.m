@@ -1751,6 +1751,16 @@ FeynArtsTopologyName[topology_] :=
       _, Print["Error: Cannot map topology to FeynArts name"]; Quit[1]
    ];
 
+(* Evaluates the vertex with the given index in its own loop, after the
+   index checks of that loop, and skips the inner loops if it is zero.
+   Its value depends only on its own indices, so evaluating it in the
+   innermost loop would repeat it for every combination of the inner
+   indices (MRSSM2: 22% of the decay run time). *)
+EvaluateVertexInLoop[index_String] :=
+   "auto const vertex" <> index <> "Val = vertex" <> index <> "::evaluate(index" <> index <> ", context);\n" <>
+   "if (vertex" <> index <> "Val.isZero())\n" <>
+   TextFormatting`IndentText["continue;\n"];
+
 (* checks[[i]] is placed at the top of the i-th loop, so that it skips all inner loops if it fails *)
 WrapCodeInLoop[indices_, checks_, code_] :=
    (
@@ -1934,14 +1944,9 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       ] /. SARAH`bar|Susyno`LieGroups`conj -> Identity]
 
                },
+         (* the vertices are evaluated in the index loops, see EvaluateVertexInLoop *)
          functionBody =
-                     StringJoin[(
-                        "auto const vertex" <> # <> "Val = " <>
-                        "vertex" <> # <> "::evaluate(index" <>
-                           #  <> ", context);\n"
-                     )& /@ indices] <>
-                  "\nif (" <> StringRiffle[("!vertex" <> # <> "Val.isZero()")& /@ indices, " && "] <> ") {\n" <>
-                  TextFormatting`IndentText[
+                  (
                   "// internal masses\n" <>
                   mass <> "\n" <>
                   (* in some cases, we apply higher order corrections at the amplitude level *)
@@ -2048,7 +2053,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                         ],
                         "result += " <> ampCall <> ";\n"
                   ]
-            ]] <> "}\n"
+            ])
      ];
 
       {FinitePart,
@@ -2090,7 +2095,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                   ToString @ N[cf, 16] <> "}"
             ]
          ] <> ";\n" <>
-         WrapCodeInLoop[indices, indexChecks, functionBody]
+         WrapCodeInLoop[indices, MapThread[#1 <> EvaluateVertexInLoop[#2]&, {indexChecks, indices}], functionBody]
                ] <>
          "}\n"
       }
