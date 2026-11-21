@@ -51,6 +51,7 @@ TEST_SRC := \
 		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_command_line_options.cpp \
 		$(DIR)/test_decay_amplitudes.cpp \
+		$(DIR)/test_negative_width.cpp \
 		$(DIR)/test_undetected_width.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_effective_coupling_list.cpp \

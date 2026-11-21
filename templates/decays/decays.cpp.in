@@ -121,6 +121,12 @@ try {
 #else
 @callAllDecaysFunctions@
 #endif
+   // set unphysical negative partial widths to zero
+   for (auto& decays_list : decay_table) {
+      for (const auto& warning : decays_list.remove_unphysical_negative_widths()) {
+         problems.add_warning(warning);
+      }
+   }
 }
 catch (std::exception& e) {
    problems.add_error(e.what());

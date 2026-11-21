@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ios>
 #include <memory>
 #include <sstream>
 
@@ -130,6 +131,40 @@ std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
    );
 
    return decays_list_as_vector;
+}
+
+bool has_unphysical_negative_width(const Decay& decay, double total_width)
+{
+   static constexpr double negative_br_tolerance = 1e-11;
+   const double width = decay.get_width();
+
+   if (width >= 0.) {
+      return false;
+   }
+
+   // with total_width = 0 every negative width is significant
+   return total_width <= 0. || -width / total_width > negative_br_tolerance;
+}
+
+std::vector<std::string> Decays_list::remove_unphysical_negative_widths()
+{
+   std::vector<std::string> warnings;
+   const double width = total_width;
+
+   for (auto& el : decays) {
+      auto& decay = el.second;
+      if (has_unphysical_negative_width(decay, width)) {
+         std::ostringstream ostr;
+         ostr << decay.get_proc_string() << ": partial width is negative ("
+              << std::scientific << decay.get_width()
+              << " GeV), the channel is set to zero";
+         warnings.push_back(ostr.str());
+         total_width -= std::abs(decay.get_width());
+         decay.set_width(0.);
+      }
+   }
+
+   return warnings;
 }
 
 std::string strip_field_namespace(std::string const& s) {
