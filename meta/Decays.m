@@ -583,7 +583,9 @@ GetFinalStatesForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFin
                                             IsElectricChargeConservingDecay[particle, finalState] &&
                                             IsColorInvariantDecay[particle, finalState] &&
                                             !FinalStateContainsInitialState[particle, finalState] &&
-                                            !IsScalarToScalarAndMasslessVector[particle, finalState]);
+                                            !IsScalarToScalarAndMasslessVector[particle, finalState] &&
+                                            (* e.g. R-parity: skips searching diagrams that can't exist *)
+                                            !Vertices`ViolatesGlobalSymmetryQ[Join[{TreeMasses`FSAntiField[particle]}, finalState]]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            OrderFinalState[particle, #] & /@ concreteFinalStates
     ];

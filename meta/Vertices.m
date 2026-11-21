@@ -60,6 +60,15 @@ SortFieldsInCp).  Without dependences (the default) the vertex is taken from SAR
 lists if they are loaded (see LoadVerticesIfNecessary): their entries are the vertices without
 dependences, but vertices that vanish with dependences are left out.  The results are
 remembered.";
+GetExactGlobalSymmetries::usage="GetExactGlobalSymmetries[] returns the names of the global
+symmetries of the model (SARAH`Global) that hold exactly for FlexibleSUSY`FSEigenstates: a U(1) or
+Z[N] symmetry that no term of the superpotential or of the non-supersymmetric Lagrangian
+violates (even if its parameter is set to zero later, as mu in the MRSSM), under which every
+particle has a definite charge, every field with a VEV is neutral, and which no vertex of SARAH's
+vertex lists violates.  The result is remembered.";
+ViolatesGlobalSymmetryQ::usage="ViolatesGlobalSymmetryQ[fields] is True if the fields (with or
+without indices) violate one of the exact global symmetries (see GetExactGlobalSymmetries), so
+that their vertex vanishes.";
 LoadVerticesIfNecessary::usage="LoadVerticesIfNecessary[] reads SARAH's vertex lists
 SARAH`VertexList3 and SARAH`VertexList4 from SARAH's output directory for
 FlexibleSUSY`FSEigenstates, if they are not loaded yet.";
@@ -807,6 +816,106 @@ ViolatesElectricChargeQ[fields_List] :=
          NumericQ[charge] && charge != 0
     ];
 
+(* Global symmetries (SARAH`Global), e.g. {{Z[2], RParity}} in the
+   MSSM.  The symbols U and Z are created by the model file, so the
+   group is recognized by the name of its head. *)
+GlobalSymmetryGroup[sym_] :=
+    Module[{group = Cases[SARAH`Global, {g_, sym} :> g, {1}, 1]},
+           Which[
+              MatchQ[group, {_[1]}] && SymbolName[Head[First[group]]] === "U", "U1",
+              MatchQ[group, {_[_Integer?Positive]}] && SymbolName[Head[First[group]]] === "Z", "ZN",
+              True, None
+           ]
+    ];
+
+(* SARAH's charge of a field: additive for U(1), a phase (e.g. -1 or
+   Exp[2 Pi I/3]) for Z[N].  SA`ChargeGlobal gives conj[f] the same
+   charge as f for every Z[N], which is only correct for Z[2], so the
+   charge of an antiparticle is inverted here. *)
+GlobalCharge[f_, sym_] := GlobalChargeOfField[StripFieldIndices[f], sym];
+
+GlobalChargeOfField[(SARAH`bar | Susyno`LieGroups`conj)[f_], sym_] :=
+    With[{q = GlobalChargeOfField[f, sym]},
+         Which[
+            !NumericQ[q], q,
+            GlobalSymmetryGroup[sym] === "U1", -q,
+            GlobalSymmetryGroup[sym] === "ZN", 1/q,
+            True, q
+         ]
+    ];
+
+GlobalChargeOfField[f_, sym_] := SA`ChargeGlobal[f, sym];
+
+IsNeutralGlobalCharge[q_, sym_] :=
+    Switch[GlobalSymmetryGroup[sym],
+           "U1", PossibleZeroQ[q],
+           "ZN", PossibleZeroQ[q - 1],
+           _, False
+    ];
+
+(* True unless the charges of the fields are known and don't add up
+   to a neutral one *)
+ConservesGlobalSymmetryQ[fields_List, sym_] :=
+    Module[{charges = GlobalCharge[#, sym]& /@ fields},
+           Which[
+              !VectorQ[charges, NumericQ], True,
+              GlobalSymmetryGroup[sym] === "U1", IsNeutralGlobalCharge[Plus @@ charges, sym],
+              GlobalSymmetryGroup[sym] === "ZN", IsNeutralGlobalCharge[Times @@ charges, sym],
+              True, True
+           ]
+    ];
+
+(* SARAH reports violating terms (Superpotential::ViolationGlobal,
+   Lagrange::ViolationGlobal) when the model is loaded, but doesn't
+   store them, so the terms are checked again here, with SARAH's
+   criterion.  This is the only check that depends on the name of the
+   symmetry: SARAH requires a total charge of 2 for superpotential terms
+   only for a symmetry named RSymmetry, and 0 otherwise.  An R-symmetry
+   under another name (or a non-R U(1) named RSymmetry) therefore fails
+   for its allowed terms and isn't used, which only loses the speed-up.
+   All other checks use the charges of the components, which add up to
+   0 (U(1)) or 1 (Z[N]) for an R-symmetry as well. *)
+ModelTermsConserveGlobalSymmetryQ[sym_] :=
+    And[
+       If[ListQ[SARAH`SuperPotential],
+          FreeQ[SARAH`CheckChargeConservationGlobal[#[[2]], sym]& /@ SARAH`SuperPotential, False],
+          True],
+       If[ListQ[SA`LagTermsNonSUSY],
+          Block[{SA`CheckGlobalLagLevel = True},
+                FreeQ[SARAH`CheckChargeConservationGlobal[List @@ #, sym]& /@ SA`LagTermsNonSUSY, False]],
+          True]
+    ];
+
+ExactGlobalSymmetryQ[sym_] :=
+    Module[{vevFields},
+           vevFields = Cases[SARAH`DEFINITION[FlexibleSUSY`FSEigenstates][SARAH`VEVs], {f_, __} :> f];
+           (* the cheap checks first; the vertex lists are a cross-check *)
+           GlobalSymmetryGroup[sym] =!= None &&
+           ModelTermsConserveGlobalSymmetryQ[sym] &&
+           VectorQ[GlobalCharge[#, sym]& /@ TreeMasses`GetParticles[], NumericQ] &&
+           And @@ (IsNeutralGlobalCharge[GlobalCharge[#, sym], sym]& /@ vevFields) &&
+           (LoadVerticesIfNecessary[];
+            And @@ (ConservesGlobalSymmetryQ[StripFieldIndices[#[[1]]], sym]& /@
+                       Join[LoadedVertexList[3], LoadedVertexList[4]]))
+    ];
+
+GetExactGlobalSymmetries[] :=
+    GetExactGlobalSymmetries[] =
+    Module[{exact = {}},
+           If[ListQ[SARAH`Global] && SARAH`Global =!= {},
+              exact = Select[SARAH`Global[[All, 2]], ExactGlobalSymmetryQ];
+           ];
+           If[exact =!= {},
+              Print["Exact global symmetries: ", ToString[exact]];
+           ];
+           exact
+    ];
+
+ViolatesGlobalSymmetryQ[fields_List] :=
+    !And @@ (ConservesGlobalSymmetryQ[fields, #]& /@ GetExactGlobalSymmetries[]);
+
+Utils`MakeUnknownInputDefinition[ViolatesGlobalSymmetryQ];
+
 (* A vertex in SARAH's lists is non-zero without dependences, and
    SARAH puts it there only if it doesn't vanish with dependences, so
    it counts as non-zero without recalculating it.  This matters with
@@ -819,6 +928,7 @@ IsNonZeroVertex[fields_List, useDependences:(True|False):False] :=
            Which[
               CachedVertex[sortedFields] =!= {}, True,
               ViolatesElectricChargeQ[sortedFields], False,
+              ViolatesGlobalSymmetryQ[sortedFields], False,
               True, MemberQ[FSVertex[sortedFields, useDependences][[2 ;;, 1]], Except[0]]
            ]
           ];
