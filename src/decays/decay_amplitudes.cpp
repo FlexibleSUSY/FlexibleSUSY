@@ -284,15 +284,23 @@ double Decay_amplitude_FFS::square() const
 // Squared amplitude averaged over the spin of the decaying fermion and
 // summed over the final state, for the vertex given in the header.
 //
-// Massive vector: the terms with form_factor_gam_left/right, the only ones
+// Massive vector: eq. (2.8) of Goodsell, Liebler, Staub, arXiv:1703.09237
+// (whose p terms, with p the momentum of the decaying fermion, have the
+// opposite sign).  The terms with form_factor_gam_left/right, the only ones
 // filled for tree-level decays, agree with FermionToFermionVectorBoson in
-// SPheno 4.0.5.  The p terms hold for p = momentum of either fermion.
+// SPheno 4.0.5 and with eq. (B.39b) of M. Gigg's thesis (Durham, 2008).
+// The p terms hold for p = momentum of either fermion.
 //
-// Massless vector: the polarization sum is -g_{mu nu}, with p = momentum
-// of the decaying fermion.  This is only correct for amplitudes that
-// fulfil the Ward identity, as loop-induced decays like
-// Chi(2) -> Chi(1) gamma; then it is the m_vector -> 0 limit of the
-// massive result.
+// Massless vector: not given in arXiv:1703.09237; the massive formula can't
+// be evaluated at m_vector = 0, as its p terms are divided by m_vector^2.
+// The polarization sum is -g_{mu nu}, with p = momentum of the decaying
+// fermion; this is only correct for amplitudes that fulfil the Ward
+// identity, as loop-induced decays like Chi(2) -> Chi(1) gamma, and then
+// it is the m_vector -> 0 limit of the massive result.  All six
+// coefficients were checked against Tr[(p2/ + m) G^mu (p1/ + M) Gbar^nu]
+// (-g_{mu nu}) / 2 with explicit Dirac matrices; c6 is -M^3 m (it was
+// -M m (M^2 + m^2)/2 before, a slip without effect so far, as the p terms
+// only appear in loop-induced decays).
 //
 // Both cases agree with SquareAmp_FtoFV of SARAH 4.15.5, whose p terms
 // have the opposite sign.
