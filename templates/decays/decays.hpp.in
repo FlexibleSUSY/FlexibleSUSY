@@ -110,6 +110,7 @@ private:
    std::shared_ptr<const standard_model::Standard_model> initialised_sm{};
 
    standard_model::Standard_model const& get_initialised_sm();
+   double get_decay_scale(double) const;
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type

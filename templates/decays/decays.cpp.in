@@ -99,6 +99,17 @@ standard_model::Standard_model const& CLASSNAME::get_initialised_sm()
    return *initialised_sm;
 }
 
+/**
+ * Returns the renormalization scale of the decays of a particle with
+ * the given mass: the parameters of the model and of the SM are run to
+ * it, and the loop functions are evaluated at it.  The models are not
+ * run below MZ, so for lighter particles it is MZ.
+ */
+double CLASSNAME::get_decay_scale(double mass) const
+{
+   return std::max(mass, qedqcd.displayPoleMZ());
+}
+
 void CLASSNAME::calculate_decays()
 {
 try {

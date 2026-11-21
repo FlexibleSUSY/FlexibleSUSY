@@ -43,6 +43,13 @@ New features
 Fixed bugs
 ----------
 
+* [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
+  photons) of a particle lighter than the Z boson evaluated the loop
+  functions at the mass of the particle, while its couplings are taken at
+  the Z mass.  Both are now at the Z mass.  Example: in the shipped MRSSM2
+  input, the width of the 66 GeV Higgs boson into two photons increases by
+  0.2%.  Decays of heavier particles are unchanged.
+
 * [commit 5257d970c]: The static libraries of FlexibleSUSY and the models
   could keep an outdated object file, without any message, when it was
   recompiled within the same second as the previous version (e.g. with

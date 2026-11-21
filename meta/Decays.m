@@ -949,13 +949,14 @@ CreateDecaysCalculationFunction[decaysList_] :=
            particleStart = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
 
            (* The decays of each particle use their own copy of the model, run
-              from the scale of the spectrum to the scale of the particle (not
-              below MZ, like the SM part), so that the result doesn't depend on
-              the order of the decaying particles. *)
+              from the scale of the spectrum to the decay scale of the particle
+              (get_decay_scale: its mass, but not below MZ), so that the result
+              doesn't depend on the order of the decaying particles.  The SM
+              part and the loop functions use the same scale. *)
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
-                 "particle_model.run_to(std::max(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ", qedqcd.displayPoleMZ()));\n";
+                 "particle_model.run_to(get_decay_scale(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> "));\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
@@ -987,10 +988,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     TextFormatting`IndentText[
                        "auto decay_mass = PHYSICAL(" <>
                           CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle  /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
-                       "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
-                       TextFormatting`IndentText[
-                          "sm.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
-                       ] <> "}\n"
+                       "sm.run_to(get_decay_scale(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> "));\n"
                     ] <>
                     "}\n" <>
                     "sm.solve_ewsb_tree_level();\n" <>
@@ -2163,7 +2161,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
                   body = body <> "\n// FormCalc's Finite variable\n";
                   body = body <>"static constexpr double Finite {1.};\n"
                 ];
-                body = body <>"\nconst double ren_scale {result.m_decay};\n";
+                body = body <>"\n// the scale of the parameters of the model (see get_decay_scale)\nconst double ren_scale {get_decay_scale(result.m_decay)};\n";
                 body = body <> Last@res <> "\n";
              ]
            ];
