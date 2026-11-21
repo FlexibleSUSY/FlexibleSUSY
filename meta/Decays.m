@@ -37,6 +37,12 @@ of the given particle: 1 for scalars, 0 (tree level only) otherwise.";
 
 CreateCompleteParticleList::usage="";
 GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
+GetFinalStatesForParticle::usage = "GetFinalStatesForParticle[particle, n, allowedFinalStateParticles]
+returns the possible final states of the decays of particle, ordered as in GetDecaysForParticle
+(n as in GetDecaysForParticle).";
+CreateParticleDecay::usage = "CreateParticleDecay[particle, finalState] returns {decay} with the
+FSParticleDecay of particle -> finalState, or {} if no diagram contributes.  GetDecaysForParticle
+calls it for every final state; the code generation calls it in parallel, one task per decay.";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
 CreateBSMParticleAliasList::usage="";
@@ -325,11 +331,35 @@ FinalStateContainsInitialState[initialParticle_, finalState_List] :=
             False
          ]
 
+(* Returns True for the decay of a scalar into a scalar and a massless
+   vector, such as S -> S' gamma or S -> S' g.  Its width is 0 at every
+   order of perturbation theory, for two equivalent reasons:
+
+   - Angular momentum: the initial state has J = 0 and the final
+     scalar has no spin, so along the decay axis the vector must have
+     helicity 0.  A massless vector has only the helicities +1 and -1.
+
+   - Gauge invariance: for S(p) -> S'(k) V(q) with p = k + q, the
+     amplitude is M = eps*_mu(q) M^mu with M^mu = A p^mu + B q^mu.
+     Since eps*.q = 0, only M = A eps*.p contributes.  The Ward identity
+     q_mu M^mu = 0 with q^2 = 0 gives A p.q = A (m_S^2 - m_S'^2)/2 = 0,
+     so A = 0 whenever there is phase space.
+
+   At tree level the photon and gluon couple diagonally (no gamma S S'
+   vertex for S != S'), and at 1 loop the diagrams cancel in the sum,
+   but not one by one.  Decay_amplitude_SSV::square() returns 0 for a
+   massless vector, so these amplitudes would only be dead code.  The
+   decay into a massive vector (S -> S' Z, S -> S' W) is allowed through
+   its longitudinal polarization, and the decay through a virtual photon
+   (S -> S' f fbar) is a 3-body decay. *)
+IsScalarToScalarAndMasslessVector[initialParticle_, finalState_List] :=
+    TreeMasses`IsScalar[initialParticle] &&
+    Length[finalState] === 2 &&
+    Count[finalState, _?TreeMasses`IsScalar] === 1 &&
+    Count[finalState, _?(TreeMasses`IsVector[#] && TreeMasses`IsMassless[#]&)] === 1;
+
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
-    Module[{numFields},
-           numFields = Length[fields];
-           Vertices`IsNonZeroVertex[fields, Vertices`GetCachedVertices[numFields, useDependences], useDependences]
-         ];
+    Vertices`IsNonZeroVertex[fields, useDependences];
 
 IsPossibleNonZeroDiagram[diagram_, useDependences_:False] :=
     Module[{vertices},
@@ -527,10 +557,18 @@ DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay /; GetDecayTopologiesAnd
     ];
 DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay/; GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 0] =!= {}] := decay;
 
-(* outputs list of FSParticleDecay objects *)
-GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
-    Module[{genericFinalStates,
-            isPossibleDecay, concreteFinalStates, decays, temp},
+GetFinalStatesForParticle[particle_, maxNumberOfProducts_Integer /; maxNumberOfProducts >= 2,
+                          allowedFinalStateParticles_List] :=
+    GetFinalStatesForParticle[particle, {2, maxNumberOfProducts}, allowedFinalStateParticles];
+
+GetFinalStatesForParticle[particle_, {minNumberOfProducts_Integer, maxNumberOfProducts_Integer} /;
+                                     2 <= minNumberOfProducts <= maxNumberOfProducts,
+                          allowedFinalStateParticles_List] :=
+    Join @@ (GetFinalStatesForParticle[particle, {#}, allowedFinalStateParticles]& /@
+                Range[minNumberOfProducts, maxNumberOfProducts]);
+
+GetFinalStatesForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
+    Module[{genericFinalStates, isPossibleDecay, concreteFinalStates},
 
            Utils`AssertWithMessage[exactNumberOfProducts === 2,
               "decays with " <> ToString@exactNumberOfProducts <>
@@ -544,9 +582,30 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            isPossibleDecay[finalState_] := (IsPhysicalFinalState[finalState] &&
                                             IsElectricChargeConservingDecay[particle, finalState] &&
                                             IsColorInvariantDecay[particle, finalState] &&
-                                            !FinalStateContainsInitialState[particle, finalState]);
+                                            !FinalStateContainsInitialState[particle, finalState] &&
+                                            !IsScalarToScalarAndMasslessVector[particle, finalState] &&
+                                            (* e.g. R-parity: skips searching diagrams that can't exist *)
+                                            !Vertices`ViolatesGlobalSymmetryQ[Join[{TreeMasses`FSAntiField[particle]}, finalState]]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
-           concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
+           OrderFinalState[particle, #] & /@ concreteFinalStates
+    ];
+
+Utils`MakeUnknownInputDefinition[GetFinalStatesForParticle];
+
+CreateParticleDecay[particle_, finalState_List] :=
+    Module[{decay = FSParticleDecay[particle, finalState, GetContributingGraphsForDecay[particle, finalState]]},
+           If[GetDecayTopologiesAndDiagrams[decay] === {},
+              {},
+              {DeleteDiagramsVanishingDueToColor[decay]}
+           ]
+    ];
+
+Utils`MakeUnknownInputDefinition[CreateParticleDecay];
+
+(* outputs list of FSParticleDecay objects *)
+GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
+    Module[{concreteFinalStates, decays},
+           concreteFinalStates = GetFinalStatesForParticle[particle, {exactNumberOfProducts}, allowedFinalStateParticles];
 
            If[!FlexibleSUSY`FSEnableParallelism,
               Print[""];
@@ -558,15 +617,14 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
                     If[!FlexibleSUSY`FSEnableParallelism,
                        WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
                     ];
-                    temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
-                    If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
-                    temp
+                    With[{decay = CreateParticleDecay[particle, #]},
+                       If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
+                       decay
+                    ]
                  )&,
                  concreteFinalStates
               ];
-
-           decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
-           DeleteDiagramsVanishingDueToColor /@ decays
+           Join @@ decays
     ];
 
 GetDecaysForParticle[particle_, n_, allowedFinalStateParticles_List] :=
@@ -890,13 +948,14 @@ CreateDecaysCalculationFunction[decaysList_] :=
            particleDim = TreeMasses`GetDimension[particle];
            particleStart = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
 
+           (* The decays of each particle use their own copy of the model, run
+              from the scale of the spectrum to the scale of the particle (not
+              below MZ, like the SM part), so that the result doesn't depend on
+              the order of the decaying particles. *)
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle /. SARAH`bar|Susyno`LieGroups`conj->Identity]] <> ");\n" <>
-                 "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
-                 TextFormatting`IndentText[
-                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
-                 ] <> "}\n";
+                 "particle_model.run_to(std::max(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ", qedqcd.displayPoleMZ()));\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
@@ -908,7 +967,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "switch (flag) {\n" <> TextFormatting`IndentText[
                  "case 1: {\n" <>
                  TextFormatting`IndentText[
-                    "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(model.get_input());\n" <>
+                    "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(particle_model.get_input());\n" <>
                     If[
                        MemberQ[
                           DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[] /. Susyno`LieGroups`conj->Identity}, Null],
@@ -919,12 +978,11 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     ] <>
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
-                    "dm->fill_from(model);\n" <>
-                    "standard_model::Standard_model sm{};\n" <>
-                    "sm.initialise_from_input(qedqcd);\n" <>
+                    "dm->fill_from(particle_model);\n" <>
+                    "standard_model::Standard_model sm = get_initialised_sm();\n" <>
                     "// set loop level for RGE running to match RGE setting\n" <>
                     "// of BSM model\n" <>
-                    "sm.set_loops(model.get_loops());\n" <>
+                    "sm.set_loops(particle_model.get_loops());\n" <>
                     "if (run_to_decay_particle_scale) {\n" <>
                     TextFormatting`IndentText[
                        "auto decay_mass = PHYSICAL(" <>
@@ -944,13 +1002,13 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "}\n" <>
                  "case 2: {\n" <>
                  TextFormatting`IndentText[
-                    "model.solve_ewsb_tree_level();\n" <>
-                    "model.calculate_DRbar_masses();\n" <>
+                    "particle_model.solve_ewsb_tree_level();\n" <>
+                    "particle_model.calculate_DRbar_masses();\n" <>
                     "// decoupling scheme automatically reorders Goldstones to first\n" <>
                     "// positions in tree-level mass and mixing matrices. The\n" <>
                     "// non-decoupled model does not.\n" <>
-                    "model.reorder_DRbar_masses();\n" <>
-                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
+                    "particle_model.reorder_DRbar_masses();\n" <>
+                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(particle_model);\n" <>
                     "break;\n"
                   ] <>
                   "}\ndefault:\n" <>
@@ -964,7 +1022,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
               "context_base context {dec_model.get()};\n" <>
               body;
 
-           body = IndentText["\nif (run_to_decay_particle_scale) {\n" <>
+           body = IndentText["\nauto particle_model = model;\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body ]<>
                   If[MemberQ[Join[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}], particle],
                   TextFormatting`IndentText["if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) || flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) || flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {\n" <>
@@ -1535,6 +1593,13 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
 ];
 
 (* returns vertex needed by FA generated routines, but in terms of SortCp'ed vertex *)
+(* IsParticle builds the list of particles on every call, which takes
+   about 1 ms.  ConvertCouplingToCPP asks it for every field of every
+   coupling of every diagram (most of the time of writing the decay
+   C++ code), and the particles don't change during the decay code
+   generation, so remember the result. *)
+IsParticleCached[f_] := IsParticleCached[f] = IsParticle[f];
+
 ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, vertices_, indices_] :=
    Module[{vertexEdges, res, pos, globalMinus = 1, vertex, lorSorted, temp},
 
@@ -1550,7 +1615,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
       not LorentzProduct[gamma[lt], PL|PR] *)
    lorSorted = lorSorted /. LorentzProduct[gamma[_], lr_:PL|PR] :> lr;
    vertex =
-      SARAH`Cp[Sequence@@(vertexEdges /. -f_[n_] /; !IsParticle[f] :> SARAH`AntiField[Field[n] /. fieldAssociation] /. f_[n_] /; !IsParticle[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> (Field[n] /. fieldAssociation))][lorSorted];
+      SARAH`Cp[Sequence@@(vertexEdges /. -f_[n_] /; !IsParticleCached[f] :> SARAH`AntiField[Field[n] /. fieldAssociation] /. f_[n_] /; !IsParticleCached[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> (Field[n] /. fieldAssociation))][lorSorted];
    temp =
       SortCp[vertex];
    temp = temp /. -SARAH`Cp[y___][x___] :> (globalMinus*=-1;{{y}, x}) /. SARAH`Cp[y___][x___] :> {{y}, x};
@@ -1687,6 +1752,16 @@ FeynArtsTopologyName[topology_] :=
         0, 0, 2}, {0, 1, 1, 0, 0, 1}, {0, 0, 0, 2, 1, 0}}, "T10",
       _, Print["Error: Cannot map topology to FeynArts name"]; Quit[1]
    ];
+
+(* Evaluates the vertex with the given index in its own loop, after the
+   index checks of that loop, and skips the inner loops if it is zero.
+   Its value depends only on its own indices, so evaluating it in the
+   innermost loop would repeat it for every combination of the inner
+   indices (MRSSM2: 22% of the decay run time). *)
+EvaluateVertexInLoop[index_String] :=
+   "auto const vertex" <> index <> "Val = vertex" <> index <> "::evaluate(index" <> index <> ", context);\n" <>
+   "if (vertex" <> index <> "Val.isZero())\n" <>
+   TextFormatting`IndentText["continue;\n"];
 
 (* checks[[i]] is placed at the top of the i-th loop, so that it skips all inner loops if it fails *)
 WrapCodeInLoop[indices_, checks_, code_] :=
@@ -1871,14 +1946,9 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       ] /. SARAH`bar|Susyno`LieGroups`conj -> Identity]
 
                },
+         (* the vertices are evaluated in the index loops, see EvaluateVertexInLoop *)
          functionBody =
-                     StringJoin[(
-                        "auto const vertex" <> # <> "Val = " <>
-                        "vertex" <> # <> "::evaluate(index" <>
-                           #  <> ", context);\n"
-                     )& /@ indices] <>
-                  "\nif (" <> StringRiffle[("!vertex" <> # <> "Val.isZero()")& /@ indices, " && "] <> ") {\n" <>
-                  TextFormatting`IndentText[
+                  (
                   "// internal masses\n" <>
                   mass <> "\n" <>
                   (* in some cases, we apply higher order corrections at the amplitude level *)
@@ -1985,7 +2055,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                         ],
                         "result += " <> ampCall <> ";\n"
                   ]
-            ]] <> "}\n"
+            ])
      ];
 
       {FinitePart,
@@ -2027,7 +2097,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                   ToString @ N[cf, 16] <> "}"
             ]
          ] <> ";\n" <>
-         WrapCodeInLoop[indices, indexChecks, functionBody]
+         WrapCodeInLoop[indices, MapThread[#1 <> EvaluateVertexInLoop[#2]&, {indexChecks, indices}], functionBody]
                ] <>
          "}\n"
       }
@@ -2084,7 +2154,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct];
 
            If[IsPossibleTreeLevelDecay[decay, True],
-              body = body <> "\n// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
+              body = body <> "\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
 
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],

@@ -110,13 +110,19 @@ TEST_SH := \
 		$(DIR)/test_run_all_spectrum_generators.sh \
 		$(DIR)/test_shell_completions.sh \
 		$(DIR)/test_space_dir.sh \
-		$(DIR)/test_wolframscript.sh \
 		$(DIR)/test_looplibrary_environment.sh
+
+# needs a working (activated) Wolfram Engine
+ifeq ($(ENABLE_META),yes)
+TEST_SH += \
+		$(DIR)/test_wolframscript.sh
+endif
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
 		$(DIR)/test_CConversion.m \
 		$(DIR)/test_Constraint.m \
+		$(DIR)/test_Decays_final_states.m \
 		$(DIR)/test_EWSB.m \
 		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
@@ -126,8 +132,11 @@ TEST_META := \
 		$(DIR)/test_MSSM_2L_yt.m \
 		$(DIR)/test_MSSM_2L_yt_loopfunction.m \
 		$(DIR)/test_MSSM_2L_yt_softsusy.m \
+		$(DIR)/test_MSSM_global_symmetries.m \
 		$(DIR)/test_MSSMCPV_SARAH.m \
+		$(DIR)/test_MRSSM_global_symmetries.m \
 		$(DIR)/test_MRSSM_TreeMasses.m \
+		$(DIR)/test_NMSSM_global_symmetries.m \
 		$(DIR)/test_Parameters.m \
 		$(DIR)/test_ReadSLHA.m \
 		$(DIR)/test_RGIntegrator.m \
@@ -147,6 +156,7 @@ TEST_META := \
 		$(DIR)/test_Utils.m \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
+		$(DIR)/test_Vertices_FSVertex.m \
 		$(DIR)/test_Vertices_colorsum.m
 
 ifeq ($(WITH_E6SSM), yes)

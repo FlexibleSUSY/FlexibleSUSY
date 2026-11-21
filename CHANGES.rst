@@ -7,6 +7,19 @@ New features
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
 
+* ``configure`` now checks all stated requirements, and the README states
+  what ``configure`` checks:
+
+  * the C++ standard library must support C++20 (``<concepts>``, ``<span>``,
+    ``<numbers>``), which catches clang++ used with the libstdc++ of g++ < 10;
+  * Boost >= 1.62 (was 1.37), except 1.64, whose odeint doesn't compile;
+  * Eigen >= 3.3 (was a warning, older versions don't compile);
+  * GM2Calc >= 2.1.0 also when found via ``pkg-config``.
+
+  The classic Intel compiler icpc (stated as icpc >= 18.0.0) is no longer
+  supported, as it lacks the needed C++20 features; Intel's LLVM-based icpx
+  is treated as clang++.
+
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
   accordingly.
@@ -21,12 +34,39 @@ New features
   needs the ``timeout`` command (``gtimeout`` from GNU coreutils on
   macOS); without it, there is no limit.
 
+* FlexibleDecay no longer generates decays of a scalar into a scalar and
+  a photon or gluon (e.g. H -> h gamma, A -> h gamma, squark -> squark
+  gluon, sneutrino -> sneutrino gamma).  These widths vanish at every
+  order and were always 0 in the output.  This makes the generated decay
+  code smaller (about 17% in the THDM-II, 14% in the MSSM).
+
 Fixed bugs
 ----------
 
 * [commit 33347f593]: ``configure --with-solvers=lattice`` failed if
   ``libboost_system`` was missing, which is common with recent Boost
   versions.  The library was never used.
+
+* [commit dedac5462]: FlexibleDecay: the decays of a particle lighter than
+  the Z boson used the BSM parameters at an arbitrary scale (the scale of
+  the spectrum, or the mass of the particle whose decays were calculated
+  before), while the SM parameters were taken at the Z mass.  Now all
+  parameters are at the Z mass for such particles, and at the mass of the
+  decaying particle otherwise.  The decays of all particles also no longer
+  depend on the order in which they are calculated.  Example: in the shipped
+  MRSSM2 input, the width of the 66 GeV Higgs boson into two photons changes
+  by 0.03%; in the MSSM and NMSSM inputs the decays change by less than
+  1e-7.
+
+* [commit 7cca3f74a]: Loading the Mathematica interface no longer prints
+  ``LibraryFunction::libload`` messages for ``FS<M>CallLilith`` and
+  ``FS<M>CallHiggsTools`` when FlexibleSUSY is configured without Lilith or
+  HiggsTools. Calling them then gives an error message saying so, and
+  ``$Failed``.
+  
+* [commit 3d27e1f6a]: FlexibleSUSY didn't compile if GSL was not in a default
+  include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
+  didn't use the GSL include path from ``gsl-config``.
 
 * [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
   "cannot find model_specific/SM/libmodel_specific_SM.a", and executables

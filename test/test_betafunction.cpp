@@ -53,6 +53,21 @@ private:
    Eigen::ArrayXd pars;
 };
 
+namespace
+{
+
+/// compares element-wise; after running, the two implementations may
+/// differ by rounding (e.g. with fused multiply-adds)
+void check_close(const DoubleVector& a, const DoubleVector& b, double eps)
+{
+   BOOST_REQUIRE_EQUAL(a.size(), b.size());
+   for (std::size_t i = 1; i <= a.size(); i++) {
+      BOOST_CHECK_CLOSE_FRACTION(a(i), b(i), eps);
+   }
+}
+
+} // anonymous namespace
+
 BOOST_AUTO_TEST_CASE( test_running )
 {
    DoubleVector pars(10);
@@ -79,7 +94,7 @@ BOOST_AUTO_TEST_CASE( test_running )
    }
 
    BOOST_CHECK_EQUAL(status_rge, status_beta);
-   BOOST_CHECK_EQUAL(rge.display(), ToDoubleVector(eig.get()));
+   check_close(rge.display(), ToDoubleVector(eig.get()), 1e-12);
    BOOST_CHECK_EQUAL(rge.displayMu(), eig.get_scale());
 }
 
@@ -103,6 +118,6 @@ BOOST_AUTO_TEST_CASE( test_custom_precision )
    rge.runto(1.0e10, custom_precision);
    eig.run_to(1.0e10, custom_precision);
 
-   BOOST_CHECK_EQUAL(rge.display(), ToDoubleVector(eig.get()));
+   check_close(rge.display(), ToDoubleVector(eig.get()), 1e-12);
    BOOST_CHECK_EQUAL(rge.displayMu(), eig.get_scale());
 }

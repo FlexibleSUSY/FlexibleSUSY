@@ -27,6 +27,7 @@
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
+#include <algorithm>
 #include <cmath>
 
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
@@ -78,11 +79,32 @@ void CLASSNAME::clear()
 {
    clear_problems();
    decay_table.clear();
+   initialised_sm.reset();
+}
+
+/**
+ * Returns the SM initialised from qedqcd, which the decays of every
+ * particle copy and run to the decay scale.  It depends only on
+ * qedqcd, and initialise_from_input() (W, Z and fermion pole masses)
+ * takes about half of the decay calculation if repeated for every
+ * decaying particle, so it is done once.
+ */
+standard_model::Standard_model const& CLASSNAME::get_initialised_sm()
+{
+   if (!initialised_sm) {
+      auto sm = std::make_shared<standard_model::Standard_model>();
+      sm->initialise_from_input(qedqcd);
+      initialised_sm = std::move(sm);
+   }
+   return *initialised_sm;
 }
 
 void CLASSNAME::calculate_decays()
 {
 try {
+   // initialise the SM before the decays of the particles are
+   // calculated (possibly in parallel)
+   get_initialised_sm();
 #ifdef ENABLE_THREADS
 @callAllDecaysFunctionsInThreads@
 #else
