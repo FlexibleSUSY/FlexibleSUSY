@@ -43,6 +43,17 @@ New features
 Fixed bugs
 ----------
 
+* [commit b74feccc6]: In models with a complex gluino mass parameter M3 (e.g.
+  MSSMCPV, CMSSMCPV with a complex m12, NMSSMCPV), all couplings of the
+  gluino had the wrong phase, so the results depended on the unphysical
+  phase convention.  This affected the SUSY-QCD corrections to the top
+  and bottom Yukawa couplings and thus the Higgs masses, the squark and
+  gluino pole masses, and processes with gluinos.  Example: in MSSMCPV
+  with a phase of 60 degrees on M1, M2, M3 and the A-terms, the top
+  Yukawa coupling was 1% too small, the lightest Higgs boson 0.85 GeV too
+  light and the light stop 4 GeV too light.  Real (also negative) values
+  of M3 are not affected.
+
 * [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
   photons) of a particle lighter than the Z boson evaluated the loop
   functions at the mass of the particle, while its couplings are taken at
