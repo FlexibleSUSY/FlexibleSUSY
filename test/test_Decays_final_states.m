@@ -69,4 +69,49 @@ TestEquality[isForbidden[VZ, {hh, VP}], False];
 TestEquality[isForbidden[hh, {Ah, Ah}], False];
 TestEquality[isForbidden[Su, {Fu, Chi}], False];
 
+(* IsCPForbiddenScalarDecay[] checks the tree-level vertex, which needs
+   SARAH's vertex lists *)
+SA`CurrentStates = SARAH`EWSB;
+SARAH`InitVertexCalculation[SARAH`EWSB, False];
+SARAH`partDefinition = SARAH`ParticleDefinitions[SARAH`EWSB];
+SARAH`Particles[SARAH`Current] = SARAH`Particles[SARAH`EWSB];
+SARAH`MakeVertexList[SARAH`EWSB, SARAH`VerticesForLoops -> True];
+SARAH`VertexList3 = {};
+SARAH`VertexList4 = {};
+
+Print["testing IsCPForbiddenScalarDecay[] ..."];
+
+TestEquality[Decays`Private`GetDefiniteCP[hh], 1];
+TestEquality[Decays`Private`GetDefiniteCP[Ah], -1];
+TestEquality[Decays`Private`GetDefiniteCP[Hpm], 0];
+TestEquality[Decays`Private`GetDefiniteCP[Sv], 0];
+
+isCPForbidden = Decays`Private`IsCPForbiddenScalarDecay;
+
+(* CP(S) != CP(S1) CP(S2) *)
+TestEquality[isCPForbidden[hh, {hh, Ah}], True];
+TestEquality[isCPForbidden[hh, {Ah, hh}], True];
+TestEquality[isCPForbidden[Ah, {hh, hh}], True];
+TestEquality[isCPForbidden[Ah, {Ah, Ah}], True];
+
+(* CP(S) = CP(S1) for S -> S1 Z *)
+TestEquality[isCPForbidden[hh, {hh, VZ}], True];
+TestEquality[isCPForbidden[Ah, {VZ, Ah}], True];
+
+(* CP-conserving decays *)
+TestEquality[isCPForbidden[hh, {hh, hh}], False];
+TestEquality[isCPForbidden[hh, {Ah, Ah}], False];
+TestEquality[isCPForbidden[Ah, {hh, Ah}], False];
+TestEquality[isCPForbidden[hh, {Ah, VZ}], False];
+TestEquality[isCPForbidden[Ah, {hh, VZ}], False];
+
+(* particles without a definite CP property, other final states *)
+TestEquality[isCPForbidden[Hpm, {Hpm, hh}], False];
+TestEquality[isCPForbidden[Hpm, {hh, VWm}], False];
+TestEquality[isCPForbidden[hh, {Sv, conj[Sv]}], False];
+TestEquality[isCPForbidden[Ah, {VZ, VZ}], False];
+TestEquality[isCPForbidden[Ah, {VP, VP}], False];
+TestEquality[isCPForbidden[Ah, {bar[Fd], Fd}], False];
+TestEquality[isCPForbidden[Chi, {Chi, hh}], False];
+
 PrintTestSummary[];
