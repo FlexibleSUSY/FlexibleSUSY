@@ -27,6 +27,7 @@
 
 #include "@ModelName@_two_scale_ewsb_solver.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_landau_gauge.hpp"
 #include "logger.hpp"
 #include "root_finder.hpp"
 #include "fixed_point_iterator.hpp"

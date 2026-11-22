@@ -5,14 +5,31 @@
 #include <boost/test/unit_test.hpp>
 #include "wrappers.hpp"
 
-#define private public
+#include "CMSSM_mass_eigenstates.hpp"
 #include "CMSSM_two_scale_model.hpp"
 
 using namespace flexiblesusy;
 
+namespace
+{
+
+/// gives access to the protected loop functions of the model
+struct Test_model : CMSSM<Two_scale> {
+   using CMSSM_mass_eigenstates::A0;
+   using CMSSM_mass_eigenstates::B0;
+   using CMSSM_mass_eigenstates::B00;
+   using CMSSM_mass_eigenstates::B1;
+   using CMSSM_mass_eigenstates::B22;
+   using CMSSM_mass_eigenstates::F0;
+   using CMSSM_mass_eigenstates::G0;
+   using CMSSM_mass_eigenstates::H0;
+};
+
+} // anonymous namespace
+
 BOOST_AUTO_TEST_CASE( test_A0 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    model.set_scale(100.);
 
    BOOST_CHECK_EQUAL(model.A0(0.), 0.);
@@ -20,7 +37,7 @@ BOOST_AUTO_TEST_CASE( test_A0 )
 
 BOOST_AUTO_TEST_CASE( test_B0 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    const double scale = 100.;
    const double scale2 = Sqr(scale);
    const double p = 91.0;
@@ -40,7 +57,7 @@ BOOST_AUTO_TEST_CASE( test_B0 )
 
 BOOST_AUTO_TEST_CASE( test_B1 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    const double scale = 100.;
    const double p = 91.0;
    model.set_scale(scale);
@@ -53,7 +70,7 @@ BOOST_AUTO_TEST_CASE( test_B1 )
 
 BOOST_AUTO_TEST_CASE( test_B00 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    const double scale = 100.;
    model.set_scale(scale);
 
@@ -62,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_B00 )
 
 BOOST_AUTO_TEST_CASE( test_B22 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    const double scale = 100.;
    model.set_scale(scale);
 
@@ -71,7 +88,7 @@ BOOST_AUTO_TEST_CASE( test_B22 )
 
 BOOST_AUTO_TEST_CASE( test_H0 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    const double scale = 100.;
    model.set_scale(scale);
 
@@ -80,7 +97,7 @@ BOOST_AUTO_TEST_CASE( test_H0 )
 
 BOOST_AUTO_TEST_CASE( test_F0 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    const double scale = 100.;
    model.set_scale(scale);
 
@@ -89,7 +106,7 @@ BOOST_AUTO_TEST_CASE( test_F0 )
 
 BOOST_AUTO_TEST_CASE( test_G0 )
 {
-   CMSSM<Two_scale> model;
+   Test_model model;
    const double scale = 100.;
    model.set_scale(scale);
 

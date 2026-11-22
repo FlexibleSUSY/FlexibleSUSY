@@ -32,6 +32,9 @@ BeginPackage["Vertices`", {
 ]
 
 VertexRules::usage;
+MissingVertexRules::usage="MissingVertexRules[nPointFunctions, vertexRules] returns the
+couplings needed by nPointFunctions (as in VertexRules) that match no rule in
+vertexRules, e.g. because vertexRules were cached before new n-point functions were added.";
 ToCpPattern::usage="ToCpPattern[cp] converts field indices inside cp to patterns, e.g. ToCpPattern[Cp[bar[UFd[{gO1}]], Sd[{gI1}], Glu[{1}]][PL]] === Cp[bar[UFd[{gO1_}]], Sd[{gI1_}], Glu[{1}]][PL].";
 ToCp::usage="ToCp[cpPattern] converts field index patterns inside cpPattern to symbols, e.g. ToCp@Cp[bar[UFd[{gO1_}]], Sd[{gI1_}], Glu[{1}]][PL] === Cp[bar[UFd[{gO1}]], Sd[{gI1}], Glu[{1}]][PL].";
 FieldIndexList::usage;
@@ -138,12 +141,26 @@ Utils`MakeUnknownInputDefinition[FSVertex];
    SARAH`Vertex[] with the indices gI2 and gI1 omitted, so that the
    mapping is determined to be {Sd -> S1, conj[Sd] -> S2}. *)
 
+(* the coupling patterns for which VertexRules creates rules *)
+RequiredCpPatterns[nPointFunctions_] :=
+    DeleteRedundantCpPatterns[
+	ToCpPattern /@ RenumberCpIndices /@ Cases[
+	    nPointFunctions, _SARAH`Cp|_SARAH`Cp[_], {0, Infinity}]];
+
+(* Compares the couplings themselves, not their patterns, because
+   DeleteRedundantCpPatterns may choose other representative patterns
+   for other sets of couplings. *)
+MissingVertexRules[nPointFunctions_, vertexRules_List] :=
+    Module[{covered = Dispatch[Append[(# -> True)& /@ (First /@ vertexRules), _ -> False]]},
+           Select[DeleteDuplicates[RenumberCpIndices /@ Cases[
+                      nPointFunctions, _SARAH`Cp|_SARAH`Cp[_], {0, Infinity}]],
+                  !Replace[#, covered]&]
+          ];
+
 VertexRules[nPointFunctions_, massMatrices_] := Block[{
 	UnitaryMatrixQ,
 	nCpPatterns,
-	cpPatterns = DeleteRedundantCpPatterns[
-	    ToCpPattern /@ RenumberCpIndices /@ Cases[
-		nPointFunctions, _SARAH`Cp|_SARAH`Cp[_], {0, Infinity}]]
+	cpPatterns = RequiredCpPatterns[nPointFunctions]
     },
     (UnitaryMatrixQ[#] = True)& /@
         Flatten@DeleteCases[massMatrices[[All,3]], Null];
@@ -155,15 +172,19 @@ VertexRules[nPointFunctions_, massMatrices_] := Block[{
 	cpPatterns]
 ];
 
+(* all expressions of all loop orders, e.g. FSSelfEnergy[p, expr1L, expr2L] *)
+NPointFunctionExpressions[nPointFunctions_List] :=
+    DeleteCases[Join @@ (List @@@ (Rest /@ nPointFunctions)), Null];
+
 SortCps[nPointFunctions_List] := Module[{
-	exprs = nPointFunctions[[All,2]]
+	exprs = NPointFunctionExpressions[nPointFunctions]
     },
     Fold[
 	Module[{sortedCp = SortCp[#2]},
 	    If[sortedCp =!= #2, #1 /. #2 -> sortedCp, #1]] &,
 	nPointFunctions,
-	Union @ Select[Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
-		       UnresolvedColorFactorFreeQ[#, exprs] &]]
+	Select[Union @ Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
+	       UnresolvedColorFactorFreeQ[#, exprs] &]]
 ];
 
 SortCp[SARAH`Cp[fields__]] :=
@@ -309,7 +330,7 @@ EnforceCpColorStructures[nPointFunction_] := nPointFunction;
 EnforceCpColorStructures[externalField_, exprs_List] := Fold[
     EnforceCpColorStructure[externalField, #1, #2] &,
     exprs,
-    Select[Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
+    Select[Union @ Cases[exprs, _SARAH`Cp|_SARAH`Cp[_], Infinity],
 	   !UnresolvedColorFactorFreeQ[#, exprs] &]
 ];
 
@@ -418,8 +439,10 @@ VertexExp[cpPattern_, nPointFunctions_, massMatrices_] := Module[{
     strippedIndices = Complement[Flatten[FieldIndexList /@ fields],
 				 Flatten[FieldIndexList /@ fieldsInRotatedCp]];
     vertex = StripGroupStructure[
-	ResolveColorFactor[
-	    vertex, fields, cpPattern, nPointFunctions[[All,2]]],
+	If[IsTwoLoopScalarQuarticCoupling[cpPattern, nPointFunctions],
+	   TwoLoopColorContraction[fields, vertex, lorentz],
+	   ResolveColorFactor[
+	       vertex, fields, cpPattern, NPointFunctionExpressions[nPointFunctions]]],
 	strippedIndices];
     contraction = Block[{
 	    SARAH`sum
@@ -435,6 +458,64 @@ VertexExp[cpPattern_, nPointFunctions_, massMatrices_] := Module[{
     -I factor TreeMasses`ReplaceDependencies[contraction] /.
 	Parameters`ApplyGUTNormalization[]
 ];
+
+(* expressions of the 1-loop and of the 2-loop n-point functions *)
+OneLoopExpressions[nPointFunctions_List] :=
+    DeleteCases[If[Length[#] >= 2, #[[2]], Null]& /@ nPointFunctions, Null];
+
+TwoLoopExpressions[nPointFunctions_List] :=
+    DeleteCases[If[Length[#] >= 3, #[[3]], Null]& /@ nPointFunctions, Null];
+
+(* True if cpPattern is a 4-scalar coupling, which appears only in the
+   (auto-generated) 2-loop n-point functions *)
+IsTwoLoopScalarQuarticCoupling[cpPattern_, nPointFunctions_List] :=
+    Module[{inTwoLoop, inOneLoop},
+           If[CpType[cpPattern] =!= SARAH`VType[S, S, S, S], Return[False]];
+           inTwoLoop = !FreeQ[TwoLoopExpressions[nPointFunctions], cpPattern];
+           inOneLoop = !FreeQ[OneLoopExpressions[nPointFunctions], cpPattern];
+           If[inTwoLoop && inOneLoop,
+              Print["Warning: 4-scalar coupling ", cpPattern, " appears at 1- and 2-loop level;",
+                    " using the colour contraction of the 1-loop n-point functions."]];
+           inTwoLoop && !inOneLoop
+          ];
+
+(* gauge groups which are not broken by EWSB, e.g. color *)
+UnbrokenGaugeGroups[] :=
+    Module[{vectors = SARAH`SGauge /. a_[{__}] :> a},
+           SARAH`Gauge[[#, 3]]& /@
+           Select[Range[Length[vectors]],
+                  !FreeQ[SARAH`Particles[FlexibleSUSY`FSEigenstates], vectors[[#]]]&]
+          ];
+
+(* Colour contraction of a 4-scalar coupling used in SARAH's 2-loop
+   diagrams, see SPhenoCouplingList4ptPOLE[] in
+   SARAH/Package/SPheno/SPhenoCoupling.m: if the coupling contains two
+   pairs of identical fields and has more than one colour structure,
+   the colour indices of the conjugate fields are identified and summed
+   over (sumOverNonAbelianIndicesPOLE[]); otherwise the coefficient of
+   the (single) colour structure is used. *)
+TwoLoopColorContraction[fields_List, vertex_, lorentz_] :=
+    Module[{re, summable, colorflag = False, multiflag = False, value = vertex,
+            structures, nonZero},
+           re = SARAH`RE /@ StripFieldIndices[fields];
+           summable = !(Length[Union[re]] >= 3 || OddQ[Count[re, First[re]]]);
+           Do[
+               structures = SARAH`ExtractStructure[value, group];
+               If[structures[[1, 1]] =!= 1,
+                  colorflag = True;
+                  nonZero = Select[structures, #[[2]] =!= 0 &];
+                  If[summable,
+                     If[Length[nonZero] > 1, multiflag = True],
+                     value = nonZero[[1, 2]]
+                    ];
+                 ];
+               , {group, UnbrokenGaugeGroups[]}];
+           Which[
+               !colorflag, vertex,
+               multiflag, SARAH`sumOverNonAbelianIndicesPOLE[{{fields, {vertex, lorentz}}}],
+               True, value
+           ]
+          ];
 
 SARAHVertex[fieldsInRotatedCp_List] := Module[{
 	sarahVertex = SARAH`Vertex @ StripFieldIndices[fieldsInRotatedCp],
@@ -755,6 +836,9 @@ UnresolvedColorFactorFreeQ[cpPattern_, exprs_] := Module[{
     },
     cpInstance = Extract[exprs, fstPos];
     exprInstance = Extract[exprs, Take[fstPos, 1]];
+    (* shortcut: expressions without any color factor, e.g. the 2-loop
+       expressions, which are expensive to expand *)
+    If[FreeQ[exprInstance, C], Return[True]];
     FreeQ[Coefficient[exprInstance //. SARAH`sum[__, ex_] :> ex, cpInstance],
 	  C]
 ];
