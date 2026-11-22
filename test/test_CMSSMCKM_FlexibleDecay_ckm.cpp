@@ -54,6 +54,8 @@
 #include "spectrum_generator_settings.hpp"
 #include "standard_model.hpp"
 
+#include <Eigen/Core>
+
 #include <cmath>
 #include <complex>
 
@@ -125,13 +127,27 @@ BOOST_AUTO_TEST_CASE(test_decoupling_scheme_with_ckm)
 
    // the mixing matrices reproduce the CKM matrix (up to the phases of
    // the quark fields)
-   const auto ckm_model = dm_ckm.get_ZUL() * dm_ckm.get_ZDL().adjoint();
+   const Eigen::Matrix<std::complex<double>, 3, 3> ckm_model =
+      dm_ckm.get_ZUL() * dm_ckm.get_ZDL().adjoint();
    for (int i = 0; i < 3; i++) {
       for (int k = 0; k < 3; k++) {
          BOOST_CHECK_SMALL(std::abs(ckm_model(i, k)) - std::abs(ckm(i, k)),
                            1e-10);
       }
    }
+
+   // the CP-violating phase: the Jarlskog invariant doesn't depend on
+   // the phases of the quark fields, but changes sign under V -> V^*,
+   // which the moduli don't see
+   const auto jarlskog =
+      [](const Eigen::Matrix<std::complex<double>, 3, 3>& V) {
+         return std::imag(V(0, 1) * V(1, 2) * std::conj(V(0, 2)) *
+                          std::conj(V(1, 1)));
+      };
+   BOOST_TEST_MESSAGE("Jarlskog invariant: model "
+                      << jarlskog(ckm_model) << ", input " << jarlskog(ckm));
+   BOOST_REQUIRE_GT(std::abs(jarlskog(ckm)), 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(jarlskog(ckm_model), jarlskog(ckm), 1e-8);
 }
 
 BOOST_AUTO_TEST_CASE(test_charged_Higgs_decays_with_ckm)
