@@ -43,6 +43,20 @@ New features
 Fixed bugs
 ----------
 
+* [commit 43f2c76f0]: U1xMSSM3G and BLSM (models with two U(1) gauge groups
+  and kinetic mixing): the couplings of the photon, Z and Z' were wrong
+  whenever the kinetic mixing was not in the special basis where the
+  B' boson doesn't couple to hypercharge, e.g. in the decays (which are
+  calculated after running to the mass of the decaying particle) and,
+  in BLSM, for every input with kinetic mixing.  The photon coupled to
+  neutral particles and was not purely vectorial.  Affected were mainly
+  the decays of the Z' and of scalars into vector bosons: in U1xMSSM3G
+  Γ(Z' -> W W) was up to 14 times too large and the scalar decays into
+  two photons violated the Ward identity by up to 180%; in BLSM
+  Γ(Z' -> Z h2) depended on the sign of the kinetic mixing by a factor
+  of 10.  In U1xMSSM3G the VEV was also determined with a Z-Z' mixing
+  angle whose sign was lost.
+
 * [commit 65e84fdf7]: If FlexibleDecay calculated a negative partial width
   that was not just a rounding error (an unphysical result, e.g. from an
   inconsistent coupling), the spectrum generator aborted without writing
