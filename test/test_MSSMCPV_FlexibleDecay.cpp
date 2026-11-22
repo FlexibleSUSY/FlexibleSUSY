@@ -827,6 +827,13 @@ Block ImMSOFT Q= 2.00000000E+03
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 1, 1, 1),
                               0.00010607114819048992, 2e-13);
+   // mostly CP-odd heavy Higgs -> c cbar, u ubar: the CP-odd part includes
+   // the top-induced O(alpha_s^2) correction, with the ratio of the
+   // CP-odd couplings g_t^P/g_q^P (eq. (30) of hep-ph/9505358)
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 2, 1, 1),
+                              6.64197468731554192e-05, 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 2, 0, 0),
+                              3.34795702510249447e-10, 1e-10);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
                               0.00022695659608435093, 3e-13);
