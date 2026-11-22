@@ -43,6 +43,18 @@ New features
 Fixed bugs
 ----------
 
+* [commit 9a905bc7b]: The 2-loop QCD correction to the quark loops of the
+  decays of CP-odd (and CP-mixed) Higgs bosons into two photons had a
+  wrong coefficient.  This changed Γ(A -> γγ) when the higher-order
+  corrections are switched on (FlexibleDecay[2] > 9), by +0.95% in the
+  MSSM and +2.9% in the THDM-II at the example points, and by much more
+  for CP-odd Higgs bosons lighter than twice the top mass (e.g. a factor
+  of 2 at 300 GeV for the top loop alone).
+
+* [commit 45eac7ff3]: The decays of CP-even Higgs bosons into photons could
+  print a misleading warning that the 2-loop QCD corrections to A → γγ
+  were disabled near the quark threshold.  The results are unchanged.
+
 * [commit 8e39fcf04]: In models with a CP-violating Higgs sector (e.g. MSSMCPV,
   NMSSMCPV), the top-quark induced O(alpha_s^2) correction to the decays
   of the neutral Higgs bosons into up and charm quarks was wrong for the
