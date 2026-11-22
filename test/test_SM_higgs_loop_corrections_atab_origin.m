@@ -21,8 +21,6 @@
    ====================================================================
 
 *)
-<<"~/Promotion/Development_FS/FlexibleSUSY/meta/TestSuite.m"
-SetDirectory["~/Promotion/Development_FS/FlexibleSUSY"]
 Needs["TestSuite`", "TestSuite.m"];
 SMdir = FileNameJoin[{Directory[], "meta", "SM"}];
 
