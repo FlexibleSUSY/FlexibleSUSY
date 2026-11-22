@@ -43,6 +43,14 @@ New features
 Fixed bugs
 ----------
 
+* [commit c01003809]: In models that set the quark Yukawa couplings with the
+  CKM matrix (e.g. CMSSMCKM, MRSSM2, MRSSM2CKM, S3), FlexibleDecay
+  calculated the decays with a unit CKM matrix.  Decays that change the
+  quark flavour through the charged current were missing (e.g. H+ ->
+  c bbar, H+ -> t sbar, t -> W+ s), and the flavour-diagonal ones (e.g.
+  H+ -> t bbar) were slightly too large.  The decays now use the CKM
+  matrix of the input (Block VCKMIN).
+
 * [commit 56f41d834]: The 1-loop self-energies of complex scalars (e.g. squarks
   and charged Higgs bosons) contained the contributions of four-scalar and
   scalar-scalar-vector-vector interactions with the indices of the external
