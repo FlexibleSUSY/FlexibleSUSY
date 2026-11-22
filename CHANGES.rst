@@ -43,6 +43,15 @@ New features
 Fixed bugs
 ----------
 
+* [commit 8e39fcf04]: In models with a CP-violating Higgs sector (e.g. MSSMCPV,
+  NMSSMCPV), the top-quark induced O(alpha_s^2) correction to the decays
+  of the neutral Higgs bosons into up and charm quarks was wrong for the
+  CP-odd component: it was missing for (nearly) CP-odd states and could
+  be arbitrarily large for states with a small CP-even component.  In
+  MSSMCPV the width of the mostly CP-odd heavy Higgs boson into c cbar
+  (u ubar) increases by about 2.6% (8%).  Decays into down-type quarks,
+  CP-conserving models and CP-even states are not affected.
+
 * [commit 56f41d834]: The 1-loop self-energies of complex scalars (e.g. squarks
   and charged Higgs bosons) contained the contributions of four-scalar and
   scalar-scalar-vector-vector interactions with the indices of the external
