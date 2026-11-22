@@ -121,12 +121,14 @@ LowScaleFirstGuess = LowScale;
 
 gYDRbar = GUTNormalization[g1] LowEnergyGaugeCoupling[1];
 eDRbar  = gYDRbar g2 / Sqrt[gYDRbar^2 + g2^2];
+(* tree-level vev from MZ: lower eigenvalue of the massive Z-Z' block
+   of the neutral gauge boson mass matrix in the triangular basis
+   (gX1 = 0), M^2 = 1/4 {{gZ^2 v^2, gZ gp v^2}, {gZ gp v^2, gp^2 v^2 + 4 gX^2 x^2}} *)
+gZ2DRbar  = gYDRbar^2 + g2^2;
+gpDRbar   = g1X GUTNormalization[g1] + gX;
 vDRbar  = AbsSqrt[
-   (-4*gYDRbar^2*(eDRbar^2*gX1^2*(x1^2 + x2^2)*Cos[ThetaWp]^2 -
-      g2*(g2*MZDRbar^2 - g2*gX^2*(x1^2 + x2^2)*Sin[ThetaWp]^2 +
-        eDRbar*gX*gX1*(x1^2 + x2^2)*Sin[2*ThetaWp])))/
-    (eDRbar*(g2^2 + (gYDRbar + gX1)*gYDRbar)*Cos[ThetaWp] -
-      g2*(g1X GUTNormalization[g1] + gX)*gYDRbar*Sin[ThetaWp])^2];
+   4 MZDRbar^2 (gX^2 (x1^2 + x2^2) - MZDRbar^2) /
+   (gZ2DRbar gX^2 (x1^2 + x2^2) - MZDRbar^2 (gZ2DRbar + gpDRbar^2))];
 
 LowScaleInput = {
     (* do not rotate g1, because it is set to gY *)
