@@ -358,6 +358,61 @@ IsScalarToScalarAndMasslessVector[initialParticle_, finalState_List] :=
     Count[finalState, _?TreeMasses`IsScalar] === 1 &&
     Count[finalState, _?(TreeMasses`IsVector[#] && TreeMasses`IsMassless[#]&)] === 1;
 
+(* CP property of a scalar: 1 (CP-even) or -1 (CP-odd) if all its
+   states are CP eigenstates of this CP property, 0 otherwise.  SARAH
+   lists the real and imaginary parts of the scalars with a VEV as
+   CP-even and CP-odd (SA`ScalarsCPeven, SA`ScalarsCPodd); a mass
+   eigenstate that mixes both (CP-violating Higgs sector) is in both
+   lists. *)
+GetDefiniteCP[particle_] :=
+    Which[MemberQ[SA`ScalarsCPeven, particle] && !MemberQ[SA`ScalarsCPodd, particle], 1,
+          MemberQ[SA`ScalarsCPodd, particle] && !MemberQ[SA`ScalarsCPeven, particle], -1,
+          True, 0];
+
+IsNeutralMassiveVector[particle_] :=
+    TreeMasses`IsVector[particle] && !TreeMasses`IsMassless[particle] &&
+    TreeMasses`FSAntiField[particle] === particle &&
+    PossibleZeroQ[TreeMasses`GetElectricCharge[particle]];
+
+(* Returns True for a decay of a CP-even or CP-odd scalar that violates
+   CP, if the model has no tree-level vertex for it:
+
+   - S -> S1 S2 with CP(S) != CP(S1) CP(S2), such as h -> h A or
+     A -> A A;
+
+   - S -> S1 V with a neutral massive vector V and CP(S) = CP(S1), such
+     as h -> h Z or A -> A Z.  A neutral gauge boson is CP-even, and the
+     final state has L = 1, so CP(S1 V) = -CP(S1).
+
+   Splitting the neutral scalars into CP-even and CP-odd fields assumes
+   that the model conserves CP, so these decays vanish at every order.
+   Their 1-loop amplitudes cancel only numerically (BRs of 1e-17 and
+   below), and some loop functions can give NaN in this cancellation.
+   A non-zero tree-level vertex means that the model violates CP anyway,
+   so then the decay is kept.  (CP phases elsewhere in a model with
+   separate CP-even and CP-odd scalars would also induce the mixing of
+   the two at 1 loop, which such a model leaves out.) *)
+IsCPForbiddenScalarDecay[initialParticle_, finalState:{_, _}] :=
+    Module[{cpIn = GetDefiniteCP[initialParticle], cpOut, violatesCP = False},
+           If[cpIn =!= 0,
+              cpOut = Which[
+                 And @@ (TreeMasses`IsScalar /@ finalState),
+                    Times @@ (GetDefiniteCP /@ finalState),
+                 MatchQ[finalState, {_?TreeMasses`IsScalar, _?IsNeutralMassiveVector} |
+                                    {_?IsNeutralMassiveVector, _?TreeMasses`IsScalar}],
+                    -GetDefiniteCP[First @ Select[finalState, TreeMasses`IsScalar]],
+                 True, 0
+              ];
+              violatesCP = cpOut =!= 0 && cpOut =!= cpIn;
+           ];
+           violatesCP &&
+              !Vertices`IsNonZeroVertex[Join[{TreeMasses`FSAntiField[initialParticle]}, finalState]]
+          ];
+
+IsCPForbiddenScalarDecay[_, _List] := False;
+
+Utils`MakeUnknownInputDefinition[IsCPForbiddenScalarDecay];
+
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
     Vertices`IsNonZeroVertex[fields, useDependences];
 
@@ -584,6 +639,7 @@ GetFinalStatesForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFin
                                             IsColorInvariantDecay[particle, finalState] &&
                                             !FinalStateContainsInitialState[particle, finalState] &&
                                             !IsScalarToScalarAndMasslessVector[particle, finalState] &&
+                                            !IsCPForbiddenScalarDecay[particle, finalState] &&
                                             (* e.g. R-parity: skips searching diagrams that can't exist *)
                                             !Vertices`ViolatesGlobalSymmetryQ[Join[{TreeMasses`FSAntiField[particle]}, finalState]]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);

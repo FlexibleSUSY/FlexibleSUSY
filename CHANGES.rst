@@ -40,6 +40,14 @@ New features
   order and were always 0 in the output.  This makes the generated decay
   code smaller (about 17% in the THDM-II, 14% in the MSSM).
 
+* FlexibleDecay no longer generates decays that violate CP in models with
+  separate CP-even and CP-odd Higgs bosons (e.g. h -> h A, A -> h h,
+  A -> A A, H -> h Z, A -> A Z).  They were computed at 1 loop, where their
+  widths are 0 up to numerical noise (branching ratios below 1e-17).  With
+  COLLIER this cancellation could give NaN, which made ``run_LRLR.x`` abort
+  at the example point.  The generated decay code of LRLR is 33% smaller.
+  Models with a CP-violating Higgs sector (e.g. MSSMCPV) are not affected.
+
 Fixed bugs
 ----------
 
