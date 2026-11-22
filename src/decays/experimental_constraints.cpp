@@ -32,7 +32,9 @@
 #endif
 
 #include "experimental_constraints.hpp"
+#include "decays/decay.hpp"
 #include "decays/standard_model_decays.hpp"
+#include "error.hpp"
 
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
@@ -58,6 +60,20 @@ namespace flexiblesusy {
 namespace {
 
 #ifdef ENABLE_HIGGSTOOLS
+/// converts the CP property to the one of HiggsTools
+HP::CP to_higgstools_cp(CP_property cp)
+{
+   switch (cp) {
+   case CP_property::even:
+      return HP::CP::even;
+   case CP_property::odd:
+      return HP::CP::odd;
+   case CP_property::undefined:
+      return HP::CP::undefined;
+   }
+   throw SetupError("Unknown CP property of a Higgs boson");
+}
+
 /// doesn't throw if the existence of the path can't be determined
 bool path_exists(const std::string& path) noexcept
 {
@@ -332,8 +348,8 @@ std::tuple<std::optional<SignalResult>, std::vector<std::tuple<int, double, doub
 
    for (auto const& el : bsm_input) {
       auto effc = HP::NeutralEffectiveCouplings {};
-      // 1 (even), -1 (odd), 0 (undefined)
-      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral, static_cast<HP::CP>(el.CP)));
+      auto& s = pred.addParticle(HP::BsmParticle(
+         el.particle, HP::ECharge::neutral, to_higgstools_cp(el.CP)));
       s.setMass(el.mass);
       s.setMassUnc(relMassError*el.mass); // set mass uncertainty to 3%
 
@@ -428,7 +444,7 @@ std::optional<SignalResult> call_lilith(
    for (auto const& el : bsm_input) {
       if (use_in_lilith(el)) {
          higgs_in_range = true;
-         cpEvenHiggs = (el.CP == 1);
+         cpEvenHiggs = (el.CP == CP_property::even);
       }
    }
    if (!higgs_in_range) {
@@ -476,7 +492,8 @@ std::optional<SignalResult> call_lilith(
       XMLinputstring += "<C to=\"mumu\" part=\"im\">" + std::to_string(std::imag(el.mumu.second)) + "</C>\n";
 
       // in the BEST-QCD mode, only the real part of the coupling is taken into account (see 1502.04138)
-      const std::string orderAsStr = (el.CP == 1 ? "BEST-QCD" : "LO");
+      const std::string orderAsStr =
+         (el.CP == CP_property::even ? "BEST-QCD" : "LO");
       XMLinputstring += "<precision>" + orderAsStr + "</precision>\n";
 
       const double BRinv = el.invWidth/el.width;

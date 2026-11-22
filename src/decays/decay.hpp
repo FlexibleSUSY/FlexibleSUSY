@@ -70,6 +70,13 @@ private:
    std::string proc_string;
 };
 
+/// CP property of a neutral Higgs boson
+enum class CP_property {
+   even,     ///< CP-even
+   odd,      ///< CP-odd
+   undefined ///< not a CP eigenstate (CP violation)
+};
+
 class NeutralHiggsEffectiveCouplings {
 public:
    std::string particle {};
@@ -78,7 +85,7 @@ public:
    double width {};
    double width_sm {};
    double invWidth {0.};
-   int CP {};
+   CP_property CP{CP_property::undefined};
    std::pair<std::string, std::complex<double>> dd {};
    std::pair<std::string, std::complex<double>> uu {};
    std::pair<std::string, std::complex<double>> ss {};
