@@ -710,7 +710,7 @@ Block MSOFT Q= 8.64566212E+02
    // Ah -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378061307989104, 4e-13);
    // Ah -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 4.1843914309546067e-06, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 4.2239510183119907e-06, 4e-12);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections

@@ -2014,14 +2014,25 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                                  ])&, verticesForFACp]," &&\n"]
                               ] <>
                               ") {\n" <>
-                              "const auto correction_S = 1. + get_alphas(context)/Pi * delta_hAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
-                              "const auto correction_P = 1. + get_alphas(context)/Pi * delta_AhAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
-                              "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
-                              "temp_result.form_factor_11  = correction_S * temp_result.form_factor_11;\n" <>
-                              "temp_result.form_factor_12  = correction_S * temp_result.form_factor_12;\n" <>
-                              "temp_result.form_factor_21  = correction_S * temp_result.form_factor_21;\n" <>
-                              "temp_result.form_factor_22  = correction_S * temp_result.form_factor_22;\n" <>
-                              "temp_result.form_factor_eps = correction_P * temp_result.form_factor_eps;\n"
+                              (* the CP-even (CP-odd) correction only applies to the
+                                 CP-even (CP-odd) form factors, so a pure CP-even
+                                 (CP-odd) scalar needs only one of them; this also
+                                 avoids the A -> gamma gamma threshold warning in the
+                                 decays of CP-even scalars *)
+                              With[{initial = GetInitialState[decay] /. Susyno`LieGroups`conj|SARAH`bar -> Identity},
+                                 If[MemberQ[SA`ScalarsCPodd, initial] && !MemberQ[SA`ScalarsCPeven, initial], "",
+                                    "const auto correction_S = 1. + get_alphas(context)/Pi * delta_hAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
+                                    "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
+                                    "temp_result.form_factor_11  = correction_S * temp_result.form_factor_11;\n" <>
+                                    "temp_result.form_factor_12  = correction_S * temp_result.form_factor_12;\n" <>
+                                    "temp_result.form_factor_21  = correction_S * temp_result.form_factor_21;\n" <>
+                                    "temp_result.form_factor_22  = correction_S * temp_result.form_factor_22;\n"
+                                 ] <>
+                                 If[MemberQ[SA`ScalarsCPeven, initial] && !MemberQ[SA`ScalarsCPodd, initial], "",
+                                    "const auto correction_P = 1. + get_alphas(context)/Pi * delta_AhAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
+                                    "temp_result.form_factor_eps = correction_P * temp_result.form_factor_eps;\n"
+                                 ]
+                              ]
                            ] <> "}\n" <>
                            "result += temp_result;\n",
                            (* colored scalar loop *)
