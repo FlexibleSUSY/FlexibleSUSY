@@ -718,6 +718,11 @@ TEST_META += \
 		$(DIR)/test_MSSMNoFV_TreeMasses.m
 endif
 
+ifeq ($(WITH_U1xMSSM3G),yes)
+TEST_SRC += \
+		$(DIR)/test_U1xMSSM3G_photon_couplings.cpp
+endif
+
 ifeq ($(WITH_MSSMCPV),yes)
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
@@ -1157,6 +1162,8 @@ endif
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
+
+$(DIR)/test_U1xMSSM3G_photon_couplings.x: $(LIBU1xMSSM3G)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
