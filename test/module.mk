@@ -724,6 +724,9 @@ TEST_SRC += \
 endif
 
 ifeq ($(WITH_MSSMCPV),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSMCPV_gluino_phase.cpp \
+		$(DIR)/test_MSSMCPV_amm_complex.cpp
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
@@ -1162,6 +1165,10 @@ endif
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_gluino_phase.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_amm_complex.x: $(LIBMSSMCPV)
 
 $(DIR)/test_U1xMSSM3G_photon_couplings.x: $(LIBU1xMSSM3G)
 
