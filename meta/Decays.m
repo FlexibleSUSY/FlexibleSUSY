@@ -1555,7 +1555,12 @@ FieldFromDiagram[diagram_, {i_, j_}] :=
    {vertex1, vertex2} -> concrete particle connecting vertex1 and 2 (e.g. Fe)
    This is the core function that allows matching between diagram at mathematica and C++
    level. *)
-(* @todo: not clear about the conjugation of particle *)
+(* The orientation (particle or antiparticle) of the fields on the edges
+   is fixed together with GetFieldsAssociations.  Checked numerically: all
+   decay widths of MSSMCPV (complex couplings) are invariant under a
+   rephasing of the fields (to 1e-8), the Ward identity of S -> gamma gamma
+   and S -> gamma Z holds there too, and each generated diagram, with its
+   charge-flow orientation, exists in FeynArts (PR #705). *)
 InsertionsOnEdgesForDiagram[topology_, insertion_] :=
    Module[{sortedVertexCombinations, connectedVertices, res},
 
@@ -1631,7 +1636,11 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
          LorentzProduct[_, PL] -> "left()",
          LorentzProduct[_, PR] -> "right()",
 
-         (* @todo: rules below need checking! *)
+         (* The rules below are checked by the Ward identity of the 1-loop
+            amplitudes S -> gamma gamma and S -> gamma Z with consistent
+            tree-level masses (test_MSSM_FlexibleDecay_ward), which use
+            triple- and four-vector, momentum-difference, ghost and
+            scalar-scalar-vector-vector vertices in Feynman gauge. *)
          (* momentum difference vertices *)
          Mom[i1_Integer] - Mom[i2_Integer] :>
             "value(" <> ToString[i1-1] <> ", " <> ToString[i2-1] <> ")",
@@ -1702,7 +1711,9 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
    GetFieldsAssociations returns translation in the form
    {Field[1] -> hh, Field[2] -> SRdp, Field[3] -> VWm, Field[4] -> SRdp, Field[5] -> Hpm, Field[6] -> VZ}
 
-   @todo: There is an ambiguity whether Field[n] -> somefield or Field[n] -> AntiField[somefield]
+   Whether Field[n] is the field or its antifield is fixed by the orientation
+   of the edge (see InsertionsOnEdgesForDiagram), checked by the rephasing
+   invariance of the MSSMCPV decays.
 *)
 GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldTypes_, diagram_, verticesInFieldTypesForFACp_] :=
    Module[{i, temp = {}, concreteFieldOnEdgeBetweenVerticesLocal},

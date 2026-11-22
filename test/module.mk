@@ -573,11 +573,13 @@ endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 endif
 
@@ -1160,6 +1162,8 @@ $(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
 endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
+
+$(DIR)/test_MSSM_FlexibleDecay_ward.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
 
