@@ -128,6 +128,7 @@ TEST_META := \
 		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
+		$(DIR)/test_MSSM_2L_mb.m \
 		$(DIR)/test_MSSM_2L_mt.m \
 		$(DIR)/test_MSSM_2L_yb_softsusy.m \
 		$(DIR)/test_MSSM_2L_yt.m \
@@ -146,6 +147,7 @@ TEST_META := \
 		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
 		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
+		$(DIR)/test_SM_higgs_loop_corrections_atab_origin.m \
 		$(DIR)/test_TestSuite.m \
 		$(DIR)/test_TextFormatting.m \
 		$(DIR)/test_THDM_threshold_corrections.m \

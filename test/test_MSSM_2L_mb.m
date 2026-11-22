@@ -53,9 +53,10 @@ MakePoint[MG_, Mst1_, Mst2_, Msb1_, Msb2_, MS_, xt_, xb_, Q_] :=
         msb1 -> Msb1, msb2 -> Msb2
     }
 
-Print[];
-Print["# non-universal SUSY masses: "];
-Print[Re @ N[b2l / (4 Pi)^4 //. #]]& /@ {
+(* 2-loop SQCD correction to mb in the MSSM at non-universal SUSY
+   masses; the reference values are those of the C++ implementation
+   (test/test_mssm_twoloop_mb.cpp) *)
+points = {
     MakePoint[1000, 1200, 1300, 1500, 1600, 1400,               0, 0, 1000],
     MakePoint[1000, 1200, 1300, 1500, 1600, 1400,               0, 0, 1100],
     MakePoint[1000, 1200, 1300, 1500, 1600, 1400,  Sqrt[6] * 1300, 0, 1000],
@@ -74,6 +75,30 @@ Print[Re @ N[b2l / (4 Pi)^4 //. #]]& /@ {
     MakePoint[1600, 1500, 1400, 1300, 1200, 1100,               0,        0, 1000],
     MakePoint[1600, 1500, 1400, 1300, 1200, 1100,  Sqrt[6] * 1300,  Sqrt[6], 1000]
 };
+
+reference = {
+    0.0060994559262305161,
+    0.0055186465519328747,
+    0.006097076094553221,
+    0.0055162667202560654,
+    0.0061018357579078102,
+    0.0055210263836096849,
+    0.006097451701735793,
+    0.0055206961724585694,
+    0.0060950747439344347,
+    0.0055183134669058234,
+    0.006099828659537153,
+    0.0055230788780113154,
+    0.0062822480184172172,
+    0.0062798983371975597,
+    0.0062845976996368739,
+    0.0062791938133536125,
+    0.0062737898965503939
+};
+
+Print["Testing 2L SQCD correction to mb at non-universal SUSY masses ..."];
+
+MapThread[TestCloseRel[Re @ N[b2l / (4 Pi)^4 //. #1], #2, 1*^-8]&, {points, reference}];
 
 Print[];
 PrintTestSummary[];
