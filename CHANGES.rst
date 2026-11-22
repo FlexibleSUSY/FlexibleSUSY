@@ -53,6 +53,40 @@ Fixed bugs
   and the A-terms, the light chargino and the second neutralino were about
   35 GeV (10%) too light.  With real parameters the masses are unchanged.
 
+* [commit 56f41d834]: The 1-loop self-energies of complex scalars (e.g. squarks
+  and charged Higgs bosons) contained the contributions of four-scalar and
+  scalar-scalar-vector-vector interactions with the indices of the external
+  fields interchanged.  With complex parameters (CP violation) these
+  contributions entered complex conjugated, so the pole masses depended on
+  the unphysical phase convention.  The effect is small: in MSSMCPV with a
+  phase of 60 degrees on M1, M2, M3 and the A-terms, the stop masses
+  changed by up to 4 MeV.  With real parameters the masses are unchanged.
+
+* [commit b74feccc6]: In models with a complex gluino mass parameter M3 (e.g.
+  MSSMCPV, CMSSMCPV with a complex m12, NMSSMCPV), all couplings of the
+  gluino had the wrong phase, so the results depended on the unphysical
+  phase convention.  This affected the SUSY-QCD corrections to the top
+  and bottom Yukawa couplings and thus the Higgs masses, the squark and
+  gluino pole masses, and processes with gluinos.  Example: in MSSMCPV
+  with a phase of 60 degrees on M1, M2, M3 and the A-terms, the top
+  Yukawa coupling was 1% too small, the lightest Higgs boson 0.85 GeV too
+  light and the light stop 4 GeV too light.  Real (also negative) values
+  of M3 are not affected.
+  
+* [commit ab1a6bc4b]: In models with CP-violating (complex) parameters, the
+  anomalous magnetic moments (e.g. a_mu) could come out as NaN, together
+  with the error "Form factor F2 should be real", depending on rounding.
+  The calculation now accepts imaginary parts of the form factor at the
+  level of rounding errors.
+
+* [commit 65e84fdf7]: If FlexibleDecay calculated a negative partial width
+  that was not just a rounding error (an unphysical result, e.g. from an
+  inconsistent coupling), the spectrum generator aborted without writing
+  any output.  Now such a channel is set to zero (also in the total width,
+  the branching ratios and the input to HiggsTools and Lilith), a warning
+  is written to the ``DCINFO`` block, and the spectrum and all other decays
+  are written as usual.
+
 * [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
   photons) of a particle lighter than the Z boson evaluated the loop
   functions at the mass of the particle, while its couplings are taken at

@@ -51,6 +51,7 @@ TEST_SRC := \
 		$(DIR)/test_amm_loop_functions.cpp \
 		$(DIR)/test_command_line_options.cpp \
 		$(DIR)/test_decay_amplitudes.cpp \
+		$(DIR)/test_negative_width.cpp \
 		$(DIR)/test_undetected_width.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_effective_coupling_list.cpp \
@@ -724,7 +725,9 @@ endif
 
 ifeq ($(WITH_MSSMCPV),yes)
 TEST_SRC += \
-		$(DIR)/test_MSSMCPV_rephasing_invariance.cpp
+		$(DIR)/test_MSSMCPV_rephasing_invariance.cpp \
+		$(DIR)/test_MSSMCPV_gluino_phase.cpp \
+		$(DIR)/test_MSSMCPV_amm_complex.cpp
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
@@ -1163,6 +1166,10 @@ endif
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_gluino_phase.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_amm_complex.x: $(LIBMSSMCPV)
 
 $(DIR)/test_MSSMCPV_rephasing_invariance.x: $(LIBMSSMCPV)
 
