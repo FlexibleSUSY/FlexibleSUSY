@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
    // h -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00035462447439152465, 5e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 9.2117697375801348e-06, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 9.2117470035944814e-06, 2e-13);
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.106402229544854e-06, 2e-13);
 

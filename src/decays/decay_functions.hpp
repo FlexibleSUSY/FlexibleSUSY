@@ -32,7 +32,7 @@ double calc_DeltaAh(double b) noexcept;
 /// Eq.(2.6) of hep-ph/0503173
 double calc_DeltaH(double b) noexcept;
 
-/// Eq.(2.11) of hep-ph/0503173, 2-loop and higher order
+/// Eq.(2.11) of hep-ph/0503173 at 2-loop, hep-ph/0511063 at higher orders
 double calc_Deltaqq(double alpha_s_red, double Nf, FlexibleDecay_settings const&) noexcept;
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
@@ -41,7 +41,7 @@ double RT(double x) noexcept;
 // eq. 2.5, 2.7 & 2.8 of https://arxiv.org/pdf/hep-ph/0509189.pdf
 std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, double mu) noexcept;
 
-// eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+// eq. 2.19, 2.20 & 2.21 of https://arxiv.org/pdf/hep-ph/0509189.pdf
 std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept;
 
 std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAh, double msq, double mu) noexcept;
@@ -53,8 +53,8 @@ std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAh, double msq,
  * to CHAPLIN library (https://arxiv.org/abs/1106.5739) */
 std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, double mu) noexcept;
 
-// eq. 6 of https://arxiv.org/pdf/1109.5304.pdf
-std::complex<double> f(double x) noexcept;
+// eq. 2.4 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+std::complex<double> f(double tau) noexcept;
 
 unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexcept;
 
