@@ -161,18 +161,18 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
 /**
  * Resets all FlexibleDecay settings to their defaults.
  *
- * | enum                                       | possible values                                      | default value         |
- * |--------------------------------------------|------------------------------------------------------|-----------------------|
- * | calculate_decays                           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
- * | min_br_to_print                            | 0 to 1 (0 = print all channels)                      | 1e-5                  |
+ * | enum                                       | possible values                                                | default value            |
+ * |--------------------------------------------|----------------------------------------------------------------|--------------------------|
+ * | calculate_decays                           | 0 (no) or 1 (yes)                                              | 1 (= enabled)            |
+ * | min_br_to_print                            | 0 to 1 (0 = print all channels)                                | 1e-5                     |
  * | include_higher_order_corrections           | two digits: tens = SM order (0 - 4), units = BSM order (0 - 1) | 41 (SM: N^4LO, BSM: NLO) |
- * | use_Thomson_alpha_in_Phigamgam_and_PhigamZ | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
- * | offshell_VV_decays                         | 0 (no) or 1 (single offshell) or 2 (double offshell) | 2 (= double offshell) |
- * | print_effc_block                           | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
- * | calculate_normalized_effc                  | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
- * | call_higgstools                            | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
- * | call_lilith                                | 0 (no) or 1 (yes)                                    | 0 (= disabled)        |
- * | use_pole_higgs_mixings                     | 0 (no) or 1 (yes)                                    | 1 (= enabled)         |
+ * | use_Thomson_alpha_in_Phigamgam_and_PhigamZ | 0 (no) or 1 (yes)                                              | 1 (= enabled)            |
+ * | offshell_VV_decays                         | 0 (no) or 1 (single offshell) or 2 (double offshell)           | 2 (= double offshell)    |
+ * | print_effc_block                           | 0 (no) or 1 (yes)                                              | 1 (= enabled)            |
+ * | calculate_normalized_effc                  | 0 (no) or 1 (yes)                                              | 0 (= disabled)           |
+ * | call_higgstools                            | 0 (no) or 1 (yes)                                              | 0 (= disabled)           |
+ * | call_lilith                                | 0 (no) or 1 (yes)                                              | 0 (= disabled)           |
+ * | use_pole_higgs_mixings                     | 0 (no) or 1 (yes)                                              | 1 (= enabled)            |
  */
 void FlexibleDecay_settings::reset()
 {
