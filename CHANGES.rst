@@ -62,6 +62,20 @@ Fixed bugs
   Yukawa coupling was 1% too small, the lightest Higgs boson 0.85 GeV too
   light and the light stop 4 GeV too light.  Real (also negative) values
   of M3 are not affected.
+  
+* [commit ab1a6bc4b]: In models with CP-violating (complex) parameters, the
+  anomalous magnetic moments (e.g. a_mu) could come out as NaN, together
+  with the error "Form factor F2 should be real", depending on rounding.
+  The calculation now accepts imaginary parts of the form factor at the
+  level of rounding errors.
+
+* [commit 65e84fdf7]: If FlexibleDecay calculated a negative partial width
+  that was not just a rounding error (an unphysical result, e.g. from an
+  inconsistent coupling), the spectrum generator aborted without writing
+  any output.  Now such a channel is set to zero (also in the total width,
+  the branching ratios and the input to HiggsTools and Lilith), a warning
+  is written to the ``DCINFO`` block, and the spectrum and all other decays
+  are written as usual.
 
 * [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
   photons) of a particle lighter than the Z boson evaluated the loop
