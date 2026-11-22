@@ -27,6 +27,7 @@
 #include "ewsb_solver.hpp"
 #include "logger.hpp"
 #include "gsl_multimin_fminimizer.hpp"
+#include "gsl_min_fminimizer.hpp"
 #include "gsl_utils.hpp"
 #include "gsl_vector.hpp"
 
@@ -72,6 +73,7 @@ public:
    void set_max_iterations(std::size_t n) { max_iterations = n; }
    void set_solver_type(Solver_type t) { solver_type = t; }
    int minimize(const Vector_t&);
+   int minimize(double, double);
 
    // EWSB_solver interface methods
    virtual std::string name() const override { return "Minimizer"; }
@@ -162,6 +164,20 @@ int Minimizer<dimension>::minimize(const Vector_t& start)
    minimum_value = minimizer.get_minimum_value();
 
    return status;
+}
+
+template <std::size_t dimension>
+int Minimizer<dimension>::minimize(double start, double end) {
+   if (!function)
+      throw SetupError("Minimizer: function not callable");
+
+   // initialize function
+   gsl_function func;
+   func.function = gsl_function3;
+   func.params = &function;
+
+   GSL_min_fminimizer minimizer(solver_type_to_gsl_pointer(),
+                                     &func, start, end);
 }
 
 template <std::size_t dimension>
