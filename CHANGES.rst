@@ -48,6 +48,21 @@ New features
   at the example point.  The generated decay code of LRLR is 33% smaller.
   Models with a CP-violating Higgs sector (e.g. MSSMCPV) are not affected.
 
+* FlexibleDecay now calculates the decays of all BSM particles by default
+  (``FSDecayParticles = Automatic``): besides the Higgs bosons also e.g.
+  sfermions, neutralinos, charginos and the gluino in the MSSM, and Z'
+  bosons in U(1)' models.  BSM states that share a multiplet with SM
+  particles (e.g. heavy neutrinos mixing with the light ones) aren't
+  included.  Scalars decay at tree level or, if a decay doesn't exist at
+  tree level, at 1 loop; fermions and vector bosons decay at tree level.
+  The tree-level widths agree with CalcHEP at the same parameters (e.g.
+  the MSSM and the B-L-SM within 1e-4, except channels with a final-state
+  Z boson, for which FlexibleDecay uses the Z pole mass).  The generated
+  decay code is larger and takes longer to generate and compile; to
+  restrict the decays to the Higgs bosons as before, set
+  ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
+  model file.
+
 Fixed bugs
 ----------
 

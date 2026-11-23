@@ -596,8 +596,14 @@ CheckDecaysOptions[] :=
       ];
       FlexibleSUSY`FSCalculateDecays = False,
       If[FlexibleSUSY`FSDecayParticles === Automatic,
+         (* the Higgs bosons and all BSM particles; particles without
+            physical decays (massless, ghosts, only Goldstone bosons)
+            are removed later by Decays`IsSupportedDecayParticle *)
          FlexibleSUSY`FSDecayParticles =
-            DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
+            DeleteDuplicates @ Join[
+               DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
+               TreeMasses`GetSusyParticles[]
+            ],
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
             FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. SARAH`bar|Susyno`LieGroups`conj -> Identity;
