@@ -21,7 +21,10 @@
 #include <boost/preprocessor/arithmetic/sub.hpp>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
+#include <cstddef>
+#include <functional>
 #include <limits>
+#include <new>
 
 #define A_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(A_ARGS_SEQ), 1)
 #define B_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(B_ARGS_SEQ), 1)
@@ -104,6 +107,40 @@ namespace flexiblesusy
 namespace looplibrary
 {
 
+template <std::size_t N, typename Coeff>
+std::size_t
+Tensor_cache<N, Coeff>::Hash::operator()(const Key& key) const noexcept
+{
+   std::size_t seed = 0;
+   for (const double x : key) {
+      // -0.0 == 0.0, so both must have the same hash
+      const std::size_t h = std::hash<double>{}(x == 0.0 ? 0.0 : x);
+      seed ^= h + 0x9e3779b97f4a7c15ULL + (seed << 6U) + (seed >> 2U);
+   }
+   return seed;
+}
+
+template <std::size_t N, typename Coeff>
+const Coeff* Tensor_cache<N, Coeff>::find(const Key& key) const noexcept
+{
+   const auto it = map.find(key);
+   return it == map.end() ? nullptr : &it->second;
+}
+
+template <std::size_t N, typename Coeff>
+void Tensor_cache<N, Coeff>::insert(const Key& key, const Coeff& coeff) noexcept
+{
+   try {
+      if (map.size() >= max_size) {
+         map.clear();
+      }
+      map.emplace(key, coeff);
+   } catch (const std::bad_alloc&) {
+      // the cache is optional: free its memory and continue without it
+      map.clear();
+   }
+}
+
 void Collier::initialize() noexcept
 {
    futils::swap();
@@ -149,9 +186,17 @@ void Collier::B(Bcoeff_t& b, B_ARGS) noexcept
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> m02 = m02_in;
    const std::complex<double> m12 = m12_in;
+   const decltype(b_cache)::Key key{p10.real(), m02.real(), m02.imag(),
+                                    m12.real(), m12.imag(), scl2_in};
+
+   if (const auto* cached = b_cache.find(key)) {
+      b = *cached;
+      return;
+   }
 
    set_mu2_uv(scl2_in);
    get_B_impl(b.data(), &p10, &m02, &m12);
+   b_cache.insert(key, b);
 }
 
 void Collier::DB(DBcoeff_t& db, DB_ARGS) noexcept
@@ -172,9 +217,18 @@ void Collier::C(Ccoeff_t& c, C_ARGS) noexcept
    const std::complex<double> m02 = m02_in;
    const std::complex<double> m12 = m12_in;
    const std::complex<double> m22 = m22_in;
+   const decltype(c_cache)::Key key{
+      p10.real(), p21.real(), p20.real(), m02.real(), m02.imag(),
+      m12.real(), m12.imag(), m22.real(), m22.imag(), scl2_in};
+
+   if (const auto* cached = c_cache.find(key)) {
+      c = *cached;
+      return;
+   }
 
    set_mu2_uv(scl2_in);
    get_C_impl(c.data(), &p10, &p21, &p20, &m02, &m12, &m22);
+   c_cache.insert(key, c);
 }
 
 void Collier::D(Dcoeff_t& d, D_ARGS) noexcept
@@ -189,10 +243,20 @@ void Collier::D(Dcoeff_t& d, D_ARGS) noexcept
    const std::complex<double> m12 = m12_in;
    const std::complex<double> m22 = m22_in;
    const std::complex<double> m32 = m32_in;
+   const decltype(d_cache)::Key key{
+      p10.real(), p21.real(), p32.real(), p30.real(), p20.real(),
+      p31.real(), m02.real(), m02.imag(), m12.real(), m12.imag(),
+      m22.real(), m22.imag(), m32.real(), m32.imag(), scl2_in};
+
+   if (const auto* cached = d_cache.find(key)) {
+      d = *cached;
+      return;
+   }
 
    set_mu2_uv(scl2_in);
    get_D_impl(d.data(), &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22,
               &m32);
+   d_cache.insert(key, d);
 }
 
 } // namespace looplibrary
