@@ -63,6 +63,12 @@ New features
   ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
   model file.
 
+* ``make`` shows its progress: each build step is printed as
+  ``[<step>/<total>] Building <file>``, where ``<total>`` is the number
+  of steps still to be done when the compilation starts
+  (`#104 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/104>`_).
+  The counter is switched off with ``make PROGRESS=0``.
+
 Fixed bugs
 ----------
 

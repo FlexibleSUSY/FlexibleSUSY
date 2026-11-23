@@ -125,8 +125,37 @@ SHELL = /bin/sh
 # disable built-in rules to improve speed
 MAKEFLAGS += -rR --include-dir=$(CURDIR)
 
-# message printed for each target
+# message printed for each target, with a progress counter [step/total]
+# (switch it off with `make PROGRESS=0')
+ifeq ($(FS_PROGRESS_COUNT),1)
+# dry run which counts the build steps (see FS_PROGRESS_STEPS)
+MSG = echo FS_PROGRESS_STEP
+else ifeq ($(PROGRESS),0)
 MSG = echo "Building $@"
+else
+MSG = printf '%s\n' "$(FS_PROGRESS)Building $@"
+endif
+
+# message printed for a target which is not counted, because it may
+# be built while make remakes its makefiles (code generation)
+MSG_NO_PROGRESS = echo "Building $@"
+
+# The total number of build steps is counted by a dry run of make,
+# when the first step starts.  The dry run neither runs the meta code
+# nor creates dependency files (see FS_PROGRESS_COUNT below), so it
+# doesn't change anything.  It is accurate once make has remade its
+# makefiles, which happens before any other target is built.  The
+# variable is expanded once and stores its value: a list with one word
+# per build step, so that make can compare the step with the total.
+FS_PROGRESS_STEPS = $(eval FS_PROGRESS_STEPS := $(shell \
+	$(MAKE) -n -j1 --no-print-directory $(MAKECMDGOALS) \
+	FS_PROGRESS_COUNT=1 ENABLE_META=no 2>/dev/null \
+	| grep -o FS_PROGRESS_STEP))$(FS_PROGRESS_STEPS)
+FS_PROGRESS_DONE :=
+# prefix "[step/total] ", empty if more steps are done than counted
+FS_PROGRESS = $(eval FS_PROGRESS_DONE += x)$(if \
+	$(word $(words $(FS_PROGRESS_DONE)),$(FS_PROGRESS_STEPS)),[$(words \
+	$(FS_PROGRESS_DONE))/$(words $(FS_PROGRESS_STEPS))] )
 
 # flexiblesusy-config script
 FSCONFIG := @FSCONFIG@
@@ -211,6 +240,10 @@ ifeq ($(findstring doc-,$(MAKECMDGOALS)),)
 ifeq ($(findstring pack-,$(MAKECMDGOALS)),)
 ifeq ($(findstring print-,$(MAKECMDGOALS)),)
 ifeq ($(findstring release-,$(MAKECMDGOALS)),)
+ifeq ($(FS_PROGRESS_COUNT),1)
+# the dry run uses the existing dependency files without remaking them
+$(ALLDEP): ;
+endif
 -include $(ALLDEP)
 endif
 endif
