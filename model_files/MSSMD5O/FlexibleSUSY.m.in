@@ -100,4 +100,3 @@ MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
 FSCalculateDecays = True;
-FSDecayParticles = {hh, Ah, Hpm, Su, Sd, Se, Sv};
