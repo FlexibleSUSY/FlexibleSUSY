@@ -66,6 +66,15 @@ New features
 Fixed bugs
 ----------
 
+* [commit e626fe1ff]: In models with complex Yukawa couplings or soft
+  parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail
+  with a "non-perturbative" problem flagged for the imaginary part of a
+  diagonal soft scalar mass, e.g. ``Im(mu2(2,2))``, which is zero, and no
+  spectrum was calculated.  Example: CMSSMCPV with m0 = 1400 GeV, m12 =
+  3500 GeV, tan(beta) = 10, A0 = -1400 GeV and a phase of 0.1 between the
+  Higgs VEVs (etaInput).  Points that worked before are unchanged within
+  the RG precision.
+
 * [commit cc0ff4d04]: The 1-loop pole masses of mixing fermions were wrong
   when their mass matrices or couplings are complex, i.e. in models with CP
   violating parameters (e.g. charginos and neutralinos with phases of M1,
