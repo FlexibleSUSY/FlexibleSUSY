@@ -17,7 +17,9 @@
 // ====================================================================
 
 #include "sm_twoloophiggs.hpp"
+#include "Li2.hpp"
 #include "loop_libraries/loop_library.hpp"
+#include "threshold_loop_functions.hpp"
 
 #include <cmath>
 
@@ -31,7 +33,6 @@ constexpr double oneLoop = 6.332573977646110963e-03; // 1/(4 Pi)^2
 constexpr double twoLoop = 4.010149318236068752e-05; // 1/(4 Pi)^4
 
 double sqr(double x) noexcept { return x*x; }
-double pow3(double x) noexcept { return x*x*x; }
 double pow4(double x) noexcept { return sqr(sqr(x)); }
 
 } // anonymous namespace
@@ -422,138 +423,275 @@ double delta_mh_2loop_ab_as_sm(
       + tadpole_higgs_2loop_ab_as_sm(scale, mb, yb, g3);
 }
 
+namespace {
+
+/**
+ * \f$m_h\f$-dependent part common to the tadpole and self-energy of
+ * one quark (\f$N_c = 3\f$) with \f$h\f$ and \f$G^0\f$ exchange.
+ * Contains \f$m_h^2 (m_h^2 - c m_f^2) \phi(m_f^2,m_f^2,m_h^2)\f$, with
+ * \f$\phi\f$ of Davydychev and Tausk, Nucl. Phys. B397 (1993) 23,
+ * evaluated as \f$m_h^2 (m_h^2 - c m_f^2)/m_f^2 \Phi(m_h^2/m_f^2, 1)\f$,
+ * which is finite for \f$m_h \to 0\f$.
+ *
+ * @param mf fermion mass
+ * @param mh Higgs mass
+ * @param scale renormalization scale
+ * @param c coefficient
+ */
+double higgs_terms(double mf, double mh, double scale, double c) noexcept
+{
+   const double mf2 = sqr(mf);
+   const double mh2 = sqr(mh);
+   const double Q2 = sqr(scale);
+   const double L = std::log(mf2/Q2);
+   const double Lh = std::log(mh2/Q2);
+
+   return mh2*(13.5 - 4.5*sqr(L) + 9*L*Lh - 12*Lh)
+      + 4.5*mh2*(mh2 - c*mf2)/mf2*threshold_loop_functions::phi_xyz(mh2, mf2, mf2);
+}
+
+/**
+ * 2-loop tadpole \f$T\f$ of one quark (\f$N_c = 3\f$) with \f$h\f$ and
+ * \f$G^0\f$ exchange (\f$m_G = 0\f$), without the factor
+ * \f$1/(16\pi^2)^2\f$.
+ *
+ * @param yf Yukawa coupling of the fermion
+ * @param mf fermion mass
+ * @param mh Higgs mass
+ * @param scale renormalization scale
+ */
+double tadpole_neutral(double yf, double mf, double mh, double scale) noexcept
+{
+   const double mf2 = sqr(mf);
+   const double L = std::log(mf2/sqr(scale));
+
+   return pow4(yf)*(36*mf2 - 30*mf2*L + 6*mf2*sqr(L)
+                    + higgs_terms(mf, mh, scale, 4));
+}
+
+/**
+ * 2-loop self-energy \f$\Sigma(0)\f$ of one quark (\f$N_c = 3\f$) with
+ * \f$h\f$ and \f$G^0\f$ exchange (\f$m_G = 0\f$), without the factor
+ * \f$1/(16\pi^2)^2\f$.
+ *
+ * @param yf Yukawa coupling of the fermion
+ * @param mf fermion mass
+ * @param mh Higgs mass
+ * @param scale renormalization scale
+ */
+double self_energy_neutral(double yf, double mf, double mh, double scale) noexcept
+{
+   const double mf2 = sqr(mf);
+   const double L = std::log(mf2/sqr(scale));
+
+   return pow4(yf)*(48*mf2 - 66*mf2*L + 18*mf2*sqr(L)
+                    + higgs_terms(mf, mh, scale, 8));
+}
+
+/**
+ * 2-loop tadpole \f$T\f$ of the top-bottom doublet with \f$G^\pm\f$
+ * exchange (\f$m_G = 0\f$), without the factor \f$1/(16\pi^2)^2\f$.
+ *
+ * @param yt top Yukawa coupling
+ * @param yb bottom Yukawa coupling
+ * @param mt top mass
+ * @param mb bottom mass
+ * @param scale renormalization scale
+ */
+double tadpole_charged(
+   double yt, double yb, double mt, double mb, double scale) noexcept
+{
+   const double mt2 = sqr(mt);
+   const double mb2 = sqr(mb);
+   const double Q2 = sqr(scale);
+   const double Lt = std::log(mt2/Q2);
+   const double Lb = std::log(mb2/Q2);
+   const double Lt2 = sqr(Lt);
+   const double li = Li2(1 - mb2/mt2);
+   const double yt2 = sqr(yt);
+   const double yb2 = sqr(yb);
+
+   return sqr(yt2)*(9*(mt2 + mb2) - 9*mt2*Lt + 3*mt2*Lt2 - 6*mb2*Lb + 6*mt2*li)
+      + sqr(yb2)*(9*(mt2 + mb2) - 6*mt2*Lt - 9*mb2*Lb + 6*mb2*Lt*Lb
+                  - 3*mb2*Lt2 - 6*mb2*li)
+      + yt2*yb2*(-18*(mt2 + mb2) + 21*mt2*Lt + 21*mb2*Lb - 9*(mt2 - mb2)*Lt2
+                 - 18*mb2*Lt*Lb - 18*(mt2 - mb2)*li);
+}
+
+/**
+ * 2-loop self-energy \f$\Sigma(0)\f$ of the top-bottom doublet with
+ * \f$G^\pm\f$ exchange (\f$m_G = 0\f$), without the factor
+ * \f$1/(16\pi^2)^2\f$.
+ *
+ * @param yt top Yukawa coupling
+ * @param yb bottom Yukawa coupling
+ * @param mt top mass
+ * @param mb bottom mass
+ * @param scale renormalization scale
+ */
+double self_energy_charged(
+   double yt, double yb, double mt, double mb, double scale) noexcept
+{
+   const double mt2 = sqr(mt);
+   const double mb2 = sqr(mb);
+   const double d = mt2 - mb2;
+   const double Q2 = sqr(scale);
+   const double Lt = std::log(mt2/Q2);
+   const double Lb = std::log(mb2/Q2);
+   const double Lt2 = sqr(Lt);
+   const double li = Li2(1 - mb2/mt2);
+   const double yt2 = sqr(yt);
+   const double yb2 = sqr(yb);
+
+   return sqr(yt2)*(9*(mt2 + mb2) + 9*mt2*Lt2 - 3*mt2*(5*mt2 - 9*mb2)/d*Lt
+                    + 6*mb2*(mb2 - 3*mt2)/d*Lb + 18*mt2*li)
+      + sqr(yb2)*(9*(mt2 + mb2) - 9*mb2*Lt2 + 18*mb2*Lt*Lb
+                  - 6*mt2*(mt2 - 3*mb2)/d*Lt - 3*mb2*(9*mt2 - 5*mb2)/d*Lb
+                  - 18*mb2*li)
+      + yt2*yb2*(-24*(mt2 + mb2) - 9*d*Lt2 - 18*mb2*Lt*Lb
+                 + 9*mt2*(3*mt2 + 5*mb2)/d*Lt - 9*mb2*(5*mt2 + 3*mb2)/d*Lb
+                 - 18*d*li)
+      + yt2*yt*yb*mt*mb*(18 - 18*Lt2 - 12*(mt2 + 3*mb2)/d*Lt + 48*mb2/d*Lb
+                         - 36*li)
+      + yt*yb2*yb*mt*mb*(18 + 18*Lt2 - 36*Lt*Lb - 48*mt2/d*Lt
+                         + 12*(3*mt2 + mb2)/d*Lb + 36*li);
+}
+
+} // anonymous namespace
+
 /**
  * Standard Model Higgs self-energy 2-loop, \f$O((\alpha_b + \alpha_t)^2)\f$.
  *
- * @param p2    squared momentum (not used so far)
+ * Closed form of the generic 2-loop diagrams [arxiv:1503.03098] with
+ * one closed top or bottom loop and \f$h\f$, \f$G^0\f$ or \f$G^\pm\f$
+ * exchange, with the full dependence on \f$m_t\f$, \f$m_b\f$ and
+ * \f$m_h\f$ (MS-bar, Landau gauge, gaugeless limit, \f$m_G = 0\f$,
+ * \f$p^2 = 0\f$).  The bottom Yukawa coupling is \f$y_b = y_t
+ * m_b/m_t\f$.  Diagrams with the trilinear Higgs coupling are not
+ * included.
+ *
+ * @param p2    squared momentum (not used)
  * @param scale renormalization scale
  * @param mt MS-bar top mass
  * @param yt MS-bar Yukawa coupling
  * @param mb MS-bar bottom mass
+ * @param mh tree-level Higgs mass in the gaugeless limit,
+ *           \f$\sqrt{\lambda} v\f$
  *
  * @return real part of 2-loop self-energy \f$O((\alpha_b + \alpha_t)^2)\f$
  */
 double self_energy_higgs_2loop_at_at_sm(
-   double /* p2 */, double scale, double mt, double yt, double mb)
+   double /* p2 */, double scale, double mt, double yt, double mb, double mh)
 {
-   const double Pi2 = sqr(Pi);
-   const double yt4 = pow4(yt);
-   const double mt2 = sqr(mt);
-   const double mb2 = sqr(mb);
-   const double Q2 = sqr(scale);
-   const double r = mb2/mt2;
-   const double LogT = std::log(mt2 / Q2);
-   const double LogT2 = sqr(LogT);
-   const double LogTB = 0.5*std::log(r);
-   const double LogTB2 = sqr(LogTB);
+   const double yb = yt*mb/mt;
 
    const double result =
-      3 * mt2 * yt4 * (19 + Pi2 - 27 * LogT + 9 * LogT2)
-      - 3 * mt2 * yt4 * (5 + 3*Pi2 - 3*LogT + 9*LogT2)*r
-      + 3./2. * mt2 * yt4 * (35 + 6*Pi2 + 6*LogT - 18*LogT2
-                             - 24*LogTB*(1 + 3*LogT))*sqr(r)
-      - 0.5 * mt2 * yt4 * (-29 + 6*Pi2 - 144*LogTB2 + 162*LogT - 54*LogT2
-                           - 24*LogTB*(-8 + 9*LogT))*pow3(r);
+      self_energy_neutral(yt, mt, mh, scale)
+      + self_energy_neutral(yb, mb, mh, scale)
+      + self_energy_charged(yt, yb, mt, mb, scale);
 
    return result * twoLoop;
 }
 
 /**
- * Standard Model Higgs tadpole 2-loop, \f$O((\alpha_b + \alpha_t)^2)\f$.
+ * Standard Model Higgs tadpole 2-loop, \f$O((\alpha_b + \alpha_t)^2)\f$,
+ * divided by the VEV.
+ *
+ * Closed form of the generic 2-loop diagrams, see
+ * self_energy_higgs_2loop_at_at_sm().
  *
  * @param scale renormalization scale
  * @param mt MS-bar top mass
  * @param yt MS-bar Yukawa coupling
  * @param mb MS-bar bottom mass
+ * @param mh tree-level Higgs mass in the gaugeless limit,
+ *           \f$\sqrt{\lambda} v\f$
  *
- * @return real part of 2-loop self-energy \f$O((\alpha_b + \alpha_t)^2)\f$
+ * @return real part of 2-loop tadpole \f$O((\alpha_b + \alpha_t)^2)\f$
  */
 double tadpole_higgs_2loop_at_at_sm(
-   double scale, double mt, double yt, double mb)
+   double scale, double mt, double yt, double mb, double mh)
 {
-   const double Pi2 = sqr(Pi);
-   const double yt4 = pow4(yt);
-   const double mt2 = sqr(mt);
-   const double mb2 = sqr(mb);
-   const double Q2 = sqr(scale);
-   const double r = mb2/mt2;
-   const double LogT = std::log(mt2 / Q2);
-   const double LogT2 = sqr(LogT);
-   const double LogTB = 0.5*std::log(r);
-   const double LogTB2 = sqr(LogTB);
+   const double yb = yt*mb/mt;
 
    const double result =
-      mt2 * yt4 * (45 + Pi2 - 39*LogT + 9*LogT2)
-      - 3 * mt2 * yt4 * (5 + Pi2 - 5*LogT + 3*LogT2)*r
-      + 3./2. * mt2 * yt4 * (5 + 2*Pi2 + LogTB*(8 - 24*LogT) + 10*LogT
-                             - 6*LogT2)*sqr(r)
-      - 1./6. * mt2 * yt4 * (-185 + 6*Pi2 - 144*LogTB2 + 234*LogT - 54*LogT2
-                             - 24*LogTB*(-14 + 9*LogT))*pow3(r);
+      tadpole_neutral(yt, mt, mh, scale)
+      + tadpole_neutral(yb, mb, mh, scale)
+      + tadpole_charged(yt, yb, mt, mb, scale);
 
    return result * twoLoop;
 }
 
 double delta_mh_2loop_at_at_sm(
-   double p2, double scale, double mt, double yt, double mb)
+   double p2, double scale, double mt, double yt, double mb, double mh)
 {
-   return - self_energy_higgs_2loop_at_at_sm(p2, scale, mt, yt, mb)
-      + tadpole_higgs_2loop_at_at_sm(scale, mt, yt, mb);
+   return - self_energy_higgs_2loop_at_at_sm(p2, scale, mt, yt, mb, mh)
+      + tadpole_higgs_2loop_at_at_sm(scale, mt, yt, mb, mh);
 }
 
 /**
- * Standard Model Higgs self-energy 2-loop, \f$O(\alpha_tau^2)\f$.
+ * Standard Model Higgs self-energy 2-loop, \f$O(\alpha_\tau^2)\f$.
  *
- * @param p2    squared momentum (not used so far)
+ * Closed form of the generic 2-loop diagrams with one closed
+ * \f$\tau\f$ loop, see self_energy_higgs_2loop_at_at_sm().  It is the
+ * top-quark result with \f$N_c = 1\f$ and a massless neutrino.
+ *
+ * @param p2    squared momentum (not used)
  * @param scale renormalization scale
  * @param mtau MS-bar tau mass
  * @param ytau MS-bar Yukawa coupling
+ * @param mh tree-level Higgs mass in the gaugeless limit,
+ *           \f$\sqrt{\lambda} v\f$
  *
- * @return real part of 2-loop self-energy \f$O(\alpha_tau^2) \f$
+ * @return real part of 2-loop self-energy \f$O(\alpha_\tau^2) \f$
  */
 double self_energy_higgs_2loop_atau_atau_sm(
-   double /* p2 */, double scale, double mtau, double ytau)
+   double /* p2 */, double scale, double mtau, double ytau, double mh)
 {
-   const double ytau4 = pow4(ytau);
    const double mtau2 = sqr(mtau);
-   const double Q2 = sqr(scale);
-   const double LogT = std::log(mtau2 / Q2);
-   const double LogT2 = sqr(LogT);
+   const double L = std::log(mtau2/sqr(scale));
+   // G^+- exchange, limit m_b -> 0 of self_energy_charged()
+   const double charged = pow4(ytau)*mtau2*(9 + 3*sqr(Pi) - 15*L + 9*sqr(L));
 
    const double result =
-      mtau2 * ytau4 * (19 + sqr(Pi) - 27 * LogT + 9 * LogT2);
+      (self_energy_neutral(ytau, mtau, mh, scale) + charged)/3;
 
    return result * twoLoop;
 }
 
 /**
- * Standard Model Higgs tadpole 2-loop, \f$O(\alpha_tau^2)\f$.
+ * Standard Model Higgs tadpole 2-loop, \f$O(\alpha_\tau^2)\f$, divided
+ * by the VEV.
+ *
+ * Closed form of the generic 2-loop diagrams, see
+ * self_energy_higgs_2loop_atau_atau_sm().
  *
  * @param scale renormalization scale
  * @param mtau MS-bar tau mass
  * @param ytau MS-bar Yukawa coupling
+ * @param mh tree-level Higgs mass in the gaugeless limit,
+ *           \f$\sqrt{\lambda} v\f$
  *
- * @return real part of 2-loop self-energy \f$O(\alpha_tau^2) \f$
+ * @return real part of 2-loop tadpole \f$O(\alpha_\tau^2) \f$
  */
 double tadpole_higgs_2loop_atau_atau_sm(
-   double scale, double mtau, double ytau)
+   double scale, double mtau, double ytau, double mh)
 {
-   const double ytau4 = pow4(ytau);
    const double mtau2 = sqr(mtau);
-   const double Q2 = sqr(scale);
-   const double LogT = std::log(mtau2 / Q2);
-   const double LogT2 = sqr(LogT);
+   const double L = std::log(mtau2/sqr(scale));
+   // G^+- exchange, limit m_b -> 0 of tadpole_charged()
+   const double charged = pow4(ytau)*mtau2*(9 + sqr(Pi) - 9*L + 3*sqr(L));
 
-   const double result =
-      1./3. * mtau2 * ytau4 * (45 + sqr(Pi) - 39*LogT + 9*LogT2);
+   const double result = (tadpole_neutral(ytau, mtau, mh, scale) + charged)/3;
 
    return result * twoLoop;
 }
 
 double delta_mh_2loop_atau_atau_sm(
-   double p2, double scale, double mtau, double ytau)
+   double p2, double scale, double mtau, double ytau, double mh)
 {
-   return - self_energy_higgs_2loop_atau_atau_sm(p2, scale, mtau, ytau)
-      + tadpole_higgs_2loop_atau_atau_sm(scale, mtau, ytau);
+   return - self_energy_higgs_2loop_atau_atau_sm(p2, scale, mtau, ytau, mh)
+      + tadpole_higgs_2loop_atau_atau_sm(scale, mtau, ytau, mh);
 }
 
 namespace {

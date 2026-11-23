@@ -999,7 +999,7 @@ CreateTwoLoopTadpolesNMSSM[higgsBoson_] :=
 
 GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH`HiggsBoson},
                               model_String /; model === "SM", 2] :=
-    Module[{mtStr, ytStr, mbStr, ybStr, mtauStr, ytauStr, g3Str},
+    Module[{mtStr, ytStr, mbStr, ybStr, mtauStr, ytauStr, g3Str, mhStr},
            AssertFieldDimension[SARAH`HiggsBoson, 1, model];
            mtStr   = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]];
            ytStr   = CConversion`RValueToCFormString[Parameters`GetThirdGeneration[SARAH`UpYukawa]];
@@ -1008,6 +1008,8 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === {SARAH`HiggsBoson, SARAH
            mtauStr = CConversion`RValueToCFormString[TreeMasses`GetMass[TreeMasses`GetDownLepton[3,True]]];
            ytauStr = CConversion`RValueToCFormString[Parameters`GetThirdGeneration[SARAH`ElectronYukawa]];
            g3Str   = CConversion`RValueToCFormString[SARAH`strongCoupling];
+           (* tree-level Higgs mass in the gaugeless limit *)
+           mhStr   = CConversion`RValueToCFormString[Sqrt[SARAH`\[Lambda]] SARAH`VEVSM];
 "\
 using namespace flexiblesusy::sm_twoloophiggs;
 
@@ -1019,11 +1021,12 @@ const double yb = " <> ybStr <> ";
 const double yt = " <> ytStr <> ";
 const double ytau = " <> ytauStr <> ";
 const double gs = " <> g3Str <> ";
+const double mh = " <> mhStr <> ";
 const double scale = get_scale();
 double self_energy = 0.;
 
 if (HIGGS_2LOOP_CORRECTION_AT_AT) {
-   self_energy -= delta_mh_2loop_at_at_sm(p2, scale, mt, yt, mb);
+   self_energy -= delta_mh_2loop_at_at_sm(p2, scale, mt, yt, mb, mh);
 }
 
 if (HIGGS_2LOOP_CORRECTION_AT_AS) {
@@ -1035,7 +1038,7 @@ if (HIGGS_2LOOP_CORRECTION_AB_AS) {
 }
 
 if (HIGGS_2LOOP_CORRECTION_ATAU_ATAU) {
-   self_energy -= delta_mh_2loop_atau_atau_sm(p2, scale, mtau, ytau);
+   self_energy -= delta_mh_2loop_atau_atau_sm(p2, scale, mtau, ytau, mh);
 }
 
 return self_energy;"

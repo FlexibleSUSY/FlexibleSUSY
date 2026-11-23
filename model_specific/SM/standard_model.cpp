@@ -4530,11 +4530,12 @@ double Standard_model::self_energy_hh_2loop(double p) const
    const double yt = Yu(2,2);
    const double ytau = Ye(2,2);
    const double gs = g3;
+   const double mh = Sqrt(Lambdax)*v;
    const double scale = get_scale();
    double self_energy = 0.;
 
    if (HIGGS_2LOOP_CORRECTION_AT_AT) {
-      self_energy -= delta_mh_2loop_at_at_sm(p2, scale, mt, yt, mb);
+      self_energy -= delta_mh_2loop_at_at_sm(p2, scale, mt, yt, mb, mh);
    }
 
    if (HIGGS_2LOOP_CORRECTION_AT_AS) {
@@ -4546,7 +4547,7 @@ double Standard_model::self_energy_hh_2loop(double p) const
    }
 
    if (HIGGS_2LOOP_CORRECTION_ATAU_ATAU) {
-      self_energy -= delta_mh_2loop_atau_atau_sm(p2, scale, mtau, ytau);
+      self_energy -= delta_mh_2loop_atau_atau_sm(p2, scale, mtau, ytau, mh);
    }
 
    return self_energy;
