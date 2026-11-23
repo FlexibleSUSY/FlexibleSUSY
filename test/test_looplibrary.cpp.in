@@ -228,6 +228,45 @@ BOOST_AUTO_TEST_CASE(test_D) {
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d33].real(), -5.64568234854199e-08, 1e-12 );
 }
 
+// Repeated calls with the same arguments give the same tensor (COLLIER
+// caches them), a different scale gives a different one, and the
+// library's scale is right after a repeated call.
+BOOST_AUTO_TEST_CASE(test_repeated_tensor_calls) {
+   auto& lib = Loop_library::get();
+
+   std::array<std::complex<double>, B_N> b50{}, b60{}, b50_again{};
+   lib.B(b50, 3, 0, 7, 50);
+   lib.B(b60, 3, 0, 7, 60);
+   lib.B(b50_again, 3, 0, 7, 50);
+   BOOST_CHECK(b50 == b50_again);
+   BOOST_CHECK(b50[looplibrary::bb0] != b60[looplibrary::bb0]);
+   BOOST_CHECK_CLOSE_FRACTION( lib.B0(3, 0, 7, 50).real(), b50[looplibrary::bb0].real(), 1e-14 );
+
+   std::array<std::complex<double>, C_N> c50{}, c60{}, c50_again{};
+   lib.C(c50, 1, 2, 7, 40, 50, 60, 50);
+   lib.C(c60, 1, 2, 7, 40, 50, 60, 60);
+   lib.C(c50_again, 1, 2, 7, 40, 50, 60, 50);
+   BOOST_CHECK(c50 == c50_again);
+   BOOST_CHECK(c50[looplibrary::c00] != c60[looplibrary::c00]);
+   BOOST_CHECK_CLOSE_FRACTION( lib.C00(1, 2, 7, 40, 50, 60, 50).real(), c50[looplibrary::c00].real(), 1e-14 );
+
+   // the D tensor up to rank 2 is UV finite, so it doesn't depend on the scale
+   std::array<std::complex<double>, D_N> d50{}, d_other_mass{}, d50_again{};
+   lib.D(d50, 1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50);
+   lib.D(d_other_mass, 1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 4e2, 50);
+   lib.D(d50_again, 1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50);
+   BOOST_CHECK(d50 == d50_again);
+   BOOST_CHECK(d50[looplibrary::d00] != d_other_mass[looplibrary::d00]);
+   BOOST_CHECK_CLOSE_FRACTION( lib.D00(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), d50[looplibrary::d00].real(), 1e-14 );
+
+#if LIBRARY_TYPE == 1
+   // -0.0 and 0.0 are the same argument for the cache
+   std::array<std::complex<double>, B_N> b_minus_zero{};
+   lib.B(b_minus_zero, 3, -0.0, 7, 50);
+   BOOST_CHECK(b50 == b_minus_zero);
+#endif
+}
+
 #endif
 
 } // namespace flexiblesusy

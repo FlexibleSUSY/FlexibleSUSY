@@ -128,6 +128,7 @@ TEST_META := \
 		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
+		$(DIR)/test_MSSM_2L_mb.m \
 		$(DIR)/test_MSSM_2L_mt.m \
 		$(DIR)/test_MSSM_2L_yb_softsusy.m \
 		$(DIR)/test_MSSM_2L_yt.m \
@@ -146,6 +147,7 @@ TEST_META := \
 		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
 		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
+		$(DIR)/test_SM_higgs_loop_corrections_atab_origin.m \
 		$(DIR)/test_TestSuite.m \
 		$(DIR)/test_TextFormatting.m \
 		$(DIR)/test_THDM_threshold_corrections.m \
@@ -576,11 +578,13 @@ endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 endif
 
@@ -1164,6 +1168,8 @@ $(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
 endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
+
+$(DIR)/test_MSSM_FlexibleDecay_ward.x: $(LIBMSSM)
 
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
 

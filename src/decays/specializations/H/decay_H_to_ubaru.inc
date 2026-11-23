@@ -165,7 +165,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                      deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (8/3. - Sqr(Pi/3.) - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
                   }
                   if (info::is_CP_violating_Higgs_sector) {
-                     const auto CSuu = HQQbarVertexDR_S/muqDR;
+                     const auto CSuu = HQQbarVertexDR_P/muqDR;
                      if (!is_zero(CSuu)) {
                         const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
                         const auto CStu = Httbar_P/context.mass<UpTypeQuark>({2});

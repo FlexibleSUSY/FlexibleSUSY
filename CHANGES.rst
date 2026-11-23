@@ -40,6 +40,14 @@ New features
   order and were always 0 in the output.  This makes the generated decay
   code smaller (about 17% in the THDM-II, 14% in the MSSM).
 
+* FlexibleDecay no longer generates decays that violate CP in models with
+  separate CP-even and CP-odd Higgs bosons (e.g. h -> h A, A -> h h,
+  A -> A A, H -> h Z, A -> A Z).  They were computed at 1 loop, where their
+  widths are 0 up to numerical noise (branching ratios below 1e-17).  With
+  COLLIER this cancellation could give NaN, which made ``run_LRLR.x`` abort
+  at the example point.  The generated decay code of LRLR is 33% smaller.
+  Models with a CP-violating Higgs sector (e.g. MSSMCPV) are not affected.
+
 Fixed bugs
 ----------
 
@@ -52,6 +60,27 @@ Fixed bugs
   convention.  Example: in MSSMCPV with a phase of 60 degrees on M1, M2, M3
   and the A-terms, the light chargino and the second neutralino were about
   35 GeV (10%) too light.  With real parameters the masses are unchanged.
+
+* [commit 9a905bc7b]: The 2-loop QCD correction to the quark loops of the
+  decays of CP-odd (and CP-mixed) Higgs bosons into two photons had a
+  wrong coefficient.  This changed Γ(A -> γγ) when the higher-order
+  corrections are switched on (FlexibleDecay[2] > 9), by +0.95% in the
+  MSSM and +2.9% in the THDM-II at the example points, and by much more
+  for CP-odd Higgs bosons lighter than twice the top mass (e.g. a factor
+  of 2 at 300 GeV for the top loop alone).
+
+* [commit 45eac7ff3]: The decays of CP-even Higgs bosons into photons could
+  print a misleading warning that the 2-loop QCD corrections to A → γγ
+  were disabled near the quark threshold.  The results are unchanged.
+
+* [commit 8e39fcf04]: In models with a CP-violating Higgs sector (e.g. MSSMCPV,
+  NMSSMCPV), the top-quark induced O(alpha_s^2) correction to the decays
+  of the neutral Higgs bosons into up and charm quarks was wrong for the
+  CP-odd component: it was missing for (nearly) CP-odd states and could
+  be arbitrarily large for states with a small CP-even component.  In
+  MSSMCPV the width of the mostly CP-odd heavy Higgs boson into c cbar
+  (u ubar) increases by about 2.6% (8%).  Decays into down-type quarks,
+  CP-conserving models and CP-even states are not affected.
 
 * [commit 56f41d834]: The 1-loop self-energies of complex scalars (e.g. squarks
   and charged Higgs bosons) contained the contributions of four-scalar and
