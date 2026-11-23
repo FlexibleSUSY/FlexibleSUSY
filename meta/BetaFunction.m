@@ -257,13 +257,37 @@ CreateBetaFunctionCallSequential[betaFunction_BetaFunction, loopOrder_Integer] :
 CreateBetaFunctionCalls[betaFunctions_List, loopOrder_Integer] :=
     StringJoin[CreateBetaFunctionCallSequential[#,loopOrder]& /@ betaFunctions]
 
+(* Soft scalar mass matrices are hermitian, but their beta functions are evaluated as sums of
+   matrix products such as mu2.Yu.Yu^+ + Yu.Yu^+.mu2, whose sum is hermitian only up to
+   rounding. The imaginary parts of the diagonal elements, which are exactly zero, would then
+   be rounding noise, which the adaptive RG integrator can't integrate to its relative
+   precision ("non-perturbative" running).
+   Only the soft masses of one field, m^2_{ij} phi_i^* phi_j, are hermitian. Soft masses that mix
+   two different fields with the same quantum numbers (SARAH's SA`ListM2ijOFF, e.g. meEX2 in
+   U1xMSSM3G) are blocks off the diagonal and needn't be hermitian, even if they are square. *)
+IsOffDiagonalSoftScalarMass[par_] := !FreeQ[SA`ListM2ijOFF, par];
+
+IsHermitianMatrixBetaFunction[betaFunction_BetaFunction] :=
+    MatchQ[GetType[betaFunction], CConversion`MatrixType[CConversion`complexScalarCType, n_, n_]] &&
+    MemberQ[SARAH`ListSoftBreakingScalarMasses, GetName[betaFunction]] &&
+    !IsOffDiagonalSoftScalarMass[GetName[betaFunction]];
+
+HermitianizeBetaFunction[betaFunction_BetaFunction] :=
+    Module[{betaName = "beta_" <> ToValidCSymbolString[GetName[betaFunction]]},
+           betaName <> " = 0.5 * (" <> betaName <> " + " <> betaName <> ".adjoint()).eval();\n"
+          ];
+
+HermitianizeBetaFunctions[betaFunctions_List] :=
+    StringJoin[HermitianizeBetaFunction /@ Select[betaFunctions, IsHermitianMatrixBetaFunction]];
+
 CreateBetaFunction[betaFunctions_List] :=
-    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta4L, allBeta5L},
+    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta4L, allBeta5L, hermitianize},
            allBeta1L = CreateBetaFunctionCalls[betaFunctions,1];
            allBeta2L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,2];
            allBeta3L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,3];
            allBeta4L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,4];
            allBeta5L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,5];
+           hermitianize = HermitianizeBetaFunctions[betaFunctions];
            StringJoin[DeclareBetaFunction /@ betaFunctions] <> "\n" <>
            "if (loops > 0) {\n" <>
            TextFormatting`IndentText[
@@ -288,7 +312,8 @@ CreateBetaFunction[betaFunctions_List] :=
                    ] <>
                    "\n}"
                ] <>
-               "\n}"
+               "\n}" <>
+               If[hermitianize === "", "", "\n\n" <> hermitianize]
            ] <>
            "\n}\n"
           ];
