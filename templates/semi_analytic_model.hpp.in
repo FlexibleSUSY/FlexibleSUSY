@@ -38,6 +38,8 @@
 namespace flexiblesusy {
 
 class Semi_analytic;
+class @ModelName@_semi_analytic_solutions;
+
 /**
  * @class @ModelName@<Semi_analytic>
  * @brief model class with routines for determining masses and mixings and EWSB
@@ -83,9 +85,6 @@ public:
    void calculate_semi_analytic_solutions(double);
 
 @getSemiAnalyticCoefficients@
-private:
-   /// semi-analytic solutions for the model soft parameters
-   @ModelName@_semi_analytic_solutions solutions{};
 };
 
 std::ostream& operator<<(std::ostream&, const @ModelName@<Semi_analytic>&);
