@@ -51,6 +51,16 @@ New features
 Fixed bugs
 ----------
 
+* [commit cc0ff4d04]: The 1-loop pole masses of mixing fermions were wrong
+  when their mass matrices or couplings are complex, i.e. in models with CP
+  violating parameters (e.g. charginos and neutralinos with phases of M1,
+  M2, M3, mu or the A-terms in MSSMCPV, NMSSMCPV and CMSSMCPV) or with
+  complex Yukawa couplings (e.g. neutrino masses in models with complex
+  neutrino Yukawas).  The results then depended on the unphysical phase
+  convention.  Example: in MSSMCPV with a phase of 60 degrees on M1, M2, M3
+  and the A-terms, the light chargino and the second neutralino were about
+  35 GeV (10%) too light.  With real parameters the masses are unchanged.
+
 * [commit 9a905bc7b]: The 2-loop QCD correction to the quark loops of the
   decays of CP-odd (and CP-mixed) Higgs bosons into two photons had a
   wrong coefficient.  This changed Γ(A -> γγ) when the higher-order
