@@ -291,6 +291,11 @@ SARAH/SPheno. When in doubt about a result or a model definition:
 
 - **Crashes:** `gdb --args models/<M>/run_<M>.x --slha-input-file=...`, then `run` and
   `bt`.
+- **Dependency files and missing headers:** `depgen -MI` silently skips headers that don't exist
+  yet, so a `.d` file created before the code generation lists no generated headers (nor the `src/`
+  headers included through them). Test `.d` files therefore depend on every model's
+  `00_DELETE_ME_TO_RERUN_METACODE` and are recreated after each code generation. In older trees
+  (or if results look stale: crashes in `free()` in only some tests), delete `test/*.d`.
 - **Profiling:** `valgrind --tool=callgrind --callgrind-out-file=callgrind.log <exe> <args>`.
   Read the result with `callgrind_annotate` or KCachegrind. `--inclusive=yes` shows where
   the time goes, including callees.
