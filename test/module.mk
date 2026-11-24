@@ -893,7 +893,7 @@ TEST_OBJ := \
 TEST_OBJ +=	$(foreach i, 1 2 3 4 5 6 7 8, $(DIR)/test_linalg2_part$(i).o)
 
 $(DIR)/test_linalg2_part%.d: $(DIR)/test_linalg2.cpp | $(DEPGEN)
-	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$(@:.d=.o)' $<
 
 $(DIR)/test_linalg2_part%.o: $(DIR)/test_linalg2.cpp
 	@$(MSG)
@@ -904,6 +904,13 @@ $(DIR)/test_linalg2_part$(i).o: | $(DIR)/test_linalg2_part$(shell echo $$(($(i)-
 
 TEST_DEP := \
 		$(TEST_OBJ:.o=.d)
+
+ifeq ($(ENABLE_META),yes)
+# Dependency files miss headers that don't exist yet (depgen -MI), such as
+# the generated headers of a model test whose .d file was created before the
+# code generation.  Recreate them after each code generation.
+$(TEST_DEP): $(addsuffix /00_DELETE_ME_TO_RERUN_METACODE,$(MODELS))
+endif
 
 TEST_EXE := \
 		$(TEST_OBJ:.o=.x)
