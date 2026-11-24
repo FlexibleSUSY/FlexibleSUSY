@@ -25,9 +25,16 @@
 
 #ifndef @ModelName@_@include_guard@_H
 #define @ModelName@_@include_guard@_H
+#include <complex>
+
+#include <Eigen/Core>
+
 #include "lowe.h"
 
 namespace flexiblesusy {
+
+class @ModelName@_mass_eigenstates;
+
 namespace @namespace@ {
 
 @calculate_prototypes@

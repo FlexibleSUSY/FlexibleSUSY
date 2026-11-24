@@ -5556,9 +5556,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                         Switch[fields, {{}}, {}, _, First/@fields]
                      ],
 
+                     (* b -> s l l: photon and gluon form factors *)
                      Module[{fields = Flatten@Cases[ObservablesExtraOutput@"BrDLToDL", ("FFV fields" -> x_) :> x]},
                         Switch[fields,
-                           {__Symbol}, (# -> {#, TreeMasses`GetPhoton[]})& /@ fields,
+                           {__Symbol}, Join @@ ({# -> {#, TreeMasses`GetPhoton[]}, # -> {#, TreeMasses`GetGluon[]}}& /@ fields),
                            _, {}
                         ]
                      ],

@@ -100,6 +100,7 @@ TEST_SRC := \
 		$(DIR)/test_spectrum_generator_settings.cpp \
 		$(DIR)/test_standard_model_G_fermi.cpp \
 		$(DIR)/test_standard_model_hh_deriv.cpp \
+		$(DIR)/test_wcxf.cpp \
 		$(DIR)/test_which.cpp \
 		$(DIR)/test_wrappers.cpp \
 		$(DIR)/test_looplibrary_softsusy.cpp \
@@ -326,6 +327,11 @@ endif
 ifeq ($(WITH_CMSSMCKM),yes)
 TEST_SRC += \
 		$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.cpp
+endif
+
+ifeq ($(WITH_CMSSMCKM) $(ENABLE_COLLIER) $(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes yes yes)
+TEST_SRC += \
+		$(DIR)/test_CMSSMCKM_br_d_l_to_d_l.cpp
 endif
 
 ifeq ($(WITH_MRSSM2),yes)
@@ -1200,6 +1206,8 @@ $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 $(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
 
 $(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.x: $(LIBCMSSMCKM)
+
+$(DIR)/test_CMSSMCKM_br_d_l_to_d_l.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 

@@ -22,6 +22,8 @@ Module[
          "@calculate_definitions@" -> definitions,
          "@npf_headers@"           -> npfHeaders,
          "@npf_definitions@"       -> npfDefinitions,
+         "@model_ckm@"             -> BtoSGamma`CreateModelCKM["model."],
+         "@g3@"                    -> CConversion`ToValidCSymbolString@SARAH`strongCoupling,
          "@include_guard@"         -> SymbolName@obs,
          "@namespace@"             -> Observables`GetObservableNamespace@obs,
          "@filename@"              -> Observables`GetObservableFileName@obs,
@@ -94,10 +96,12 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
             "@Qd@"    -> CConversion`ToValidCSymbolString@qd,
             "@Lep@"   -> CConversion`ToValidCSymbolString@lep,
             "@Ph@"    -> CConversion`ToValidCSymbolString@SARAH`Photon,
+            "@G@"     -> CConversion`ToValidCSymbolString@SARAH`Gluon,
             "@loopN@" -> CConversion`ToValidCSymbolString@loopN,
             "@contr@" -> CConversion`ToValidCSymbolString@contr,
             "@class@" -> "@Qd@@Lep@_to_@Qd@@Lep@_@contr@@loopN@",
-            "@photon_penguin@" -> If[loopN === 1, "calculate_@Qd@_@Qd@_@Ph@_form_factors", "zero"]
+            "@photon_penguin@" -> If[loopN === 1, "calculate_@Qd@_@Qd@_@Ph@_form_factors", "zero"],
+            "@gluon_penguin@" -> If[loopN === 1, "calculate_@Qd@_@Qd@_@G@_form_factors", "zero"]
          }
       ]&,
       {
@@ -105,6 +109,7 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
          return forge<
             fields::@Qd@, fields::@Lep@, fields::@Ph@,
             @photon_penguin@,
+            @gluon_penguin@,
             npointfunctions::@class@
          >(qi, qo, li, model, qedqcd);\n}",
          npfDefinition

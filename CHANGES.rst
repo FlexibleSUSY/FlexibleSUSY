@@ -63,6 +63,20 @@ New features
   ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
   model file.
 
+* New observable ``BrDLToDL``: the 1-loop Wilson coefficients of
+  :math:`d_i \ell \to d_j \ell` (e.g. :math:`b \to s \mu\mu`) from box
+  diagrams, scalar penguins and the photon penguin.  The coefficients C7,
+  C8, C9, C10, CS, CP and their primed counterparts (flavio/SuperIso
+  normalization) are written to the blocks ``FWCOEF`` and ``IMFWCOEF`` of
+  the Flavour Les Houches Accord, which SuperIso reads.  For
+  :math:`b \to s \ell\ell` and :math:`b \to d \ell\ell` the
+  semi-leptonic coefficients are also added to ``WC_<model>.json``, so that
+  flavio predicts e.g. BR(Bs->mumu) from it (see
+  ``utils/calc_flavio_observables.py``).  It is
+  calculated by default for :math:`b \to s \mu\mu` in CMSSMCKM and
+  MRSSM2CKM.  Z penguins (``Vectors``) can be switched on, but are not yet
+  reliable, as they don't decouple.
+
 Fixed bugs
 ----------
 

@@ -65,6 +65,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
 		$(DIR)/unitarity.cpp \
+		$(DIR)/wcxf.cpp \
 		$(DIR)/wrappers.cpp \
 		$(DIR)/zeta.cpp
 
@@ -174,6 +175,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
 		$(DIR)/unitarity.hpp \
+		$(DIR)/wcxf.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp \
 		$(DIR)/zeta.hpp
