@@ -83,6 +83,16 @@ New features
 Fixed bugs
 ----------
 
+* [commit 0fa9c3004]: The branching ratios of lepton flavour violating decays
+  into three leptons of the same flavour (mu -> 3e, tau -> 3mu, tau -> 3e;
+  observable ``BrLTo3L``) were wrong whenever Z penguins or box diagrams
+  contribute noticeably: the box diagrams were treated as penguins and
+  vice versa.  In the MSSM with lepton flavour violating slepton masses
+  BR(mu -> 3e) changes by about 1% where the photon dipole dominates and
+  by up to about 10% otherwise (e.g. -11% with me2(1,2) = 1500 GeV^2 and
+  tan(beta) = 3).  Decays into leptons of different flavours
+  (tau -> mu e e) are unchanged.
+
 * [commit 641ace734]: The code generation failed for models based on a SARAH
   submodel (e.g. ``MSSM/CPV`` in MSSMCPV, ``NMSSM/CPV`` in NMSSMCPV) when
   the model file asked for one of the observables ``BrLTo3L``,

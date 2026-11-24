@@ -125,7 +125,9 @@ Module[{
       ];
    ] &/@ {Scalars, Vectors, Boxes};
 
-   {{npfVertices, npfCode}, Last/@DownValues@forge}
+   (* in the order of the template parameters of forge in br_l_to_3l.cpp.in
+      (DownValues would sort them alphabetically) *)
+   {{npfVertices, npfCode}, forge /@ {Scalars, Vectors, Boxes}}
 ];
 ];
 

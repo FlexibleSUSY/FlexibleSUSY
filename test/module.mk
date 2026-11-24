@@ -575,6 +575,10 @@ ifeq ($(WITH_MSSM),yes)
 TEST_SH += \
 		$(DIR)/test_standalone.sh
 endif
+ifeq ($(WITH_MSSM) $(ENABLE_COLLIER),yes yes)
+TEST_SH += \
+		$(DIR)/test_MSSM_br_l_to_3l.sh
+endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
@@ -1054,6 +1058,8 @@ $(DIR)/test_depgen.sh.xml: $(DEPGEN_EXE)
 $(DIR)/test_looplibrary_environment.sh.xml : $(DIR)/test_looplibrary_environment.x
 
 $(DIR)/test_lowMSSM.sh.xml: $(RUN_CMSSM_EXE) $(RUN_lowMSSM_EXE)
+
+$(DIR)/test_MSSM_br_l_to_3l.sh.xml: $(EXEMSSM_EXE)
 
 $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
 
