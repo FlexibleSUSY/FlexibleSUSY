@@ -63,6 +63,17 @@ New features
   ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
   model file.
 
+* When the RG running stops because the integrator cannot reach the
+  target scale (step size too small or too many steps) while all
+  parameters are still finite, the problem is now reported as ``RG
+  integration failed (too many steps) at Q = ... GeV, step size limited
+  by <parameter> = <value>`` (in the Mathematica interface:
+  ``FailedRGIntegration``) instead of ``non-perturbative``.  The
+  parameter that limited the step size tells the cause: a large value
+  points to a Landau pole, a tiny one (e.g. ``Im(mu2(2,2)) = 5e-15``) to
+  a numerical problem.  ``non-perturbative`` is still reported when a
+  parameter becomes infinite or NaN, or exceeds a perturbativity limit.
+
 * ``make`` shows its progress: each build step is printed as
   ``[<step>/<total>] Building <file>``, where ``<total>`` is the number
   of steps still to be done when the compilation starts

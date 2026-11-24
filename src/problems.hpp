@@ -46,6 +46,8 @@ public:
    void flag_no_perturbative();
    void flag_no_pole_mass_convergence(int particle);
    void flag_non_perturbative_parameter(int parameter, double value, double scale, double threshold = 0.);
+   void flag_failed_rg_integration(const std::string& reason, int parameter,
+                                   double value, double scale);
    void flag_no_sinThetaW_convergence();
    void flag_no_G_fermi_convergence();
    void flag_no_minimum(const std::string& msg, int status);
@@ -64,6 +66,7 @@ public:
    void unflag_no_pole_mass_convergence(int particle);
    void unflag_non_perturbative_parameter(int parameter);
    void unflag_all_non_perturbative_parameters();
+   void unflag_failed_rg_integration();
    void unflag_no_sinThetaW_convergence();
    void unflag_no_G_fermi_convergence();
    void unflag_no_minimum(const std::string& msg);
@@ -78,6 +81,7 @@ public:
    bool have_tachyon() const;
    bool have_thrown() const;
    bool have_non_perturbative_parameter() const;
+   bool have_failed_rg_integration() const;
    bool have_failed_pole_mass_convergence() const;
    bool no_ewsb() const;
    bool no_ewsb_tree_level() const;
@@ -119,6 +123,14 @@ private:
       double value{0.}, scale{0.}, threshold{0.};
    };
 
+   /// failed RG integration (see RGIntegrationError)
+   struct FailedRGIntegration {
+      std::string reason; ///< reason (empty if no failure)
+      int parameter{-1};  ///< index of parameter that limited the step size
+      double value{0.};   ///< value of this parameter at scale
+      double scale{0.};   ///< renormalization scale reached
+   };
+
    std::string model_name;             ///< model name
    const Names* particle_names;        ///< access to particle names
    const Names* parameter_names;       ///< access to parameter names
@@ -127,6 +139,7 @@ private:
    std::vector<int> pole_tachyons;     ///< tachyonic particles (pole mass)
    std::vector<int> failed_pole_mass_convergence; ///< no convergence during pole mass calculation
    std::map<int, NonPerturbativeValue> non_pert_pars; ///< non-perturbative parmeters
+   FailedRGIntegration failed_rg_integration;         ///< failed RG integration
    std::map<std::string, int> failed_minimum; ///< no minimum found (message, status code)
    std::map<std::string, int> failed_root; ///< no root found (message, status code)
    std::string exception_msg;          ///< exception message
