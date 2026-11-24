@@ -66,6 +66,14 @@ New features
 Fixed bugs
 ----------
 
+* [commit c3a22b444]: ``FS<model>ToSLHA`` of the Mathematica interface now
+  writes the results of ``FS<model>CallHiggsTools`` and
+  ``FS<model>CallLilith`` to the blocks ``HIGGSSIGNALS``, ``HIGGSBOUNDS``
+  and ``LILITH``.  Before, with ``callHiggsTools -> 1`` it wrote a block
+  ``HIGGSSIGNALS`` with zeros, with ``callLilith -> 1`` an empty block
+  ``HIGGSBOUNDS``, and never a block ``LILITH``.  Non-ASCII characters
+  in the output, such as the χ² in comments, are no longer garbled.
+
 * [commit cc0ff4d04]: The 1-loop pole masses of mixing fermions were wrong
   when their mass matrices or couplings are complex, i.e. in models with CP
   violating parameters (e.g. charginos and neutralinos with phases of M1,
