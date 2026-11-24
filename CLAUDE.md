@@ -42,6 +42,15 @@ make -j4                               # runs the meta code, then compiles
 - **`make -n` isn't a safe dry run:** it can still trigger the meta code, because the
   generated `module.mk` files are make prerequisites. Avoid it in a tree where the
   generated code matters.
+- **Progress counter (`[step/total] Building ...`):** `MSG` in `config/Makefile.in` counts
+  the steps; the total comes from a dry run (`make -n FS_PROGRESS_COUNT=1 ENABLE_META=no`,
+  which doesn't remake dependency files) started when the first counted step runs.
+  Rules that can run while make remakes its makefiles (code generation, generated test
+  sources) use `MSG_NO_PROGRESS`, as make restarts and resets the counter afterwards.
+  The total is only right if `make -n` predicts the real build: a phony prerequisite of a
+  file, or a recipe that doesn't update its target (Fortran `.mod` files), makes `make -n`
+  count steps that the real build skips. To compare, run
+  `make -n FS_PROGRESS_COUNT=1 ENABLE_META=no 'MSG=echo STEP $@'` before `make`.
 - **One target generates all models:** for the same reason, `make` of any target
   (even one model's `00_DELETE_ME_TO_RERUN_METACODE`) first generates every configured
   model whose code is missing or out of date. Without `-j` they run one after another;
@@ -291,6 +300,11 @@ SARAH/SPheno. When in doubt about a result or a model definition:
 
 - **Crashes:** `gdb --args models/<M>/run_<M>.x --slha-input-file=...`, then `run` and
   `bt`.
+- **Dependency files and missing headers:** `depgen -MI` silently skips headers that don't exist
+  yet, so a `.d` file created before the code generation lists no generated headers (nor the `src/`
+  headers included through them). Test `.d` files therefore depend on every model's
+  `00_DELETE_ME_TO_RERUN_METACODE` and are recreated after each code generation. In older trees
+  (or if results look stale: crashes in `free()` in only some tests), delete `test/*.d`.
 - **Profiling:** `valgrind --tool=callgrind --callgrind-out-file=callgrind.log <exe> <args>`.
   Read the result with `callgrind_annotate` or KCachegrind. `--inclusive=yes` shows where
   the time goes, including callees.

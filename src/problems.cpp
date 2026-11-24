@@ -69,6 +69,7 @@ void Problems::clear()
    std::fill(pole_tachyons.begin(), pole_tachyons.end(), 0);
    std::fill(failed_pole_mass_convergence.begin(), failed_pole_mass_convergence.end(), 0);
    non_pert_pars.clear();
+   failed_rg_integration = FailedRGIntegration{};
    failed_minimum.clear();
    failed_root.clear();
    exception_msg = "";
@@ -96,6 +97,9 @@ void Problems::add(const Problems& other)
    if (exception_msg.empty() && !other.exception_msg.empty())
       exception_msg = other.exception_msg;
 
+   if (!have_failed_rg_integration() && other.have_failed_rg_integration())
+      failed_rg_integration = other.failed_rg_integration;
+
    failed_ewsb = failed_ewsb || other.failed_ewsb;
    failed_ewsb_tree_level = failed_ewsb_tree_level || other.failed_ewsb_tree_level;
    failed_GFermi_convergence = failed_GFermi_convergence || other.failed_GFermi_convergence;
@@ -117,6 +121,8 @@ unsigned Problems::number_of_problems() const
    if (failed_ewsb_tree_level) count++;
    if (failed_GFermi_convergence) count++;
    if (non_perturbative || have_non_perturbative_parameter()) count++;
+   if (have_failed_rg_integration())
+      count++;
    if (failed_sinThetaW_convergence) count++;
    if (failed_GF_convergence) count++;
    if (no_minimum()) count++;
@@ -195,6 +201,17 @@ std::vector<std::string> Problems::get_problem_strings() const
          str += " [" + par_name + "(" +
                 flexiblesusy::to_string(par.second.scale) +
                 ") = " + flexiblesusy::to_string(par.second.value) + "]";
+      }
+      strings.emplace_back(str);
+   }
+
+   if (have_failed_rg_integration()) {
+      const auto& f = failed_rg_integration;
+      std::string str("RG integration failed (" + f.reason +
+                      ") at Q = " + flexiblesusy::to_string(f.scale) + " GeV");
+      if (f.parameter >= 0) {
+         str += ", step size limited by " + get_parameter_name(f.parameter) +
+                " = " + flexiblesusy::to_string(f.value);
       }
       strings.emplace_back(str);
    }
@@ -324,15 +341,46 @@ void Problems::flag_non_perturbative_parameter(
 {
    const auto n_parameters = parameter_names->size();
 
-   if (parameter < -1 || parameter >= n_parameters)
+   if (parameter < -1 || parameter >= n_parameters) {
       ERROR("Parameter index " << parameter << " out of range [" << -1 << ", "
             << (n_parameters - 1) << "]");
+      parameter = -1;
+   }
 
    VERBOSE_MSG("Problem: " << get_parameter_name(parameter) << "(Q = "
                << scale << ") = " << value
                << " is non-perturbative (threshold = " << threshold << ").");
 
    non_pert_pars[parameter] = NonPerturbativeValue(value, scale, threshold);
+}
+
+/**
+ * Flags that the RG integration failed although all parameters are
+ * finite, e.g. because the step size became too small.
+ *
+ * @param reason reason why the integration failed
+ * @param parameter index of the parameter that limited the step size (-1 if
+ * unknown)
+ * @param value value of this parameter at the scale reached
+ * @param scale renormalization scale reached
+ */
+void Problems::flag_failed_rg_integration(const std::string& reason,
+                                          int parameter, double value,
+                                          double scale)
+{
+   const auto n_parameters = parameter_names->size();
+
+   if (parameter < -1 || parameter >= n_parameters) {
+      ERROR("Parameter index " << parameter << " out of range [" << -1 << ", "
+                               << (n_parameters - 1) << "]");
+      parameter = -1;
+   }
+
+   VERBOSE_MSG("Problem: RG integration failed ("
+               << reason << ") at Q = " << scale << " GeV");
+
+   failed_rg_integration = FailedRGIntegration{
+      .reason = reason, .parameter = parameter, .value = value, .scale = scale};
 }
 
 void Problems::flag_no_sinThetaW_convergence()
@@ -421,6 +469,11 @@ void Problems::unflag_all_non_perturbative_parameters()
    non_pert_pars.clear();
 }
 
+void Problems::unflag_failed_rg_integration()
+{
+   failed_rg_integration = FailedRGIntegration{};
+}
+
 void Problems::unflag_no_sinThetaW_convergence()
 {
    failed_sinThetaW_convergence = false;
@@ -487,6 +540,11 @@ bool Problems::have_thrown() const
 bool Problems::have_non_perturbative_parameter() const
 {
    return !non_pert_pars.empty();
+}
+
+bool Problems::have_failed_rg_integration() const
+{
+   return !failed_rg_integration.reason.empty();
 }
 
 bool Problems::have_failed_pole_mass_convergence() const

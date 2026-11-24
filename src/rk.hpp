@@ -144,7 +144,9 @@ double odeStepper(ArrayType& y, const ArrayType& dydx, double& x, double htry,
                << max_step_dir << ") = " << y(max_step_dir) << ", dy("
                << max_step_dir << ")/dx = " << dydx(max_step_dir));
 #endif
-         throw NonPerturbativeRunningError(std::exp(x), max_step_dir, y(max_step_dir));
+         throw RGIntegrationError(
+            RGIntegrationError::Reason::step_size_underflow, std::exp(x),
+            max_step_dir, y(max_step_dir));
       }
    }
    x += h;
@@ -168,6 +170,7 @@ void integrateOdes(ArrayType& ystart, double from, double to, double eps,
    ArrayType y(ystart);
    ArrayType dydx;
    int max_step_dir = 0;
+   auto reason = RGIntegrationError::Reason::too_many_steps;
 
    for (int nstp = 0; nstp < max_steps; ++nstp) {
       dydx = derivs(x, y);
@@ -189,20 +192,25 @@ void integrateOdes(ArrayType& ystart, double from, double to, double eps,
 #ifdef ENABLE_VERBOSE
          ERROR("step size too small: |hnext| = " << hnext << " (<= " << hmin << ")");
 #endif
+         reason = RGIntegrationError::Reason::step_size_underflow;
          break;
       }
    }
 
 #ifdef ENABLE_VERBOSE
-   ERROR("Bailed out of rk.cpp:too many steps (> " << max_steps << ") in integrateOdes\n"
-         "********** Q = " << std::exp(x) << " *********");
+   ERROR("Bailed out of integrateOdes: "
+         << RGIntegrationError::to_string(reason)
+         << " (maximum number of steps: " << max_steps
+         << ")\n"
+            "********** Q = "
+         << std::exp(x) << " *********");
    ERROR("max step in direction of " << max_step_dir);
    for (int i = 0; i < nvar; i++)
       ERROR("y(" << i << ") = " << y(i) << " dydx(" << i <<
             ") = " << dydx(i));
 #endif
 
-   throw NonPerturbativeRunningError(std::exp(x), max_step_dir, y(max_step_dir));
+   throw RGIntegrationError(reason, std::exp(x), max_step_dir, y(max_step_dir));
 }
 
 } // namespace runge_kutta
