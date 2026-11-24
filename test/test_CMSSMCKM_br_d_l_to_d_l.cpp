@@ -217,25 +217,25 @@ BOOST_AUTO_TEST_CASE(test_b_to_s_mu_mu)
 
    // b -> s mu mu: indices of b, s, mu
    const auto res =
-      CMSSMCKM_br_d_l_to_d_l::calculate_FdFe_FdFe_ListScalarsBoxes_1(
+      CMSSMCKM_br_d_l_to_d_l::calculate_FdFe_FdFe_ListVectorsScalarsBoxes_1(
          2, 1, 1, model, qedqcd);
 
    // regression test of the Wilson coefficients in the flavio basis
    // (C7, C7', C8, C8', C9, C9', C10, C10', CS, CS', CP, CP'),
    // values of the SLHA output of run_CMSSMCKM.x (9 digits)
    const std::array<std::complex<double>, 12> expected = {
-      std::complex<double>{1.71541231E-02, 9.70417735E-09},  // C7
-      std::complex<double>{4.25103704E-04, 2.46515504E-10},  // C7'
-      std::complex<double>{-2.38395981E-03, 2.19517884E-08}, // C8
-      std::complex<double>{-6.89512042E-05, 5.54826823E-10}, // C8'
-      std::complex<double>{1.38561722E-03, -3.36660436E-10}, // C9
-      std::complex<double>{2.85904560E-04, -5.68823588E-06}, // C9'
-      std::complex<double>{1.34933954E-04, -3.90905351E-11}, // C10
-      std::complex<double>{1.20216699E-08, -8.35217491E-15}, // C10'
-      std::complex<double>{4.11346627E-03, -1.01493304E-09}, // CS
-      std::complex<double>{-5.09622466E-05, 1.47263717E-11}, // CS'
-      std::complex<double>{-4.18230060E-03, 1.03039629E-09}, // CP
-      std::complex<double>{-5.20621245E-05, 1.55506227E-11}, // CP'
+      std::complex<double>{1.71541231E-02, 9.70417589E-09},  // C7
+      std::complex<double>{4.25103704E-04, 2.46515596E-10},  // C7'
+      std::complex<double>{-2.38395981E-03, 2.19517782E-08}, // C8
+      std::complex<double>{-6.89512042E-05, 5.54826803E-10}, // C8'
+      std::complex<double>{1.32248449E-03, -3.17774492E-10}, // C9
+      std::complex<double>{2.70644760E-04, -5.68821819E-06}, // C9'
+      std::complex<double>{3.00639160E-03, -8.98078050E-10}, // C10
+      std::complex<double>{6.94071385E-04, -8.04746989E-10}, // C10'
+      std::complex<double>{4.12061732E-03, -1.01674473E-09}, // CS
+      std::complex<double>{1.07252834E-04, -2.64062730E-11}, // CS'
+      std::complex<double>{-4.18968486E-03, 1.03229881E-09}, // CP
+      std::complex<double>{1.08992029E-04, -2.67967570E-11}, // CP'
    };
    for (int i = 0; i < 12; i++) {
       BOOST_CHECK_CLOSE(res[i + 1].real(), expected[i].real(), 1e-5);

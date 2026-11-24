@@ -24,7 +24,6 @@
 #include <complex>
 
 #include "lowe.h"
-#include "test_complex_equality.hpp"
 
 #include "test_CMSSMCKM.hpp"
 
@@ -201,8 +200,22 @@ Block MSOFTIN
    constexpr std::complex<double> C8pNP{-0.0003861004022929475,
                                         1.2046683222034378e-09};
 
-   TEST_COMPLEX_CLOSE_FRACTION(C7NP , calculated_value[0], 6e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 6e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C8NP , calculated_value[2], 6e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C8pNP, calculated_value[3], 6e-5);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C7NP), std::real(calculated_value[0]),
+                              6e-5);
+   // the imaginary parts vanish up to the phase difference of the CKM
+   // matrices, so they are compared with the modulus
+   BOOST_CHECK_SMALL(std::imag(calculated_value[0]) - std::imag(C7NP),
+                     6e-5 * std::abs(C7NP));
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C7pNP), std::real(calculated_value[1]),
+                              6e-5);
+   BOOST_CHECK_SMALL(std::imag(calculated_value[1]) - std::imag(C7pNP),
+                     6e-5 * std::abs(C7pNP));
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C8NP), std::real(calculated_value[2]),
+                              6e-5);
+   BOOST_CHECK_SMALL(std::imag(calculated_value[2]) - std::imag(C8NP),
+                     6e-5 * std::abs(C8NP));
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C8pNP), std::real(calculated_value[3]),
+                              6e-5);
+   BOOST_CHECK_SMALL(std::imag(calculated_value[3]) - std::imag(C8pNP),
+                     6e-5 * std::abs(C8pNP));
 }

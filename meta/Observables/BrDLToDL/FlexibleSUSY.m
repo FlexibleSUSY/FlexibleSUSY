@@ -67,6 +67,13 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
       LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
       LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
    };
+   (* In the penguins with a self-energy on an external quark leg the quark
+      mass is kept (needed for the leg), which also puts it into the vector
+      boson propagator, 1/(m_q^2 - m_V^2). Evaluate the propagator at q^2 = 0
+      as in the vertex penguins: the UV divergences of the vertex and leg
+      diagrams cancel only then, and the result decouples. *)
+   npf = npf /. Plus[Power[m_[_[{_}]], 2], Times[-1, Power[m_[v_NPointFunctions`GenericV], 2]]] :>
+      -m[v]^2;
    fields = Flatten@NPointFunctions`GetProcess@npf;
    sp[i_] := SARAH`DiracSpinor[fields[[i]], 0, 0];
    dc[a_, b__, c_] := NPointFunctions`DiracChain[sp@a, b, sp@c];

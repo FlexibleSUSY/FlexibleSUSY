@@ -65,7 +65,7 @@ New features
 
 * New observable ``BrDLToDL``: the 1-loop Wilson coefficients of
   :math:`d_i \ell \to d_j \ell` (e.g. :math:`b \to s \mu\mu`) from box
-  diagrams, scalar penguins and the photon penguin.  The coefficients C7,
+  diagrams, Z and scalar penguins and the photon penguin.  The coefficients C7,
   C8, C9, C10, CS, CP and their primed counterparts (flavio/SuperIso
   normalization) are written to the blocks ``FWCOEF`` and ``IMFWCOEF`` of
   the Flavour Les Houches Accord, which SuperIso reads.  For
@@ -75,8 +75,7 @@ New features
   ``utils/calc_flavio_observables.py``).  It is
   calculated by default for :math:`b \to s \mu\mu` and
   :math:`b \to s ee` (needed for :math:`R_K`, :math:`R_{K^*}`) in CMSSMCKM
-  and MRSSM2CKM.  Z penguins (``Vectors``) can be switched on, but are not yet
-  reliable, as they don't decouple.
+  and MRSSM2CKM.
 
 * When the RG running stops because the integrator cannot reach the
   target scale (step size too small or too many steps) while all

@@ -38,8 +38,8 @@ NPointFunctions [2402.14630]_ by adding
     ExtraSLHAOutputBlocks = {
         ...
         {FWCOEF, {
-                {1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Scalars, Boxes}, 1]},
-                {2, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[1]} -> {Fd[2], Fe[1]}, {Scalars, Boxes}, 1]}
+                {1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Vectors, Scalars, Boxes}, 1]},
+                {2, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[1]} -> {Fd[2], Fe[1]}, {Vectors, Scalars, Boxes}, 1]}
             }
         },
         {IMFWCOEF, { (* the same entries *) }}
@@ -61,10 +61,11 @@ order (0 or 1):
 
 The photon penguin is always included at one loop (through the form factors
 also used for :math:`b \to s \gamma`), without Standard Model particles in
-the loop. ``Vectors`` is not recommended at the moment: the Z penguins don't
-decouple (they stay finite when all new particles are very heavy), so they
-aren't reliable yet. Diagrams with a vector boson in the loop are left out,
-e.g. box diagrams with a W boson and a charged Higgs boson.
+the loop. In the penguins with a self-energy on an external quark leg the quark
+masses are kept, and the Z propagator is evaluated at :math:`q^2 = 0` as in
+the vertex penguins, so that the UV divergences cancel and the Z penguins
+decouple. Diagrams with a vector boson in the loop are left out, e.g. box
+diagrams with a W boson and a charged Higgs boson.
 
 The new physics contributions to the Wilson coefficients
 :math:`C_7, C_8, C_9, C_{10}, C_S, C_P` and their primed counterparts are
@@ -79,14 +80,14 @@ parts) of the Flavour Les Houches Accord (FLHA) [1008.0762]_, e.g. for
          0305     4322   00   1     ...   # C7' 1 loop
          0305     6421   00   1     ...   # C8 1 loop
          0305     6321   00   1     ...   # C8' 1 loop
-     03051313     4133   00   1     ...   # C9 Scalars+Boxes 1 loop
-     03051313     4233   00   1     ...   # C9' Scalars+Boxes 1 loop
-     03051313     4137   00   1     ...   # C10 Scalars+Boxes 1 loop
-     03051313     4237   00   1     ...   # C10' Scalars+Boxes 1 loop
-     03051313     3230   00   1     ...   # CS Scalars+Boxes 1 loop
-     03051313     3130   00   1     ...   # CS' Scalars+Boxes 1 loop
-     03051313     3234   00   1     ...   # CP Scalars+Boxes 1 loop
-     03051313     3134   00   1     ...   # CP' Scalars+Boxes 1 loop
+     03051313     4133   00   1     ...   # C9 Vectors+Scalars+Boxes 1 loop
+     03051313     4233   00   1     ...   # C9' Vectors+Scalars+Boxes 1 loop
+     03051313     4137   00   1     ...   # C10 Vectors+Scalars+Boxes 1 loop
+     03051313     4237   00   1     ...   # C10' Vectors+Scalars+Boxes 1 loop
+     03051313     3230   00   1     ...   # CS Vectors+Scalars+Boxes 1 loop
+     03051313     3130   00   1     ...   # CS' Vectors+Scalars+Boxes 1 loop
+     03051313     3234   00   1     ...   # CP Vectors+Scalars+Boxes 1 loop
+     03051313     3134   00   1     ...   # CP' Vectors+Scalars+Boxes 1 loop
 
 The fermion code 0305 stands for :math:`\bar{s} \ldots b` and 1313 for
 :math:`\bar{\mu} \ldots \mu`; the operator codes are those of the FLHA
@@ -136,9 +137,9 @@ This will result in an output like
 .. code-block:: bash
 
     BR(B->Xsgamma)           = 3.188819e-04   SM: 3.309692e-04   ratio: 0.963479
-    BR(Bs->mumu)             = 4.679011e-09   SM: 3.628931e-09   ratio: 1.289363
-    <Rmue>(B+->Kll):1.1:6    = 1.000773e+00   SM: 1.000416e+00   ratio: 1.000357
-    <Rmue>(B0->K*ll):1.1:6   = 9.967237e-01   SM: 9.964532e-01   ratio: 1.000271
+    BR(Bs->mumu)             = 4.714078e-09   SM: 3.628931e-09   ratio: 1.299026
+    <Rmue>(B+->Kll):1.1:6    = 1.000760e+00   SM: 1.000416e+00   ratio: 1.000344
+    <Rmue>(B0->K*ll):1.1:6   = 9.967367e-01   SM: 9.964532e-01   ratio: 1.000284
 
 Other flavio observables can be given after the file name; arguments such as
 a :math:`q^2` bin are appended with colons, e.g. ``'<Rmue>(B+->Kll):1.1:6'``.

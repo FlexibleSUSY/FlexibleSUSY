@@ -287,8 +287,13 @@ Module[{inFields, outFields, dirMod = "", obsDir},
    outFields = meta[[1, 2]];
    opts = SortBy[Cases[meta[[2]], _Rule], First];
    obsDir = FileNameJoin@{dir, "Observables", SymbolName@Head@Utils`FSGetOption[opts, Observable]};
+   (* The newest modification time of the observable's files: the time of
+      the directory changes only when files are added or removed, not when
+      a file (e.g. NPointFunctions.m with the settings) is edited. *)
    If[DirectoryQ@obsDir,
-      dirMod = "modtime" <> DateString@FileDate[obsDir, "Modification"];
+      dirMod = "modtime" <> DateString@Max[
+         AbsoluteTime@FileDate[#, "Modification"]& /@
+            Prepend[FileNames["*", obsDir], obsDir]];
    ];
    StringReplace[
       Utils`StringJoinWithSeparator[

@@ -75,5 +75,6 @@ chains[1] = {
 };
 
 mass[1] = {
-   inSelfT -> {"keep initial quark mass untouched", Hold :> ExternalMass[1]}
+   inSelfT -> {"keep initial quark mass untouched", Hold :> ExternalMass[1]},
+   outSelfT -> {"keep final quark mass untouched", Hold :> ExternalMass[3]}
 };
