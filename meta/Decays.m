@@ -1049,7 +1049,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "}\n" <>
                     "sm.solve_ewsb_tree_level();\n" <>
                     "sm.calculate_DRbar_masses();\n" <>
-                    "dm->fill_from(sm);\n" <>
+                    "dm->fill_from(sm, qedqcd.get_complex_ckm());\n" <>
                     "return dm;\n" <>
                     "break;\n"
                  ] <>

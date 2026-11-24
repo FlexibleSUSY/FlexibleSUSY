@@ -103,7 +103,28 @@ void CLASSNAME::set_precision(double precision_)
    precision = precision_;
 }
 
+/**
+ * Sets the SM-like parameters from the SM, with a unit CKM matrix.
+ * The quark Yukawa couplings of the SM are diagonal, so it has no
+ * flavour mixing of its own.
+ */
 void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input)
+{
+   fill_from(sm_input, Eigen::Matrix<std::complex<double>,3,3>::Identity());
+}
+
+/**
+ * Sets the SM-like parameters (gauge couplings, VEV(s), Yukawa
+ * couplings) from the SM, as in the low-scale constraint of the model.
+ * The CKM matrix enters the Yukawa couplings of models that use it
+ * there (CKM in the low-scale input); it is taken from the input,
+ * because the SM has diagonal quark Yukawa couplings.
+ *
+ * @param sm_input SM at the scale of the decays
+ * @param ckm CKM matrix
+ */
+void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input,
+                          const Eigen::Matrix<std::complex<double>,3,3>& ckm)
 {
    using RM33 = Eigen::Matrix<double, 3, 3>;
    using CM33 = Eigen::Matrix<std::complex<double>, 3, 3>;
@@ -118,7 +139,7 @@ void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input)
    const auto VEV   = sm.get_v();
 
    // SM interface parameters for the low-scale constraint
-   const CM33 CKM = sm.get_Vu().adjoint() * sm.get_Vd();
+   const CM33 CKM = ckm;
    const double MZMSbar = sm.get_MVZ();
    const double MZDRbar = sm.get_MVZ();
    const double MWMSbar = sm.get_MVWp();

@@ -326,6 +326,16 @@ endif
 ifeq ($(WITH_CMSSMCKM),yes)
 TEST_SRC += \
 		$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.cpp
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
+TEST_SRC += \
+		$(DIR)/test_CMSSMCKM_FlexibleDecay_ckm.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_CMSSMCKM_FlexibleDecay_ckm.cpp
+endif
+endif
 endif
 
 ifeq ($(WITH_MRSSM2),yes)
@@ -1208,6 +1218,8 @@ $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 $(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
 
 $(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.x: $(LIBCMSSMCKM)
+
+$(DIR)/test_CMSSMCKM_FlexibleDecay_ckm.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 

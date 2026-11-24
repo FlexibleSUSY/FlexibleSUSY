@@ -83,6 +83,14 @@ New features
 Fixed bugs
 ----------
 
+* [commit c01003809]: In models that set the quark Yukawa couplings with the
+  CKM matrix (e.g. CMSSMCKM, MRSSM2, MRSSM2CKM, S3), FlexibleDecay
+  calculated the decays with a unit CKM matrix.  Decays that change the
+  quark flavour through the charged current were missing (e.g. H+ ->
+  c bbar, H+ -> t sbar, t -> W+ s), and the flavour-diagonal ones (e.g.
+  H+ -> t bbar) were slightly too large.  The decays now use the CKM
+  matrix of the input (Block VCKMIN).
+
 * [commit e626fe1ff]: In models with complex Yukawa couplings or soft
   parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail
   with a "non-perturbative" problem flagged for the imaginary part of a

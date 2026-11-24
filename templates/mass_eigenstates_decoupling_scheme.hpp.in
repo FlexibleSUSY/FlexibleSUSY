@@ -34,6 +34,7 @@
 #include "@ModelName@_mass_eigenstates_interface.hpp"
 #include "problems.hpp"
 
+#include <complex>
 #include <iosfwd>
 #include <memory>
 
@@ -77,7 +78,10 @@ public:
    void check_pole_masses_for_tachyons();
    void do_force_output(bool);
    bool do_force_output() const;
+   /// sets the SM-like parameters from the SM, with a unit CKM matrix
    void fill_from(const standard_model::Standard_model&);
+   /// sets the SM-like parameters from the SM and the given CKM matrix
+   void fill_from(const standard_model::Standard_model&, const Eigen::Matrix<std::complex<double>,3,3>&);
    void fill_from(const @ModelName@_mass_eigenstates&);
    void reorder_tree_level_masses();
    void reorder_pole_masses();
