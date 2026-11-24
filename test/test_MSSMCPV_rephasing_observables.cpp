@@ -29,11 +29,13 @@
  * anomalous magnetic moment of the muon and all decay widths (which also
  * involve the running of the complex parameters to the decay scales).
  * The point has lepton flavour violation (off-diagonal ml2, me2 and
- * complex off-diagonal A_e), so that l -> l' gamma is non-zero and the
- * complex flavour mixing of the sleptons is tested too.
+ * complex off-diagonal A_e), so that l -> l' gamma, l -> 3 l' and
+ * mu -> e conversion are non-zero and the complex flavour mixing of the
+ * sleptons is tested too.
  *
  * A second test rephases the lepton fields, which must leave the same
- * lepton observables unchanged.
+ * lepton observables unchanged (the Wilson coefficients of l -> 3 l' and
+ * mu -> e conversion then change by a common phase).
  *
  * When a new observable is added to FlexibleSUSY, add it here too.
  */
@@ -51,7 +53,10 @@
 #include "decays/MSSMCPV_decays.hpp"
 #include "decays/flexibledecay_settings.hpp"
 #include "lowe.h"
+#include "observables/MSSMCPV_br_l_to_3l.hpp"
 #include "observables/MSSMCPV_br_l_to_l_gamma.hpp"
+#include "observables/MSSMCPV_l_to_l_conversion.hpp"
+#include "observables/l_to_l_conversion/settings.hpp"
 #include "physical_input.hpp"
 #include "spectrum_generator_settings.hpp"
 
@@ -62,6 +67,8 @@
 #include <map>
 #include <numbers>
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 using namespace flexiblesusy;
@@ -176,11 +183,42 @@ Spectrum_generator_settings make_settings()
    return settings;
 }
 
-/// compares the lepton EDMs, a_mu and BR(l -> l' gamma) of two models
+/// What must agree between two points
+enum class Compare : bool {
+   all,       ///< everything (R rotation)
+   abs_values ///< Wilson coefficients only up to a common phase (rephasing)
+};
+
+/// compares the result of an l -> 3 l' or conversion calculation: the
+/// branching ratio or conversion rate (element 0) and the Wilson
+/// coefficients (elements 1-12), relative to the largest coefficient
+void check_lfv_result(const Eigen::Array<std::complex<double>, 13, 1>& a,
+                      const Eigen::Array<std::complex<double>, 13, 1>& b,
+                      Compare compare, const std::string& name)
+{
+   BOOST_TEST_MESSAGE(name << ": " << a(0).real() << " vs " << b(0).real());
+   BOOST_CHECK(a(0).real() > 0.);
+   BOOST_CHECK_CLOSE_FRACTION(a(0).real(), b(0).real(), 1e-8);
+
+   const auto ca = a.tail<12>();
+   const auto cb = b.tail<12>();
+   const double scale = ca.abs().maxCoeff();
+   BOOST_CHECK(scale > 0.);
+   const double diff = compare == Compare::all
+                          ? (ca - cb).abs().maxCoeff()
+                          : (ca.abs() - cb.abs()).abs().maxCoeff();
+   BOOST_TEST_MESSAGE(name << ": max. difference of the coefficients "
+                           << diff / scale << " (relative to the largest)");
+   BOOST_CHECK_SMALL(diff / scale, 1e-8);
+}
+
+/// compares the lepton EDMs, a_mu, BR(l -> l' gamma), BR(l -> 3 l') and the
+/// mu -> e conversion rates of two models
 void check_lepton_observables(const MSSMCPV_mass_eigenstates& mA,
                               const MSSMCPV_mass_eigenstates& mB,
                               const softsusy::QedQcd& qedqcd,
-                              const Spectrum_generator_settings& settings)
+                              const Spectrum_generator_settings& settings,
+                              Compare compare)
 {
    using MSSMCPV_cxx_diagrams::fields::Fe;
 
@@ -210,6 +248,35 @@ void check_lepton_observables(const MSSMCPV_mass_eigenstates& mA,
                                   << " vs " << brB);
       BOOST_CHECK(brA > 0.);
       BOOST_CHECK_CLOSE_FRACTION(brA, brB, 1e-8);
+   }
+
+   // l_I -> l_O l_A l_A-bar
+   const std::array<std::array<int, 3>, 5> decays_3l{
+      {{1, 0, 0}, {2, 0, 0}, {2, 1, 1}, {2, 1, 0}, {2, 0, 1}}};
+   for (const auto& [nI, nO, nA] : decays_3l) {
+      std::ostringstream name;
+      name << "BR(Fe(" << nI << ") -> Fe(" << nO << ") Fe(" << nA << ") Fe("
+           << nA << ")bar)";
+      check_lfv_result(
+         MSSMCPV_br_l_to_3l::calculate_Fe_to_FeFebarFe_for_All_1loop(
+            nI, nO, nA, mA, qedqcd),
+         MSSMCPV_br_l_to_3l::calculate_Fe_to_FeFebarFe_for_All_1loop(
+            nI, nO, nA, mB, qedqcd),
+         compare, name.str());
+   }
+
+   using MSSMCPV_l_to_l_conversion::Nucleus;
+   const LToLConversion_settings conversion_settings;
+   // Ti is listed in Nucleus, but has no data (throws)
+   const std::array<std::pair<Nucleus, const char*>, 2> nuclei{
+      {{Nucleus::Al, "Al"}, {Nucleus::Au, "Au"}}};
+   for (const auto& [nucleus, nucleus_name] : nuclei) {
+      check_lfv_result(MSSMCPV_l_to_l_conversion::calculate_FeFe_forAll_1loop(
+                          1, 0, nucleus, mA, conversion_settings, qedqcd),
+                       MSSMCPV_l_to_l_conversion::calculate_FeFe_forAll_1loop(
+                          1, 0, nucleus, mB, conversion_settings, qedqcd),
+                       compare,
+                       std::string("CR(mu -> e, ") + nucleus_name + ")");
    }
 }
 
@@ -249,7 +316,7 @@ BOOST_AUTO_TEST_CASE(test_MSSMCPV_observables_rephasing)
       m->calculate_pole_masses();
    }
 
-   check_lepton_observables(mA, mB, qedqcd, settings);
+   check_lepton_observables(mA, mB, qedqcd, settings, Compare::all);
 
    const Physical_input physical_input;
    const FlexibleDecay_settings fd_settings;
@@ -312,5 +379,5 @@ BOOST_AUTO_TEST_CASE(test_MSSMCPV_lepton_rephasing)
       m->calculate_pole_masses();
    }
 
-   check_lepton_observables(mA, mB, qedqcd, settings);
+   check_lepton_observables(mA, mB, qedqcd, settings, Compare::abs_values);
 }

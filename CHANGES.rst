@@ -4,6 +4,11 @@ FlexibleSUSY 2.9.1 [November, ?? 2026]
 New features
 ------------
 
+* MSSMCPV now also calculates BR(mu -> 3e) and the mu -> e conversion rate
+  in aluminium (``FlexibleSUSYLowEnergy`` entries 31 and 41), as MSSM
+  does, so that these lepton flavour violating observables can be studied
+  with complex parameters.
+
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
 
