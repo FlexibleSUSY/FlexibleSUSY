@@ -738,11 +738,13 @@ TEST_META += \
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp
+		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp \
+		$(DIR)/test_MSSMCPV_rephasing_observables.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp
+		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp \
+		$(DIR)/test_MSSMCPV_rephasing_observables.cpp
 endif
 endif
 endif
@@ -1186,6 +1188,8 @@ $(DIR)/test_MSSMCPV_gluino_phase.x: $(LIBMSSMCPV)
 $(DIR)/test_MSSMCPV_amm_complex.x: $(LIBMSSMCPV)
 
 $(DIR)/test_MSSMCPV_rephasing_invariance.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_rephasing_observables.x: $(LIBMSSMCPV)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
