@@ -35,6 +35,6 @@ BOOST_AUTO_TEST_CASE( test_is_nothrow_constructible )
 {
    using namespace flexiblesusy;
 
-   BOOST_CHECK(std::is_nothrow_constructible<FatalError>::value);
+   BOOST_CHECK(std::is_nothrow_constructible_v<FatalError>);
 }
 */

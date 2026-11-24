@@ -19,6 +19,8 @@
 #ifndef FLEXIBLEDECAY_SETTINGS_H
 #define FLEXIBLEDECAY_SETTINGS_H
 
+#include "decay_corrections.hpp"
+
 #include <array>
 #include <Eigen/Core>
 
@@ -33,7 +35,11 @@ public:
       include_higher_order_corrections,           ///< [2] include higher order corrections in decays
       use_Thomson_alpha_in_Phigamgam_and_PhigamZ, ///< [3]
       offshell_VV_decays,                         ///< [4]
-      print_effc_block,                           ///< [1]
+      print_effc_block,                           ///< [5]
+      calculate_normalized_effc,                  ///< [6]
+      call_higgstools,                            ///< [7]
+      call_lilith,                                ///< [8]
+      use_pole_higgs_mixings,                     ///< [9]
       NUMBER_OF_OPTIONS                           ///< number of possible options
    };
 
@@ -46,6 +52,7 @@ public:
    std::string get_description(Settings) const; ///< get description of spectrum generator setting
    void set(Settings, double); ///< set value of spectrum generator setting
    void set(const Settings_t&);///< set all spectrum generator settings
+   Decay_corrections get_decay_corrections() const;
    void reset();               ///< resets all settings to their defaults
 
 private:

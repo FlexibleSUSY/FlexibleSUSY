@@ -16,10 +16,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 
    static constexpr double color_factor = squared_color_generator<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
-   if(!boost::range::equal(indexOut1, indexOut2)) {
-      if (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right())) {
-         const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
-         const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+   if (indexOut1 != indexOut2) {
+      const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
+      const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      if (mHOS > muqOS1 + muqOS2 && (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right()))) {
          const auto xOS1 = Sqr(muqOS1/mHOS);
          const auto xOS2 = Sqr(muqOS2/mHOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
@@ -46,6 +46,23 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
    double result_P = 0;
 
    if (4.*std::max(xDR, xOS) > 1.) {
+      if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+          flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+          flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+      ) {
+         neutral_higgs_effc.add_coupling(
+            field_as_string<Higgs>(indexIn),
+            {
+               boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
+               boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
+            },
+            std::pair<std::string, std::complex<double>> {
+               field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
+               indexOut1.at(0) == 2 && indexOut2.at(0) == 2 ? std::real(HQQbarVertexDR_S) + std::imag(HQQbarVertexDR_P)*1i : 0.
+            },
+            0 // decay channel kinematically closed, doesn't contribute to total width
+         );
+      }
    }
    else {
       const auto betaOS = std::sqrt(1.-4.*xOS);
@@ -76,7 +93,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
          );
       }
 
-      if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5)  {
+      if (flexibledecay_settings.get_decay_corrections().sm > 0 && Nf >= 5)  {
             double alpha_s_red;
             double Y_conversion = 1.;
             switch (Nf) {
@@ -148,10 +165,10 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                      deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (8/3. - Sqr(Pi/3.) - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
                   }
                   if (info::is_CP_violating_Higgs_sector) {
-                     const auto CSuu = HQQbarVertexDR_S/muqDR;
+                     const auto CSuu = HQQbarVertexDR_P/muqDR;
                      if (!is_zero(CSuu)) {
                         const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
-                        const auto CStu = Httbar_P/context.mass<Fu>({2});
+                        const auto CStu = Httbar_P/context.mass<UpTypeQuark>({2});
                         deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
                      }
                   }
@@ -177,7 +194,26 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 
       result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
       result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
-}
 
+      if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+          flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+          flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+      ) {
+         const double remove_normalization = flux*phase_spaceOS*2*Sqr(mHOS);
+         neutral_higgs_effc.add_coupling(
+            field_as_string<Higgs>(indexIn),
+            {
+               boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
+               boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
+            },
+            std::pair<std::string, std::complex<double>> {
+               field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
+               std::sqrt(result_S/(remove_normalization*Sqr(betaOS))) + std::sqrt(result_P/(remove_normalization))*1i
+            },
+            result_S + result_P
+         );
+      }
+
+   }
    return result_S + result_P;
 }

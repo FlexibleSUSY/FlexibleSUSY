@@ -18,9 +18,17 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
+   const int Nf = number_of_active_flavours(qedqcd, mAh);
+   if (Nf < 5) {
+      problems.add_warning(
+         create_process_string<PseudoscalarHiggs,Gluon,Gluon>(in_idx, out1_idx, out2_idx)
+         + ": Pseudoscalar Higgs too light (less than 5 active quark flavours). Disabling higher-order corrections."
+      );
+   }
+
    // higher order QCD corrections
    const double tau = Sqr(mAh/(2.*context.mass<UpTypeQuark>({2})));
-   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
+   if (flexibledecay_settings.get_decay_corrections().sm > 0 && Nf >= 5 && tau < 0.7) {
       // number of active light flavours
       static constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
@@ -50,14 +58,14 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       // eq. D10 of 2207.01032 and 23 of 9807241
       const double deltaNNLO {
          51959/96. - 363/8.*zeta2 - 495/8.*zeta3 + Nf*(-473/8. + 11/2.*zeta2 + 5/4.*zeta3 + Lt) + Sqr(Nf)*(251/216. - 1/6.*zeta2)
-         + (3405/16. - 73/3*Nf + 7/12.*Sqr(Nf))*LH
+         + (3405/16. - 73/3.*Nf + 7/12.*Sqr(Nf))*LH
          + (363/16. - 11/4.*Nf + 1/12.*Sqr(Nf))*Sqr(LH)
       };
 
       const double alpha_s_red = alpha_s_5f/Pi;
 
       double pseudoscalar_corr = 0.0;
-      switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+      switch (flexibledecay_settings.get_decay_corrections().sm) {
          case 4:
             [[fallthrough]];
          case 3:
@@ -77,13 +85,27 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, Gluon, Gluon>(
       result += pseudoscalar_corr;
    }
 
+   const std::string tag = field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx);
+
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       effhiggscouplings_block_input.push_back(
          {
-            36 + 10*(in_idx.size()>0 ? in_idx.at(0)-1 : 0), 21, 21,
+            fieldPDG<PseudoscalarHiggs>(in_idx), 21, 21,
             std::sqrt(result/(flux * color_fact * ps * ps_symmetry)/(0.5*Power4(mAh))),
-            field_as_string<PseudoscalarHiggs>(in_idx) + "-" + field_as_string<Gluon>(out1_idx) + "-" + field_as_string<Gluon>(out2_idx)
+            tag
          }
+      );
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      neutral_higgs_effc.add_coupling(
+         field_as_string<PseudoscalarHiggs>(in_idx),
+         {21, 21},
+         std::pair<std::string, double> {tag, std::sqrt(result)},
+         result
       );
    }
 

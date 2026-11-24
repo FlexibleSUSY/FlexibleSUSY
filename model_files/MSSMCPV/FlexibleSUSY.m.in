@@ -120,6 +120,8 @@ InitialGuessAtLowScale = {
    {Ye, Automatic}
 };
 
+PotentialLSPParticles = {Chi, Sv, Su, Sd, Se, Cha, Glu};
+
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYOutput, NoScale,
            {{0, Hold[HighScale]},

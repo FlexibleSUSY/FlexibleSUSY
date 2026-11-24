@@ -84,7 +84,7 @@ double calc_Deltaqq(double alpha_s_red, double Nf, FlexibleDecay_settings const&
    constexpr double Pi2 = Sqr(Pi);
 
    double result = 0.;
-   switch (static_cast<int>(settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+   switch (settings.get_decay_corrections().sm) {
       case 4:
          result += alpha_s_red * (39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf)));
          [[fallthrough]];
@@ -157,7 +157,7 @@ std::complex<double> taum1fprime(double tau) noexcept {
    else {
       return
 (tau-1.)*(1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) + 
+   (-2i*std::sqrt((-1. + tau)*tau) +
      2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
    }
 }
@@ -169,7 +169,7 @@ std::complex<double> fprime(double tau) noexcept {
    else {
       return
 (1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
-   (-2i*std::sqrt((-1. + tau)*tau) + 
+   (-2i*std::sqrt((-1. + tau)*tau) +
      2*Pi*(2*(-1 + tau)*tau + std::sqrt((-1 + tau)*tau) - 2*std::sqrt((-1 + tau)*Power3(tau))));
    }
 }
@@ -227,7 +227,7 @@ std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, d
       - z*(1.+Sqr(z))/(Cube(1.-z)*(1.+z))*(72.*li4p + 96.*li4m - 128./3.*(li3p + li3m)*ln
             + 28./3.*li2p*Sqr(ln) + 16./3.*li2m*Sqr(ln) + 1./18.*Power4(ln)
             + 8./3.*zeta2*Sqr(ln) + 32./3.*zeta3*ln + 12.*zeta4)
-      + z/Sqr(1.-z)*(-56./.3*li3p - 64./3.*li3m + 16.*li2p*ln
+      + z/Sqr(1.-z)*(-56./3.*li3p - 64./3.*li3m + 16.*li2p*ln
             + 32./3*li2m*ln + 20./3.*std::log(1.-z)*Sqr(ln) - 8./3.*zeta2*ln + 8./3.*zeta3)
       + 2.*z*(1.+z)/(3.*Cube(1.-z))*Cube(ln);
    const std::complex<double> F0AC2A = 2./tau*(f(tau) - tau*fprime(tau));

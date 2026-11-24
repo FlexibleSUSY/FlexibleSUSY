@@ -16,7 +16,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
 
    static constexpr double color_factor = squared_color_generator<Higgs,bar<DownTypeQuark>::type,DownTypeQuark>();
 
-   if(!boost::range::equal(indexOut1, indexOut2)) {
+   if (indexOut1 != indexOut2) {
       if (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right())) {
          const double mdqOS1 = context.physical_mass<DownTypeQuark>(indexOut1);
          const double mdqOS2 = context.physical_mass<DownTypeQuark>(indexOut2);
@@ -75,7 +75,7 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
       );
    }
 
-   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5) {
+   if (flexibledecay_settings.get_decay_corrections().sm > 0 && Nf >= 5) {
          double alpha_s_red;
          double Y_conversion = 1.;
          switch (Nf) {
@@ -176,6 +176,24 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
 
    const double result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
    const double result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      const double remove_normalization = flux*phase_spaceOS*2*Sqr(mHOS);
+      neutral_higgs_effc.add_coupling(field_as_string<Higgs>(indexIn),
+         {
+            boost::hana::unpack(bar<DownTypeQuark>::pdgids, _to_array<bar<DownTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
+            boost::hana::unpack(DownTypeQuark::pdgids, _to_array<DownTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
+         },
+         std::pair<std::string, std::complex<double>> {
+            field_as_string<Higgs>(indexIn) + "-" + field_as_string<bar<DownTypeQuark>::type>(indexOut1) + "-" + field_as_string<DownTypeQuark>(indexOut2),
+            std::sqrt(result_S/(remove_normalization*Sqr(betaOS))) + std::sqrt(result_P/(remove_normalization))*1i
+         },
+         result_S + result_P
+      );
+   }
 
    return result_S + result_P;
 }

@@ -20,7 +20,29 @@
      $     DMS(0:2,0:2),DMP(0:2,0:2)
       double precision c2t,s2t,At,mu,Xt,ht,sbe,pi,k
       double precision F1t,F2t,F3t,Ft,FA
+      double precision, parameter :: eps_st = 1d-5
+      double precision, parameter :: eps_t1 = 1d-5
 
+c     ADDED by ALEX: guards against NANs when sin theta is zero!
+      if (dabs(st).lt.eps_st) then
+         if (st.ge.0.0d0) then
+            st = eps_st
+         else
+            st = -eps_st
+         endif
+         ct = sqrt(1.d0-st*st)
+      endif
+c     end of addition by ALEX
+
+c     ADDED by ALEX: guards against NANs when T1 == T2
+      if (dabs((T1-T2)/T1).lt.eps_t1) then
+         if (T1.gt.T2) then
+            T1 = T2 / (1d0 - eps_t1)
+         else
+            T1 = T2 / (1d0 + eps_t1)
+         endif
+      endif
+c     end of addition by ALEX
 
       pi = 4d0*atan(1.d0)
 

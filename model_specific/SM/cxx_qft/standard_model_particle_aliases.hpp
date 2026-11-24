@@ -25,17 +25,17 @@
 
 #include "cxx_qft/standard_model_fields.hpp"
 
-namespace flexiblesusy {
+namespace flexiblesusy::standard_model_cxx_diagrams::fields {
 
-using Higgs = standard_model_cxx_diagrams::fields::hh;
-using WpBoson = standard_model_cxx_diagrams::fields::VWp;
-using WmBoson = typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type;
-using Photon = standard_model_cxx_diagrams::fields::VP;
-using ZBoson = standard_model_cxx_diagrams::fields::VZ;
-using Gluon = standard_model_cxx_diagrams::fields::VG;
-using ChargedLepton = standard_model_cxx_diagrams::fields::Fe;
-using Neutrino = standard_model_cxx_diagrams::fields::Fv;
-using UpTypeQuark = standard_model_cxx_diagrams::fields::Fu;
-using DownTypeQuark = standard_model_cxx_diagrams::fields::Fd;
+using Higgs = hh;
+using WpBoson = VWp;
+using WmBoson = typename conj<VWp>::type;
+using Photon = VP;
+using ZBoson = VZ;
+using Gluon = VG;
+using ChargedLepton = Fe;
+using Neutrino = Fv;
+using UpTypeQuark = Fu;
+using DownTypeQuark = Fd;
 
 }

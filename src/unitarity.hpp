@@ -37,6 +37,9 @@ struct UnitarityInfiniteS {
    Eigen::MatrixXcd scatteringMatrix {};
 };
 
+/// max(|Re(eigenvalues(m))|) of a square matrix
+double max_abs_re_eigenvalue(Eigen::MatrixXcd const& m);
+
 } // namespace flexiblesusy
 
 #endif

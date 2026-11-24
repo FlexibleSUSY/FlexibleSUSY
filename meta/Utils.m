@@ -183,6 +183,12 @@ In[1]:= rules = {a -> b, {c, d} -> e};
         Utils`UnzipRules[rules]
 Out[1]= {a -> b, c -> e, d -> e}";
 
+FSDebugPrint::usage = "
+@brief Print debug messages from the meta phase. Printout is controlled by the
+       FlexibleSUSY`FSDebugOutput global variable.
+@param module name as string (e.g. Utils), message as sequence of strings
+";
+
 Begin["`Private`"];
 
 AppendOrReplaceInList[values_List, elem_, test_:SameQ] :=
@@ -331,7 +337,6 @@ Module[{warning, chopped},
    ];
    chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
    chopped = StringReplace[chopped, "\n"-> "\n         "];
-   WriteString[$Output, warning <> chopped <> "\n"]
    If[$Notebooks,
       Print[warning, chopped];,
       WriteString[$Output, warning <> chopped <> "\n"];
@@ -491,6 +496,10 @@ StringJoinWithReplacement ~ SetAttributes ~ {Locked,Protected};
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
 		fileHandle = OpenRead[fileName, BinaryFormat -> True];
+		(* Read[$Failed, String] stays unevaluated, so without this check
+		   the loop below would never end *)
+		AssertWithMessage[Head[fileHandle] === InputStream,
+			"Utils`ReadLinesInFile[]: Unable to open file '" <> fileName <> "'"];
 
 		While[(line = Read[fileHandle, String]) =!= EndOfFile,
 			AssertWithMessage[line =!= $Failed,
@@ -537,6 +546,10 @@ VersionOrderGtEqThan[version_List, minimRequired_List] /;
 
 FSRound[num_, prec_] :=
    PaddedForm[num, {IntegerPart[Log[10, Abs[num]]] + prec + 1, prec}];
+
+FSDebugPrint[module_String, msg___] :=
+    If[FlexibleSUSY`FSDebugOutput,
+       Print["Debug<" <> module <> ">: ", Sequence @@ Utils`InputFormOfNonStrings /@ {msg}]];
 
 End[];
 

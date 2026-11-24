@@ -827,6 +827,13 @@ Block ImMSOFT Q= 2.00000000E+03
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 1, 1, 1),
                               0.00010607114819048992, 2e-13);
+   // mostly CP-odd heavy Higgs -> c cbar, u ubar: the CP-odd part includes
+   // the top-induced O(alpha_s^2) correction, with the ratio of the
+   // CP-odd couplings g_t^P/g_q^P (eq. (30) of hep-ph/9505358)
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 2, 1, 1),
+                              6.64197468731554192e-05, 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 2, 0, 0),
+                              3.34795702510249447e-10, 1e-10);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
                               0.00022695659608435093, 3e-13);
@@ -851,7 +858,7 @@ Block ImMSOFT Q= 2.00000000E+03
    // with 2L QCD for squark
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 1), 5.3089524775640594e-06, 7e-10);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1994529676800549e-07, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1066699988752152e-07, 7e-11);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -875,5 +882,5 @@ Block ImMSOFT Q= 2.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 1), 6.1972425811286929e-05, 2e-10);
 
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1994529676800549e-07, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1066699988752152e-07, 7e-11);
 }

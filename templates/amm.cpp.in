@@ -37,6 +37,7 @@
 #include "logger.hpp"
 #include "scan.hpp"
 #include "spectrum_generator_settings.hpp"
+#include "string_format.hpp"
 
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
@@ -202,18 +203,12 @@ double calculate_amm_impl_1l(const context_base& context, const @ModelName@_mass
 
 @AMMCalculation@
 
-   // Im[F2]/Re[F2] ~ 0
-   if (!is_zero((form_factors[2] + form_factors[3]).real())) {
-      const double ratio = (form_factors[2] + form_factors[3]).imag()/(form_factors[2] + form_factors[3]).real();
-      if (!is_zero(ratio)) {
-         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[Fe]/Re[F2] = " + std::to_string(ratio));
-         return std::numeric_limits<double>::quiet_NaN();
-      }
-   }
-   // Im[F2] ~ 0
-   else {
-      if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
-         ERROR("Error in the g-2 calculation! Form factor F2 should be real: Im[F2] = " + std::to_string((form_factors[2] + form_factors[3]).imag()));
+   // F2 must be real.  With complex couplings its imaginary part
+   // cancels only up to rounding, so allow a small relative imaginary part.
+   {
+      const std::complex<double> F2 = form_factors[2] + form_factors[3];
+      if (std::abs(F2.imag()) > 1e-10 * std::abs(F2)) {
+         ERROR("Error in the g-2 calculation! Form factor F2 should be real: F2 = " + flexiblesusy::to_string(F2));
          return std::numeric_limits<double>::quiet_NaN();
       }
    }
@@ -465,7 +460,7 @@ Lepton, Fermion, Scalar
                       >;
 
    using LeptonZVertex = Vertex<
-                      ZBoson,
+                      fields::ZBoson,
                       Lepton,
                       typename Lepton::lorentz_conjugate
                       >;
@@ -477,7 +472,7 @@ Lepton, Fermion, Scalar
                          >;
 
    using FermionZVertex = Vertex<
-                         ZBoson,
+                         fields::ZBoson,
                          typename Fermion::lorentz_conjugate,
                          Fermion
                          >;
@@ -527,7 +522,7 @@ Lepton, Fermion, Scalar
 
                const auto fermionMass = context.mass<Fermion>(fermionIndices);
                const auto scalarMass = context.mass<Scalar>(scalarIndices);
-               const auto zMass = context.mass<ZBoson>({ });
+               const auto zMass = context.mass<fields::ZBoson>({ });
 
                static constexpr double fermionChargeCount =
                   Fermion::electricCharge / Lepton::electricCharge;

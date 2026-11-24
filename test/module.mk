@@ -49,10 +49,16 @@ endif
 
 TEST_SRC := \
 		$(DIR)/test_amm_loop_functions.cpp \
-		$(DIR)/test_array_view.cpp \
+		$(DIR)/test_command_line_options.cpp \
+		$(DIR)/test_decay_amplitudes.cpp \
+		$(DIR)/test_negative_width.cpp \
+		$(DIR)/test_undetected_width.cpp \
 		$(DIR)/test_cast_model.cpp \
+		$(DIR)/test_effective_coupling_list.cpp \
 		$(DIR)/test_ckm.cpp \
+		$(DIR)/test_max_abs_re_eigenvalue.cpp \
 		$(DIR)/test_composite_root_finder.cpp \
+		$(DIR)/test_hVV_4body.cpp \
 		$(DIR)/test_logger.cpp \
 		$(DIR)/test_derivative.cpp \
 		$(DIR)/test_eigen_utils.cpp \
@@ -68,6 +74,7 @@ TEST_SRC := \
 		$(DIR)/test_mssm_twoloop_mt.cpp \
 		$(DIR)/test_mssm_twoloop_mtau.cpp \
 		$(DIR)/test_MSSM_2L_limits.cpp \
+		$(DIR)/test_NMSSM_twoloophiggs.cpp \
 		$(DIR)/test_multiindex.cpp \
 		$(DIR)/test_numerics.cpp \
 		$(DIR)/test_observable_problems.cpp \
@@ -77,6 +84,7 @@ TEST_SRC := \
 		$(DIR)/test_root_finder.cpp \
 		$(DIR)/test_scan.cpp \
 		$(DIR)/test_sm_fourloop_as.cpp \
+		$(DIR)/test_sm_higher_loop_higgs.cpp \
 		$(DIR)/test_sm_mw.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
@@ -101,25 +109,36 @@ TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
+		$(DIR)/test_shell_completions.sh \
 		$(DIR)/test_space_dir.sh \
-		$(DIR)/test_wolframscript.sh \
 		$(DIR)/test_looplibrary_environment.sh
+
+# needs a working (activated) Wolfram Engine
+ifeq ($(ENABLE_META),yes)
+TEST_SH += \
+		$(DIR)/test_wolframscript.sh
+endif
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
 		$(DIR)/test_CConversion.m \
 		$(DIR)/test_Constraint.m \
+		$(DIR)/test_Decays_final_states.m \
 		$(DIR)/test_EWSB.m \
 		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
+		$(DIR)/test_MSSM_2L_mb.m \
 		$(DIR)/test_MSSM_2L_mt.m \
 		$(DIR)/test_MSSM_2L_yb_softsusy.m \
 		$(DIR)/test_MSSM_2L_yt.m \
 		$(DIR)/test_MSSM_2L_yt_loopfunction.m \
 		$(DIR)/test_MSSM_2L_yt_softsusy.m \
+		$(DIR)/test_MSSM_global_symmetries.m \
 		$(DIR)/test_MSSMCPV_SARAH.m \
+		$(DIR)/test_MRSSM_global_symmetries.m \
 		$(DIR)/test_MRSSM_TreeMasses.m \
+		$(DIR)/test_NMSSM_global_symmetries.m \
 		$(DIR)/test_Parameters.m \
 		$(DIR)/test_ReadSLHA.m \
 		$(DIR)/test_RGIntegrator.m \
@@ -128,6 +147,7 @@ TEST_META := \
 		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
 		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
+		$(DIR)/test_SM_higgs_loop_corrections_atab_origin.m \
 		$(DIR)/test_TestSuite.m \
 		$(DIR)/test_TextFormatting.m \
 		$(DIR)/test_THDM_threshold_corrections.m \
@@ -139,6 +159,7 @@ TEST_META := \
 		$(DIR)/test_Utils.m \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
+		$(DIR)/test_Vertices_FSVertex.m \
 		$(DIR)/test_Vertices_colorsum.m
 
 ifeq ($(WITH_E6SSM), yes)
@@ -171,11 +192,31 @@ TEST_SRC += \
 		$(DIR)/test_NMSSMEFTHiggs.cpp
 endif
 
+ifeq ($(WITH_HSSUSY) $(WITH_NMSSMEFTHiggs) $(WITH_NUHNMSSMHimalaya),yes yes yes)
+TEST_SRC += \
+		$(DIR)/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.cpp
+endif
+
+ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
+TEST_SRC += \
+		$(DIR)/test_NUHMSSMNoFVHimalaya.cpp
+TEST_META += \
+		$(DIR)/test_NUHMSSMNoFVHimalaya_uncertainty.m
+endif
+
 ifeq ($(WITH_NUHMSSMNoFVHimalayaEFTHiggs),yes)
 TEST_SRC += \
 		$(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.cpp
 endif
 
+ifeq ($(WITH_NUHNMSSMHimalaya),yes)
+TEST_SRC += \
+		$(DIR)/test_NUHNMSSMHimalaya.cpp
+endif
+
+ifeq ($(WITH_NUHNMSSMHimalaya) $(WITH_NUHMSSMNoFVHimalaya),yes yes)
+TEST_SRC += \
+		$(DIR)/test_NUHMSSMNoFVHimalaya_NUHNMSSMHimalaya.cpp
 endif
 
 ifeq ($(ENABLE_LOOPTOOLS), yes)
@@ -187,6 +228,8 @@ ifeq ($(ENABLE_COLLIER), yes)
 TEST_SRC += \
 		$(DIR)/test_looplibrary_collier.cpp
 endif
+
+endif # shooting
 
 ifeq ($(ENABLE_FFLITE), yes)
 TEST_SRC += \
@@ -294,11 +337,13 @@ endif
 ifeq ($(WITH_MRSSM2) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_FlexibleDecay.cpp
+		$(DIR)/test_MRSSM2_FlexibleDecay.cpp \
+		$(DIR)/test_MRSSM2_normalized_effc.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_FlexibleDecay.cpp
+		$(DIR)/test_MRSSM2_FlexibleDecay.cpp \
+		$(DIR)/test_MRSSM2_normalized_effc.cpp
 endif
 endif
 
@@ -380,6 +425,11 @@ ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
 TEST_SRC += \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.cpp \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.cpp
+endif
+
+ifeq ($(WITH_GrimusNeufeld), yes)
+TEST_SRC += \
+		$(DIR)/test_GrimusNeufeld_Fv_masses.cpp
 endif
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -528,11 +578,13 @@ endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 endif
 
@@ -628,6 +680,11 @@ TEST_SRC += \
 		$(DIR)/test_NSM_low_scale_constraint.cpp
 endif
 
+ifeq ($(WITH_InertMSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_InertMSSM_inert_charginos.cpp
+endif
+
 ifeq ($(WITH_lowMSSM) $(WITH_CMSSM),yes yes)
 TEST_SH += \
 		$(DIR)/test_lowMSSM.sh
@@ -636,6 +693,11 @@ endif
 ifeq ($(WITH_lowNMSSM) $(WITH_SOFTSUSY),yes yes)
 TEST_SH += \
 		$(DIR)/test_lowNMSSM_spectrum.sh
+endif
+
+ifeq ($(WITH_lowNMSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_lowNMSSM_2loop_singlet_sign.cpp
 endif
 
 ifeq ($(WITH_CMSSMGSLHybrid) $(WITH_CMSSMGSLHybridS) $(WITH_CMSSMGSLBroyden) $(WITH_CMSSMGSLNewton) $(WITH_CMSSMFPIRelative) $(WITH_CMSSMFPIAbsolute) $(WITH_CMSSMFPITadpole),yes yes yes yes yes yes yes)
@@ -666,6 +728,10 @@ TEST_META += \
 endif
 
 ifeq ($(WITH_MSSMCPV),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSMCPV_rephasing_invariance.cpp \
+		$(DIR)/test_MSSMCPV_gluino_phase.cpp \
+		$(DIR)/test_MSSMCPV_amm_complex.cpp
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
@@ -747,11 +813,6 @@ TEST_SH += \
 		$(DIR)/test_NMSSMEFTHiggsTwoScale.sh
 endif
 
-ifeq ($(WITH_NUHMSSMNoFVHimalaya),yes)
-TEST_META += \
-		$(DIR)/test_NUHMSSMNoFVHimalaya_uncertainty.m
-endif
-
 ifeq ($(WITH_SMHighPrecision) $(WITH_SMEFTHiggs),yes yes)
 TEST_SH += \
 		$(DIR)/test_SMEFTHiggs.sh
@@ -776,6 +837,7 @@ ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_SH += \
 		$(DIR)/test_flexiblesusy-config.sh
 TEST_META += \
+		$(DIR)/test_SM_librarylink_invalid_paths.m \
 		$(DIR)/test_SM_observable_problems.m
 endif
 
@@ -957,8 +1019,9 @@ $(DIR)/%.x.xml: $(DIR)/%.x
 $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		@rm -f $@ $(@:.xml=.log)
 		@$(PTR); \
-		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
-		Quit[TestSuite\`GetNumberOfFailedTests[]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; \
+		CheckAbort[Get[\"$<\"]; Quit[TestSuite\`GetNumberOfFailedTests[]], \
+		Print[\"Error: test aborted\"]; Quit[1]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
 
 $(DIR)/%.sh.xml: $(DIR)/%.sh
@@ -1106,13 +1169,25 @@ endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
+$(DIR)/test_MSSM_FlexibleDecay_ward.x: $(LIBMSSM)
+
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_gluino_phase.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_amm_complex.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_rephasing_invariance.x: $(LIBMSSMCPV)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
+
+$(DIR)/test_GrimusNeufeld_Fv_masses.x: $(LIBGrimusNeufeld)
+
+$(DIR)/test_MRSSM2_normalized_effc.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_amm.x: $(LIBMRSSM2)
 
@@ -1178,7 +1253,15 @@ $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
 $(DIR)/test_NMSSMEFTHiggs.x: $(LIBNMSSMEFTHiggs)
 
+$(DIR)/test_NMSSMEFTHiggs_NUHNMSSMHimalaya_HSSUSY.x: $(LIBHSSUSY) $(LIBNMSSMEFTHiggs) $(LIBNUHNMSSMHimalaya)
+
+$(DIR)/test_NUHMSSMNoFVHimalaya.x: $(LIBNUHMSSMNoFVHimalaya)
+
 $(DIR)/test_NUHMSSMNoFVHimalayaEFTHiggs.x: $(LIBNUHMSSMNoFVHimalayaEFTHiggs)
+
+$(DIR)/test_NUHMSSMNoFVHimalaya_NUHNMSSMHimalaya.x: $(LIBNUHMSSMNoFVHimalaya) $(LIBNUHNMSSMHimalaya)
+
+$(DIR)/test_NUHNMSSMHimalaya.x: $(LIBNUHNMSSMHimalaya)
 
 $(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.x: $(LIBMSSMEFTHiggs)
 
@@ -1275,6 +1358,8 @@ $(DIR)/test_SMSU3_low_scale_constraint.x: $(LIBSMSU3)
 
 $(DIR)/test_NSM_low_scale_constraint.x: $(LIBNSM)
 
+$(DIR)/test_InertMSSM_inert_charginos.x: $(LIBInertMSSM)
+
 $(DIR)/test_VCMSSM_ewsb.x: $(LIBVCMSSM) $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_unitarity.x: $(LIBCMSSM)
@@ -1306,6 +1391,8 @@ $(DIR)/test_CE6SSM_semi_analytic_solutions.x: $(LIBCE6SSM)
 $(DIR)/test_CE6SSM_consistent_solutions.x: $(LIBCE6SSM) $(LIBE6SSM)
 
 $(DIR)/test_lowNMSSM_spectrum.sh: $(RUN_SOFTPOINT_EXE)
+
+$(DIR)/test_lowNMSSM_2loop_singlet_sign.x: $(LIBlowNMSSM)
 
 $(DIR)/test_lowNUHMSSMSemiAnalytic_ewsb.x: $(LIBlowNUHMSSMSemiAnalytic)
 
@@ -1341,9 +1428,10 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAt
 
 # test rule for files which depend on pv #######################################
 ifneq ($(OPERATING_SYSTEM),Darwin)
+# test_pv_crosschecks.cpp is built only as test_pv_{fflite,looptools,softsusy}.x
+# (see test_pv_crosschecks.sh), with their own rules.
 PV_DEP_EXE := \
-		$(DIR)/test_pv.x \
-		$(DIR)/test_pv_crosschecks.x
+		$(DIR)/test_pv.x
 
 PV_DEP_OBJ := $(patsubst %.x, %.o, $(PV_DEP_EXE))
 
@@ -1366,7 +1454,7 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
+		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(HIGGSTOOLSLIBS) $(PYTHONLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)
@@ -1381,7 +1469,7 @@ $(LIBTEST): $(LIBTEST_OBJ)
 		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 endif
 
-ALLDEP += $(LIBTEST_DEP) $(TEST_DEP)
+ALLDEP += $(LIBTEST_DEP) $(LIBPV_DEP) $(TEST_DEP)
 ALLLIB += $(LIBTEST) $(LIBPV)
 ALLTST += $(TEST_EXE) $(PV_DEP_EXE)
 ALLMODDEP += $(MODtest_DEP)

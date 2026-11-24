@@ -80,9 +80,11 @@ double Decay_amplitude_SVV::square() const
             2.*fgSqr + 0.5*Power4(m_decay)*fepsSqr;
          const double WI_violation = std::abs(1. - std::abs(res1/res2));
          if (WI_violation > 0.1) {
-            std::stringstream ss;
-            ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + ss.str() + "% due to higher order effects");
+            std::stringstream ss1;
+            ss1 << std::fixed << std::setprecision(0) << 100.*WI_violation;
+            std::stringstream ss2;
+            ss2 << std::fixed << std::setprecision(1) << m_decay;
+            WARNING("Warning: Ward identity violated in decay of scalar with mass " + ss2.str() + " Gev to massless vectors by " + ss1.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined
@@ -114,9 +116,11 @@ double Decay_amplitude_SVV::square() const
          // compare two results
          const double WI_violation = std::abs(1. - std::abs(res1/res2));
          if (WI_violation > 0.1) {
-            std::stringstream ss;
-            ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless and massive vector by " + ss.str() + "% due to higher order effects");
+            std::stringstream ss1;
+            ss1 << std::fixed << std::setprecision(0) << 100.*WI_violation;
+            std::stringstream ss2;
+            ss2 << std::fixed << std::setprecision(1) << m_decay;
+            WARNING("Warning: Ward identity violated in decay of scalar with mass " + ss2.str() + " GeV to massless and massive vector by " + ss1.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined
@@ -130,6 +134,9 @@ double Decay_amplitude_SVV::square() const
       }
    }
 
+   // massive vectors: physical (on-shell) vector masses on purpose; this
+   // breaks the equivalence theorem for heavy scalars (see the note above
+   // Decay_amplitude_VSS::square())
    const double m_s_sq = Sqr(m_decay);
    const double m_s_4 = Power4(m_decay);
    const double m_1_sq = Sqr(m_vector_1);
@@ -174,6 +181,7 @@ Decay_amplitude_SSV operator*(std::complex<double> factor, Decay_amplitude_SSV c
    amp.m_decay = amp2.m_decay;
    amp.m_scalar = amp2.m_scalar;
    amp.m_vector = amp2.m_vector;
+   amp.massless_vector_threshold = amp2.massless_vector_threshold;
    amp.form_factor = factor * amp2.form_factor;
    return amp;
 }
@@ -212,6 +220,43 @@ Decay_amplitude_SFF operator*(Decay_amplitude_SFF const& amp, std::complex<doubl
    return operator*(factor, amp);
 }
 
+Decay_amplitude_FFS operator*(std::complex<double> factor,
+                              Decay_amplitude_FFS const& amp2)
+{
+   Decay_amplitude_FFS amp;
+   amp.m_decay = amp2.m_decay;
+   amp.m_fermion = amp2.m_fermion;
+   amp.m_scalar = amp2.m_scalar;
+   amp.form_factor_left = factor * amp2.form_factor_left;
+   amp.form_factor_right = factor * amp2.form_factor_right;
+   return amp;
+}
+Decay_amplitude_FFS operator*(Decay_amplitude_FFS const& amp,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp);
+}
+
+Decay_amplitude_FFV operator*(std::complex<double> factor,
+                              Decay_amplitude_FFV const& amp2)
+{
+   Decay_amplitude_FFV amp;
+   amp.m_decay = amp2.m_decay;
+   amp.m_fermion = amp2.m_fermion;
+   amp.m_vector = amp2.m_vector;
+   amp.massless_vector_threshold = amp2.massless_vector_threshold;
+   amp.form_factor_gam_left = factor * amp2.form_factor_gam_left;
+   amp.form_factor_gam_right = factor * amp2.form_factor_gam_right;
+   amp.form_factor_p_1 = factor * amp2.form_factor_p_1;
+   amp.form_factor_p_2 = factor * amp2.form_factor_p_2;
+   return amp;
+}
+Decay_amplitude_FFV operator*(Decay_amplitude_FFV const& amp,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp);
+}
+
 double Decay_amplitude_SFF::square() const
 {
    const double m_in_sq = Sqr(m_decay);
@@ -232,14 +277,33 @@ double Decay_amplitude_FFS::square() const
 
    return 0.5 * (m_in_sq + m_f_sq - m_s_sq) *
       (AbsSqr(form_factor_left) + AbsSqr(form_factor_right))
-      + 2. * m_fermion * m_scalar * Re(
+      + 2. * m_decay * m_fermion * Re(
          form_factor_left * Conj(form_factor_right));
 }
 
-// This routine is for decays that we currently do not support and is not used
-// Currently in development for future versions
-// @todo handle massless vectors safely
-// @todo check these expressions, they appear not to agree with SARAH/SPheno
+// Squared amplitude averaged over the spin of the decaying fermion and
+// summed over the final state, for the vertex given in the header.
+//
+// Massive vector: eq. (2.8) of Goodsell, Liebler, Staub, arXiv:1703.09237
+// (whose p terms, with p the momentum of the decaying fermion, have the
+// opposite sign).  The terms with form_factor_gam_left/right, the only ones
+// filled for tree-level decays, agree with FermionToFermionVectorBoson in
+// SPheno 4.0.5 and with eq. (B.39b) of M. Gigg's thesis (Durham, 2008).
+// The p terms hold for p = momentum of either fermion.
+//
+// Massless vector: not given in arXiv:1703.09237; the massive formula can't
+// be evaluated at m_vector = 0, as its p terms are divided by m_vector^2.
+// The polarization sum is -g_{mu nu}, with p = momentum of the decaying
+// fermion; this is only correct for amplitudes that fulfil the Ward
+// identity, as loop-induced decays like Chi(2) -> Chi(1) gamma, and then
+// it is the m_vector -> 0 limit of the massive result.  All six
+// coefficients were checked against Tr[(p2/ + m) G^mu (p1/ + M) Gbar^nu]
+// (-g_{mu nu}) / 2 with explicit Dirac matrices; c6 is -M^3 m (it was
+// -M m (M^2 + m^2)/2 before, a slip without effect so far, as the p terms
+// only appear in loop-induced decays).
+//
+// Both cases agree with SquareAmp_FtoFV of SARAH 4.15.5, whose p terms
+// have the opposite sign.
 double Decay_amplitude_FFV::square() const
 {
    const double m_in_sq = Sqr(m_decay);
@@ -251,7 +315,7 @@ double Decay_amplitude_FFV::square() const
       const double c3 = -4. * m_decay * m_fermion;
       const double c4 = -m_in_sq * m_fermion;
       const double c5 = -0.5 * m_decay * (m_in_sq + m_f_sq);
-      const double c6 = -0.5 * m_decay * m_fermion * (m_in_sq + m_f_sq);
+      const double c6 = -m_in_sq * m_decay * m_fermion;
 
       return c1 * (AbsSqr(form_factor_gam_left) + AbsSqr(form_factor_gam_right))
          + c2 * (AbsSqr(form_factor_p_1) + AbsSqr(form_factor_p_2))
@@ -297,6 +361,139 @@ double Decay_amplitude_FFV::square() const
       + 2. * c5 * Re(form_factor_gam_left * Conj(form_factor_p_2)
                      + form_factor_gam_right * Conj(form_factor_p_1))
       + 2. * c6 * Re(form_factor_p_1 * Conj(form_factor_p_2));
+}
+
+// Squared amplitudes of tree-level decays of a massive vector boson,
+// summed over the spins and polarizations of the final state and
+// averaged over the 3 polarizations of the decaying vector.  They agree
+// with VectorBosonToTwoScalars, VectorBosonToTwoFermionsC,
+// VectorBosonToScalarAndVectorBoson and VectorBosonToTwoVectorBosons in
+// SPheno 4.0.7.
+//
+// As for Decay_amplitude_SSV, decays into a massless vector return 0:
+// gauge invariance forbids a tree-level coupling of a massless gauge boson
+// in these channels, so a non-zero form factor is numerical noise.
+//
+// Note on the masses: the final-state vectors are external on-shell
+// states, so their masses in the polarization sums are the physical
+// (1-loop) masses on purpose, while the couplings come from the model at
+// the scale of the decay.  The difference is of higher order, but the
+// longitudinal polarizations enhance it: V -> V V by (M/m_V)^4 and
+// V -> V S by (M/m_V)^2, which cancel against couplings proportional to
+// m_V^2 only if both use the same m_V.  This choice therefore breaks the
+// Goldstone boson equivalence theorem, Gamma(Z' -> W W) = Gamma(Z' -> Z h)
+// for M >> m_W.  Example: in BLSM with M_Z' = 3.7 TeV the couplings
+// correspond to m_W = 76.7 GeV, but m_W = 81.0 GeV is used, so
+// Gamma(Z' -> W W) is smaller by (76.7/81.0)^4 = 0.80 than in micrOMEGAs,
+// which uses the masses of its couplings.  Decay_amplitude_SVV makes the
+// same choice for heavy scalars.
+
+double Decay_amplitude_VSS::square() const
+{
+   const double m_in_sq = Sqr(m_decay);
+   const double lambda =
+      KallenLambda(m_in_sq, Sqr(m_scalar_1), Sqr(m_scalar_2));
+
+   return AbsSqr(form_factor) * lambda / (3. * m_in_sq);
+}
+
+double Decay_amplitude_VFF::square() const
+{
+   const double m_in_sq = Sqr(m_decay);
+   const double m_1_sq = Sqr(m_fermion_1);
+   const double m_2_sq = Sqr(m_fermion_2);
+
+   const double c1 =
+      2. * m_in_sq - m_1_sq - m_2_sq - Sqr(m_1_sq - m_2_sq) / m_in_sq;
+   const double c2 = 12. * m_fermion_1 * m_fermion_2;
+
+   return (c1 * (AbsSqr(form_factor_left) + AbsSqr(form_factor_right)) +
+           c2 * Re(form_factor_left * Conj(form_factor_right))) /
+          3.;
+}
+
+double Decay_amplitude_VVS::square() const
+{
+   if (m_vector <= massless_vector_threshold) {
+      return 0.;
+   }
+
+   const double m_in_sq = Sqr(m_decay);
+   const double m_v_sq = Sqr(m_vector);
+   const double p_dot_k = 0.5 * (m_in_sq + m_v_sq - Sqr(m_scalar));
+
+   return AbsSqr(form_factor) * (2. + Sqr(p_dot_k) / (m_in_sq * m_v_sq)) / 3.;
+}
+
+double Decay_amplitude_VVV::square() const
+{
+   if (m_vector_1 <= massless_vector_threshold ||
+       m_vector_2 <= massless_vector_threshold) {
+      return 0.;
+   }
+
+   const double m_in_sq = Sqr(m_decay);
+   const double m_1_sq = Sqr(m_vector_1);
+   const double m_2_sq = Sqr(m_vector_2);
+   const double lambda = KallenLambda(m_in_sq, m_1_sq, m_2_sq);
+
+   return AbsSqr(form_factor) * lambda *
+          (Sqr(m_in_sq) + Sqr(m_1_sq) + Sqr(m_2_sq) +
+           10. * (m_in_sq * m_1_sq + m_in_sq * m_2_sq + m_1_sq * m_2_sq)) /
+          (12. * m_in_sq * m_1_sq * m_2_sq);
+}
+
+Decay_amplitude_VSS operator*(std::complex<double> factor,
+                              Decay_amplitude_VSS const& amp2)
+{
+   Decay_amplitude_VSS amp = amp2;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+Decay_amplitude_VSS operator*(Decay_amplitude_VSS const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
+}
+
+Decay_amplitude_VFF operator*(std::complex<double> factor,
+                              Decay_amplitude_VFF const& amp2)
+{
+   Decay_amplitude_VFF amp = amp2;
+   amp.form_factor_left = factor * amp2.form_factor_left;
+   amp.form_factor_right = factor * amp2.form_factor_right;
+   return amp;
+}
+Decay_amplitude_VFF operator*(Decay_amplitude_VFF const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
+}
+
+Decay_amplitude_VVS operator*(std::complex<double> factor,
+                              Decay_amplitude_VVS const& amp2)
+{
+   Decay_amplitude_VVS amp = amp2;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+Decay_amplitude_VVS operator*(Decay_amplitude_VVS const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
+}
+
+Decay_amplitude_VVV operator*(std::complex<double> factor,
+                              Decay_amplitude_VVV const& amp2)
+{
+   Decay_amplitude_VVV amp = amp2;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+Decay_amplitude_VVV operator*(Decay_amplitude_VVV const& amp2,
+                              std::complex<double> factor)
+{
+   return operator*(factor, amp2);
 }
 
 } // namespace flexiblesusy

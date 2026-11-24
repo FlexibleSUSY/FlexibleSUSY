@@ -75,7 +75,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "U. Khasianevich",
               "W. Kotlarski", "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2024";
+FS`Years   = "2013-2025";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -186,6 +186,7 @@ THRESHOLD;
 VEV::usage = "running SM-like VEV in the full model";
 UseHiggs2LoopNMSSM = False;
 UseHiggs3LoopMSSM = False;
+UseHiggs3LoopNMSSM = False;
 EffectiveMu;
 EffectiveMASqr;
 UseSM3LoopRGEs = False;
@@ -450,10 +451,6 @@ HaveBVPSolver[solver_] := MemberQ[FlexibleSUSY`FSBVPSolvers, solver];
 ToVersionString[{major_Integer, minor_Integer, patch_Integer}] :=
     ToString[major] <> "." <> ToString[minor] <> "." <> ToString[patch];
 
-DebugPrint[msg___] :=
-    If[FlexibleSUSY`FSDebugOutput,
-       Print["Debug<FlexibleSUSY>: ", Sequence @@ InputFormOfNonStrings /@ {msg}]];
-
 ReplaceSymbolsInUserInput[rules_] :=
     Module[{},
            (* input/output blocks *)
@@ -599,8 +596,14 @@ CheckDecaysOptions[] :=
       ];
       FlexibleSUSY`FSCalculateDecays = False,
       If[FlexibleSUSY`FSDecayParticles === Automatic,
+         (* the Higgs bosons and all BSM particles; particles without
+            physical decays (massless, ghosts, only Goldstone bosons)
+            are removed later by Decays`IsSupportedDecayParticle *)
          FlexibleSUSY`FSDecayParticles =
-            DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
+            DeleteDuplicates @ Join[
+               DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
+               TreeMasses`GetSusyParticles[]
+            ],
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
             FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. SARAH`bar|Susyno`LieGroups`conj -> Identity;
@@ -612,7 +615,7 @@ CheckDecaysOptions[] :=
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ]
          ]
-      ]
+      ];
    ];
 
 (* sets model file variables to default values, after SARAH`Start[] has been called *)
@@ -1532,7 +1535,7 @@ WriteMatchingClass[susyScaleMatching_List, massMatrices_List, files_List] :=
  		 twoLoopLambdaMatching = FlexibleEFTHiggsMatching`Create2LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs2LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs2LoopShift["model", SARAH`HiggsBoson, "idx"];
 	      ];
-              If[FlexibleSUSY`UseHiggs3LoopMSSM === True, 
+              If[FlexibleSUSY`UseHiggs3LoopMSSM === True || FlexibleSUSY`UseHiggs3LoopNMSSM === True, 
  		 threeLoopLambdaMatching = FlexibleEFTHiggsMatching`Create3LoopMatching["model_input", "sm", SARAH`HiggsBoson, "idx"];
 		 calculateMHiggs3LoopShift = FlexibleEFTHiggsMatching`CalculateMHiggs3LoopShift["model", "sm", SARAH`HiggsBoson, "idx"];
 		 createSMMt2LoopFunction = FlexibleEFTHiggsMatching`CreateSMMtop2LoopFunction[];
@@ -1731,7 +1734,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             physicalMassesDef = "", mixingMatricesDef = "",
             massCalculationPrototypes = "", massCalculationFunctions = "",
             calculateAllMasses = "",
-            selfEnergyPrototypes = "", selfEnergyFunctions = "", 
+            selfEnergyPrototypes = "", selfEnergyFunctions = "",
             selfEnergyDerivPrototypes = "",   selfEnergyDerivFunctions = "",
             twoLoopTadpolePrototypes = "", twoLoopTadpoleFunctions = "",
             twoLoopSelfEnergyPrototypes = "", twoLoopSelfEnergyFunctions = "",
@@ -1815,28 +1818,37 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               calculateTwoLoopTadpoles  = SelfEnergies`FillArrayWithTwoLoopTadpoles[SARAH`HiggsBoson, "tadpole", "-"];
              ];
            If[FlexibleSUSY`UseHiggs2LoopSM === True,
-              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesSM[{SARAH`HiggsBoson}];
+              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               twoLoopHiggsHeaders = "#include \"sm_twoloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSM[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = "#include \"sm_threeloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs4LoopSM === True,
-              {fourLoopSelfEnergyPrototypes, fourLoopSelfEnergyFunctions} = SelfEnergies`CreateFourLoopSelfEnergiesSM[{SARAH`HiggsBoson}];
+              {fourLoopSelfEnergyPrototypes, fourLoopSelfEnergyFunctions} = SelfEnergies`CreateFourLoopSelfEnergiesSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               fourLoopHiggsHeaders = "#include \"sm_fourloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs3LoopSplit === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSplit[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesSplit[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = "#include \"splitmssm_threeloophiggs.hpp\"\n";
              ];
            If[SARAH`UseHiggs2LoopMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesMSSM[SARAH`HiggsBoson];
-              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesMSSM[{SARAH`HiggsBoson, SARAH`PseudoScalar}];
+              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesMSSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}, {SARAH`PseudoScalar, SARAH`PseudoScalar}}];
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n";
              ];
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
-              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{SARAH`HiggsBoson}];
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{{SARAH`HiggsBoson, SARAH`HiggsBoson}}];
+              threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
+#ifdef ENABLE_HIMALAYA
+#include \"himalaya/HierarchyCalculator.hpp\"
+#include \"himalaya/version.hpp\"
+#endif
+";
+             ];
+           If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
+              {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesNMSSM[{{SARAH`HiggsBoson,SARAH`HiggsBoson}}];
               threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
 #ifdef ENABLE_HIMALAYA
 #include \"himalaya/HierarchyCalculator.hpp\"
@@ -1846,7 +1858,13 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
              ];
            If[FlexibleSUSY`UseHiggs2LoopNMSSM === True,
               {twoLoopTadpolePrototypes, twoLoopTadpoleFunctions} = SelfEnergies`CreateTwoLoopTadpolesNMSSM[SARAH`HiggsBoson];
-              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} = SelfEnergies`CreateTwoLoopSelfEnergiesNMSSM[{SARAH`HiggsBoson, SARAH`PseudoScalar}];
+              {twoLoopSelfEnergyPrototypes, twoLoopSelfEnergyFunctions} =
+                  SelfEnergies`CreateTwoLoopSelfEnergiesNMSSM[
+                     {
+                        {SARAH`HiggsBoson, SARAH`HiggsBoson},
+                        {SARAH`PseudoScalar, SARAH`PseudoScalar}
+                     }
+                  ];
               twoLoopHiggsHeaders = "#include \"sfermions.hpp\"\n#include \"mssm_twoloophiggs.hpp\"\n#include \"nmssm_twoloophiggs.hpp\"\n";
              ];
            twoLoopThresholdHeaders = ThresholdCorrections`GetTwoLoopThresholdHeaders[];
@@ -1854,7 +1872,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               FlexibleSUSY`UseHiggs2LoopNMSSM === True ||
               FlexibleSUSY`UseMSSMYukawa2Loop === True ||
               FlexibleSUSY`UseMSSMAlphaS2Loop === True ||
-              FlexibleSUSY`UseHiggs3LoopMSSM === True,
+              FlexibleSUSY`UseHiggs3LoopMSSM === True ||
+              FlexibleSUSY`UseHiggs3LoopNMSSM === True,
               {secondGenerationHelperPrototypes, secondGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[2];
               {thirdGenerationHelperPrototypes, thirdGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[3];
              ];
@@ -1956,7 +1975,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            reorderPoleMasses            = TreeMasses`ReorderGoldstoneBosons["PHYSICAL"];
            checkPoleMassesForTachyons   = TreeMasses`CheckPoleMassesForTachyons["PHYSICAL"];
            WriteOut`ReplaceInFiles[files,
-                          { "@lspGetters@"           -> IndentText[lspGetters],
+                          { "@[abstract]lspGetters@"           -> IndentText[FunctionModifiers`MakeAbstract[lspGetters]],
+                            "@[override]lspGetters@"           -> IndentText[FunctionModifiers`MakeOverride[lspGetters]],
                             "@lspFunctions@"         -> lspFunctions,
                             "@[abstract]parameterGetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterGetter /@ Parameters`GetModelParameters[]]]],
                             "@[abstract]parameterSetters@" -> IndentText[FunctionModifiers`MakeAbstract[StringJoin[Parameters`CreateModelParameterSetter /@ Parameters`GetModelParameters[]]]],
@@ -2020,6 +2040,15 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@setDecouplingYukawaDownLeptons@"  -> IndentText @ IndentText[
                                 ThresholdCorrections`SetDRbarYukawaCouplingElectron[FlexibleSUSY`LowScaleInput]
                                                                              ],
+                            "@overrideTreeHiggsMixings@" -> IndentText@IndentText@StringRiffle[
+                               With[{mixingMatrix = FindMixingMatrixSymbolFor[#]},
+                                  If[mixingMatrix =!= Null,
+                                     ToString@mixingMatrix <> " = this->get_physical()." <> ToString@mixingMatrix <> ";",
+                                     ""
+                                  ]
+                               ]& /@ DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[], TreeMasses`GetChargedHiggsBoson[]}, Null],
+                               "\n"
+                            ],
                             "@copyRunningBSMMassesToDecouplingMasses@" -> IndentText[copyRunningBSMMassesToDecouplingMasses],
                             "@reorderDRbarMasses@"     -> IndentText[reorderDRbarMasses],
                             "@reorderPoleMasses@"      -> IndentText[reorderPoleMasses],
@@ -2101,7 +2130,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
           ];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
-    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, numberOfDecayParticles = 0,
+    Module[{maxFinalStateParticles = 2, decaysLists = {}, decayTasks = {}, decaysVertices, numberOfDecayParticles = 0,
             enableDecaysCalculationThreads,
             callAllDecaysFunctions = "", callAllDecaysFunctionsInThreads = "",
             decaysListGettersPrototypes = "", decaysListGettersFunctions = "",
@@ -2128,14 +2157,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            Block[{FlexibleSUSY`FSEnableParallelism = If[Length[decayParticles] < 2, False, FlexibleSUSY`FSEnableParallelism]},
               (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
               If[FlexibleSUSY`FSEnableParallelism,
-                 If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
-                    SA`CurrentStates = FlexibleSUSY`FSEigenstates;
-                    SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
-                    SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
-                    SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
-                    SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
-                    SARAH`MakeCouplingLists;
-                 ];
+                 Vertices`LoadVerticesIfNecessary[];
                  LaunchKernels[];
                  DistributeDefinitions[contentOfPath, modelName];
                  ParallelEvaluate[
@@ -2145,6 +2167,15 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                     (* don't pollute terminal with SARAH initialization message *)
                     Block[{Print,workingDirectory = Directory[]},
                        << SARAH`;
+                       (* load FlexibleSUSY before SARAH`Start[], as on the main
+                          kernel (cf. templates/start.m.in): some meta packages
+                          name model symbols in the SARAH` context (e.g. SARAH`vd
+                          in meta/Himalaya.m), so on the main kernel the model
+                          uses those, while Start[] alone would create Global`vd.
+                          The definitions distributed below would then create
+                          SARAH`vd next to Global`vd, giving General::shdw
+                          messages and two different symbols for vd. *)
+                       Needs["FlexibleSUSY`", FileNameJoin[{workingDirectory, "meta", "FlexibleSUSY.m"}]];
                        SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
                        SARAH`SARAH[InputDirectories] = {
                           FileNameJoin[{workingDirectory, "sarah"}],
@@ -2163,13 +2194,25 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                     DistributedContexts -> None
                  ];
                  DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4];
+                 (* one task per decay, not per decaying particle: the
+                    decays of the Higgs bosons take most of the time *)
+                 decayTasks = Join @@ (
+                    Function[particle, {particle, #}& /@
+                       Decays`GetFinalStatesForParticle[particle, maxFinalStateParticles, finalStateParticles]] /@
+                    decayParticles);
                  decaysLists =
                     AbsoluteTiming @ ParallelMap[
-                       {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
-                       decayParticles,
+                       Decays`CreateParticleDecay @@ #&,
+                       decayTasks,
                        DistributedContexts -> All,
                        Method -> "FinestGrained"
                     ];
+                 (* regroup the decays by decaying particle, in the order of the tasks *)
+                 decaysLists = {
+                    First[decaysLists],
+                    Function[particle,
+                       {particle, Join @@ Pick[Last[decaysLists], decayTasks[[All, 1]], particle]}] /@ decayParticles
+                 };
                  Needs["Parallel`Developer`"];
                  Parallel`Developer`ClearDistributedDefinitions[];
                  Parallel`Developer`ClearKernels[];
@@ -2239,6 +2282,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
+                            "@isCPodd@" -> If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && GetDimensionWithoutGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]] > 0, " || std::is_same_v<FieldIn, " <> FSModelName <> "_cxx_diagrams::fields::PseudoscalarHiggs>", ""],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
@@ -2390,7 +2434,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
 
         massFunctions = CXXDiagrams`CreateMassFunctions[];
         physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
-        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[];
+        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[PotentialLSPParticles];
         defineFieldTraits =
            CXXDiagrams`CreateFieldTraitsDefinitions[
               TreeMasses`GetParticles[], "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"
@@ -2598,8 +2642,8 @@ double lepton_pole_mass(const softsusy::QedQcd& qedqcd, int idx)
 StringRiffle[
 (
 "template <typename Lepton>
-std::enable_if_t<std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">, double>
-lepton_pole_mass(const softsusy::QedQcd& qedqcd)
+requires std::is_same_v<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">
+double lepton_pole_mass(const softsusy::QedQcd& qedqcd)
 {\n" <>
 TextFormatting`IndentText[
    Switch[#,
@@ -2706,7 +2750,7 @@ RunEnabledSpectrumGenerator[solver_] :=
                         "slha_io, spectrum_generator_settings, " <>
                         If[FSCalculateDecays, "flexibledecay_settings, ", ""] <>
                         "slha_output_file,\n"]
-                  <> IndentText["database_output_file, spectrum_file, rgflow_file);\n"]
+                  <> IndentText["database_output_file, spectrum_file, rgflow_file, higgsbounds_dataset, higgssignals_dataset, lilith_db);\n"]
                   <> "if (!exit_code || solver_type != 0) break;\n"
                   <> "[[fallthrough]];\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
@@ -2746,16 +2790,45 @@ ExampleDecaysIncludes[] :=
     ];
 
 ExampleCalculateDecaysForModel[] :=
+IndentText[
 "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) &&
      (spectrum_generator_settings.get(Spectrum_generator_settings::force_output) ||
       !problems.have_problem())) {
    if (loop_library_for_decays) {
-      decays.calculate_decays();
-   }
-   else if (!loop_library_for_decays) {
-      WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
-   }
-}";
+      decays.calculate_decays();\n"
+] <>
+IndentText@IndentText@IndentText[
+"effc =
+   get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);\n" <>
+IndentText[
+   "try {\n" <>
+   IndentText[
+      "// structured bindings creates new variables - need to use std::tie
+#ifdef ENABLE_HIGGSTOOLS
+if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
+         std::tie(hs, higgsbounds_v) =
+            call_higgstools(effc, physical_input, higgsbounds_dataset, higgssignals_dataset);
+}
+#endif
+#ifdef ENABLE_LILITH
+if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {
+   lilith = call_lilith(effc, physical_input, lilith_db);
+}
+#endif\n"
+   ] <>
+   "}\n" <>
+   "catch (const std::exception& error) {\n" <>
+      IndentText["ERROR(error.what());\n"] <>
+   "}\n"
+]
+] <>
+IndentText[IndentText[
+"}
+else if (!loop_library_for_decays) {
+   WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
+}"
+] <> "\n}"
+];
 
 ExampleSetDecaysSLHAOutput[] := "\
 const bool show_decays = !decays.get_problems().have_problem() ||
@@ -2767,6 +2840,26 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());
    }
+   if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc)) {
+      slha_io.set_normalized_effectivecouplings_block(effc);\n" <>
+      If[SA`CPViolationHiggsSector || GetDimensionWithoutGoldstones@TreeMasses`GetPseudoscalarHiggsBoson[] != 0, IndentText@IndentText["slha_io.set_imnormalized_effectivecouplings_block(effc);\n"], ""] <>
+"   }
+#ifdef ENABLE_HIGGSTOOLS
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
+      if (hs.has_value()) {
+         SignalResult hs_ = hs.value();
+         slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs_.ndof, hs_.chi2BSM, hs_.chi2SM, hs_.mhRef, hs_.pval1d, hs_.pval2d);
+      }
+      if (higgsbounds_v.size() > 0) {
+         slha_io.set_higgsbounds(higgsbounds_v);
+      }
+   }
+#endif
+#ifdef ENABLE_LILITH
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) && lilith.has_value()) {
+      slha_io.set_hs_or_lilith(\"LILITH\", lilith.value().ndof, lilith.value().chi2BSM, lilith.value().chi2SM, lilith.value().mhRef, lilith.value().pval1d, lilith.value().pval2d);
+   }
+#endif
 }";
 
 ExampleCalculateCmdLineDecays[] :=
@@ -2904,15 +2997,17 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             numberOfObservables, putObservables,
             inputPars, outPars, requestedObservables, defaultSolverType,
             solverIncludes = "", runEnabledSolvers = "",
-            decaysData = "", calculateDecaysVirtualFunc = "", calculateSpectrumDecaysPrototype = "",
-            calculateSpectrumDecaysFunction = "", calculateModelDecaysPrototype = "",
+            decaysData = "", calculateDecaysVirtualFunc = "", calculateDecaysEffCVirtualFunc = "", calculateSpectrumDecaysPrototype = "", calculateSpectrumDecaysEffCPrototype = "",
+            calculateSpectrumDecaysFunction = "", calculateModelDecaysPrototype = "", calculateModelDecaysEffCFunction = "",
+            calculateSpectrumDecaysEffCFunction = "", calculateModelDecaysEffCPrototype = "",
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
-            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
+            getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "", putEffCPrototype = "", putEffCFunction = "", callLilithMessages = "", callHiggsToolsMessages = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
+            mathlinkCalcNormalizedEffC = "", loadCalculateEffCFunction = "", loadCallHiggsToolsFunction = "", loadCallLilithFunction = "",
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
-            decayIndex = "const Index_t n_fd_settings = 0;"},
+            decayIndex = "const std::ptrdiff_t n_fd_settings = 0;"},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -2948,26 +3043,51 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               getDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysGetterInterface[FlexibleSUSY`FSModelName];
               getSpectrumDecays = CreateSpectrumDecaysGetter[FlexibleSUSY`FSModelName];
               calculateDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysInterface[FlexibleSUSY`FSModelName];
+              calculateDecaysEffCVirtualFunc = FSMathLink`CreateSpectrumDecaysEffCInterface[FlexibleSUSY`FSModelName];
               {calculateSpectrumDecaysPrototype, calculateSpectrumDecaysFunction} =
                   FSMathLink`CreateSpectrumDecaysCalculation[FlexibleSUSY`FSModelName];
+              {calculateSpectrumDecaysEffCPrototype, calculateSpectrumDecaysEffCFunction} =
+                  FSMathLink`CreateSpectrumDecaysEffCCalculation[FlexibleSUSY`FSModelName];
               {calculateModelDecaysPrototype, calculateModelDecaysFunction} =
                   FSMathLink`CreateModelDecaysCalculation[FlexibleSUSY`FSModelName];
+              {calculateModelDecaysEffCPrototype, calculateModelDecaysEffCFunction} =
+                  FSMathLink`CreateModelDecaysEffCCalculation[FlexibleSUSY`FSModelName];
               fillDecaysSLHA = FSMathLink`FillDecaysSLHAData[];
               {putDecaysPrototype, putDecaysFunction} = FSMathLink`PutDecays[FlexibleSUSY`FSModelName];
+              {putEffCPrototype, putEffCFunction} = FSMathLink`PutEffCouplings[FlexibleSUSY`FSModelName];
               mathlinkDecaysCalculationFunction = FSMathLink`CreateMathLinkDecaysCalculation[FlexibleSUSY`FSModelName];
               loadCalculateDecaysFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CalculateDecays\", LinkObject, LinkObject];\n";
+              loadCalculateEffCFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateNormalizedEffectiveCouplings = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CalculateNormalizedEffectiveCouplings\", LinkObject, LinkObject];";
+              loadCallHiggsToolsFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CallHiggsTools\", LinkObject, LinkObject];";
+              loadCallLilithFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallLilith = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "CallLilith\", LinkObject, LinkObject];";
               calculateDecaysMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
+              callLilithMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::error = \"`1`\";\n" <>
+                                        "FS" <> FlexibleSUSY`FSModelName <> "CallLilith::warning = \"`1`\";\n";
+              callHiggsToolsMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools::error = \"`1`\";\n" <>
+                                        "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
               decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"";
+              mathlinkCalcNormalizedEffC = FSMathLink`CalculateNormalizedEffectiveCouplings[FlexibleSUSY`FSModelName];
               fdDefaultSettings =
 "\nfdDefaultSettings = {
    minBRtoPrint -> 1*^-5,
-   maxHigherOrderCorrections -> 4,
+   maxHigherOrderCorrections -> 41,
    alphaThomson -> 1,
-   offShellVV -> 2
+   offShellVV -> 2,
+   printEffCBlock -> 1,
+   calcNormalizedEffC -> 0,
+   callHiggsTools -> 0,
+   callLilith -> 0,
+   usePoleHiggsMixings -> 1
 };\n";
                addFDOptions1 = ", Sequence @@ fdDefaultSettings";
                addFDOptions2 = "| fdSettings";
@@ -2976,15 +3096,25 @@ setFDOptions =
 OptionValue[minBRtoPrint],
 OptionValue[maxHigherOrderCorrections],
 OptionValue[alphaThomson],
-OptionValue[offShellVV]";
+OptionValue[offShellVV],
+OptionValue[printEffCBlock],
+OptionValue[calcNormalizedEffC],
+OptionValue[callHiggsTools],
+OptionValue[callLilith],
+OptionValue[usePoleHiggsMixings]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
-flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections , pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ , pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays , pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars.next());
 ";
-decayIndex = "const Index_t n_fd_settings = 4;";
+decayIndex = "const std::ptrdiff_t n_fd_settings = 9;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
              ];
            WriteOut`ReplaceInFiles[files,
@@ -3003,18 +3133,30 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@runEnabledSolvers@" -> runEnabledSolvers,
                             "@defaultSolverType@" -> defaultSolverType,
                             "@calculateDecaysVirtualFunc@" -> IndentText[calculateDecaysVirtualFunc],
+                            "@calculateDecaysEffCVirtualFunc@" -> IndentText[calculateDecaysEffCVirtualFunc],
                             "@calculateSpectrumDecaysPrototype@" -> IndentText[calculateSpectrumDecaysPrototype],
+                            "@calculateSpectrumDecaysEffCPrototype@" -> IndentText[calculateSpectrumDecaysEffCPrototype],
                             "@calculateSpectrumDecaysFunction@" -> calculateSpectrumDecaysFunction,
+                            "@calculateSpectrumDecaysEffCFunction@" -> calculateSpectrumDecaysEffCFunction,
                             "@calculateModelDecaysPrototype@" -> IndentText[calculateModelDecaysPrototype],
                             "@calculateModelDecaysFunction@" -> calculateModelDecaysFunction,
+                            "@calculateModelDecaysEffCPrototype@" -> IndentText[calculateModelDecaysEffCPrototype],
+                            "@calculateModelDecaysEffCFunction@" -> calculateModelDecaysEffCFunction,
                             "@decaysData@" -> IndentText[decaysData],
                             "@fillDecaysSLHA@" -> IndentText[fillDecaysSLHA],
                             "@getDecaysVirtualFunc@" -> IndentText[getDecaysVirtualFunc],
                             "@getSpectrumDecays@" -> IndentText[getSpectrumDecays],
                             "@putDecaysPrototype@" -> IndentText[putDecaysPrototype],
                             "@putDecaysFunction@" -> putDecaysFunction,
+                            "@putEffCPrototype@" -> IndentText[putEffCPrototype],
+                            "@putEffCFunction@" -> putEffCFunction,
                             "@mathlinkDecaysCalculationFunction@" -> mathlinkDecaysCalculationFunction,
                             "@loadCalculateDecaysFunction@" -> loadCalculateDecaysFunction,
+                            "@loadCalculateEffCFunction@" -> loadCalculateEffCFunction,
+                            "@loadCallHiggsToolsFunction@" -> loadCallHiggsToolsFunction,
+                            "@callLilithMessages@" -> callLilithMessages,
+                            "@callHiggsToolsMessages@" -> callHiggsToolsMessages,
+                            "@loadCallLilithFunction@" -> loadCallLilithFunction,
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
                             "@decaysIncludes@" -> decaysIncludes,
@@ -3025,6 +3167,7 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
                             "@fillFDSettings@" -> fillFDSettings,
                             "@decayIndex@" -> decayIndex,
+                            "@mathlinkCalcNormalizedEffC@" -> mathlinkCalcNormalizedEffC,
                             "@loadCalculateUnitarityFunction@" -> loadCalculateUnitarityFunction,
                             "@calculateUnitarityMessages@" -> calculateUnitarityMessages,
                             "@setUnitarity@" -> setUnitarity,
@@ -3268,7 +3411,7 @@ WriteSMParticlesAliases[files_List] := Module[{},
 
    CreateParticleAlias[particle_, namespace_String] :=
       "using " <> SimplifiedName[particle] <> " = " <>
-      CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> namespace] <> ";";
+      CXXDiagrams`CXXNameOfField[particle] <> ";";
 
    CreateParticleAliases[particles_, namespace_:""] :=
       Utils`StringJoinWithSeparator[CreateParticleAlias[#, namespace]& /@ particles, "\n"];
@@ -3451,7 +3594,8 @@ FSPrepareRGEs[loopOrder_] :=
           ];
 
 FSCheckLoopCorrections[eigenstates_] :=
-    Module[{needToCalculateLoopCorrections},
+    Module[{needToCalculateLoopCorrections, selfEnergies,
+            fileName = GetSelfEnergyFileNames[$sarahCurrentOutputMainDir, eigenstates]},
            needToCalculateLoopCorrections = Or[
                NeedToCalculateSelfEnergies[eigenstates],
                NeedToCalculateTadpoles[eigenstates],
@@ -3459,6 +3603,11 @@ FSCheckLoopCorrections[eigenstates_] :=
                                               ];
            If[needToCalculateLoopCorrections,
               SARAH`CalcLoopCorrections[eigenstates];
+              selfEnergies = Get[fileName];
+              selfEnergies = {{#1, #1}, #2}& @@@ selfEnergies;
+              Get["createVPVZ.m"];
+              AppendTo[selfEnergies, {{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}, Global`GetVPVZSelfEnergy /. C->Cp}];
+              Put[selfEnergies, fileName];
              ];
           ];
 
@@ -3466,6 +3615,13 @@ FSCheckFlags[] :=
     Module[{},
            If[FlexibleSUSY`UseHiggs3LoopMSSM === True,
               SARAH`UseHiggs2LoopMSSM = True;
+              FlexibleSUSY`UseMSSMYukawa2Loop = True;
+              FlexibleSUSY`UseMSSMAlphaS2Loop = True;
+              FlexibleSUSY`UseMSSM3LoopRGEs = True;
+             ];
+
+           If[FlexibleSUSY`UseHiggs3LoopNMSSM === True,
+              FlexibleSUSY`UseHiggs2LoopNMSSM = True;
               FlexibleSUSY`UseMSSMYukawa2Loop = True;
               FlexibleSUSY`UseMSSMAlphaS2Loop = True;
               FlexibleSUSY`UseMSSM3LoopRGEs = True;
@@ -3601,7 +3757,7 @@ FSCheckFlags[] :=
               References`AddReference["Benakli:2013msa"];
              ];
 
-           If[FlexibleSUSY`UseHiggs3LoopMSSM,
+           If[FlexibleSUSY`UseHiggs3LoopMSSM || FlexibleSUSY`UseHiggs3LoopNMSSM,
               Print["Adding 3-loop MSSM Higgs mass contributions from ",
                     "[arxiv:hep-ph/0803.0672, arxiv:hep-ph/1005.5709,",
                     " arxiv:1409.2297, arxiv:1708.05720]"];
@@ -3685,7 +3841,7 @@ PrepareUnrotatedParticles[eigenstates_] :=
              ];
            Print["Reading unrotated particles from file ", nonMixedParticlesFile, " ..."];
            nonMixedParticles = Get[nonMixedParticlesFile];
-           DebugPrint["unrotated particles: ", nonMixedParticles];
+           FSDebugPrint["FlexibleSUSY", "unrotated particles: ", nonMixedParticles];
            TreeMasses`SetUnrotatedParticles[nonMixedParticles];
           ];
 
@@ -4237,7 +4393,7 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
            (* store all model parameters *)
            allParameters = StripSARAHIndices[((#[[1]])& /@ Join[susyBetaFunctions, susyBreakingBetaFunctions])];
            Parameters`SetModelParameters[allParameters];
-           DebugPrint["Model parameters: ", allParameters];
+           FSDebugPrint["FlexibleSUSY", "Model parameters: ", allParameters];
 
            (* collect all phases from SARAH *)
            phases = DeleteDuplicates @ Join[
@@ -4289,7 +4445,7 @@ SetupMassMatrices[allParameters_] :=
 		       allIntermediateOutputParameters =
 		         Parameters`GetIntermediateOutputParameterDependencies[
 		           TreeMasses`GetMassMatrix /@ massMatrices];
-		       DebugPrint["intermediate output parameters = ", allIntermediateOutputParameters];
+		       FSDebugPrint["FlexibleSUSY", "intermediate output parameters = ", allIntermediateOutputParameters];
 
 		       (* decrease index literals of intermediate output parameters in mass matrices *)
 		       allIntermediateOutputParameterIndexReplacementRules =
@@ -4308,7 +4464,7 @@ SetupOutputParameters[massMatrices_] :=
                     Flatten[TreeMasses`GetMixingMatrixSymbol[#]& /@ massMatrices]]], Null];
 
            Parameters`SetOutputParameters[allOutputParameters];
-           DebugPrint["output parameters = ", allOutputParameters];
+           FSDebugPrint["FlexibleSUSY", "output parameters = ", allOutputParameters];
     ];
 
 CheckObsDependencies[requested_List] :=
@@ -4383,9 +4539,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             decaysSources = {}, decaysHeaders = {}, decaysSLHAIncludeFiles = {}},
 
            Utils`PrintHeadline["Starting FlexibleSUSY"];
-           FSDebugOutput["meta code directory: ", $flexiblesusyMetaDir];
-           FSDebugOutput["config directory   : ", $flexiblesusyConfigDir];
-           FSDebugOutput["templates directory: ", $flexiblesusyTemplateDir];
+           FSDebugPrint["FlexibleSUSY", "meta code directory: ", $flexiblesusyMetaDir];
+           FSDebugPrint["FlexibleSUSY", "config directory   : ", $flexiblesusyConfigDir];
+           FSDebugPrint["FlexibleSUSY", "templates directory: ", $flexiblesusyTemplateDir];
 
            (* check if SARAH`Start[] was called *)
            If[!ValueQ[Model`Name],
@@ -4420,7 +4576,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
              				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
            PrepareUnrotatedParticles[FSEigenstates];
 
-           DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
+           FSDebugPrint["FlexibleSUSY", "particles (mass eigenstates): ", TreeMasses`GetParticles[]];
 
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
 
@@ -4516,8 +4672,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            inputParameters = Parameters`GetInputParametersAndTypes[];
 
-           DebugPrint["input parameters: ", Parameters`GetInputParameters[]];
-           DebugPrint["auxiliary parameters: ", Parameters`GetExtraParameters[]];
+           FSDebugPrint["FlexibleSUSY", "input parameters: ", Parameters`GetInputParameters[]];
+           FSDebugPrint["FlexibleSUSY", "auxiliary parameters: ", Parameters`GetExtraParameters[]];
 
            On[Assert];
 
@@ -4717,6 +4873,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[FlexibleSUSY`FSCalculateDecays,
 
               FlexibleSUSY`FSDecayParticles = Select[FlexibleSUSY`FSDecayParticles, Decays`IsSupportedDecayParticle];
+
+              With[{treeLevelOnly = Select[FlexibleSUSY`FSDecayParticles, Decays`GetMaxLoopOrderForDecay[#] === 0&]},
+                 If[treeLevelOnly =!= {},
+                    Utils`FSFancyWarning[
+                       "Only tree-level decays are calculated for ", treeLevelOnly,
+                       ": loop-induced decays are only supported for scalars."
+                    ];
+                 ];
+              ];
 
               If[FlexibleSUSY`FSDecayParticles === {},
                  Utils`FSFancyWarning[

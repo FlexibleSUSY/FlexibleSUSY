@@ -41,7 +41,7 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 2-loop corrections O((alpha_t + alpha_b)^2)",
    "Higgs 2-loop corrections O(alpha_tau^2)",
    "force output",
-   "Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)",
+   "Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)",
    "beta-function zero threshold",
    "calculate all observables",
    "force positive majorana masses",
@@ -280,41 +280,41 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
 /**
  * Resets all spectrum generator settings to their defaults.
  *
- * | enum                             | possible values                                 | default value   |
- * |----------------------------------|-------------------------------------------------|-----------------|
- * | precision                        | any positive double                             | 1.0e-4          |
- * | max_iterations                   | any positive double                             | 0 (= automatic) |
- * | solver                           | 0 (all), 1 (two-scale) or 2 (semi-analytic)     | 0 (= all)       |
- * | calculate_sm_masses              | 0 (no) or 1 (yes)                               | 0 (= no)        |
- * | pole_mass_loop_order             | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
- * | ewsb_loop_order                  | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
- * | beta_loop_order                  | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
- * | threshold_corrections_loop_order | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
- * | higgs_2loop_correction_at_as     | 0, 1                                            | 1 (= enabled)   |
- * | higgs_2loop_correction_ab_as     | 0, 1                                            | 1 (= enabled)   |
- * | higgs_2loop_correction_at_at     | 0, 1                                            | 1 (= enabled)   |
- * | higgs_2loop_correction_atau_atau | 0, 1                                            | 1 (= enabled)   |
- * | force_output                     | 0 (no) or 1 (yes)                               | 0 (= no)        |
- * | top_pole_qcd_corrections         | 0 (1L), 1 (2L), 2 (3L), 3 (4L)                  | 3 (= 4L QCD)    |
- * | beta_zero_threshold              | any positive double                             | 1.0e-11         |
- * | calculate_observables            | 0 (no) or 1 (yes)                               | 0 (= no)        |
- * | force_positive_masses            | 0 (no) or 1 (yes)                               | 0 (= no)        |
- * | pole_mass_scale                  | any positive double                             | 0 (= SUSY scale)|
+ * | enum                             | possible values                                 | default value                    |
+ * |----------------------------------|-------------------------------------------------|----------------------------------|
+ * | precision                        | any positive double                             | 1.0e-4                           |
+ * | max_iterations                   | any positive double                             | 0 (= automatic)                  |
+ * | solver                           | 0 (all), 1 (two-scale) or 2 (semi-analytic)     | 0 (= all)                        |
+ * | calculate_sm_masses              | 0 (no) or 1 (yes)                               | 0 (= no)                         |
+ * | pole_mass_loop_order             | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)                     |
+ * | ewsb_loop_order                  | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)                     |
+ * | beta_loop_order                  | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)                     |
+ * | threshold_corrections_loop_order | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)                     |
+ * | higgs_2loop_correction_at_as     | 0, 1                                            | 1 (= enabled)                    |
+ * | higgs_2loop_correction_ab_as     | 0, 1                                            | 1 (= enabled)                    |
+ * | higgs_2loop_correction_at_at     | 0, 1                                            | 1 (= enabled)                    |
+ * | higgs_2loop_correction_atau_atau | 0, 1                                            | 1 (= enabled)                    |
+ * | force_output                     | 0 (no) or 1 (yes)                               | 0 (= no)                         |
+ * | top_pole_qcd_corrections         | 0 (1L), 1 (2L), 2 (3L), 3 (4L)                  | 3 (= 4L QCD)                     |
+ * | beta_zero_threshold              | any positive double                             | 1.0e-11                          |
+ * | calculate_observables            | 0 (no) or 1 (yes)                               | 0 (= no)                         |
+ * | force_positive_masses            | 0 (no) or 1 (yes)                               | 0 (= no)                         |
+ * | pole_mass_scale                  | any positive double                             | 0 (= SUSY scale)                 |
  * | eft_pole_mass_scale              | any positive double                             | 0 (= minimum of {Mt, SUSY scale})|
- * | eft_matching_scale               | any positive double                             | 0 (= SUSY scale)|
- * | eft_matching_loop_order_up       | 0, 1, 2                                         | 2 (= 2-loop)    |
- * | eft_matching_loop_order_down     | 0, 1                                            | 1 (= 1-loop)    |
- * | eft_higgs_index                  | any integer >= 0                                | 0 (= lightest)  |
- * | calculate_bsm_masses             | 0 (no) or 1 (yes)                               | 1 (= yes)       |
- * | threshold_corrections            | positive integer                                | 124111421       |
- * | higgs_3loop_ren_scheme_atb_as2   | 0 (DR'), 1 (MDR'), 2 (H3m)                      | 0 (= DR')       |
- * | higgs_3loop_correction_at_as2    | 0, 1                                            | 1 (= enabled)   |
- * | higgs_3loop_correction_ab_as2    | 0, 1                                            | 1 (= enabled)   |
- * | higgs_3loop_correction_at2_as    | 0, 1                                            | 1 (= enabled)   |
- * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
- * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
- * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)  |
- * | calculate_amm                    | 0(no),1(1L),1.5(1L+2LQED),2(1L+2LQED+Barr-Zee)  | 2 (= 1L+2LQED+Barr-Zee)|
+ * | eft_matching_scale               | any positive double                             | 0 (= SUSY scale)                 |
+ * | eft_matching_loop_order_up       | 0, 1, 2                                         | 2 (= 2-loop)                     |
+ * | eft_matching_loop_order_down     | 0, 1                                            | 1 (= 1-loop)                     |
+ * | eft_higgs_index                  | any integer >= 0                                | 0 (= lightest)                   |
+ * | calculate_bsm_masses             | 0 (no) or 1 (yes)                               | 1 (= yes)                        |
+ * | threshold_corrections            | positive integer                                | 124111421                        |
+ * | higgs_3loop_ren_scheme_atb_as2   | 0 (DR'), 1 (MDR'), 2 (H3m)                      | 0 (= DR')                        |
+ * | higgs_3loop_correction_at_as2    | 0, 1                                            | 1 (= enabled)                    |
+ * | higgs_3loop_correction_ab_as2    | 0, 1                                            | 1 (= enabled)                    |
+ * | higgs_3loop_correction_at2_as    | 0, 1                                            | 1 (= enabled)                    |
+ * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)                    |
+ * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)                    |
+ * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)                   |
+ * | calculate_amm                    | 0(no),1(1L),1.5(1L+2LQED),2(1L+2LQED+Barr-Zee)  | 2 (= 1L+2LQED+Barr-Zee)          |
  */
 void Spectrum_generator_settings::reset()
 {

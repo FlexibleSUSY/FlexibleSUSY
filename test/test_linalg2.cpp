@@ -719,7 +719,7 @@ BOOST_AUTO_TEST_CASE(test_calculate_majorana_singlet_mass)
    mass = calculate_majorana_singlet_mass(-100., phase);
    BOOST_CHECK_EQUAL(mass, 100.);
    BOOST_CHECK_SMALL(phase.real(), 1e-15);
-   BOOST_CHECK_EQUAL(phase.imag(), 1.);
+   BOOST_CHECK_EQUAL(phase.imag(), -1.);
 
    mass = calculate_majorana_singlet_mass(std::complex<double>(100.,0.), phase);
    BOOST_CHECK_EQUAL(mass, 100.);
@@ -729,12 +729,19 @@ BOOST_AUTO_TEST_CASE(test_calculate_majorana_singlet_mass)
    mass = calculate_majorana_singlet_mass(std::complex<double>(-100.,0.), phase);
    BOOST_CHECK_EQUAL(mass, 100.);
    BOOST_CHECK_SMALL(phase.real(), 1e-15);
-   BOOST_CHECK_EQUAL(phase.imag(), 1.);
+   BOOST_CHECK_EQUAL(phase.imag(), -1.);
 
    mass = calculate_majorana_singlet_mass(std::complex<double>(1.,1.), phase);
    BOOST_CHECK_EQUAL(mass, std::sqrt(2.));
    BOOST_CHECK_EQUAL(std::abs(phase), 1.);
-   BOOST_CHECK_CLOSE(std::arg(phase), 0.5 * Pi/4., 1e-13);
+   BOOST_CHECK_CLOSE(std::arg(phase), -0.5 * Pi / 4., 1e-13);
+
+   // the phase makes the mass term real and positive: phase^2 M = |M|
+   // (SARAH: fG -> phase Glu in -1/2 M fG fG)
+   const std::complex<double> M(-30., 70.);
+   mass = calculate_majorana_singlet_mass(M, phase);
+   BOOST_CHECK_CLOSE((phase * phase * M).real(), mass, 1e-13);
+   BOOST_CHECK_SMALL((phase * phase * M).imag(), 1e-13);
 }
 
 BOOST_AUTO_TEST_CASE(test_calculate_dirac_singlet_mass)

@@ -82,7 +82,7 @@ CalculateMHiggs3LoopShift[inputModel_String, outputModel_String, higgsBoson_, hi
 
 try {
    // 3-loop self-energy, calculated using tree-level parameters
-   const auto self_energy_3l = Re(model." <> SelfEnergies`CreateSelfEnergyFunctionName[higgsBoson, 3] <> "());
+   const auto self_energy_3l = Re(model." <> SelfEnergies`CreateSelfEnergyFunctionName[{higgsBoson, higgsBoson}, 3] <> "());
    const auto mass_matrix = (calculate_mh2_0l(model) - self_energy_3l).eval();
    const double Mh2_pole = calculate_eigenvalue(mass_matrix, idx);
    const double mh2_tree = Sqr(model.get_" <> higgsMassStr <> "(idx));
@@ -182,18 +182,17 @@ const double lambda_2l = lambda_1l + delta_lambda_2l;
 
 sm = sm_1l;
 sm.set_Lambdax(lambda_2l);
-
-if (yt_loop_order > 1) {
-" <> TextFormatting`IndentText[If[FlexibleSUSY`UseHiggs3LoopMSSM === True, FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[], ""]] <> "
-}
-
 sm.calculate_DRbar_masses();"
 ];
 
+AttachBrackets[FlexibleSUSY`M[sym_[idx_]]] := FlexibleSUSY`M[sym][idx];
+AttachBrackets[FlexibleSUSY`M[sym_]] := FlexibleSUSY`M[sym][];
+AttachBrackets[sym_] := sym;
 
 Create3LoopMatching[inputModel_String, outputModel_String, higgsBoson_, higgsIndex_String] :=
    Module[{modelNameStr = ToString[FlexibleSUSY`FSModelName],
-	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]]},
+	   higgsMassStr = CConversion`RValueToCFormString[FlexibleSUSY`M[higgsBoson]],
+           mtstr = CConversion`RValueToCFormString[AttachBrackets[TreeMasses`GetMass[TreeMasses`GetUpQuark[3,True]]]]},
 "// calculate running masses of the input model
 const auto model = [] (const auto& model_input) {
    auto model = model_input;
@@ -208,9 +207,7 @@ const auto sm_1l = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", mod
 const auto sm_0l_gl = match_high_to_low_scale_sm_0l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
 const auto sm_1l_gl = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl, " <> higgsIndex <> ");
 const auto sm_1l_gl_no_g3 = match_high_to_low_scale_sm_1l_copy(" <> outputModel <> ", model_gl_no_g3, " <> higgsIndex <> ");
-const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ", 2);
-
-" <> outputModel <> " = sm_2l;
+const auto sm_2l = match_high_to_low_scale_sm_2l_copy(" <> outputModel <> ", model, " <> higgsIndex <> ");
 
 // calculation of 3-loop threshold corrections below
 
@@ -219,13 +216,13 @@ const double lambda_2l = sm_2l.get_Lambdax();
 const double v2 = Sqr(sm_0l_gl.get_v());
 const double yt = sm_0l_gl.get_Yu(2, 2);
 const double yt2 = Sqr(yt);
+const double yt_2l = calculate_yt_sm_2l(sm_0l, sm_1l, model);
 const double g3 = sm_0l_gl.get_g3();
 const double g32 = Sqr(g3);
 const double g34 = Sqr(g32);
-const double MS = Sqrt(model_gl.get_MSt(0) * model_gl.get_MSt(1));
 const double Q = sm_0l_gl.get_scale();
 const double Q2 = Sqr(Q);
-const double mt = model_gl.get_MFt();
+const double mt = model_gl.get_" <> mtstr <> ";
 const double mt2 = Sqr(mt);
 const double logmt = Log(mt2 / Q2);
 const double logmt2 = Sqr(logmt);
@@ -235,7 +232,7 @@ const double k2 = twoLoop;
 const double k3 = threeLoop;
 
 const double delta_yt_1l = sm_1l_gl.get_Yu(2, 2) - sm_1l_gl_no_g3.get_Yu(2, 2);
-const double delta_yt_2l = sm_2l.get_Yu(2, 2) - sm_1l.get_Yu(2, 2);
+const double delta_yt_2l = yt_2l - sm_1l.get_Yu(2, 2);
 const double delta_g3_1l = sm_1l.get_g3() - g3;
 
 // 1st derivative of 1-loop SM contribution to Mh w.r.t. yt, times Delta yt(2l)
@@ -261,12 +258,18 @@ const double mh2_3l_sm_shift = -Re(sm_0l_gl.self_energy_hh_3loop());
 // Eq.(4.21) [arxiv:2003.04639] for n=3
 const double mh2_3l_bsm_shift = calculate_Mh2_3l_shift(sm, model_gl, idx);
 
+const bool no_error = std::isfinite(mh2_3l_bsm_shift);
+
 // Eq.(4.28d) [arxiv:2003.04639], Delta lambda^(3l)
-const double delta_lambda_3l = std::isfinite(mh2_3l_bsm_shift) ? (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2 : 0.0;
+const double delta_lambda_3l = no_error ? (mh2_3l_bsm_shift - mh2_3l_sm_shift - mh2_3l_parameter_conversion)/v2 : 0.0;
 
 // Eq.(4.28a) [arxiv:2003.04639] up to (including) 3-loop terms
 const double lambda_3l = lambda_2l + delta_lambda_3l;
 
+" <> outputModel <> " = sm_2l;
+if (no_error) {
+" <> TextFormatting`IndentText[FlexibleEFTHiggsMatching`CallMatch2LoopTopMass[outputModel <> "."]] <> "
+}
 " <> outputModel <> ".set_Lambdax(lambda_3l);
 " <> outputModel <> ".calculate_DRbar_masses();"
 ];
@@ -339,7 +342,7 @@ double calculate_Mt_bsm_2l(
    model_2l.set_pole_mass_loop_order(2);
    model_2l.set_loop_corrections(loop_corrections);
 
-   model_2l." <> CreateLoopMassFunctionName[TreeMasses`GetUpQuark[3,True]] <> "();
+   model_2l." <> CreateLoopMassFunctionName[Parameters`StripIndices[TreeMasses`GetUpQuark[3,True]]] <> "();
 
    const auto Mt_bsm = model_2l.get_physical()." <> mtstr <> ";
 

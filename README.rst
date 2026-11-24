@@ -41,8 +41,10 @@ modification, extension and reuse.
   If you use **FlexibleSUSY+GM2Calc** in your work, please cite
   [1510.08071]_ and (if appropriate) [2110.13238]_.
 
-  If you use **FlexibleDecay** in your work, please cite
-  [2106.05038]_ and [1211.2099]_.
+  If you use **FlexibleDecay** in your work, please cite [2106.05038]_ and
+  [1211.2099]_. If you compute Higgs-physics constrainst using HiggsTools or
+  Lilith please also cite [2603.12119]_ and (as appropriate) [2210.09332]_ or
+  [1502.04138]_, [1908.03952]_, [2012.11408]_.
 
   If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
   (or later), please cite [2204.05285]_.
@@ -100,13 +102,16 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++17 compiler (g++ >= 7.0.0 or clang++ >= 4.0.0 or icpc >= 18.0.0)
+* C++20 compiler (g++ >= 10.1.0, or clang++ >= 10.0.0 with libstdc++ >= 10;
+  on macOS Apple clang with its libc++, tested with Xcode 16 on Apple
+  Silicon; Intel's icpx is LLVM-based and counts as clang++, the classic
+  icpc is not supported)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
-* Boost_ (version 1.37.0 or higher)
-* `Eigen 3`_ (version 3.1 or higher)
-* `GNU scientific library`_
+* Boost_ (version 1.62.0 or higher, except 1.64)
+* `Eigen 3`_ (version 3.3 or higher)
+* `GNU scientific library`_ (version 2.0 or higher)
 
 Optional:
 
@@ -114,20 +119,36 @@ Optional:
 * FormCalc_ (version 9.8 or higher)
 * GM2Calc_ (version 2.1.0 or higher)
 * LoopTools_ (version 2.8 or higher)
+* HiggsTools_ (version 1.1.4 or higher)
+* Lilith_ (requires Python3 development files)
 * COLLIER_
-* Himalaya_
+* Himalaya_ (version 2.0.0 or higher)
 * TSIL_
 
 Installation of required/optional libraries
 -------------------------------------------
 
-The required libraries Boost_, `Eigen 3`_ and `GNU scientific library`_
-can usually be installed via the package manager of the operating system.
+The required libraries Boost_, `Eigen 3`_ and `GNU scientific library`_ and the
+optionally required Python3 development files can usually be installed via the
+package manager of the operating system.
 On Debian/Ubuntu one may run for example
 
 .. code-block:: shell
 
-    sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev
+    sudo apt-get install libboost-all-dev libeigen3-dev libgsl-dev python3-dev
+
+On macOS, the libraries and the Fortran compiler (from GCC) can be
+installed with Homebrew_.  Homebrew's directories are not searched by
+default, so they are passed to ``configure``:
+
+.. code-block:: shell
+
+    brew install gcc boost eigen gsl
+    ./configure --with-cxx=clang++ --with-fc=gfortran \
+       --with-boost-incdir="$(brew --prefix boost)/include" \
+       --with-boost-libdir="$(brew --prefix boost)/lib" \
+       --with-eigen-incdir="$(brew --prefix eigen)/include/eigen3" \
+       --with-gsl-config="$(brew --prefix gsl)/bin/gsl-config"
 
 The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
 LoopTools_, Himalaya_ and TSIL_ can be also installed using the Conan_
@@ -160,7 +181,7 @@ the following setup
 
 .. code-block:: shell
 
-    SARAH_VERSION=4.15.2
+    SARAH_VERSION=4.15.4
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
@@ -627,7 +648,7 @@ libraries, which is the default) you need to pass the
 name extension for the shared libraries as well as the command to
 build them can be overwritten using the ``--with-shared-lib-ext=``
 ``--with-shared-lib-cmd=``.  parameters.  For example, when Intel
-compilers should be used, replace gcc by icc or icpc
+compilers should be used, replace gcc by icx or icpx
 
 .. code-block:: shell
 
@@ -832,6 +853,48 @@ achieved by setting in the TSIL ``Makefile``
 
     TSIL_OPT = -O3 -funroll-loops -fPIC
 
+Linking with other external libraries
+-------------------------------------
+
+HiggsTools support
+``````````````````
+
+It is possible to check consistency of a BSM Higgs sector with experimental
+data using HiggsTools_. To enable HiggsTools, configure FlexibleSUSY as
+
+.. code-block:: shell
+
+    HIGGSTOOLS_DIR=/path/to/higgstools
+    ./configure --with-higgstools-incdir=$HIGGSTOOLS_DIR/include \
+       --with-higgstools-libdir=$HIGGSTOOLS_DIR/lib64
+
+Note that depending on the system, HiggsTools library is installed either in
+`lib` or `lib64` directory. At runtime user has to provide directories
+containing HiggsSignals and HiggsBounds datasets (which are downloaded
+separatelly from HiggsTools) as
+
+.. code-block:: shell
+
+    models/<model>/run_<model>.x --higgsbounds-dataset=/path/to/HB/datasetdir \
+       --higgssignals-dataset=/path/to/HS/datasetdir
+
+Lilith support
+``````````````
+
+It is possible to check consistency of a BSM Higgs sector with experimental
+data using Lilith_. To enable Lilith, configure FlexibleSUSY as
+
+.. code-block:: shell
+
+    ./configure --with-lilith=/path/to/Lilith
+
+At runtime user can provide the Lilith database `.list` file
+
+.. code-block:: shell
+
+    models/<model>/run_<model>.x --lilith-db=/path/to/Lilith/database/file
+
+If not provided, the default file will be used.
 
 Creating an addon
 -----------------
@@ -1019,10 +1082,13 @@ References
 .. _SOFTSUSY: http://softsusy.hepforge.org
 .. _Boost: http://www.boost.org
 .. _Conan: https://conan.io/
+.. _Homebrew: https://brew.sh/
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _GNU scientific library: http://www.gnu.org/software/gsl
+.. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
+.. _Lilith: https://github.com/sabinekraml/Lilith-2
 .. _`Mathematica/Wolfram Engine`: https://www.wolfram.com
 .. _LoopTools: http://www.feynarts.de/looptools
 .. _COLLIER: https://collier.hepforge.org
@@ -1056,4 +1122,9 @@ References
 .. [2106.05038] `CPC 283 (2023) 108584 <https://inspirehep.net/literature/1867840>`_ [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
 .. [2110.13238] `Eur. Phys. J. C82 (2022) no. 3, 229 <https://inspirehep.net/literature/1952331>`_ [`arxiv:2110.13238 <https://arxiv.org/abs/2110.13238>`_]
 .. [2204.05285] `Phys. Rev. D 106 (2022) 9, 095023 <https://inspirehep.net/literature/2065408>`_ [`arxiv:2204.05285 <https://arxiv.org/abs/2204.05285>`_]
-.. [2402.14630] `CPC 302 (2024) 109244 <https://inspirehep.net/literature/2760779>`_ [`arxiv:2402.14630 <https://arxiv.org/pdf/2402.14630.pdf>`_]
+.. [2402.14630] `CPC 302 (2024) 109244 <https://inspirehep.net/literature/2760779>`_ [`arxiv:2402.14630 <https://arxiv.org/abs/2402.14630>`_]
+.. [2210.09332] `CPC 291 (2023) 108803 <https://inspirehep.net/literature/2166780>`_ [`arxiv:2210.09332 <https://arxiv.org/abs/2210.09332>`_]
+.. [1502.04138] `Eur. Phys. J. C75 (2015) no. 9, 440 <https://inspirehep.net/literature/1345039>`_ [`arxiv:1502.04138 <https://arxiv.org/abs/1502.04138>`_]
+.. [1908.03952] `SciPost Phys. 7 (2019) 4, 052 <https://inspirehep.net/literature/1749361>`_ [`arxiv:1908.03952 <https://arxiv.org/abs/1908.03952>`_]
+.. [2012.11408] `PoS TOOLS2020 (2021), 040 <https://inspirehep.net/literature/1837690>`_ [`arxiv:2012.11408 <https://arxiv.org/abs/2012.11408>`_]
+.. [2603.12119] `JHEP 10 (2026) 277 <https://inspirehep.net/literature/3128784>`_ [`arXiv:2603.12119 <https://arxiv.org/abs/2603.12119>`_]

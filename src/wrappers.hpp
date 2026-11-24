@@ -28,6 +28,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <concepts>
 #include <Eigen/Core>
 
 #include "eigen_tensor.hpp"
@@ -434,8 +435,8 @@ T Max(T&&t) noexcept
    return std::forward<T>(t);
 }
 
-template<typename T0, typename T1, typename... Ts>
-typename std::common_type<T0, T1, Ts...>::type Max(T0&& val1, T1&& val2, Ts&&... vs) noexcept
+template <typename T0, typename T1, typename... Ts>
+std::common_type_t<T0, T1, Ts...> Max(T0&& val1, T1&& val2, Ts&&... vs) noexcept
 {
    if (val2 < val1)
       return Max(val1, std::forward<Ts>(vs)...);
@@ -449,8 +450,8 @@ T Min(T&&t) noexcept
    return std::forward<T>(t);
 }
 
-template<typename T0, typename T1, typename... Ts>
-typename std::common_type<T0, T1, Ts...>::type Min(T0&& val1, T1&& val2, Ts&&... vs) noexcept
+template <typename T0, typename T1, typename... Ts>
+std::common_type_t<T0, T1, Ts...> Min(T0&& val1, T1&& val2, Ts&&... vs) noexcept
 {
    if (val2 < val1)
       return Min(val2, std::forward<Ts>(vs)...);
@@ -607,14 +608,12 @@ auto SignedAbsSqrt(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Deri
 
 // Sqrt ////////////////////////////////////////////////////////////////
 
-template <class T, typename = std::enable_if_t<std::is_floating_point<T>::value,T>>
-T Sqrt(T a) noexcept
+std::floating_point auto Sqrt(std::floating_point auto a) noexcept
 {
    return std::sqrt(a);
 }
 
-template <class T, typename = std::enable_if_t<std::is_integral<T>::value,T>>
-double Sqrt(T a) noexcept
+double Sqrt(std::integral auto a) noexcept
 {
    return std::sqrt(static_cast<double>(a));
 }
@@ -635,7 +634,8 @@ constexpr std::complex<T> Sqr(const std::complex<T>& a) noexcept
    return a * a;
 }
 
-template <typename T, class = std::enable_if_t<std::is_arithmetic<T>::value,T>>
+template <typename T>
+requires std::is_arithmetic_v<T>
 constexpr T Sqr(T a) noexcept
 {
    return a * a;

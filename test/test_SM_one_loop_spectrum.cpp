@@ -231,3 +231,25 @@ BOOST_AUTO_TEST_CASE( test_SM_one_loop_masses )
       }
    }
 }
+
+BOOST_AUTO_TEST_CASE( test_SM_Zgamma_self_energy )
+{
+   SM_input_parameters input;
+   input.LambdaIN = 0.25;
+   SM<Two_scale> m;
+   setup_SM_const(m, input);
+
+   m.calculate_DRbar_masses();
+
+   if (m.get_problems().have_problem()) {
+      std::ostringstream ostr;
+      m.get_problems().print_problems(ostr);
+      BOOST_FAIL(ostr.str());
+   }
+
+   const double p = 100.;
+
+   BOOST_CHECK_CLOSE_FRACTION(m.self_energy_VPVZ_1loop(p).real(), 126.16413171469556, 4e-12);
+   BOOST_CHECK_SMALL(m.self_energy_VPVZ_1loop(p).imag(), 0.);
+}
+

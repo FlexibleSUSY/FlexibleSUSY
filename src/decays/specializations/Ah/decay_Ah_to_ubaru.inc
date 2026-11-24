@@ -21,10 +21,10 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
    static constexpr double color_factor = squared_color_generator<PseudoscalarHiggs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
    // flavour-violating decay
-   if(!boost::range::equal(indexOut1, indexOut2)) {
-      if (!is_zero(AhQQbarVertexDR.left()) || !is_zero(AhQQbarVertexDR.right())) {
-         const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
-         const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+   if (indexOut1 != indexOut2) {
+      const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
+      const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
+      if (mAhOS > muqOS1 + muqOS2 && (!is_zero(AhQQbarVertexDR.left()) || !is_zero(AhQQbarVertexDR.right()))) {
          const auto xOS1 = Sqr(muqOS1/mAhOS);
          const auto xOS2 = Sqr(muqOS2/mAhOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
@@ -48,6 +48,8 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
 
    const auto AhQQbarVertexDR_P = 0.5*(AhQQbarVertexDR.right() - AhQQbarVertexDR.left());
 
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
+
    // off-shell decay
    if (4.*std::max(xDR, xOS) > 1.) {
    }
@@ -56,7 +58,6 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
       const auto betaDR = std::sqrt(1.-4.*xDR);
 
       const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
-      const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
       double amp2DR_P = 0;
       double amp2OS_P = 0;
@@ -73,7 +74,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
          );
       }
 
-      if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 && Nf >= 5) {
+      if (flexibledecay_settings.get_decay_corrections().sm > 0 && Nf >= 5) {
             double alpha_s_red;
             double Y_conversion = 1.;
             switch (Nf) {
@@ -123,7 +124,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
                   const auto CSuu = AhQQbarVertexDR_P/context.mass<UpTypeQuark>(indexOut1);
                   if (!is_zero(CSuu)) {
                      const auto Ahttbar_P = 0.5*(Ahttbar.right() - Ahttbar.left());
-                     const auto CStu = Ahttbar_P/context.mass<Fu>({2});
+                     const auto CStu = Ahttbar_P/context.mass<UpTypeQuark>({2});
                      deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
                   }
                }
@@ -141,6 +142,26 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
          flux * color_factor * phase_spaceOS * amp2OS_P;
 
       result = (1-4.*xOS)*result_DR + 4*xOS*result_OS;
+   }
+
+   if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::call_lilith) != 0 ||
+       flexibledecay_settings.get(FlexibleDecay_settings::calculate_normalized_effc) != 0
+   ) {
+      const double remove_normalization = flux*phase_spaceOS*2*Sqr(mAhOS);
+      neutral_higgs_effc.add_coupling(field_as_string<PseudoscalarHiggs>(indexIn),
+         {
+            boost::hana::unpack(bar<UpTypeQuark>::pdgids, _to_array<bar<UpTypeQuark>::numberOfGenerations>).at(indexOut1.at(0)),
+            boost::hana::unpack(UpTypeQuark::pdgids, _to_array<UpTypeQuark::numberOfGenerations>).at(indexOut2.at(0))
+         },
+         std::pair<std::string, std::complex<double>> {
+            field_as_string<PseudoscalarHiggs>(indexIn) + "-" + field_as_string<bar<UpTypeQuark>::type>(indexOut1) + "-" + field_as_string<UpTypeQuark>(indexOut2),
+            // if the decay is not kinematically allowed return the tree-level coupling,
+            // otherwise a sqrt of a partial width
+            4.*std::max(xDR, xOS) > 1. ? std::imag(AhQQbarVertexDR_P)*1i : std::sqrt(result/remove_normalization)*1i
+         },
+         result
+         );
    }
 
    return result;

@@ -128,7 +128,7 @@ DEFINITION[EWSB][MatterSector]=
      {{SHdm,conj[SHup]},{Hpm,ZP}},
      {{SInertHdm,conj[SInertHup]},{InertHpm,ZIP}},
      {{SInertHd0,conj[SInertHu0]},{Inerthh ,ZIH}},
-     {{FInertHdm,FInertHup},{LHpm,UIP}},
+     {{{FInertHdm},{FInertHup}},{{LHm,UIM},{LHp,UIP}}},
      {{FInertHd0,FInertHu0},{LH0 ,UIH}},
      {{fB, fW0, FHd0, FHu0}, {L0, ZN}}, 
      {{{fWm, FHdm}, {fWp, FHup}}, {{Lm,UM}, {Lp,UP}}},
@@ -151,6 +151,6 @@ DEFINITION[EWSB][DiracSpinors]={
  Chi ->{ L0, conj[L0]},
  Cha ->{ Lm, conj[Lp]},
  InertChi ->{ LH0 , conj[LH0]},
- InertCha ->{ LHpm, conj[LHpm]},
+ InertCha ->{ LHm, conj[LHp]},
  Glu ->{ fG, conj[fG]}
 };	

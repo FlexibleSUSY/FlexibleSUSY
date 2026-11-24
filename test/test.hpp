@@ -60,7 +60,8 @@ double max_rel_diff(T a, T b)
    return (a - b) / a;
 }
 
-template <class T, class = typename std::enable_if<std::is_arithmetic<T>::value>::type>
+template <class T>
+requires std::is_arithmetic_v<T>
 void check_equality(T a, T b, const std::string& testMsg, double max_dev)
 {
    if (!is_equal(a, b, T(max_dev))) {

@@ -21,20 +21,20 @@
 *)
 
 (**
-  Functions to perform an uncertainty estimate of NUHNMSSM.
+  Functions to perform an uncertainty estimate of NUHNMSSMHimalaya.
  *)
 
-CalcNUHNMSSMDMh::usage="\
+CalcNUHNMSSMHimalayaDMh::usage="\
 The function takes the parameter point as input (same syntax as
-FSNUHNMSSMOpenHandle[]) and returns the 2-component list { Mh, DMh }
+FSNUHNMSSMHimalayaOpenHandle[]) and returns the 2-component list { Mh, DMh }
 where Mh is the Higgs mass and DMh is an uncertainty estimate of
 missing 3-loop and 4-loop corrections.
 
 Example: Peform a parameter scan over the SUSY scale in the interval
 [1000, 10^10] GeV for tan(beta) = 20 and Xt/MS = Sqrt[6].
 
-Get[\"models/NUHNMSSM/NUHNMSSM_librarylink.m\"];
-Get[\"model_files/NUHNMSSM/NUHNMSSM_uncertainty_estimate.m\"];
+Get[\"models/NUHNMSSMHimalaya/NUHNMSSMHimalaya_librarylink.m\"];
+Get[\"model_files/NUHNMSSMHimalaya/NUHNMSSMHimalaya_uncertainty_estimate.m\"];
 
 CalcTlambda[mA2_, TB_, lam_, kap_, muEff_] :=
     Module[{vS = muEff Sqrt[2] / lam},
@@ -47,7 +47,7 @@ CalcTkappa[m2_, lam_, muEff_] :=
            ];
 
 CalcMh[MS_, TB_, Xtt_] :=
-    CalcNUHNMSSMDMh[
+    CalcNUHNMSSMHimalayaDMh[
         fsSettings -> {
             precisionGoal -> 1.*^-5,
             poleMassLoopOrder -> 3,
@@ -101,16 +101,16 @@ LogRange[start_, stop_, steps_] :=
     Exp /@ Range[Log[start], Log[stop], (Log[stop] - Log[start])/steps];
 
 (* calculate Higgs mass *)
-CalcNUHNMSSMMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
-    CalcNUHNMSSMMh[a, Sequence @@ s, r];
+CalcNUHNMSSMHimalayaMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
+    CalcNUHNMSSMHimalayaMh[a, Sequence @@ s, r];
 
-CalcNUHNMSSMMh[asLoops_?NumericQ, ytLoops_?NumericQ, Qpole_?NumericQ, args__] :=
+CalcNUHNMSSMHimalayaMh[asLoops_?NumericQ, ytLoops_?NumericQ, Qpole_?NumericQ, args__] :=
     Module[{handle, spec, tc},
            tc = thresholdCorrections /. { args };
            tc = If[IntegerQ[tc], tc,
-                   thresholdCorrections /. Options[FSNUHNMSSMOpenHandle]];
-           handle = FSNUHNMSSMOpenHandle[args];
-           FSNUHNMSSMSet[handle,
+                   thresholdCorrections /. Options[FSNUHNMSSMHimalayaOpenHandle]];
+           handle = FSNUHNMSSMHimalayaOpenHandle[args];
+           FSNUHNMSSMHimalayaSet[handle,
                fsSettings -> {
                    calculateStandardModelMasses -> 0,
                    calculateBSMMasses -> 1,
@@ -119,26 +119,26 @@ CalcNUHNMSSMMh[asLoops_?NumericQ, ytLoops_?NumericQ, Qpole_?NumericQ, args__] :=
                    thresholdCorrections -> SetDigit[SetDigit[tc, 2, asLoops], 6, ytLoops]
                }
            ];
-           spec = FSNUHNMSSMCalculateSpectrum[handle];
-           FSNUHNMSSMCloseHandle[handle];
+           spec = FSNUHNMSSMHimalayaCalculateSpectrum[handle];
+           FSNUHNMSSMHimalayaCloseHandle[handle];
            If[spec === $Failed, $Failed,
-              (Pole[M[hh]] /. (NUHNMSSM /. spec))[[1]]]
+              (Pole[M[hh]] /. (NUHNMSSMHimalaya /. spec))[[1]]]
           ];
 
 (* calculate Higgs mass and uncertainty estimate *)
-CalcNUHNMSSMDMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
-    CalcNUHNMSSMDMh[a, Sequence @@ s, r];
+CalcNUHNMSSMHimalayaDMh[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
+    CalcNUHNMSSMHimalayaDMh[a, Sequence @@ s, r];
 
-CalcNUHNMSSMDMh[args__] :=
+CalcNUHNMSSMHimalayaDMh[args__] :=
     Module[{Mh, MhAs, MhYt, varyQpole, DMh,
             mhLoops = poleMassLoopOrder /. { args }, ytLoops, asLoops,
             MS = MSUSY /. { args }},
            ytLoops    = Max[mhLoops - 1, 1];
            asLoops    = Max[mhLoops - 2, 1];
-           Mh         = CalcNUHNMSSMMh[asLoops    , ytLoops    , 0, args];
-           MhAs       = CalcNUHNMSSMMh[asLoops + 1, ytLoops    , 0, args];
-           MhYt       = CalcNUHNMSSMMh[asLoops    , ytLoops + 1, 0, args];
-           varyQpole  = CalcNUHNMSSMMh[asLoops    , ytLoops    , #, args]& /@
+           Mh         = CalcNUHNMSSMHimalayaMh[asLoops    , ytLoops    , 0, args];
+           MhAs       = CalcNUHNMSSMHimalayaMh[asLoops + 1, ytLoops    , 0, args];
+           MhYt       = CalcNUHNMSSMHimalayaMh[asLoops    , ytLoops + 1, 0, args];
+           varyQpole  = CalcNUHNMSSMHimalayaMh[asLoops    , ytLoops    , #, args]& /@
                         LogRange[MS/2, 2 MS, 10];
            If[Mh === $Failed, Return[{ $Failed, $Failed }]];
            If[MhAs === $Failed || MhYt === $Failed || MemberQ[varyQpole, $Failed],

@@ -19,7 +19,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "Test SM CXXDiagrams"
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/fusion/include/boost_array.hpp>
 #include <boost/fusion/include/make_fused.hpp>
@@ -60,7 +60,7 @@ public:
 	using vertex_type = typename Vertex<Fields...>::vertex_type;
 private:
 	using boost_indices_type = boost::array<int,
-		std::tuple_size<indices_type>::value
+		std::tuple_size_v<indices_type>
 	>;
 	using model_type = SM_mass_eigenstates;
 	

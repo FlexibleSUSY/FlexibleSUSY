@@ -19,16 +19,18 @@
 #ifndef DECAY_H
 #define DECAY_H
 
+#include <algorithm>
 #include <initializer_list>
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <boost/core/demangle.hpp>
-#include <boost/range/algorithm/equal.hpp>
 
+#include "wrappers.hpp"
 #include "always_false.hpp"
 #include "cxx_qft/fields.hpp"
+#include "cxx_qft/vertices.hpp"
 
 namespace flexiblesusy {
 
@@ -68,7 +70,88 @@ private:
    std::string proc_string;
 };
 
+class NeutralHiggsEffectiveCouplings {
+public:
+   std::string particle {};
+   int pdgid {};
+   double mass {};
+   double width {};
+   double width_sm {};
+   double invWidth {0.};
+   int CP {};
+   std::pair<std::string, std::complex<double>> dd {};
+   std::pair<std::string, std::complex<double>> uu {};
+   std::pair<std::string, std::complex<double>> ss {};
+   std::pair<std::string, std::complex<double>> cc {};
+   std::pair<std::string, std::complex<double>> bb {};
+   std::pair<std::string, std::complex<double>> tt {};
+   std::pair<std::string, std::complex<double>> ee {};
+   std::pair<std::string, std::complex<double>> mumu {};
+   std::pair<std::string, std::complex<double>> tautau {};
+   // sums of the partial widths of both charge combinations, in GeV
+   double emu_width {0.};
+   double etau_width {0.};
+   double mutau_width {0.};
+   std::pair<std::string, double> WW {};
+   std::pair<std::string, double> ZZ {};
+   std::pair<std::string, double> Zgam {};
+   std::pair<std::string, double> gamgam {};
+   std::pair<std::string, double> gg = {};
+   double lam {};
+   double undetectedWidth {0.};
+
+   double get_undetected_width() const { return undetectedWidth; }
+   /// adds the total width minus the invisible width to the
+   /// undetected width (from which the widths of the channels passed
+   /// to HiggsTools and Lilith were subtracted); a negative result is
+   /// set to 0, with a warning if it is larger than rounding errors
+   void calculate_undetected_br();
+};
+
+class EffectiveCoupling_list {
+public:
+   EffectiveCoupling_list() = default;
+   ~EffectiveCoupling_list() = default;
+
+   std::vector<NeutralHiggsEffectiveCouplings>::iterator begin() noexcept { return effective_coupling_list.begin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator begin() const noexcept { return effective_coupling_list.begin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator cbegin() const noexcept { return effective_coupling_list.cbegin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::iterator end() noexcept { return effective_coupling_list.end(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator end() const noexcept { return effective_coupling_list.end(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator cend() const noexcept { return effective_coupling_list.end(); }
+
+   NeutralHiggsEffectiveCouplings const& operator[](int index) const {
+      return effective_coupling_list[index];
+   }
+
+   /// adds the effective coupling and the partial width of a decay of
+   /// particle p into the final state fs (PDG codes); for the lepton
+   /// flavour violating final states (e mu, e tau, mu tau) only the
+   /// partial width is used, as HiggsTools takes widths for them
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs,
+                     std::pair<std::string, double> const&, double partialW);
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs,
+                     std::pair<std::string, std::complex<double>> const&,
+                     double partialW);
+   void set_invisible_width(std::string const& p, double);
+   void push_back(NeutralHiggsEffectiveCouplings&& el) { effective_coupling_list.push_back(el); };
+
+   std::size_t size() const noexcept { return effective_coupling_list.size(); }
+
+private:
+   std::vector<NeutralHiggsEffectiveCouplings> effective_coupling_list {};
+};
+
 std::size_t hash_decay(const Decay& decay);
+
+/**
+ * Whether a channel has a negative partial width that is more than
+ * rounding noise, i.e. whose branching ratio (relative to the total
+ * width, which is the sum of the absolute partial widths) is below
+ * -1e-11.  Such channels are unphysical and are left out of the
+ * output.
+ */
+bool has_unphysical_negative_width(const Decay&, double total_width);
 
 class Decays_list {
 private:
@@ -107,7 +190,7 @@ public:
          total_width -= pos->second.get_width();
          pos->second.set_width(width);
       } else {
-         decays.insert(pos, std::make_pair(decay_hash, decay));
+         decays.insert(pos, std::make_pair(decay_hash, std::move(decay)));
       }
 
       // some channels give small negative withs
@@ -121,6 +204,15 @@ public:
    int get_particle_id() const { return initial_pdg; }
    const Decay& get_decay(std::initializer_list<int> products) const;
    double get_total_width() const { return total_width; }
+
+   /**
+    * Sets the partial widths of all channels with an unphysical
+    * negative width (see has_unphysical_negative_width()) to zero and
+    * removes them from the total width.
+    *
+    * @return a warning for each such channel
+    */
+   std::vector<std::string> remove_unphysical_negative_widths();
 
 private:
    int initial_pdg{0};
@@ -169,38 +261,38 @@ std::string create_process_string(
 
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr double squared_color_generator() noexcept {
-   if constexpr (cxx_diagrams::fields::is_singlet_v<FieldIn>) {
+   if constexpr (cxx_diagrams::fields::is_singlet<FieldIn>) {
       // 1 -> 1, 1
-      if constexpr (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>) {
+      if constexpr (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>) {
          return 1.;
       }
       // 1 -> 3, -3
       else if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
+         || (cxx_diagrams::fields::is_anti_triplet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 3.;
       }
       // 1 -> 8, 8
-      else if constexpr (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2>) {
+      else if constexpr (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2>) {
          return 8.;
       }
       else {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
       }
    }
-   else if constexpr (cxx_diagrams::fields::is_triplet_v<FieldIn>) {
+   else if constexpr (cxx_diagrams::fields::is_triplet<FieldIn>) {
       // 3 -> 1, 3
       if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 1.;
       }
       // 3 -> 3, 8
       else if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldIn> && cxx_diagrams::fields::is_octet<FieldOut2>)
+         || (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 16/3.;
       }
@@ -208,18 +300,18 @@ constexpr double squared_color_generator() noexcept {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
       }
    }
-   else if constexpr (cxx_diagrams::fields::is_anti_triplet_v<FieldIn>) {
+   else if constexpr (cxx_diagrams::fields::is_anti_triplet<FieldIn>) {
       // -3 -> 1, -3
       if constexpr (
-         (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_anti_triplet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
       ) {
          return 1.;
       }
       // -3 -> -3, 8
       else if constexpr (
-         (cxx_diagrams::fields::is_anti_triplet_v<FieldIn> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_anti_triplet<FieldIn> && cxx_diagrams::fields::is_octet<FieldOut2>)
+         || (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
       ) {
          return 16/3.;
       }
@@ -227,24 +319,24 @@ constexpr double squared_color_generator() noexcept {
          static_assert(always_false<FieldIn, FieldOut1, FieldOut2>, "Unknow colour structure in decay");
       }
    }
-   else if constexpr (cxx_diagrams::fields::is_octet_v<FieldIn>) {
+   else if constexpr (cxx_diagrams::fields::is_octet<FieldIn>) {
       // 8 -> 1, 8
       if constexpr (
-         (cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_singlet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_singlet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_singlet<FieldOut2>)
+         || (cxx_diagrams::fields::is_singlet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2>)
       ) {
          return 1.;
       }
       else if constexpr (
-         (cxx_diagrams::fields::is_triplet_v<FieldOut1> && cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
-         || (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> && cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+         (cxx_diagrams::fields::is_triplet<FieldOut1> && cxx_diagrams::fields::is_anti_triplet<FieldOut2>)
+         || (cxx_diagrams::fields::is_anti_triplet<FieldOut1> && cxx_diagrams::fields::is_triplet<FieldOut2>)
       ) {
          return 2.;
       }
       // 8 -> 8, 8 with identical particles in the final state
       // because of symmetry of the final state it must be proportional to d^2
       else if constexpr (
-         cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2> && std::is_same_v<FieldOut1, FieldOut2>
+         cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2> && std::is_same_v<FieldOut1, FieldOut2>
       ) {
          // color:   d^2 = (2 (4 - 5 Nc^2 + Nc^4) TR)/Nc = 40/3
          // average: 1/8
@@ -252,7 +344,7 @@ constexpr double squared_color_generator() noexcept {
       }
       // 8 -> 8, 8 with differnt particles in the final state
       else if constexpr (
-         cxx_diagrams::fields::is_octet_v<FieldOut1> && cxx_diagrams::fields::is_octet_v<FieldOut2> && !std::is_same_v<FieldOut1, FieldOut2>
+         cxx_diagrams::fields::is_octet<FieldOut1> && cxx_diagrams::fields::is_octet<FieldOut2> && !std::is_same_v<FieldOut1, FieldOut2>
       ) {
          // color:   f^2 = 2 Nc (-1 + Nc^2) TR = 24
          // average: 1/8
@@ -272,7 +364,7 @@ double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>:
       return 1.;
    }
    else {
-      if (boost::range::equal(idx1, idx2)) {
+      if (idx1 == idx2) {
          return 0.5;
       }
       else {
@@ -282,11 +374,31 @@ double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>:
 }
 
 // utility functions for H->V*V*
-double hVV_4body(double *q2, size_t dim, void *params);
-struct hVV_4body_params {
-   double mHOS {};
-   double mVOS {};
-   double GammaV {};
+struct HVV_4body_result {
+   double value {};
+   double error {};
+};
+HVV_4body_result hVV_4body(double mH, double mV, double GammaV);
+
+enum PDG_id_pairs: int {
+   dd = 0,
+   uu = 1,
+   ss = 2,
+   cc = 3,
+   bb = 4,
+   tt = 5,
+   ee = 6,
+   mumu = 7,
+   tautau = 8,
+   WW = 9,
+   ZZ = 10,
+   gamgam = 11,
+   Zgam = 12,
+   gg = 13,
+   emu = 14,
+   etau = 15,
+   mutau = 16,
+   NUMBER_OF_PDG_IDS
 };
 
 } // namespace flexiblesusy

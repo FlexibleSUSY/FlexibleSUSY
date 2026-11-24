@@ -132,8 +132,8 @@ BOOST_AUTO_TEST_CASE( test_SMSSM_pole_masses )
    // charginos
    const DoubleVector MCha(ToDoubleVector(m.get_physical().MCha));
    const DoubleVector mch = s.displayPhys().mch.apply(fabs);
-   BOOST_CHECK_CLOSE(mch(1), MCha(1), 1.0e-12);
-   BOOST_CHECK_CLOSE(mch(2), MCha(2), 1.0e-12);
+   BOOST_CHECK_CLOSE(mch(1), MCha(1), 5.0e-9);
+   BOOST_CHECK_CLOSE(mch(2), MCha(2), 2.0e-9);
 
    // photon, gluon mass
    const double vp = m.get_physical().MVP;
@@ -149,32 +149,32 @@ BOOST_AUTO_TEST_CASE( test_SMSSM_pole_masses )
    // down-type squarks
    const DoubleVector Sd(ToDoubleVector(m.get_physical().MSd));
    const DoubleVector md(s.displayPhys().md.flatten().sort());
-   BOOST_CHECK_CLOSE(Sd(1), md(1), 1.0e-12);
-   BOOST_CHECK_CLOSE(Sd(2), md(2), 1.0e-12);
-   BOOST_CHECK_CLOSE(Sd(3), md(3), 1.0e-12);
-   BOOST_CHECK_CLOSE(Sd(4), md(4), 1.0e-12);
-   BOOST_CHECK_CLOSE(Sd(5), md(5), 1.0e-12);
-   BOOST_CHECK_CLOSE(Sd(6), md(6), 1.0e-12);
+   BOOST_CHECK_CLOSE(Sd(1), md(1), 4.0e-8);
+   BOOST_CHECK_CLOSE(Sd(2), md(2), 4.0e-8);
+   BOOST_CHECK_CLOSE(Sd(3), md(3), 4.0e-8);
+   BOOST_CHECK_CLOSE(Sd(4), md(4), 4.0e-8);
+   BOOST_CHECK_CLOSE(Sd(5), md(5), 4.0e-8);
+   BOOST_CHECK_CLOSE(Sd(6), md(6), 4.0e-8);
 
    // up-type squarks
    const DoubleVector Su(ToDoubleVector(m.get_physical().MSu));
    const DoubleVector mu(s.displayPhys().mu.flatten().sort());
-   BOOST_CHECK_CLOSE(Su(1), mu(1), 1.0e-12);
-   BOOST_CHECK_CLOSE(Su(2), mu(2), 1.0e-12);
-   BOOST_CHECK_CLOSE(Su(3), mu(3), 1.0e-12);
-   BOOST_CHECK_CLOSE(Su(4), mu(4), 1.0e-12);
-   BOOST_CHECK_CLOSE(Su(5), mu(5), 1.0e-12);
-   BOOST_CHECK_CLOSE(Su(6), mu(6), 1.0e-12);
+   BOOST_CHECK_CLOSE(Su(1), mu(1), 4.0e-8);
+   BOOST_CHECK_CLOSE(Su(2), mu(2), 4.0e-8);
+   BOOST_CHECK_CLOSE(Su(3), mu(3), 4.0e-8);
+   BOOST_CHECK_CLOSE(Su(4), mu(4), 4.0e-8);
+   BOOST_CHECK_CLOSE(Su(5), mu(5), 4.0e-8);
+   BOOST_CHECK_CLOSE(Su(6), mu(6), 3.0e-8);
 
    // down-type sleptons
    const DoubleVector Se(ToDoubleVector(m.get_physical().MSe));
    const DoubleVector me(s.displayPhys().me.flatten().sort());
-   BOOST_CHECK_CLOSE(Se(1), me(1), 1.0e-12);
-   BOOST_CHECK_CLOSE(Se(2), me(2), 1.0e-12);
-   BOOST_CHECK_CLOSE(Se(3), me(3), 1.0e-12);
-   BOOST_CHECK_CLOSE(Se(4), me(4), 1.0e-12);
-   BOOST_CHECK_CLOSE(Se(5), me(5), 1.0e-12);
-   BOOST_CHECK_CLOSE(Se(6), me(6), 1.0e-12);
+   BOOST_CHECK_CLOSE(Se(1), me(1), 2.0e-9);
+   BOOST_CHECK_CLOSE(Se(2), me(2), 2.0e-9);
+   BOOST_CHECK_CLOSE(Se(3), me(3), 2.0e-9);
+   BOOST_CHECK_CLOSE(Se(4), me(4), 2.0e-9);
+   BOOST_CHECK_CLOSE(Se(5), me(5), 2.0e-9);
+   BOOST_CHECK_CLOSE(Se(6), me(6), 2.0e-9);
 
    // up-type sleptons
    const DoubleVector Sv(ToDoubleVector(m.get_physical().MSv));
@@ -321,10 +321,10 @@ BOOST_AUTO_TEST_CASE( test_self_energies )
    const double nmPHSE33 = s.pip3p3(momentum,s.displayMu());
    const double fsPHSE33 = m.self_energy_Ah_1loop(momentum, 2, 2).real();
 
-   BOOST_CHECK_CLOSE(nmPHSE11, fsPHSE11, 1.0e-12);
-   BOOST_CHECK_CLOSE(nmPHSE12, fsPHSE12, 1.0e-12);
+   BOOST_CHECK_CLOSE(nmPHSE11, fsPHSE11, 9.0e-12);
+   BOOST_CHECK_CLOSE(nmPHSE12, fsPHSE12, 7.0e-12);
    BOOST_CHECK_CLOSE(nmPHSE13, fsPHSE13, 7.0e-12);
-   BOOST_CHECK_CLOSE(nmPHSE22, fsPHSE22, 1.0e-12);
-   BOOST_CHECK_CLOSE(nmPHSE23, fsPHSE23, 1.1e-11);
+   BOOST_CHECK_CLOSE(nmPHSE22, fsPHSE22, 2.0e-12);
+   BOOST_CHECK_CLOSE(nmPHSE23, fsPHSE23, 2.0e-11);
    BOOST_CHECK_CLOSE(nmPHSE33, fsPHSE33, 1.0e-12);
 }

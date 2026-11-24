@@ -449,18 +449,17 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
          << FORMAT_TOTAL_WIDTH(pdg, width, name + " decays");
 
    if (!is_zero(width, 1e-100)) {
-      static constexpr double NEGATIVE_BR_TOLERANCE = 1e-11;
       const double MIN_BR_TO_PRINT = flexibledecay_settings.get(FlexibleDecay_settings::min_br_to_print);
       std::vector<Decay> sorted_decays_list = sort_decays_list(decays_list);
       for (const auto& channel : sorted_decays_list) {
          auto const partial_width = channel.get_width();
          auto branching_ratio = partial_width / width;
-         if (partial_width < 0 && !is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
-            std::stringstream ss;
-            ss << std::scientific << partial_width;
-            throw std::runtime_error("Error in " + channel.get_proc_string() + ": partial width is negative (" + ss.str() + " GeV).");
+         // unphysical negative widths are set to zero and reported in
+         // DCINFO by the decay calculation; skip any that remain
+         if (has_unphysical_negative_width(channel, width)) {
+            continue;
          }
-         else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
+         else if (partial_width < 0) {
             branching_ratio = 0;
          }
          if (branching_ratio < MIN_BR_TO_PRINT) continue;
@@ -483,8 +482,26 @@ void @ModelName@_slha_io::set_effectivecouplings_block(const std::vector<std::tu
    slha_io.set_effectivecouplings_block(effCouplings);
 }
 
+void @ModelName@_slha_io::set_normalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   slha_io.set_normalized_effectivecouplings_block(effCouplings);
+}
+
+void @ModelName@_slha_io::set_imnormalized_effectivecouplings_block(const EffectiveCoupling_list& effCouplings) {
+   slha_io.set_imnormalized_effectivecouplings_block(effCouplings);
+}
+
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
+
+void @ModelName@_slha_io::set_hs_or_lilith(std::string const& block_name, const int ndof, const double chi2, const double chi2SMmin, const double mhSM, const double pval1d, const double pval2d)
+{
+   slha_io.set_hs_or_lilith(block_name, ndof, chi2, chi2SMmin, mhSM, pval1d, pval2d);
+}
+
+void @ModelName@_slha_io::set_higgsbounds(std::vector<std::tuple<int, double, double, std::string>> const& hb)
+{
+   slha_io.set_higgsbounds(hb);
+}
 
 /**
  * Stores the model (DR-bar) parameters, masses and mixing matrices in
