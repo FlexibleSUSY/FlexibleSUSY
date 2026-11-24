@@ -91,6 +91,9 @@ inline void mathlink_format_problems(MLINK link, const Problems& pr)
    if (pr.no_perturbative() || pr.have_non_perturbative_parameter()) {
       MLPutRuleTo(link, "True", "NonPerturbative");
    }
+   if (pr.have_failed_rg_integration()) {
+      MLPutRuleTo(link, "True", "FailedRGIntegration");
+   }
    if (pr.no_sinThetaW_convergence()) {
       MLPutRuleTo(link, "True", "NoSinThetaWConvergence");
    }

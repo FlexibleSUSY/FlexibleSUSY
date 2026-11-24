@@ -290,7 +290,7 @@ COLLWRAP := $(LOOP_DIR)/libcollier_wrapper
 
 $(LOOP_HDR) $(LOOP_SRC) : $(COLLWRAP).a
 
-$(COLLWRAP).a : $(COLLWRAP).o $(COLLWRAP).mod
+$(COLLWRAP).a : $(COLLWRAP).o
 	$(Q)$(MSG)
 	$(Q)$(MODULE_MAKE_LIB_CMD) $@ $(COLLWRAP).o
 
@@ -303,7 +303,9 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 
 $(COLLWRAP).f90 : $(COLLWRAP).cpp
 	$(Q)$(MSG)
-	$(Q)$(CXX) -E $< | tr '@' '\n' > $@
+	$(Q)rm -f $@; \
+	$(CXX) -E $< > $@.E && tr '@' '\n' < $@.E > $@.tmp && mv -f $@.tmp $@; \
+	status=$$?; rm -f $@.E $@.tmp; exit $$status
 
 LIBAUX += \
 	$(COLLWRAP).a

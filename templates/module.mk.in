@@ -289,16 +289,20 @@ pack-$(MODNAME)-src:
 		$(@CLASSNAME@_GNUPLOT) \
 		$(@CLASSNAME@_FlexibleDecay_MK)
 
+# not in the dry run which counts the build steps: make -n considers
+# every target which depends on a phony target out of date
+ifneq ($(FS_PROGRESS_COUNT),1)
 $(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) $(EXE@CLASSNAME@_SRC) $(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
 : run-metacode-$(MODNAME)
 		@true
+endif
 
 run-metacode-$(MODNAME): $(METACODE_STAMP_@CLASSNAME@)
 		@true
 
 ifeq ($(ENABLE_META),yes)
 $(METACODE_STAMP_@CLASSNAME@): $(DIR)/start.m $(DIR)/FlexibleSUSY.m $(META_SRC) $(TEMPLATES) $(SARAH_MODEL_FILES_@CLASSNAME@)
-		@$(MSG)
+		@$(MSG_NO_PROGRESS)
 		$(Q)printf "%s" "Get[\"$<\"]; Quit[]" | "$(MATH)" || (echo "Error: The code generation failed!"; exit 1)
 		@touch "$(METACODE_STAMP_@CLASSNAME@)"
 		@echo "Note: to regenerate @CLASSNAME@ source files," \
