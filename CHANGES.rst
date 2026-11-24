@@ -83,6 +83,15 @@ New features
 Fixed bugs
 ----------
 
+* [commit e626fe1ff]: In models with complex Yukawa couplings or soft
+  parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail
+  with a "non-perturbative" problem flagged for the imaginary part of a
+  diagonal soft scalar mass, e.g. ``Im(mu2(2,2))``, which is zero, and no
+  spectrum was calculated.  Example: CMSSMCPV with m0 = 1400 GeV, m12 =
+  3500 GeV, tan(beta) = 10, A0 = -1400 GeV and a phase of 0.1 between the
+  Higgs VEVs (etaInput).  Points that worked before are unchanged within
+  the RG precision.
+
 * [commit c3a22b444]: ``FS<model>ToSLHA`` of the Mathematica interface now
   writes the results of ``FS<model>CallHiggsTools`` and
   ``FS<model>CallLilith`` to the blocks ``HIGGSSIGNALS``, ``HIGGSBOUNDS``
