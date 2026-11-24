@@ -664,6 +664,10 @@ ifeq ($(WITH_MSSM),yes)
 TEST_SRC += \
 		$(DIR)/test_MSSM_npointfunctions.cpp \
 		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
+ifeq ($(ENABLE_COLLIER),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSM_lfv_decoupling.cpp
+endif
 endif
 endif
 
@@ -1170,6 +1174,8 @@ $(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(D
 
 $(DIR)/test_MSSM_matching_selfenergy_Fd.o $(DIR)/test_MSSM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+
+$(DIR)/test_MSSM_lfv_decoupling.x: $(LIBMSSM)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfenergy_Fd.meta $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
 	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)

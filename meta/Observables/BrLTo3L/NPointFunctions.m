@@ -73,6 +73,6 @@ chains[1] = {
 };
 
 mass[1] = {
-   inSelfT -> {"explicit final lepton mass", InternalMass[FeynArts`F, 6] :> ExternalMass[3]},
-   inSelfT -> {"keep initial lepton mass untouched", Hold :> ExternalMass[1]}
+   inSelfT -> {"keep initial lepton mass untouched", Hold :> ExternalMass[1]},
+   outSelfT -> {"keep final lepton mass untouched", Hold :> ExternalMass[3]}
 };

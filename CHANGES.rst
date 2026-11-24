@@ -88,6 +88,21 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: The Z-penguin contributions to mu -> e conversion
+  (``LToLConversion``) and l -> 3l (``BrLTo3L``) didn't decouple when the
+  new particles are heavy.  This affects these observables with the
+  contributions ``All`` or ``Vectors``, e.g. in the MSSM model file.  In a
+  CMSSM-like scenario with slepton flavour mixing (m0 = m1/2 = M, A0 = 0,
+  tan(beta) = 10) CR(mu -> e, Al) was too large by a factor 11 for
+  M = 3 TeV and 1200 for M = 10 TeV, BR(mu -> 3e) by 1.2 and 20; at
+  tan(beta) = 40 the errors are larger.  At M = 1 TeV the conversion rate
+  changes by 7%.  The results now agree with SARAH/SPheno as well as
+  BR(mu -> e gamma) does (10-50%).
+
+* [commit XXXXXXXXX]: ``LToLConversion`` and ``BrLTo3L`` in the blocks
+  ``FWCOEF`` or ``IMFWCOEF`` with a list of contributions, e.g.
+  ``{Vectors, Boxes}``, produced C++ code that doesn't compile.
+
 * [commit 947f73834]: With LoopTools as loop library (``FlexibleSUSY[31] = 2``)
   the branching ratios of l -> 3l (``BrLTo3L``) and the l -> l conversion
   rates (``LToLConversion``) were NaN as soon as lepton flavour was
