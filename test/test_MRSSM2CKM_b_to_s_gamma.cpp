@@ -199,10 +199,14 @@ Block MSOFTIN
    auto model = std::get<0>(spectrum_generator.get_models_slha());
 
    const auto calculated_value = MRSSM2CKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
-   constexpr std::complex<double> C7NP {-0.20234697574469934, -0.003696545310887334};
-   constexpr std::complex<double> C7pNP {-0.0043545893784175324, -7.9551161505564508e-05};
-   constexpr std::complex<double> C8NP {-0.17125493908345221, -0.00312854511269766};
-   constexpr std::complex<double> C8pNP {-0.0037973614617843958, -6.9371527069492648e-05};
+   constexpr std::complex<double> C7NP{-0.20238073799709574,
+                                       -4.9279075529350548e-19};
+   constexpr std::complex<double> C7pNP{-0.0043553159539678381,
+                                        -1.0605057871310188e-20};
+   constexpr std::complex<double> C8NP{-0.17128357729750623,
+                                       -1.0705011525132551e-18};
+   constexpr std::complex<double> C8pNP{-0.0037979917474274066,
+                                        -2.3736978214758859e-20};
 
    TEST_COMPLEX_CLOSE_FRACTION(C7NP,  calculated_value[0], 1e-6);
    TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 1e-6);

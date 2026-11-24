@@ -26,6 +26,9 @@
 #ifndef @ModelName@_BToSGamma_H
 #define @ModelName@_BToSGamma_H
 
+#include <array>
+#include <complex>
+
 namespace softsusy {
 class QedQcd;
 }

@@ -66,6 +66,15 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: The new physics contributions to the Wilson
+  coefficients C7, C7', C8 and C8' of :math:`b \to s \gamma` written to
+  ``WC_<model>.json`` (and ``Re(C7)`` in ``FlexibleSUSYLowEnergy``)
+  depended on the arbitrary phases of the quark mass eigenstates of the
+  model.  In CMSSMCKM their sign was wrong, so that flavio predicted the
+  wrong sign of the new physics effect on BR(B->Xsgamma), e.g. an
+  enhancement instead of a suppression in the CMSSM with mu > 0 and large
+  tan(beta).  In all models they had a spurious imaginary part of about 2%.
+
 * [commit cc0ff4d04]: The 1-loop pole masses of mixing fermions were wrong
   when their mass matrices or couplings are complex, i.e. in models with CP
   violating parameters (e.g. charginos and neutralinos with phases of M1,

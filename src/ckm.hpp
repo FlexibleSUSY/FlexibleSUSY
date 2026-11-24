@@ -56,6 +56,28 @@ struct CKM_parameters {
    double theta_12{0.}, theta_13{0.}, theta_23{0.}, delta{0.};
 };
 
+/**
+ * Returns the phase that converts the coefficient of a flavour-changing
+ * operator (dbar_out ... d_in) from the quark phase convention of a model
+ * to the convention of a reference CKM matrix (e.g. the PDG convention of
+ * the low-energy input): lambda_ref/lambda_model with lambda = V_{t,in}
+ * V_{t,out}^*, normalized to modulus 1. The quark field phases of the
+ * mass eigenstates of a model are arbitrary (from the diagonalization), so
+ * such a coefficient must be rephased before it is compared with or
+ * normalized by the reference CKM matrix.
+ *
+ * @param ckm_model CKM matrix in the quark phase convention of the model
+ * @param ckm_ref reference CKM matrix
+ * @param in generation of the incoming down-type quark
+ * @param out generation of the outgoing down-type quark
+ *
+ * @return phase factor, or 1 if lambda vanishes in either convention
+ */
+std::complex<double>
+ckm_rephasing_phase(const Eigen::Matrix<std::complex<double>, 3, 3>& ckm_model,
+                    const Eigen::Matrix<std::complex<double>, 3, 3>& ckm_ref,
+                    int in, int out);
+
 } // namespace flexiblesusy
 
 #endif

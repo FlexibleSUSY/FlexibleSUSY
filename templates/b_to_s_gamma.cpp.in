@@ -32,6 +32,7 @@
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
+#include "ckm.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "json.hpp"

@@ -192,10 +192,14 @@ Block MSOFTIN
    CMSSMCKM_slha model = setup_CMSSMCKM(input, qedqcd, settings);
 
    const auto calculated_value = CMSSMCKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
-   constexpr std::complex<double> C7NP  {-0.0053094128952261635,  -9.7025869191383121e-05};
-   constexpr std::complex<double> C7pNP {-0.00012366231966027145, -2.2598442848446435e-06};
-   constexpr std::complex<double> C8NP  {0.016490888662826098,     0.00030121451286620036};
-   constexpr std::complex<double> C8pNP {0.00038601398040478963,   7.0507444188070971e-06};
+   constexpr std::complex<double> C7NP{0.0053102909491339317,
+                                       3.0093495912708513e-08};
+   constexpr std::complex<double> C7pNP{0.0001236827894233506,
+                                        7.0276233042722173e-10};
+   constexpr std::complex<double> C8NP{-0.016494601258865899,
+                                       5.1644994775013668e-08};
+   constexpr std::complex<double> C8pNP{-0.0003861004022929475,
+                                        1.2046683222034378e-09};
 
    TEST_COMPLEX_CLOSE_FRACTION(C7NP , calculated_value[0], 6e-5);
    TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 6e-5);
