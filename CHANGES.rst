@@ -93,6 +93,11 @@ Fixed bugs
   tan(beta) = 3).  Decays into leptons of different flavours
   (tau -> mu e e) are unchanged.
 
+* [commit 641ace734]: The code generation failed for models based on a SARAH
+  submodel (e.g. ``MSSM/CPV`` in MSSMCPV, ``NMSSM/CPV`` in NMSSMCPV) when
+  the model file asked for one of the observables ``BrLTo3L``,
+  ``LToLConversion`` or ``BrDLToDL`` ("Model File does not exist!").
+
 * [commit e626fe1ff]: In models with complex Yukawa couplings or soft
   parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail
   with a "non-perturbative" problem flagged for the imaginary part of a
