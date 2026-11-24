@@ -288,7 +288,7 @@ COLLWRAP := $(LOOP_DIR)/libcollier_wrapper
 
 $(LOOP_HDR) $(LOOP_SRC) : $(COLLWRAP).a
 
-$(COLLWRAP).a : $(COLLWRAP).o $(COLLWRAP).mod
+$(COLLWRAP).a : $(COLLWRAP).o
 	$(Q)$(MSG)
 	$(Q)$(MODULE_MAKE_LIB_CMD) $@ $(COLLWRAP).o
 
