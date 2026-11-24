@@ -16,6 +16,8 @@
 #endif
 
 #include <Eigen/Core>
+#include <cmath>
+#include <limits>
 
 using namespace flexiblesusy;
 using namespace softsusy;
@@ -316,3 +318,68 @@ BOOST_AUTO_TEST_CASE( test_rkf_numerical_solution_gauge_one_loop )
 }
 
 #endif
+
+namespace
+{
+
+/// beta functions with a smooth parameter and a parameter that is pure
+/// (deterministic) rounding noise
+Eigen::ArrayXd beta_noise(double x, const Eigen::ArrayXd& parameters)
+{
+   Eigen::ArrayXd beta(parameters.size());
+   beta(0) = -0.1 * parameters(0);
+   beta(1) = 1e-11 * std::sin(1e12 * x);
+   return beta;
+}
+
+/// beta function that yields NaN
+Eigen::ArrayXd beta_nan(double /* x */, const Eigen::ArrayXd& parameters)
+{
+   Eigen::ArrayXd beta(parameters.size());
+   beta.setConstant(std::numeric_limits<double>::quiet_NaN());
+   return beta;
+}
+
+} // anonymous namespace
+
+BOOST_AUTO_TEST_CASE(test_rg_integration_error)
+{
+   Eigen::ArrayXd parameters(2);
+   parameters << 1., 1e-14;
+
+   runge_kutta::Basic_rk_integrator<Eigen::ArrayXd> integrator;
+
+   try {
+      integrator(std::log(100.), std::log(1e10), parameters, beta_noise, 1e-4);
+      BOOST_FAIL("no exception thrown");
+   } catch (const RGIntegrationError& e) {
+      BOOST_TEST_MESSAGE(e.what_detailed());
+      BOOST_CHECK_EQUAL(e.get_parameter_index(), 1);
+      BOOST_CHECK(
+         e.get_reason() == RGIntegrationError::Reason::too_many_steps ||
+         e.get_reason() == RGIntegrationError::Reason::step_size_underflow);
+   }
+
+   // existing handlers of NonPerturbativeRunningError catch it, too
+   parameters << 1., 1e-14;
+   BOOST_CHECK_THROW(
+      integrator(std::log(100.), std::log(1e10), parameters, beta_noise, 1e-4),
+      NonPerturbativeRunningError);
+}
+
+BOOST_AUTO_TEST_CASE(test_non_finite_running_is_not_rg_integration_error)
+{
+   Eigen::ArrayXd parameters(2);
+   parameters << 1., 1.;
+
+   runge_kutta::Basic_rk_integrator<Eigen::ArrayXd> integrator;
+
+   try {
+      integrator(std::log(100.), std::log(1e10), parameters, beta_nan, 1e-4);
+      BOOST_FAIL("no exception thrown");
+   } catch (const RGIntegrationError&) {
+      BOOST_FAIL("RGIntegrationError thrown for non-finite running");
+   } catch (const NonPerturbativeRunningError&) {
+      BOOST_CHECK(true);
+   }
+}

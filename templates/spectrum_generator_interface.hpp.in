@@ -190,6 +190,10 @@ void @ModelName@_spectrum_generator_interface<T>::translate_exception_to_problem
       throw;
    } catch (const NoConvergenceError&) {
       problems.flag_no_convergence();
+   } catch (const RGIntegrationError& error) {
+      model.get_problems().flag_failed_rg_integration(
+         error.get_reason_string(), error.get_parameter_index(),
+         error.get_parameter_value(), error.get_scale());
    } catch (const NonPerturbativeRunningError& error) {
       model.get_problems().flag_no_perturbative();
       model.get_problems().flag_non_perturbative_parameter(

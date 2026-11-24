@@ -42,20 +42,35 @@ The default is
 
   FSDecayParticles = Automatic;
 
-which means the CP-even, CP-odd and charged Higgs bosons.
+which means the CP-even, CP-odd and charged Higgs bosons and all BSM
+particles of the model, except particles that can't decay (massless
+particles and multiplets that contain only Goldstone bosons).
 For example, in SARAH's THDM-II, :mathematica:`Automatic` is equivalent to
 
 .. code-block:: mathematica
 
   FSDecayParticles = {hh, Ah, Hpm};
 
-:mathematica:`All` selects all particles of the model.
-Other particles can also be added to the list.
-For example, to add squark decays in SARAH's MSSM one would write
+and in SARAH's MSSM to
+
+.. code-block:: mathematica
+
+  FSDecayParticles = {hh, Ah, Hpm, Sd, Su, Se, Sv, Chi, Cha, Glu};
+
+Scalars decay at tree level or, if a decay doesn't exist at tree level, at
+one loop; fermions and vector bosons decay only at tree level.
+Additional states inside the SM fermion multiplets (e.g. vector-like
+quarks mixing with the SM quarks) aren't included, since the SM
+fermions themselves aren't.
+:mathematica:`All` selects all particles of the model, including the SM ones.
+The list can also be given explicitly, e.g. to restrict the decays to the
+Higgs bosons and the squarks in SARAH's MSSM:
 
 .. code-block:: mathematica
 
   FSDecayParticles = {hh, Ah, Hpm, Su, Sd};
+
+A shorter list makes the code generation and compilation faster.
 
 Configuration
 +++++++++++++

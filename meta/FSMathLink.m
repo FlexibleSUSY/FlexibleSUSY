@@ -266,7 +266,11 @@ CreateSpectrumDecaysEffCCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
            prototype = "virtual void calculate_normalized_effc(const Physical_input&, const softsusy::QedQcd&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) override;";
            args = "const Physical_input& physical_input, const softsusy::QedQcd& qedqcd, const Spectrum_generator_settings& settings, const FlexibleDecay_settings& flexibledecay_settings";
-           body = "normalized_higgs_effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, settings, flexibledecay_settings);\n";
+           body = "normalized_higgs_effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, settings, flexibledecay_settings);\n" <>
+                  "// HiggsTools and Lilith results of the previous couplings are outdated\n" <>
+                  "higgssignals.reset();\n" <>
+                  "higgsbounds.clear();\n" <>
+                  "lilith.reset();\n";
            function = "template <typename Solver_type>\n" <>
                       "void " <> modelName <> "_spectrum_impl<Solver_type>::calculate_normalized_effc(\n" <>
                       TextFormatting`IndentText[args <> ")\n"] <> "{\n" <>
@@ -344,16 +348,20 @@ FillDecaysSLHAData[] :=
              "slha_io.set_imnormalized_effectivecouplings_block(get_normalized_higgs_effc());\n"
           ] <>
        "}\n" <>
-       "if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
+       "// results of FS<M>CallHiggsTools and FS<M>CallLilith, if called\n" <>
+       "if (higgssignals.has_value()) {\n" <>
           TextFormatting`IndentText[
-             "const SignalResult& hs = get_higgssignals_output();\n" <>
+             "const SignalResult& hs = higgssignals.value();\n" <>
              "slha_io.set_hs_or_lilith(\"HIGGSSIGNALS\", hs.ndof, hs.chi2BSM, hs.chi2SM, hs.mhRef, hs.pval1d, hs.pval2d);\n"
           ] <>
        "}\n" <>
-       "if (flexibledecay_settings.get(FlexibleDecay_settings::call_lilith)) {\n" <>
+       "if (!higgsbounds.empty()) {\n" <>
+          TextFormatting`IndentText["slha_io.set_higgsbounds(higgsbounds);\n"] <>
+       "}\n" <>
+       "if (lilith.has_value()) {\n" <>
           TextFormatting`IndentText[
-             "const std::vector<std::tuple<int, double, double, std::string>>& hb = get_higgsbounds_output();\n" <>
-             "slha_io.set_higgsbounds(hb);\n"
+             "const SignalResult& ll = lilith.value();\n" <>
+             "slha_io.set_hs_or_lilith(\"LILITH\", ll.ndof, ll.chi2BSM, ll.chi2SM, ll.mhRef, ll.pval1d, ll.pval2d);\n"
           ] <>
        "}\n"
     ] <>

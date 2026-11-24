@@ -40,6 +40,46 @@ New features
   order and were always 0 in the output.  This makes the generated decay
   code smaller (about 17% in the THDM-II, 14% in the MSSM).
 
+* FlexibleDecay no longer generates decays that violate CP in models with
+  separate CP-even and CP-odd Higgs bosons (e.g. h -> h A, A -> h h,
+  A -> A A, H -> h Z, A -> A Z).  They were computed at 1 loop, where their
+  widths are 0 up to numerical noise (branching ratios below 1e-17).  With
+  COLLIER this cancellation could give NaN, which made ``run_LRLR.x`` abort
+  at the example point.  The generated decay code of LRLR is 33% smaller.
+  Models with a CP-violating Higgs sector (e.g. MSSMCPV) are not affected.
+
+* FlexibleDecay now calculates the decays of all BSM particles by default
+  (``FSDecayParticles = Automatic``): besides the Higgs bosons also e.g.
+  sfermions, neutralinos, charginos and the gluino in the MSSM, and Z'
+  bosons in U(1)' models.  BSM states that share a multiplet with SM
+  particles (e.g. heavy neutrinos mixing with the light ones) aren't
+  included.  Scalars decay at tree level or, if a decay doesn't exist at
+  tree level, at 1 loop; fermions and vector bosons decay at tree level.
+  The tree-level widths agree with CalcHEP at the same parameters (e.g.
+  the MSSM and the B-L-SM within 1e-4, except channels with a final-state
+  Z boson, for which FlexibleDecay uses the Z pole mass).  The generated
+  decay code is larger and takes longer to generate and compile; to
+  restrict the decays to the Higgs bosons as before, set
+  ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
+  model file.
+
+* When the RG running stops because the integrator cannot reach the
+  target scale (step size too small or too many steps) while all
+  parameters are still finite, the problem is now reported as ``RG
+  integration failed (too many steps) at Q = ... GeV, step size limited
+  by <parameter> = <value>`` (in the Mathematica interface:
+  ``FailedRGIntegration``) instead of ``non-perturbative``.  The
+  parameter that limited the step size tells the cause: a large value
+  points to a Landau pole, a tiny one (e.g. ``Im(mu2(2,2)) = 5e-15``) to
+  a numerical problem.  ``non-perturbative`` is still reported when a
+  parameter becomes infinite or NaN, or exceeds a perturbativity limit.
+
+* ``make`` shows its progress: each build step is printed as
+  ``[<step>/<total>] Building <file>``, where ``<total>`` is the number
+  of steps still to be done when the compilation starts
+  (`#104 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/104>`_).
+  The counter is switched off with ``make PROGRESS=0``.
+
 Fixed bugs
 ----------
 
@@ -50,6 +90,54 @@ Fixed bugs
   c bbar, H+ -> t sbar, t -> W+ s), and the flavour-diagonal ones (e.g.
   H+ -> t bbar) were slightly too large.  The decays now use the CKM
   matrix of the input (Block VCKMIN).
+
+* [commit e626fe1ff]: In models with complex Yukawa couplings or soft
+  parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail
+  with a "non-perturbative" problem flagged for the imaginary part of a
+  diagonal soft scalar mass, e.g. ``Im(mu2(2,2))``, which is zero, and no
+  spectrum was calculated.  Example: CMSSMCPV with m0 = 1400 GeV, m12 =
+  3500 GeV, tan(beta) = 10, A0 = -1400 GeV and a phase of 0.1 between the
+  Higgs VEVs (etaInput).  Points that worked before are unchanged within
+  the RG precision.
+
+* [commit c3a22b444]: ``FS<model>ToSLHA`` of the Mathematica interface now
+  writes the results of ``FS<model>CallHiggsTools`` and
+  ``FS<model>CallLilith`` to the blocks ``HIGGSSIGNALS``, ``HIGGSBOUNDS``
+  and ``LILITH``.  Before, with ``callHiggsTools -> 1`` it wrote a block
+  ``HIGGSSIGNALS`` with zeros, with ``callLilith -> 1`` an empty block
+  ``HIGGSBOUNDS``, and never a block ``LILITH``.  Non-ASCII characters
+  in the output, such as the χ² in comments, are no longer garbled.
+
+* [commit cc0ff4d04]: The 1-loop pole masses of mixing fermions were wrong
+  when their mass matrices or couplings are complex, i.e. in models with CP
+  violating parameters (e.g. charginos and neutralinos with phases of M1,
+  M2, M3, mu or the A-terms in MSSMCPV, NMSSMCPV and CMSSMCPV) or with
+  complex Yukawa couplings (e.g. neutrino masses in models with complex
+  neutrino Yukawas).  The results then depended on the unphysical phase
+  convention.  Example: in MSSMCPV with a phase of 60 degrees on M1, M2, M3
+  and the A-terms, the light chargino and the second neutralino were about
+  35 GeV (10%) too light.  With real parameters the masses are unchanged.
+
+* [commit 9a905bc7b]: The 2-loop QCD correction to the quark loops of the
+  decays of CP-odd (and CP-mixed) Higgs bosons into two photons had a
+  wrong coefficient.  This changed Γ(A -> γγ) when the higher-order
+  corrections are switched on (FlexibleDecay[2] > 9), by +0.95% in the
+  MSSM and +2.9% in the THDM-II at the example points, and by much more
+  for CP-odd Higgs bosons lighter than twice the top mass (e.g. a factor
+  of 2 at 300 GeV for the top loop alone).
+
+* [commit 45eac7ff3]: The decays of CP-even Higgs bosons into photons could
+  print a misleading warning that the 2-loop QCD corrections to A → γγ
+  were disabled near the quark threshold.  The results are unchanged.
+
+* [commit 8e39fcf04]: In models with a CP-violating Higgs sector (e.g. MSSMCPV,
+  NMSSMCPV), the top-quark induced O(alpha_s^2) correction to the decays
+  of the neutral Higgs bosons into up and charm quarks was wrong for the
+  CP-odd component: it was missing for (nearly) CP-odd states and could
+  be arbitrarily large for states with a small CP-even component.  In
+  MSSMCPV the width of the mostly CP-odd heavy Higgs boson into c cbar
+  (u ubar) increases by about 2.6% (8%).  Decays into down-type quarks,
+  CP-conserving models and CP-even states are not affected.
 
 * [commit 56f41d834]: The 1-loop self-energies of complex scalars (e.g. squarks
   and charged Higgs bosons) contained the contributions of four-scalar and

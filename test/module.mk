@@ -128,6 +128,7 @@ TEST_META := \
 		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
+		$(DIR)/test_MSSM_2L_mb.m \
 		$(DIR)/test_MSSM_2L_mt.m \
 		$(DIR)/test_MSSM_2L_yb_softsusy.m \
 		$(DIR)/test_MSSM_2L_yt.m \
@@ -146,6 +147,7 @@ TEST_META := \
 		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
 		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
+		$(DIR)/test_SM_higgs_loop_corrections_atab_origin.m \
 		$(DIR)/test_TestSuite.m \
 		$(DIR)/test_TextFormatting.m \
 		$(DIR)/test_THDM_threshold_corrections.m \
@@ -435,6 +437,11 @@ TEST_SRC += \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.cpp
 endif
 
+ifeq ($(WITH_GrimusNeufeld), yes)
+TEST_SRC += \
+		$(DIR)/test_GrimusNeufeld_Fv_masses.cpp
+endif
+
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 ifeq ($(WITH_CMSSM) $(WITH_CMSSMSemiAnalytic), yes yes)
 TEST_SH += \
@@ -581,11 +588,13 @@ endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecay.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp \
+		$(DIR)/test_MSSM_FlexibleDecay_ward.cpp
 endif
 endif
 
@@ -709,7 +718,8 @@ endif
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
 		$(DIR)/test_CMSSMCPV_ewsb.cpp \
-		$(DIR)/test_CMSSMCPV_edm.cpp
+		$(DIR)/test_CMSSMCPV_edm.cpp \
+		$(DIR)/test_CMSSMCPV_hermitian_beta.cpp
 endif
 ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
@@ -730,6 +740,7 @@ endif
 
 ifeq ($(WITH_MSSMCPV),yes)
 TEST_SRC += \
+		$(DIR)/test_MSSMCPV_rephasing_invariance.cpp \
 		$(DIR)/test_MSSMCPV_gluino_phase.cpp \
 		$(DIR)/test_MSSMCPV_amm_complex.cpp
 TEST_META += \
@@ -893,7 +904,7 @@ TEST_OBJ := \
 TEST_OBJ +=	$(foreach i, 1 2 3 4 5 6 7 8, $(DIR)/test_linalg2_part$(i).o)
 
 $(DIR)/test_linalg2_part%.d: $(DIR)/test_linalg2.cpp | $(DEPGEN)
-	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$(@:.d=.o)' $<
 
 $(DIR)/test_linalg2_part%.o: $(DIR)/test_linalg2.cpp
 	@$(MSG)
@@ -904,6 +915,13 @@ $(DIR)/test_linalg2_part$(i).o: | $(DIR)/test_linalg2_part$(shell echo $$(($(i)-
 
 TEST_DEP := \
 		$(TEST_OBJ:.o=.d)
+
+ifeq ($(ENABLE_META),yes)
+# Dependency files miss headers that don't exist yet (depgen -MI), such as
+# the generated headers of a model test whose .d file was created before the
+# code generation.  Recreate them after each code generation.
+$(TEST_DEP): $(addsuffix /00_DELETE_ME_TO_RERUN_METACODE,$(MODELS))
+endif
 
 TEST_EXE := \
 		$(TEST_OBJ:.o=.x)
@@ -1105,7 +1123,7 @@ ifeq ($(WITH_SM),yes)
 $(DIR)/test_SM_cxxdiagrams.o $(DIR)/test_SM_cxxdiagrams.d: CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
@@ -1119,7 +1137,7 @@ ifeq ($(ENABLE_COLLIER),yes)
 $(DIR)/test_MRSSM2_l_to_l_conversion.o $(DIR)/test_MRSSM2_l_to_l_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 $(DIR)/test_MRSSM2_l_to_l_conversion.cpp : $(DIR)/test_MRSSM2_l_to_l_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_l_to_l_conversion.cpp.in $(META_SRC)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
@@ -1131,14 +1149,14 @@ ifeq ($(WITH_SM),yes)
 $(DIR)/test_SM_npointfunctions.o $(DIR)/test_SM_npointfunctions.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_npointfunctions.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_SM_matching_selfenergy_Fd.o $(DIR)/test_SM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
@@ -1148,14 +1166,14 @@ ifeq ($(WITH_MSSM),yes)
 $(DIR)/test_MSSM_npointfunctions.o $(DIR)/test_MSSM_npointfunctions.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_MSSM_matching_selfenergy_Fd.o $(DIR)/test_MSSM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfenergy_Fd.meta $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
@@ -1169,17 +1187,23 @@ endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
+$(DIR)/test_MSSM_FlexibleDecay_ward.x: $(LIBMSSM)
+
 $(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
 
 $(DIR)/test_MSSMCPV_gluino_phase.x: $(LIBMSSMCPV)
 
 $(DIR)/test_MSSMCPV_amm_complex.x: $(LIBMSSMCPV)
 
+$(DIR)/test_MSSMCPV_rephasing_invariance.x: $(LIBMSSMCPV)
+
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
+
+$(DIR)/test_GrimusNeufeld_Fv_masses.x: $(LIBGrimusNeufeld)
 
 $(DIR)/test_MRSSM2_normalized_effc.x: $(LIBMRSSM2)
 
@@ -1244,6 +1268,8 @@ $(DIR)/test_CMSSMLowPrecision.x: $(LIBCMSSMLowPrecision)
 $(DIR)/test_CMSSMCPV_ewsb.x: $(LIBCMSSMCPV)
 
 $(DIR)/test_CMSSMCPV_edm.x: $(LIBCMSSMCPV)
+
+$(DIR)/test_CMSSMCPV_hermitian_beta.x: $(LIBCMSSMCPV)
 
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 

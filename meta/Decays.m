@@ -358,6 +358,61 @@ IsScalarToScalarAndMasslessVector[initialParticle_, finalState_List] :=
     Count[finalState, _?TreeMasses`IsScalar] === 1 &&
     Count[finalState, _?(TreeMasses`IsVector[#] && TreeMasses`IsMassless[#]&)] === 1;
 
+(* CP property of a scalar: 1 (CP-even) or -1 (CP-odd) if all its
+   states are CP eigenstates of this CP property, 0 otherwise.  SARAH
+   lists the real and imaginary parts of the scalars with a VEV as
+   CP-even and CP-odd (SA`ScalarsCPeven, SA`ScalarsCPodd); a mass
+   eigenstate that mixes both (CP-violating Higgs sector) is in both
+   lists. *)
+GetDefiniteCP[particle_] :=
+    Which[MemberQ[SA`ScalarsCPeven, particle] && !MemberQ[SA`ScalarsCPodd, particle], 1,
+          MemberQ[SA`ScalarsCPodd, particle] && !MemberQ[SA`ScalarsCPeven, particle], -1,
+          True, 0];
+
+IsNeutralMassiveVector[particle_] :=
+    TreeMasses`IsVector[particle] && !TreeMasses`IsMassless[particle] &&
+    TreeMasses`FSAntiField[particle] === particle &&
+    PossibleZeroQ[TreeMasses`GetElectricCharge[particle]];
+
+(* Returns True for a decay of a CP-even or CP-odd scalar that violates
+   CP, if the model has no tree-level vertex for it:
+
+   - S -> S1 S2 with CP(S) != CP(S1) CP(S2), such as h -> h A or
+     A -> A A;
+
+   - S -> S1 V with a neutral massive vector V and CP(S) = CP(S1), such
+     as h -> h Z or A -> A Z.  A neutral gauge boson is CP-even, and the
+     final state has L = 1, so CP(S1 V) = -CP(S1).
+
+   Splitting the neutral scalars into CP-even and CP-odd fields assumes
+   that the model conserves CP, so these decays vanish at every order.
+   Their 1-loop amplitudes cancel only numerically (BRs of 1e-17 and
+   below), and some loop functions can give NaN in this cancellation.
+   A non-zero tree-level vertex means that the model violates CP anyway,
+   so then the decay is kept.  (CP phases elsewhere in a model with
+   separate CP-even and CP-odd scalars would also induce the mixing of
+   the two at 1 loop, which such a model leaves out.) *)
+IsCPForbiddenScalarDecay[initialParticle_, finalState:{_, _}] :=
+    Module[{cpIn = GetDefiniteCP[initialParticle], cpOut, violatesCP = False},
+           If[cpIn =!= 0,
+              cpOut = Which[
+                 And @@ (TreeMasses`IsScalar /@ finalState),
+                    Times @@ (GetDefiniteCP /@ finalState),
+                 MatchQ[finalState, {_?TreeMasses`IsScalar, _?IsNeutralMassiveVector} |
+                                    {_?IsNeutralMassiveVector, _?TreeMasses`IsScalar}],
+                    -GetDefiniteCP[First @ Select[finalState, TreeMasses`IsScalar]],
+                 True, 0
+              ];
+              violatesCP = cpOut =!= 0 && cpOut =!= cpIn;
+           ];
+           violatesCP &&
+              !Vertices`IsNonZeroVertex[Join[{TreeMasses`FSAntiField[initialParticle]}, finalState]]
+          ];
+
+IsCPForbiddenScalarDecay[_, _List] := False;
+
+Utils`MakeUnknownInputDefinition[IsCPForbiddenScalarDecay];
+
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
     Vertices`IsNonZeroVertex[fields, useDependences];
 
@@ -584,6 +639,7 @@ GetFinalStatesForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFin
                                             IsColorInvariantDecay[particle, finalState] &&
                                             !FinalStateContainsInitialState[particle, finalState] &&
                                             !IsScalarToScalarAndMasslessVector[particle, finalState] &&
+                                            !IsCPForbiddenScalarDecay[particle, finalState] &&
                                             (* e.g. R-parity: skips searching diagrams that can't exist *)
                                             !Vertices`ViolatesGlobalSymmetryQ[Join[{TreeMasses`FSAntiField[particle]}, finalState]]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
@@ -1555,7 +1611,12 @@ FieldFromDiagram[diagram_, {i_, j_}] :=
    {vertex1, vertex2} -> concrete particle connecting vertex1 and 2 (e.g. Fe)
    This is the core function that allows matching between diagram at mathematica and C++
    level. *)
-(* @todo: not clear about the conjugation of particle *)
+(* The orientation (particle or antiparticle) of the fields on the edges
+   is fixed together with GetFieldsAssociations.  Checked numerically: all
+   decay widths of MSSMCPV (complex couplings) are invariant under a
+   rephasing of the fields (to 1e-8), the Ward identity of S -> gamma gamma
+   and S -> gamma Z holds there too, and each generated diagram, with its
+   charge-flow orientation, exists in FeynArts (PR #705). *)
 InsertionsOnEdgesForDiagram[topology_, insertion_] :=
    Module[{sortedVertexCombinations, connectedVertices, res},
 
@@ -1631,7 +1692,11 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
          LorentzProduct[_, PL] -> "left()",
          LorentzProduct[_, PR] -> "right()",
 
-         (* @todo: rules below need checking! *)
+         (* The rules below are checked by the Ward identity of the 1-loop
+            amplitudes S -> gamma gamma and S -> gamma Z with consistent
+            tree-level masses (test_MSSM_FlexibleDecay_ward), which use
+            triple- and four-vector, momentum-difference, ghost and
+            scalar-scalar-vector-vector vertices in Feynman gauge. *)
          (* momentum difference vertices *)
          Mom[i1_Integer] - Mom[i2_Integer] :>
             "value(" <> ToString[i1-1] <> ", " <> ToString[i2-1] <> ")",
@@ -1702,7 +1767,9 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
    GetFieldsAssociations returns translation in the form
    {Field[1] -> hh, Field[2] -> SRdp, Field[3] -> VWm, Field[4] -> SRdp, Field[5] -> Hpm, Field[6] -> VZ}
 
-   @todo: There is an ambiguity whether Field[n] -> somefield or Field[n] -> AntiField[somefield]
+   Whether Field[n] is the field or its antifield is fixed by the orientation
+   of the edge (see InsertionsOnEdgesForDiagram), checked by the rephasing
+   invariance of the MSSMCPV decays.
 *)
 GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldTypes_, diagram_, verticesInFieldTypesForFACp_] :=
    Module[{i, temp = {}, concreteFieldOnEdgeBetweenVerticesLocal},
@@ -1780,6 +1847,39 @@ WrapCodeInLoop[indices_, checks_, code_] :=
          "}\n",
          #-1
          ]& /@ Reverse@Range@Length[indices]));
+
+(* Symmetry factor S_gen/S_class of a diagram with the given internal lines.
+
+   The generic expressions contain 1/S_gen, the symmetry factor of the generic
+   diagram, which counts two lines between the same vertices, or a line that
+   closes on one vertex, as interchangeable. Whether they are depends on the
+   fields: S_class is 2 only if they are identical self-conjugate fields.
+   This reproduces RelativeCF of FeynArts.
+
+   edges            - list of {vertex1, vertex2} -> Field[n] of the generic diagram
+   fieldAssociation - list of Field[n] -> field rules of the insertion *)
+SymmetryFactorForInsertion[edges_List, fieldAssociation_List] :=
+   Module[{internal, baseField, selfConjugateQ, selfLoops, bubbles, l1, l2},
+      (* vertices 1, 2 and 3 are the external ones *)
+      internal = Cases[edges, ({a_, b_} -> f_) /; a > 3 && b > 3 :> {{a, b}, f}];
+      baseField[f_] := (f /. fieldAssociation) /. SARAH`bar | Susyno`LieGroups`conj -> Identity;
+      selfConjugateQ[f_] := SARAH`AntiField[baseField[f]] === baseField[f];
+      selfLoops = Cases[internal, {{a_, a_}, f_} :> f];
+      bubbles = Select[GatherBy[internal, Sort[First[#]]&], Length[#] === 2&];
+      Which[
+         selfLoops =!= {},
+            If[selfConjugateQ[First[selfLoops]], 1, 2],
+         bubbles =!= {},
+            l1 = bubbles[[1, 1, 2]];
+            l2 = bubbles[[1, 2, 2]];
+            Which[
+               GetFeynArtsTypeName[baseField[l1]] =!= GetFeynArtsTypeName[baseField[l2]], 1,
+               baseField[l1] === baseField[l2] && selfConjugateQ[l1], 1,
+               True, 2
+            ],
+         True, 1
+      ]
+   ];
 
 WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    Module[{(*vertices, *)indices, cppVertices,
@@ -1970,14 +2070,25 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                                  ])&, verticesForFACp]," &&\n"]
                               ] <>
                               ") {\n" <>
-                              "const auto correction_S = 1. + get_alphas(context)/Pi * delta_hAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
-                              "const auto correction_P = 1. + get_alphas(context)/Pi * delta_AhAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
-                              "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
-                              "temp_result.form_factor_11  = correction_S * temp_result.form_factor_11;\n" <>
-                              "temp_result.form_factor_12  = correction_S * temp_result.form_factor_12;\n" <>
-                              "temp_result.form_factor_21  = correction_S * temp_result.form_factor_21;\n" <>
-                              "temp_result.form_factor_22  = correction_S * temp_result.form_factor_22;\n" <>
-                              "temp_result.form_factor_eps = correction_P * temp_result.form_factor_eps;\n"
+                              (* the CP-even (CP-odd) correction only applies to the
+                                 CP-even (CP-odd) form factors, so a pure CP-even
+                                 (CP-odd) scalar needs only one of them; this also
+                                 avoids the A -> gamma gamma threshold warning in the
+                                 decays of CP-even scalars *)
+                              With[{initial = GetInitialState[decay] /. Susyno`LieGroups`conj|SARAH`bar -> Identity},
+                                 If[MemberQ[SA`ScalarsCPodd, initial] && !MemberQ[SA`ScalarsCPeven, initial], "",
+                                    "const auto correction_S = 1. + get_alphas(context)/Pi * delta_hAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
+                                    "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
+                                    "temp_result.form_factor_11  = correction_S * temp_result.form_factor_11;\n" <>
+                                    "temp_result.form_factor_12  = correction_S * temp_result.form_factor_12;\n" <>
+                                    "temp_result.form_factor_21  = correction_S * temp_result.form_factor_21;\n" <>
+                                    "temp_result.form_factor_22  = correction_S * temp_result.form_factor_22;\n"
+                                 ] <>
+                                 If[MemberQ[SA`ScalarsCPeven, initial] && !MemberQ[SA`ScalarsCPodd, initial], "",
+                                    "const auto correction_P = 1. + get_alphas(context)/Pi * delta_AhAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
+                                    "temp_result.form_factor_eps = correction_P * temp_result.form_factor_eps;\n"
+                                 ]
+                              ]
                            ] <> "}\n" <>
                            "result += temp_result;\n",
                            (* colored scalar loop *)
@@ -2070,15 +2181,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
          (* diagram symmetry factor *)
           "\nstatic constexpr double " <> ToString@symmetryFac <> " {" <>
              ToString @
-               N[With[{topoName = FeynArtsTopologyName[topology]},
-
-                (* weird FA factor *)
-                If[MemberQ[{"T2", "T3", "T4", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
-                If[topoName === "T9" || topoName === "T8",
-                   If[(Field[5] /. fieldAssociation) === (SARAH`AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
-                   1
-                ]
-               ],16] <>
+               N[SymmetryFactorForInsertion[translation[[3]], fieldAssociation], 16] <>
          "};\n" <>
 
          (* color factor *)

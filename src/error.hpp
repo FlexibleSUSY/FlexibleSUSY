@@ -160,7 +160,8 @@ public:
    virtual ~NonPerturbativeRunningError() = default;
    std::string what_detailed() const override {
       if (parameter_index == -1) {
-         return "NonPerturbativeRunningError: scale Q = " + std::to_string(value);
+         return "NonPerturbativeRunningError: scale Q = " +
+                std::to_string(scale);
       }
 
       return "NonPerturbativeRunningError: non-perturbative running of parameter "
@@ -174,10 +175,85 @@ public:
    int get_parameter_index() const { return parameter_index; }
    double get_parameter_value() const { return value; }
    double get_scale() const { return scale; }
+
+protected:
+   NonPerturbativeRunningError(const std::string& msg, double scale_,
+                               int parameter_index_, double value_)
+      : Error(msg), scale(scale_), value(value_),
+        parameter_index(parameter_index_)
+   {
+   }
+
 private:
    double scale; ///< renormalization scale
    double value; ///< value of parameter that becomes non-perturbative
    int parameter_index; ///< index of parameter that becomes non-perturbative
+};
+
+/**
+ * @class RGIntegrationError
+ * @brief The RG integrator could not reach the target scale
+ *
+ * Thrown when the step size of the RG integrator becomes too small or
+ * the maximum number of steps is exceeded, while all parameters are
+ * still finite. This happens close to a Landau pole, but also when a
+ * parameter (e.g. one that is analytically zero) consists of rounding
+ * noise, which the step size control cannot integrate to the requested
+ * relative precision. The parameter index and value refer to the
+ * parameter that limited the step size: a large value hints at a
+ * Landau pole, a tiny one at a numerical problem.
+ *
+ * It is derived from NonPerturbativeRunningError, so that handlers of
+ * the latter catch it, too.
+ */
+class RGIntegrationError : public NonPerturbativeRunningError
+{
+public:
+   enum class Reason {
+      step_size_underflow, ///< step size became too small
+      too_many_steps,      ///< maximum number of steps exceeded
+   };
+
+   /**
+    * Constructor.
+    *
+    * @param reason_ reason why the integration failed
+    * @param scale_ renormalization scale reached
+    * @param parameter_index_ index of the parameter that limited the step size
+    * @param value_ value of this parameter at scale_
+    */
+   RGIntegrationError(Reason reason_, double scale_, int parameter_index_,
+                      double value_)
+      : NonPerturbativeRunningError("RG integration failed: " +
+                                       to_string(reason_),
+                                    scale_, parameter_index_, value_),
+        reason(reason_)
+   {
+   }
+   ~RGIntegrationError() override = default;
+   std::string what_detailed() const override
+   {
+      return "RGIntegrationError: " + to_string(reason) + " at scale " +
+             std::to_string(get_scale()) + ", step size limited by parameter " +
+             std::to_string(get_parameter_index()) + " = " +
+             std::to_string(get_parameter_value());
+   }
+   Reason get_reason() const { return reason; }
+   std::string get_reason_string() const { return to_string(reason); }
+
+   static std::string to_string(Reason r)
+   {
+      switch (r) {
+      case Reason::step_size_underflow:
+         return "step size too small";
+      case Reason::too_many_steps:
+         return "too many steps";
+      }
+      return "unknown reason";
+   }
+
+private:
+   Reason reason; ///< reason why the integration failed
 };
 
 class NonPerturbativeRunningQedQcdError : public Error {
