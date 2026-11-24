@@ -301,7 +301,9 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 
 $(COLLWRAP).f90 : $(COLLWRAP).cpp
 	$(Q)$(MSG)
-	$(Q)$(CXX) -E $< | tr '@' '\n' > $@
+	$(Q)rm -f $@; \
+	$(CXX) -E $< > $@.E && tr '@' '\n' < $@.E > $@.tmp && mv -f $@.tmp $@; \
+	status=$$?; rm -f $@.E $@.tmp; exit $$status
 
 LIBAUX += \
 	$(COLLWRAP).a
