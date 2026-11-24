@@ -115,6 +115,10 @@ Module[{
             LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
             LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
          };
+         (* vector boson propagator at q^2 = 0 also in the penguins with a
+            self-energy on an external leg (see BrDLToDL) *)
+         npf = npf /. Plus[Power[m_[_[{_}]], 2], Times[-1, Power[m_[v_NPointFunctions`GenericV], 2]]] :>
+            -m[v]^2;
 
          {npf, operatorRules} = match@npf;
          extraVertices = NPointFunctions`VerticesForNPointFunction@npf;
