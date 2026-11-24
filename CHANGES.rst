@@ -83,6 +83,11 @@ New features
 Fixed bugs
 ----------
 
+* [commit 947f73834]: With LoopTools as loop library (``FlexibleSUSY[31] = 2``)
+  the branching ratios of l -> 3l (``BrLTo3L``) and the l -> l conversion
+  rates (``LToLConversion``) were NaN as soon as lepton flavour was
+  violated.  They now agree with the results obtained with COLLIER.
+
 * [commit e626fe1ff]: In models with complex Yukawa couplings or soft
   parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail
   with a "non-perturbative" problem flagged for the imaginary part of a
