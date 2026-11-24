@@ -265,12 +265,14 @@ Building a FlexibleSUSY model
 
        make
 
-   Use ``make -j<N>`` to use ``<N>`` CPU cores.  When ``make`` is
-   executed, Mathematica is called, which generates the C++ code for
-   the specified models.  All C++ source files are written to the
-   directory ``models/<model>/``.  When ``make`` has finished, the
-   following spectrum generator(s) are available for each specified
-   model:
+   Use ``make -j<N>`` to use ``<N>`` CPU cores.  Each build step is
+   printed with a counter ``[<step>/<total>]`` (switched off with
+   ``make PROGRESS=0``), and ``make VERBOSE=1`` prints the commands.
+   When ``make`` is executed, Mathematica is called, which generates
+   the C++ code for the specified models.  All C++ source files are
+   written to the directory ``models/<model>/``.  When ``make`` has
+   finished, the following spectrum generator(s) are available for
+   each specified model:
 
    * ``models/<model>/run_<model>.x``: command line spectrum generator
    * ``models/<model>/run_<model>.m``: Mathematica interface

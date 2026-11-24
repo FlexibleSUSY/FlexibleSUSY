@@ -74,8 +74,22 @@ New features
   a numerical problem.  ``non-perturbative`` is still reported when a
   parameter becomes infinite or NaN, or exceeds a perturbativity limit.
 
+* ``make`` shows its progress: each build step is printed as
+  ``[<step>/<total>] Building <file>``, where ``<total>`` is the number
+  of steps still to be done when the compilation starts
+  (`#104 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/104>`_).
+  The counter is switched off with ``make PROGRESS=0``.
+
 Fixed bugs
 ----------
+
+* [commit c3a22b444]: ``FS<model>ToSLHA`` of the Mathematica interface now
+  writes the results of ``FS<model>CallHiggsTools`` and
+  ``FS<model>CallLilith`` to the blocks ``HIGGSSIGNALS``, ``HIGGSBOUNDS``
+  and ``LILITH``.  Before, with ``callHiggsTools -> 1`` it wrote a block
+  ``HIGGSSIGNALS`` with zeros, with ``callLilith -> 1`` an empty block
+  ``HIGGSBOUNDS``, and never a block ``LILITH``.  Non-ASCII characters
+  in the output, such as the χ² in comments, are no longer garbled.
 
 * [commit cc0ff4d04]: The 1-loop pole masses of mixing fermions were wrong
   when their mass matrices or couplings are complex, i.e. in models with CP

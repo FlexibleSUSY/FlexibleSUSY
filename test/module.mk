@@ -893,7 +893,7 @@ TEST_OBJ := \
 TEST_OBJ +=	$(foreach i, 1 2 3 4 5 6 7 8, $(DIR)/test_linalg2_part$(i).o)
 
 $(DIR)/test_linalg2_part%.d: $(DIR)/test_linalg2.cpp | $(DEPGEN)
-	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$(@:.d=.o)' $<
 
 $(DIR)/test_linalg2_part%.o: $(DIR)/test_linalg2.cpp
 	@$(MSG)
@@ -904,6 +904,13 @@ $(DIR)/test_linalg2_part$(i).o: | $(DIR)/test_linalg2_part$(shell echo $$(($(i)-
 
 TEST_DEP := \
 		$(TEST_OBJ:.o=.d)
+
+ifeq ($(ENABLE_META),yes)
+# Dependency files miss headers that don't exist yet (depgen -MI), such as
+# the generated headers of a model test whose .d file was created before the
+# code generation.  Recreate them after each code generation.
+$(TEST_DEP): $(addsuffix /00_DELETE_ME_TO_RERUN_METACODE,$(MODELS))
+endif
 
 TEST_EXE := \
 		$(TEST_OBJ:.o=.x)
@@ -1105,7 +1112,7 @@ ifeq ($(WITH_SM),yes)
 $(DIR)/test_SM_cxxdiagrams.o $(DIR)/test_SM_cxxdiagrams.d: CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
@@ -1119,7 +1126,7 @@ ifeq ($(ENABLE_COLLIER),yes)
 $(DIR)/test_MRSSM2_l_to_l_conversion.o $(DIR)/test_MRSSM2_l_to_l_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 $(DIR)/test_MRSSM2_l_to_l_conversion.cpp : $(DIR)/test_MRSSM2_l_to_l_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_l_to_l_conversion.cpp.in $(META_SRC)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
@@ -1131,14 +1138,14 @@ ifeq ($(WITH_SM),yes)
 $(DIR)/test_SM_npointfunctions.o $(DIR)/test_SM_npointfunctions.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_npointfunctions.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_SM_matching_selfenergy_Fd.o $(DIR)/test_SM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
@@ -1148,14 +1155,14 @@ ifeq ($(WITH_MSSM),yes)
 $(DIR)/test_MSSM_npointfunctions.o $(DIR)/test_MSSM_npointfunctions.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 $(DIR)/test_MSSM_matching_selfenergy_Fd.o $(DIR)/test_MSSM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfenergy_Fd.meta $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
-	@$(MSG)
+	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
