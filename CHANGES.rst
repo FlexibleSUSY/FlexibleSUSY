@@ -83,6 +83,11 @@ New features
 Fixed bugs
 ----------
 
+* [commit 947f73834]: With LoopTools as loop library (``FlexibleSUSY[31] = 2``)
+  the branching ratios of l -> 3l (``BrLTo3L``) and the l -> l conversion
+  rates (``LToLConversion``) were NaN as soon as lepton flavour was
+  violated.  They now agree with the results obtained with COLLIER.
+
 * [commit 0fa9c3004]: The branching ratios of lepton flavour violating decays
   into three leptons of the same flavour (mu -> 3e, tau -> 3mu, tau -> 3e;
   observable ``BrLTo3L``) were wrong whenever Z penguins or box diagrams
