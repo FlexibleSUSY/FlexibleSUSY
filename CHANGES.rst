@@ -73,8 +73,9 @@ New features
   semi-leptonic coefficients are also added to ``WC_<model>.json``, so that
   flavio predicts e.g. BR(Bs->mumu) from it (see
   ``utils/calc_flavio_observables.py``).  It is
-  calculated by default for :math:`b \to s \mu\mu` in CMSSMCKM and
-  MRSSM2CKM.  Z penguins (``Vectors``) can be switched on, but are not yet
+  calculated by default for :math:`b \to s \mu\mu` and
+  :math:`b \to s ee` (needed for :math:`R_K`, :math:`R_{K^*}`) in CMSSMCKM
+  and MRSSM2CKM.  Z penguins (``Vectors``) can be switched on, but are not yet
   reliable, as they don't decouple.
 
 * When the RG running stops because the integrator cannot reach the

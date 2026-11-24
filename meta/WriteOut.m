@@ -579,9 +579,19 @@ WriteSLHABlockEntry[tuple___] :=
           ""
          ];
 
+(* key of an FWCOEF/IMFWCOEF entry: fermions, operator, order and model *)
+FLHAEntryKey[entry_String] := Take[StringSplit[entry, ","], UpTo[5]];
+
 WriteSLHABlock[{blockName_, tuples_List}, scale_String:"model.get_scale()"] :=
-    Module[{blockNameStr},
+    Module[{blockNameStr, entries},
            blockNameStr = ToString[blockName];
+           entries = Flatten[WriteSLHABlockEntry[blockNameStr, #]& /@ tuples];
+           (* several observables can write the same Wilson coefficient,
+              e.g. C7 of b -> s mu mu and b -> s e e: write it once, as
+              readers of FLHA files add up repeated entries *)
+           If[MemberQ[{"FWCOEF", "IMFWCOEF"}, blockNameStr],
+              entries = DeleteDuplicatesBy[entries, FLHAEntryKey];
+             ];
            "{\n" <>
            TextFormatting`IndentText[
                "std::ostringstream block;\n" <>
@@ -591,7 +601,7 @@ WriteSLHABlock[{blockName_, tuples_List}, scale_String:"model.get_scale()"] :=
                   "\""
                  ] <>
                " << '\\n'\n" <>
-               StringJoin[WriteSLHABlockEntry[blockNameStr, #]& /@ tuples] <> ";\n" <>
+               StringJoin[entries] <> ";\n" <>
                "slha_io.set_block(block);\n"
            ] <>
            "}\n"

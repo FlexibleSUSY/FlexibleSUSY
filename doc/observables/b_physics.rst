@@ -38,10 +38,16 @@ NPointFunctions [2402.14630]_ by adding
     ExtraSLHAOutputBlocks = {
         ...
         {FWCOEF, {
-                {1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Scalars, Boxes}, 1]}
+                {1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Scalars, Boxes}, 1]},
+                {2, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[1]} -> {Fd[2], Fe[1]}, {Scalars, Boxes}, 1]}
             }
-        }
+        },
+        {IMFWCOEF, { (* the same entries *) }}
     };
+
+calculates :math:`b \to s \mu\mu` and :math:`b \to s ee`. Both are needed
+for lepton-universality ratios such as :math:`R_K` and :math:`R_{K^*}`:
+coefficients that are missing are taken as zero by flavio.
 
 The first argument gives the incoming and outgoing down-type quark and the
 lepton, the second the contributions to calculate and the third the loop
@@ -129,10 +135,14 @@ This will result in an output like
 
 .. code-block:: bash
 
-    BR(B->Xsgamma)       = 3.188840e-04   SM: 3.309692e-04   ratio: 0.963485
-    BR(Bs->mumu)         = 4.678855e-09   SM: 3.628931e-09   ratio: 1.289320
+    BR(B->Xsgamma)           = 3.188819e-04   SM: 3.309692e-04   ratio: 0.963479
+    BR(Bs->mumu)             = 4.679011e-09   SM: 3.628931e-09   ratio: 1.289363
+    <Rmue>(B+->Kll):1.1:6    = 1.000773e+00   SM: 1.000416e+00   ratio: 1.000357
+    <Rmue>(B0->K*ll):1.1:6   = 9.967237e-01   SM: 9.964532e-01   ratio: 1.000271
 
-Other flavio observables can be given after the file name. The older script
+Other flavio observables can be given after the file name; arguments such as
+a :math:`q^2` bin are appended with colons, e.g. ``'<Rmue>(B+->Kll):1.1:6'``.
+The older script
 ``calc_b_to_s_gamma.py`` only calculates BR(B->Xsgamma).
 
 .. [1008.0762] Flavour Les Houches Accord, `arxiv:1008.0762 <https://arxiv.org/abs/1008.0762>`_
