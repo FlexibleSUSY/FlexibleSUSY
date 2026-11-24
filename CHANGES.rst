@@ -66,7 +66,7 @@ New features
 Fixed bugs
 ----------
 
-* [commit XXXXXXXXX]: ``FS<model>ToSLHA`` of the Mathematica interface now
+* [commit c3a22b444]: ``FS<model>ToSLHA`` of the Mathematica interface now
   writes the results of ``FS<model>CallHiggsTools`` and
   ``FS<model>CallLilith`` to the blocks ``HIGGSSIGNALS``, ``HIGGSBOUNDS``
   and ``LILITH``.  Before, with ``callHiggsTools -> 1`` it wrote a block
