@@ -24,7 +24,6 @@
 #include <complex>
 
 #include "lowe.h"
-#include "test_complex_equality.hpp"
 
 #include "MRSSM2CKM_two_scale_spectrum_generator.hpp"
 
@@ -199,13 +198,31 @@ Block MSOFTIN
    auto model = std::get<0>(spectrum_generator.get_models_slha());
 
    const auto calculated_value = MRSSM2CKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
-   constexpr std::complex<double> C7NP {-0.20234697574469934, -0.003696545310887334};
-   constexpr std::complex<double> C7pNP {-0.0043545893784175324, -7.9551161505564508e-05};
-   constexpr std::complex<double> C8NP {-0.17125493908345221, -0.00312854511269766};
-   constexpr std::complex<double> C8pNP {-0.0037973614617843958, -6.9371527069492648e-05};
+   constexpr std::complex<double> C7NP{-0.20238073799709574,
+                                       -4.9279075529350548e-19};
+   constexpr std::complex<double> C7pNP{-0.0043553159539678381,
+                                        -1.0605057871310188e-20};
+   constexpr std::complex<double> C8NP{-0.17128357729750623,
+                                       -1.0705011525132551e-18};
+   constexpr std::complex<double> C8pNP{-0.0037979917474274066,
+                                        -2.3736978214758859e-20};
 
-   TEST_COMPLEX_CLOSE_FRACTION(C7NP,  calculated_value[0], 1e-6);
-   TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 1e-6);
-   TEST_COMPLEX_CLOSE_FRACTION(C8NP,  calculated_value[2], 1e-5);
-   TEST_COMPLEX_CLOSE_FRACTION(C8pNP, calculated_value[3], 1e-5);
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C7NP), std::real(calculated_value[0]),
+                              1e-6);
+   // the imaginary parts vanish up to the phase difference of the CKM
+   // matrices, so they are compared with the modulus
+   BOOST_CHECK_SMALL(std::imag(calculated_value[0]) - std::imag(C7NP),
+                     1e-6 * std::abs(C7NP));
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C7pNP), std::real(calculated_value[1]),
+                              1e-6);
+   BOOST_CHECK_SMALL(std::imag(calculated_value[1]) - std::imag(C7pNP),
+                     1e-6 * std::abs(C7pNP));
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C8NP), std::real(calculated_value[2]),
+                              1e-5);
+   BOOST_CHECK_SMALL(std::imag(calculated_value[2]) - std::imag(C8NP),
+                     1e-5 * std::abs(C8NP));
+   BOOST_CHECK_CLOSE_FRACTION(std::real(C8pNP), std::real(calculated_value[3]),
+                              1e-5);
+   BOOST_CHECK_SMALL(std::imag(calculated_value[3]) - std::imag(C8pNP),
+                     1e-5 * std::abs(C8pNP));
 }

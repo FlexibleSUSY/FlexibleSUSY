@@ -68,6 +68,35 @@ New features
   ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
   model file.
 
+* ``BrDLToDL`` calculates also :math:`b \to s \nu\bar{\nu}` when the
+  lepton is a neutrino: the coefficients :math:`C_L, C_R` of the flavio
+  basis are written to ``WC_<model>.json`` (so that flavio predicts e.g.
+  :math:`\text{BR}(B \to K^{(*)} \nu\bar{\nu})`) and to the FLHA blocks
+  ``FWCOEF``, ``IMFWCOEF``. Enabled for the three neutrino flavours in
+  CMSSMCKM and MRSSM2CKM. ``utils/calc_flavio_observables.py`` calculates
+  :math:`\text{BR}(B^+ \to K^+ \nu\bar{\nu})` and
+  :math:`\text{BR}(B^0 \to K^{*0} \nu\bar{\nu})` by default.
+
+* New observable ``BrDLToDL``: the 1-loop Wilson coefficients of
+  :math:`d_i \ell \to d_j \ell` (e.g. :math:`b \to s \mu\mu`) from box
+  diagrams, Z and scalar penguins and the photon penguin.  The coefficients C7,
+  C8, C9, C10, CS, CP and their primed counterparts (flavio/SuperIso
+  normalization) are written to the blocks ``FWCOEF`` and ``IMFWCOEF`` of
+  the Flavour Les Houches Accord, which SuperIso reads.  For
+  :math:`b \to s \ell\ell` and :math:`b \to d \ell\ell` the
+  semi-leptonic coefficients are also added to ``WC_<model>.json``, so that
+  flavio predicts e.g. BR(Bs->mumu) from it (see
+  ``utils/calc_flavio_observables.py``).  It is
+  calculated by default for :math:`b \to s \mu\mu` and
+  :math:`b \to s ee` (needed for :math:`R_K`, :math:`R_{K^*}`) in CMSSMCKM
+  and MRSSM2CKM.  Diagrams with a W boson and a new particle in the loop, such as
+  the W-charged Higgs boxes, which change :math:`C_S` and :math:`C_P` by up
+  to 10-20% at large tan(beta), are included.  The coefficients contain only the new
+  physics part: diagrams with only Standard Model-like fields, including the
+  CP-even Higgs boson with the mass closest to ``FlexibleSUSYInput[1]``,
+  are left out (see
+  ``doc/observables/b_physics.rst``).
+
 * When the RG running stops because the integrator cannot reach the
   target scale (step size too small or too many steps) while all
   parameters are still finite, the problem is now reported as ``RG
@@ -87,6 +116,15 @@ New features
 
 Fixed bugs
 ----------
+
+* [commit XXXXXXXXX]: The new physics contributions to the Wilson
+  coefficients C7, C7', C8 and C8' of :math:`b \to s \gamma` written to
+  ``WC_<model>.json`` (and ``Re(C7)`` in ``FlexibleSUSYLowEnergy``)
+  depended on the arbitrary phases of the quark mass eigenstates of the
+  model.  In CMSSMCKM their sign was wrong, so that flavio predicted the
+  wrong sign of the new physics effect on BR(B->Xsgamma), e.g. an
+  enhancement instead of a suppression in the CMSSM with mu > 0 and large
+  tan(beta).  In all models they had a spurious imaginary part of about 2%.
 
 * [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
   mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points

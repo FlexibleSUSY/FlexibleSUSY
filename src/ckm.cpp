@@ -308,4 +308,23 @@ void CKM_parameters::to_pdg_convention(Eigen::Matrix<std::complex<double>,3,3>& 
    ckm = Vu * Vd.adjoint();
 }
 
+std::complex<double>
+ckm_rephasing_phase(const Eigen::Matrix<std::complex<double>, 3, 3>& ckm_model,
+                    const Eigen::Matrix<std::complex<double>, 3, 3>& ckm_ref,
+                    int in, int out)
+{
+   const std::complex<double> lambda_model =
+      ckm_model(2, in) * std::conj(ckm_model(2, out));
+   const std::complex<double> lambda_ref =
+      ckm_ref(2, in) * std::conj(ckm_ref(2, out));
+
+   if (std::abs(lambda_model) == 0. || std::abs(lambda_ref) == 0.) {
+      return {1., 0.};
+   }
+
+   const std::complex<double> ratio = lambda_ref / lambda_model;
+
+   return ratio / std::abs(ratio);
+}
+
 } // namespace flexiblesusy

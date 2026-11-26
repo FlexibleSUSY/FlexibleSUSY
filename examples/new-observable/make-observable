@@ -89,10 +89,6 @@ in
               copythings
               echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FlexibleSUSYLowEnergy,{{1, FlexibleSUSYObservable`HiggsTo2Gluons[hh -> {VG, VG}, All]}}}};' >> ${FSMODELDIR}
               ;;
-   example-5) EXAMPLEDIR=btosmumu
-              copythings
-              echo '(*REMOVE*)ExtraSLHAOutputBlocks = {{FWCOEF,{{1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Boxes}, 1]}}}};' >> ${FSMODELDIR}
-              ;;
    clean-all) cleanall
               ;;
    *) exit 0;

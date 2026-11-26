@@ -28,6 +28,7 @@ BeginPackage["BtoSGamma`",
 ];
 
 CreateInterfaceBtoSGamma::usage = "Creates the c++ interface for b->s gamma";
+CreateModelCKM::usage = "CreateModelCKM[obj] returns a C++ expression for the CKM matrix in the quark phase convention of the model (mass eigenstates), where obj is the prefix to access the model, e.g. \"model.\"";
 GetBottomQuark::usage="Returns bottom quark";
 GetStrangeQuark::usage="Returns strange quark";
 
@@ -55,6 +56,19 @@ GetStrangeQuark[] := If[TreeMasses`GetDimension[TreeMasses`GetSMStrangeQuarkMult
  * \note We assume that in the quark multiplet the b quark is the 3rd
  * and the s quark is the 2nd element.
  **)
+CreateModelCKM::errArg = "CreateModelCKM: unexpected argument `1`.";
+CreateModelCKM[obj_String] :=
+   If[MemberQ[Parameters`GetOutputParameters[], SARAH`DownMatrixL] &&
+      MemberQ[Parameters`GetOutputParameters[], SARAH`UpMatrixL] &&
+      SARAH`getDimParameters[SARAH`DownMatrixL] === {3,3} &&
+      SARAH`getDimParameters[SARAH`UpMatrixL] === {3,3},
+      "Eigen::Matrix<std::complex<double>,3,3>(" <>
+         obj <> "get_" <> CConversion`ToValidCSymbolString[SARAH`UpMatrixL] <> "() * " <>
+         obj <> "get_" <> CConversion`ToValidCSymbolString[SARAH`DownMatrixL] <> "().adjoint())",
+      "Eigen::Matrix<std::complex<double>,3,3>::Identity()"
+   ];
+CreateModelCKM[args___] := Utils`AssertOrQuit[False, CreateModelCKM::errArg, {args}];
+
 CreateInterfaceBtoSGamma[matchingOn_] :=
   Module[{definition="",
           inFermion = GetBottomQuark[],
@@ -90,9 +104,12 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
         If[dimensionInFermion =!= 1,
             "b_quark_index, s_quark_index, ", ""] <>
 	    "model, discard_SM_contribution);\n\n" <>
+        "// convert from the quark phase convention of the model to the one of\n" <>
+        "// the CKM matrix of the low-energy input, which normalizes the coefficients\n" <>
+        "const auto phase = ckm_rephasing_phase(" <> CreateModelCKM["context.model."] <> ", complex_CKM, 2, 1);\n\n" <>
         "// choose normalization according to flavio\n" <>
-        "const auto normC7 = -16*Sqr(Pi)*Sqr(mW)/(unit_charge(context)*Sqr(g2)*Vtb*Conj(Vts));\n" <>
-        "const auto normC8 = -16*Sqr(Pi)*Sqr(mW)/(g3*Sqr(g2)*Vtb*Conj(Vts));\n" <>
+        "const auto normC7 = -16*Sqr(Pi)*Sqr(mW)/(unit_charge(context)*Sqr(g2)*Vtb*Conj(Vts)) * phase;\n" <>
+        "const auto normC8 = -16*Sqr(Pi)*Sqr(mW)/(g3*Sqr(g2)*Vtb*Conj(Vts)) * phase;\n" <>
         "const auto C7NP_bs = normC7 * form_factors_VP[3];\n" <>
         "const auto C7pNP_bs = normC7 * form_factors_VP[2];\n" <>
         "const auto C8NP_bs = normC8 * form_factors_VG[3];\n" <>

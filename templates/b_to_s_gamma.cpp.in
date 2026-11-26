@@ -25,16 +25,16 @@
 
 #include <array>
 #include <complex>
-#include <fstream>
 
 #include "@ModelName@_b_to_s_gamma.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
+#include "ckm.hpp"
 #include "lowe.h"
+#include "wcxf.hpp"
 #include "wrappers.hpp"
-#include "json.hpp"
 
 
 #define MODELPARAMETER(p) context.model.get_##p()
@@ -48,26 +48,20 @@ using namespace @ModelName@_FFV_form_factors;
 namespace @ModelName@_b_to_s_gamma {
 
 /**
- * @brief Writes the Wilson coefficients into a json file to make it usable
- *        for the wilson and flavio package
+ * @brief Writes the Wilson coefficients into the json file
+ *        WC_@ModelName@.json (WCxf format, flavio basis), which the
+ *        wilson and flavio packages read
  */
 void write_wilsoncoeffs(const std::complex<double>& C7NP_bs, const std::complex<double>& C7pNP_bs,
    const std::complex<double>& C8NP_bs, const std::complex<double>& C8pNP_bs,
-   const double& matching_scale)
+   double matching_scale)
 {
-   nlohmann::json j;
-   j["eft"] = "WET";
-   j["basis"] = "flavio";
-   j["scale"] = matching_scale;
-   j["values"] = {
-      {"C7_bs",  {{"Re", Re(C7NP_bs)},  {"Im", Im(C7NP_bs)}}},
-      {"C7p_bs", {{"Re", Re(C7pNP_bs)}, {"Im", Im(C7pNP_bs)}}},
-      {"C8_bs",  {{"Re", Re(C8NP_bs)},  {"Im", Im(C8NP_bs)}}},
-      {"C8p_bs", {{"Re", Re(C8pNP_bs)}, {"Im", Im(C8pNP_bs)}}}
-   };
-   std::ofstream wc_json("WC_@ModelName@.json");
-   wc_json << std::setw(4) << j << std::endl;
-   wc_json.close();
+   wcxf::update_json_flavio("WC_@ModelName@.json", matching_scale, {
+      {"C7_bs",  C7NP_bs},
+      {"C7p_bs", C7pNP_bs},
+      {"C8_bs",  C8NP_bs},
+      {"C8p_bs", C8pNP_bs}
+   });
 }
 
 /**

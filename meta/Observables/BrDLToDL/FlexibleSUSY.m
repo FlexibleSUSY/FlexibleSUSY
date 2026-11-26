@@ -10,8 +10,10 @@ Module[
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
       observables = DeleteDuplicates[observables /. f_@_Integer -> f@_];
       fieldsFFV   = Cases[observables, Rule[{q_[_], _}, _] :> q, Infinity];
-      verticesFFV = Cases[observables, Rule[{_, l_[_]}, _] :> {SARAH`bar@l, l, TreeMasses`GetPhoton[]}, Infinity];
-      {additionalVertices, npfDefinitions, prototypes, definitions} = create@observables;
+      (* neutral leptons (neutrinos) don't couple to the photon *)
+      verticesFFV = Cases[observables, Rule[{_, l_[_]}, _] /; TreeMasses`IsElectricallyCharged[l] :>
+         {SARAH`bar@l, l, TreeMasses`GetPhoton[]}, Infinity];
+      {additionalVertices, npfDefinitions, prototypes, definitions} = Create@observables;
       npfHeaders  = NPointFunctions`CreateCXXHeaders[];
    ];
 
@@ -22,6 +24,9 @@ Module[
          "@calculate_definitions@" -> definitions,
          "@npf_headers@"           -> npfHeaders,
          "@npf_definitions@"       -> npfDefinitions,
+         "@model_ckm@"             -> BtoSGamma`CreateModelCKM["model."],
+         "@g3@"                    -> CConversion`ToValidCSymbolString@SARAH`strongCoupling,
+         "@HiggsBoson@"            -> CConversion`ToValidCSymbolString@TreeMasses`GetHiggsBoson[],
          "@include_guard@"         -> SymbolName@obs,
          "@namespace@"             -> Observables`GetObservableNamespace@obs,
          "@filename@"              -> Observables`GetObservableFileName@obs,
@@ -35,14 +40,14 @@ Module[
    }
 ];
 
-create[manyObservables:{__FlexibleSUSYObservable`BrDLToDL}] := {
+Create[manyObservables:{__FlexibleSUSYObservable`BrDLToDL}] := {
    DeleteDuplicates[Join@@#[[All,1]]],
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
-}&[create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
+}&[Create/@DeleteDuplicates[manyObservables /. Rule[_Integer, _Integer] -> Rule[_, _]]];
 
-create[obs:FlexibleSUSYObservable`BrDLToDL[{qd_[_], lep_[_]} -> _, contr_, loopN_]] :=
+Create[obs:FlexibleSUSYObservable`BrDLToDL[{qd_[_], lep_[_]} -> _, contr_, loopN_]] :=
 Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
    keep, npf, fields, sp, dc, basis},
    keep = If[Head@contr === List, contr, {contr}];
@@ -59,12 +64,23 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
       NPointFunctions`Observable          -> obs,
       NPointFunctions`KeepProcesses       -> keep
    ];
+   (* Products of external momenta k_i.k_j (FormCalc's abbreviations PairN,
+      e.g. from the tensor coefficients of the W-H+ boxes) are of the order
+      of the external masses squared and vanish at zero external momenta. *)
+   npf = npf /. s_Symbol /; StringMatchQ[SymbolName@s, "Pair" ~~ DigitCharacter..] :> 0;
    npf = npf /. {
       SARAH`sum[__] -> 0,
       LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
       LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
       LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
    };
+   (* In the penguins with a self-energy on an external quark leg the quark
+      mass is kept (needed for the leg), which also puts it into the vector
+      boson propagator, 1/(m_q^2 - m_V^2). Evaluate the propagator at q^2 = 0
+      as in the vertex penguins: the UV divergences of the vertex and leg
+      diagrams cancel only then, and the result decouples. *)
+   npf = npf /. Plus[Power[m_[_[{_}]], 2], Times[-1, Power[m_[v_NPointFunctions`GenericV], 2]]] :>
+      -m[v]^2;
    fields = Flatten@NPointFunctions`GetProcess@npf;
    sp[i_] := SARAH`DiracSpinor[fields[[i]], 0, 0];
    dc[a_, b__, c_] := NPointFunctions`DiracChain[sp@a, b, sp@c];
@@ -94,19 +110,22 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
             "@Qd@"    -> CConversion`ToValidCSymbolString@qd,
             "@Lep@"   -> CConversion`ToValidCSymbolString@lep,
             "@Ph@"    -> CConversion`ToValidCSymbolString@SARAH`Photon,
+            "@G@"     -> CConversion`ToValidCSymbolString@SARAH`Gluon,
             "@loopN@" -> CConversion`ToValidCSymbolString@loopN,
             "@contr@" -> CConversion`ToValidCSymbolString@contr,
             "@class@" -> "@Qd@@Lep@_to_@Qd@@Lep@_@contr@@loopN@",
-            "@photon_penguin@" -> If[loopN === 1, "calculate_@Qd@_@Qd@_@Ph@_form_factors", "zero"]
+            "@photon_penguin@" -> If[loopN === 1, "calculate_@Qd@_@Qd@_@Ph@_form_factors", "zero"],
+            "@gluon_penguin@" -> If[loopN === 1, "calculate_@Qd@_@Qd@_@G@_form_factors", "zero"]
          }
       ]&,
       {
-         prototype <> " {
+         StringReplace[prototype, " = Physical_input()" -> ""] <> " {
          return forge<
             fields::@Qd@, fields::@Lep@, fields::@Ph@,
             @photon_penguin@,
+            @gluon_penguin@,
             npointfunctions::@class@
-         >(qi, qo, li, model, qedqcd);\n}",
+         >(qi, qo, li, model, qedqcd, physical_input);\n}",
          npfDefinition
       }
    ];

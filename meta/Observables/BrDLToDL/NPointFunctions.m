@@ -16,18 +16,26 @@ diagrams[0, Absent] = {
    }
 };
 
+(* Diagrams with W or Z bosons in the loop are kept: e.g. the W-H+ boxes, which
+   form a gauge-independent set with the G+-H+ boxes (Feynman gauge).  Diagrams
+   whose loop fields are all SM (W-top, G+-top, ...) are skipped in the
+   generated sums.  Photons and gluons in the loop only appear in SM diagrams
+   (QED/QCD corrections, infrared divergent at zero momenta) and are removed.
+   Boxes with two vector bosons (W-W) are SM-only in the MSSM; their Dirac
+   structure isn't reduced to the operator basis, so they are removed. *)
 diagrams[1, Present] = {
    Vectors -> {
       penguinT -> {"remove external quarks", FreeQ[LoopFields@##, FieldPattern[#, 1|3]]&},
-      penguinT -> {"remove loop vectors", FreeQ[LoopFields@##, FeynArts`V]&}
+      penguinT -> {"remove massless loop vectors", FreeQ[LoopFields@##, v:FeynArts`V[__] /; FeynArts`TheMass[v] === 0]&}
    },
    Scalars -> {
       penguinT -> {"remove external quarks", FreeQ[LoopFields@##, FieldPattern[#, 1|3]]&},
-      penguinT -> {"remove loop vectors", FreeQ[LoopFields@##, FeynArts`V]&}
+      penguinT -> {"remove massless loop vectors", FreeQ[LoopFields@##, v:FeynArts`V[__] /; FeynArts`TheMass[v] === 0]&}
    },
    Boxes -> {
       boxAll -> {"remove external quarks", FreeQ[LoopFields@##, FieldPattern[#, 1|2|3|4]]&},
-      boxAll -> {"remove loop vectors", FreeQ[LoopFields@##, FeynArts`V]&}
+      boxAll -> {"remove massless loop vectors", FreeQ[LoopFields@##, v:FeynArts`V[__] /; FeynArts`TheMass[v] === 0]&},
+      boxAll -> {"remove boxes with two loop vectors", Count[LoopFields@##, FeynArts`V[__], Infinity] < 2&}
    }
 };
 
@@ -75,5 +83,6 @@ chains[1] = {
 };
 
 mass[1] = {
-   inSelfT -> {"keep initial quark mass untouched", Hold :> ExternalMass[1]}
+   inSelfT -> {"keep initial quark mass untouched", Hold :> ExternalMass[1]},
+   outSelfT -> {"keep final quark mass untouched", Hold :> ExternalMass[3]}
 };

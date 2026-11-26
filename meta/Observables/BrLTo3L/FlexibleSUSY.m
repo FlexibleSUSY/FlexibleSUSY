@@ -16,7 +16,7 @@ Module[
       fermions =     {SARAH`bar@#, #} &/@ observables[[All, 1]];
       ffvV = Flatten/@Tuples@{fermions, {TreeMasses`GetPhoton[]}};
 
-      {npfV, npfDefinitions, obsPrototypes, obsDefinitions} = create@observables;
+      {npfV, npfDefinitions, obsPrototypes, obsDefinitions} = Create@observables;
    ];
 
    WriteOut`ReplaceInFiles[files,
@@ -38,14 +38,14 @@ Module[
    }
 ];
 
-create[manyObservables:{__FlexibleSUSYObservable`BrLTo3L}] := {
+Create[manyObservables:{__FlexibleSUSYObservable`BrLTo3L}] := {
    DeleteDuplicates[Join@@#[[All,1]]],
    StringRiffle[#[[All, 2]], "\n\n"],
    StringRiffle[#[[All, 3]], "\n\n"],
    StringRiffle[#[[All, 4]], "\n\n"]
-}&[create/@DeleteDuplicates[manyObservables /. Rule[_, {_, _, _}] -> Rule[_, {_, _, _}]]];
+}&[Create/@DeleteDuplicates[manyObservables /. Rule[_, {_, _, _}] -> Rule[_, {_, _, _}]]];
 
-create[obs:FlexibleSUSYObservable`BrLTo3L[lep_, __, loopN_]] :=
+Create[obs:FlexibleSUSYObservable`BrLTo3L[lep_, __, loopN_]] :=
 Module[{npfVertices = {}, npfCode = "", prototype, definition, scalars, vectors, boxes},
    {{npfVertices, npfCode}, {scalars, vectors, boxes}} = generate@obs;
 
