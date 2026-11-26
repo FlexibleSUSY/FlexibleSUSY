@@ -1,5 +1,8 @@
 Begin@"FlexibleSUSY`Private`";
 
+FlexibleSUSYObservable`LToLConversion::errNucleus =
+   "Unknown nucleus `1` in LToLConversion. Supported nuclei: Al, Au, Ti.";
+
 WriteClass[obs:FlexibleSUSYObservable`LToLConversion, slha_, files_] :=
 Module[{
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
@@ -27,6 +30,12 @@ Module[{
 
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
+
+      (* nuclei with overlap integrals and capture rates in l_to_l_conversion.cpp.in *)
+      Utils`AssertOrQuit[
+         MatchQ[#, _Symbol] && MemberQ[{"Al", "Au", "Ti"}, SymbolName@#],
+         FlexibleSUSYObservable`LToLConversion::errNucleus, #
+      ]&/@ observables[[All, 3]];
 
       fieldsFFV = {#, #} &/@ observables[[All, 1]];
       verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
