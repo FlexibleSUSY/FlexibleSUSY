@@ -138,7 +138,8 @@ overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd&
    // get muon pole mass from input slha file
    const auto muon_pole_mass_5o2 = pow(qedqcd.displayMass(softsusy::mMuon), 5./2.);
 
-   // Tab. 2 of hep-ph/0203110
+   // Tab. 2 of hep-ph/0203110 (neutron densities from pionic atoms); Ti is
+   // not in it, so its values are from Tab. 4 (from proton scattering)
    switch (N) {
       case Nucleus::Au:
          res.D  = 0.1670 * muon_pole_mass_5o2;
@@ -154,17 +155,28 @@ overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd&
          res.Sp = 0.0153 * muon_pole_mass_5o2;
          res.Sn = 0.0163 * muon_pole_mass_5o2;
          return res;
+      case Nucleus::Ti:
+         res.D  = 0.0870 * muon_pole_mass_5o2;
+         res.Vp = 0.0399 * muon_pole_mass_5o2;
+         res.Vn = 0.0495 * muon_pole_mass_5o2;
+         res.Sp = 0.0371 * muon_pole_mass_5o2;
+         res.Sn = 0.0462 * muon_pole_mass_5o2;
+         return res;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }
 }
 
+/// muon capture rate in GeV, from table 8 of hep-ph/0203110 (in 1/s)
 double get_capture_rate (const Nucleus N) {
+   constexpr double hbar = 6.582119569e-25; // [GeV*s]
    switch (N) {
       case Nucleus::Au:
-         return 8.84868e-18;
+         return 13.07e6 * hbar;
       case Nucleus::Al:
-         return 4.64079e-19;
+         return 0.7054e6 * hbar;
+      case Nucleus::Ti:
+         return 2.59e6 * hbar;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }
@@ -325,7 +337,7 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
    const auto DR = - 0.5 * form_factors[3];
    const auto CXYu = - photon_u - npf_u;
    const auto CXYd = - photon_d - npf_d;
-   const auto CXYs = - photon_s - npf_d;
+   const auto CXYs = - photon_s - npf_s;
 
    auto CSLu = ( CXYu[0] + CXYu[1] )/2.;
    auto CSRu = ( CXYu[2] + CXYu[3] )/2.;
@@ -388,8 +400,15 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
    }
 
    const auto ff = get_overlap_integrals(nucleus, qedqcd);
-   const auto left  = DR*ff.D/4. - gpLV*ff.Vp - gnLV*ff.Vn - gpRS*ff.Sp - gnRS*ff.Sn;
-   const auto right = DL*ff.D/4. - gpRV*ff.Vp - gnRV*ff.Vn - gpLS*ff.Sp - gnLS*ff.Sn;
+   // The dipole overlap integral D of hep-ph/0203110 contains the electric
+   // field of the nucleus for their covariant derivative D = d - i Q e A
+   // (photon vertex of the electron Q e = -e). Under A -> -A the dipole
+   // coefficients change sign, the four-fermion coefficients don't. So the
+   // dipole term changes sign if the electron's photon vertex is +e in the
+   // model, i.e. if unit_charge(context) > 0.
+   const double dipole_sign = unit_charge(context) < 0 ? 1. : -1.;
+   const auto left  = dipole_sign*DR*ff.D/4. - gpLV*ff.Vp - gnLV*ff.Vn - gpRS*ff.Sp - gnRS*ff.Sn;
+   const auto right = dipole_sign*DL*ff.D/4. - gpRV*ff.Vp - gnRV*ff.Vn - gpLS*ff.Sp - gnLS*ff.Sn;
 
    // eq. (3.31) of 1902.06650 (with some coefficient redefinitions)
    const double conversion_rate = 4*(std::norm(left) + std::norm(right));
