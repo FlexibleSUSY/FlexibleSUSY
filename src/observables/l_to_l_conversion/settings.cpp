@@ -35,7 +35,7 @@ const std::array<std::string, LToLConversion_settings::NUMBER_OF_OPTIONS> descri
    "scalar form factor G^S_{p,d} without masses",
    "scalar form factor G^S_{n,d} without masses",
    "scalar form factor G^S_{p,s} without masses",
-   "scalar form factor G^T_{n,s} without masses",
+   "scalar form factor G^S_{n,s} without masses",
    "vector form factor G^V_{p,u}",
    "vector form factor G^V_{n,u}",
    "vector form factor G^V_{p,d}",

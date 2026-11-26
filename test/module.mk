@@ -743,6 +743,10 @@ TEST_SRC += \
 		$(DIR)/test_MSSMCPV_amm_complex.cpp
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
+ifeq ($(ENABLE_COLLIER),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSMCPV_mu_e_conversion.cpp
+endif
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
@@ -1202,6 +1206,8 @@ $(DIR)/test_MSSMCPV_amm_complex.x: $(LIBMSSMCPV)
 $(DIR)/test_MSSMCPV_rephasing_invariance.x: $(LIBMSSMCPV)
 
 $(DIR)/test_MSSMCPV_rephasing_observables.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_mu_e_conversion.x: $(LIBMSSMCPV)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
