@@ -43,9 +43,10 @@ void @ModelName@_physical::convert_to_hk()
 }
 
 /**
- * Convert masses and mixing matrices to SLHA convention: Fermion
- * mixing matrices are always real and fermion masses are allowed to
- * be negative.
+ * Convert masses and mixing matrices to SLHA convention: Majorana
+ * fermion mixing matrices are made real and the masses are allowed to
+ * be negative.  If CP is violated, so that a mixing matrix can't be made
+ * real, its masses stay positive and the mixing matrix complex (SLHA2).
  */
 void @ModelName@_physical::convert_to_slha()
 {

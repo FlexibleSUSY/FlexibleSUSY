@@ -552,6 +552,62 @@ BOOST_AUTO_TEST_CASE(test_slha_mixing_matrix_convention_rounding_noise)
    BOOST_CHECK_EQUAL((eigenvalues < 0.).count(), 1);
 }
 
+// A complex symmetric mass matrix (CP violation) can't be diagonalized by a
+// real mixing matrix: the masses must stay positive and the mixing matrix
+// unchanged (SLHA2 convention for CP violation), and has_imaginary_part()
+// must report it, so that its imaginary part is written to the SLHA output.
+BOOST_AUTO_TEST_CASE(test_slha_mixing_matrix_convention_cp_violation)
+{
+   using C = std::complex<double>;
+   Eigen::Matrix<C, 3, 3> mass_matrix;
+   // clang-format off
+   mass_matrix << C(300., 50.),  C(0.),  C(-40.),
+                  C(0.),         C(600.), C(50., -20.),
+                  C(-40.),       C(50., -20.), C(-200., 30.);
+   // clang-format on
+
+   Eigen::Array<double, 3, 1> eigenvalues;
+   Eigen::Matrix<C, 3, 3> Z;
+   fs_diagonalize_symmetric(mass_matrix, eigenvalues, Z);
+
+   const Eigen::Array<double, 3, 1> eigenvalues_hk(eigenvalues);
+   const Eigen::Matrix<C, 3, 3> Z_hk(Z);
+
+   convert_symmetric_fermion_mixings_to_slha(eigenvalues, Z);
+
+   BOOST_CHECK((eigenvalues == eigenvalues_hk).all());
+   BOOST_CHECK(Z == Z_hk);
+   BOOST_CHECK((eigenvalues > 0.).all());
+   BOOST_CHECK(has_imaginary_part(Z));
+
+   // the mixing matrix still diagonalizes the mass matrix: M = Z^T m Z
+   const Eigen::Matrix<C, 3, 3> reconstructed =
+      Z.transpose() * eigenvalues.matrix().cast<C>().asDiagonal() * Z;
+
+   for (int i = 0; i < 3; i++) {
+      for (int k = 0; k < 3; k++) {
+         BOOST_CHECK_SMALL(std::abs(reconstructed(i, k) - mass_matrix(i, k)),
+                           1e-10);
+      }
+   }
+
+   // 1x1 case: a complex phase that is not a multiple of Pi/2
+   double m1 = 100.;
+   Eigen::Matrix<C, 1, 1> z1;
+   z1(0, 0) = std::polar(1., 1.);
+   const auto z1_hk = z1;
+   convert_symmetric_fermion_mixings_to_slha(m1, z1);
+   BOOST_CHECK_EQUAL(m1, 100.);
+   BOOST_CHECK(z1 == z1_hk);
+   BOOST_CHECK(has_imaginary_part(z1));
+
+   // real matrices and rounding noise are not reported
+   BOOST_CHECK(!has_imaginary_part(Eigen::Matrix<double, 2, 2>::Identity()));
+   Eigen::Matrix<C, 2, 2> noisy = Eigen::Matrix<C, 2, 2>::Identity();
+   noisy(0, 1) = C(0., 1e-15);
+   BOOST_CHECK(!has_imaginary_part(noisy));
+}
+
 template<int N>
 void convert_symmetric_fermion_mixings_to_slha_forloop(
    Eigen::Array<double, N, 1>& m,
