@@ -100,6 +100,17 @@ Fixed bugs
   ``FlexibleSUSY[16] = 1`` (positive Majorana masses) the output was
   correct.
 
+* [commit XXXXXXXXX]: At points with CP violation in the neutralino
+  (Majorana fermion) sector, e.g. complex mu or gaugino masses in
+  MSSMCPV or NMSSMCPV, the SLHA output contained only the real parts of
+  the mixing matrices (``NMIX``), so the neutralino mixing couldn't be
+  reconstructed from it, and some of the masses in ``MASS`` were
+  negative.  The imaginary parts (``IMNMIX``) were only written with
+  ``FlexibleSUSY[16] = 1``.  Now, when a mixing matrix can't be made
+  real, its masses are positive and its imaginary part is written too,
+  as SLHA2 asks for the CP-violating case.  Points without CP violation
+  are written as before.
+
 * [commit XXXXXXXXX]: The Z-penguin contributions to mu -> e conversion
   (``LToLConversion``) and l -> 3l (``BrLTo3L``) didn't decouple when the
   new particles are heavy.  This affects these observables with the

@@ -25,6 +25,7 @@
 #include "@ModelName@_physical.hpp"
 #include "ew_input.hpp"
 #include "logger.hpp"
+#include "mixings.hpp"
 #include "observable_problems.hpp"
 #include "observable_problems_format_slha.hpp"
 #include "numerics2.hpp"
