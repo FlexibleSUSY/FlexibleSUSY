@@ -1,5 +1,8 @@
 Begin@"FlexibleSUSY`Private`";
 
+FlexibleSUSYObservable`LToLConversion::errNucleus =
+   "Unknown nucleus `1` in LToLConversion. Supported nuclei: Al, Au, Ti.";
+
 WriteClass[obs:FlexibleSUSYObservable`LToLConversion, slha_, files_] :=
 Module[{
       observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@slha, _obs],
@@ -27,6 +30,12 @@ Module[{
 
    If[observables =!= {} && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
+
+      (* nuclei with overlap integrals and capture rates in l_to_l_conversion.cpp.in *)
+      Utils`AssertOrQuit[
+         MatchQ[#, _Symbol] && MemberQ[{"Al", "Au", "Ti"}, SymbolName@#],
+         FlexibleSUSYObservable`LToLConversion::errNucleus, #
+      ]&/@ observables[[All, 3]];
 
       fieldsFFV = {#, #} &/@ observables[[All, 1]];
       verticesFFV = Flatten/@Tuples@{{SARAH`bar@#, #}&/@TreeMasses`GetSMQuarks[], {TreeMasses`GetPhoton[]}};
@@ -128,6 +137,10 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD, parsed},
       LoopTools`C0i[i_, Repeated[_, {3}], mm__] :> LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
       LoopTools`D0i[i_, Repeated[_, {6}], mm__] :> LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]
    };
+   (* vector boson propagator at q^2 = 0 also in the penguins with a
+      self-energy on an external leg (see BrDLToDL) *)
+   {npfU, npfD} = {npfU, npfD} /.
+      Plus[Power[m_[_[{_}]], 2], Times[-1, Power[m_[v_NPointFunctions`GenericV], 2]]] :> -m[v]^2;
 
    fields[SARAH`UpQuark] = Flatten@NPointFunctions`GetProcess@npfU;
    fields[SARAH`DownQuark] = Flatten@NPointFunctions`GetProcess@npfD;

@@ -581,6 +581,10 @@ ifeq ($(WITH_MSSM),yes)
 TEST_SH += \
 		$(DIR)/test_standalone.sh
 endif
+ifeq ($(WITH_MSSM) $(ENABLE_COLLIER),yes yes)
+TEST_SH += \
+		$(DIR)/test_MSSM_br_l_to_3l.sh
+endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
@@ -666,6 +670,10 @@ ifeq ($(WITH_MSSM),yes)
 TEST_SRC += \
 		$(DIR)/test_MSSM_npointfunctions.cpp \
 		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
+ifeq ($(ENABLE_COLLIER),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSM_lfv_decoupling.cpp
+endif
 endif
 endif
 
@@ -741,14 +749,20 @@ TEST_SRC += \
 		$(DIR)/test_MSSMCPV_amm_complex.cpp
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
+ifeq ($(ENABLE_COLLIER),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSMCPV_mu_e_conversion.cpp
+endif
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp
+		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp \
+		$(DIR)/test_MSSMCPV_rephasing_observables.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp
+		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp \
+		$(DIR)/test_MSSMCPV_rephasing_observables.cpp
 endif
 endif
 endif
@@ -1059,6 +1073,8 @@ $(DIR)/test_looplibrary_environment.sh.xml : $(DIR)/test_looplibrary_environment
 
 $(DIR)/test_lowMSSM.sh.xml: $(RUN_CMSSM_EXE) $(RUN_lowMSSM_EXE)
 
+$(DIR)/test_MSSM_br_l_to_3l.sh.xml: $(EXEMSSM_EXE)
+
 $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
 
 $(DIR)/test_CMSSM_NMSSM_linking.x: $(LIBCMSSM) $(LIBNMSSM)
@@ -1168,6 +1184,8 @@ $(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(D
 
 $(DIR)/test_MSSM_matching_selfenergy_Fd.o $(DIR)/test_MSSM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+
+$(DIR)/test_MSSM_lfv_decoupling.x: $(LIBMSSM)
 $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfenergy_Fd.meta $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
 	@$(MSG_NO_PROGRESS)
 	@$(TEST_MSG)
@@ -1192,6 +1210,10 @@ $(DIR)/test_MSSMCPV_gluino_phase.x: $(LIBMSSMCPV)
 $(DIR)/test_MSSMCPV_amm_complex.x: $(LIBMSSMCPV)
 
 $(DIR)/test_MSSMCPV_rephasing_invariance.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_rephasing_observables.x: $(LIBMSSMCPV)
+
+$(DIR)/test_MSSMCPV_mu_e_conversion.x: $(LIBMSSMCPV)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 

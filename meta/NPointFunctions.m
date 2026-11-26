@@ -346,9 +346,10 @@ With[{currentPath = $Path,
       metaDir = FlexibleSUSY`$flexiblesusyMetaDir,
       sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
       sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
-      SARAHModelName = If[SARAH`submodeldir =!= False,
-         SARAH`modelDir <> "-" <> SARAH`submodeldir,
-         SARAH`modelDir
+      (* arguments of SARAH`Start: {model} or {model, submodel} *)
+      sarahStartArguments = If[SARAH`submodeldir =!= False,
+         {SARAH`modelDir, SARAH`submodeldir},
+         {SARAH`modelDir}
       ],
       eigenstates = FlexibleSUSY`FSEigenstates
    },
@@ -358,7 +359,7 @@ With[{currentPath = $Path,
       $Path = currentPath;
       SetDirectory@currentDir;
       Get@FileNameJoin@{metaDir, "NPointFunctions", "MakeModelFile.m"};
-      NPointFunctions`MakeModelFile[sarahInputDirs,sarahOutputDir, SARAHModelName, eigenstates];,
+      NPointFunctions`MakeModelFile[sarahInputDirs,sarahOutputDir, sarahStartArguments, eigenstates];,
       kernel,
       DistributedContexts -> None
    ];

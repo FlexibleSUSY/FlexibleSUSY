@@ -4,6 +4,11 @@ FlexibleSUSY 2.9.1 [November, ?? 2026]
 New features
 ------------
 
+* MSSMCPV now also calculates BR(mu -> 3e) and the mu -> e conversion rate
+  in aluminium (``FlexibleSUSYLowEnergy`` entries 31 and 41), as MSSM
+  does, so that these lepton flavour violating observables can be studied
+  with complex parameters.
+
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
 
@@ -105,6 +110,71 @@ Fixed bugs
   wrong sign of the new physics effect on BR(B->Xsgamma), e.g. an
   enhancement instead of a suppression in the CMSSM with mu > 0 and large
   tan(beta).  In all models they had a spurious imaginary part of about 2%.
+
+* [commit XXXXXXXXX]: The mu -> e conversion rates (``LToLConversion``)
+  had the photon dipole contribution with the wrong sign relative to the
+  other contributions (photon monopole, Z penguins, boxes, scalars), so
+  their interference had the wrong sign.  This affects all models with
+  ``LToLConversion`` (e.g. MSSM, MSSMCPV, MRSSM2) wherever the dipole is
+  not the only large contribution.  In the MSSM with mixing of the
+  right-handed selectron and smuon (tan(beta) = 3, sleptons at 800 GeV,
+  mu = 200 to 3000 GeV) the rate in aluminium was too small by factors 4
+  to 27, or too large by factors 3 to 270 where the contributions cancel;
+  at tan(beta) = 20 and 50 it was 30% and 15% too small.  The rates now
+  agree with those from the Wilson coefficients of SARAH/SPheno
+  (FlavorKit) to 10% away from strong cancellations.
+
+* [commit XXXXXXXXX]: The scalar contribution of the strange quark to the
+  mu -> e conversion rates (``LToLConversion``) was calculated with the
+  coefficient of the down quark.  This changes Higgs-mediated
+  contributions, e.g. the rate by 5% in the MSSM at tan(beta) = 50 and
+  m_A = 400 GeV.  Also the muon capture rate of gold was that of lead, so
+  the conversion rate in gold was 3% too small (in aluminium the rate
+  changes by 0.05% from a more precise conversion of the capture rate to
+  GeV).
+
+* [commit XXXXXXXXX]: Mu -> e conversion in titanium
+  (``LToLConversion[..., Ti, ...]`` in the model file) generated code that
+  compiled but threw an exception at run time, as the overlap integrals
+  and the capture rate of titanium were missing, so the rate wasn't
+  calculated.  They are now taken from hep-ph/0203110.  A nucleus other
+  than Al, Au and Ti is now reported during the code generation instead
+  of giving C++ code that doesn't compile.
+
+* [commit XXXXXXXXX]: The Z-penguin contributions to mu -> e conversion
+  (``LToLConversion``) and l -> 3l (``BrLTo3L``) didn't decouple when the
+  new particles are heavy.  This affects these observables with the
+  contributions ``All`` or ``Vectors``, e.g. in the MSSM model file.  In a
+  CMSSM-like scenario with slepton flavour mixing (m0 = m1/2 = M, A0 = 0,
+  tan(beta) = 10) CR(mu -> e, Al) was too large by a factor 11 for
+  M = 3 TeV and 1200 for M = 10 TeV, BR(mu -> 3e) by 1.2 and 20; at
+  tan(beta) = 40 the errors are larger.  At M = 1 TeV the conversion rate
+  changes by 7%.  The results now agree with SARAH/SPheno as well as
+  BR(mu -> e gamma) does (10-50%).
+
+* [commit XXXXXXXXX]: ``LToLConversion`` and ``BrLTo3L`` in the blocks
+  ``FWCOEF`` or ``IMFWCOEF`` with a list of contributions, e.g.
+  ``{Vectors, Boxes}``, produced C++ code that doesn't compile.
+
+* [commit 947f73834]: With LoopTools as loop library (``FlexibleSUSY[31] = 2``)
+  the branching ratios of l -> 3l (``BrLTo3L``) and the l -> l conversion
+  rates (``LToLConversion``) were NaN as soon as lepton flavour was
+  violated.  They now agree with the results obtained with COLLIER.
+
+* [commit 0fa9c3004]: The branching ratios of lepton flavour violating decays
+  into three leptons of the same flavour (mu -> 3e, tau -> 3mu, tau -> 3e;
+  observable ``BrLTo3L``) were wrong whenever Z penguins or box diagrams
+  contribute noticeably: the box diagrams were treated as penguins and
+  vice versa.  In the MSSM with lepton flavour violating slepton masses
+  BR(mu -> 3e) changes by about 1% where the photon dipole dominates and
+  by up to about 10% otherwise (e.g. -11% with me2(1,2) = 1500 GeV^2 and
+  tan(beta) = 3).  Decays into leptons of different flavours
+  (tau -> mu e e) are unchanged.
+
+* [commit 641ace734]: The code generation failed for models based on a SARAH
+  submodel (e.g. ``MSSM/CPV`` in MSSMCPV, ``NMSSM/CPV`` in NMSSMCPV) when
+  the model file asked for one of the observables ``BrLTo3L``,
+  ``LToLConversion`` or ``BrDLToDL`` ("Model File does not exist!").
 
 * [commit e626fe1ff]: In models with complex Yukawa couplings or soft
   parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail

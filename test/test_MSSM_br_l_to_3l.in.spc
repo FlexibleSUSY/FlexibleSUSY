@@ -1,0 +1,145 @@
+Block MODSEL                 # Select model
+    6   0                    # flavour violation
+#   12    1000                # DRbar parameter output scale (GeV)
+Block FlexibleSUSY
+    0   1.000000000e-04      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
+    3   0                    # calculate SM pole masses
+    4   2                    # pole mass loop order
+    5   2                    # EWSB loop order
+    6   3                    # beta-functions loop order
+    7   2                    # threshold corrections loop order
+    8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
+   12   0                    # force output
+   13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L, 3 = 4L)
+   14   1.000000000e-11      # beta-function zero threshold
+   15   1                    # calculate all observables
+   16   0                    # force positive majorana masses
+   17   0                    # pole mass renormalization scale (0 = SUSY scale)
+   18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
+   19   0                    # EFT matching scale (0 = SUSY scale)
+   20   2                    # EFT loop order for upwards matching
+   21   1                    # EFT loop order for downwards matching
+   22   0                    # EFT index of SM-like Higgs in the BSM model
+   23   1                    # calculate BSM pole masses
+   24   123111321            # individual threshold correction loop orders
+   25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
+   26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
+   27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
+   28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
+   29   1                    # Higgs 3-loop corrections O(alpha_t^3)
+   30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+   31   1                    # loop library (1 = COLLIER)
+   32   2                    # loop level to calculate AMM
+Block SMINPUTS               # Standard Model inputs
+    1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
+    3   1.176000000e-01      # alpha_s(MZ) SM MSbar
+    4   9.118760000e+01      # MZ(pole)
+    5   4.200000000e+00      # mb(mb) SM MSbar
+    6   1.733000000e+02      # mtop(pole)
+    7   1.777000000e+00      # mtau(pole)
+    8   0.000000000e+00      # mnu3(pole)
+   11   5.109989020e-04      # melectron(pole)
+   12   0.000000000e+00      # mnu1(pole)
+   13   1.056583570e-01      # mmuon(pole)
+   14   0.000000000e+00      # mnu2(pole)
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
+# Block VCKMIN                 # CKM matrix input (Wolfenstein parameters)
+#     1   2.272000000e-01      # lambda(MZ) SM DR-bar
+#     2   8.180000000e-01      # A(MZ) SM DR-bar
+#     3   2.210000000e-01      # rhobar(MZ) SM DR-bar
+#     4   3.400000000e-01      # etabar(MZ) SM DR-bar
+# Block UPMNSIN                # PMNS matrix input
+#     1   5.837630000e-01      # theta_12
+#     2   7.695840000e-01      # theta_23
+#     3   1.549480000e-01      # theta_13
+#     4   0.000000000e+00      # delta
+#     5   0.000000000e+00      # alpha_1
+#     6   0.000000000e+00      # alpha_2
+Block MINPAR                 # Input parameters
+    3   3.                   # TanBeta
+    4   1                    # SignMu
+Block EXTPAR
+    0   1.9422e+16            # unification scale
+   21   15625                # mHd2
+   22   15625                # mHu2
+Block AEIN
+    1   1   0.0
+    2   2   0.0
+    3   3   0.0
+Block ADIN
+    1   1   0.0
+    2   2   0.0
+    3   3   0.0
+Block AUIN
+    1   1   0.0
+    2   2   0.0
+    3   3   0.0
+Block MSQ2IN
+  1  1     15625.0          # mq2(1,1)
+  1  2     0.00000000E+00   # mq2(1,2)
+  1  3     0.00000000E+00   # mq2(1,3)
+  2  1     0.00000000E+00   # mq2(2,1)
+  2  2     15625.0          # mq2(2,2)
+  2  3     0.00000000E+00   # mq2(2,3)
+  3  1     0.00000000E+00   # mq2(3,1)
+  3  2     0.00000000E+00   # mq2(3,2)
+  3  3     15625.0          # mq2(3,3)
+Block MSE2IN
+  1  1     15625.0          # me2(1,1)
+  1  2     1500.0           # me2(1,2)
+  1  3     0.00000000E+00   # me2(1,3)
+  2  1     1500.0           # me2(2,1)
+  2  2     15625.0          # me2(2,2)
+  2  3     0.00000000E+00   # me2(2,3)
+  3  1     0.00000000E+00   # me2(3,1)
+  3  2     0.00000000E+00   # me2(3,2)
+  3  3     15625.0          # me2(3,3)
+Block MSL2IN
+  1  1     15625.0          # ml2(1,1)
+  1  2     0.00000000E+00   # ml2(1,2)
+  1  3     0.00000000E+00   # ml2(1,3)
+  2  1     0.00000000E+00   # ml2(2,1)
+  2  2     15625.0          # ml2(2,2)
+  2  3     0.00000000E+00   # ml2(2,3)
+  3  1     0.00000000E+00   # ml2(3,1)
+  3  2     0.00000000E+00   # ml2(3,2)
+  3  3     15625.0          # ml2(3,3)
+Block MSU2IN
+  1  1     15625.0          # mu2(1,1)
+  1  2     0.00000000E+00   # mu2(1,2)
+  1  3     0.00000000E+00   # mu2(1,3)
+  2  1     0.00000000E+00   # mu2(2,1)
+  2  2     15625.0          # mu2(2,2)
+  2  3     0.00000000E+00   # mu2(2,3)
+  3  1     0.00000000E+00   # mu2(3,1)
+  3  2     0.00000000E+00   # mu2(3,2)
+  3  3     15625.0          # mu2(3,3)
+Block MSD2IN
+  1  1     15625.0          # md2(1,1)
+  1  2     0.00000000E+00   # md2(1,2)
+  1  3     0.00000000E+00   # md2(1,3)
+  2  1     0.00000000E+00   # md2(2,1)
+  2  2     15625.0          # md2(2,2)
+  2  3     0.00000000E+00   # md2(2,3)
+  3  1     0.00000000E+00   # md2(3,1)
+  3  2     0.00000000E+00   # md2(3,2)
+  3  3     15625.0          # md2(3,3)
+Block MSOFTIN
+     1     500.0   # MassB
+     2     500.0   # MassWB
+     3     500.0   # MassG
+Block FlexibleDecay
+   0   0                    # calculate decays (0 = no, 1 = yes)
+   1   1e-5                 # minimum BR to print
+   2   41                   # include higher order corrections in decays SM|BSM (0 = LO, 1 = NLO, 2 = NNLO, 3 = N^3LO, 4 = N^4LO)
+   3   1                    # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
+   4   2                    # off-shell decays into VV pair
