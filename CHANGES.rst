@@ -88,6 +88,13 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: SLHA blocks of non-square matrices were read and
+  written with swapped elements, and some input entries were lost.  This
+  affects the 3x2 Yukawa couplings ``fu``, ``fd`` and ``hE`` of CSE6SSM
+  (input blocks ``ESIXFUYUKIN``, ``ESIXFDYUKIN``, ``ESIXHEYUKIN`` and the
+  corresponding output blocks) and any user model with a non-square
+  matrix parameter in an SLHA block.  Square matrices were not affected.
+
 * [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
   mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points
   without CP violation could contain a wrong neutralino: one row of
