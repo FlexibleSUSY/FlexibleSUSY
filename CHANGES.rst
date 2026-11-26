@@ -117,6 +117,29 @@ Fixed bugs
   enhancement instead of a suppression in the CMSSM with mu > 0 and large
   tan(beta).  In all models they had a spurious imaginary part of about 2%.
 
+* [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
+  mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points
+  without CP violation could contain a wrong neutralino: one row of
+  ``NMIX`` was zero (of the order 1e-16) and the sign of that neutralino's
+  mass in ``MASS`` was flipped, because a real row with rounding errors in
+  its imaginary parts was treated as imaginary.  This happened at most
+  points, e.g. in MSSMCPV at tan(beta) = 3 for each value of mu tested.
+  Programs reading the SLHA output got a wrong neutralino sector;
+  FlexibleSUSY's own results were not affected.  With
+  ``FlexibleSUSY[16] = 1`` (positive Majorana masses) the output was
+  correct.
+
+* [commit XXXXXXXXX]: At points with CP violation in the neutralino
+  (Majorana fermion) sector, e.g. complex mu or gaugino masses in
+  MSSMCPV or NMSSMCPV, the SLHA output contained only the real parts of
+  the mixing matrices (``NMIX``), so the neutralino mixing couldn't be
+  reconstructed from it, and some of the masses in ``MASS`` were
+  negative.  The imaginary parts (``IMNMIX``) were only written with
+  ``FlexibleSUSY[16] = 1``.  Now, when a mixing matrix can't be made
+  real, its masses are positive and its imaginary part is written too,
+  as SLHA2 asks for the CP-violating case.  Points without CP violation
+  are written as before.
+
 * [commit XXXXXXXXX]: The mu -> e conversion rates (``LToLConversion``)
   had the photon dipole contribution with the wrong sign relative to the
   other contributions (photon monopole, Z penguins, boxes, scalars), so

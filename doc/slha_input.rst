@@ -390,9 +390,19 @@ Force positive Majorana masses (``FlexibleSUSY[16]``)
 `````````````````````````````````````````````````````
 
 If set to 1, the masses of Majorana fermions will always be positive.
-In this case, the corresponding mixing matrices may be complex.
+In this case, the corresponding mixing matrices may be complex, and
+their imaginary parts are written to the SLHA output (e.g. block
+``IMNMIX``).
 
-.. WARNING:: Setting ``FlexibleSUSY[6] = 1`` violates the SLHA standard.
+If set to 0 (default), the mixing matrices of Majorana fermions are
+written in the SLHA convention: real, with negative masses where
+needed.  If CP is violated, so that a mixing matrix can't be made
+real, its masses stay positive and the imaginary part of the mixing
+matrix is written as well (e.g. ``IMNMIX``), as SLHA2 asks for the
+CP-violating case.
+
+.. WARNING:: Setting ``FlexibleSUSY[16] = 1`` violates the SLHA standard
+   at CP-conserving points.
 
 Pole mass scale (``FlexibleSUSY[17]``)
 ``````````````````````````````````````
