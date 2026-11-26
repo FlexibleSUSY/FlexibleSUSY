@@ -672,6 +672,87 @@ BOOST_AUTO_TEST_CASE(test_slha_scalar_mixing_matrix_convention)
    BOOST_CHECK(Zr == Zr_orig);
 }
 
+// The sfermion mixing matrix in the super-CKM basis must diagonalize the
+// sfermion mass matrix written with the soft-breaking parameters in SLHA
+// convention (m_Q^2 -> vL m_Q^2 vL^dagger, m_d^2 -> vR^* m_d^2 vR^T,
+// T_d -> vR^* T_d vL^dagger).
+BOOST_AUTO_TEST_CASE(test_slha_sfermion_mixing_super_ckm_basis)
+{
+   using C = std::complex<double>;
+   using M3 = Eigen::Matrix<C, 3, 3>;
+   using M6 = Eigen::Matrix<C, 6, 6>;
+
+   // hermitian soft masses and a trilinear coupling with flavour mixing
+   M3 mq2, md2, Td;
+   // clang-format off
+   mq2 << C(1.0e6),        C(2.0e4, 1.0e4), C(-3.0e3, 5.0e2),
+          C(2.0e4, -1.0e4), C(1.1e6),       C(4.0e4, -2.0e3),
+          C(-3.0e3, -5.0e2), C(4.0e4, 2.0e3), C(0.9e6);
+   md2 << C(8.0e5),        C(-1.0e4, 3.0e3), C(2.0e3),
+          C(-1.0e4, -3.0e3), C(8.5e5),       C(5.0e3, 1.0e3),
+          C(2.0e3),         C(5.0e3, -1.0e3), C(7.0e5);
+   Td  << C(10., 1.), C(2., -3.), C(-5.),
+          C(1., 2.),  C(30.),     C(4., 1.),
+          C(-2.),     C(3., 3.),  C(500., -20.);
+   // clang-format on
+
+   // rotations of the left- and right-handed fermions (as from fs_svd)
+   M3 vL, vR;
+   Eigen::Array<double, 3, 1> w;
+   fs_diagonalize_hermitian(M3(mq2 * 1e-6 + M3::Identity()), w, vL);
+   fs_diagonalize_hermitian(M3(md2.conjugate() * 1e-6 + 2. * M3::Identity()), w,
+                            vR);
+
+   // sfermion mass matrix in the interaction basis (f_L, f_R)
+   const double v = 20.;
+   M6 mass_matrix;
+   mass_matrix << mq2, v * Td.adjoint(), v * Td, md2;
+
+   Eigen::Array<double, 6, 1> m2;
+   M6 Z;
+   fs_diagonalize_hermitian(mass_matrix, m2, Z);
+
+   convert_sfermion_mixings_to_slha(Z, vL, vR);
+
+   // mass matrix with the parameters in SLHA convention
+   const M3 mq2_slha = vL * mq2 * vL.adjoint();
+   const M3 md2_slha = vR.conjugate() * md2 * vR.transpose();
+   const M3 Td_slha = vR.conjugate() * Td * vL.adjoint();
+   M6 mass_matrix_slha;
+   mass_matrix_slha << mq2_slha, v * Td_slha.adjoint(), v * Td_slha, md2_slha;
+
+   const M6 diag = Z * mass_matrix_slha * Z.adjoint();
+   for (int i = 0; i < 6; i++) {
+      for (int k = 0; k < 6; k++) {
+         BOOST_CHECK_SMALL(std::abs(diag(i, k) - (i == k ? C(m2(i)) : C(0.))),
+                           1e-6 * m2.maxCoeff());
+      }
+   }
+
+   // left-handed sfermions only (sneutrinos)
+   M3 ZV;
+   Eigen::Array<double, 3, 1> mv2;
+   fs_diagonalize_hermitian(mq2, mv2, ZV);
+   convert_sfermion_mixings_to_slha(ZV, vL);
+   const M3 diag_v = ZV * mq2_slha * ZV.adjoint();
+   for (int i = 0; i < 3; i++) {
+      for (int k = 0; k < 3; k++) {
+         BOOST_CHECK_SMALL(
+            std::abs(diag_v(i, k) - (i == k ? C(mv2(i)) : C(0.))),
+            1e-6 * mv2.maxCoeff());
+      }
+   }
+
+   // a real mixing matrix with real rotations stays real
+   Eigen::Matrix<double, 2, 2> Zr;
+   Zr << 0.6, -0.8, 0.8, 0.6;
+   Eigen::Matrix<double, 1, 1> one;
+   one << -1.;
+   convert_sfermion_mixings_to_slha(Zr, one, one);
+   BOOST_CHECK_EQUAL(Zr(0, 0), -0.6);
+   BOOST_CHECK_EQUAL(Zr(1, 1), -0.6);
+}
+
 template<int N>
 void convert_symmetric_fermion_mixings_to_slha_forloop(
    Eigen::Array<double, N, 1>& m,

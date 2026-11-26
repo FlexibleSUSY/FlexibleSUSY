@@ -76,6 +76,7 @@ void @ModelName@_slha::convert_to_slha()
    calculate_pmns_matrix();
    convert_trilinear_couplings_to_slha();
    convert_soft_squared_masses_to_slha();
+   convert_sfermion_mixings_to_slha();
 }
 
 void @ModelName@_slha::calculate_ckm_matrix()
@@ -102,6 +103,16 @@ void @ModelName@_slha::convert_yukawa_couplings_to_slha()
 void @ModelName@_slha::convert_trilinear_couplings_to_slha()
 {
 @convertTrilinearCouplingsToSLHA@
+}
+
+/**
+ * Convert sfermion mixing matrices to the super-CKM/PMNS basis of the
+ * SLHA output, the basis of the Yukawa couplings, trilinear couplings
+ * and soft-breaking squared masses in SLHA convention
+ */
+void @ModelName@_slha::convert_sfermion_mixings_to_slha()
+{
+@convertSfermionMixingsToSLHA@
 }
 
 /**

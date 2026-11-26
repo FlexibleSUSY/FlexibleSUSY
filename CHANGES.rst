@@ -88,6 +88,18 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: The sfermion mixing matrices in the SLHA output
+  (``USQMIX``, ``DSQMIX``, ``SELMIX``, ``SNUMIX``) were given in the
+  interaction basis of the model, while the Yukawa couplings, trilinear
+  couplings and soft-breaking squared masses in the same output
+  (``Yu``, ``TD``, ``MSQ2``, ...) are given in the super-CKM basis, as
+  SLHA2 prescribes for the mixing matrices too.  This affects models
+  with flavour mixing in the Yukawa couplings, such as CMSSMCKM or
+  MRSSM2CKM: e.g. in CMSSMCKM the squark mixing matrices didn't
+  diagonalize the squark mass matrices built from the SLHA output.  Now
+  the sfermion mixing matrices are written in the super-CKM basis.
+  FlexibleSUSY's own results were not affected.
+
 * [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
   mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points
   without CP violation could contain a wrong neutralino: one row of

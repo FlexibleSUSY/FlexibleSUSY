@@ -1407,6 +1407,7 @@ WriteModelSLHAClass[massMatrices_List, files_List] :=
             slhaSoftSquaredMassesDef = "",
             slhaSoftSquaredMassesGetter = "",
             convertSoftSquaredMassesToSLHA = "",
+            convertSfermionMixingsToSLHA = "",
             slhaFerimonMixingMatricesDef = "",
             slhaFerimonMixingMatricesGetters = "",
             slhaPoleMassGetters = "",
@@ -1423,6 +1424,7 @@ WriteModelSLHAClass[massMatrices_List, files_List] :=
            slhaSoftSquaredMassesDef    = WriteOut`CreateSLHASoftSquaredMassesDefinition[];
            slhaSoftSquaredMassesGetter = WriteOut`CreateSLHASoftSquaredMassesGetters[];
            convertSoftSquaredMassesToSLHA = WriteOut`ConvertSoftSquaredMassesToSLHA[];
+           convertSfermionMixingsToSLHA = WriteOut`ConvertSfermionMixingsToSLHA[];
            slhaFerimonMixingMatricesDef = WriteOut`CreateSLHAFermionMixingMatricesDef[];
            slhaFerimonMixingMatricesGetters = WriteOut`CreateSLHAFermionMixingMatricesGetters[];
            calculateCKMMatrix = WriteOut`CalculateCKMMatrix[];
@@ -1443,6 +1445,7 @@ WriteModelSLHAClass[massMatrices_List, files_List] :=
                             "@slhaSoftSquaredMassesDef@"       -> IndentText[slhaSoftSquaredMassesDef],
                             "@slhaSoftSquaredMassesGetter@"    -> IndentText[slhaSoftSquaredMassesGetter],
                             "@convertSoftSquaredMassesToSLHA@" -> IndentText[convertSoftSquaredMassesToSLHA],
+                            "@convertSfermionMixingsToSLHA@"   -> IndentText[convertSfermionMixingsToSLHA],
                             "@slhaPoleMassGetters@"            -> IndentText[slhaPoleMassGetters],
                             "@slhaPoleMixingMatrixGetters@"    -> IndentText[slhaPoleMixingMatrixGetters],
                             "@calculateCKMMatrix@"             -> IndentText[calculateCKMMatrix],

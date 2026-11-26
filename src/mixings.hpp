@@ -79,6 +79,74 @@ void convert_scalar_mixings_to_slha(Eigen::MatrixBase<Derived>& z)
    }
 }
 
+namespace detail
+{
+
+/// assigns @p src to @p dst, taking the real part if @p dst is real
+template <class DerivedDst, class DerivedSrc>
+void assign_mixing(Eigen::MatrixBase<DerivedDst>& dst,
+                   const Eigen::MatrixBase<DerivedSrc>& src)
+{
+   using Scalar = typename DerivedDst::Scalar;
+   if constexpr (std::is_same_v<Scalar, std::complex<double>>) {
+      dst = src;
+   } else {
+      dst = src.real();
+   }
+}
+
+} // namespace detail
+
+/**
+ * Rotates the mixing matrix of 2n sfermions from the interaction basis
+ * (f_L, f_R) of the model to the super-CKM (super-PMNS) basis of the
+ * SLHA output, in which the Yukawa couplings are diagonal.
+ *
+ * The rotation matrices are those that convert the Yukawa couplings,
+ * trilinear couplings and soft-breaking squared masses to SLHA
+ * convention, e.g. m_Q^2 -> vL m_Q^2 vL^dagger and
+ * m_d^2 -> vR^* m_d^2 vR^T, so the sfermion fields transform as
+ * f_L -> vL f_L and f_R -> vR^* f_R:
+ *
+ *    z -> z * diag(vL^dagger, vR^T)
+ *
+ * A real @p z (in models with real parameters, where the rotations are
+ * real) stays real.
+ *
+ * @param z sfermion mixing matrix (2n x 2n)
+ * @param vL left-handed fermion mixing matrix in SLHA convention (n x n)
+ * @param vR right-handed fermion mixing matrix in SLHA convention (n x n)
+ */
+template <class DerivedZ, class DerivedL, class DerivedR>
+void convert_sfermion_mixings_to_slha(Eigen::MatrixBase<DerivedZ>& z,
+                                      const Eigen::MatrixBase<DerivedL>& vL,
+                                      const Eigen::MatrixBase<DerivedR>& vR)
+{
+   const Eigen::Index n = vL.rows();
+   Eigen::MatrixXcd zc = z.template cast<std::complex<double>>();
+   zc.leftCols(n) = (zc.leftCols(n) * vL.adjoint()).eval();
+   zc.rightCols(n) = (zc.rightCols(n) * vR.transpose()).eval();
+   detail::assign_mixing(z, zc);
+}
+
+/**
+ * Rotates the mixing matrix of n left-handed sfermions (e.g. sneutrinos)
+ * from the interaction basis to the super-CKM (super-PMNS) basis of the
+ * SLHA output: z -> z * vL^dagger, see
+ * convert_sfermion_mixings_to_slha(z, vL, vR).
+ *
+ * @param z sfermion mixing matrix (n x n)
+ * @param vL left-handed fermion mixing matrix in SLHA convention (n x n)
+ */
+template <class DerivedZ, class DerivedL>
+void convert_sfermion_mixings_to_slha(Eigen::MatrixBase<DerivedZ>& z,
+                                      const Eigen::MatrixBase<DerivedL>& vL)
+{
+   const Eigen::MatrixXcd zc =
+      z.template cast<std::complex<double>>() * vL.adjoint();
+   detail::assign_mixing(z, zc);
+}
+
 void convert_symmetric_fermion_mixings_to_slha(double&,
                                                Eigen::Matrix<double, 1, 1>&);
 
