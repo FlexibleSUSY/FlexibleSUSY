@@ -213,7 +213,9 @@ Operators embed_photon(
    const auto lR =  value.right();
 
    Operators res{};
-   // Term from eq. (t.1) will contribute to four-fermion vector coefficients.
+   // Term (t.1) of the form factor definition (see the documentation of
+   // forge below; eq. (3.4) of 1902.06650) will contribute to four-fermion
+   // vector coefficients.
    // Minus comes from the form_factors embedding into four-fermion amplitude:
    res[4] = - ff[0] * lL;
    res[5] = - ff[0] * lR;
