@@ -380,12 +380,17 @@ WriteSLHAMixingMatricesBlocks[lesHouchesParameters_List] :=
            susyMix = Complement[mixingMatrices, smMix];
            (smMixStr = smMixStr <> WriteSLHAMatrix[#,"LOCALPHYSICAL",""])& /@ smMix;
            (susyMixStr = susyMixStr <> WriteSLHAMatrix[#,"LOCALPHYSICAL",""])& /@ susyMix;
-           (majoranaMixStr = majoranaMixStr <> WriteSLHAMatrix[#,"LOCALPHYSICAL","","set_block_imag"])& /@ majoranaMix;
+           (* imaginary parts: always with positive masses, otherwise if the
+              mixing matrix can't be made real (CP violation) *)
+           (majoranaMixStr = majoranaMixStr <>
+               "if (print_imaginary_parts_of_majorana_mixings || has_imaginary_part(LOCALPHYSICAL(" <>
+               CConversion`ToValidCSymbolString[#[[1]]] <> "))) {\n" <>
+               TextFormatting`IndentText[WriteSLHAMatrix[#,"LOCALPHYSICAL","","set_block_imag"]] <>
+               "}\n")& /@ majoranaMix;
            result = susyMixStr <> "\n" <>
                     "if (write_sm_mixing_matrics) {\n" <>
                     TextFormatting`IndentText[smMixStr] <> "}\n\n" <>
-                    "if (print_imaginary_parts_of_majorana_mixings) {\n" <>
-                    TextFormatting`IndentText[majoranaMixStr] <> "}\n";
+                    majoranaMixStr;
            Return[result];
           ];
 

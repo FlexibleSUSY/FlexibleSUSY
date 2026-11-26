@@ -17,9 +17,9 @@
 // ====================================================================
 
 #include "mixings.hpp"
-#include "logger.hpp"
-#include "numerics2.hpp"
-#include "config.h"
+
+#include <cmath>
+#include <complex>
 
 namespace flexiblesusy {
 
@@ -35,17 +35,14 @@ void convert_symmetric_fermion_mixings_to_slha(double& /*unused*/,
 void convert_symmetric_fermion_mixings_to_slha(double& m,
                                                Eigen::Matrix<std::complex<double>, 1, 1>& z)
 {
-   // check if 1st row contains non-zero imaginary parts
-   if (!is_zero(std::abs(std::imag(z(0,0))))) {
-      z(0,0) *= std::complex<double>(0.0,1.0);
-      m *= -1;
-#if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
-      if (!is_zero(std::abs(std::imag(z(0,0))))) {
-         WARNING("Element (0,0) of the following fermion mixing matrix"
-                 " contains entries which have non-zero real and imaginary"
-                 " parts:\nZ = " << z);
+   // rotate if the imaginary part dominates (not for rounding errors)
+   if (std::abs(std::imag(z(0, 0))) > std::abs(std::real(z(0, 0)))) {
+      const auto z_slha = z(0, 0) * std::complex<double>(0.0, 1.0);
+      // CP violation: keep the positive mass and the complex phase
+      if (std::abs(std::imag(z_slha)) <= mixing_imag_tolerance) {
+         z(0, 0) = z_slha;
+         m *= -1;
       }
-#endif
    }
 }
 
