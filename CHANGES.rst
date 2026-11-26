@@ -88,6 +88,18 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
+  mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points
+  without CP violation could contain a wrong neutralino: one row of
+  ``NMIX`` was zero (of the order 1e-16) and the sign of that neutralino's
+  mass in ``MASS`` was flipped, because a real row with rounding errors in
+  its imaginary parts was treated as imaginary.  This happened at most
+  points, e.g. in MSSMCPV at tan(beta) = 3 for each value of mu tested.
+  Programs reading the SLHA output got a wrong neutralino sector;
+  FlexibleSUSY's own results were not affected.  With
+  ``FlexibleSUSY[16] = 1`` (positive Majorana masses) the output was
+  correct.
+
 * [commit XXXXXXXXX]: The mu -> e conversion rates (``LToLConversion``)
   had the photon dipole contribution with the wrong sign relative to the
   other contributions (photon monopole, Z penguins, boxes, scalars), so
