@@ -510,6 +510,48 @@ BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )
    BOOST_CHECK_EQUAL(Im(reconstructed_mass_matrix(1,1)), 0.);
 }
 
+// A real row with imaginary parts from rounding errors must not be
+// multiplied by i: before, such a row became purely imaginary (printed as
+// zero in the SLHA block NMIX) and the sign of its mass was flipped.
+BOOST_AUTO_TEST_CASE(test_slha_mixing_matrix_convention_rounding_noise)
+{
+   Eigen::Matrix<double, 3, 3> mass_matrix;
+   // clang-format off
+   mass_matrix << 300.,  0., -40.,
+                    0., 600.,  50.,
+                  -40.,  50., -200.;
+   // clang-format on
+
+   Eigen::Array<double, 3, 1> eigenvalues;
+   Eigen::Matrix<std::complex<double>, 3, 3> Z;
+   fs_diagonalize_symmetric(mass_matrix, eigenvalues, Z);
+
+   // add rounding noise to the imaginary parts of the real rows
+   for (int i = 0; i < 3; i++) {
+      if (Z.row(i).imag().cwiseAbs().maxCoeff() == 0.) {
+         Z(i, 2) += std::complex<double>(0., 1e-15);
+      }
+   }
+
+   convert_symmetric_fermion_mixings_to_slha(eigenvalues, Z);
+
+   // the mixing matrix is real up to the noise and diagonalizes the mass matrix
+   BOOST_CHECK_SMALL(Z.imag().cwiseAbs().maxCoeff(), 1e-14);
+
+   const Eigen::Matrix<double, 3, 3> reconstructed =
+      Z.real().transpose() * eigenvalues.matrix().asDiagonal() * Z.real();
+
+   for (int i = 0; i < 3; i++) {
+      for (int k = 0; k < 3; k++) {
+         BOOST_CHECK_SMALL(std::abs(reconstructed(i, k) - mass_matrix(i, k)),
+                           1e-10);
+      }
+   }
+
+   // exactly one negative mass (det < 0)
+   BOOST_CHECK_EQUAL((eigenvalues < 0.).count(), 1);
+}
+
 template<int N>
 void convert_symmetric_fermion_mixings_to_slha_forloop(
    Eigen::Array<double, N, 1>& m,

@@ -21,6 +21,9 @@
 #include "numerics2.hpp"
 #include "config.h"
 
+#include <cmath>
+#include <complex>
+
 namespace flexiblesusy {
 
 void convert_symmetric_fermion_mixings_to_slha(double& /*unused*/,
@@ -35,8 +38,8 @@ void convert_symmetric_fermion_mixings_to_slha(double& /*unused*/,
 void convert_symmetric_fermion_mixings_to_slha(double& m,
                                                Eigen::Matrix<std::complex<double>, 1, 1>& z)
 {
-   // check if 1st row contains non-zero imaginary parts
-   if (!is_zero(std::abs(std::imag(z(0,0))))) {
+   // rotate if the imaginary part dominates (not for rounding errors)
+   if (std::abs(std::imag(z(0, 0))) > std::abs(std::real(z(0, 0)))) {
       z(0,0) *= std::complex<double>(0.0,1.0);
       m *= -1;
 #if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
