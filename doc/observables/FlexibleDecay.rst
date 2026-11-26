@@ -199,6 +199,12 @@ __ https://github.com/FlexibleSUSY/FlexibleSUSY#mathematica-interface
       }
     ];
 
+The FlexibleDecay settings of a handle are listed by
+:mathematica:`FSSMGetFDSettings[handle]`, and can be changed with
+:mathematica:`FSSMSet`, for example
+:mathematica:`FSSMSet[handle, fdSettings -> { minBRtoPrint -> 1*^-3 }]`.
+Settings that are not given keep their values.
+
 After computing the spectrum via
 
 .. code-block:: mathematica

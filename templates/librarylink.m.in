@@ -9,7 +9,7 @@ lib@ModelName@ = FileNameJoin[{Directory[], "models", "@ModelName@", "@ModelName
 FS@ModelName@GetSettings = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@GetSettings", LinkObject, LinkObject];
 FS@ModelName@GetSMInputParameters = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@GetSMInputParameters", LinkObject, LinkObject];
 FS@ModelName@GetInputParameters = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@GetInputParameters", LinkObject, LinkObject];
-FS@ModelName@GetProblems = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@GetProblems", LinkObject, LinkObject];
+@loadGetFDSettingsFunction@FS@ModelName@GetProblems = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@GetProblems", LinkObject, LinkObject];
 FS@ModelName@GetWarnings = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@GetWarnings", LinkObject, LinkObject];
 FS@ModelName@ToSLHA = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@ToSLHA", LinkObject, LinkObject];
 
@@ -201,7 +201,7 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
 
 Options[FS@ModelName@Set] = Options[FS@ModelName@OpenHandle];
 
-FS@ModelName@Set[handle_Integer, a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
+FS@ModelName@Set[handle_Integer, a___, (fsSettings | fsSMParameters | fsModelParameters @addFDOptions2@) -> s_List, r___] :=
     FS@ModelName@Set[handle, a, Sequence @@ s, r];
 
 FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
@@ -281,4 +281,4 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
         { p } /.
         FS@ModelName@GetSettings[handle] /.
         FS@ModelName@GetSMInputParameters[handle] /.
-        FS@ModelName@GetInputParameters[handle]]];
+        FS@ModelName@GetInputParameters[handle]@getFDSettingsInSet@]];

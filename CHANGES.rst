@@ -88,6 +88,14 @@ New features
 Fixed bugs
 ----------
 
+* [commit 8f0a015b8]: Fixed ``FS<M>Set[]`` of the Mathematica interface in
+  models with decays. Since FlexibleSUSY 2.6.0 it aborted with
+  ``minBRtoPrint is not a numeric input value!``, so the settings and
+  parameters of an open handle couldn't be changed. ``FS<M>Set[]`` now
+  also accepts ``fdSettings``, and the new function
+  ``FS<M>GetFDSettings[handle]`` lists the FlexibleDecay settings of a
+  handle.
+
 * [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
   mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points
   without CP violation could contain a wrong neutralino: one row of
