@@ -24,6 +24,7 @@ Module[
          "@npf_definitions@"       -> npfDefinitions,
          "@model_ckm@"             -> BtoSGamma`CreateModelCKM["model."],
          "@g3@"                    -> CConversion`ToValidCSymbolString@SARAH`strongCoupling,
+         "@HiggsBoson@"            -> CConversion`ToValidCSymbolString@TreeMasses`GetHiggsBoson[],
          "@include_guard@"         -> SymbolName@obs,
          "@namespace@"             -> Observables`GetObservableNamespace@obs,
          "@filename@"              -> Observables`GetObservableFileName@obs,
@@ -116,13 +117,13 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
          }
       ]&,
       {
-         prototype <> " {
+         StringReplace[prototype, " = Physical_input()" -> ""] <> " {
          return forge<
             fields::@Qd@, fields::@Lep@, fields::@Ph@,
             @photon_penguin@,
             @gluon_penguin@,
             npointfunctions::@class@
-         >(qi, qo, li, model, qedqcd);\n}",
+         >(qi, qo, li, model, qedqcd, physical_input);\n}",
          npfDefinition
       }
    ];

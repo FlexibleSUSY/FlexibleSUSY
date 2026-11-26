@@ -84,7 +84,8 @@ New features
   the W-charged Higgs boxes, which change :math:`C_S` and :math:`C_P` by up
   to 10-20% at large tan(beta), are included.  The coefficients contain only the new
   physics part: diagrams with only Standard Model-like fields, including the
-  lightest CP-even Higgs boson, are left out (see
+  CP-even Higgs boson with the mass closest to ``FlexibleSUSYInput[1]``,
+  are left out (see
   ``doc/observables/b_physics.rst``).
 
 * When the RG running stops because the integrator cannot reach the

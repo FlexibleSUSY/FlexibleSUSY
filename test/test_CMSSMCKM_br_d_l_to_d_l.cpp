@@ -29,6 +29,7 @@
 #include "json.hpp"
 #include "loop_libraries/loop_library.hpp"
 #include "lowe.h"
+#include "physical_input.hpp"
 
 #include <array>
 #include <complex>
@@ -270,6 +271,27 @@ BOOST_AUTO_TEST_CASE(test_b_to_s_mu_mu)
    // (C10_SM ~ -4.2 in flavio), which enhances BR(B_s -> mu mu) by about
    // 30% (also SARAH/SPheno's FlavorKit gives an enhancement here).
    BOOST_CHECK_LT(CP.real(), -1e-3);
+
+   // The CP-even Higgs boson with the pole mass closest to
+   // FlexibleSUSYInput[1] counts as SM Higgs: diagrams with it and only SM
+   // fields are removed. With the default (125.09 GeV) that is h, so the
+   // pseudoscalar coefficient CP (no h exchange) and CS stay as above.
+   // Declaring the heavy H as SM-like removes its diagrams with SM loops
+   // (H exchange with W/top loops), which changes CS, but not CP.
+   const Physical_input pi_h;
+   const auto res_h =
+      CMSSMCKM_br_d_l_to_d_l::calculate_FdFe_FdFe_ListVectorsScalarsBoxes_1(
+         2, 1, 1, model, qedqcd, pi_h);
+   BOOST_CHECK_EQUAL(res_h[9], res[9]);
+   BOOST_CHECK_EQUAL(res_h[11], res[11]);
+
+   Physical_input pi_H;
+   pi_H.set(Physical_input::mh_pole, model.get_physical().Mhh(1));
+   const auto res_H =
+      CMSSMCKM_br_d_l_to_d_l::calculate_FdFe_FdFe_ListVectorsScalarsBoxes_1(
+         2, 1, 1, model, qedqcd, pi_H);
+   BOOST_CHECK_GT(std::abs(res_H[9] - res[9]), 1e-2 * std::abs(res[9]));
+   BOOST_CHECK_CLOSE(res_H[11].real(), res[11].real(), 1e-10);
 
    (void)std::remove("WC_CMSSMCKM.json");
 }

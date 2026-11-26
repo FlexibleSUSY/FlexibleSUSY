@@ -24,7 +24,9 @@
  */
 
 #include <array>
+#include <cmath>
 #include <complex>
+#include <limits>
 #include <string>
 #include <valarray>
 
@@ -37,6 +39,7 @@
 #include "logger.hpp"
 #include "lowe.h"
 #include "numerics2.hpp"
+#include "physical_input.hpp"
 #include "wcxf.hpp"
 #include "wrappers.hpp"
 
@@ -189,7 +192,43 @@ using ffv_function = std::valarray<std::complex<double>> (*)
    (int, int, const @ModelName@_mass_eigenstates&, bool);
 
 using npf_function = std::array<std::complex<double>, number_of_operators> (*)
-   (const @ModelName@_mass_eigenstates&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&);
+   (const @ModelName@_mass_eigenstates&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&, int);
+
+double element(double x, int /* i */) { return x; }
+
+template <class T>
+double element(const T& a, int i) { return a(i); }
+
+/**
+ * Returns the generation index of the SM-like CP-even Higgs boson: the one
+ * whose pole mass is closest to the SM Higgs mass of the input
+ * (FlexibleSUSYInput[1]).  Its DR-bar masses are used if the pole masses
+ * haven't been calculated.  Diagrams with only SM fields and this Higgs boson
+ * are removed as SM contributions.
+ *
+ * @param model mass eigenstates
+ * @param physical_input SM Higgs pole mass
+ * @return generation index of the SM-like Higgs boson
+ */
+int sm_like_higgs_index(const @ModelName@_mass_eigenstates& model,
+                        const Physical_input& physical_input)
+{
+   using Higgs = fields::@HiggsBoson@;
+   const double mh = physical_input.get(Physical_input::mh_pole);
+   const auto& pole = model.get_physical().M@HiggsBoson@;
+   context_base context {model};
+   int index = 0;
+   double min_diff = std::numeric_limits<double>::max();
+   for (int i = 0; i < Higgs::numberOfGenerations; i++) {
+      const double m_pole = element(pole, i);
+      const double m = m_pole > 0. ? m_pole : context.mass<Higgs>({i});
+      if (std::abs(m - mh) < min_diff) {
+         min_diff = std::abs(m - mh);
+         index = i;
+      }
+   }
+   return index;
+}
 
 /**
  * @tparam    L     Type of a lepton field.
@@ -236,10 +275,11 @@ Operators embed_photon(
  */
 template <npf_function Name>
 Operators fix_tensors_sign(
-   const @ModelName@_mass_eigenstates& model, int in, int out, int g) {
+   const @ModelName@_mass_eigenstates& model, int in, int out, int g,
+   int sm_like_higgs) {
    const auto npf = Name(model,
          std::array<int,4>{in, g, out, g},
-         std::array<Eigen::Vector4d, 0>{});
+         std::array<Eigen::Vector4d, 0>{}, sm_like_higgs);
    Operators res(npf.data());
    res[8] = - res[8];
    res[9] = - res[9];
@@ -290,7 +330,8 @@ template<class Down, class Lepton, class Photon, ffv_function photon,
 Result forge(
    int dIn, int dOut, int lInOut,
    const @ModelName@_mass_eigenstates& model,
-   const softsusy::QedQcd& qedqcd) {
+   const softsusy::QedQcd& qedqcd,
+   const Physical_input& physical_input) {
 
    context_base context {model};
 
@@ -298,7 +339,8 @@ Result forge(
    const auto form_factors = photon(dIn, dOut, model, discard_SM_contributions);
    const auto form_factors_g = gluon(dIn, dOut, model, discard_SM_contributions);
    const auto photon_l = embed_photon<Lepton, Photon>(model, form_factors, lInOut);
-   const auto npf_l = fix_tensors_sign<npf>(model, dIn, dOut, lInOut);
+   const auto npf_l = fix_tensors_sign<npf>(
+      model, dIn, dOut, lInOut, sm_like_higgs_index(model, physical_input));
 
    // The quark field phases of the model's mass eigenstates are arbitrary:
    // convert to the convention of the CKM matrix of the low-energy input.

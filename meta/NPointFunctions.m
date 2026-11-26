@@ -452,12 +452,14 @@ Module[{GetFunctionPrototype, prototype, definition},
 
       @npf_function@ {
          @class_name@ helper{model, indices, momenta};
+         @set_sm_like_higgs@
          return helper.calculate();
       }",
       {
          "@class_name@" -> GetHelperClassName[],
          "@class_body@" -> CreateClassBody@ApplySubexpressions@npf,
-         "@npf_function@" -> GetFunctionPrototype@GetCXXArguments@npf
+         "@npf_function@" -> GetFunctionPrototype@GetCXXArguments@npf,
+         "@set_sm_like_higgs@" -> If[skipSM, "helper.set_sm_like_higgs_index(sm_like_higgs_index);", ""]
       }
    ];
    {prototype, definition}
@@ -474,14 +476,18 @@ TextFormatting`ReplaceCXXTokens["
    const @eigenstates@ &model,
    const std::array<int, @indices_length@> &indices,
    const std::array<Eigen::Vector4d, @momenta_length@> &momenta
-   @default@",
+   @default@@sm_like_higgs@",
    {
       "@eigenstates@" -> FlexibleSUSY`FSModelName<>"_mass_eigenstates",
       "@indices_length@" -> ToString@Length@GetExternalIndices@npf,
       "@momenta_length@" -> ToString@Length@GetExternalMomenta@npf,
       "@default@" -> If[control === Default,
             "= { "<> Utils`StringJoinWithReplacement@Array["Eigen::Vector4d::Zero()", Length@GetExternalMomenta@npf]<>" }", ""
-         ]
+         ],
+      (* generation index of the SM-like Higgs, counted as SM field when SM
+         contributions are skipped (see CXXSkipSM) *)
+      "@sm_like_higgs@" -> If[GetSkipSM[] === True && control =!= Constructor,
+            ", int sm_like_higgs_index" <> If[control === Default, " = 0", ""], ""]
    }
 ];
 GetCXXArguments // secure;
@@ -551,7 +557,7 @@ Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
          "@Context@" -> "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">",
          "@KeyStructsInitialization@" -> InitializeKeyStructs@genFields,
          "@GenericSums@" -> CXXGenericSum[npf, genSumNames],
-         "@Arguments@" -> GetCXXArguments@npf,
+         "@Arguments@" -> GetCXXArguments[npf, Constructor],
          "@CalculateFunction@" -> CXXCalculateFunction@genSumNames
       }
    ]
@@ -996,9 +1002,9 @@ Module[{beginsOfFor},
 CXXGenericSumBegin // secure;
 
 (* Skips diagrams whose fields are all SM fields, i.e. SM fermions and
-   gauge bosons, Goldstone bosons and the lightest CP-even Higgs boson (the
-   SM-like Higgs, index 0 of TreeMasses`GetHiggsBoson[]), as in
-   SARAH/FlavorKit.  The removed SM part is calculated with the couplings of
+   gauge bosons, Goldstone bosons and the SM-like CP-even Higgs boson (the
+   generation sm_like_higgs_index() of TreeMasses`GetHiggsBoson[], passed to
+   the generated function), as in SARAH/FlavorKit.  The removed SM part is calculated with the couplings of
    the BSM model, so deviations of the couplings of the lightest Higgs from the
    SM aren't part of the result either. *)
 CXXSkipSM[summation_?IsSummation] :=
@@ -1007,7 +1013,7 @@ Module[{fields, indices, conditions, higgs},
    fields = (CXXFullFieldName@First@#) &/@ summation;
    indices = (CXXIndex@First@#) &/@ summation;
    higgs = "fields::" <> CConversion`ToValidCSymbolString@TreeMasses`GetHiggsBoson[];
-   conditions = MapThread["cxx_diagrams::isSMFieldOrSMLikeHiggs<"<>#1<>", "<>higgs<>">("<>#2<>")"&,
+   conditions = MapThread["cxx_diagrams::isSMFieldOrSMLikeHiggs<"<>#1<>", "<>higgs<>">("<>#2<>", this->sm_like_higgs_index())"&,
       {fields, indices}
    ];
    "if (" <>

@@ -214,6 +214,7 @@ public context_with_vertices {
 private:
    const std::array<int,NumberOfExternalIndices> &ext_indices;
    const std::array<Eigen::Vector4d,NumberOfExternalMomenta> &ext_momenta;
+   int sm_like_higgs{0};
 
 public:
    correlation_function_context(
@@ -222,6 +223,11 @@ public:
       const std::array<Eigen::Vector4d, NumberOfExternalMomenta> &em) :
    context_with_vertices( m ), ext_indices( ei ), ext_momenta( em ) {
    }
+
+  /// generation index of the SM-like Higgs boson, which counts as SM field
+  /// when the SM contributions are skipped
+  int sm_like_higgs_index() const { return sm_like_higgs; }
+  void set_sm_like_higgs_index(int index) { sm_like_higgs = index; }
 
   using context_with_vertices::mass;
   using context_with_vertices::vertex;

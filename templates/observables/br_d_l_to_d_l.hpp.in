@@ -30,6 +30,7 @@
 #include <Eigen/Core>
 
 #include "lowe.h"
+#include "physical_input.hpp"
 
 namespace flexiblesusy {
 

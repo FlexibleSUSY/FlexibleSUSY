@@ -118,18 +118,19 @@ namespace flexiblesusy::cxx_diagrams {
    }
 
    /**
-    * Like isSMField, but also counts the lightest generation (index 0) of
-    * the field SMLikeHiggs as SM field.  Used to remove the Standard Model
-    * contributions from Wilson coefficients: the lightest CP-even Higgs of a
+    * Like isSMField, but also counts the generation sm_like_index of the
+    * field SMLikeHiggs as SM field.  Used to remove the Standard Model
+    * contributions from Wilson coefficients: the SM-like CP-even Higgs of a
     * BSM model is then treated as the SM Higgs (as in SARAH/FlavorKit).
     */
    template <class Field, class SMLikeHiggs>
    bool
-   isSMFieldOrSMLikeHiggs(const typename field_indices<Field>::type& indices)
+   isSMFieldOrSMLikeHiggs(const typename field_indices<Field>::type& indices,
+                          int sm_like_index)
    {
       if constexpr (std::is_same_v<Field, SMLikeHiggs> &&
                     Field::numberOfGenerations != 1) {
-         return indices.front() == 0 || isSMField<Field>(indices);
+         return indices.front() == sm_like_index || isSMField<Field>(indices);
       } else {
          return isSMField<Field>(indices);
       }

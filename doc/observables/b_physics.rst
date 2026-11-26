@@ -74,13 +74,16 @@ Model part itself; it has no Standard Model contribution to
 * **Removed as Standard Model part:** diagrams in which all fields (in the
   loop and in the tree-level propagator) are Standard Model-like: quarks,
   leptons, neutrinos, gluon, photon, Z, W, the Goldstone bosons and the
-  lightest CP-even Higgs boson, which is taken as the SM Higgs boson (as in
-  SARAH/FlavorKit). These diagrams are removed with the couplings of the BSM
-  model, so the deviations of the couplings of the lightest Higgs boson from
+  SM-like CP-even Higgs boson, which is taken as the SM Higgs boson (as in
+  SARAH/FlavorKit). The SM-like Higgs boson is the one whose pole mass is
+  closest to the SM Higgs mass of the input (``FlexibleSUSYInput[1]``,
+  default 125.09 GeV; its DR-bar mass if the pole masses aren't
+  calculated). These diagrams are removed with the couplings of the BSM
+  model, so the deviations of the couplings of the SM-like Higgs boson from
   the Standard Model in them are not included. In the MSSM these are of order
   :math:`M_Z^2/M_A^2` times the Standard Model Higgs penguin, whose
   contribution to :math:`C_S` is about :math:`10^{-4}\,\text{GeV}^{-1}`.
-  In models where the lightest Higgs boson has flavour-changing couplings to
+  In models where the SM-like Higgs boson has flavour-changing couplings to
   quarks, the diagrams with these couplings and only Standard Model-like
   fields are missing as well. In the photon penguin and :math:`C_7, C_8`
   (form factors of :math:`b \to s \gamma`) only the quarks, leptons, gauge
