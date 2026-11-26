@@ -232,8 +232,8 @@ BOOST_AUTO_TEST_CASE(test_b_to_s_mu_mu)
       std::complex<double>{2.70644760E-04, -5.68821819E-06},  // C9'
       std::complex<double>{3.00639160E-03, -8.98078050E-10},  // C10
       std::complex<double>{6.94071385E-04, -8.04746989E-10},  // C10'
-      std::complex<double>{3.90131526E-03, 9.12414479E-11},   // CS
-      std::complex<double>{1.01724751E-04, 1.52437865E-12},   // CS'
+      std::complex<double>{4.00966421E-03, 5.78795006E-11},   // CS
+      std::complex<double>{1.04453981E-04, 6.84333959E-13},   // CS'
       std::complex<double>{-3.98574119E-03, -6.17669772E-11}, // CP
       std::complex<double>{1.03850889E-04, 7.83180556E-13},   // CP'
    };

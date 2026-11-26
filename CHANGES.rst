@@ -82,7 +82,10 @@ New features
   :math:`b \to s ee` (needed for :math:`R_K`, :math:`R_{K^*}`) in CMSSMCKM
   and MRSSM2CKM.  Diagrams with a W boson and a new particle in the loop, such as
   the W-charged Higgs boxes, which change :math:`C_S` and :math:`C_P` by up
-  to 10-20% at large tan(beta), are included.
+  to 10-20% at large tan(beta), are included.  The coefficients contain only the new
+  physics part: diagrams with only Standard Model-like fields, including the
+  lightest CP-even Higgs boson, are left out (see
+  ``doc/observables/b_physics.rst``).
 
 * When the RG running stops because the integrator cannot reach the
   target scale (step size too small or too many steps) while all

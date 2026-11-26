@@ -21,6 +21,7 @@
 
 #include <array> /**< Only for field_indices and isSMField*/
 #include <concepts>
+#include <type_traits>
 
 #include <boost/array.hpp>
 #include <boost/version.hpp>
@@ -114,6 +115,24 @@ namespace flexiblesusy::cxx_diagrams {
    requires (Field::numberOfGenerations == 1)
    bool isSMField(const typename field_indices<Field>::type&) {
       return boost::mpl::at_c<typename Field::sm_flags, 0>::type::value;
+   }
+
+   /**
+    * Like isSMField, but also counts the lightest generation (index 0) of
+    * the field SMLikeHiggs as SM field.  Used to remove the Standard Model
+    * contributions from Wilson coefficients: the lightest CP-even Higgs of a
+    * BSM model is then treated as the SM Higgs (as in SARAH/FlavorKit).
+    */
+   template <class Field, class SMLikeHiggs>
+   bool
+   isSMFieldOrSMLikeHiggs(const typename field_indices<Field>::type& indices)
+   {
+      if constexpr (std::is_same_v<Field, SMLikeHiggs> &&
+                    Field::numberOfGenerations != 1) {
+         return indices.front() == 0 || isSMField<Field>(indices);
+      } else {
+         return isSMField<Field>(indices);
+      }
    }
 
    namespace fields

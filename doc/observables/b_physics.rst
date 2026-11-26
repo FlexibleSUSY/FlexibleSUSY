@@ -61,15 +61,39 @@ order (0 or 1):
   lepton line.
 
 The photon penguin is always included at one loop (through the form factors
-also used for :math:`b \to s \gamma`), without Standard Model particles in
-the loop. In the penguins with a self-energy on an external quark leg the quark
-masses are kept, and the Z propagator is evaluated at :math:`q^2 = 0` as in
-the vertex penguins, so that the UV divergences cancel and the Z penguins
-decouple. Diagrams whose loop particles are all Standard Model particles
-are left out, as are photons and gluons in the loop (they only appear in
-such diagrams) and box diagrams with two vector bosons in the loop (W-W in
-the MSSM, which are pure Standard Model). In models with new vector bosons
-(e.g. a W' or Z') boxes with two of them are therefore missing.
+also used for :math:`b \to s \gamma`). In the penguins with a self-energy on
+an external quark leg the quark masses are kept, and the Z propagator is
+evaluated at :math:`q^2 = 0` as in the vertex penguins, so that the UV
+divergences cancel and the Z penguins decouple.
+
+The Wilson coefficients contain only the new physics contributions, as
+flavio and the FLHA entries written here expect (flavio adds the Standard
+Model part itself; it has no Standard Model contribution to
+:math:`C_S, C_P`). Precisely:
+
+* **Removed as Standard Model part:** diagrams in which all fields (in the
+  loop and in the tree-level propagator) are Standard Model-like: quarks,
+  leptons, neutrinos, gluon, photon, Z, W, the Goldstone bosons and the
+  lightest CP-even Higgs boson, which is taken as the SM Higgs boson (as in
+  SARAH/FlavorKit). These diagrams are removed with the couplings of the BSM
+  model, so the deviations of the couplings of the lightest Higgs boson from
+  the Standard Model in them are not included. In the MSSM these are of order
+  :math:`M_Z^2/M_A^2` times the Standard Model Higgs penguin, whose
+  contribution to :math:`C_S` is about :math:`10^{-4}\,\text{GeV}^{-1}`.
+  In models where the lightest Higgs boson has flavour-changing couplings to
+  quarks, the diagrams with these couplings and only Standard Model-like
+  fields are missing as well. In the photon penguin and :math:`C_7, C_8`
+  (form factors of :math:`b \to s \gamma`) only the quarks, leptons, gauge
+  bosons and Goldstone bosons count as Standard Model fields.
+* **Included:** all other one-loop diagrams with box, Z-, photon- and
+  scalar-penguin topologies, including those with a W boson and a new
+  particle in the loop (e.g. the W-charged Higgs boxes and penguins) and
+  those with Standard Model particles in the loop and a new particle in the
+  tree-level propagator (e.g. the heavy Higgs bosons H, A).
+* **Missing:** box diagrams with two vector bosons in the loop (pure
+  Standard Model W-W boxes in the MSSM, but e.g. W-W' or Z-Z' boxes in models
+  with new vector bosons), and QCD or electroweak corrections beyond one loop
+  (e.g. the :math:`\tan\beta`-enhanced corrections to the Higgs penguins).
 
 The new physics contributions to the Wilson coefficients
 :math:`C_7, C_8, C_9, C_{10}, C_S, C_P` and their primed counterparts are

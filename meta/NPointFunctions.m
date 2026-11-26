@@ -995,12 +995,19 @@ Module[{beginsOfFor},
 ];
 CXXGenericSumBegin // secure;
 
+(* Skips diagrams whose fields are all SM fields, i.e. SM fermions and
+   gauge bosons, Goldstone bosons and the lightest CP-even Higgs boson (the
+   SM-like Higgs, index 0 of TreeMasses`GetHiggsBoson[]), as in
+   SARAH/FlavorKit.  The removed SM part is calculated with the couplings of
+   the BSM model, so deviations of the couplings of the lightest Higgs from the
+   SM aren't part of the result either. *)
 CXXSkipSM[summation_?IsSummation] :=
-Module[{fields, indices, conditions},
+Module[{fields, indices, conditions, higgs},
    If[GetSkipSM[] === False, Return@""];
    fields = (CXXFullFieldName@First@#) &/@ summation;
    indices = (CXXIndex@First@#) &/@ summation;
-   conditions = MapThread["cxx_diagrams::isSMField<"<>#1<>">("<>#2<>")"&,
+   higgs = "fields::" <> CConversion`ToValidCSymbolString@TreeMasses`GetHiggsBoson[];
+   conditions = MapThread["cxx_diagrams::isSMFieldOrSMLikeHiggs<"<>#1<>", "<>higgs<>">("<>#2<>")"&,
       {fields, indices}
    ];
    "if (" <>
