@@ -224,18 +224,18 @@ BOOST_AUTO_TEST_CASE(test_b_to_s_mu_mu)
    // (C7, C7', C8, C8', C9, C9', C10, C10', CS, CS', CP, CP'),
    // values of the SLHA output of run_CMSSMCKM.x (9 digits)
    const std::array<std::complex<double>, 12> expected = {
-      std::complex<double>{1.71541231E-02, 9.70417589E-09},  // C7
-      std::complex<double>{4.25103704E-04, 2.46515596E-10},  // C7'
-      std::complex<double>{-2.38395981E-03, 2.19517782E-08}, // C8
-      std::complex<double>{-6.89512042E-05, 5.54826803E-10}, // C8'
-      std::complex<double>{1.32248449E-03, -3.17774492E-10}, // C9
-      std::complex<double>{2.70644760E-04, -5.68821819E-06}, // C9'
-      std::complex<double>{3.00639160E-03, -8.98078050E-10}, // C10
-      std::complex<double>{6.94071385E-04, -8.04746989E-10}, // C10'
-      std::complex<double>{4.12061732E-03, -1.01674473E-09}, // CS
-      std::complex<double>{1.07252834E-04, -2.64062730E-11}, // CS'
-      std::complex<double>{-4.18968486E-03, 1.03229881E-09}, // CP
-      std::complex<double>{1.08992029E-04, -2.67967570E-11}, // CP'
+      std::complex<double>{1.71541231E-02, 9.70417589E-09},   // C7
+      std::complex<double>{4.25103704E-04, 2.46515596E-10},   // C7'
+      std::complex<double>{-2.38395981E-03, 2.19517782E-08},  // C8
+      std::complex<double>{-6.89512042E-05, 5.54826803E-10},  // C8'
+      std::complex<double>{1.32248449E-03, -3.17774492E-10},  // C9
+      std::complex<double>{2.70644760E-04, -5.68821819E-06},  // C9'
+      std::complex<double>{3.00639160E-03, -8.98078050E-10},  // C10
+      std::complex<double>{6.94071385E-04, -8.04746989E-10},  // C10'
+      std::complex<double>{3.90131526E-03, 9.12414479E-11},   // CS
+      std::complex<double>{1.01724751E-04, 1.52437865E-12},   // CS'
+      std::complex<double>{-3.98574119E-03, -6.17669772E-11}, // CP
+      std::complex<double>{1.03850889E-04, 7.83180556E-13},   // CP'
    };
    for (int i = 0; i < 12; i++) {
       BOOST_CHECK_CLOSE(res[i + 1].real(), expected[i].real(), 1e-5);

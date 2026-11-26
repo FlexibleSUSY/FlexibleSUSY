@@ -61,6 +61,10 @@ Module[{npfVertices, npfDefinition, calculateDefinition, prototype,
       NPointFunctions`Observable          -> obs,
       NPointFunctions`KeepProcesses       -> keep
    ];
+   (* Products of external momenta k_i.k_j (FormCalc's abbreviations PairN,
+      e.g. from the tensor coefficients of the W-H+ boxes) are of the order
+      of the external masses squared and vanish at zero external momenta. *)
+   npf = npf /. s_Symbol /; StringMatchQ[SymbolName@s, "Pair" ~~ DigitCharacter..] :> 0;
    npf = npf /. {
       SARAH`sum[__] -> 0,
       LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],

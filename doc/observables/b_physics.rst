@@ -53,7 +53,8 @@ The first argument gives the incoming and outgoing down-type quark and the
 lepton, the second the contributions to calculate and the third the loop
 order (0 or 1):
 
-* ``Boxes``: box diagrams without vector bosons in the loop,
+* ``Boxes``: box diagrams, including those with a W boson and a new
+  particle (e.g. a charged Higgs boson) in the loop,
 * ``Scalars``: penguins with a scalar (e.g. Higgs bosons) between the quark
   and the lepton line,
 * ``Vectors``: penguins with a vector boson (Z) between the quark and the
@@ -64,8 +65,11 @@ also used for :math:`b \to s \gamma`), without Standard Model particles in
 the loop. In the penguins with a self-energy on an external quark leg the quark
 masses are kept, and the Z propagator is evaluated at :math:`q^2 = 0` as in
 the vertex penguins, so that the UV divergences cancel and the Z penguins
-decouple. Diagrams with a vector boson in the loop are left out, e.g. box
-diagrams with a W boson and a charged Higgs boson.
+decouple. Diagrams whose loop particles are all Standard Model particles
+are left out, as are photons and gluons in the loop (they only appear in
+such diagrams) and box diagrams with two vector bosons in the loop (W-W in
+the MSSM, which are pure Standard Model). In models with new vector bosons
+(e.g. a W' or Z') boxes with two of them are therefore missing.
 
 The new physics contributions to the Wilson coefficients
 :math:`C_7, C_8, C_9, C_{10}, C_S, C_P` and their primed counterparts are
