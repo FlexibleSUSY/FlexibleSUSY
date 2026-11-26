@@ -142,10 +142,12 @@ BOOST_AUTO_TEST_CASE( test_massless_higgs_limit )
    const double mb = 1e-2*mt; // r = mb^2/mt^2 = 1e-4
    const double mtau = 1.7497734255695216, ytau = 0.01;
 
-   for (const double scale : {mt, 500.}) {
+   // m_h -> 0 numerically and exactly (m_h = 0, used by the model code)
+   for (const auto [scale, ratio] : {std::array{mt, 1e-6}, std::array{500., 1e-6},
+                                     std::array{mt, 0.}, std::array{500., 0.}}) {
       // Arrange
-      const double mh_t = 1e-6*mt;
-      const double mh_tau = 1e-6*mtau;
+      const double mh_t = ratio*mt;
+      const double mh_tau = ratio*mtau;
 
       // Act
       const double se =

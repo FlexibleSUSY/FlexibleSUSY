@@ -434,12 +434,17 @@ namespace {
  * which is finite for \f$m_h \to 0\f$.
  *
  * @param mf fermion mass
- * @param mh Higgs mass
+ * @param mh Higgs mass, \f$m_h = 0\f$ gives the limit \f$m_h \to 0\f$
  * @param scale renormalization scale
  * @param c coefficient
  */
 double higgs_terms(double mf, double mh, double scale, double c) noexcept
 {
+   // limit m_h -> 0 (avoids 0*log(0))
+   if (mh == 0) {
+      return 0;
+   }
+
    const double mf2 = sqr(mf);
    const double mh2 = sqr(mh);
    const double Q2 = sqr(scale);

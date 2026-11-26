@@ -4530,7 +4530,8 @@ double Standard_model::self_energy_hh_2loop(double p) const
    const double yt = Yu(2,2);
    const double ytau = Ye(2,2);
    const double gs = g3;
-   const double mh = Sqrt(Lambdax)*v;
+   // limit lambda -> 0, as in the BSM built-in corrections (FlexibleEFTHiggs)
+   const double mh = 0.;
    const double scale = get_scale();
    double self_energy = 0.;
 

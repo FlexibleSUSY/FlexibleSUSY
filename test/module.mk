@@ -73,6 +73,7 @@ TEST_SRC := \
 		$(DIR)/test_mssm_twoloop_mb.cpp \
 		$(DIR)/test_mssm_twoloop_mt.cpp \
 		$(DIR)/test_mssm_twoloop_mtau.cpp \
+		$(DIR)/test_mssm_twoloophiggs.cpp \
 		$(DIR)/test_MSSM_2L_limits.cpp \
 		$(DIR)/test_NMSSM_twoloophiggs.cpp \
 		$(DIR)/test_multiindex.cpp \
