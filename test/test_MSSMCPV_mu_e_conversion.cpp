@@ -17,15 +17,17 @@
 // ====================================================================
 
 /**
- * Compares the mu -> e conversion rate in aluminium with the rate from
- * the Wilson coefficients of SARAH 4.15.5/SPheno 4.0.7 (FlavorKit), put
- * into eq. (14) of Kitano, Koike, Okada [hep-ph/0203110] with the
- * overlap integrals of its table 1 (as used by FlexibleSUSY).  At these
+ * Compares the mu -> e conversion rates in aluminium, titanium and gold
+ * with the rates from the Wilson coefficients of SARAH 4.15.5/SPheno 4.0.7
+ * (FlavorKit), put into eq. (14) of Kitano, Koike, Okada [hep-ph/0203110]
+ * with the overlap integrals and capture rates used by FlexibleSUSY
+ * (tables 2, 4 for Ti, and 8).  At these
  * points of a low-scale MSSM with mixing of the right-handed smuon and
  * selectron, the photon dipole and monopole (charge radius) contributions
  * are of similar size and add up.  Until 2026 the dipole contribution had
  * the wrong sign relative to the others, which gave a conversion rate
- * smaller by a factor 27 (mu = 500 GeV) or 7 (mu = 800 GeV).  The
+ * smaller by a factor 27 (mu = 500 GeV) or 7 (mu = 800 GeV) in Al, and
+ * titanium had no overlap integrals (an exception was thrown).  The
  * remaining differences of a few percent come from the different masses
  * and couplings of the two codes (BR(mu -> e gamma) differs by 10%).
  */
@@ -42,6 +44,10 @@
 #include "observables/MSSMCPV_l_to_l_conversion.hpp"
 #include "observables/l_to_l_conversion/settings.hpp"
 #include "spectrum_generator_settings.hpp"
+
+#include <array>
+#include <cstddef>
+#include <utility>
 
 using namespace flexiblesusy;
 
@@ -79,7 +85,10 @@ MSSMCPV_input_parameters make_input(double mu)
    return input;
 }
 
-double conversion_rate_Al(double mu)
+using MSSMCPV_l_to_l_conversion::Nucleus;
+
+/// CR(mu -> e) in the nuclei Al, Ti, Au
+std::array<double, 3> conversion_rates(double mu)
 {
    Loop_library::set(1);
 
@@ -96,24 +105,38 @@ double conversion_rate_Al(double mu)
    BOOST_REQUIRE(!spectrum_generator.get_problems().have_problem());
 
    const auto model = spectrum_generator.get_model();
-   const auto res = MSSMCPV_l_to_l_conversion::calculate_FeFe_forAll_1loop(
-      1, 0, MSSMCPV_l_to_l_conversion::Nucleus::Al, model,
-      LToLConversion_settings{}, qedqcd);
+   std::array<double, 3> res{};
+   const std::array<Nucleus, 3> nuclei{Nucleus::Al, Nucleus::Ti, Nucleus::Au};
+   for (std::size_t i = 0; i < nuclei.size(); i++) {
+      res.at(i) =
+         MSSMCPV_l_to_l_conversion::calculate_FeFe_forAll_1loop(
+            1, 0, nuclei.at(i), model, LToLConversion_settings{}, qedqcd)(0)
+            .real();
+   }
 
-   return res(0).real();
+   return res;
 }
 
 } // anonymous namespace
 
-BOOST_AUTO_TEST_CASE(test_mu_e_conversion_Al)
+BOOST_AUTO_TEST_CASE(test_mu_e_conversion)
 {
-   // {mu, CR(mu -> e, Al) from the SPheno/FlavorKit Wilson coefficients}
-   const double points[][2] = {{500., 1.92e-13}, {800., 1.11e-13}};
+   const std::array<const char*, 3> names{"Al", "Ti", "Au"};
+
+   // mu and CR(mu -> e) in Al, Ti, Au from the SPheno/FlavorKit Wilson
+   // coefficients
+   const std::array<std::pair<double, std::array<double, 3>>, 2> points{{
+      {500., {1.92e-13, 2.95e-13, 2.34e-13}},
+      {800., {1.11e-13, 1.78e-13, 1.52e-13}},
+   }};
 
    for (const auto& [mu, cr_ref] : points) {
-      const double cr = conversion_rate_Al(mu);
-      BOOST_TEST_MESSAGE("mu = " << mu << ": CR(mu -> e, Al) = " << cr
-                                 << ", reference " << cr_ref);
-      BOOST_CHECK_CLOSE_FRACTION(cr, cr_ref, 0.15);
+      const auto cr = conversion_rates(mu);
+      for (std::size_t i = 0; i < cr.size(); i++) {
+         BOOST_TEST_MESSAGE("mu = " << mu << ": CR(mu -> e, " << names.at(i)
+                                    << ") = " << cr.at(i) << ", reference "
+                                    << cr_ref.at(i));
+         BOOST_CHECK_CLOSE_FRACTION(cr.at(i), cr_ref.at(i), 0.15);
+      }
    }
 }

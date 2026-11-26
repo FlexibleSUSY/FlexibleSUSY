@@ -138,7 +138,8 @@ overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd&
    // get muon pole mass from input slha file
    const auto muon_pole_mass_5o2 = pow(qedqcd.displayMass(softsusy::mMuon), 5./2.);
 
-   // Tab. 2 of hep-ph/0203110
+   // Tab. 2 of hep-ph/0203110 (neutron densities from pionic atoms); Ti is
+   // not in it, so its values are from Tab. 4 (from proton scattering)
    switch (N) {
       case Nucleus::Au:
          res.D  = 0.1670 * muon_pole_mass_5o2;
@@ -154,17 +155,28 @@ overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd&
          res.Sp = 0.0153 * muon_pole_mass_5o2;
          res.Sn = 0.0163 * muon_pole_mass_5o2;
          return res;
+      case Nucleus::Ti:
+         res.D  = 0.0870 * muon_pole_mass_5o2;
+         res.Vp = 0.0399 * muon_pole_mass_5o2;
+         res.Vn = 0.0495 * muon_pole_mass_5o2;
+         res.Sp = 0.0371 * muon_pole_mass_5o2;
+         res.Sn = 0.0462 * muon_pole_mass_5o2;
+         return res;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }
 }
 
+/// muon capture rate in GeV, from table 8 of hep-ph/0203110 (in 1/s)
 double get_capture_rate (const Nucleus N) {
+   constexpr double hbar = 6.582119569e-25; // [GeV*s]
    switch (N) {
       case Nucleus::Au:
-         return 8.59868e-18; // 13.07e6 1/s (hep-ph/0203110, table 8)
+         return 13.07e6 * hbar;
       case Nucleus::Al:
-         return 4.64079e-19; // 0.7054e6 1/s (hep-ph/0203110, table 8)
+         return 0.7054e6 * hbar;
+      case Nucleus::Ti:
+         return 2.59e6 * hbar;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }

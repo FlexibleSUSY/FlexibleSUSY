@@ -106,7 +106,17 @@ Fixed bugs
   coefficient of the down quark.  This changes Higgs-mediated
   contributions, e.g. the rate by 5% in the MSSM at tan(beta) = 50 and
   m_A = 400 GeV.  Also the muon capture rate of gold was that of lead, so
-  the conversion rate in gold was 3% too small.
+  the conversion rate in gold was 3% too small (in aluminium the rate
+  changes by 0.05% from a more precise conversion of the capture rate to
+  GeV).
+
+* [commit XXXXXXXXX]: Mu -> e conversion in titanium
+  (``LToLConversion[..., Ti, ...]`` in the model file) generated code that
+  compiled but threw an exception at run time, as the overlap integrals
+  and the capture rate of titanium were missing, so the rate wasn't
+  calculated.  They are now taken from hep-ph/0203110.  A nucleus other
+  than Al, Au and Ti is now reported during the code generation instead
+  of giving C++ code that doesn't compile.
 
 * [commit XXXXXXXXX]: The Z-penguin contributions to mu -> e conversion
   (``LToLConversion``) and l -> 3l (``BrLTo3L``) didn't decouple when the
