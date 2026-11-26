@@ -65,7 +65,10 @@ using Operators = Eigen::Array<std::complex<double>, number_of_operators, 1>;
 /// entries of the result: the Wilson coefficients in the flavio basis
 enum Coefficient : int {
    dummy, C7, C7p, C8, C8p, C9, C9p, C10, C10p, CS, CSp, CP, CPp,
-   number_of_results
+   number_of_results,
+   // neutrinos in the final state (d -> d' nu nu): C_L and C_R of flavio
+   // in the last two entries, all other semi-leptonic entries are zero
+   CL = CP, CR = CPp
 };
 
 using Result = Eigen::Array<std::complex<double>, number_of_results, 1>;
@@ -97,6 +100,14 @@ std::valarray<std::complex<double>> zero(
  * d; for other transitions V_tb V_tq^* is replaced by V_t,in V_t,out^*).
  * The tensor operators are not part of this basis.
  *
+ * With neutrinos in the final state the semi-leptonic operators are
+ *
+ *    O_L = e^2/(16 Pi^2) (qbar gamma^mu P_L b)(nubar gamma_mu (1 - gamma_5) nu),
+ *    O_R = e^2/(16 Pi^2) (qbar gamma^mu P_R b)(nubar gamma_mu (1 - gamma_5) nu),
+ *
+ * whose coefficients C_L, C_R are returned in the entries CL, CR (only the
+ * left-handed neutrinos of the model couple).
+ *
  * @param DL, DR coefficients of m_b (qbar sigma^munu P_{L,R} b) F_munu
  * @param GL, GR coefficients of m_b (qbar sigma^munu T^a P_{L,R} b) G^a_munu
  * @param CXY coefficients of the four-fermion operators [3 X 1][4 Y 2]
@@ -106,6 +117,7 @@ std::valarray<std::complex<double>> zero(
  * @param dIn generation index of the incoming quark
  * @param dOut generation index of the outgoing quark
  * @param qedqcd low-energy data (G_F and CKM matrix)
+ * @param neutrinos true for neutrinos in the final state
  *
  * @return Wilson coefficients (0 if V_t,in V_t,out^* vanishes)
  */
@@ -113,7 +125,7 @@ Result to_flavio_basis(
    std::complex<double> DL, std::complex<double> DR,
    std::complex<double> GL, std::complex<double> GR,
    const Operators& CXY, double mb, double e, double gs,
-   int dIn, int dOut, const softsusy::QedQcd& qedqcd)
+   int dIn, int dOut, const softsusy::QedQcd& qedqcd, bool neutrinos)
 {
    Result res = Result::Zero();
 
@@ -135,6 +147,14 @@ Result to_flavio_basis(
    res[C7p]  = DL/N7;
    res[C8]   = GR/N8;
    res[C8p]  = GL/N8;
+
+   if (neutrinos) {
+      // (nubar gamma_mu (1 - gamma_5) nu) = 2 (nubar gamma_mu P_L nu)
+      res[CL] = CXY[4]/(2.*N9);
+      res[CR] = CXY[6]/(2.*N9);
+      return res;
+   }
+
    res[C9]   = (CXY[5] + CXY[4])/(2.*N9);
    res[C9p]  = (CXY[7] + CXY[6])/(2.*N9);
    res[C10]  = (CXY[5] - CXY[4])/(2.*N9);
@@ -158,14 +178,27 @@ Result to_flavio_basis(
  * @param dOut generation index of the outgoing quark (1 = s, 0 = d)
  * @param lep generation index of the leptons
  * @param scale renormalization scale of the coefficients
+ * @param neutrinos true for neutrinos in the final state (C_L, C_R)
  */
-void write_flavio_json(const Result& c, int dIn, int dOut, int lep, double scale)
+void write_flavio_json(const Result& c, int dIn, int dOut, int lep, double scale,
+                       bool neutrinos)
 {
    if (dIn != 2 || (dOut != 0 && dOut != 1) || lep < 0 || lep > 2) {
       return;
    }
 
    static const std::array<std::string, 3> quarks = {"d", "s", "b"};
+
+   if (neutrinos) {
+      static const std::array<std::string, 3> nus = {"nuenue", "numunumu", "nutaunutau"};
+      const std::string name = quarks.at(dIn) + quarks.at(dOut) + nus.at(lep);
+      wcxf::update_json_flavio("WC_@ModelName@.json", scale, {
+         {"CL_" + name, c[CL]},
+         {"CR_" + name, c[CR]}
+      });
+      return;
+   }
+
    static const std::array<std::string, 3> leptons = {"ee", "mumu", "tautau"};
    const std::string name = quarks.at(dIn) + quarks.at(dOut) + leptons.at(lep);
 
@@ -323,7 +356,8 @@ Operators fix_tensors_sign(
  * @return 0 (no observable is calculated) and the new physics Wilson
  *         coefficients C7, C7', C8, C8', C9, C9', C10, C10', CS, CS', CP,
  *         CP' in the flavio basis (see to_flavio_basis()), in the quark
- *         phase convention of the CKM matrix of the low-energy input.
+ *         phase convention of the CKM matrix of the low-energy input; for
+ *         neutrinos in the final state C_L, C_R in the last two entries.
  */
 template<class Down, class Lepton, class Photon, ffv_function photon,
          ffv_function gluon, npf_function npf>
@@ -338,7 +372,12 @@ Result forge(
    constexpr bool discard_SM_contributions = true;
    const auto form_factors = photon(dIn, dOut, model, discard_SM_contributions);
    const auto form_factors_g = gluon(dIn, dOut, model, discard_SM_contributions);
-   const auto photon_l = embed_photon<Lepton, Photon>(model, form_factors, lInOut);
+   // neutrinos don't couple to the photon
+   constexpr bool neutrinos = Lepton::electricCharge == 0;
+   Operators photon_l = Operators::Zero();
+   if constexpr (!neutrinos) {
+      photon_l = embed_photon<Lepton, Photon>(model, form_factors, lInOut);
+   }
    const auto npf_l = fix_tensors_sign<npf>(
       model, dIn, dOut, lInOut, sm_like_higgs_index(model, physical_input));
 
@@ -355,9 +394,9 @@ Result forge(
 
    const auto res = to_flavio_basis(
       DL, DR, GL, GR, CXY, context.mass<Down>({dIn}), unit_charge(context),
-      model.get_@g3@(), dIn, dOut, qedqcd);
+      model.get_@g3@(), dIn, dOut, qedqcd, neutrinos);
 
-   write_flavio_json(res, dIn, dOut, lInOut, model.get_scale());
+   write_flavio_json(res, dIn, dOut, lInOut, model.get_scale(), neutrinos);
 
    return res;
 }

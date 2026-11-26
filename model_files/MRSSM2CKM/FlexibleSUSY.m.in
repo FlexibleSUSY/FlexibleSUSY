@@ -98,9 +98,15 @@ ExtraSLHAOutputBlocks = {
       }
    },
    {FWCOEF, {{1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Vectors, Scalars, Boxes}, 1]},
-           {2, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[1]} -> {Fd[2], Fe[1]}, {Vectors, Scalars, Boxes}, 1]}}},
+           {2, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[1]} -> {Fd[2], Fe[1]}, {Vectors, Scalars, Boxes}, 1]},
+           {3, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[1]} -> {Fd[2], Fv[1]}, {Vectors, Scalars, Boxes}, 1]},
+           {4, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[2]} -> {Fd[2], Fv[2]}, {Vectors, Scalars, Boxes}, 1]},
+           {5, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[3]} -> {Fd[2], Fv[3]}, {Vectors, Scalars, Boxes}, 1]}}},
    {IMFWCOEF, {{1, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[2]} -> {Fd[2], Fe[2]}, {Vectors, Scalars, Boxes}, 1]},
-             {2, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[1]} -> {Fd[2], Fe[1]}, {Vectors, Scalars, Boxes}, 1]}}}
+             {2, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fe[1]} -> {Fd[2], Fe[1]}, {Vectors, Scalars, Boxes}, 1]},
+             {3, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[1]} -> {Fd[2], Fv[1]}, {Vectors, Scalars, Boxes}, 1]},
+             {4, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[2]} -> {Fd[2], Fv[2]}, {Vectors, Scalars, Boxes}, 1]},
+             {5, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[3]} -> {Fd[2], Fv[3]}, {Vectors, Scalars, Boxes}, 1]}}}
 };
 
 FSCalculateDecays = True;

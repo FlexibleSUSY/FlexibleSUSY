@@ -136,6 +136,51 @@ block in the quark phase convention of the CKM matrix of the input
 (``VCKMIN``, PDG convention). SuperIso reads :math:`C_{7,8,9,10}^{(\prime)}`
 from these blocks (its program ``flha.x``).
 
+++++++++++++++++++++++++++++++++
+:math:`b \to s \nu\bar{\nu}`
+++++++++++++++++++++++++++++++++
+
+With a neutrino as lepton, ``BrDLToDL`` calculates the coefficients of
+:math:`b \to s \nu\bar{\nu}` (:math:`B \to K^{(*)} \nu\bar{\nu}`), e.g.
+for the three neutrino flavours
+
+.. code-block:: mathematica
+
+   {FWCOEF, {
+      ...
+      {3, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[1]} -> {Fd[2], Fv[1]}, {Vectors, Scalars, Boxes}, 1]},
+      {4, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[2]} -> {Fd[2], Fv[2]}, {Vectors, Scalars, Boxes}, 1]},
+      {5, FlexibleSUSYObservable`BrDLToDL[{Fd[3], Fv[3]} -> {Fd[2], Fv[3]}, {Vectors, Scalars, Boxes}, 1]}}}
+
+as in CMSSMCKM and MRSSM2CKM. The coefficients are those of the flavio
+basis,
+
+.. math::
+
+   O_L = \frac{e^2}{16\pi^2} (\bar{s} \gamma^\mu P_L b)(\bar{\nu} \gamma_\mu (1 - \gamma_5) \nu), \qquad
+   O_R = \frac{e^2}{16\pi^2} (\bar{s} \gamma^\mu P_R b)(\bar{\nu} \gamma_\mu (1 - \gamma_5) \nu),
+
+with the same normalization as above; only the left-handed neutrinos of the
+model couple. They are returned in the last two entries of the observable
+(the other semi-leptonic entries are zero) and written to ``WC_<model>.json``
+(``CL_bsnumunumu``, ``CR_bsnumunumu``, ...). In the FLHA blocks they are
+written with the operator codes 4141 and 4241, i.e. for the operators
+:math:`(\bar{s} \gamma^\mu P_{L,R} b)(\bar{\nu} \gamma_\mu P_L \nu)`,
+whose coefficients are :math:`2 C_L` and :math:`2 C_R`:
+
+.. code-block::
+
+     03051414     4141   00   1     ...   # 2 CL Vectors+Scalars+Boxes 1 loop
+     03051414     4241   00   1     ...   # 2 CR Vectors+Scalars+Boxes 1 loop
+
+The same diagrams are included as for charged leptons (see above), without
+the photon penguin. The Z penguins contribute equally to :math:`C_L` and
+:math:`C_{10}` (and to :math:`C_R` and :math:`C_{10}'`); :math:`C_L` and
+:math:`C_{10}` differ by the boxes (charged sleptons instead of sneutrinos).
+flavio predicts e.g. ``BR(B+->Knunu)`` and ``BR(B0->K*nunu)``, summed over
+the neutrino flavours; flavour-changing coefficients
+(:math:`\nu_i \neq \nu_j`) are not calculated.
+
 ++++++++++++++++++++
 Interface to flavio
 ++++++++++++++++++++

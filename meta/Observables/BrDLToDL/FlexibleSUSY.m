@@ -10,7 +10,9 @@ Module[
       Utils`PrintHeadline["Creating " <> SymbolName@obs <> " class ..."];
       observables = DeleteDuplicates[observables /. f_@_Integer -> f@_];
       fieldsFFV   = Cases[observables, Rule[{q_[_], _}, _] :> q, Infinity];
-      verticesFFV = Cases[observables, Rule[{_, l_[_]}, _] :> {SARAH`bar@l, l, TreeMasses`GetPhoton[]}, Infinity];
+      (* neutral leptons (neutrinos) don't couple to the photon *)
+      verticesFFV = Cases[observables, Rule[{_, l_[_]}, _] /; TreeMasses`IsElectricallyCharged[l] :>
+         {SARAH`bar@l, l, TreeMasses`GetPhoton[]}, Infinity];
       {additionalVertices, npfDefinitions, prototypes, definitions} = Create@observables;
       npfHeaders  = NPointFunctions`CreateCXXHeaders[];
    ];

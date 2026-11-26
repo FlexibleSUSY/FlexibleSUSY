@@ -68,6 +68,15 @@ New features
   ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
   model file.
 
+* ``BrDLToDL`` calculates also :math:`b \to s \nu\bar{\nu}` when the
+  lepton is a neutrino: the coefficients :math:`C_L, C_R` of the flavio
+  basis are written to ``WC_<model>.json`` (so that flavio predicts e.g.
+  :math:`\text{BR}(B \to K^{(*)} \nu\bar{\nu})`) and to the FLHA blocks
+  ``FWCOEF``, ``IMFWCOEF``. Enabled for the three neutrino flavours in
+  CMSSMCKM and MRSSM2CKM. ``utils/calc_flavio_observables.py`` calculates
+  :math:`\text{BR}(B^+ \to K^+ \nu\bar{\nu})` and
+  :math:`\text{BR}(B^0 \to K^{*0} \nu\bar{\nu})` by default.
+
 * New observable ``BrDLToDL``: the 1-loop Wilson coefficients of
   :math:`d_i \ell \to d_j \ell` (e.g. :math:`b \to s \mu\mu`) from box
   diagrams, Z and scalar penguins and the photon penguin.  The coefficients C7,

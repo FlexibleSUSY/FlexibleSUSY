@@ -8,12 +8,15 @@ Usage:
 
 An observable that depends on arguments, e.g. a q^2 bin, is given as
 name:arg1:arg2, e.g. '<Rmue>(B+->Kll):1.1:6'. Without observables,
-BR(B->Xsgamma), BR(Bs->mumu) and R_K, R_K* in 1.1 < q^2 < 6 GeV^2 are
-calculated. Each observable is printed with its Standard Model prediction
-and the ratio of the two. Requires the flavio and wilson packages.
+BR(B->Xsgamma), BR(Bs->mumu), R_K, R_K* in 1.1 < q^2 < 6 GeV^2 and
+BR(B+ -> K+ nu nu), BR(B0 -> K*0 nu nu) are calculated. Each observable
+is printed with its Standard Model prediction and the ratio of the two.
+Requires the flavio and wilson packages.
 
 Coefficients that are missing in the file are taken as zero by flavio:
-R_K and R_K* need the coefficients of b -> s mu mu and b -> s e e.
+R_K and R_K* need the coefficients of b -> s mu mu and b -> s e e, and
+B -> K(*) nu nu (summed over the neutrino flavours) those of b -> s nu nu
+for all three neutrinos.
 """
 
 import argparse
@@ -24,6 +27,8 @@ DEFAULT_OBSERVABLES = [
     'BR(Bs->mumu)',
     '<Rmue>(B+->Kll):1.1:6',
     '<Rmue>(B0->K*ll):1.1:6',
+    'BR(B+->Knunu)',
+    'BR(B0->K*nunu)',
 ]
 
 

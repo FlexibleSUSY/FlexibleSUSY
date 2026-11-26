@@ -295,3 +295,57 @@ BOOST_AUTO_TEST_CASE(test_b_to_s_mu_mu)
 
    (void)std::remove("WC_CMSSMCKM.json");
 }
+
+BOOST_AUTO_TEST_CASE(test_b_to_s_nu_nu)
+{
+   std::stringstream istr(slha_input);
+
+   CMSSMCKM_slha_io slha_io;
+   slha_io.read_from_stream(istr);
+
+   softsusy::QedQcd qedqcd;
+   CMSSMCKM_input_parameters input;
+   Spectrum_generator_settings settings;
+
+   slha_io.fill(settings);
+   slha_io.fill(qedqcd);
+   slha_io.fill(input);
+
+   settings.set(Spectrum_generator_settings::calculate_observables, 0);
+   Loop_library::set(1);
+
+   const CMSSMCKM_slha model = setup_CMSSMCKM(input, qedqcd, settings);
+
+   (void)std::remove("WC_CMSSMCKM.json");
+
+   const auto mumu =
+      CMSSMCKM_br_d_l_to_d_l::calculate_FdFe_FdFe_ListVectorsScalarsBoxes_1(
+         2, 1, 1, model, qedqcd);
+   // b -> s nu_mu nu_mu: C_L and C_R in the last two entries
+   const auto nunu =
+      CMSSMCKM_br_d_l_to_d_l::calculate_FdFv_FdFv_ListVectorsScalarsBoxes_1(
+         2, 1, 1, model, qedqcd);
+
+   // The Z penguin contributes equally to C_L and C10 (and to C_R and C10'),
+   // as the Z couples to nu_L and to the axial current of the charged
+   // leptons with the same strength (1/2 and 1/4, with (1 - gamma_5) = 2 P_L
+   // in the operator of C_L). The two differ by the box diagrams (charged
+   // sleptons vs. sneutrinos), which are small at this point.
+   BOOST_CHECK_CLOSE(nunu[11].real(), mumu[7].real(), 2.);
+   BOOST_CHECK_CLOSE(nunu[12].real(), mumu[8].real(), 2.);
+
+   // no other coefficients for neutrinos
+   for (int i = 5; i <= 10; i++) {
+      BOOST_CHECK_EQUAL(nunu[i], std::complex<double>(0., 0.));
+   }
+
+   // the json file contains C_L and C_R of b -> s nu_mu nu_mu
+   std::ifstream ifs("WC_CMSSMCKM.json");
+   const auto j = nlohmann::json::parse(ifs);
+   const auto CL = read_wc(j, "CL_bsnumunumu");
+   const auto CR = read_wc(j, "CR_bsnumunumu");
+   BOOST_CHECK_CLOSE(CL.real(), nunu[11].real(), 1e-10);
+   BOOST_CHECK_CLOSE(CR.real(), nunu[12].real(), 1e-10);
+
+   (void)std::remove("WC_CMSSMCKM.json");
+}
