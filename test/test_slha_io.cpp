@@ -608,6 +608,70 @@ BOOST_AUTO_TEST_CASE(test_slha_mixing_matrix_convention_cp_violation)
    BOOST_CHECK(!has_imaginary_part(noisy));
 }
 
+// The rows of a complex scalar mixing matrix have arbitrary phases.  For a
+// real mass matrix, convert_scalar_mixings_to_slha() must make them real
+// (otherwise the real part in the SLHA output isn't the mixing matrix), and
+// for a complex hermitian mass matrix the matrix must still diagonalize it.
+BOOST_AUTO_TEST_CASE(test_slha_scalar_mixing_matrix_convention)
+{
+   using C = std::complex<double>;
+
+   const auto check_diagonalizes = [](const Eigen::Matrix<C, 3, 3>& mass_matrix,
+                                      const Eigen::Array<double, 3, 1>& m2,
+                                      const Eigen::Matrix<C, 3, 3>& Z) {
+      // M = Z^dagger m2 Z
+      const Eigen::Matrix<C, 3, 3> reconstructed =
+         Z.adjoint() * m2.matrix().cast<C>().asDiagonal() * Z;
+      for (int i = 0; i < 3; i++) {
+         for (int k = 0; k < 3; k++) {
+            BOOST_CHECK_SMALL(std::abs(reconstructed(i, k) - mass_matrix(i, k)),
+                              1e-8);
+         }
+      }
+   };
+
+   // real mass matrix, diagonalized with random phases of the rows
+   Eigen::Matrix<C, 3, 3> mass_matrix;
+   // clang-format off
+   mass_matrix << C(9.e4),  C(-3.e3), C(0.),
+                  C(-3.e3), C(4.e5),  C(2.e4),
+                  C(0.),    C(2.e4),  C(2.5e5);
+   // clang-format on
+
+   Eigen::Array<double, 3, 1> m2;
+   Eigen::Matrix<C, 3, 3> Z;
+   fs_diagonalize_hermitian(mass_matrix, m2, Z);
+   for (int i = 0; i < 3; i++) {
+      Z.row(i) *= std::polar(1., 0.7 + 1.3 * i);
+   }
+   BOOST_REQUIRE(has_imaginary_part(Z));
+
+   convert_scalar_mixings_to_slha(Z);
+
+   BOOST_CHECK(!has_imaginary_part(Z));
+   check_diagonalizes(mass_matrix, m2, Z);
+   for (int i = 0; i < 3; i++) {
+      Eigen::Index k = 0;
+      Z.row(i).cwiseAbs().maxCoeff(&k);
+      BOOST_CHECK_GT(std::real(Z(i, k)), 0.);
+   }
+
+   // complex hermitian mass matrix (CP violation): Z stays complex
+   mass_matrix(0, 1) = C(-3.e3, 2.e3);
+   mass_matrix(1, 0) = std::conj(mass_matrix(0, 1));
+   fs_diagonalize_hermitian(mass_matrix, m2, Z);
+   convert_scalar_mixings_to_slha(Z);
+   BOOST_CHECK(has_imaginary_part(Z));
+   check_diagonalizes(mass_matrix, m2, Z);
+
+   // a real matrix is left unchanged
+   Eigen::Matrix<double, 2, 2> Zr;
+   Zr << 0.6, -0.8, -0.8, -0.6;
+   const auto Zr_orig = Zr;
+   convert_scalar_mixings_to_slha(Zr);
+   BOOST_CHECK(Zr == Zr_orig);
+}
+
 template<int N>
 void convert_symmetric_fermion_mixings_to_slha_forloop(
    Eigen::Array<double, N, 1>& m,

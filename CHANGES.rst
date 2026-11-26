@@ -111,6 +111,20 @@ Fixed bugs
   as SLHA2 asks for the CP-violating case.  Points without CP violation
   are written as before.
 
+* [commit XXXXXXXXX]: In models with complex sfermion or Higgs mixing
+  matrices, such as CMSSMCKM or MSSMCPV, the SLHA output contained only
+  the real parts of these mixing matrices (``USQMIX``, ``DSQMIX``,
+  ``SELMIX``, ``SNUMIX``, ...), and their rows had arbitrary complex
+  phases.  Many rows were therefore printed as (nearly) zero even
+  without CP violation, e.g. four of the six rows of ``DSQMIX`` in
+  CMSSMCKM at tan(beta) = 40, and programs reading the SLHA output got
+  wrong mixing matrices.  Now the phase of each row of a scalar mixing
+  matrix is chosen such that its largest element is real and positive,
+  which makes the matrix real when CP is conserved.  If a complex
+  mixing matrix still has an imaginary part (CP violation), it is
+  written to the corresponding SLHA2 block (``IMDSQMIX``, ``IMUMIX``,
+  ...).  FlexibleSUSY's own results were not affected.
+
 * [commit XXXXXXXXX]: The mu -> e conversion rates (``LToLConversion``)
   had the photon dipole contribution with the wrong sign relative to the
   other contributions (photon monopole, Z penguins, boxes, scalars), so
