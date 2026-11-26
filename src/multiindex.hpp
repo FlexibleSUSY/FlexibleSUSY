@@ -19,217 +19,126 @@
 #ifndef FS_MULTIINDEX_H
 #define FS_MULTIINDEX_H
 
-#include "find_if.hpp"
-
 #include <array>
+#include <cstddef>
 #include <iterator>
-
-#include <boost/array.hpp>
+#include <utility>
 
 #include <boost/mpl/at.hpp>
-#include <boost/mpl/range_c.hpp>
 #include <boost/mpl/size.hpp>
-
-#include <boost/range/iterator_range.hpp>
-
-#include <boost/fusion/adapted/boost_array.hpp>
-#include <boost/fusion/adapted/mpl.hpp>
-#include <boost/fusion/include/copy.hpp>
 
 namespace flexiblesusy
 {
 namespace detail
 {
-template <class End, class Location>
-struct can_increment_multiindex {
-   template <class Indices>
-   bool operator()(const Indices& indices)
-   {
-      return (indices[Location::value] !=
-              boost::mpl::at<End, Location>::type::value - 1);
-   }
-};
-
-template <class End>
-struct increment_checker {
-   template <class Location>
-   using type = can_increment_multiindex<End, Location>;
-};
-
-template <class Begin>
-struct increment_multiindex {
-   template <class Location>
-   struct type {
-      template <class Indices>
-      void operator()(Indices& indices)
-      {
-         boost::array<int, std::tuple_size<Indices>::value> boost_temp;
-         boost::fusion::copy(Begin(), boost_temp);
-         std::copy(boost_temp.begin(), boost_temp.begin() + Location::value,
-                   indices.begin());
-
-         ++(indices[Location::value]);
-      }
-   };
-};
-
-template <class Begin, class End, bool>
-class multiindex_impl;
-
-/* FIXME: This copying back and forth
-          using boost::array<> between
-          boost::mpl and std::array<>
-          is stupid...
-          Using boost::hana would be the
-          way to go! */
-template <class Begin, class End>
-class multiindex_impl<Begin, End, false>
+/// converts a boost::mpl sequence of integral constants to a std::array
+template <class Sequence, std::size_t... I>
+constexpr std::array<int, sizeof...(I)>
+mpl_to_array(std::index_sequence<I...> /* indices */)
 {
-   static constexpr auto NumIndices = boost::mpl::size<Begin>::value;
-   using data_type = std::array<int, NumIndices>;
+   return {static_cast<int>(boost::mpl::at_c<Sequence, I>::type::value)...};
+}
 
-   data_type data;
-
-   multiindex_impl(data_type&& d) : data(std::move(d)) {}
-
-public:
-   static multiindex_impl begin()
-   {
-      boost::array<int, NumIndices> boost_temp;
-      std::array<int, NumIndices> std_temp;
-
-      boost::fusion::copy(Begin(), boost_temp);
-      std::copy(boost_temp.begin(), boost_temp.end(), std_temp.begin());
-
-      return multiindex_impl{std::move(std_temp)};
-   }
-
-   static multiindex_impl end()
-   {
-      boost::array<int, NumIndices> boost_temp;
-      std::array<int, NumIndices> std_temp;
-
-      boost::fusion::copy(End(), boost_temp);
-      std::copy(boost_temp.begin(), boost_temp.end(), std_temp.begin());
-
-      return multiindex_impl{std::move(std_temp)};
-   }
-
-   multiindex_impl& operator++()
-   {
-      using locations = boost::mpl::range_c<int, 0, NumIndices>;
-
-      if (meta::find_if<locations,
-                        detail::increment_checker<End>::template type,
-                        detail::increment_multiindex<Begin>::template type>(
-             data) == false) {
-         boost::array<int, NumIndices> boost_temp;
-         boost::fusion::copy(End(), boost_temp);
-
-         std::copy(boost_temp.begin(), boost_temp.end(), data.begin());
-      }
-
-      return *this;
-   }
-
-   multiindex_impl operator++(int)
-   {
-      multiindex_impl copy(*this);
-      operator++();
-      return copy;
-   }
-
-   const data_type& operator*() const { return data; }
-
-   const data_type* operator->() const { return &data; }
-
-   bool operator==(const multiindex_impl& other) const
-   {
-      return data == other.data;
-   }
-
-   bool operator!=(const multiindex_impl& other) const
-   {
-      return !(*this == other);
-   }
-};
-
-template <class Begin, class End>
-class multiindex_impl<Begin, End, true>
+template <class Sequence>
+constexpr auto mpl_to_array()
 {
-   using data_type = std::array<int, 0>;
-   bool is_incremented;
-
-   data_type data;
-
-   multiindex_impl(bool is_inc) : is_incremented(is_inc) {}
-
-public:
-   static multiindex_impl begin() { return multiindex_impl{false}; }
-
-   static multiindex_impl end() { return multiindex_impl{true}; }
-
-   multiindex_impl& operator++()
-   {
-      is_incremented = true;
-      return *this;
-   }
-
-   multiindex_impl operator++(int)
-   {
-      multiindex_impl copy(*this);
-      operator++();
-      return copy;
-   }
-
-   const data_type& operator*() const { return data; }
-
-   const data_type* operator->() const { return &data; }
-
-   bool operator==(const multiindex_impl& other) const
-   {
-      return is_incremented == other.is_incremented;
-   }
-
-   bool operator!=(const multiindex_impl& other) const
-   {
-      return !(*this == other);
-   }
-};
+   return mpl_to_array<Sequence>(
+      std::make_index_sequence<boost::mpl::size<Sequence>::value>{});
+}
 } // namespace detail
 
+/**
+ * @class multiindex
+ * @brief forward iterator over all index combinations in [Begin, End)
+ *
+ * Begin and End are boost::mpl sequences of integral constants with
+ * the lower (inclusive) and upper (exclusive) bound of each index.
+ * The first index runs fastest.  Without indices there is exactly one
+ * (empty) combination; if any index has an empty range, there is none.
+ */
 template <class Begin, class End>
 class multiindex
-   : public detail::multiindex_impl<Begin, End,
-                                    std::is_same<Begin, End>::type::value>
 {
-   using impl = detail::multiindex_impl<Begin, End,
-                                        std::is_same<Begin, End>::type::value>;
-
-   multiindex(impl&& index) : impl(std::move(index)) {}
-
 public:
-   static multiindex begin() { return impl::begin(); }
+   static constexpr std::size_t size = boost::mpl::size<Begin>::value;
+   using data_type = std::array<int, size>;
 
-   static multiindex end() { return impl::end(); }
-};
-} // namespace flexiblesusy
-
-namespace std
-{
-template <class Begin, class End>
-struct iterator_traits<flexiblesusy::multiindex<Begin, End>> {
    using difference_type = std::ptrdiff_t;
-   using value_type = typename std::decay<decltype(
-      *std::declval<flexiblesusy::multiindex<Begin, End>>())>::type;
+   using value_type = data_type;
    using pointer = const value_type*;
    using reference = const value_type&;
    using iterator_category = std::forward_iterator_tag;
-};
-} // namespace std
 
-namespace flexiblesusy
-{
+   static_assert(boost::mpl::size<End>::value == size,
+                 "multiindex: Begin and End have different lengths");
+
+   multiindex() = default;
+
+   static multiindex begin() { return multiindex{lower, is_empty()}; }
+   static multiindex end() { return multiindex{lower, true}; }
+
+   multiindex& operator++()
+   {
+      at_end = !increment(std::make_index_sequence<size>{});
+      return *this;
+   }
+
+   multiindex operator++(int)
+   {
+      multiindex copy(*this);
+      operator++();
+      return copy;
+   }
+
+   reference operator*() const { return data; }
+   pointer operator->() const { return &data; }
+
+   bool operator==(const multiindex& other) const
+   {
+      return at_end == other.at_end && (at_end || data == other.data);
+   }
+
+private:
+   static constexpr data_type lower = detail::mpl_to_array<Begin>();
+   static constexpr data_type upper = detail::mpl_to_array<End>();
+
+   data_type data{};
+   bool at_end{true};
+
+   multiindex(const data_type& indices, bool is_end)
+      : data(indices), at_end(is_end)
+   {
+   }
+
+   /// increments the first index that is not at its upper bound and
+   /// resets the ones before it; returns false if there is none
+   template <std::size_t... I>
+   bool increment(std::index_sequence<I...> /* positions */)
+   {
+      return ((++data[I] < upper[I] ? true : (data[I] = lower[I], false)) ||
+              ...);
+   }
+
+   static constexpr bool is_empty()
+   {
+      for (std::size_t i = 0; i < size; ++i) {
+         if (lower[i] >= upper[i]) {
+            return true;
+         }
+      }
+      return false;
+   }
+};
+
+/// range of all index combinations in [Begin, End)
+template <class Begin, class End>
+struct multiindex_range {
+   using iterator = multiindex<Begin, End>;
+
+   iterator begin() const { return iterator::begin(); }
+   iterator end() const { return iterator::end(); }
+};
+
 namespace meta
 {
 template <class ObjectWithIndexBounds>
@@ -238,26 +147,20 @@ struct index_bounds {
 };
 } // namespace meta
 
+/**
+ * range of all index combinations of an object with index bounds,
+ * used as
+ * @code{.cpp}
+ * for (const auto& indices : index_range<Vertex>()) { ... }
+ * @endcode
+ *
+ * Objects with the same bounds give the same type.
+ */
 template <class ObjectWithIndexBounds>
-static decltype(boost::make_iterator_range(
-   multiindex<typename meta::index_bounds<ObjectWithIndexBounds>::type::first,
-              typename meta::index_bounds<
-                 ObjectWithIndexBounds>::type::second>::begin(),
-   multiindex<
-      typename meta::index_bounds<ObjectWithIndexBounds>::type::first,
-      typename meta::index_bounds<ObjectWithIndexBounds>::type::second>::end()))
-index_range()
-{
-   return boost::make_iterator_range(
-      multiindex<
-         typename meta::index_bounds<ObjectWithIndexBounds>::type::first,
-         typename meta::index_bounds<ObjectWithIndexBounds>::type::second>::
-         begin(),
-      multiindex<
-         typename meta::index_bounds<ObjectWithIndexBounds>::type::first,
-         typename meta::index_bounds<ObjectWithIndexBounds>::type::second>::
-         end());
-}
+using index_range = multiindex_range<
+   typename meta::index_bounds<ObjectWithIndexBounds>::type::first,
+   typename meta::index_bounds<ObjectWithIndexBounds>::type::second>;
+
 } // namespace flexiblesusy
 
 #endif

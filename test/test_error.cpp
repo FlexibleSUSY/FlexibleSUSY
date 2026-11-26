@@ -22,6 +22,10 @@ BOOST_AUTO_TEST_CASE( test_catch_by_std_exception )
    BOOST_REQUIRE_THROW(THROW(NoSinThetaWConvergenceError, 1, 0.2), ET);
    BOOST_REQUIRE_THROW(THROW(NonPerturbativeSinThetaW), ET);
    BOOST_REQUIRE_THROW(THROW(NonPerturbativeRunningError, 0.), ET);
+   BOOST_REQUIRE_THROW(THROW(RGIntegrationError,
+                             RGIntegrationError::Reason::too_many_steps, 0., 0,
+                             0.),
+                       ET);
    BOOST_REQUIRE_THROW(THROW(NonPerturbativeRunningQedQcdError, ""), ET);
    BOOST_REQUIRE_THROW(THROW(OutOfMemoryError, ""), ET);
    BOOST_REQUIRE_THROW(THROW(OutOfBoundsError, ""), ET);
@@ -35,6 +39,21 @@ BOOST_AUTO_TEST_CASE( test_is_nothrow_constructible )
 {
    using namespace flexiblesusy;
 
-   BOOST_CHECK(std::is_nothrow_constructible<FatalError>::value);
+   BOOST_CHECK(std::is_nothrow_constructible_v<FatalError>);
 }
 */
+
+BOOST_AUTO_TEST_CASE(test_non_perturbative_running_error_message)
+{
+   using namespace flexiblesusy;
+
+   const NonPerturbativeRunningError e(123.);
+   BOOST_TEST_MESSAGE(e.what_detailed());
+   BOOST_CHECK(e.what_detailed().find("123") != std::string::npos);
+
+   const RGIntegrationError r(RGIntegrationError::Reason::too_many_steps, 117.,
+                              3, 1e-14);
+   BOOST_TEST_MESSAGE(r.what_detailed());
+   BOOST_CHECK(r.what_detailed().find("too many steps") != std::string::npos);
+   BOOST_CHECK(r.get_reason() == RGIntegrationError::Reason::too_many_steps);
+}

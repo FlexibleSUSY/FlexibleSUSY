@@ -27,7 +27,7 @@ Switch[blockName,
             },
             {
                "c1" -> c1, "c2" -> c2,
-               "contr" -> SymbolName@contr, "loopN" -> ToString@loopN,
+               "contr" -> StringRiffle[SymbolName /@ Flatten@{contr}, "+"], "loopN" -> ToString@loopN,
                "obs" -> type<>"(observables."<>Observables`GetObservableName@obs<>")"
             }
          ]

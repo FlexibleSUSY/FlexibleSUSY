@@ -45,12 +45,17 @@
 #include "wrappers.hpp"
 
 #include <cmath>
+#include <memory>
 #include <vector>
 
 #include "boost/mpl/contains.hpp"
 #include <boost/mpl/for_each.hpp>
 
 namespace flexiblesusy {
+
+namespace standard_model {
+class Standard_model;
+} // namespace standard_model
 
 class @ModelName@_decays {
 public:
@@ -92,6 +97,16 @@ public:
 
 @partialWidthCalculationPrototypes@
 
+   /// amplitude (form factors) of the decay FieldIn -> FieldOut1 FieldOut2,
+   /// at tree level or, if there is none, at 1 loop; public for tests
+   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
+   calculate_amplitude(
+      const @ModelName@_cxx_diagrams::context_base&,
+      const typename cxx_diagrams::field_indices<FieldIn>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut1>::type&,
+      const typename cxx_diagrams::field_indices<FieldOut2>::type&) const;
+
 private:
    @ModelName@_mass_eigenstates model{};
    softsusy::QedQcd qedqcd{};
@@ -101,14 +116,11 @@ private:
    @ModelName@_decay_table decay_table{};
    FlexibleDecay_problems problems{};
    EffectiveCoupling_list neutral_higgs_effc {};
+   /// SM initialised from qedqcd, shared by the decays of all particles
+   std::shared_ptr<const standard_model::Standard_model> initialised_sm{};
 
-   template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-   typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
-   calculate_amplitude(
-      const @ModelName@_cxx_diagrams::context_base&,
-      const typename cxx_diagrams::field_indices<FieldIn>::type&,
-      const typename cxx_diagrams::field_indices<FieldOut1>::type&,
-      const typename cxx_diagrams::field_indices<FieldOut2>::type&) const;
+   standard_model::Standard_model const& get_initialised_sm();
+   double get_decay_scale(double) const;
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    double amplitude_squared(@ModelName@_cxx_diagrams::context_base const& context,

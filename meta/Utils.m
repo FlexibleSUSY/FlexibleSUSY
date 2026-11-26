@@ -496,6 +496,10 @@ StringJoinWithReplacement ~ SetAttributes ~ {Locked,Protected};
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
 		fileHandle = OpenRead[fileName, BinaryFormat -> True];
+		(* Read[$Failed, String] stays unevaluated, so without this check
+		   the loop below would never end *)
+		AssertWithMessage[Head[fileHandle] === InputStream,
+			"Utils`ReadLinesInFile[]: Unable to open file '" <> fileName <> "'"];
 
 		While[(line = Read[fileHandle, String]) =!= EndOfFile,
 			AssertWithMessage[line =!= $Failed,

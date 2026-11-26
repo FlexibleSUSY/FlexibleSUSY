@@ -70,6 +70,13 @@ private:
    std::string proc_string;
 };
 
+/// CP property of a neutral Higgs boson
+enum class CP_property {
+   even,     ///< CP-even
+   odd,      ///< CP-odd
+   undefined ///< not a CP eigenstate (CP violation)
+};
+
 class NeutralHiggsEffectiveCouplings {
 public:
    std::string particle {};
@@ -78,7 +85,7 @@ public:
    double width {};
    double width_sm {};
    double invWidth {0.};
-   int CP {};
+   CP_property CP{CP_property::undefined};
    std::pair<std::string, std::complex<double>> dd {};
    std::pair<std::string, std::complex<double>> uu {};
    std::pair<std::string, std::complex<double>> ss {};
@@ -144,6 +151,15 @@ private:
 
 std::size_t hash_decay(const Decay& decay);
 
+/**
+ * Whether a channel has a negative partial width that is more than
+ * rounding noise, i.e. whose branching ratio (relative to the total
+ * width, which is the sum of the absolute partial widths) is below
+ * -1e-11.  Such channels are unphysical and are left out of the
+ * output.
+ */
+bool has_unphysical_negative_width(const Decay&, double total_width);
+
 class Decays_list {
 private:
    /* map is slower than unordered_map but will preserve order of entries */
@@ -195,6 +211,15 @@ public:
    int get_particle_id() const { return initial_pdg; }
    const Decay& get_decay(std::initializer_list<int> products) const;
    double get_total_width() const { return total_width; }
+
+   /**
+    * Sets the partial widths of all channels with an unphysical
+    * negative width (see has_unphysical_negative_width()) to zero and
+    * removes them from the total width.
+    *
+    * @return a warning for each such channel
+    */
+   std::vector<std::string> remove_unphysical_negative_widths();
 
 private:
    int initial_pdg{0};
@@ -346,7 +371,7 @@ double final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>:
       return 1.;
    }
    else {
-      if (boost::range::equal(idx1, idx2)) {
+      if (idx1 == idx2) {
          return 0.5;
       }
       else {

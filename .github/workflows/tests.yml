@@ -35,45 +35,34 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
 
 jobs:
+  # Compiled and shell script tests that need neither Mathematica nor a
+  # model, so they run even when the Wolfram Engine can't be activated.
+  # No secrets are used, so this job also runs on pull requests from forks.
   no-meta:
+
+    runs-on: ubuntu-latest
+    container:
+      image: navir/opensuseleap-for-flexiblesusy:0.18.10
+
     strategy:
+      fail-fast: false
       matrix:
-        OS: [macos-10.15, ubuntu-latest]
         CXXCOMPILER: [g++, clang++]
-    runs-on: ${{ matrix.OS }}
-    if: false
 
     steps:
-      - name: Homebrew
-        if: runner.os == 'macOS'
-        run: |
-          brew update
-          brew upgrade
-          brew reinstall gcc
-          brew install gsl
 
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install conan
-        run: |
-          pip3 install --user conan
-          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-          conan profile new default --detect
-
-      - name: Setup conan
-        run: |
-          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-          conan profile update settings.compiler.libcxx=libstdc++11 default
+      - name: "Set FS dependency directory"
         env:
-          CXX: ${{ matrix.CXXCOMPILER }}
-        if: ${{ runner.os == 'Linux' }}
-
-      - name: Install dependencies
+          compiler: ${{ matrix.CXXCOMPILER }}
         run: |
-          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-          conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
-          conan install . --build=missing
+          case "$compiler" in
+            "g++")    echo "FS_DEPENDENCIES_DIR=/fs_dependencies/gcc" >> $GITHUB_ENV ;;
+            "clang++")  echo "FS_DEPENDENCIES_DIR=/fs_dependencies/clang" >> $GITHUB_ENV ;;
+            *) exit 1 ;;
+          esac
 
       - name: Configure
         env:
@@ -81,9 +70,12 @@ jobs:
         run: |
           ./configure \
             --with-cxx=$CXXCOMPILER \
-            --with-optional-modules=test \
             --with-loop-libraries=collier,looptools \
-            --with-install-dir=install \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --with-optional-modules=test \
             --disable-meta
           make showbuild
 
@@ -115,8 +107,128 @@ jobs:
           FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
-      - name: Install
-        run: make install-src
+      - name: (Optional) Save logs in case of an error
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: no-meta-${{matrix.CXXCOMPILER}}_test-logs
+          path: |
+            config.*
+            test/test_*.log
+
+  # The no-meta tests on macOS with Apple clang (libc++), gfortran and the
+  # libraries from Homebrew.  COLLIER and LoopTools aren't in Homebrew, so
+  # they are built from source and cached.
+  no-meta-macos:
+
+    runs-on: macos-15
+
+    env:
+      COLLIER_VERSION: '1.2.10'
+      LOOPTOOLS_VERSION: '2.16'
+      DEPS_DIR: ${{ github.workspace }}/.fs_dependencies
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install dependencies from Homebrew
+        run: |
+          brew install gcc boost eigen gsl
+          clang++ --version
+          gfortran --version
+
+      - name: Restore COLLIER and LoopTools
+        id: cache-deps
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.DEPS_DIR }}
+          key: macos-15-collier-${{ env.COLLIER_VERSION }}-looptools-${{ env.LOOPTOOLS_VERSION }}-v1
+
+      - name: Build COLLIER and LoopTools
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$DEPS_DIR/src"
+          cd "$DEPS_DIR/src"
+          curl -sSfLO "https://collier.hepforge.org/downloads/collier-${COLLIER_VERSION}.tar.gz"
+          curl -sSfLO "https://www.feynarts.de/looptools/LoopTools-${LOOPTOOLS_VERSION}.tar.gz"
+          tar -xzf "collier-${COLLIER_VERSION}.tar.gz"
+          cmake -S "collier-COLLIER-${COLLIER_VERSION}" -B collier-build -Dstatic=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_Fortran_COMPILER=gfortran \
+            -DCMAKE_INSTALL_PREFIX="$DEPS_DIR/COLLIER"
+          cmake --build collier-build -j3
+          cmake --install collier-build
+          tar -xzf "LoopTools-${LOOPTOOLS_VERSION}.tar.gz"
+          cd "LoopTools-${LOOPTOOLS_VERSION}"
+          FC=gfortran FFLAGS="-O2 -fPIC" CFLAGS="-O2 -fPIC" CXXFLAGS="-O2 -fPIC" \
+            ./configure --prefix="$DEPS_DIR/LoopTools"
+          make -j3
+          make install
+          cd "$DEPS_DIR"
+          rm -rf src
+          ls -R "$DEPS_DIR"
+
+      - name: Configure
+        run: |
+          # LoopTools installs into lib or lib64
+          looptools_libdir=$(dirname "$(find "$DEPS_DIR/LoopTools" -name 'libooptools.a' | head -n 1)")
+          ./configure \
+            --with-cxx=clang++ \
+            --with-fc=gfortran \
+            --with-loop-libraries=collier,looptools \
+            --with-looptools-incdir="$DEPS_DIR/LoopTools/include" \
+            --with-looptools-libdir="$looptools_libdir" \
+            --with-collier-incdir="$DEPS_DIR/COLLIER/include" \
+            --with-collier-libdir="$DEPS_DIR/COLLIER/lib" \
+            --with-boost-incdir="$(brew --prefix boost)/include" \
+            --with-boost-libdir="$(brew --prefix boost)/lib" \
+            --with-eigen-incdir="$(brew --prefix eigen)/include/eigen3" \
+            --with-gsl-config="$(brew --prefix gsl)/bin/gsl-config" \
+            --with-optional-modules=test \
+            --disable-meta
+          make showbuild
+
+      - name: Make
+        run: make -j3
+
+      - name: Build compiled tests
+        run: make -j3 alltest
+
+      - name: Run compiled and shell script (Softsusy)
+        # -k: run all tests, so that one failure doesn't hide others
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=0 make -k -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (Collier)
+        if: ${{ !cancelled() }}
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=1 make -k -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (LoopTools)
+        if: ${{ !cancelled() }}
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=2 make -k -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (fflite)
+        if: ${{ !cancelled() }}
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=3 make -k -j3 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: (Optional) Save logs in case of an error
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: no-meta-macos_test-logs
+          path: |
+            config.*
+            test/test_*.log
 
   with-meta:
 
@@ -139,7 +251,7 @@ jobs:
     env:
       FORMCALC_VERSION: '9.10'
       MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCPV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic MSSMNoFVEFTHiggs UMSSM'
-      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3 NMSSMCPV'
+      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM S3 NMSSMCPV GrimusNeufeld'
 
     steps:
 

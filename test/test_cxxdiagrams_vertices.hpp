@@ -128,10 +128,10 @@ struct test_vertex_equality
 		using first = typename boost::mpl::first<VertexPair>::type;
 		using second = typename boost::mpl::second<VertexPair>::type;
 		
-		static_assert( std::is_same<
+		static_assert( std::is_same_v<
 			decltype( index_range<first>() ),
 			decltype( index_range<second>() )
-		>::value, "Incompatible index types in vertex pair" );
+		>, "Incompatible index types in vertex pair" );
 		
 		for( auto &index : index_range<first>() )
 		{

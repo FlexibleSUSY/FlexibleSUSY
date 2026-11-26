@@ -1512,13 +1512,17 @@ double calculate_singlet_mass(T value) noexcept
 }
 
 /**
- * Calculates the mass of a Majoran fermion singlet from a (possibly
+ * Calculates the mass of a Majorana fermion singlet from a (possibly
  * complex) numerical value by taking the magnitude of the value.
  *
- * The phase is set to exp(i theta/2), where theta is the phase angle
- * of the complex value.  If the value is pure real, then the phase
- * will be set to 1.  If the value is purely imaginary, then the phase
- * will be set to \f$e^{i \pi/2}\f$.
+ * The phase is set to exp(-i theta/2), where theta is the phase angle
+ * of the complex value M.  SARAH replaces the gauge eigenstate by
+ * phase times the mass eigenstate (e.g. fG -> PhaseGlu Glu), so the
+ * mass term -1/2 M fG fG becomes -1/2 M phase^2 Glu Glu, which is real
+ * and positive for phase^2 = exp(-i theta).  This is the same
+ * convention as Z^* M Z^dagger = diag for mixing Majorana fermions,
+ * with phase = Z^*.  If the value is real and positive (negative),
+ * the phase is 1 (-i).
  *
  * @param value numerical value
  * @param[out] phase phase
@@ -1527,7 +1531,7 @@ double calculate_singlet_mass(T value) noexcept
 template <typename T>
 double calculate_majorana_singlet_mass(T value, std::complex<double>& phase)
 {
-   phase = std::polar(1., 0.5 * std::arg(std::complex<double>(value)));
+   phase = std::polar(1., -0.5 * std::arg(std::complex<double>(value)));
    return std::abs(value);
 }
 

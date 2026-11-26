@@ -16,7 +16,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
 
    static constexpr double color_factor = squared_color_generator<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>();
 
-   if(!boost::range::equal(indexOut1, indexOut2)) {
+   if (indexOut1 != indexOut2) {
       const double muqOS1 = context.physical_mass<UpTypeQuark>(indexOut1);
       const double muqOS2 = context.physical_mass<UpTypeQuark>(indexOut2);
       if (mHOS > muqOS1 + muqOS2 && (!is_zero(HQQbarVertexDR.left()) || !is_zero(HQQbarVertexDR.right()))) {
@@ -165,7 +165,7 @@ double CLASSNAME::get_partial_width<Higgs, bar<UpTypeQuark>::type, UpTypeQuark>(
                      deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (8/3. - Sqr(Pi/3.) - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
                   }
                   if (info::is_CP_violating_Higgs_sector) {
-                     const auto CSuu = HQQbarVertexDR_S/muqDR;
+                     const auto CSuu = HQQbarVertexDR_P/muqDR;
                      if (!is_zero(CSuu)) {
                         const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
                         const auto CStu = Httbar_P/context.mass<UpTypeQuark>({2});

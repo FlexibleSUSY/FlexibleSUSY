@@ -596,8 +596,14 @@ CheckDecaysOptions[] :=
       ];
       FlexibleSUSY`FSCalculateDecays = False,
       If[FlexibleSUSY`FSDecayParticles === Automatic,
+         (* the Higgs bosons and all BSM particles; particles without
+            physical decays (massless, ghosts, only Goldstone bosons)
+            are removed later by Decays`IsSupportedDecayParticle *)
          FlexibleSUSY`FSDecayParticles =
-            DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
+            DeleteDuplicates @ Join[
+               DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
+               TreeMasses`GetSusyParticles[]
+            ],
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
             FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. SARAH`bar|Susyno`LieGroups`conj -> Identity;
@@ -2124,7 +2130,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
           ];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
-    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, numberOfDecayParticles = 0,
+    Module[{maxFinalStateParticles = 2, decaysLists = {}, decayTasks = {}, decaysVertices, numberOfDecayParticles = 0,
             enableDecaysCalculationThreads,
             callAllDecaysFunctions = "", callAllDecaysFunctionsInThreads = "",
             decaysListGettersPrototypes = "", decaysListGettersFunctions = "",
@@ -2151,14 +2157,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            Block[{FlexibleSUSY`FSEnableParallelism = If[Length[decayParticles] < 2, False, FlexibleSUSY`FSEnableParallelism]},
               (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
               If[FlexibleSUSY`FSEnableParallelism,
-                 If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
-                    SA`CurrentStates = FlexibleSUSY`FSEigenstates;
-                    SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
-                    SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
-                    SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
-                    SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
-                    SARAH`MakeCouplingLists;
-                 ];
+                 Vertices`LoadVerticesIfNecessary[];
                  LaunchKernels[];
                  DistributeDefinitions[contentOfPath, modelName];
                  ParallelEvaluate[
@@ -2195,13 +2194,25 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                     DistributedContexts -> None
                  ];
                  DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4];
+                 (* one task per decay, not per decaying particle: the
+                    decays of the Higgs bosons take most of the time *)
+                 decayTasks = Join @@ (
+                    Function[particle, {particle, #}& /@
+                       Decays`GetFinalStatesForParticle[particle, maxFinalStateParticles, finalStateParticles]] /@
+                    decayParticles);
                  decaysLists =
                     AbsoluteTiming @ ParallelMap[
-                       {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
-                       decayParticles,
+                       Decays`CreateParticleDecay @@ #&,
+                       decayTasks,
                        DistributedContexts -> All,
                        Method -> "FinestGrained"
                     ];
+                 (* regroup the decays by decaying particle, in the order of the tasks *)
+                 decaysLists = {
+                    First[decaysLists],
+                    Function[particle,
+                       {particle, Join @@ Pick[Last[decaysLists], decayTasks[[All, 1]], particle]}] /@ decayParticles
+                 };
                  Needs["Parallel`Developer`"];
                  Parallel`Developer`ClearDistributedDefinitions[];
                  Parallel`Developer`ClearKernels[];
@@ -2997,7 +3008,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
             loadGetFDSettingsFunction = "", getFDSettingsInSet = "",
-            decayIndex = "const Index_t n_fd_settings = 0;"},
+            decayIndex = "const std::ptrdiff_t n_fd_settings = 0;"},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -3099,17 +3110,17 @@ OptionValue[callLilith],
 OptionValue[usePoleHiggsMixings]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
-flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars[c++]);
-flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars.next());
+flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars.next());
 ";
-decayIndex = "const Index_t n_fd_settings = 9;";
+decayIndex = "const std::ptrdiff_t n_fd_settings = 9;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
              ];
            WriteOut`ReplaceInFiles[files,

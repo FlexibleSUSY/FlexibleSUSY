@@ -319,12 +319,24 @@ ConvertSarahTadpoles[tadpoles_List] :=
            result /. SARAH`Mass -> FlexibleSUSY`M
           ];
 
+(* In SARAH's self-energies the external index gO1 sits on the
+   conjugated field in the 3-point couplings, e.g.
+   Cp[hh, Su, conj[USu[{gO1}]]], but on the unconjugated field in the
+   4-point (contact) couplings, e.g.
+   Cp[USu[{gO1}], conj[USu[{gO2}]], conj[Su[{gI1}]], Su[{gI1}]].
+   SARAH's SPheno output interchanges gO1 and gO2 in the contact
+   terms; without this, the contact terms enter the self-energy matrix
+   transposed, i.e. complex conjugated for complex parameters. *)
+SwapExternalIndicesOfContactTerms[expr_] :=
+    expr /. c:SARAH`Cp[_, _, _, _] :> (c /. {SARAH`gO1 -> SARAH`gO2, SARAH`gO2 -> SARAH`gO1});
+
 ConvertSarahSelfEnergies[selfEnergies_List] :=
     Module[{result, heavySE,
             tQuark = TreeMasses`GetSMTopQuarkMultiplet[],
             bQuark = TreeMasses`GetSMBottomQuarkMultiplet[]
            },
            result = (SelfEnergies`FSSelfEnergy @@@ selfEnergies) /. CreateMassEigenstateReplacements[];
+           result = SwapExternalIndicesOfContactTerms[result];
            result = AppendFieldIndices[result, SARAH`gO1, SARAH`gO2];
            result = SplitFermionSelfEnergies[result];
            result = Remove1DimensionalFieldIndices[result];

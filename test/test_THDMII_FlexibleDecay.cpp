@@ -295,7 +295,7 @@ Block UERMIX
    // Ah -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00078773837698980077, 3e-14);
    // Ah -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 3.5731537651293608e-06, 3e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 3.6772876431584249e-06, 3e-12);
 
    // Ah -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),

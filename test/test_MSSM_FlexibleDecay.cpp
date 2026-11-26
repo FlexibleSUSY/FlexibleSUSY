@@ -710,7 +710,7 @@ Block MSOFT Q= 8.64566212E+02
    // Ah -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378061307989104, 4e-13);
    // Ah -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 4.1843914309546067e-06, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 4.2239510183119907e-06, 4e-12);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -851,4 +851,30 @@ Block MSOFT Q= 8.64566212E+02
    BOOST_CHECK_CLOSE_FRACTION(
       decays_without_HO.partial_width_Cha_to_ChiVWm(&m, 1, 1),
       1.1131589058961608, 1e-12);
+
+   // -----------------------------------------------------
+   // The decays of a particle don't depend on the decays calculated
+   // before: each particle runs its own copy of the model to its
+   // scale.  (The model used to be run from particle to particle.)
+   // The model above has no RG running (loop order 0), so use the loop
+   // order of the input.
+
+   MSSM_slha m_running(m);
+   m_running.set_loops(static_cast<int>(
+      settings.get(Spectrum_generator_settings::beta_loop_order)));
+
+   MSSM_decays decays_hh_only(m_running, qedqcd, physical_input,
+                              flexibledecay_settings);
+   decays_hh_only.calculate_hh_decays();
+
+   MSSM_decays decays_Su_first(m_running, qedqcd, physical_input,
+                               flexibledecay_settings);
+   decays_Su_first.calculate_Su_decays();
+   decays_Su_first.calculate_hh_decays();
+
+   for (int i = 0; i < 2; ++i) {
+      BOOST_CHECK_EQUAL(
+         decays_hh_only.get_decay_table().get_hh_decays(i).get_total_width(),
+         decays_Su_first.get_decay_table().get_hh_decays(i).get_total_width());
+   }
 }

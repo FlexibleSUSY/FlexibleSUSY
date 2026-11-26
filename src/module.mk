@@ -71,7 +71,6 @@ LIBFLEXI_SRC := \
 LIBFLEXI_HDR := \
 		$(DIR)/always_false.hpp \
 		$(DIR)/amm_loop_functions.hpp \
-		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
 		$(DIR)/betafunction.hpp \
 		$(DIR)/build_info.hpp \
@@ -109,7 +108,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/ewsb_solver.hpp \
 		$(DIR)/factorial.hpp \
 		$(DIR)/ffv_loop_functions.hpp \
-		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/for_each.hpp \
 		$(DIR)/functors.hpp \
@@ -290,7 +288,7 @@ COLLWRAP := $(LOOP_DIR)/libcollier_wrapper
 
 $(LOOP_HDR) $(LOOP_SRC) : $(COLLWRAP).a
 
-$(COLLWRAP).a : $(COLLWRAP).o $(COLLWRAP).mod
+$(COLLWRAP).a : $(COLLWRAP).o
 	$(Q)$(MSG)
 	$(Q)$(MODULE_MAKE_LIB_CMD) $@ $(COLLWRAP).o
 
@@ -303,7 +301,9 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 
 $(COLLWRAP).f90 : $(COLLWRAP).cpp
 	$(Q)$(MSG)
-	$(Q)$(CXX) -E $< | tr '@' '\n' > $@
+	$(Q)rm -f $@; \
+	$(CXX) -E $< > $@.E && tr '@' '\n' < $@.E > $@.tmp && mv -f $@.tmp $@; \
+	status=$$?; rm -f $@.E $@.tmp; exit $$status
 
 LIBAUX += \
 	$(COLLWRAP).a

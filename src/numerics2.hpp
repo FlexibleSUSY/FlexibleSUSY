@@ -126,7 +126,7 @@ template <typename T>
 requires std::is_unsigned_v<T>
 bool is_equal_rel(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
-   using ST = typename std::make_signed<T>::type;
+   using ST = std::make_signed_t<T>;
    const auto sa = static_cast<ST>(a);
    const auto sb = static_cast<ST>(b);
    const auto sprec = static_cast<ST>(prec);

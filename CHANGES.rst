@@ -4,8 +4,26 @@ FlexibleSUSY 2.9.1 [November, ?? 2026]
 New features
 ------------
 
+* MSSMCPV now also calculates BR(mu -> 3e) and the mu -> e conversion rate
+  in aluminium (``FlexibleSUSYLowEnergy`` entries 31 and 41), as MSSM
+  does, so that these lepton flavour violating observables can be studied
+  with complex parameters.
+
 * Moved to C++20. This increased the minimal supported version of compilers to
   g++ >= 10.1.0 or clang++ >= 10.0.0 with libstdc++ >= 10.
+
+* ``configure`` now checks all stated requirements, and the README states
+  what ``configure`` checks:
+
+  * the C++ standard library must support C++20 (``<concepts>``, ``<span>``,
+    ``<numbers>``), which catches clang++ used with the libstdc++ of g++ < 10;
+  * Boost >= 1.62 (was 1.37), except 1.64, whose odeint doesn't compile;
+  * Eigen >= 3.3 (was a warning, older versions don't compile);
+  * GM2Calc >= 2.1.0 also when found via ``pkg-config``.
+
+  The classic Intel compiler icpc (stated as icpc >= 18.0.0) is no longer
+  supported, as it lacks the needed C++20 features; Intel's LLVM-based icpx
+  is treated as clang++.
 
 * Added the corresponding 1D p-values for the :math:`$\chi^2$` computed by
   HiggsSignals and Lilith. Previously available 2D p-values are marked
@@ -13,6 +31,59 @@ New features
 
 * Lilith is no longer accessible only via the command-line interface (see
   footnote 2 of [`2603.12119 <https://arxiv.org/abs/2603.12119>`_]).
+
+* ``configure`` stops each Mathematica kernel it starts (to check
+  Mathematica, SARAH, FeynArts, FormCalc and the model files) after
+  300 s, so that a hanging kernel no longer blocks it.  The time limit
+  is set with ``--with-math-timeout=<seconds>`` (0 = no limit).  It
+  needs the ``timeout`` command (``gtimeout`` from GNU coreutils on
+  macOS); without it, there is no limit.
+
+* FlexibleDecay no longer generates decays of a scalar into a scalar and
+  a photon or gluon (e.g. H -> h gamma, A -> h gamma, squark -> squark
+  gluon, sneutrino -> sneutrino gamma).  These widths vanish at every
+  order and were always 0 in the output.  This makes the generated decay
+  code smaller (about 17% in the THDM-II, 14% in the MSSM).
+
+* FlexibleDecay no longer generates decays that violate CP in models with
+  separate CP-even and CP-odd Higgs bosons (e.g. h -> h A, A -> h h,
+  A -> A A, H -> h Z, A -> A Z).  They were computed at 1 loop, where their
+  widths are 0 up to numerical noise (branching ratios below 1e-17).  With
+  COLLIER this cancellation could give NaN, which made ``run_LRLR.x`` abort
+  at the example point.  The generated decay code of LRLR is 33% smaller.
+  Models with a CP-violating Higgs sector (e.g. MSSMCPV) are not affected.
+
+* FlexibleDecay now calculates the decays of all BSM particles by default
+  (``FSDecayParticles = Automatic``): besides the Higgs bosons also e.g.
+  sfermions, neutralinos, charginos and the gluino in the MSSM, and Z'
+  bosons in U(1)' models.  BSM states that share a multiplet with SM
+  particles (e.g. heavy neutrinos mixing with the light ones) aren't
+  included.  Scalars decay at tree level or, if a decay doesn't exist at
+  tree level, at 1 loop; fermions and vector bosons decay at tree level.
+  The tree-level widths agree with CalcHEP at the same parameters (e.g.
+  the MSSM and the B-L-SM within 1e-4, except channels with a final-state
+  Z boson, for which FlexibleDecay uses the Z pole mass).  The generated
+  decay code is larger and takes longer to generate and compile; to
+  restrict the decays to the Higgs bosons as before, set
+  ``FSDecayParticles = {hh, Ah, Hpm}`` (with the model's names) in the
+  model file.
+
+* When the RG running stops because the integrator cannot reach the
+  target scale (step size too small or too many steps) while all
+  parameters are still finite, the problem is now reported as ``RG
+  integration failed (too many steps) at Q = ... GeV, step size limited
+  by <parameter> = <value>`` (in the Mathematica interface:
+  ``FailedRGIntegration``) instead of ``non-perturbative``.  The
+  parameter that limited the step size tells the cause: a large value
+  points to a Landau pole, a tiny one (e.g. ``Im(mu2(2,2)) = 5e-15``) to
+  a numerical problem.  ``non-perturbative`` is still reported when a
+  parameter becomes infinite or NaN, or exceeds a perturbativity limit.
+
+* ``make`` shows its progress: each build step is printed as
+  ``[<step>/<total>] Building <file>``, where ``<total>`` is the number
+  of steps still to be done when the compilation starts
+  (`#104 <https://github.com/FlexibleSUSY/FlexibleSUSY/issues/104>`_).
+  The counter is switched off with ``make PROGRESS=0``.
 
 Fixed bugs
 ----------
@@ -24,6 +95,240 @@ Fixed bugs
   also accepts ``fdSettings``, and the new function
   ``FS<M>GetFDSettings[handle]`` lists the FlexibleDecay settings of a
   handle.
+
+* [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
+  mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points
+  without CP violation could contain a wrong neutralino: one row of
+  ``NMIX`` was zero (of the order 1e-16) and the sign of that neutralino's
+  mass in ``MASS`` was flipped, because a real row with rounding errors in
+  its imaginary parts was treated as imaginary.  This happened at most
+  points, e.g. in MSSMCPV at tan(beta) = 3 for each value of mu tested.
+  Programs reading the SLHA output got a wrong neutralino sector;
+  FlexibleSUSY's own results were not affected.  With
+  ``FlexibleSUSY[16] = 1`` (positive Majorana masses) the output was
+  correct.
+
+* [commit XXXXXXXXX]: At points with CP violation in the neutralino
+  (Majorana fermion) sector, e.g. complex mu or gaugino masses in
+  MSSMCPV or NMSSMCPV, the SLHA output contained only the real parts of
+  the mixing matrices (``NMIX``), so the neutralino mixing couldn't be
+  reconstructed from it, and some of the masses in ``MASS`` were
+  negative.  The imaginary parts (``IMNMIX``) were only written with
+  ``FlexibleSUSY[16] = 1``.  Now, when a mixing matrix can't be made
+  real, its masses are positive and its imaginary part is written too,
+  as SLHA2 asks for the CP-violating case.  Points without CP violation
+  are written as before.
+
+* [commit XXXXXXXXX]: The mu -> e conversion rates (``LToLConversion``)
+  had the photon dipole contribution with the wrong sign relative to the
+  other contributions (photon monopole, Z penguins, boxes, scalars), so
+  their interference had the wrong sign.  This affects all models with
+  ``LToLConversion`` (e.g. MSSM, MSSMCPV, MRSSM2) wherever the dipole is
+  not the only large contribution.  In the MSSM with mixing of the
+  right-handed selectron and smuon (tan(beta) = 3, sleptons at 800 GeV,
+  mu = 200 to 3000 GeV) the rate in aluminium was too small by factors 4
+  to 27, or too large by factors 3 to 270 where the contributions cancel;
+  at tan(beta) = 20 and 50 it was 30% and 15% too small.  The rates now
+  agree with those from the Wilson coefficients of SARAH/SPheno
+  (FlavorKit) to 10% away from strong cancellations.
+
+* [commit XXXXXXXXX]: The scalar contribution of the strange quark to the
+  mu -> e conversion rates (``LToLConversion``) was calculated with the
+  coefficient of the down quark.  This changes Higgs-mediated
+  contributions, e.g. the rate by 5% in the MSSM at tan(beta) = 50 and
+  m_A = 400 GeV.  Also the muon capture rate of gold was that of lead, so
+  the conversion rate in gold was 3% too small (in aluminium the rate
+  changes by 0.05% from a more precise conversion of the capture rate to
+  GeV).
+
+* [commit XXXXXXXXX]: Mu -> e conversion in titanium
+  (``LToLConversion[..., Ti, ...]`` in the model file) generated code that
+  compiled but threw an exception at run time, as the overlap integrals
+  and the capture rate of titanium were missing, so the rate wasn't
+  calculated.  They are now taken from hep-ph/0203110.  A nucleus other
+  than Al, Au and Ti is now reported during the code generation instead
+  of giving C++ code that doesn't compile.
+
+* [commit XXXXXXXXX]: The Z-penguin contributions to mu -> e conversion
+  (``LToLConversion``) and l -> 3l (``BrLTo3L``) didn't decouple when the
+  new particles are heavy.  This affects these observables with the
+  contributions ``All`` or ``Vectors``, e.g. in the MSSM model file.  In a
+  CMSSM-like scenario with slepton flavour mixing (m0 = m1/2 = M, A0 = 0,
+  tan(beta) = 10) CR(mu -> e, Al) was too large by a factor 11 for
+  M = 3 TeV and 1200 for M = 10 TeV, BR(mu -> 3e) by 1.2 and 20; at
+  tan(beta) = 40 the errors are larger.  At M = 1 TeV the conversion rate
+  changes by 7%.  The results now agree with SARAH/SPheno as well as
+  BR(mu -> e gamma) does (10-50%).
+
+* [commit XXXXXXXXX]: ``LToLConversion`` and ``BrLTo3L`` in the blocks
+  ``FWCOEF`` or ``IMFWCOEF`` with a list of contributions, e.g.
+  ``{Vectors, Boxes}``, produced C++ code that doesn't compile.
+
+* [commit 947f73834]: With LoopTools as loop library (``FlexibleSUSY[31] = 2``)
+  the branching ratios of l -> 3l (``BrLTo3L``) and the l -> l conversion
+  rates (``LToLConversion``) were NaN as soon as lepton flavour was
+  violated.  They now agree with the results obtained with COLLIER.
+
+* [commit 0fa9c3004]: The branching ratios of lepton flavour violating decays
+  into three leptons of the same flavour (mu -> 3e, tau -> 3mu, tau -> 3e;
+  observable ``BrLTo3L``) were wrong whenever Z penguins or box diagrams
+  contribute noticeably: the box diagrams were treated as penguins and
+  vice versa.  In the MSSM with lepton flavour violating slepton masses
+  BR(mu -> 3e) changes by about 1% where the photon dipole dominates and
+  by up to about 10% otherwise (e.g. -11% with me2(1,2) = 1500 GeV^2 and
+  tan(beta) = 3).  Decays into leptons of different flavours
+  (tau -> mu e e) are unchanged.
+
+* [commit 641ace734]: The code generation failed for models based on a SARAH
+  submodel (e.g. ``MSSM/CPV`` in MSSMCPV, ``NMSSM/CPV`` in NMSSMCPV) when
+  the model file asked for one of the observables ``BrLTo3L``,
+  ``LToLConversion`` or ``BrDLToDL`` ("Model File does not exist!").
+
+* [commit e626fe1ff]: In models with complex Yukawa couplings or soft
+  parameters (e.g. CMSSMCPV, MSSMCPV, NMSSMCPV), the RG running could fail
+  with a "non-perturbative" problem flagged for the imaginary part of a
+  diagonal soft scalar mass, e.g. ``Im(mu2(2,2))``, which is zero, and no
+  spectrum was calculated.  Example: CMSSMCPV with m0 = 1400 GeV, m12 =
+  3500 GeV, tan(beta) = 10, A0 = -1400 GeV and a phase of 0.1 between the
+  Higgs VEVs (etaInput).  Points that worked before are unchanged within
+  the RG precision.
+
+* [commit c3a22b444]: ``FS<model>ToSLHA`` of the Mathematica interface now
+  writes the results of ``FS<model>CallHiggsTools`` and
+  ``FS<model>CallLilith`` to the blocks ``HIGGSSIGNALS``, ``HIGGSBOUNDS``
+  and ``LILITH``.  Before, with ``callHiggsTools -> 1`` it wrote a block
+  ``HIGGSSIGNALS`` with zeros, with ``callLilith -> 1`` an empty block
+  ``HIGGSBOUNDS``, and never a block ``LILITH``.  Non-ASCII characters
+  in the output, such as the χ² in comments, are no longer garbled.
+
+* [commit cc0ff4d04]: The 1-loop pole masses of mixing fermions were wrong
+  when their mass matrices or couplings are complex, i.e. in models with CP
+  violating parameters (e.g. charginos and neutralinos with phases of M1,
+  M2, M3, mu or the A-terms in MSSMCPV, NMSSMCPV and CMSSMCPV) or with
+  complex Yukawa couplings (e.g. neutrino masses in models with complex
+  neutrino Yukawas).  The results then depended on the unphysical phase
+  convention.  Example: in MSSMCPV with a phase of 60 degrees on M1, M2, M3
+  and the A-terms, the light chargino and the second neutralino were about
+  35 GeV (10%) too light.  With real parameters the masses are unchanged.
+
+* [commit 9a905bc7b]: The 2-loop QCD correction to the quark loops of the
+  decays of CP-odd (and CP-mixed) Higgs bosons into two photons had a
+  wrong coefficient.  This changed Γ(A -> γγ) when the higher-order
+  corrections are switched on (FlexibleDecay[2] > 9), by +0.95% in the
+  MSSM and +2.9% in the THDM-II at the example points, and by much more
+  for CP-odd Higgs bosons lighter than twice the top mass (e.g. a factor
+  of 2 at 300 GeV for the top loop alone).
+
+* [commit 45eac7ff3]: The decays of CP-even Higgs bosons into photons could
+  print a misleading warning that the 2-loop QCD corrections to A → γγ
+  were disabled near the quark threshold.  The results are unchanged.
+
+* [commit 8e39fcf04]: In models with a CP-violating Higgs sector (e.g. MSSMCPV,
+  NMSSMCPV), the top-quark induced O(alpha_s^2) correction to the decays
+  of the neutral Higgs bosons into up and charm quarks was wrong for the
+  CP-odd component: it was missing for (nearly) CP-odd states and could
+  be arbitrarily large for states with a small CP-even component.  In
+  MSSMCPV the width of the mostly CP-odd heavy Higgs boson into c cbar
+  (u ubar) increases by about 2.6% (8%).  Decays into down-type quarks,
+  CP-conserving models and CP-even states are not affected.
+
+* [commit 56f41d834]: The 1-loop self-energies of complex scalars (e.g. squarks
+  and charged Higgs bosons) contained the contributions of four-scalar and
+  scalar-scalar-vector-vector interactions with the indices of the external
+  fields interchanged.  With complex parameters (CP violation) these
+  contributions entered complex conjugated, so the pole masses depended on
+  the unphysical phase convention.  The effect is small: in MSSMCPV with a
+  phase of 60 degrees on M1, M2, M3 and the A-terms, the stop masses
+  changed by up to 4 MeV.  With real parameters the masses are unchanged.
+
+* [commit b74feccc6]: In models with a complex gluino mass parameter M3 (e.g.
+  MSSMCPV, CMSSMCPV with a complex m12, NMSSMCPV), all couplings of the
+  gluino had the wrong phase, so the results depended on the unphysical
+  phase convention.  This affected the SUSY-QCD corrections to the top
+  and bottom Yukawa couplings and thus the Higgs masses, the squark and
+  gluino pole masses, and processes with gluinos.  Example: in MSSMCPV
+  with a phase of 60 degrees on M1, M2, M3 and the A-terms, the top
+  Yukawa coupling was 1% too small, the lightest Higgs boson 0.85 GeV too
+  light and the light stop 4 GeV too light.  Real (also negative) values
+  of M3 are not affected.
+  
+* [commit ab1a6bc4b]: In models with CP-violating (complex) parameters, the
+  anomalous magnetic moments (e.g. a_mu) could come out as NaN, together
+  with the error "Form factor F2 should be real", depending on rounding.
+  The calculation now accepts imaginary parts of the form factor at the
+  level of rounding errors.
+
+* [commit 65e84fdf7]: If FlexibleDecay calculated a negative partial width
+  that was not just a rounding error (an unphysical result, e.g. from an
+  inconsistent coupling), the spectrum generator aborted without writing
+  any output.  Now such a channel is set to zero (also in the total width,
+  the branching ratios and the input to HiggsTools and Lilith), a warning
+  is written to the ``DCINFO`` block, and the spectrum and all other decays
+  are written as usual.
+
+* [commit 6950ccf0c]: FlexibleDecay: the loop-induced decays (e.g. into two
+  photons) of a particle lighter than the Z boson evaluated the loop
+  functions at the mass of the particle, while its couplings are taken at
+  the Z mass.  Both are now at the Z mass.  Example: in the shipped MRSSM2
+  input, the width of the 66 GeV Higgs boson into two photons increases by
+  0.2%.  Decays of heavier particles are unchanged.
+
+* [commit 5257d970c]: The static libraries of FlexibleSUSY and the models
+  could keep an outdated object file, without any message, when it was
+  recompiled within the same second as the previous version (e.g. with
+  ``ccache`` or after switching branches).  Executables then used the old
+  code.  The libraries are now always updated (``ar cr`` instead of
+  ``ar cruU``).
+
+* [commit 33347f593]: ``configure --with-solvers=lattice`` failed if
+  ``libboost_system`` was missing, which is common with recent Boost
+  versions.  The library was never used.
+
+* [commit dedac5462]: FlexibleDecay: the decays of a particle lighter than
+  the Z boson used the BSM parameters at an arbitrary scale (the scale of
+  the spectrum, or the mass of the particle whose decays were calculated
+  before), while the SM parameters were taken at the Z mass.  Now all
+  parameters are at the Z mass for such particles, and at the mass of the
+  decaying particle otherwise.  The decays of all particles also no longer
+  depend on the order in which they are calculated.  Example: in the shipped
+  MRSSM2 input, the width of the 66 GeV Higgs boson into two photons changes
+  by 0.03%; in the MSSM and NMSSM inputs the decays change by less than
+  1e-7.
+
+* [commit 7cca3f74a]: Loading the Mathematica interface no longer prints
+  ``LibraryFunction::libload`` messages for ``FS<M>CallLilith`` and
+  ``FS<M>CallHiggsTools`` when FlexibleSUSY is configured without Lilith or
+  HiggsTools. Calling them then gives an error message saying so, and
+  ``$Failed``.
+  
+* [commit 3d27e1f6a]: FlexibleSUSY didn't compile if GSL was not in a default
+  include path (e.g. installed with Homebrew on macOS): ``model_specific/SM``
+  didn't use the GSL include path from ``gsl-config``.
+
+* [commit e750008b0]: With ``--enable-shared-libs``, linking failed with
+  "cannot find model_specific/SM/libmodel_specific_SM.a", and executables
+  only started from the FlexibleSUSY directory.
+
+* [commit 31fc4bc48]: With the tests enabled (``--with-optional-modules=test``),
+  a parallel ``make`` could fail to link ``test/SOFTSUSY/run_softpoint.x``
+  or ``run_softsusy.x`` with "no such file:
+  model_specific/SM/libmodel_specific_SM.a".
+
+* [commit c5c8f62ab]: ``./configure --help`` (also ``--version`` or an
+  invalid option) overwrote ``config.status``, which records the options
+  of the last configuration, e.g. for ``./configure $(head -1
+  config.status)``.  Running the tests did this too.
+
+* [commit 21cdd8732]: The code generation of models that use NPointFunctions
+  could hang forever when no Wolfram subkernel was free, e.g. while
+  another code generation ran.  It now waits up to 5 minutes for a
+  subkernel and otherwise stops with an error message.
+
+* [commit 18d0c4aa9]: ``configure`` stops again with an error if the meta
+  code is enabled and the Mathematica kernel is not found or is older
+  than the required version.  Since FlexibleSUSY 2.6.2 it continued and
+  failed later with the misleading message "SARAH is not installed
+  correctly".
 
 * [commit 888d2e6c3]: Fixed the 2-loop NMSSM Higgs mass corrections
   (``UseHiggs2LoopNMSSM = True``) at large tan(beta). Higgs masses and

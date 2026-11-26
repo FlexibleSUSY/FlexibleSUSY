@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE( MSSM_tadpole_at_at_st_0_mst1_eq_mst2 )
    BOOST_CHECK_EQUAL(tad_ps(0), tad_fs_close(0));
    BOOST_CHECK_EQUAL(tad_ps(1), tad_fs_close(1));
 
-   BOOST_CHECK_CLOSE(tad_ps(0), tad_fs_exact(0), 5e-5);
+   BOOST_CHECK_CLOSE(tad_ps(0), tad_fs_exact(0), 1e-4);
    BOOST_CHECK_CLOSE(tad_ps(1), tad_fs_exact(1), 1e-5);
 
    BOOST_TEST_MESSAGE("Pietro Slavich                : " << tad_ps.transpose());

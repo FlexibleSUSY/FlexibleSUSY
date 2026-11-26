@@ -537,7 +537,10 @@ FS<model>ToSLHA
 The running parameters, the mass spectrum and/or the observables can
 be converted to SLHA format using the ``FS<model>ToSLHA[handle]``
 function.  The function returns a string formatted according to
-[SLHA1_, SLHA2_].
+[SLHA1_, SLHA2_].  If ``FS<model>CallHiggsTools`` or ``FS<model>CallLilith``
+has been called since the last calculation of the spectrum and of the
+normalized effective couplings, their results are written as well, in
+the blocks ``HIGGSSIGNALS``, ``HIGGSBOUNDS`` and ``LILITH``.
 
 .. _SLHA1: https://inspirehep.net/record/632863
 .. _SLHA2: https://inspirehep.net/record/777216

@@ -53,11 +53,11 @@ struct EvalEigenXprImpl {
 
 template<typename Idx, typename Function>
 struct EvalEigenXprImpl<Idx, Function, true> {
-    static auto eval(Idx i, Function f) ->
-	typename std::remove_reference<decltype(f(i).eval())>::type
-    {
-	return f(i).eval();
-    }
+   static auto eval(Idx i, Function f)
+      -> std::remove_cvref_t<decltype(f(i).eval())>
+   {
+      return f(i).eval();
+   }
 };
 
 template<typename Idx, typename Function>
@@ -91,7 +91,7 @@ template<class Idx, class Function>
 auto sum(Idx ini, Idx fin, Function f) -> decltype(EvalEigenXpr<Idx>(ini, f))
 {
     using Evaled = decltype(EvalEigenXpr<Idx>(ini, f));
-    using Acc = typename std::remove_cv<Evaled>::type;
+    using Acc = std::remove_cvref_t<Evaled>;
     Acc s = create_zero<Acc, is_eigen_type<Acc>::value>::zero();
     for (Idx i = ini; i <= fin; i++) s += f(i);
     return s;
