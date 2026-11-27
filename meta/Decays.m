@@ -430,27 +430,56 @@ IsPossibleTreeLevelDecay[decay_FSParticleDecay, useDependences_:False] :=
 IsPossibleOneLoopDecay[decay_FSParticleDecay] :=
     GetDecayDiagramsOnlyAtLoopOrder[decay, 1] =!= {};
 
-ContainsOnlySupportedVertices[diagram_] :=
-    Module[{vertices, vertexTypes, unsupportedVertices},
-           vertices = CXXDiagrams`VerticesForDiagram[diagram];
-           (* This function indirectly calls a GaugeStructureOfVertexLorentzPart.
-              That's why we don't make GaugeStructureOfVertexLorentzPart function
-                 to fail on unsuported color structure.
-              We generated tree and 1-loop amplitude all at once and then select the
-              lowest order one. For the process we considered so far the amplitudes with
-              unsuported vertices don't contribute in the end. *)
-           vertexTypes = CXXDiagrams`VertexTypeForFields /@ vertices;
-           unsupportedVertices = Complement[vertexTypes, CXXDiagrams`VertexTypes[]];
-           If[unsupportedVertices =!= {},
-              MapIndexed[(If[!MemberQ[CXXDiagrams`VertexTypes[], vertexTypes[[First[#2]]]],
-                             Utils`FSFancyWarning["vertex with fields " <> ToString[#1] <> " is not currently supported."];
-                             Print["    Diagrams involving this vertex will be discarded."];
-                            ];)&, vertices];
-             ];
-           unsupportedVertices === {}
+(* Returns the vertices of a diagram whose Lorentz (or colour) structure
+   CXXDiagrams can't evaluate, such as the four-gluon vertex, whose
+   colour structure differs between its Lorentz parts.  Diagrams with
+   such vertices are discarded, see WarnAboutDiscardedDiagrams. *)
+GetUnsupportedVertices[diagram_] :=
+    Select[CXXDiagrams`VerticesForDiagram[diagram],
+           !MemberQ[CXXDiagrams`VertexTypes[], CXXDiagrams`VertexTypeForFields[#]]&];
+
+IsSupportedDiagram[diagram_] := GetUnsupportedVertices[diagram] === {};
+
+(* Returns True if every loop of the diagram is a tadpole (a propagator
+   that starts and ends at the same vertex) of a massless field.  Such a
+   diagram is proportional to A0(0) = 0, whatever its vertices are. *)
+IsMasslessTadpoleDiagram[topology_, diagram_] :=
+    Module[{loopVertices, loopFields},
+           loopVertices = Select[Range[Length[topology]], topology[[#, #]] > 0&];
+           loopFields = Flatten[
+              Function[v, diagram[[v, First[#]]]& /@
+                 CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[v, v, diagram, topology]] /@
+                    loopVertices];
+           loopFields =!= {} &&
+              And @@ (TreeMasses`IsMassless[Vertices`StripFieldIndices[#]]& /@ loopFields)
           ];
 
-IsSupportedDiagram[diagram_] := ContainsOnlySupportedVertices[diagram];
+(* Warns about the 1-loop diagrams of the decay initialParticle ->
+   finalParticles that were discarded because they contain a vertex
+   that is not supported, unless they vanish (massless tadpoles).  Call
+   it only when the decay is calculated at 1 loop: if it has a
+   tree-level amplitude, the 1-loop diagrams are not used.
+   oneLoopToposAndDiags is {{topology, {diagrams}}, ...} before the
+   unsupported diagrams were removed. *)
+WarnAboutDiscardedDiagrams[initialParticle_, finalParticles_List, oneLoopToposAndDiags_List] :=
+    Module[{discarded},
+           discarded = Flatten[
+              Function[{topo, diags},
+                 {FeynArtsTopologyName[topo], #, GetUnsupportedVertices[#]}& /@
+                    Select[diags, (!IsSupportedDiagram[#] && !IsMasslessTadpoleDiagram[topo, #])&]
+              ] @@@ oneLoopToposAndDiags, 1];
+           If[discarded =!= {},
+              Utils`FSFancyWarning[
+                 "The 1-loop decay " <> ToString[initialParticle] <> " -> " <>
+                 ToString[finalParticles] <> " is incomplete: " <>
+                 ToString[Length[discarded]] <> " diagram(s) with a vertex " <>
+                 "that FlexibleDecay can't evaluate were left out, although " <>
+                 "they may be non-zero. Unsupported vertices: " <>
+                 ToString[DeleteDuplicates[Flatten[discarded[[All, 3]], 1]]] <>
+                 ". Diagrams (topology, fields): " <> ToString[discarded[[All, {1, 2}]]]
+              ];
+             ];
+          ];
 
 GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
    Module[
@@ -471,8 +500,9 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
       Select[diagrams, IsPossibleNonZeroDiagram[#, True]&]
    ];
 
-(* returns list of {{number of loops, {{topology, list of insertions}}}, ...} *)
-GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
+(* returns list of {{number of loops, {{topology, list of insertions}}}, ...},
+   including the diagrams with vertices that CXXDiagrams can't evaluate *)
+GetAllContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
     Module[{nFinalParticles = Length[finalParticles], topologies, diagrams, minLoops},
            (* Until we include non-renormalizable operators, existence
               of tree-level amplitude for h->Zgamma or h->gamma gamma
@@ -496,9 +526,16 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
            diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, TreeMasses`FSAntiField /@ finalParticles, #]}& /@ #[[2]]}&
                       /@ topologies;
            diagrams = {#[[1]], With[{toposAndDiags = #[[2]]}, Select[toposAndDiags, #[[2]] =!= {}&]]}& /@ diagrams;
-           diagrams = DeleteCases[diagrams, {_Integer, {}}];
-           {#[[1]], With[{toposAndDiags = #[[2]]}, {#[[1]], Select[#[[2]], IsSupportedDiagram]}& /@ toposAndDiags]}& /@ diagrams
+           DeleteCases[diagrams, {_Integer, {}}]
           ];
+
+(* returns list of {{number of loops, {{topology, list of insertions}}}, ...},
+   without the diagrams with vertices that CXXDiagrams can't evaluate *)
+GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
+    RemoveUnsupportedDiagrams[GetAllContributingGraphsForDecay[initialParticle, finalParticles, maxLoops]];
+
+RemoveUnsupportedDiagrams[graphs_List] :=
+    {#[[1]], With[{toposAndDiags = #[[2]]}, {#[[1]], Select[#[[2]], IsSupportedDiagram]}& /@ toposAndDiags]}& /@ graphs;
 
 (* The generic 1-loop decay diagrams in
    meta/generic_loop_decay_diagram_classes.m exist only for decays of
@@ -649,7 +686,14 @@ GetFinalStatesForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFin
 Utils`MakeUnknownInputDefinition[GetFinalStatesForParticle];
 
 CreateParticleDecay[particle_, finalState_List] :=
-    Module[{decay = FSParticleDecay[particle, finalState, GetContributingGraphsForDecay[particle, finalState]]},
+    Module[{allGraphs, decay},
+           allGraphs = GetAllContributingGraphsForDecay[particle, finalState, GetMaxLoopOrderForDecay[particle]];
+           decay = FSParticleDecay[particle, finalState, RemoveUnsupportedDiagrams[allGraphs]];
+           (* The 1-loop diagrams are only used without a tree-level amplitude. *)
+           If[!IsPossibleTreeLevelDecay[decay, True],
+              WarnAboutDiscardedDiagrams[particle, finalState,
+                 Join @@ Cases[allGraphs, {1, toposAndDiags_} :> toposAndDiags]];
+             ];
            If[GetDecayTopologiesAndDiagrams[decay] === {},
               {},
               {DeleteDiagramsVanishingDueToColor[decay]}

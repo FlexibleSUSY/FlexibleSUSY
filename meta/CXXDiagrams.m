@@ -103,6 +103,8 @@ Begin["`Private`"];
 LeftChiralVertex::usage="A left projector part of a vertex";
 RightChiralVertex::usage="A right projector part of a vertex";
 TwoMetricVertex::usage="A g[l1,l2] * g[l3,l4] part of a vertex";
+CompositeQuadrupleVectorVertex::usage="A VVVV vertex whose g[l1,l2] * g[l3,l4] \
+parts have different colour structures (e.g. the four-gluon vertex); not supported";
 
 (** \brief Returns a list of the different Lorentz structures that
  * are currently implemented by CXXDiagrams.
@@ -947,7 +949,7 @@ GaugeStructureOfVertexLorentzPart[
 	scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] -
      scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] /;
          MemberQ[{c1}, j1] && MemberQ[{c2}, j1] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
-] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
+] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] -
 		scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] :>
 {scalar, AdjointlyColouredVertex[c1] AdjointlyColouredVertex[c2] - AdjointlyColouredVertex[c3] AdjointlyColouredVertex[c4], lorentzStructure} /;
 		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
@@ -1176,8 +1178,23 @@ GaugeStructureOfVertex[vertex_] :=
 			LabelLorentzPart /@ Rest[vertex]];
 
 		gaugeStructures = GaugeStructureOfVertexLorentzPart /@ lorentzParts;
-		FullGaugeStructureFromParts[gaugeStructures]
+
+		If[IsCompositeQuadrupleVectorVertex[gaugeStructures],
+			{gaugeStructures, UnsupportedColouredVertex, CompositeQuadrupleVectorVertex},
+			FullGaugeStructureFromParts[gaugeStructures]
+		]
 	]
+
+(** \brief Returns True if the `TwoMetricVertex[]` parts of a vertex
+ * have different colour structures, as the four-gluon vertex
+ * `f f (g g - g g) + ...` does.  Such a vertex is not of the form
+ * `colour structure * Lorentz structure`, which CXXDiagrams assumes,
+ * so it is reported as `CompositeQuadrupleVectorVertex`, which is not
+ * among `VertexTypes[]`.
+ **)
+IsCompositeQuadrupleVectorVertex[gaugeParts_List] :=
+	Length[DeleteDuplicates[Cases[gaugeParts,
+		{_, colour:Except[ZeroColouredVertex], _TwoMetricVertex} :> colour]]] > 1;
 
 (** \brief Creates c++ code that makes functions available that
  * numerically evaluate any of the given vertices.
