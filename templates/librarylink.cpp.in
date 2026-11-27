@@ -30,6 +30,7 @@
 #include "bvp_solver_problems_format_mathlink.hpp"
 #include "error.hpp"
 #include "for_each.hpp"
+#include "logger.hpp"
 #include "observable_problems_format_mathlink.hpp"
 #include "physical_input.hpp"
 #include "problems_format_mathlink.hpp"

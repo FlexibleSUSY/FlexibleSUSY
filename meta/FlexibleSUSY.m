@@ -3119,6 +3119,15 @@ flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pa
 flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars.next());
 flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars.next());
 flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars.next());
+// as run_<M>.x: no EFFHIGGSCOUPLINGS block in models with a CP-violating Higgs sector
+if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block) && " <> FlexibleSUSY`FSModelName <> "_info::is_CP_violating_Higgs_sector) {
+   static bool warned = false;
+   if (!warned) {
+      WARNING(\"Printing of EFFHIGGSCOUPLINGS block is disabled in models with CP-violating Higgs sector\");
+      warned = true;
+   }
+   flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, 0.);
+}
 ";
 decayIndex = "const std::ptrdiff_t n_fd_settings = 9;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
