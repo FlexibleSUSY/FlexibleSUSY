@@ -88,6 +88,20 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: When the decay calculation stopped with an error
+  (e.g. a failed loop function or diagonalization), the error was written
+  to ``DCINFO`` entry 4, but the decays calculated before it were written
+  as if the decay table were complete: the particles not yet calculated
+  were written with zero width, and the particle being calculated with
+  only some of its decay channels.  The Mathematica interface returned
+  the incomplete table without a message.  Now such an error counts as a
+  problem, as in the spectrum calculation: the ``DECAY`` blocks are only
+  written with ``FlexibleSUSY[12] = 1`` (force output), ``DCINFO`` with
+  the error is always written, and ``FS<M>CalculateDecays`` reports the
+  error and returns ``$Failed``.  A channel with a NaN or infinite width
+  is still set to zero and reported in ``DCINFO``, and the decays are
+  written as before.
+
 * [commit XXXXXXXXX]: The sfermion mixing matrices in the SLHA output
   (``USQMIX``, ``DSQMIX``, ``SELMIX``, ``SNUMIX``) were given in the
   interaction basis of the model, while the Yukawa couplings, trilinear

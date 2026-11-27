@@ -24,11 +24,27 @@
 
 namespace flexiblesusy {
 
+/**
+ * Errors and warnings of the decay calculation, written to DCINFO.
+ *
+ * An error that interrupted the decay calculation (add_fatal_error)
+ * leaves the decay table incomplete, so it is a problem that
+ * suppresses the decay output unless force output is set.  Other
+ * errors (add_error), e.g. a channel set to zero because its width
+ * isn't finite, are reported without suppressing the output.
+ */
 class FlexibleDecay_problems {
 public:
-   void clear() {}
-   bool have_problem() const { return false; }
-   bool have_warning() const { return false; }
+   void clear()
+   {
+      warning_strings.clear();
+      error_strings.clear();
+      incomplete = false;
+   }
+   /// true if an error interrupted the decay calculation
+   bool have_problem() const { return incomplete; }
+   bool have_error() const { return !error_strings.empty(); }
+   bool have_warning() const { return !warning_strings.empty(); }
    std::vector<std::string> get_problem_strings() const {
       return error_strings;
    }
@@ -37,11 +53,17 @@ public:
    }
    void add_warning(std::string const& warning) {warning_strings.push_back(warning);}
    void add_error(std::string const& error) {error_strings.push_back(error);}
+   /// adds an error that interrupted the decay calculation
+   void add_fatal_error(std::string const& error)
+   {
+      error_strings.push_back(error);
+      incomplete = true;
+   }
 
 private:
-   std::string model_name{};
    std::vector<std::string> warning_strings {};
    std::vector<std::string> error_strings {};
+   bool incomplete{false};
 };
 
 } // namespace flexiblesusy
