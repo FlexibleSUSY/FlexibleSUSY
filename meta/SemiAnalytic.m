@@ -335,7 +335,7 @@ SumOverElements[par_] :=
           ];
 
 (* @todo handle cases like TYu = Yu *)
-GetCoefficientAndTerm[monomial_NumericQ, dimZeroPars_List] := {monomial, Null};
+GetCoefficientAndTerm[monomial_?NumericQ, dimZeroPars_List] := {monomial, Null};
 
 GetCoefficientAndTerm[monomial_Times, dimZeroPars_List] :=
     Module[{i, operands, coeff = {}, term = {}},

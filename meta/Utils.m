@@ -470,7 +470,7 @@ singleInclude // Protect;
 
 DynamicInclude::errNoFile = "\nFile\n`1`\ndoes not exist and can't be loaded!";
 
-UnzipRules[rules:{Rule[_|{__}, _]...}] :=
+UnzipRules[rules:{Rule[_, _]...}] :=
    rules /. Rule[lhs:{__}, rhs_] :> Sequence@@ (Rule[#, rhs]&/@ lhs);
 UnzipRules // MakeUnknownInputDefinition;
 UnzipRules // Protect;
