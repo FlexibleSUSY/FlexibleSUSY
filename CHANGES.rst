@@ -88,6 +88,13 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: With SM corrections at NLO (``FlexibleDecay[2]`` =
+  10 or 11), the decays of neutral Higgs bosons into quarks still included
+  the two-loop :math:`O(\alpha\alpha_s)` and top-induced
+  :math:`O(\alpha_s^2)` corrections, because the whole setting instead of
+  its SM digit was compared with 1.  They are now included only from
+  NNLO on (tens digit >= 2).  The default (41) isn't affected.
+
 * [commit XXXXXXXXX]: If FlexibleDecay calculated a NaN or infinite
   partial width (a failed numerical calculation, e.g. a loop function
   returning NaN), the spectrum generator aborted with ``Total width of

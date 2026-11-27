@@ -111,7 +111,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<UpTypeQuark>::type, U
 
             double deltaqq_QCDxQED_DR = 0.;
             double deltaPhi2_P = 0.;
-            if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
+            if (flexibledecay_settings.get_decay_corrections().sm > 1) {
                deltaqq_QCDxQED_DR =
                   deltaqq_QCDxQED*Sqr(UpTypeQuark::electricCharge)*alpha_red*alpha_s_red;
                if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
