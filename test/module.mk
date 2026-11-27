@@ -310,6 +310,11 @@ TEST_SRC += \
 		$(DIR)/test_NMSSM_tree_level_spectrum.cpp
 endif
 
+ifeq ($(WITH_SMSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_SMSSM_singlet_shift.cpp
+endif
+
 ifeq ($(WITH_SOFTSUSY) $(WITH_SMSSM),yes yes)
 TEST_SRC += \
 		$(DIR)/test_SMSSM_beta_functions.cpp \
@@ -1324,6 +1329,8 @@ $(DIR)/test_NMSSM_slha_output.x.xml: $(EXAMPLES_EXE) $(DIR)/test_NMSSM_slha_outp
 $(DIR)/test_NMSSM_slha_output.x: $(LIBNMSSM)
 
 $(DIR)/test_SMSSM_beta_functions.x: $(LIBSMSSM)
+
+$(DIR)/test_SMSSM_singlet_shift.x: $(LIBSMSSM)
 
 $(DIR)/test_SMSSM_ewsb.x: $(LIBSMSSM)
 

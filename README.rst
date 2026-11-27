@@ -1073,6 +1073,7 @@ Further reading
 * `meta code documentation`_
 * `SLHA input parameters`_
 * `Observables`_
+* `Tadpoles and EWSB`_
 
 
 References
@@ -1103,6 +1104,7 @@ References
 .. _`meta code documentation`: doc/meta_code.rst
 .. _`SLHA input parameters`: doc/slha_input.rst
 .. _`Observables`: doc/observables.rst
+.. _`Tadpoles and EWSB`: doc/tadpoles.rst
 
 .. [hep-ph:0104145] `CPC 143 (2002) 305-331 <https://inspirehep.net/record/555481>`_ [`arxiv:hep-ph/0104145 <http://arxiv.org/abs/hep-ph/0104145>`_]
 .. [0909.2863] `CPC 181 (2010) 1077-1086 <https://inspirehep.net/record/831371>`_ [`arxiv:0909.2863 <http://arxiv.org/abs/0909.2863>`_]

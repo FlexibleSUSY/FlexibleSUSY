@@ -14,7 +14,8 @@ DOC_TMPL     := \
 		$(DIR)/meta_code.rst \
 		$(DIR)/mainpage.dox.in \
 		$(DIR)/model_file.rst \
-		$(DIR)/slha_input.rst
+		$(DIR)/slha_input.rst \
+		$(DIR)/tadpoles.rst
 
 DOC_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
 

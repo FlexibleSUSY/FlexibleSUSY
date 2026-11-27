@@ -496,6 +496,7 @@ SARAH/SPheno. When in doubt about a result or a model definition:
 |---|---|
 | Model file variables (`FSModelName`, `EWSBOutputParameters`, boundary conditions, `FSDecayParticles`, ...) | `doc/model_file.rst` |
 | SLHA input entries (except `FlexibleDecay`) | `doc/slha_input.rst` |
+| Tadpoles, EWSB, the parameters used inside the loops (`FSSolveEWSBTreeLevelFor`) | `doc/tadpoles.rst` |
 | FlexibleDecay: options, LibraryLink use, comparison with NMSSMCALC | `doc/observables/FlexibleDecay.rst` |
 | The Mathematica interface | `doc/librarylink.rst` |
 | FlexibleEFTHiggs | `doc/FlexibleEFTHiggs.rst` |

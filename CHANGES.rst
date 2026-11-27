@@ -88,6 +88,21 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: In SMSSM and NUTSMSSM, the Higgs and neutralino
+  pole masses depended on the singlet VEV vS beyond what the physics
+  allows: these models have an exact symmetry (the shift S -> S + delta
+  of the singlet) that changes vS but not the spectrum, yet at small |vS|
+  the 1-loop masses changed by several GeV (e.g. a singlet-like Higgs
+  from 230.7 to 221.6 GeV at vS = 32 GeV in a GNMSSM-like model), and
+  points with vS of about 10 GeV or below, or with vS < 0, were flagged
+  as "running tachyon" whenever decays were calculated.  Now the spectrum
+  is the same in every frame (to 3e-5 at the tested points, down to
+  |vS| = 10 GeV and for vS < 0), and such points are valid.  At large vS
+  the masses change slightly (a 2-loop effect, e.g. 0.03 GeV).  Models
+  with a linear singlet term created by users (e.g. a GNMSSM) should add
+  ``FSSolveEWSBTreeLevelFor = { mHd2, mHu2, L[L1] }`` to their model file,
+  see the new note on tadpoles ``doc/tadpoles.rst``.
+
 * [commit 8f0a015b8]: Fixed ``FS<M>Set[]`` of the Mathematica interface in
   models with decays. Since FlexibleSUSY 2.6.0 it aborted with
   ``minBRtoPrint is not a numeric input value!``, so the settings and
