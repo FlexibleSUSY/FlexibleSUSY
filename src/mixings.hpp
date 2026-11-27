@@ -50,6 +50,35 @@ bool has_imaginary_part(const Eigen::DenseBase<Derived>& z)
    }
 }
 
+/**
+ * Fixes the phases of the rows of a scalar mixing matrix for the SLHA
+ * output: each row is multiplied by a phase such that its element with
+ * the largest absolute value is real and positive.
+ *
+ * The phase of each row of a complex scalar mixing matrix is arbitrary
+ * (a phase of the mass eigenstate field) and comes out of the
+ * diagonalization at random.  Without CP violation in the mass matrix,
+ * every row is then real (up to rounding errors), and the real part
+ * written to the SLHA output is the whole matrix.  A real matrix is
+ * left unchanged.
+ *
+ * @param z mixing matrix
+ */
+template <class Derived>
+void convert_scalar_mixings_to_slha(Eigen::MatrixBase<Derived>& z)
+{
+   using Scalar = typename Derived::Scalar;
+   if constexpr (std::is_same_v<Scalar, std::complex<double>>) {
+      for (Eigen::Index i = 0; i < z.rows(); i++) {
+         Eigen::Index k = 0;
+         const double max_abs = z.row(i).cwiseAbs().maxCoeff(&k);
+         if (max_abs > 0.) {
+            z.row(i) *= std::conj(z(i, k)) / max_abs;
+         }
+      }
+   }
+}
+
 void convert_symmetric_fermion_mixings_to_slha(double&,
                                                Eigen::Matrix<double, 1, 1>&);
 

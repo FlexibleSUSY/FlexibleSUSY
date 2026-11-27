@@ -3310,7 +3310,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
            readLesHouchesPhysicalParameters = WriteOut`ReadLesHouchesPhysicalParameters[lesHouchesParameters, "LOCALPHYSICAL",
                                                                                         "DEFINE_PHYSICAL_PARAMETER"];
            writeSLHAMassBlock = WriteOut`WriteSLHAMassBlock[massMatrices];
-           writeSLHAMixingMatricesBlocks  = WriteOut`WriteSLHAMixingMatricesBlocks[lesHouchesParameters];
+           writeSLHAMixingMatricesBlocks  = WriteOut`WriteSLHAMixingMatricesBlocks[lesHouchesParameters, massMatrices];
            writeSLHAModelParametersBlocks = WriteOut`WriteSLHAModelParametersBlocks[lesHouchesParameters];
            writeSLHAPhasesBlocks = WriteOut`WriteSLHAPhasesBlocks[lesHouchesParameters];
            writeSLHAMinparBlock = WriteOut`WriteSLHAMinparBlock[minpar];

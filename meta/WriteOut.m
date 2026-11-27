@@ -367,8 +367,24 @@ WriteSLHAMatrix[{mixingMatrix_, lesHouchesName_}, head_String, scale_String, set
            "\"" <> If[scale != "", ", " <> scale, ""] <> ");\n"
           ];
 
-WriteSLHAMixingMatricesBlocks[lesHouchesParameters_List] :=
-    Module[{result, mixingMatrices, smMix, susyMix, majoranaMix,
+(* symbols of the mixing matrices with complex elements *)
+GetComplexMixingMatrices[massMatrices_List] :=
+    Flatten[{TreeMasses`GetMixingMatrixSymbol[#]}& /@
+            Select[massMatrices,
+                   (TreeMasses`GetMixingMatrixSymbol[#] =!= Null &&
+                    !CConversion`IsRealType[TreeMasses`GetMixingMatrixType[#]])&]];
+
+(* imaginary part of a complex mixing matrix, if it can't be made real *)
+WriteSLHAMatrixImagPart[{mixingMatrix_, lesHouchesName_}] :=
+    "if (has_imaginary_part(LOCALPHYSICAL(" <>
+    CConversion`ToValidCSymbolString[mixingMatrix] <> "))) {\n" <>
+    TextFormatting`IndentText[
+        WriteSLHAMatrix[{mixingMatrix, Symbol["IM" <> ToString[lesHouchesName]]},
+                        "LOCALPHYSICAL", "", "set_block_imag"]] <>
+    "}\n";
+
+WriteSLHAMixingMatricesBlocks[lesHouchesParameters_List, massMatrices_List:{}] :=
+    Module[{result, mixingMatrices, smMix, susyMix, majoranaMix, complexMix,
             smMixStr = "", susyMixStr = "", majoranaMixStr = ""},
            mixingMatrices = GetSLHAMixingMatrices[lesHouchesParameters];
            smMix = Flatten[TreeMasses`FindMixingMatrixSymbolFor /@ SARAH`SMParticles];
@@ -380,6 +396,14 @@ WriteSLHAMixingMatricesBlocks[lesHouchesParameters_List] :=
            susyMix = Complement[mixingMatrices, smMix];
            (smMixStr = smMixStr <> WriteSLHAMatrix[#,"LOCALPHYSICAL",""])& /@ smMix;
            (susyMixStr = susyMixStr <> WriteSLHAMatrix[#,"LOCALPHYSICAL",""])& /@ susyMix;
+           (* imaginary parts of the other complex mixing matrices (SLHA2
+              IMUSQMIX, IMUMIX, ...), written if they can't be made real *)
+           complexMix = GetComplexMixingMatrices[massMatrices];
+           (smMixStr = smMixStr <> WriteSLHAMatrixImagPart[#])& /@
+               Select[smMix, MemberQ[complexMix, #[[1]]]&];
+           (susyMixStr = susyMixStr <> WriteSLHAMatrixImagPart[#])& /@
+               Select[susyMix, (MemberQ[complexMix, #[[1]]] &&
+                                FreeQ[majoranaMix, #[[1]]])&];
            (* imaginary parts: always with positive masses, otherwise if the
               mixing matrix can't be made real (CP violation) *)
            (majoranaMixStr = majoranaMixStr <>
@@ -838,6 +862,14 @@ ConvertMixingsToConvention[massMatrices_List, convention_String] :=
                            "convert_symmetric_fermion_mixings_to_" <> convention <> "(LOCALPHYSICAL(" <>
                            eigenstateNameStr <> "), LOCALPHYSICAL(" <>
                            mixingMatrixSymStr <> "));\n";
+                 ];
+               (* fix the arbitrary phases of complex scalar mixing matrices *)
+               If[convention === "slha" && TreeMasses`IsScalar[eigenstateName] &&
+                  Head[mixingMatrixSym] === Symbol && mixingMatrixSym =!= Null &&
+                  !CConversion`IsRealType[TreeMasses`GetMixingMatrixType[massMatrices[[i]]]],
+                  result = result <>
+                           "convert_scalar_mixings_to_slha(LOCALPHYSICAL(" <>
+                           CConversion`ToValidCSymbolString[mixingMatrixSym] <> "));\n";
                  ];
               ];
            Return[result];
