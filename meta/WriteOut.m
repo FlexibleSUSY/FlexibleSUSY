@@ -70,6 +70,7 @@ ConvertTrilinearCouplingsToSLHA::usage="";
 CreateSLHASoftSquaredMassesDefinition::usage="";
 CreateSLHASoftSquaredMassesGetters::usage="";
 ConvertSoftSquaredMassesToSLHA::usage="";
+ConvertSfermionMixingsToSLHA::usage="converts the sfermion mixing matrices to the super-CKM/PMNS basis of the SLHA output";
 
 CalculateCKMMatrix::usage="";
 CalculatePMNSMatrix::usage="";
@@ -1148,6 +1149,57 @@ ConvertSoftSquaredMassesToSLHA[] :=
                               ] <> ";\n";
                     ];
            ]& /@ massSq;
+           result
+          ];
+
+(* interaction basis of a mixing matrix, e.g. {SdL, SdR} for ZD *)
+GetSfermionMixingBasis[mix_] :=
+    Module[{sector},
+           sector = SARAH`DEFINITION[FlexibleSUSY`FSEigenstates][SARAH`MatterSector];
+           If[Head[sector] =!= List, Return[{}]];
+           Replace[Cases[sector, {basis_List, {_, mix}} :> basis], {{b_List} :> b, _ -> {}}]
+          ];
+
+(* sfermion mixing matrix that is defined in the model, has the given
+   dimension and mixes the given number of complex scalar fields with
+   dimension/number generations each *)
+IsConvertibleSfermionMixing[mix_, dim_Integer, numberOfFields_Integer] :=
+    MemberQ[Parameters`GetOutputParameters[], mix] &&
+    SARAH`getDimParameters[mix] === {dim, dim} &&
+    Length[GetSfermionMixingBasis[mix]] === numberOfFields &&
+    FreeQ[GetSfermionMixingBasis[mix], Susyno`LieGroups`conj] &&
+    And @@ (!TreeMasses`IsRealScalar[#]& /@ GetSfermionMixingBasis[mix]);
+
+IsConvertibleFermionMixing[vs_List, dim_Integer] :=
+    And @@ (MemberQ[Parameters`GetOutputParameters[], #] &&
+            SARAH`getDimParameters[#] === {dim, dim}& /@ vs);
+
+ConvertSfermionMixingToSLHA[mix_, vs_List] :=
+    "flexiblesusy::convert_sfermion_mixings_to_slha(PHYSICAL_SLHA(" <>
+    CConversion`ToValidCSymbolString[mix] <> "), " <>
+    Utils`StringJoinWithSeparator[CreateSLHAFermionMixingMatrixName /@ vs, ", "] <>
+    ");\n";
+
+ConvertSfermionMixingsToSLHA[] :=
+    Module[{result = "", sfermions},
+           (* squarks and charged sleptons: interaction basis {f_L, f_R} *)
+           sfermions = {
+               {SARAH`DownSquarkMM, {SARAH`DownMatrixL, SARAH`DownMatrixR}},
+               {SARAH`UpSquarkMM, {SARAH`UpMatrixL, SARAH`UpMatrixR}},
+               {SARAH`SleptonMM, {SARAH`ElectronMatrixL, SARAH`ElectronMatrixR}}
+           };
+           Scan[
+               If[IsConvertibleSfermionMixing[#[[1]], 6, 2] &&
+                  IsConvertibleFermionMixing[#[[2]], 3],
+                  result = result <> ConvertSfermionMixingToSLHA[#[[1]], #[[2]]];
+                 ]&,
+               sfermions];
+           (* left-handed sneutrinos, rotated as the left-handed charged
+              leptons (as the soft-breaking mass m_L^2) *)
+           If[IsConvertibleSfermionMixing[SARAH`SneutrinoMM, 3, 1] &&
+              IsConvertibleFermionMixing[{SARAH`ElectronMatrixL}, 3],
+              result = result <> ConvertSfermionMixingToSLHA[SARAH`SneutrinoMM, {SARAH`ElectronMatrixL}];
+             ];
            result
           ];
 

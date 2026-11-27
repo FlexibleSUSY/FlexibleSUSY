@@ -88,6 +88,7 @@ private:
    void convert_yukawa_couplings_to_slha();
    void convert_trilinear_couplings_to_slha();
    void convert_soft_squared_masses_to_slha();
+   void convert_sfermion_mixings_to_slha();
 };
 
 } // namespace flexiblesusy
