@@ -112,7 +112,7 @@ double CLASSNAME::get_partial_width<PseudoscalarHiggs, bar<DownTypeQuark>::type,
          double deltaPhi2_P = 0.;
          double deltaqq_QCDxQED_DR = 0.;
 
-         if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
+         if (flexibledecay_settings.get_decay_corrections().sm > 1) {
             deltaqq_QCDxQED_DR =
                deltaqq_QCDxQED*Sqr(DownTypeQuark::electricCharge)*alpha_red*alpha_s_red;
             if (!is_zero(gbHoVEV_P)) {

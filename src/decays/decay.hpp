@@ -70,6 +70,13 @@ private:
    std::string proc_string;
 };
 
+/// CP property of a neutral Higgs boson
+enum class CP_property {
+   even,     ///< CP-even
+   odd,      ///< CP-odd
+   undefined ///< not a CP eigenstate (CP violation)
+};
+
 class NeutralHiggsEffectiveCouplings {
 public:
    std::string particle {};
@@ -78,7 +85,7 @@ public:
    double width {};
    double width_sm {};
    double invWidth {0.};
-   int CP {};
+   CP_property CP{CP_property::undefined};
    std::pair<std::string, std::complex<double>> dd {};
    std::pair<std::string, std::complex<double>> uu {};
    std::pair<std::string, std::complex<double>> ss {};
@@ -213,6 +220,15 @@ public:
     * @return a warning for each such channel
     */
    std::vector<std::string> remove_unphysical_negative_widths();
+
+   /**
+    * Sets the partial widths of all channels with a NaN or infinite
+    * width (a failed numerical calculation) to zero and recalculates
+    * the total width from the remaining channels.
+    *
+    * @return a problem description for each such channel
+    */
+   std::vector<std::string> remove_non_finite_widths();
 
 private:
    int initial_pdg{0};

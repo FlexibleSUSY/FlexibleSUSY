@@ -140,7 +140,8 @@ The entries are:
 
 #. Print the loop-induced Higgs couplings to :math:`gg`, :math:`\gamma\gamma`
    and :math:`Z\gamma` in the block ``EFFHIGGSCOUPLINGS`` (0 = no, 1 = yes;
-   default 1).
+   default 1). Switched off, with a warning, in models with a CP-violating
+   Higgs sector.
 #. Calculate the Higgs couplings normalized to those of an SM Higgs boson of the
    same mass, and print them in the blocks ``NORMALIZEDEFFHIGGSCOUPLINGS`` and
    ``IMNORMALIZEDEFFHIGGSCOUPLINGS`` (0 = no, 1 = yes; default 0).
@@ -198,6 +199,12 @@ __ https://github.com/FlexibleSUSY/FlexibleSUSY#mathematica-interface
         usePoleHiggsMixings -> 1            (* FlexibleDecay[9] *)
       }
     ];
+
+The FlexibleDecay settings of a handle are listed by
+:mathematica:`FSSMGetFDSettings[handle]`, and can be changed with
+:mathematica:`FSSMSet`, for example
+:mathematica:`FSSMSet[handle, fdSettings -> { minBRtoPrint -> 1*^-3 }]`.
+Settings that are not given keep their values.
 
 After computing the spectrum via
 

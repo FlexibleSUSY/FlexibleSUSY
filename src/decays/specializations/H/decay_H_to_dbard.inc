@@ -112,12 +112,24 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
          const double deltaqq_QED_OS_S =
             alpha_red * Sqr(DownTypeQuark::electricCharge) * calc_DeltaH(betaOS);
 
-         double deltaPhi2_S = 0.;
          double deltaqq_QCD_OS_P = 0.;
          double deltaqq_QED_OS_P = 0.;
+         // don't waste time computing it in models without CPV
+         if (info::is_CP_violating_Higgs_sector) {
+            deltaqq_QCD_DR_P += 2. * (1. - 6. * xDR) / (1 - 4. * xDR) *
+                                   (4. / 3. - std::log(xDR)) * alpha_s_red +
+                                4. / 3. * alpha_s_red * calc_DeltaAh(betaDR);
+
+            deltaqq_QCD_OS_P = 4. / 3. * alpha_s_red * calc_DeltaAh(betaOS);
+
+            deltaqq_QED_OS_P = alpha_red * Sqr(DownTypeQuark::electricCharge) *
+                               calc_DeltaAh(betaOS);
+         }
+
+         double deltaPhi2_S = 0.;
          double deltaPhi2_P = 0.;
          double deltaqq_QCDxQED_DR = 0.;
-         if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
+         if (flexibledecay_settings.get_decay_corrections().sm > 1) {
 
             deltaqq_QCDxQED_DR =
                deltaqq_QCDxQED*Sqr(DownTypeQuark::electricCharge)*alpha_red*alpha_s_red;
@@ -137,17 +149,6 @@ double CLASSNAME::get_partial_width<Higgs,bar<DownTypeQuark>::type,DownTypeQuark
 
             // don't waste time computing it in models without CPV
             if (info::is_CP_violating_Higgs_sector) {
-
-               deltaqq_QCD_DR_P +=
-                  2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-                  4./3.*alpha_s_red*calc_DeltaAh(betaDR);
-
-               deltaqq_QCD_OS_P =
-                  4./3. * alpha_s_red * calc_DeltaAh(betaOS);
-
-               deltaqq_QED_OS_P =
-                  alpha_red * Sqr(DownTypeQuark::electricCharge) * calc_DeltaAh(betaOS);
-
                const auto gbHoVEV_P = HQQbarVertexDR_P/mdqDR;
                if (!is_zero(gbHoVEV_P)) {
                   const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());

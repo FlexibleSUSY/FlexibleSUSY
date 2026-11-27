@@ -4,14 +4,15 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "linalg2.hpp"
+#include "mixings.hpp"
 #include "slha_io.hpp"
 #include "slhaea.h"
-#include "mixings.hpp"
-#include "linalg2.hpp"
 #include "stopwatch.hpp"
 #include "wrappers.hpp"
-#include <string>
 #include <Eigen/Core>
+#include <complex>
+#include <string>
 
 using namespace flexiblesusy;
 
@@ -238,6 +239,50 @@ BOOST_AUTO_TEST_CASE( test_write_read_matrix )
    BOOST_CHECK_EQUAL(matrix(0,1), new_matrix(0,1));
    BOOST_CHECK_EQUAL(matrix(1,0), new_matrix(1,0));
    BOOST_CHECK_EQUAL(matrix(1,1), new_matrix(1,1));
+}
+
+// non-square matrices: the element (i,k) must be written as entry "i k" and
+// read back to (i,k)
+BOOST_AUTO_TEST_CASE(test_write_read_matrix_non_square)
+{
+   using C = std::complex<double>;
+   Eigen::Matrix<double, 3, 2> m32;
+   m32 << 11, 12, 21, 22, 31, 32;
+   Eigen::Matrix<C, 2, 3> m23;
+   m23 << C(11, -11), C(12, -12), C(13, -13), C(21, -21), C(22, -22),
+      C(23, -23);
+
+   SLHA_io slha_io;
+   slha_io.set_block("M32", m32, "M32");
+   slha_io.set_block("M23", m23, "M23");
+   slha_io.set_block_imag("IMM23", m23, "M23");
+
+   // entry "i k" must hold 10*i + k (or its negative for IMM23)
+   const auto check_entries = [&slha_io](const std::string& name, int rows,
+                                         int cols, double sign) {
+      const auto& block = slha_io.get_data().at(name);
+      for (int i = 1; i <= rows; i++) {
+         for (int k = 1; k <= cols; k++) {
+            const auto& line = block.at({std::to_string(i), std::to_string(k)});
+            BOOST_CHECK_EQUAL(std::stod(line.at(2)), sign * (10 * i + k));
+         }
+      }
+   };
+
+   check_entries("M32", 3, 2, 1.);
+   check_entries("M23", 2, 3, 1.);
+   check_entries("IMM23", 2, 3, -1.);
+
+   Eigen::Matrix<double, 3, 2> m32_read = Eigen::Matrix<double, 3, 2>::Zero();
+   slha_io.read_block("M32", m32_read);
+   BOOST_CHECK(m32_read == m32);
+
+   Eigen::Matrix<double, 2, 3> m23_re = Eigen::Matrix<double, 2, 3>::Zero();
+   Eigen::Matrix<double, 2, 3> m23_im = Eigen::Matrix<double, 2, 3>::Zero();
+   slha_io.read_block("M23", m23_re);
+   slha_io.read_block("IMM23", m23_im);
+   BOOST_CHECK(m23_re == m23.real());
+   BOOST_CHECK(m23_im == m23.imag());
 }
 
 BOOST_AUTO_TEST_CASE( test_write_read_matrix_complex )

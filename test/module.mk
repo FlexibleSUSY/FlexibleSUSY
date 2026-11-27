@@ -52,6 +52,7 @@ TEST_SRC := \
 		$(DIR)/test_command_line_options.cpp \
 		$(DIR)/test_decay_amplitudes.cpp \
 		$(DIR)/test_negative_width.cpp \
+		$(DIR)/test_non_finite_width.cpp \
 		$(DIR)/test_undetected_width.cpp \
 		$(DIR)/test_cast_model.cpp \
 		$(DIR)/test_effective_coupling_list.cpp \
@@ -234,6 +235,11 @@ endif # shooting
 ifeq ($(ENABLE_FFLITE), yes)
 TEST_SRC += \
 		$(DIR)/test_looplibrary_fflite.cpp
+endif
+
+ifeq ($(ENABLE_LILITH), yes)
+TEST_SRC += \
+		$(DIR)/test_lilith_interface.cpp
 endif
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -953,6 +959,16 @@ $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data
 
 $(DIR)/test_amm_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/amm_loop_functions\""
 
+$(DIR)/test_lilith_interface.d $(DIR)/test_lilith_interface.x: CPPFLAGS += $(PYTHONFLAGS)
+
+# libflexisusy (experimental_constraints.o) and the SM library in
+# HIGGSTOOLSLIBS need each other, so libflexisusy is repeated after it
+$(DIR)/test_lilith_interface.x: $(DIR)/test_lilith_interface.o
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
+		$(HIGGSTOOLSLIBS) $(call abspathx,$(LIBFLEXI)) \
+		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(PYTHONLIBS)
+
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
 		clean-$(MODNAME)-lib clean-$(MODNAME)-obj \
@@ -1186,11 +1202,6 @@ $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfener
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
-endif
-
-ifeq ($(ENABLE_HIGGSTOOLS), yes)
-$(DIR)/test_HiggsTools_CP.o: CPPFLAGS += $(MODtest_INC) $(HIGGSTOOLSFLAGS)
-$(DIR)/test_HiggsTools_CP.x: $(MODtest_LIB) $(LIBTEST)
 endif
 
 $(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)

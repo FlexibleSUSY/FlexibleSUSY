@@ -3010,6 +3010,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             setUnitarity = "", loadCalculateUnitarityFunction = "", calculateUnitarityMessages = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
             addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
+            loadGetFDSettingsFunction = "", getFDSettingsInSet = "",
             decayIndex = "const std::ptrdiff_t n_fd_settings = 0;"},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
@@ -3068,6 +3069,11 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               loadCallHiggsToolsFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallHiggsTools = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CallHiggsTools\", LinkObject, LinkObject];";
+              loadGetFDSettingsFunction = "FS" <> FlexibleSUSY`FSModelName <> "GetFDSettings = LibraryFunctionLoad[lib" <>
+                                            FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
+                                            "GetFDSettings\", LinkObject, LinkObject];\n";
+              (* FS<M>Set takes the FlexibleDecay settings that aren't given from the handle *)
+              getFDSettingsInSet = " /.\n        FS" <> FlexibleSUSY`FSModelName <> "GetFDSettings[handle]";
               loadCallLilithFunction = "FS" <> FlexibleSUSY`FSModelName <> "CallLilith = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>
                                             "CallLilith\", LinkObject, LinkObject];";
@@ -3116,6 +3122,15 @@ flexibledecay_settings.set(FlexibleDecay_settings::calculate_normalized_effc, pa
 flexibledecay_settings.set(FlexibleDecay_settings::call_higgstools, pars.next());
 flexibledecay_settings.set(FlexibleDecay_settings::call_lilith, pars.next());
 flexibledecay_settings.set(FlexibleDecay_settings::use_pole_higgs_mixings, pars.next());
+// as run_<M>.x: no EFFHIGGSCOUPLINGS block in models with a CP-violating Higgs sector
+if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block) && " <> FlexibleSUSY`FSModelName <> "_info::is_CP_violating_Higgs_sector) {
+   static bool warned = false;
+   if (!warned) {
+      WARNING(\"Printing of EFFHIGGSCOUPLINGS block is disabled in models with CP-violating Higgs sector\");
+      warned = true;
+   }
+   flexibledecay_settings.set(FlexibleDecay_settings::print_effc_block, 0.);
+}
 ";
 decayIndex = "const std::ptrdiff_t n_fd_settings = 9;";
 fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
@@ -3166,6 +3181,8 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@fdDefaultSettings@" -> fdDefaultSettings,
                             "@addFDOptions1@" -> IndentText[addFDOptions1],
                             "@addFDOptions2@" -> addFDOptions2,
+                            "@loadGetFDSettingsFunction@" -> loadGetFDSettingsFunction,
+                            "@getFDSettingsInSet@" -> getFDSettingsInSet,
                             "@setFDOptions@" -> IndentText @ IndentText @ IndentText @ IndentText @ setFDOptions,
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
                             "@fillFDSettings@" -> fillFDSettings,

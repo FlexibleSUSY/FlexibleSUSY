@@ -210,6 +210,35 @@ HeadToStr[sym_]    := "\"" <> ToString[sym] <> "\"";
 HeadsToStr[{}]     := "";
 HeadsToStr[l_List] := ", {" <> StringRiffle[HeadToStr /@ l, ", "] <> "}";
 
+(* name of a symbol as it is put on the link: FlexibleSUSYObservable` and
+   SARAH` symbols with their context, all others (fields, nuclei, System`
+   symbols) without, as a user writes them *)
+LinkSymbolName[sym_Symbol] :=
+    If[MemberQ[{"FlexibleSUSYObservable`", "SARAH`"}, Context[sym]],
+       Context[sym] <> SymbolName[sym],
+       SymbolName[sym]
+    ];
+
+(* C++ code that puts the expression expr as it is (indices are not shifted) *)
+PutExpression[expr_Integer, link_String] :=
+    "MLPutInteger(" <> link <> ", " <> ToString[expr] <> ");\n";
+PutExpression[expr_Symbol, link_String] :=
+    "MLPutSymbol(" <> link <> ", \"" <> LinkSymbolName[expr] <> "\");\n";
+PutExpression[expr:h_Symbol[args___], link_String] :=
+    "MLPutFunction(" <> link <> ", \"" <> LinkSymbolName[h] <> "\", " <>
+    ToString[Length[expr]] <> ");\n" <>
+    StringJoin[PutExpression[#, link]& /@ {args}];
+Utils`MakeUnknownInputDefinition[PutExpression];
+
+(* rule key -> Re(observable(0)), the key as written in the model file;
+   for observables whose first entry is the real observable and the
+   others are Wilson coefficients (BrLTo3L, LToLConversion) *)
+PutFirstEntryOfObservable[obs_, link_String] :=
+    "MLPutFunction(" <> link <> ", \"Rule\", 2);\n" <>
+    PutExpression[obs, link] <>
+    "MLPutReal(" <> link <> ", Re(OBSERVABLE(" <>
+    Observables`GetObservableName[obs] <> ")(0)));\n";
+
 PutObservable[obs_[sub_], type_, link_String, heads_:{}] :=
     PutObservable[sub, type, link, Join[heads, {obs}]];
 
