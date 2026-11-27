@@ -271,11 +271,40 @@ a linear singlet term in which :math:`v_S` can be small or negative
 should do the same.  ``test/test_SMSSM_singlet_shift.cpp`` checks the
 invariance.
 
-If :math:`m_S^2` is an EWSB output parameter, the EWSB conditions
-themselves remain ill-conditioned for :math:`|v_S|` of a few GeV, since
-:math:`m_S^2` is multiplied by :math:`v_S`: the solver may then find a
-different solution.  Use a frame with a larger :math:`|v_S|`, or
-:math:`\xi_S` as EWSB output parameter.
+**Small** :math:`|v_S|` **with** :math:`m_S^2` **as EWSB output
+parameter.**  This choice of ``FSSolveEWSBTreeLevelFor`` doesn't help
+if :math:`m_S^2` is itself an EWSB output parameter (as in NUTSMSSM),
+because then the loop-level EWSB conditions are ill-conditioned for
+small :math:`|v_S|`.  :math:`m_S^2` enters the condition of :math:`v_S`
+only as :math:`v_S m_S^2`, whose slope :math:`v_S` becomes comparable
+to the :math:`m_S^2` dependence of the one-loop tadpole :math:`t_S`
+(through the singlet masses in the loops).  The condition
+
+.. math::
+
+   v_S m_S^2 + \ldots - t_S(m_S^2) = 0
+
+can then have two solutions for the same input parameters, and every
+solver (the fixed-point iteration and the GSL root finders) finds the
+one nearer its starting point.  At :math:`v_S = 0`, :math:`m_S^2` drops
+out of the condition altogether.  Both solutions are genuine one-loop
+vacua, so no problem is flagged.  Note that the shift
+:math:`S \to S + \delta` also shifts the linear soft-breaking term by
+:math:`m_S^2 \delta`, so with the linear term fixed, solving for
+:math:`m_S^2` is a different problem in each frame.
+
+E.g. at the GNMSSM point above, shifted to :math:`v_S = 3` GeV, the
+one-loop EWSB conditions have the solutions
+:math:`m_S^2 = -2.02\cdot 10^4~\text{GeV}^2` (the point at
+:math:`v_S = 611` GeV) and :math:`m_S^2 = +1.25\cdot 10^5~\text{GeV}^2`
+(a CP-even singlet at 442 instead of 231 GeV).  The spectrum generator
+starts from the tree-level solution and finds the second one.  It
+finds similarly wrong points for :math:`v_S = 4, \ldots, 1` GeV, and
+flags running tachyons for :math:`|v_S| \lesssim 1` GeV, while
+:math:`v_S \ge 5` GeV and :math:`v_S \le -3` GeV are fine at this point.
+To avoid this, choose a frame with a larger :math:`|v_S|` (the physics
+is the same), or a linear term (:math:`\xi_S`, whose coefficient in the
+condition is constant) as EWSB output parameter, as the SMSSM does.
 
 
 Decays
