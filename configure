@@ -3378,7 +3378,6 @@ update_module_mk() {
     local ho
     ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
     sed -i -e "s|^\(MOD${name}_MOD[[:space:]]*:=\).*$|\1 $ho|" "$mkfile"
-    touch "${mkfile}" "${model_file}"
     message "($ho)"
     logmsg "   Depends on model-specific modules: ${ho}"
 }
