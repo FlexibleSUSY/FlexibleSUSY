@@ -387,6 +387,79 @@ struct HVV_4body_result {
 };
 HVV_4body_result hVV_4body(double mH, double mV, double GammaV);
 
+/**
+ * Width of H -> VV (V = W, Z) for x = mV^2/mH^2, combined from the double
+ * off-shell (4-body), single off-shell (3-body) and on-shell (2-body) results
+ * according to FlexibleDecay[4] (offshell_VV_decays).
+ *
+ * The results are switched where they are equal, so that the width is
+ * continuous at the thresholds:
+ *
+ * - The on-shell width vanishes at the VV threshold, the double off-shell
+ *   width doesn't.  Above the threshold, the larger of the two is used
+ *   (offshell_VV_decays != 0).  They cross at x ~ 0.246 for W and Z, i.e.
+ *   1.2 (W) and 1.4 (Z) GeV above the threshold, and the on-shell width is
+ *   the larger one from there on, so the double off-shell width is only
+ *   calculated for x > 0.24.
+ * - The single off-shell width (offshell_VV_decays = 1) treats one vector
+ *   boson as on-shell with zero width, so it diverges at the VV threshold.
+ *   For x < 0.3 the smaller of the single and double off-shell widths is
+ *   used.  They cross at x ~ 0.272 for W and Z.
+ *
+ * Below the single vector threshold (x >= 1) the double off-shell width is
+ * used if offshell_VV_decays != 0.  With offshell_VV_decays = 1 the width
+ * jumps there from the double off-shell width to the single off-shell one,
+ * which vanishes at x = 1.  This step is small: 1.3e-6 GeV (W) and 1.0e-6
+ * GeV (Z) for an SM-like coupling.
+ *
+ * @param x mV^2/mH^2
+ * @param offshell_VV_decays value of FlexibleDecay[4]
+ * @param four_body function returning the double off-shell width and the
+ *    absolute error of its integration
+ * @param three_body function returning the single off-shell width
+ * @param two_body function returning the on-shell width
+ *
+ * @return width, and the absolute integration error if the double off-shell
+ *    width is used (0 otherwise)
+ */
+template <typename FourBody, typename ThreeBody, typename TwoBody>
+HVV_4body_result hVV_width(double x, int offshell_VV_decays,
+                           const FourBody& four_body,
+                           const ThreeBody& three_body, const TwoBody& two_body)
+{
+   static constexpr double x_min_four_body = 0.24;
+   static constexpr double x_max_three_body = 0.3;
+
+   if (4. * x < 1.) {
+      const double on_shell = two_body();
+      if (offshell_VV_decays != 0 && x > x_min_four_body) {
+         const HVV_4body_result double_off_shell = four_body();
+         if (double_off_shell.value > on_shell) {
+            return double_off_shell;
+         }
+      }
+      return {on_shell, 0.};
+   }
+
+   if (offshell_VV_decays == 0) {
+      return {};
+   }
+
+   if (offshell_VV_decays == 2 || x >= 1.) {
+      return four_body();
+   }
+
+   const double single_off_shell = three_body();
+   if (x < x_max_three_body) {
+      const HVV_4body_result double_off_shell = four_body();
+      // the negation also replaces a NaN at x = 1/4
+      if (!(single_off_shell <= double_off_shell.value)) {
+         return double_off_shell;
+      }
+   }
+   return {single_off_shell, 0.};
+}
+
 enum PDG_id_pairs: int {
    dd = 0,
    uu = 1,

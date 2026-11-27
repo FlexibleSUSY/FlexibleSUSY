@@ -88,6 +88,21 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: The widths of :math:`H \to WW` and :math:`H \to ZZ`
+  jumped at the :math:`VV` threshold, :math:`m_H = 2 m_V`.  With
+  ``FlexibleDecay[4] = 2`` (the default) the width dropped there from the
+  double off-shell value to the on-shell one, which vanishes at the
+  threshold: in the SM from 84 to 22 MeV for :math:`WW` and from 61 to
+  25 MeV for :math:`ZZ`.  The two only agreed again 1.2 GeV (:math:`WW`)
+  and 1.4 GeV (:math:`ZZ`) above the threshold.  With
+  ``FlexibleDecay[4] = 1`` the single off-shell width, which diverges at
+  the threshold, was used below it: 1 GeV below the threshold the widths
+  were 1.4 (:math:`WW`) and 1.5 (:math:`ZZ`) times the double off-shell
+  ones.  At exactly :math:`m_H = 2 m_V` the width was 0.  The double
+  off-shell width is now used near the threshold, up to where it meets the
+  on-shell and the single off-shell widths, so the widths are continuous.
+  They change only from about 6 GeV below to 1.4 GeV above the threshold.
+
 * [commit XXXXXXXXX]: The Mathematica interface wrote the block
   ``EFFHIGGSCOUPLINGS`` in models with a CP-violating Higgs sector, such as
   MSSMCPV or CMSSMCPV, where ``run_<M>.x`` switches it off.  It now switches

@@ -138,6 +138,13 @@ The entries are:
    2. double off-shell decays also between the :math:`VV^*` and :math:`VV`
       thresholds
 
+   To keep the widths continuous, the double off-shell width is also used
+   near the :math:`VV` threshold, where the other two are not reliable: up
+   to 1.2 GeV (:math:`W`) or 1.4 GeV (:math:`Z`) above it, where it falls
+   below the on-shell width, and, with 1, from about 4% below it, where the
+   single off-shell width, which diverges at the threshold, becomes larger
+   than the double off-shell one.
+
 #. Print the loop-induced Higgs couplings to :math:`gg`, :math:`\gamma\gamma`
    and :math:`Z\gamma` in the block ``EFFHIGGSCOUPLINGS`` (0 = no, 1 = yes;
    default 1). Switched off, with a warning, in models with a CP-violating

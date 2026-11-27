@@ -333,6 +333,15 @@ The code:
   theorem at the level of (m_V,run/m_V,phys)^4: in BLSM with M_Z' = 3.7 TeV,
   Γ(Z' -> WW) is 0.80 of micrOMEGAs's value, while Z' -> f f agree to 1e-4. This is a
   deliberate choice, not a bug; the deviation is of higher order.
+- **H -> WW, ZZ near thresholds:** `specializations/H/decay_H_to_{WpWm,ZZ}.inc` have a
+  double off-shell (4-body, `hVV_4body`), a single off-shell (3-body, `RT(x)`, zero
+  width, diverges at 2 m_V) and an on-shell (2-body, vanishes at 2 m_V) result.
+  `hVV_width` (`decay.hpp`) picks one according to FlexibleDecay[4] and switches where
+  two of them are equal, so that the width is continuous: the 4-body and 2-body widths
+  cross 1.2 (W) / 1.4 (Z) GeV above 2 m_V, the 3-body and 4-body ones at about
+  0.96 * 2 m_V (the 3-body width is the smaller one from m_V up to there). Keep the
+  width continuous when changing any of the three; `test_hVV_4body` scans the
+  thresholds.
 
 ## Unitarity constraints
 
