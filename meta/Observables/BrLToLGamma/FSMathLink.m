@@ -10,6 +10,7 @@ MLPutFunction(link, \"List\", 2);
 MLPutFunction(link, " <> ObsToStr[p2] <> ", 1);
 MLPutInteger(link, " <> ObsToStr[idx2] <> ");
 MLPutSymbol(link, " <> ObsToStr[V] <> ");
-MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToString[p2] <> ToString[idx2] <> "_" <> ToString[V] <> "));"
+MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToString[p2] <> ToString[idx2] <> "_" <> ToString[V] <> "));
+"
 
 End[];
