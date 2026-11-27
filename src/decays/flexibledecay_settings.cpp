@@ -117,7 +117,7 @@ void FlexibleDecay_settings::set(Settings o, double value)
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 1, descriptions.at(o).c_str());
       break;
-   case include_higher_order_corrections: // 2 [int >= 0 and <= 4]
+   case include_higher_order_corrections: // 2 [two digits: SM 0-4, BSM 0-1]
       assert_integer(value, descriptions.at(o).c_str());
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(static_cast<int>(value) % 10, 1, descriptions.at(o).c_str());
@@ -186,12 +186,6 @@ void FlexibleDecay_settings::reset()
    values[call_higgstools]                            = 0.0;
    values[call_lilith]                                = 0.0;
    values[use_pole_higgs_mixings]                     = 1.0;
-}
-
-bool is_integer(double value)
-{
-   double intpart;
-   return std::modf(value, &intpart) == 0.0;
 }
 
 Decay_corrections FlexibleDecay_settings::get_decay_corrections() const

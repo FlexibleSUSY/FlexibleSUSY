@@ -79,6 +79,8 @@ void CLASSNAME::clear()
 {
    clear_problems();
    decay_table.clear();
+   neutral_higgs_effc = {};
+   effhiggscouplings_block_input.clear();
    initialised_sm.reset();
 }
 
@@ -112,6 +114,10 @@ double CLASSNAME::get_decay_scale(double mass) const
 
 void CLASSNAME::calculate_decays()
 {
+   // start from scratch, so that a repeated calculation doesn't add
+   // up effective couplings or undetected widths
+   clear();
+
 try {
    // initialise the SM before the decays of the particles are
    // calculated (possibly in parallel)

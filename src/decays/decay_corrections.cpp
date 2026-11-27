@@ -86,4 +86,14 @@ void Decay_corrections::set(Flags_t flags)
    bsm = get_digit(flags, static_cast<int>(Positions::bsm));
 }
 
+Decay_corrections::Flags_t Decay_corrections::get() const
+{
+   Flags_t flags = 0;
+
+   set_digit(flags, static_cast<int>(Positions::sm), sm);
+   set_digit(flags, static_cast<int>(Positions::bsm), bsm);
+
+   return flags;
+}
+
 } // namespace flexiblesusy
