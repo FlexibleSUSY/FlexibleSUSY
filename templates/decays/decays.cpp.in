@@ -121,16 +121,22 @@ try {
 #else
 @callAllDecaysFunctions@
 #endif
-   // set unphysical negative partial widths to zero
-   for (auto& decays_list : decay_table) {
-      for (const auto& warning : decays_list.remove_unphysical_negative_widths()) {
-         problems.add_warning(warning);
-      }
-   }
 }
 catch (std::exception& e) {
    problems.add_error(e.what());
 }
+
+   // Set NaN or infinite and unphysical negative partial widths to
+   // zero.  This is done also if the calculation was interrupted by an
+   // exception, as the decays calculated until then are written out.
+   for (auto& decays_list : decay_table) {
+      for (const auto& problem : decays_list.remove_non_finite_widths()) {
+         problems.add_error(problem);
+      }
+      for (const auto& warning : decays_list.remove_unphysical_negative_widths()) {
+         problems.add_warning(warning);
+      }
+   }
 }
 
 double CLASSNAME::get_alphas(@ModelName@_cxx_diagrams::context_base const&  context) const

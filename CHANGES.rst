@@ -88,6 +88,16 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: If FlexibleDecay calculated a NaN or infinite
+  partial width (a failed numerical calculation, e.g. a loop function
+  returning NaN), the spectrum generator aborted with ``Total width of
+  ... is nan`` and a core dump, without writing any output.  Now such a
+  channel is set to zero (also in the total width, the branching ratios
+  and the input to HiggsTools and Lilith), a problem is written to the
+  ``DCINFO`` block, and the spectrum and all other decays are written as
+  usual.  The decays calculated before an exception interrupted the decay
+  calculation are now cleaned up in the same way.
+
 * [commit XXXXXXXXX]: The Mathematica interface wrote the block
   ``EFFHIGGSCOUPLINGS`` in models with a CP-violating Higgs sector, such as
   MSSMCPV or CMSSMCPV, where ``run_<M>.x`` switches it off.  It now switches
