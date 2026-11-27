@@ -269,9 +269,9 @@ void process_upmnsin_tuple(PMNS_parameters& pmns_parameters, int key, double val
    }
 }
 
-int column_major_index(int r, int c, int /* rows */ , int cols)
+int column_major_index(int r, int c, int rows, int /* cols */)
 {
-   return c*cols + r;
+   return c * rows + r;
 }
 
 template <typename T>
@@ -322,7 +322,7 @@ double read_matrix_(const SLHAea::Coll& data, const std::string& block_name, T* 
             const int i = to_int(line[0].c_str()) - 1;
             const int k = to_int(line[1].c_str()) - 1;
             if (0 <= i && i < rows && 0 <= k && k < cols) {
-               a[k*cols + i] = to_double(line[2].c_str());
+               a[k * rows + i] = to_double(line[2].c_str());
             }
          }
       }
