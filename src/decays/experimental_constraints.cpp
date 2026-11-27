@@ -26,9 +26,7 @@
 #include "config.h"
 
 #ifdef ENABLE_LILITH
-#include <Python.h>
-#include "lilith.h"
-#include "lilith.c"
+#include "decays/lilith_interface.hpp"
 #endif
 
 #include "experimental_constraints.hpp"
