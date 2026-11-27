@@ -95,6 +95,57 @@ Fixed bugs
   corresponding output blocks) and any user model with a non-square
   matrix parameter in an SLHA block.  Square matrices were not affected.
 
+* [commit XXXXXXXXX]: FlexibleSUSY now calls Lilith's Python class
+  directly instead of through Lilith's C API, which fixes these problems:
+
+  * An error in Lilith (e.g. a database that can't be read) ended the
+    program, the Mathematica kernel or the Python interpreter with
+    ``exit(1)``.  It is now reported as an error, and the calculation
+    continues.  If Lilith couldn't read the input or compute the
+    likelihood, it only printed a message, and -1 was used as the likelihood.
+  * The memory grew by about 0.6 MB with every call, which mattered for
+    scans with the Mathematica interface.
+  * The likelihoods were returned in single precision, so that
+    ``chi2 - chi2SM`` had only a few significant digits when both are large.
+
+  Lilith is also initialized and its database read only once per
+  database file, which makes a call about 40 times faster.
+
+* [commit XXXXXXXXX]: With SM corrections at NLO (``FlexibleDecay[2]`` =
+  10 or 11), the decays of neutral Higgs bosons into quarks still included
+  the two-loop :math:`O(\alpha\alpha_s)` and top-induced
+  :math:`O(\alpha_s^2)` corrections, because the whole setting instead of
+  its SM digit was compared with 1.  They are now included only from
+  NNLO on (tens digit >= 2).  The default (41) isn't affected.
+
+* [commit XXXXXXXXX]: If FlexibleDecay calculated a NaN or infinite
+  partial width (a failed numerical calculation, e.g. a loop function
+  returning NaN), the spectrum generator aborted with ``Total width of
+  ... is nan`` and a core dump, without writing any output.  Now such a
+  channel is set to zero (also in the total width, the branching ratios
+  and the input to HiggsTools and Lilith), a problem is written to the
+  ``DCINFO`` block, and the spectrum and all other decays are written as
+  usual.  The decays calculated before an exception interrupted the decay
+  calculation are now cleaned up in the same way.
+
+* [commit XXXXXXXXX]: The Mathematica interface wrote the block
+  ``EFFHIGGSCOUPLINGS`` in models with a CP-violating Higgs sector, such as
+  MSSMCPV or CMSSMCPV, where ``run_<M>.x`` switches it off.  It now switches
+  ``printEffCBlock`` off too, with the same warning (printed once per loaded
+  library), and ``FS<M>GetFDSettings[]`` reports ``printEffCBlock -> 0``.
+
+* [commit XXXXXXXXX]: The tests ``test_wrappers``, ``test_SM_FlexibleDecay``
+  and ``test_MRSSM2_FlexibleDecay`` didn't compile with clang >= 16 and
+  Boost < 1.81, so ``make alltest`` failed with these versions.
+
+* [commit 8f0a015b8]: Fixed ``FS<M>Set[]`` of the Mathematica interface in
+  models with decays. Since FlexibleSUSY 2.6.0 it aborted with
+  ``minBRtoPrint is not a numeric input value!``, so the settings and
+  parameters of an open handle couldn't be changed. ``FS<M>Set[]`` now
+  also accepts ``fdSettings``, and the new function
+  ``FS<M>GetFDSettings[handle]`` lists the FlexibleDecay settings of a
+  handle.
+
 * [commit XXXXXXXXX]: In models with complex neutralino (Majorana fermion)
   mixing matrices, such as MSSMCPV or NMSSMCPV, the SLHA output at points
   without CP violation could contain a wrong neutralino: one row of
@@ -117,6 +168,20 @@ Fixed bugs
   real, its masses are positive and its imaginary part is written too,
   as SLHA2 asks for the CP-violating case.  Points without CP violation
   are written as before.
+
+* [commit XXXXXXXXX]: In models with complex sfermion or Higgs mixing
+  matrices, such as CMSSMCKM or MSSMCPV, the SLHA output contained only
+  the real parts of these mixing matrices (``USQMIX``, ``DSQMIX``,
+  ``SELMIX``, ``SNUMIX``, ...), and their rows had arbitrary complex
+  phases.  Many rows were therefore printed as (nearly) zero even
+  without CP violation, e.g. four of the six rows of ``DSQMIX`` in
+  CMSSMCKM at tan(beta) = 40, and programs reading the SLHA output got
+  wrong mixing matrices.  Now the phase of each row of a scalar mixing
+  matrix is chosen such that its largest element is real and positive,
+  which makes the matrix real when CP is conserved.  If a complex
+  mixing matrix still has an imaginary part (CP violation), it is
+  written to the corresponding SLHA2 block (``IMDSQMIX``, ``IMUMIX``,
+  ...).  FlexibleSUSY's own results were not affected.
 
 * [commit XXXXXXXXX]: The mu -> e conversion rates (``LToLConversion``)
   had the photon dipole contribution with the wrong sign relative to the

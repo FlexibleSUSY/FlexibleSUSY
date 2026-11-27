@@ -201,10 +201,12 @@ LIBFLEXI_HDR += \
 endif
 
 LIBFLEXI_SRC += \
-		$(DIR)/decays/experimental_constraints.cpp
+		$(DIR)/decays/experimental_constraints.cpp \
+		$(DIR)/decays/lilith_interface.cpp
 
 LIBFLEXI_HDR += \
-		$(DIR)/decays/experimental_constraints.hpp
+		$(DIR)/decays/experimental_constraints.hpp \
+		$(DIR)/decays/lilith_interface.hpp
 
 ifneq ($(findstring shooting,$(SOLVERS)),)
 LIBFLEXI_HDR += \
@@ -366,6 +368,12 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(HIGGSTOOLSFLAGS) $(LILITHFLAGS) $(PYTHONFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
+
+# Lilith's root directory (LILITHFLAGS = -I<root>/lilith/c-api), from which
+# the Python module lilith is imported
+LILITH_DIR := $(patsubst -I%/lilith/c-api,%,$(filter -I%/lilith/c-api,$(LILITHFLAGS)))
+$(DIR)/decays/lilith_interface.d $(DIR)/decays/lilith_interface.o: \
+	CPPFLAGS += -DFLEXIBLESUSY_LILITH_DIR='"$(LILITH_DIR)"'
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)

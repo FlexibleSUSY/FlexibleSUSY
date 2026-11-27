@@ -167,6 +167,33 @@ std::vector<std::string> Decays_list::remove_unphysical_negative_widths()
    return warnings;
 }
 
+std::vector<std::string> Decays_list::remove_non_finite_widths()
+{
+   std::vector<std::string> problems;
+
+   for (auto& el : decays) {
+      auto& decay = el.second;
+      if (!std::isfinite(decay.get_width())) {
+         std::ostringstream ostr;
+         ostr << decay.get_proc_string() << ": partial width is "
+              << decay.get_width() << ", the channel is set to zero";
+         problems.push_back(ostr.str());
+         decay.set_width(0.);
+      }
+   }
+
+   // a non-finite partial width makes the total width non-finite, so
+   // it must be recalculated rather than corrected
+   if (!problems.empty()) {
+      total_width = 0.;
+      for (const auto& el : decays) {
+         total_width += std::abs(el.second.get_width());
+      }
+   }
+
+   return problems;
+}
+
 std::string strip_field_namespace(std::string const& s) {
    std::string result = s.substr(s.find_last_of(':')+1);
    if (s.find("bar") != std::string::npos) {

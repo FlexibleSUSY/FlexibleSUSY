@@ -1073,7 +1073,7 @@ void SLHA_io::set_normalized_effectivecouplings_block(const EffectiveCoupling_li
    ss << "Block NORMALIZEDEFFHIGGSCOUPLINGS\n";
    for (auto const& effC : effCouplings) {
       ss << FORMAT_EFFECTIVECOUPLINGS(effC.pdgid, 0,  0, effC.width_sm, "SM Higgs width for mhSM = m" + effC.particle);
-      if (effC.CP != -1) {
+      if (effC.CP != CP_property::odd) {
          DECAY_FERMION_RE(-1, 1, dd);
          DECAY_FERMION_RE(-2, 2, uu);
          DECAY_FERMION_RE(-3, 3, ss);
@@ -1102,7 +1102,7 @@ void SLHA_io::set_imnormalized_effectivecouplings_block(const EffectiveCoupling_
    std::ostringstream ss;
    ss << "Block IMNORMALIZEDEFFHIGGSCOUPLINGS\n";
    for (auto const& effC : effCouplings) {
-      if (effC.CP == 1) continue;
+      if (effC.CP == CP_property::even) continue;
       DECAY_FERMION_IM(-1, 1, dd);
       DECAY_FERMION_IM(-2, 2, uu);
       DECAY_FERMION_IM(-3, 3, ss);
