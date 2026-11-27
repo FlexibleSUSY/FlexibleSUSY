@@ -167,6 +167,11 @@ TEST_META += \
 		$(DIR)/test_E6SSM_CXXDiagrams.m
 endif
 
+ifeq ($(WITH_MSSM), yes)
+TEST_META += \
+		$(DIR)/test_MSSM_unsupported_vertices.m
+endif
+
 ifneq ($(OPERATING_SYSTEM),Darwin)
 TEST_SRC += \
 		$(DIR)/test_pv.cpp

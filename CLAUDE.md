@@ -315,6 +315,12 @@ The code:
   code (`Thread_pool` in `CallDecaysCalculationFunctions`, `meta/Decays.m`) is never compiled in a
   build that calculates decays; this is by design. Threads only run with softsusy or fflite (pole
   masses, matching).
+- **Unsupported vertices:** CXXDiagrams assumes every vertex is *colour structure × Lorentz
+  structure*. The four-gluon vertex isn't (each metric pair has its own `f f - f f`), so its
+  type is `CompositeQuadrupleVectorVertex`, which isn't in `VertexTypes[]`, and diagrams with
+  it are dropped. `CreateParticleDecay` warns ("The 1-loop decay ... is incomplete") when a
+  decay without a tree-level amplitude loses such a diagram, unless it's a massless tadpole
+  (A0(0) = 0). Test: `test/test_MSSM_unsupported_vertices.m`.
 - **Decays of fermions and vectors** are tree level only (`GetMaxLoopOrderForDecay`).
   Vector decays use `Decay_amplitude_{VSS,VFF,VVS,VVV}`; their `square()` matches
   SPheno's `VectorBosonTo*` routines in `DecayFunctions.f90`. They aren't advertised yet,
