@@ -246,22 +246,22 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
    const auto effc = get_normalized_effective_couplings(decays.get_neutral_higgs_effc(), physical_input, qedqcd, settings, flexibledecay_settings);
 
    // tolerance in %
-   BOOST_CHECK_CLOSE(effc[0].gg.second, 1, 0.005);
-   BOOST_CHECK_CLOSE(effc[0].gamgam.second, 1, 0.01);
-   BOOST_CHECK_CLOSE(effc[0].Zgam.second, 1, 0.02);
+   BOOST_CHECK_CLOSE(effc[0].gg.second, 1., 0.005);
+   BOOST_CHECK_CLOSE(effc[0].gamgam.second, 1., 0.01);
+   BOOST_CHECK_CLOSE(effc[0].Zgam.second, 1., 0.02);
 
-   BOOST_CHECK_CLOSE(effc[0].ZZ.second, 1, 0.04);
+   BOOST_CHECK_CLOSE(effc[0].ZZ.second, 1., 0.04);
    // The SM equivalent is only tuned to the Higgs mass within 1e-4, and these
    // widths are very sensitive to the Higgs mass.
-   BOOST_CHECK_CLOSE(effc[0].WW.second, 1, 0.04);
+   BOOST_CHECK_CLOSE(effc[0].WW.second, 1., 0.04);
 
-   BOOST_CHECK_CLOSE(std::real(effc[0].ee.second),     1, 0.002);
-   BOOST_CHECK_CLOSE(std::real(effc[0].mumu.second),   1, 0.002);
-   BOOST_CHECK_CLOSE(std::real(effc[0].tautau.second), 1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].ee.second), 1., 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].mumu.second), 1., 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].tautau.second), 1., 0.002);
 
-   BOOST_CHECK_CLOSE(std::real(effc[0].bb.second), 1, 0.028);
-   BOOST_CHECK_CLOSE(std::real(effc[0].cc.second), 1, 0.002);
-   BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1, 0.002);
-   BOOST_CHECK_CLOSE(std::real(effc[0].dd.second), 1, 0.002);
-   BOOST_CHECK_CLOSE(std::real(effc[0].uu.second), 1, 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].bb.second), 1., 0.028);
+   BOOST_CHECK_CLOSE(std::real(effc[0].cc.second), 1., 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1., 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].dd.second), 1., 0.002);
+   BOOST_CHECK_CLOSE(std::real(effc[0].uu.second), 1., 0.002);
 }
