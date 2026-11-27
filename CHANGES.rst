@@ -88,6 +88,22 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: FlexibleSUSY now calls Lilith's Python class
+  directly instead of through Lilith's C API, which fixes these problems:
+
+  * An error in Lilith (e.g. a database that can't be read) ended the
+    program, the Mathematica kernel or the Python interpreter with
+    ``exit(1)``.  It is now reported as an error, and the calculation
+    continues.  If Lilith couldn't read the input or compute the
+    likelihood, it only printed a message, and -1 was used as the likelihood.
+  * The memory grew by about 0.6 MB with every call, which mattered for
+    scans with the Mathematica interface.
+  * The likelihoods were returned in single precision, so that
+    ``chi2 - chi2SM`` had only a few significant digits when both are large.
+
+  Lilith is also initialized and its database read only once per
+  database file, which makes a call about 40 times faster.
+
 * [commit XXXXXXXXX]: With SM corrections at NLO (``FlexibleDecay[2]`` =
   10 or 11), the decays of neutral Higgs bosons into quarks still included
   the two-loop :math:`O(\alpha\alpha_s)` and top-induced

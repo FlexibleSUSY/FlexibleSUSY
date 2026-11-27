@@ -237,6 +237,11 @@ TEST_SRC += \
 		$(DIR)/test_looplibrary_fflite.cpp
 endif
 
+ifeq ($(ENABLE_LILITH), yes)
+TEST_SRC += \
+		$(DIR)/test_lilith_interface.cpp
+endif
+
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 TEST_SRC += \
 		$(DIR)/test_two_scale_running_precision.cpp \
@@ -953,6 +958,16 @@ endif
 $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
 
 $(DIR)/test_amm_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/amm_loop_functions\""
+
+$(DIR)/test_lilith_interface.d $(DIR)/test_lilith_interface.x: CPPFLAGS += $(PYTHONFLAGS)
+
+# libflexisusy (experimental_constraints.o) and the SM library in
+# HIGGSTOOLSLIBS need each other, so libflexisusy is repeated after it
+$(DIR)/test_lilith_interface.x: $(DIR)/test_lilith_interface.o
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
+		$(HIGGSTOOLSLIBS) $(call abspathx,$(LIBFLEXI)) \
+		$(filter -%,$(LOOPFUNCLIBS)) $(GM2CALCLIBS) $(HIMALAYALIBS) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(PYTHONLIBS)
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \

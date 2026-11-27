@@ -299,6 +299,11 @@ The code:
   - `one_loop_decay_diagrams.cpp`: generated generic diagrams.
   - `decay.cpp`: decay tables and effective couplings.
   - `experimental_constraints.cpp`: HiggsTools and Lilith.
+  - `lilith_interface.cpp`: calls Lilith's Python class `lilith.Lilith` directly (functions
+    named as in Lilith's C API `lilith/c-api/lilith.c`, which isn't used: it calls `exit(1)`
+    and leaks). Errors throw; one `Lilith` object per database is cached and never released.
+    Lilith's root comes from `-DFLEXIBLESUSY_LILITH_DIR`, derived from `LILITHFLAGS` in
+    `src/module.mk`. Test: `test_lilith_interface` (default database, no environment needed).
   - `specializations/`: hand-written channels such as H -> qq, gg, gamma gamma.
 - **Couplings and masses:** decays use the `*_mass_eigenstates_decoupling_scheme` class
   (`flag = 1`). It solves EWSB at tree level and, with FlexibleDecay[9] = 1, replaces
