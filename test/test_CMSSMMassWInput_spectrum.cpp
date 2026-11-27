@@ -6,24 +6,24 @@
 
 #define private public
 
-#include "softsusy.h"
-#include "error.hpp"
-#include "minimizer.hpp"
-#include "logger.hpp"
-#include "ew_input.hpp"
-#include "wrappers.hpp"
-#include "conversion.hpp"
-#include "weinberg_angle.hpp"
-#include "two_scale_solver.hpp"
-#include "two_scale_running_precision.hpp"
-#include "CMSSMMassWInput_two_scale_model.hpp"
 #include "CMSSMMassWInput_input_parameters.hpp"
-#include "CMSSMMassWInput_two_scale_high_scale_constraint.hpp"
-#include "CMSSMMassWInput_two_scale_susy_scale_constraint.hpp"
-#include "CMSSMMassWInput_two_scale_low_scale_constraint.hpp"
 #include "CMSSMMassWInput_two_scale_convergence_tester.hpp"
+#include "CMSSMMassWInput_two_scale_high_scale_constraint.hpp"
 #include "CMSSMMassWInput_two_scale_initial_guesser.hpp"
+#include "CMSSMMassWInput_two_scale_low_scale_constraint.hpp"
+#include "CMSSMMassWInput_two_scale_model.hpp"
+#include "CMSSMMassWInput_two_scale_susy_scale_constraint.hpp"
+#include "CMSSMMassWInput_weinberg_angle.hpp"
+#include "conversion.hpp"
+#include "error.hpp"
+#include "ew_input.hpp"
+#include "logger.hpp"
+#include "minimizer.hpp"
+#include "softsusy.h"
 #include "test_CMSSM_like.hpp"
+#include "two_scale_running_precision.hpp"
+#include "two_scale_solver.hpp"
+#include "wrappers.hpp"
 
 softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
 {
@@ -60,8 +60,6 @@ softsusy::QedQcd_legacy convert(const softsusy::QedQcd& ql)
 
    return qn;
 }
-
-using namespace weinberg_angle;
 
 /**
  * @class CMSSMMassWInput_precise_gauge_couplings_low_scale_constraint
@@ -178,7 +176,9 @@ public:
 
 private:
    void calculate_DRbar_gauge_couplings_gmu();
-   void fill_data(Weinberg_angle::Data&, double);
+   CMSSMMassWInput_weinberg_angle::Parameters
+   make_weinberg_angle_parameters() const;
+   void check_self_energies(const CMSSMMassWInput_weinberg_angle& weinberg);
 };
 
 void CMSSMMassWInput_weinberg_angle_low_scale_constraint::apply()
@@ -290,15 +290,14 @@ void CMSSMMassWInput_weinberg_angle_low_scale_constraint::calculate_DRbar_gauge_
    const double AlphaS = alpha_s_drbar;
    const double EDRbar = e_drbar;
 
-   Weinberg_angle::Data data;
-   fill_data(data, alpha_em_drbar);
+   CMSSMMassWInput_weinberg_angle weinberg(model,
+                                           make_weinberg_angle_parameters());
 
-   Weinberg_angle weinberg;
-   weinberg.set_data(data);
+   check_self_energies(weinberg);
 
-   const int error = weinberg.calculate();
-   BOOST_REQUIRE(error == 0);
-   const double ThetaW = ArcSin(weinberg.get_sin_theta());
+   double sin_theta_w = 0.;
+   BOOST_REQUIRE_NO_THROW(sin_theta_w = weinberg.calculate().first);
+   const double ThetaW = ArcSin(sin_theta_w);
 
    new_g1 = 1.2909944487358056*EDRbar*Sec(ThetaW);
    new_g2 = EDRbar*Csc(ThetaW);
@@ -310,115 +309,65 @@ void CMSSMMassWInput_weinberg_angle_low_scale_constraint::calculate_DRbar_gauge_
    BOOST_TEST_MESSAGE("   g2 = " << new_g2);
 }
 
-void CMSSMMassWInput_weinberg_angle_low_scale_constraint::fill_data(
-   Weinberg_angle::Data& data, double alpha_em_drbar)
+CMSSMMassWInput_weinberg_angle::Parameters
+CMSSMMassWInput_weinberg_angle_low_scale_constraint::
+   make_weinberg_angle_parameters() const
 {
-   const double scale   = model->get_scale();
    const double mw_pole = qedqcd.displayPoleMW();
    const double mz_pole = qedqcd.displayPoleMZ();
-   const double mt_pole = qedqcd.displayPoleMt();
-   const double gfermi     = softsusy::GMU;
-   const double mt_drbar   = model->get_MFu(2);
-   const double mb_drbar   = model->get_MFd(2);
-   const double alphaDrbar = alpha_em_drbar;
-   const double gY         = model->get_g1() * sqrt(0.6);
-   const double g2         = model->get_g2();
-   const double hmu        = model->get_Ye(1,1);
-   const double g3         = model->get_g3();
-   const double mt         = qedqcd.displayPoleMt();
-   const double mh         = model->get_Mhh(0);
-   const double alpha      = model->get_ZH(0,1);
-   const double tanBeta    = model->get_vu() / model->get_vd();
-   double mselL            = 0.;
-   double msmuL            = 0.;
-   double msnue            = 0.;
-   double msnumu           = 0.;
-   const Eigen::ArrayXd mneut = model->get_MChi();
-   const Eigen::MatrixXcd n   = model->get_ZN();
-   const Eigen::ArrayXd mch   = model->get_MCha();
-   const Eigen::MatrixXcd u   = model->get_UM();
-   const Eigen::MatrixXcd v   = model->get_UP();
+   double mh_pole = model->get_physical().Mhh(0);
 
-   const auto MSe(model->get_MSe());
-   const auto ZE(model->get_ZE());
-   const auto MSv(model->get_MSv());
-   const auto ZV(model->get_ZV());
-
-   for (int i = 0; i < decltype(MSe)::RowsAtCompileTime; i++) {
-      mselL += AbsSqr(ZE(i,0))*MSe(i);
-      msmuL += AbsSqr(ZE(i,1))*MSe(i);
+   if (mh_pole == 0.) {
+      mh_pole = Electroweak_constants::MH;
    }
-
-   for (int i = 0; i < decltype(MSv)::RowsAtCompileTime; i++) {
-      msnue  += AbsSqr(ZV(i,0))*MSv(i);
-      msnumu += AbsSqr(ZV(i,1))*MSv(i);
-   }
-
-   softsusy::GMU = gfermi;
-   softsusy::PRINTOUT = 10;
 
    BOOST_REQUIRE(mw_pole > 0.);
    BOOST_REQUIRE(mz_pole > 0.);
-   BOOST_CHECK_EQUAL(scale, mz_pole);
+   BOOST_CHECK_EQUAL(model->get_scale(), mz_pole);
 
-   const double pizztMZ = Re(model->self_energy_VZ_1loop(mz_pole));
-   const double piwwt0  = Re(model->self_energy_VWm_1loop(0));
-   const double piwwtMW = Re(model->self_energy_VWm_1loop(mw_pole));
+   CMSSMMassWInput_weinberg_angle::Parameters parameters;
+   parameters.fermi_constant = softsusy::GMU;
+   parameters.mw_pole = mw_pole;
+   parameters.mz_pole = mz_pole;
+   parameters.mt_pole = qedqcd.displayPoleMt();
+   parameters.mh_pole = mh_pole;
+   parameters.alpha_s =
+      calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+   parameters.alpha_s_mz = qedqcd.displayAlphaSInput();
+   parameters.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
+   parameters.higgs_index = 0;
 
-   Weinberg_angle::Self_energy_data se_data;
-   se_data.scale = scale;
-   se_data.mt_pole = mt_pole;
-   se_data.mt_drbar = mt_drbar;
-   se_data.mb_drbar = mb_drbar;
-   se_data.gY = gY;
-   se_data.g2 = g2;
+   return parameters;
+}
 
-   const double pizztMZ_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_z(pizztMZ, mz_pole, se_data);
+/**
+ * Checks that the W and Z self-energies used in the calculation of
+ * the weak mixing angle are equal to the ones calculated with the top
+ * quark pole mass instead of the DR-bar mass.
+ */
+void CMSSMMassWInput_weinberg_angle_low_scale_constraint::check_self_energies(
+   const CMSSMMassWInput_weinberg_angle& weinberg)
+{
+   BOOST_REQUIRE(model->get_thresholds() > 1);
 
-   const double piwwtMW_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_w(piwwtMW, mw_pole, se_data);
+   const double mw_pole = qedqcd.displayPoleMW();
+   const double mz_pole = qedqcd.displayPoleMZ();
+   const double mt_pole = qedqcd.displayPoleMt();
+   const double mt_drbar = model->get_MFu(2);
 
-   const double piwwt0_corrected =
-      Weinberg_angle::replace_mtop_in_self_energy_w(piwwt0, 0., se_data);
+   const double pizztMZ_corrected = weinberg.calculate_self_energy_VZ(mz_pole);
+   const double piwwtMW_corrected = weinberg.calculate_self_energy_VWm(mw_pole);
+   const double piwwt0_corrected = weinberg.calculate_self_energy_VWm(0.);
 
-   // check corrected self-energies
-   {
-      model->MFu(2) = mt_pole;
-      const double pizztMZ_check = Re(model->self_energy_VZ_1loop(mz_pole));
-      const double piwwt0_check  = Re(model->self_energy_VWm_1loop(0));
-      const double piwwtMW_check = Re(model->self_energy_VWm_1loop(mw_pole));
-      model->MFu(2) = mt_drbar;
+   model->MFu(2) = mt_pole;
+   const double pizztMZ_check = Re(model->self_energy_VZ_1loop(mz_pole));
+   const double piwwt0_check = Re(model->self_energy_VWm_1loop(0));
+   const double piwwtMW_check = Re(model->self_energy_VWm_1loop(mw_pole));
+   model->MFu(2) = mt_drbar;
 
-      BOOST_CHECK_CLOSE_FRACTION(pizztMZ_check, pizztMZ_corrected, 1.0e-10);
-      BOOST_CHECK_CLOSE_FRACTION(piwwtMW_check, piwwtMW_corrected, 1.0e-10);
-      BOOST_CHECK_CLOSE_FRACTION(piwwt0_check , piwwt0_corrected , 1.0e-10);
-   }
-
-   data.scale = scale;
-   data.alpha_em_drbar = alphaDrbar;
-   data.fermi_contant = gfermi;
-   data.self_energy_z_at_mz = pizztMZ_corrected;
-   data.self_energy_w_at_mw = piwwtMW_corrected;
-   data.self_energy_w_at_0 = piwwt0_corrected;
-   data.mw_pole = mw_pole;
-   data.mz_pole = mz_pole;
-   data.mt_pole = mt;
-   data.mh_drbar = mh;
-   data.hmix_12 = alpha;
-   data.msel_drbar = mselL;
-   data.msmul_drbar = msmuL;
-   data.msve_drbar = msnue;
-   data.msvm_drbar = msnumu;
-   data.mn_drbar = mneut;
-   data.mc_drbar = mch;
-   data.zn = n;
-   data.um = u;
-   data.up = v;
-   data.gY = gY;
-   data.g2 = g2;
-   data.g3 = g3;
-   data.tan_beta = tanBeta;
+   BOOST_CHECK_CLOSE_FRACTION(pizztMZ_check, pizztMZ_corrected, 1.0e-10);
+   BOOST_CHECK_CLOSE_FRACTION(piwwtMW_check, piwwtMW_corrected, 1.0e-10);
+   BOOST_CHECK_CLOSE_FRACTION(piwwt0_check, piwwt0_corrected, 1.0e-10);
 }
 
 /**
@@ -980,16 +929,22 @@ BOOST_AUTO_TEST_CASE( test_CMSSMMassWInput_spectrum_with_weinberg_angle )
    SoftSusy_tester softSusy_tester;
    BOOST_REQUIRE_NO_THROW(softSusy_tester.test(pp, mxGuess));
 
-   BOOST_CHECK_CLOSE_FRACTION(mssm_tester.get_mx(), softSusy_tester.get_mx(), 6.2e-4);
-   BOOST_CHECK_CLOSE_FRACTION(mssm_tester.get_msusy(), softSusy_tester.get_msusy(), 1.5e-5);
+   // The generated CMSSMMassWInput_weinberg_angle class is not a port of
+   // Softsusy's calculation of the weak mixing angle (it uses e.g. the
+   // full 2-loop Higgs sector contributions to Delta rho and alpha_s(mt)
+   // in the SM), so the gauge couplings agree only to O(1e-5).
+   BOOST_CHECK_CLOSE_FRACTION(mssm_tester.get_mx(), softSusy_tester.get_mx(),
+                              4.0e-3);
+   BOOST_CHECK_CLOSE_FRACTION(mssm_tester.get_msusy(),
+                              softSusy_tester.get_msusy(), 8.0e-5);
 
    // compare model parameters
    const MssmSoftsusy ss(softSusy_tester.get_model());
    const CMSSMMassWInput<Two_scale> fs(mssm_tester.get_model());
 
-   BOOST_CHECK_CLOSE_FRACTION(fs.get_g1(), ss.displayGaugeCoupling(1), 0.0000023);
-   BOOST_CHECK_CLOSE_FRACTION(fs.get_g2(), ss.displayGaugeCoupling(2), 0.0000066);
-   BOOST_CHECK_CLOSE_FRACTION(fs.get_g3(), ss.displayGaugeCoupling(3), 0.0000010);
+   BOOST_CHECK_CLOSE_FRACTION(fs.get_g1(), ss.displayGaugeCoupling(1), 1.2e-5);
+   BOOST_CHECK_CLOSE_FRACTION(fs.get_g2(), ss.displayGaugeCoupling(2), 4.0e-5);
+   BOOST_CHECK_CLOSE_FRACTION(fs.get_g3(), ss.displayGaugeCoupling(3), 2.5e-6);
 
    BOOST_CHECK_CLOSE_FRACTION(fs.get_Mu() , ss.displaySusyMu(), 0.0012);
    BOOST_CHECK_CLOSE_FRACTION(fs.get_BMu(), ss.displayM3Squared(), 0.0024);
@@ -1017,13 +972,13 @@ BOOST_AUTO_TEST_CASE( test_CMSSMMassWInput_spectrum_with_weinberg_angle )
    const double mH0 = ss.displayDrBarPars().mh0(2);
 
    BOOST_CHECK_CLOSE_FRACTION(MHpm(1), MwRun, 1.0e-10); // for RXi(Wm) == 1
-   BOOST_CHECK_CLOSE_FRACTION(MHpm(2), mHpm, 8.e-5);
+   BOOST_CHECK_CLOSE_FRACTION(MHpm(2), mHpm, 2.1e-4);
 
    BOOST_CHECK_CLOSE_FRACTION(MAh(1), MzRun, 1.0e-10); // for RXi(VZ) == 1
-   BOOST_CHECK_CLOSE_FRACTION(MAh(2), mA0, 8.e-5);
+   BOOST_CHECK_CLOSE_FRACTION(MAh(2), mA0, 2.1e-4);
 
-   BOOST_CHECK_CLOSE_FRACTION(Mhh(1), mh0, 3.e-6);
-   BOOST_CHECK_CLOSE_FRACTION(Mhh(2), mH0, 8.e-5);
+   BOOST_CHECK_CLOSE_FRACTION(Mhh(1), mh0, 8.e-6);
+   BOOST_CHECK_CLOSE_FRACTION(Mhh(2), mH0, 2.1e-4);
 }
 
 

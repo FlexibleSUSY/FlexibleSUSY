@@ -18,6 +18,7 @@ module, is part of it.
 | `model_specific/` | Higher-order corrections from the literature, shared by several models (SM, MSSM, NMSSM, ...) |
 | `models/<M>/` | A created model: inputs `FlexibleSUSY.m` and `start.m`, and the **generated** C++ code |
 | `test/` | Tests: Boost.Test `.cpp`, Mathematica `.m`, shell `.sh`; registered in `test/module.mk` |
+| `test/model_files/<M>/` | Model files used only by tests (e.g. `CMSSMMassWInput`, `CMSSMLowPrecision`); `createmodel --name=<M>` finds them too. CI builds only the models listed in `.github/workflows/tests.yml`, so tests of other models can rot unnoticed |
 | `utils/` | Reusable scripts for developers and users (SLHA processing, scans, static analysis, ...); new reusable scripts go here |
 | `utils/loop_decays/` | FeynArts/FormCalc scripts that produced the generic 1-loop decay diagrams (`make` regenerates `meta/generic_loop_decay_diagram_classes.m` and `src/decays/one_loop_decay_diagrams.*`; it needs FormCalc <= 9.6, because it relies on FormCalc's internal representation of the amplitudes, which changed after 9.6) |
 | `doc/` | Documentation (see "Further documentation" below) |
