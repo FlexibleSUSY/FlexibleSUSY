@@ -236,8 +236,10 @@ models/<M>/run_<M>.x --slha-input-file=models/<M>/LesHouches.in.<M> --slha-outpu
   It isn't the automatic choice on purpose: where the loops stabilize a direction, the tree-level
   mass at the loop-level vacuum is tachyonic, which re-solving the soft mass hides (DiracGauginos'
   example point gets "running tachyon hh" with L[L1]). Details in `doc/tadpoles.rst` (once merged).
-  With ms2 as EWSB output, |vS| of a few GeV is still ill-conditioned (ms2 multiplies vS in the
-  tadpole equation): the EWSB solver then lands on a different solution.
+  With ms2 as EWSB output (NUTSMSSM), |vS| of a few GeV is ill-conditioned whatever is re-solved:
+  ms2 enters the tadpole only as vS ms2, so the 1-loop EWSB conditions can have two genuine roots
+  (at vS = 3 GeV: ms2 = -2.0e4 and +1.25e5), all solvers find the one nearer their start, and no
+  problem is flagged. Not a solver bug: use a frame with larger |vS| or L[L1] as EWSB output.
 
 ## Tests
 
@@ -410,6 +412,12 @@ amplitudes and the trilinear vertices, and only touch the s -> infinity step sep
   another element: `f[{a_ /; a >= 2, b_ /; b >= a}]` never matches, even `f[{2, 3}]`. Put the
   condition on the whole list: `f[{a_Integer, b_Integer} /; 2 <= a <= b]`. Test such definitions
   with valid input too, not only with input that should be rejected.
+- **Per-observable meta files (`meta/Observables/<Obs>/*.m`):** their definitions (e.g.
+  `PutObservable` in `FSMathLink.m`, `WriteObservable` in `WriteOut.m`) must match the syntax in the
+  observable's `DefineObservable`. If the syntax changes and a pattern no longer matches, the generic
+  definition is used silently: for the LibraryLink it put the whole observable as one symbol name, so
+  `FS<M>CalculateObservables` failed with `LibraryFunction::typerr` (bug in BrLTo3L/LToLConversion
+  after #583). `FSMathLink`Private`PutExpression` puts an expression on the link as it is.
 - **CKM matrix:** the built-in SM (`model_specific/SM/standard_model.cpp`) has a unit CKM matrix:
   `initialise_from_input(qedqcd)` puts the running masses on the diagonal of the Yukawa matrices and
   ignores the CKM matrix of `qedqcd`. The same holds for every model with `{Yu, Automatic}` (SM, MSSM,
