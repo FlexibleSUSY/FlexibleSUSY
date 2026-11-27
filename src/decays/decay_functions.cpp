@@ -268,30 +268,16 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
    }
 }
 
-std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAh, double msq, double mu) noexcept {
-   const double r = Sqr(mAh/msq);
-   if (r < 0.7) {
-      return 0.;
-   }
-   else if (r > 1.5) {
-      return 0.;
-   }
-   else {
-      return 0.;
-   }
-}
-
-// eq. 6 of https://arxiv.org/pdf/1109.5304.pdf
-std::complex<double> hgg_SM_loop_function(double x) noexcept {
-   if(is_zero(1.-x)) {
-      return Sqr(Pi/2.);
-   }
-   else if (x > 1) {
-      return Sqr(std::asin(1./std::sqrt(x)));
-   }
-   else {
-      return -0.25*Sqr(std::log((1.+std::sqrt(1.-x))/(1.-std::sqrt(1.-x))) - 1i*Pi);
-   }
+/* 2-loop QCD corrections to A -> gamma gamma through a scalar colour
+ * triplet loop.  They are only applied with a CP-conserving Higgs
+ * sector, where a CP-odd scalar doesn't couple to two equal scalar
+ * mass eigenstates, so the 1-loop amplitude they would multiply
+ * vanishes.  Therefore the correction is set to 0. */
+std::complex<double>
+delta_AhAA_2loopQCD_for_squark_loop(double /* mAh */, double /* msq */,
+                                    double /* mu */) noexcept
+{
+   return 0.;
 }
 
 unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m) noexcept

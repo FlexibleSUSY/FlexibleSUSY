@@ -264,4 +264,21 @@ BOOST_AUTO_TEST_CASE( test_SM_normalized_effective_couplings )
    BOOST_CHECK_CLOSE(std::real(effc[0].ss.second), 1., 0.002);
    BOOST_CHECK_CLOSE(std::real(effc[0].dd.second), 1., 0.002);
    BOOST_CHECK_CLOSE(std::real(effc[0].uu.second), 1., 0.002);
+
+   // a repeated calculation must not add up the effective couplings
+   const double undetected_width =
+      decays.get_neutral_higgs_effc()[0].get_undetected_width();
+   const double total_width =
+      decays.get_decay_table().get_hh_decays().get_total_width();
+   const auto n_effc_block = decays.get_effhiggscouplings_block_input().size();
+   BOOST_REQUIRE(n_effc_block > 0);
+
+   decays.calculate_decays();
+
+   BOOST_CHECK_EQUAL(decays.get_neutral_higgs_effc()[0].get_undetected_width(),
+                     undetected_width);
+   BOOST_CHECK_EQUAL(decays.get_decay_table().get_hh_decays().get_total_width(),
+                     total_width);
+   BOOST_CHECK_EQUAL(decays.get_effhiggscouplings_block_input().size(),
+                     n_effc_block);
 }
