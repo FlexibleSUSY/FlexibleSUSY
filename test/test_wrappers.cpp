@@ -626,9 +626,9 @@ BOOST_AUTO_TEST_CASE(test_Sqr)
       Eigen::ArrayXd v(3);
       v << 1, 2, 3;
       Eigen::ArrayXd v2(Sqr(v + v));
-      BOOST_CHECK_CLOSE(v2(0),  4, 1e-10);
-      BOOST_CHECK_CLOSE(v2(1), 16, 1e-10);
-      BOOST_CHECK_CLOSE(v2(2), 36, 1e-10);
+      BOOST_CHECK_CLOSE(v2(0), 4., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1), 16., 1e-10);
+      BOOST_CHECK_CLOSE(v2(2), 36., 1e-10);
    }
    {
       Eigen::MatrixXd v(2,2);
