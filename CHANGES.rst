@@ -88,6 +88,12 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: The Mathematica interface wrote the block
+  ``EFFHIGGSCOUPLINGS`` in models with a CP-violating Higgs sector, such as
+  MSSMCPV or CMSSMCPV, where ``run_<M>.x`` switches it off.  It now switches
+  ``printEffCBlock`` off too, with the same warning (printed once per loaded
+  library), and ``FS<M>GetFDSettings[]`` reports ``printEffCBlock -> 0``.
+
 * [commit XXXXXXXXX]: The tests ``test_wrappers``, ``test_SM_FlexibleDecay``
   and ``test_MRSSM2_FlexibleDecay`` didn't compile with clang >= 16 and
   Boost < 1.81, so ``make alltest`` failed with these versions.
