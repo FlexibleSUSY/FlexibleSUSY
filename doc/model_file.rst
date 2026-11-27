@@ -736,6 +736,20 @@ output parameters are chosen automatically as follows:
   ``EWSBOutputParameters`` are fixed by the tree-level EWSB equation
   temporarily when the running (tree-level) masses are calculated.
 
+The temporarily fixed parameters absorb the loop tadpoles, so the
+running masses used inside the loops differ from the tree-level
+masses at the loop-level vacuum by terms of the order :math:`t/c`,
+where :math:`t` is a tadpole and :math:`c` the coefficient of the
+parameter in its EWSB equation, e.g. a VEV.  In models with a linear
+term of a field with a small VEV, such as the soft-breaking term
+``L[L1]`` of a gauge singlet in the SMSSM or GNMSSM, it is better to
+fix the linear term instead of the soft mass, as it doesn't enter the
+mass matrices::
+
+    FSSolveEWSBTreeLevelFor = { mHd2, mHu2, L[L1] };
+
+See the `note on tadpoles <tadpoles.rst>`_ for details.
+
 _____________________________________________________________________
 
 **Symbol**: ``MatchingScaleInput``

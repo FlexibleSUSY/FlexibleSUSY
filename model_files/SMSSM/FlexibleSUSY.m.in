@@ -22,6 +22,10 @@ EXTPAR = { {61, LambdaInput},
 
 EWSBOutputParameters = { \[Mu], B[\[Mu]], L[L1] };
 
+(* re-solve the linear soft-breaking term instead of ms2 for the running
+   masses inside the loops, see doc/tadpoles.rst *)
+FSSolveEWSBTreeLevelFor = { mHd2, mHu2, L[L1] };
+
 SUSYScale = Sqrt[Product[M[Su[i]]^(Abs[ZU[i,3]]^2 + Abs[ZU[i,6]]^2), {i,6}]];
 
 SUSYScaleFirstGuess = Sqrt[m0^2 + 4 m12^2];
