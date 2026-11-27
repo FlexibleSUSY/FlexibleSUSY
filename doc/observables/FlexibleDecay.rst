@@ -140,7 +140,8 @@ The entries are:
 
 #. Print the loop-induced Higgs couplings to :math:`gg`, :math:`\gamma\gamma`
    and :math:`Z\gamma` in the block ``EFFHIGGSCOUPLINGS`` (0 = no, 1 = yes;
-   default 1).
+   default 1). Switched off, with a warning, in models with a CP-violating
+   Higgs sector.
 #. Calculate the Higgs couplings normalized to those of an SM Higgs boson of the
    same mass, and print them in the blocks ``NORMALIZEDEFFHIGGSCOUPLINGS`` and
    ``IMNORMALIZEDEFFHIGGSCOUPLINGS`` (0 = no, 1 = yes; default 0).

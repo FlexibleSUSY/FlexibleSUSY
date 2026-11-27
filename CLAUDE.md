@@ -95,6 +95,15 @@ make -j4                               # runs the meta code, then compiles
   test sources (`test/test_<M>_*.meta`) start together while make remakes its makefiles; a failure
   there is ignored (the `.d` files are `-include`d), and make generates the missing sources
   again after it restarts, so they can appear several times in the log.
+  `configure` checks FeynArts and FormCalc with a kernel too: if a check fails (seen while
+  another code generation was running, probably for lack of a licence), it reports
+  "ok (not installed)" and disables the package, and the next code generation then silently leaves
+  out the NPointFunctions observables (`BrLTo3L`, `LToLConversion`, `BrDLToDL`; only
+  "Warning: ... FeynArts or FormCalc are disabled" in the log), so their tests aren't built.
+  Configure only when no other main kernel runs, and check those lines of its output.
+- **Recreating a model after its model file changed:** `models/<M>/FlexibleSUSY.m` is a copy
+  made by `createmodel`, so a later change of `model_files/<M>/FlexibleSUSY.m.in` (e.g. from a
+  merge) isn't used until `./createmodel --name=<M> -f` and a new `configure`.
 - **Generating and compiling separately:** `./configure --disable-compile` only generates
   the code. `./configure --disable-meta` only compiles code that was generated before,
   without Mathematica or SARAH.
@@ -175,6 +184,13 @@ models/<M>/run_<M>.x --slha-input-file=models/<M>/LesHouches.in.<M> --slha-outpu
   `ANGLES 10` (ThetaWp) read by CalcHEP/micrOMEGAs models, belong in the model file's
   `ExtraSLHAOutputBlocks`. Differences in how another program interprets standard
   entries are that program's convention, to be documented in the comparison.
+- **SLHA conversion (`<M>_slha` class, `templates/model_slha.cpp.in`):** the Yukawas, trilinears
+  and soft masses are rotated to the super-CKM basis with `ZDL_slha`, `ZDR_slha`, ... (fermions
+  f_L -> vL f_L, f_R -> vR^* f_R, e.g. `md2_slha = ZDR^* md2 ZDR^T`; SARAH's right-handed sfermion
+  block in the basis (SdL, SdR) is `md2` itself). Everything written next to them must use the same
+  basis (sfermion mixings: z -> z diag(vL^dagger, vR^T), PR #802). To check an SLHA output, rebuild
+  Z^dagger m^2 Z from the mixing and MASS blocks at tree-level pole masses (`FlexibleSUSY[4] = [5] = 0`)
+  and compare it with the soft-mass blocks; mixing matrices must be unitary including their `IM` blocks.
 - **Loop library:** `FlexibleSUSY[31]` in the input selects it (0 softsusy, 1 Collier,
   2 LoopTools, 3 fflite). The environment variable `FLEXIBLESUSY_LOOP_LIBRARY` is only
   read when this entry is -1, which is the default when it's missing
@@ -208,6 +224,22 @@ models/<M>/run_<M>.x --slha-input-file=models/<M>/LesHouches.in.<M> --slha-outpu
   MRSSM, vS, vT ~ 1 GeV), the tadpoles enter as t/v and the two-loop differences between codes
   that solve for different parameters (SPheno: mS2, mT2; FS: vS, vT) can be large. Compare at
   the same Lagrangian parameters.
+- **Parameters re-solved for the masses in the loops:** `calculate_DRbar_masses()` (and the
+  decoupling-scheme model of the decays) re-solves the tree-level EWSB for `FSSolveEWSBTreeLevelFor`,
+  by default the soft Higgs masses that appear in exactly one EWSB equation, not for the
+  `EWSBOutputParameters`. If such a mass multiplies a small or negative VEV (ms2 with vS in the
+  SMSSM/GNMSSM), the masses in the loops differ from the loop-level vacuum by t/v: the result then
+  depends on the frame of the singlet shift S -> S + delta (exact symmetry of models with linear
+  singlet terms), and points with small |vS| or vS < 0 get spurious "running tachyon" flags. With a
+  linear soft term, set `FSSolveEWSBTreeLevelFor = {mHd2, mHu2, L[L1]}`: L[L1] doesn't enter the
+  mass matrices, so the loops then use the loop-level vacuum and the spectrum is frame independent.
+  It isn't the automatic choice on purpose: where the loops stabilize a direction, the tree-level
+  mass at the loop-level vacuum is tachyonic, which re-solving the soft mass hides (DiracGauginos'
+  example point gets "running tachyon hh" with L[L1]). Details in `doc/tadpoles.rst` (once merged).
+  With ms2 as EWSB output (NUTSMSSM), |vS| of a few GeV is ill-conditioned whatever is re-solved:
+  ms2 enters the tadpole only as vS ms2, so the 1-loop EWSB conditions can have two genuine roots
+  (at vS = 3 GeV: ms2 = -2.0e4 and +1.25e5), all solvers find the one nearer their start, and no
+  problem is flagged. Not a solver bug: use a frame with larger |vS| or L[L1] as EWSB output.
 
 ## Tests
 
@@ -230,6 +262,11 @@ models/<M>/run_<M>.x --slha-input-file=models/<M>/LesHouches.in.<M> --slha-outpu
   `FLEXIBLESUSY_LOOP_LIBRARY=1 make test/test_SM_FlexibleDecay.x`.
 - **Tolerances:** many tests compare with stored reference values at tight tolerances
   (down to 1e-16). A change of the last digit can fail them without a real error.
+- **Rephasing test of observables:** `test_MSSMCPV_rephasing_observables` checks that the EDMs, a_mu,
+  l -> l' gamma, l -> 3l', mu -> e conversion and all decay widths of MSSMCPV don't change under an R rotation of the CP phases and a
+  rephasing of the lepton fields (at a point with CP phases and lepton flavour violation). When adding a
+  new observable to FlexibleSUSY, enable it in MSSMCPV if it applies there and add it to this test (or to
+  a similar rephasing check in a model that has it), so that its handling of complex phases is tested.
 - **CI:** the `with-meta` jobs in `.github/workflows/tests.yml` activate a Wolfram Engine
   first. If they fail at "Activate Wolfram Engine", no test ran.
 
@@ -272,6 +309,12 @@ The code:
 - **PDG codes:** each physical field has a unique PDG code; 0 marks unphysical fields (Goldstone
   bosons, ghosts), which never appear in decay tables. Decay channels are identified by their PDG
   codes (`Decays_list::set_decay`), so (i, j) and (j, i) of identical fields replace each other.
+- **No threads with Collier or LoopTools:** these loop libraries keep global state (e.g. the
+  renormalization scale), so they aren't thread safe, and `configure` disables threads
+  (`ENABLE_THREADS`) when either is enabled. As the decays need one of them, the threaded decay
+  code (`Thread_pool` in `CallDecaysCalculationFunctions`, `meta/Decays.m`) is never compiled in a
+  build that calculates decays; this is by design. Threads only run with softsusy or fflite (pole
+  masses, matching).
 - **Decays of fermions and vectors** are tree level only (`GetMaxLoopOrderForDecay`).
   Vector decays use `Decay_amplitude_{VSS,VFF,VVS,VVV}`; their `square()` matches
   SPheno's `VectorBosonTo*` routines in `DecayFunctions.f90`. They aren't advertised yet,
@@ -362,10 +405,19 @@ amplitudes and the trilinear vertices, and only touch the s -> infinity step sep
   elsewhere silently changes which symbol the model file sets.
 - **`For` loop bounds that don't evaluate:** `For[l = 1, l <= f[x], l++, ...]` runs zero times if
   `f[x]` stays unevaluated (e.g. a function with no matching definition), without any message.
+- **`DownValues` are sorted:** `Last /@ DownValues[f]` returns the values in Mathematica's canonical order of
+  the arguments (e.g. alphabetical for symbols), not in the order they were defined. To get values in a given
+  order, map `f` over the list of arguments (`f /@ {Scalars, Vectors, Boxes}`); this caused #793.
 - **Conditions inside list patterns:** a condition on one element can't use the pattern variable of
   another element: `f[{a_ /; a >= 2, b_ /; b >= a}]` never matches, even `f[{2, 3}]`. Put the
   condition on the whole list: `f[{a_Integer, b_Integer} /; 2 <= a <= b]`. Test such definitions
   with valid input too, not only with input that should be rejected.
+- **Per-observable meta files (`meta/Observables/<Obs>/*.m`):** their definitions (e.g.
+  `PutObservable` in `FSMathLink.m`, `WriteObservable` in `WriteOut.m`) must match the syntax in the
+  observable's `DefineObservable`. If the syntax changes and a pattern no longer matches, the generic
+  definition is used silently: for the LibraryLink it put the whole observable as one symbol name, so
+  `FS<M>CalculateObservables` failed with `LibraryFunction::typerr` (bug in BrLTo3L/LToLConversion
+  after #583). `FSMathLink`Private`PutExpression` puts an expression on the link as it is.
 - **CKM matrix:** the built-in SM (`model_specific/SM/standard_model.cpp`) has a unit CKM matrix:
   `initialise_from_input(qedqcd)` puts the running masses on the diagonal of the Yukawa matrices and
   ignores the CKM matrix of `qedqcd`. The same holds for every model with `{Yu, Automatic}` (SM, MSSM,
@@ -400,6 +452,24 @@ amplitudes and the trilinear vertices, and only touch the s -> infinity step sep
   `Vertices`IsNonZeroVertex` (used by the decays, always with dependences) are built on this.
   `SARAH`Vertex[..., UseDependences -> True]` is slow for large vertices (seconds for 4-squark
   vertices).
+- **Sign of the photon coupling:** in the generated models the electron's photon vertex is +e
+  (`unit_charge(context) > 0`, i.e. D = ∂ + i Q e A), while many papers use D = ∂ - i Q e A
+  (e.g. Kitano et al. for mu -> e conversion). Coefficients from photon exchange (∝ e²) don't depend
+  on this, but dipole coefficients (form factor A2, C7) change sign under A -> -A. A formula from a
+  paper that combines a dipole with something charged (the field of the nucleus in the overlap integral
+  D, the leptons in l -> 3l) needs the sign of `unit_charge(context)`; forgetting it flipped the
+  dipole-monopole interference in `LToLConversion` (factors up to 270 in the rate). Cross-check such
+  observables component by component (dipole, monopole, four-fermion) with SPheno's FlavorKit.
+- **NPointFunctions observables (`meta/Observables/<O>/NPointFunctions.m`):** the diagram filters
+  decide which diagram classes are generated; the generated C++ sums then skip diagrams whose loop
+  fields are all SM (`cxx_diagrams::isSMField`). Filtering out every vector boson in the loop also
+  removes BSM diagrams such as the W-H+ boxes of b -> s l l, while their Feynman-gauge partners
+  (G+-H+) stay, which leaves a gauge-dependent set. Boxes with two loop vectors give Dirac chains
+  with three gamma matrices that `WilsonCoeffs` can't map to the basis ("missing basis element for
+  fermionic chain"), and diagrams with W bosons can leave FormCalc abbreviations `PairN` (k_i.k_j)
+  that the C++ conversion doesn't handle (set them to 0 at zero external momenta). The results are
+  cached in `Output/<SARAH model>/<eigenstates>/NPointFunctions/`, keyed by the newest file time of
+  the observable's directory.
 - **Eigen comma initialization:** it assigns in order, so `a << a[0] + a[1], a[0];` uses
   the new `a[0]` for the second element.
 - **Shell scripts:** prefer `bash` for scripts with variable expansion. Some interactive
