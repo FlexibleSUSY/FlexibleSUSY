@@ -256,7 +256,15 @@ SLHA
            25          22          22     3.05976327E-05   # hh-VP-VP
            25          22          23     5.44958649E-05   # hh-VP-VZ
 
-The output conforms to the SLHA standard.
+The output conforms to the SLHA standard.  Warnings of the decay
+calculation are written to ``DCINFO`` entry 3 and errors to entry 4.
+An error that stops the decay calculation leaves the decay table
+incomplete: then the ``DECAY`` blocks and the blocks derived from them
+(effective couplings, HiggsTools, Lilith) are only written with
+``FlexibleSUSY[12] = 1`` (force output), and ``FSSMCalculateDecays``
+returns ``$Failed``.
+A channel whose partial width isn't finite is set to zero and reported
+as an error, but the decays are written as usual.
 
 LibraryLink
 ~~~~~~~~~~~

@@ -123,12 +123,13 @@ try {
 #endif
 }
 catch (std::exception& e) {
-   problems.add_error(e.what());
+   problems.add_fatal_error(e.what());
 }
 
    // Set NaN or infinite and unphysical negative partial widths to
    // zero.  This is done also if the calculation was interrupted by an
-   // exception, as the decays calculated until then are written out.
+   // exception, as the decays calculated until then are written out
+   // with force output.
    for (auto& decays_list : decay_table) {
       for (const auto& problem : decays_list.remove_non_finite_widths()) {
          problems.add_error(problem);

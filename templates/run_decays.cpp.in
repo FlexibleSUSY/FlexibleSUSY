@@ -59,11 +59,13 @@ int main(int argc, char* argv[])
    @ModelName@_decays decays(m, qedqcd, physical_input, flexibledecay_settings);
    decays.calculate_decays();
 
+   // an error in the decay calculation leaves the decay table incomplete
    const bool show_decays = !decays.get_problems().have_problem() ||
        settings.get(Spectrum_generator_settings::force_output);
 
+   slha_io.set_dcinfo(decays.get_problems());
+
    if (show_decays) {
-      slha_io.set_dcinfo(decays.get_problems());
       slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
    }
 

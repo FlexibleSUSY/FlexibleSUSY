@@ -2834,11 +2834,15 @@ else if (!loop_library_for_decays) {
 ];
 
 ExampleSetDecaysSLHAOutput[] := "\
+// an error in the decay calculation leaves the decay table incomplete
 const bool show_decays = !decays.get_problems().have_problem() ||
    spectrum_generator_settings.get(Spectrum_generator_settings::force_output);
 
-if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
+if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_dcinfo(decays.get_problems());
+}
+
+if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
    if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {
       slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());

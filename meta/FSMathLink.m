@@ -364,9 +364,12 @@ FillDecaysSLHAData[] :=
       "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
       "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
     ] <>
+    "if (loop_library_for_decays || force_output) {\n" <>
+    TextFormatting`IndentText["slha_io.set_dcinfo(decays_problems);\n"] <>
+    "}\n" <>
+    "// an error in the decay calculation leaves the decay table incomplete\n" <>
     "if ((!decays_problems.have_problem() && loop_library_for_decays) || force_output) {\n" <>
     TextFormatting`IndentText[
-       "slha_io.set_dcinfo(decays_problems);\n" <>
        "slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);\n" <>
        "if (flexibledecay_settings.get(FlexibleDecay_settings::print_effc_block)) {\n" <>
           TextFormatting`IndentText["slha_io.set_effectivecouplings_block(decays.get_effhiggscouplings_block_input());\n"] <>
@@ -537,7 +540,18 @@ PutDecays[modelName_] :=
            prototype = "void " <> PutDecaysFunctionName[] <> "(MLINK link) const;\n";
 
            body = "check_spectrum_pointer();\n" <>
-                  modelName <> "_decays decays = spectrum->get_decays();\n" <>
+                  "const auto& decays = spectrum->get_decays();\n" <>
+                  "const auto& decays_problems = decays.get_problems();\n" <>
+                  "for (const auto& s: decays_problems.get_problem_strings()) {\n" <>
+                  TextFormatting`IndentText[
+                     "put_message(link, \"FS" <> modelName <> "CalculateDecays\", \"error\", s);\n"
+                  ] <>
+                  "}\n" <>
+                  "// an error in the decay calculation leaves the decay table incomplete\n" <>
+                  "if (decays_problems.have_problem() &&\n" <>
+                  "    !settings.get(Spectrum_generator_settings::force_output)) {\n" <>
+                  TextFormatting`IndentText["put_error_output(link);\nreturn;\n"] <>
+                  "}\n" <>
                   "const auto& decay_table = decays.get_decay_table();\n" <>
                   "const auto number_of_decays = decay_table.size();\n\n" <>
                   "MLPutFunction(link, \"List\", 1);\n" <>
