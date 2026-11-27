@@ -88,6 +88,16 @@ New features
 Fixed bugs
 ----------
 
+* [commit XXXXXXXXX]: If FlexibleDecay calculated a NaN or infinite
+  partial width (a failed numerical calculation, e.g. a loop function
+  returning NaN), the spectrum generator aborted with ``Total width of
+  ... is nan`` and a core dump, without writing any output.  Now such a
+  channel is set to zero (also in the total width, the branching ratios
+  and the input to HiggsTools and Lilith), a problem is written to the
+  ``DCINFO`` block, and the spectrum and all other decays are written as
+  usual.  The decays calculated before an exception interrupted the decay
+  calculation are now cleaned up in the same way.
+
 * [commit 8f0a015b8]: Fixed ``FS<M>Set[]`` of the Mathematica interface in
   models with decays. Since FlexibleSUSY 2.6.0 it aborted with
   ``minBRtoPrint is not a numeric input value!``, so the settings and

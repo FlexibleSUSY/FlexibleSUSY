@@ -221,6 +221,15 @@ public:
     */
    std::vector<std::string> remove_unphysical_negative_widths();
 
+   /**
+    * Sets the partial widths of all channels with a NaN or infinite
+    * width (a failed numerical calculation) to zero and recalculates
+    * the total width from the remaining channels.
+    *
+    * @return a problem description for each such channel
+    */
+   std::vector<std::string> remove_non_finite_widths();
+
 private:
    int initial_pdg{0};
    List_type decays{};
